@@ -12,7 +12,7 @@ func resourceConverterOrganizationPolicy() ResourceConverter {
 	}
 }
 
-func GetOrganizationPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetOrganizationPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/organizations/{{org_id}}")
 	if err != nil {
 		return []Asset{}, err
@@ -33,7 +33,7 @@ func MergeOrganizationPolicy(existing, incoming Asset) Asset {
 	return existing
 }
 
-func GetOrganizationPolicyApiObject(d TerraformResourceData, config *transport_tpg.Config) (OrgPolicy, error) {
+func GetOrganizationPolicyApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (OrgPolicy, error) {
 
 	listPolicy, err := expandListOrganizationPolicy(d.Get("list_policy").([]interface{}))
 	if err != nil {

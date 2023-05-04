@@ -199,7 +199,7 @@ func suppressWindowsFamilyDiff(imageName, familyName string) bool {
 	return strings.Contains(updatedImageName, updatedFamilyString)
 }
 
-func expandComputeDiskType(v interface{}, d TerraformResourceData, config *transport_tpg.Config) *string {
+func expandComputeDiskType(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) *string {
 	if v == "" {
 		return nil
 	}
@@ -213,7 +213,7 @@ func expandComputeDiskType(v interface{}, d TerraformResourceData, config *trans
 	return &rl
 }
 
-func expandComputeDiskSourceImage(v interface{}, d TerraformResourceData, config *transport_tpg.Config) *string {
+func expandComputeDiskSourceImage(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) *string {
 	if v == "" {
 		return nil
 	}
@@ -235,7 +235,7 @@ func expandComputeDiskSourceImage(v interface{}, d TerraformResourceData, config
 	return &f
 }
 
-func expandComputeDiskSnapshot(v interface{}, d TerraformResourceData, config *transport_tpg.Config) *string {
+func expandComputeDiskSnapshot(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) *string {
 	if v == "" {
 		return nil
 	}

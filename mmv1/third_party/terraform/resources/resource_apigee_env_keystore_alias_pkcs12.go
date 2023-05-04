@@ -431,35 +431,35 @@ func flattenApigeeKeystoreAliasesPkcsType(v interface{}, d *schema.ResourceData,
 	return v
 }
 
-func expandApigeeKeystoreAliasesPkcsOrgId(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsOrgId(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsEnvironment(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsEnvironment(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsKeystore(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsKeystore(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsAlias(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsAlias(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsKey(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsKey(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsPassword(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsPassword(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsCert(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsCert(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsCertsInfo(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsCertsInfo(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -478,7 +478,7 @@ func expandApigeeKeystoreAliasesPkcsCertsInfo(v interface{}, d TerraformResource
 	return transformed, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfo(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfo(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	req := make([]interface{}, 0, len(l))
 	for _, raw := range l {
@@ -570,46 +570,46 @@ func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfo(v interface{}, d Terraform
 	return req, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoVersion(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoVersion(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoSubject(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoSubject(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoIssuer(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoIssuer(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoExpiryDate(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoExpiryDate(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoValidFrom(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoValidFrom(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoIsValid(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoIsValid(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoSubjectAlternativeNames(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoSubjectAlternativeNames(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoSigAlgName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoSigAlgName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoPublicKey(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoPublicKey(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoBasicConstraints(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoBasicConstraints(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoSerialNumber(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoSerialNumber(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }

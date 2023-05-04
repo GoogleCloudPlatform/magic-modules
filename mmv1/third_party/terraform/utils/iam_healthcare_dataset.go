@@ -22,11 +22,11 @@ var IamHealthcareDatasetSchema = map[string]*schema.Schema{
 
 type HealthcareDatasetIamUpdater struct {
 	resourceId string
-	d          TerraformResourceData
+	d          tpgresource.TerraformResourceData
 	Config     *transport_tpg.Config
 }
 
-func NewHealthcareDatasetIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+func NewHealthcareDatasetIamUpdater(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
 	dataset := d.Get("dataset_id").(string)
 	datasetId, err := ParseHealthcareDatasetId(dataset, config)
 

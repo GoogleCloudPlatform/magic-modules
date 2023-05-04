@@ -28,11 +28,11 @@ var IamPubsubSubscriptionSchema = map[string]*schema.Schema{
 
 type PubsubSubscriptionIamUpdater struct {
 	subscription string
-	d            TerraformResourceData
+	d            tpgresource.TerraformResourceData
 	Config       *transport_tpg.Config
 }
 
-func NewPubsubSubscriptionIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+func NewPubsubSubscriptionIamUpdater(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
 	project, err := getProject(d, config)
 	if err != nil {
 		return nil, err

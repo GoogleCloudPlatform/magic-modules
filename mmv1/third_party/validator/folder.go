@@ -13,7 +13,7 @@ func resourceConverterFolder() ResourceConverter {
 	}
 }
 
-func GetFolderCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetFolderCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/folders/{{folder_id}}")
 
 	if err != nil {
@@ -36,7 +36,7 @@ func GetFolderCaiObject(d TerraformResourceData, config *transport_tpg.Config) (
 	}
 }
 
-func GetFolderApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+func GetFolderApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
 
 	folder := &Folder{
 		Name:        d.Get("name").(string),

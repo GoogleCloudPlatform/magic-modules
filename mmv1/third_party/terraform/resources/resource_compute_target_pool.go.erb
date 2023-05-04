@@ -21,7 +21,7 @@ import (
 <% end -%>
 )
 
-var instancesSelfLinkPattern = regexp.MustCompile(fmt.Sprintf(zonalLinkBasePattern, "instances"))
+var instancesSelfLinkPattern = regexp.MustCompile(fmt.Sprintf(tpgresource.ZonalLinkBasePattern, "instances"))
 
 func ResourceComputeTargetPool() *schema.Resource {
 	return &schema.Resource{

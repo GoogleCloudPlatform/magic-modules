@@ -35,15 +35,15 @@ func resourceConverterKmsKeyRingIamMember() ResourceConverter {
 	}
 }
 
-func GetKmsKeyRingIamPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetKmsKeyRingIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newKmsKeyRingIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetKmsKeyRingIamBindingCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetKmsKeyRingIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newKmsKeyRingIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetKmsKeyRingIamMemberCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetKmsKeyRingIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newKmsKeyRingIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -69,9 +69,9 @@ func MergeKmsKeyRingIamMemberDelete(existing, incoming Asset) Asset {
 }
 
 func newKmsKeyRingIamAsset(
-	d TerraformResourceData,
+	d tpgresource.TerraformResourceData,
 	config *transport_tpg.Config,
-	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
+	expandBindings func(d tpgresource.TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
@@ -93,7 +93,7 @@ func newKmsKeyRingIamAsset(
 	}}, nil
 }
 
-func FetchKmsKeyRingIamPolicy(d TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
+func FetchKmsKeyRingIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("key_ring_id"); !ok {
 		return Asset{}, ErrEmptyIdentityField
@@ -111,7 +111,7 @@ func FetchKmsKeyRingIamPolicy(d TerraformResourceData, config *transport_tpg.Con
 	)
 }
 
-func constructKmsKeyRingIAMAssetNameTemplate(d TerraformResourceData) string {
+func constructKmsKeyRingIAMAssetNameTemplate(d tpgresource.TerraformResourceData) string {
 	assetNameTemplate := "//cloudkms.googleapis.com/{{key_ring_id}}"
 	if val, ok := d.GetOk("key_ring_id"); ok {
 		keyRingID := val.(string)

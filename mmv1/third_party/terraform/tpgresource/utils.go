@@ -20,6 +20,31 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+type TerraformResourceDataChange interface {
+	GetChange(string) (interface{}, interface{})
+}
+
+type TerraformResourceData interface {
+	HasChange(string) bool
+	GetOkExists(string) (interface{}, bool)
+	GetOk(string) (interface{}, bool)
+	Get(string) interface{}
+	Set(string, interface{}) error
+	SetId(string)
+	Id() string
+	GetProviderMeta(interface{}) error
+	Timeout(key string) time.Duration
+}
+
+type TerraformResourceDiff interface {
+	HasChange(string) bool
+	GetChange(string) (interface{}, interface{})
+	Get(string) interface{}
+	GetOk(string) (interface{}, bool)
+	Clear(string) error
+	ForceNew(string) error
+}
+
 // Contains functions that don't really belong anywhere else.
 
 // GetRegionFromZone returns the region from a zone for Google cloud.
@@ -90,6 +115,32 @@ func IsNotFoundGrpcError(err error) bool {
 		return true
 	}
 	return false
+}
+
+// ExpandLabels pulls the value of "labels" out of a TerraformResourceData as a map[string]string.
+func ExpandLabels(d TerraformResourceData) map[string]string {
+	return ExpandStringMap(d, "labels")
+}
+
+// ExpandEnvironmentVariables pulls the value of "environment_variables" out of a schema.ResourceData as a map[string]string.
+func ExpandEnvironmentVariables(d *schema.ResourceData) map[string]string {
+	return ExpandStringMap(d, "environment_variables")
+}
+
+// ExpandBuildEnvironmentVariables pulls the value of "build_environment_variables" out of a schema.ResourceData as a map[string]string.
+func ExpandBuildEnvironmentVariables(d *schema.ResourceData) map[string]string {
+	return ExpandStringMap(d, "build_environment_variables")
+}
+
+// ExpandStringMap pulls the value of key out of a TerraformResourceData as a map[string]string.
+func ExpandStringMap(d TerraformResourceData, key string) map[string]string {
+	v, ok := d.GetOk(key)
+
+	if !ok {
+		return map[string]string{}
+	}
+
+	return ConvertStringMap(v.(map[string]interface{}))
 }
 
 func ConvertStringMap(v map[string]interface{}) map[string]string {

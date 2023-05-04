@@ -16,7 +16,7 @@ func resourceConverterProjectOrgPolicy() ResourceConverter {
 	}
 }
 
-func GetProjectOrgPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetProjectOrgPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project}}")
 	if err != nil {
 		return []Asset{}, err
@@ -37,7 +37,7 @@ func MergeProjectOrgPolicy(existing, incoming Asset) Asset {
 	return existing
 }
 
-func GetProjectOrgPolicyApiObject(d TerraformResourceData, config *transport_tpg.Config) (OrgPolicy, error) {
+func GetProjectOrgPolicyApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (OrgPolicy, error) {
 
 	listPolicy, err := expandListOrganizationPolicy(d.Get("list_policy").([]interface{}))
 	if err != nil {

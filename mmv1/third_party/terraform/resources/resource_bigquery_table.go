@@ -323,7 +323,7 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error)
 	}
 }
 
-func resourceBigQueryTableSchemaCustomizeDiffFunc(d TerraformResourceDiff) error {
+func resourceBigQueryTableSchemaCustomizeDiffFunc(d tpgresource.TerraformResourceDiff) error {
 	if _, hasSchema := d.GetOk("schema"); hasSchema {
 		oldSchema, newSchema := d.GetChange("schema")
 		oldSchemaText := oldSchema.(string)

@@ -22,11 +22,11 @@ var IamFolderSchema = map[string]*schema.Schema{
 
 type FolderIamUpdater struct {
 	folderId string
-	d        TerraformResourceData
+	d        tpgresource.TerraformResourceData
 	Config   *transport_tpg.Config
 }
 
-func NewFolderIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+func NewFolderIamUpdater(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
 	return &FolderIamUpdater{
 		folderId: canonicalFolderId(d.Get("folder").(string)),
 		d:        d,

@@ -13,7 +13,7 @@
         # limitations under the License.
 #%>
 // If the property hasn't been explicitly set in config use the project defined by the provider or env.
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	if v == nil {
 		project, err := getProject(d, config)
 		if err != nil {

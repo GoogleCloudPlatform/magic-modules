@@ -21,11 +21,11 @@ var IamProjectSchema = map[string]*schema.Schema{
 
 type ProjectIamUpdater struct {
 	resourceId string
-	d          TerraformResourceData
+	d          tpgresource.TerraformResourceData
 	Config     *transport_tpg.Config
 }
 
-func NewProjectIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+func NewProjectIamUpdater(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
 	return &ProjectIamUpdater{
 		resourceId: d.Get("project").(string),
 		d:          d,

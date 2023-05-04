@@ -35,15 +35,15 @@ func resourceConverterKmsCryptoKeyIamMember() ResourceConverter {
 	}
 }
 
-func GetKmsCryptoKeyIamPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetKmsCryptoKeyIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newKmsCryptoKeyIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetKmsCryptoKeyIamBindingCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetKmsCryptoKeyIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newKmsCryptoKeyIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetKmsCryptoKeyIamMemberCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetKmsCryptoKeyIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newKmsCryptoKeyIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -69,9 +69,9 @@ func MergeKmsCryptoKeyIamMemberDelete(existing, incoming Asset) Asset {
 }
 
 func newKmsCryptoKeyIamAsset(
-	d TerraformResourceData,
+	d tpgresource.TerraformResourceData,
 	config *transport_tpg.Config,
-	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
+	expandBindings func(d tpgresource.TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
@@ -93,7 +93,7 @@ func newKmsCryptoKeyIamAsset(
 	}}, nil
 }
 
-func FetchKmsCryptoKeyIamPolicy(d TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
+func FetchKmsCryptoKeyIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("crypto_key_id"); !ok {
 		return Asset{}, ErrEmptyIdentityField
@@ -111,7 +111,7 @@ func FetchKmsCryptoKeyIamPolicy(d TerraformResourceData, config *transport_tpg.C
 	)
 }
 
-func constructAssetNameTemplate(d TerraformResourceData) string {
+func constructAssetNameTemplate(d tpgresource.TerraformResourceData) string {
 	assetNameTemplate := "//cloudkms.googleapis.com/{{crypto_key_id}}"
 	if val, ok := d.GetOk("crypto_key_id"); ok {
 		cryptoKeyID := val.(string)

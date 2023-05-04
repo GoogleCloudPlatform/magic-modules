@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"time"
 	"log"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -84,7 +86,7 @@ func asyncReplicationGetDiskFromConfig(disk string, d *schema.ResourceData, meta
 	config := meta.(*transport_tpg.Config)
 
 	var zonalMatch bool
-	zonalMatch, err = regexp.MatchString(fmt.Sprintf(zonalLinkBasePattern, "disks"), disk)
+	zonalMatch, err = regexp.MatchString(fmt.Sprintf(tpgresource.ZonalLinkBasePattern, "disks"), disk)
 	if err != nil {
 		return
 	}
@@ -95,14 +97,14 @@ func asyncReplicationGetDiskFromConfig(disk string, d *schema.ResourceData, meta
 			return
 		}
 		var regionalMatch bool
-		regionalMatch, err = regexp.MatchString(fmt.Sprintf(regionalLinkBasePattern, "disks"), disk)
+		regionalMatch, err = regexp.MatchString(fmt.Sprintf(tpgresource.RegionalLinkBasePattern, "disks"), disk)
 		if !regionalMatch || err != nil {
 			err = fmt.Errorf("regional disk expected: %s", disk)
 			return
 		}
-		resourceId = fmt.Sprintf(regionalLinkTemplate, rv.Project, rv.Region, "disks", rv.Name)
+		resourceId = fmt.Sprintf(tpgresource.RegionalLinkTemplate, rv.Project, rv.Region, "disks", rv.Name)
 	} else {
-		resourceId = fmt.Sprintf(zonalLinkTemplate, zv.Project, zv.Zone, "disks", zv.Name)
+		resourceId = fmt.Sprintf(tpgresource.ZonalLinkTemplate, zv.Project, zv.Zone, "disks", zv.Name)
 	}
 	return
 }

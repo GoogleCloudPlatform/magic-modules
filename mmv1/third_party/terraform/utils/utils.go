@@ -22,31 +22,6 @@ import (
 	"google.golang.org/api/googleapi"
 )
 
-type TerraformResourceDataChange interface {
-	GetChange(string) (interface{}, interface{})
-}
-
-type TerraformResourceData interface {
-	HasChange(string) bool
-	GetOkExists(string) (interface{}, bool)
-	GetOk(string) (interface{}, bool)
-	Get(string) interface{}
-	Set(string, interface{}) error
-	SetId(string)
-	Id() string
-	GetProviderMeta(interface{}) error
-	Timeout(key string) time.Duration
-}
-
-type TerraformResourceDiff interface {
-	HasChange(string) bool
-	GetChange(string) (interface{}, interface{})
-	Get(string) interface{}
-	GetOk(string) (interface{}, bool)
-	Clear(string) error
-	ForceNew(string) error
-}
-
 // getRegionFromZone returns the region from a zone for Google cloud.
 // This is by removing the last two chars from the zone name to leave the region
 // If there aren't enough characters in the input string, an empty string is returned
@@ -63,20 +38,20 @@ func getRegionFromZone(zone string) string {
 // - region extracted from the `zone` field in resource schema
 // - provider-level region
 // - region extracted from the provider-level zone
-func getRegion(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+func getRegion(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (string, error) {
 	return getRegionFromSchema("region", "zone", d, config)
 }
 
 // getProject reads the "project" field from the given resource data and falls
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
-func getProject(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+func getProject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (string, error) {
 	return getProjectFromSchema("project", d, config)
 }
 
 // getBillingProject reads the "billing_project" field from the given resource data and falls
 // back to the provider's value if not given. If no value is found, an error is returned.
-func getBillingProject(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+func getBillingProject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (string, error) {
 	return getBillingProjectFromSchema("billing_project", d, config)
 }
 
@@ -118,29 +93,35 @@ func isNotFoundGrpcError(err error) bool {
 }
 
 // expandLabels pulls the value of "labels" out of a TerraformResourceData as a map[string]string.
-func expandLabels(d TerraformResourceData) map[string]string {
-	return expandStringMap(d, "labels")
+//
+// Deprecated: For backward compatibility expandLabels is still working,
+// but all new code should use ExpandLabels in the tpgresource package instead.
+func expandLabels(d tpgresource.TerraformResourceData) map[string]string {
+	return tpgresource.ExpandLabels(d)
 }
 
 // expandEnvironmentVariables pulls the value of "environment_variables" out of a schema.ResourceData as a map[string]string.
+//
+// Deprecated: For backward compatibility expandEnvironmentVariables is still working,
+// but all new code should use ExpandEnvironmentVariables in the tpgresource package instead.
 func expandEnvironmentVariables(d *schema.ResourceData) map[string]string {
-	return expandStringMap(d, "environment_variables")
+	return tpgresource.ExpandEnvironmentVariables(d)
 }
 
 // expandBuildEnvironmentVariables pulls the value of "build_environment_variables" out of a schema.ResourceData as a map[string]string.
+//
+// Deprecated: For backward compatibility expandBuildEnvironmentVariables is still working,
+// but all new code should use ExpandBuildEnvironmentVariables in the tpgresource package instead.
 func expandBuildEnvironmentVariables(d *schema.ResourceData) map[string]string {
-	return expandStringMap(d, "build_environment_variables")
+	return tpgresource.ExpandBuildEnvironmentVariables(d)
 }
 
-// expandStringMap pulls the value of key out of a TerraformResourceData as a map[string]string.
-func expandStringMap(d TerraformResourceData, key string) map[string]string {
-	v, ok := d.GetOk(key)
-
-	if !ok {
-		return map[string]string{}
-	}
-
-	return convertStringMap(v.(map[string]interface{}))
+// expandStringMap pulls the value of key out of a tpgresource.TerraformResourceData as a map[string]string.
+//
+// Deprecated: For backward compatibility expandStringMap is still working,
+// but all new code should use ExpandStringMap in the tpgresource package instead.
+func expandStringMap(d tpgresource.TerraformResourceData, key string) map[string]string {
+	return tpgresource.ExpandStringMap(d)
 }
 
 // Deprecated: For backward compatibility convertStringMap is still working,
@@ -243,7 +224,7 @@ func Nprintf(format string, params map[string]interface{}) string {
 // A project is required if we are trying to build the FQN from a service account id and
 // and error will be returned in this case if no project is set in the resource or the
 // provider-level config
-func serviceAccountFQN(serviceAccount string, d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+func serviceAccountFQN(serviceAccount string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (string, error) {
 	// If the service account id is already the fully qualified name
 	if strings.HasPrefix(serviceAccount, "projects/") {
 		return serviceAccount, nil
@@ -298,7 +279,7 @@ func migrateStateNoop(v int, is *terraform.InstanceState, meta interface{}) (*te
 	return tpgresource.MigrateStateNoop(v, is, meta)
 }
 
-func expandString(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+func expandString(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (string, error) {
 	return v.(string), nil
 }
 
@@ -308,7 +289,7 @@ func changeFieldSchemaToForceNew(sch *schema.Schema) {
 	tpgresource.ChangeFieldSchemaToForceNew(sch)
 }
 
-func generateUserAgentString(d TerraformResourceData, currentUserAgent string) (string, error) {
+func generateUserAgentString(d tpgresource.TerraformResourceData, currentUserAgent string) (string, error) {
 	var m transport_tpg.ProviderMeta
 
 	err := d.GetProviderMeta(&m)
@@ -391,7 +372,7 @@ func isEmptyValue(v reflect.Value) bool {
 	return tpgresource.IsEmptyValue(v)
 }
 
-func ReplaceVars(d TerraformResourceData, config *transport_tpg.Config, linkTmpl string) (string, error) {
+func ReplaceVars(d tpgresource.TerraformResourceData, config *transport_tpg.Config, linkTmpl string) (string, error) {
 	return replaceVarsRecursive(d, config, linkTmpl, false, 0)
 }
 
@@ -403,14 +384,14 @@ func ReplaceVars(d TerraformResourceData, config *transport_tpg.Config, linkTmpl
 // access_policy: accessPolicies/foo
 // access_level: accessPolicies/foo/accessLevels/bar
 // becomes accessPolicies/foo/accessLevels/bar
-func replaceVarsForId(d TerraformResourceData, config *transport_tpg.Config, linkTmpl string) (string, error) {
+func replaceVarsForId(d tpgresource.TerraformResourceData, config *transport_tpg.Config, linkTmpl string) (string, error) {
 	return replaceVarsRecursive(d, config, linkTmpl, true, 0)
 }
 
 // ReplaceVars must be done recursively because there are baseUrls that can contain references to regions
 // (eg cloudrun service) there aren't any cases known for 2+ recursion but we will track a run away
 // substitution as 10+ calls to allow for future use cases.
-func replaceVarsRecursive(d TerraformResourceData, config *transport_tpg.Config, linkTmpl string, shorten bool, depth int) (string, error) {
+func replaceVarsRecursive(d tpgresource.TerraformResourceData, config *transport_tpg.Config, linkTmpl string, shorten bool, depth int) (string, error) {
 	if depth > 10 {
 		return "", errors.New("Recursive substitution detcted")
 	}
@@ -433,7 +414,7 @@ func replaceVarsRecursive(d TerraformResourceData, config *transport_tpg.Config,
 // This function replaces references to Terraform properties (in the form of {{var}}) with their value in Terraform
 // It also replaces {{project}}, {{project_id_or_project}}, {{region}}, and {{zone}} with their appropriate values
 // This function supports URL-encoding the result by prepending '%' to the field name e.g. {{%var}}
-func buildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *transport_tpg.Config, linkTmpl string, shorten bool) (func(string) string, error) {
+func buildReplacementFunc(re *regexp.Regexp, d tpgresource.TerraformResourceData, config *transport_tpg.Config, linkTmpl string, shorten bool) (func(string) string, error) {
 	var project, projectID, region, zone string
 	var err error
 

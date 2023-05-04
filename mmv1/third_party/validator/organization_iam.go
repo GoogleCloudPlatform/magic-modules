@@ -34,15 +34,15 @@ func resourceConverterOrganizationIamMember() ResourceConverter {
 	}
 }
 
-func GetOrganizationIamPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetOrganizationIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newOrganizationIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetOrganizationIamBindingCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetOrganizationIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newOrganizationIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetOrganizationIamMemberCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetOrganizationIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newOrganizationIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -68,9 +68,9 @@ func MergeOrganizationIamMemberDelete(existing, incoming Asset) Asset {
 }
 
 func newOrganizationIamAsset(
-	d TerraformResourceData,
+	d tpgresource.TerraformResourceData,
 	config *transport_tpg.Config,
-	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
+	expandBindings func(d tpgresource.TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
@@ -91,7 +91,7 @@ func newOrganizationIamAsset(
 	}}, nil
 }
 
-func FetchOrganizationIamPolicy(d TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
+func FetchOrganizationIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
 	return fetchIamPolicy(
 		NewOrganizationIamUpdater,
 		d,

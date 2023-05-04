@@ -6,7 +6,7 @@ import (
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
-func expandMonitoringSloRollingPeriodDays(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandMonitoringSloRollingPeriodDays(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	if v == nil {
 		return nil, nil
 	}

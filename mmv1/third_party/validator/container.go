@@ -32,7 +32,7 @@ func resourceConverterContainerNodePool() ResourceConverter {
 	}
 }
 
-func expandContainerEnabledObject(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerEnabledObject(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	if val := reflect.ValueOf(v); !val.IsValid() || tpgresource.IsEmptyValue(val) {
 		return nil, nil
 	}
@@ -42,15 +42,15 @@ func expandContainerEnabledObject(v interface{}, d TerraformResourceData, config
 	return transformed, nil
 }
 
-func expandContainerClusterEnableLegacyAbac(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterEnableLegacyAbac(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return expandContainerEnabledObject(v, d, config)
 }
 
-func expandContainerClusterEnableBinaryAuthorization(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterEnableBinaryAuthorization(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return expandContainerEnabledObject(v, d, config)
 }
 
-func expandContainerMaxPodsConstraint(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerMaxPodsConstraint(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	if val := reflect.ValueOf(v); !val.IsValid() || tpgresource.IsEmptyValue(val) {
 		return nil, nil
 	}
@@ -60,15 +60,15 @@ func expandContainerMaxPodsConstraint(v interface{}, d TerraformResourceData, co
 	return transformed, nil
 }
 
-func expandContainerClusterDefaultMaxPodsPerNode(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterDefaultMaxPodsPerNode(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return expandContainerMaxPodsConstraint(v, d, config)
 }
 
-func expandContainerNodePoolMaxPodsPerNode(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolMaxPodsPerNode(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return expandContainerMaxPodsConstraint(v, d, config)
 }
 
-func expandContainerClusterNetwork(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNetwork(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	fv, err := ParseNetworkFieldValue(v.(string), d, config)
 	if err != nil {
 		return nil, err
@@ -76,7 +76,7 @@ func expandContainerClusterNetwork(v interface{}, d TerraformResourceData, confi
 	return fv.RelativeLink(), nil
 }
 
-func expandContainerClusterSubnetwork(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterSubnetwork(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	fv, err := ParseNetworkFieldValue(v.(string), d, config)
 	if err != nil {
 		return nil, err
@@ -92,17 +92,17 @@ func canonicalizeServiceScopesFromSet(scopesSet *schema.Set) (interface{}, error
 	return scopes, nil
 }
 
-func expandContainerClusterNodeConfigOauthScopes(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigOauthScopes(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	scopesSet := v.(*schema.Set)
 	return canonicalizeServiceScopesFromSet(scopesSet)
 }
 
-func expandContainerNodePoolNodeConfigOauthScopes(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigOauthScopes(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	scopesSet := v.(*schema.Set)
 	return canonicalizeServiceScopesFromSet(scopesSet)
 }
 
-func GetContainerClusterCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetContainerClusterCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{name}}")
 	if err != nil {
 		return []Asset{}, err
@@ -123,7 +123,7 @@ func GetContainerClusterCaiObject(d TerraformResourceData, config *transport_tpg
 	}
 }
 
-func GetContainerClusterApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+func GetContainerClusterApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
 	obj := make(map[string]interface{})
 	binaryAuthorizationProp, err := expandContainerClusterEnableBinaryAuthorization(d.Get("enable_binary_authorization"), d, config)
 	if err != nil {
@@ -306,11 +306,11 @@ func GetContainerClusterApiObject(d TerraformResourceData, config *transport_tpg
 	return obj, nil
 }
 
-func expandContainerClusterEnableKubernetesAlpha(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterEnableKubernetesAlpha(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterPodSecurityPolicyConfig(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterPodSecurityPolicyConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -329,23 +329,23 @@ func expandContainerClusterPodSecurityPolicyConfig(v interface{}, d TerraformRes
 	return transformed, nil
 }
 
-func expandContainerClusterPodSecurityPolicyConfigEnabled(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterPodSecurityPolicyConfigEnabled(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterDescription(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterInitialNodeCount(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterInitialNodeCount(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterNodeConfig(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -462,7 +462,7 @@ func expandContainerClusterNodeConfig(v interface{}, d TerraformResourceData, co
 	return transformed, nil
 }
 
-func expandContainerClusterNodeConfigWorkloadMetadataConfig(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigWorkloadMetadataConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -481,23 +481,23 @@ func expandContainerClusterNodeConfigWorkloadMetadataConfig(v interface{}, d Ter
 	return transformed, nil
 }
 
-func expandContainerClusterNodeConfigWorkloadMetadataConfigMode(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigWorkloadMetadataConfigMode(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterNodeConfigMachineType(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigMachineType(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterNodeConfigDiskSizeGb(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigDiskSizeGb(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterNodeConfigServiceAccount(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigServiceAccount(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterNodeConfigMetadata(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
+func expandContainerClusterNodeConfigMetadata(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
 	if v == nil {
 		return map[string]string{}, nil
 	}
@@ -508,11 +508,11 @@ func expandContainerClusterNodeConfigMetadata(v interface{}, d TerraformResource
 	return m, nil
 }
 
-func expandContainerClusterNodeConfigImageType(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigImageType(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterNodeConfigLabels(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
+func expandContainerClusterNodeConfigLabels(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
 	if v == nil {
 		return map[string]string{}, nil
 	}
@@ -523,19 +523,19 @@ func expandContainerClusterNodeConfigLabels(v interface{}, d TerraformResourceDa
 	return m, nil
 }
 
-func expandContainerClusterNodeConfigLocalSsdCount(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigLocalSsdCount(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterNodeConfigTags(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigTags(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterNodeConfigPreemptible(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigPreemptible(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterNodeConfigGuestAccelerator(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigGuestAccelerator(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	req := make([]interface{}, 0, len(l))
 	for _, raw := range l {
@@ -564,23 +564,23 @@ func expandContainerClusterNodeConfigGuestAccelerator(v interface{}, d Terraform
 	return req, nil
 }
 
-func expandContainerClusterNodeConfigGuestAcceleratorCount(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigGuestAcceleratorCount(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterNodeConfigGuestAcceleratorType(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigGuestAcceleratorType(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterNodeConfigDiskType(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigDiskType(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterNodeConfigMinCpuPlatform(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigMinCpuPlatform(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterNodeConfigTaint(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigTaint(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	req := make([]interface{}, 0, len(l))
 	for _, raw := range l {
@@ -616,19 +616,19 @@ func expandContainerClusterNodeConfigTaint(v interface{}, d TerraformResourceDat
 	return req, nil
 }
 
-func expandContainerClusterNodeConfigTaintKey(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigTaintKey(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterNodeConfigTaintValue(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigTaintValue(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterNodeConfigTaintEffect(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeConfigTaintEffect(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterMasterAuth(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterMasterAuth(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -682,15 +682,15 @@ func expandContainerClusterMasterAuth(v interface{}, d TerraformResourceData, co
 	return transformed, nil
 }
 
-func expandContainerClusterMasterAuthUsername(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterMasterAuthUsername(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterMasterAuthPassword(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterMasterAuthPassword(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterMasterAuthClientCertificateConfig(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterMasterAuthClientCertificateConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -709,31 +709,31 @@ func expandContainerClusterMasterAuthClientCertificateConfig(v interface{}, d Te
 	return transformed, nil
 }
 
-func expandContainerClusterMasterAuthClientCertificateConfigIssueClientCertificate(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterMasterAuthClientCertificateConfigIssueClientCertificate(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterMasterAuthClusterCaCertificate(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterMasterAuthClusterCaCertificate(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterMasterAuthClientCertificate(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterMasterAuthClientCertificate(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterMasterAuthClientKey(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterMasterAuthClientKey(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterLoggingService(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterLoggingService(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterMonitoringService(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterMonitoringService(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterWorkloadIdentityConfig(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterWorkloadIdentityConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -751,11 +751,11 @@ func expandContainerClusterWorkloadIdentityConfig(v interface{}, d TerraformReso
 	return transformed, nil
 }
 
-func expandContainerClusterWorkloadIdentityConfigWorkloadPool(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterWorkloadIdentityConfigWorkloadPool(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterPrivateClusterConfig(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterPrivateClusterConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -802,31 +802,31 @@ func expandContainerClusterPrivateClusterConfig(v interface{}, d TerraformResour
 	return transformed, nil
 }
 
-func expandContainerClusterPrivateClusterConfigEnablePrivateNodes(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterPrivateClusterConfigEnablePrivateNodes(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterPrivateClusterConfigEnablePrivateEndpoint(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterPrivateClusterConfigEnablePrivateEndpoint(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterPrivateClusterConfigMasterIpv4CidrBlock(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterPrivateClusterConfigMasterIpv4CidrBlock(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterPrivateClusterConfigPrivateEndpoint(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterPrivateClusterConfigPrivateEndpoint(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterPrivateClusterConfigPublicEndpoint(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterPrivateClusterConfigPublicEndpoint(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterClusterIpv4Cidr(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterClusterIpv4Cidr(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterAddonsConfig(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterAddonsConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -859,7 +859,7 @@ func expandContainerClusterAddonsConfig(v interface{}, d TerraformResourceData, 
 	return transformed, nil
 }
 
-func expandContainerClusterAddonsConfigHttpLoadBalancing(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterAddonsConfigHttpLoadBalancing(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -878,11 +878,11 @@ func expandContainerClusterAddonsConfigHttpLoadBalancing(v interface{}, d Terraf
 	return transformed, nil
 }
 
-func expandContainerClusterAddonsConfigHttpLoadBalancingDisabled(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterAddonsConfigHttpLoadBalancingDisabled(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterAddonsConfigHorizontalPodAutoscaling(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterAddonsConfigHorizontalPodAutoscaling(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -901,11 +901,11 @@ func expandContainerClusterAddonsConfigHorizontalPodAutoscaling(v interface{}, d
 	return transformed, nil
 }
 
-func expandContainerClusterAddonsConfigHorizontalPodAutoscalingDisabled(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterAddonsConfigHorizontalPodAutoscalingDisabled(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterAddonsConfigNetworkPolicyConfig(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterAddonsConfigNetworkPolicyConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -924,16 +924,16 @@ func expandContainerClusterAddonsConfigNetworkPolicyConfig(v interface{}, d Terr
 	return transformed, nil
 }
 
-func expandContainerClusterAddonsConfigNetworkPolicyConfigDisabled(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterAddonsConfigNetworkPolicyConfigDisabled(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterNodeLocations(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNodeLocations(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	v = v.(*schema.Set).List()
 	return v, nil
 }
 
-func expandContainerClusterResourceLabels(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
+func expandContainerClusterResourceLabels(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
 	if v == nil {
 		return map[string]string{}, nil
 	}
@@ -944,11 +944,11 @@ func expandContainerClusterResourceLabels(v interface{}, d TerraformResourceData
 	return m, nil
 }
 
-func expandContainerClusterLabelFingerprint(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterLabelFingerprint(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterNetworkPolicy(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNetworkPolicy(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -974,15 +974,15 @@ func expandContainerClusterNetworkPolicy(v interface{}, d TerraformResourceData,
 	return transformed, nil
 }
 
-func expandContainerClusterNetworkPolicyProvider(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNetworkPolicyProvider(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterNetworkPolicyEnabled(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterNetworkPolicyEnabled(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterIpAllocationPolicy(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterIpAllocationPolicy(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -1057,55 +1057,55 @@ func expandContainerClusterIpAllocationPolicy(v interface{}, d TerraformResource
 	return transformed, nil
 }
 
-func expandContainerClusterIpAllocationPolicyUseIpAliases(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterIpAllocationPolicyUseIpAliases(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterIpAllocationPolicyCreateSubnetwork(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterIpAllocationPolicyCreateSubnetwork(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterIpAllocationPolicySubnetworkName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterIpAllocationPolicySubnetworkName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterIpAllocationPolicyClusterSecondaryRangeName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterIpAllocationPolicyClusterSecondaryRangeName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterIpAllocationPolicyServicesSecondaryRangeName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterIpAllocationPolicyServicesSecondaryRangeName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterIpAllocationPolicyClusterIpv4CidrBlock(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterIpAllocationPolicyClusterIpv4CidrBlock(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterIpAllocationPolicyNodeIpv4CidrBlock(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterIpAllocationPolicyNodeIpv4CidrBlock(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterIpAllocationPolicyServicesIpv4CidrBlock(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterIpAllocationPolicyServicesIpv4CidrBlock(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterIpAllocationPolicyTPUIpv4CidrBlock(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterIpAllocationPolicyTPUIpv4CidrBlock(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterMinMasterVersion(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterMinMasterVersion(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterEnableTpu(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterEnableTpu(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterTPUIpv4CidrBlock(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterTPUIpv4CidrBlock(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterMasterAuthorizedNetworksConfig(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterMasterAuthorizedNetworksConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -1128,7 +1128,7 @@ func expandContainerClusterMasterAuthorizedNetworksConfig(v interface{}, d Terra
 	return transformed, nil
 }
 
-func expandContainerClusterMasterAuthorizedNetworksConfigCidrBlocks(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterMasterAuthorizedNetworksConfigCidrBlocks(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	v = v.(*schema.Set).List()
 	l := v.([]interface{})
 	req := make([]interface{}, 0, len(l))
@@ -1158,27 +1158,27 @@ func expandContainerClusterMasterAuthorizedNetworksConfigCidrBlocks(v interface{
 	return req, nil
 }
 
-func expandContainerClusterMasterAuthorizedNetworksConfigCidrBlocksDisplayName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterMasterAuthorizedNetworksConfigCidrBlocksDisplayName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterMasterAuthorizedNetworksConfigCidrBlocksCidrBlock(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterMasterAuthorizedNetworksConfigCidrBlocksCidrBlock(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterLocation(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterLocation(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterKubectlPath(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterKubectlPath(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerClusterKubectlContext(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerClusterKubectlContext(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func GetContainerNodePoolCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetContainerNodePoolCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}")
 	if err != nil {
 		return []Asset{}, err
@@ -1199,7 +1199,7 @@ func GetContainerNodePoolCaiObject(d TerraformResourceData, config *transport_tp
 	}
 }
 
-func GetContainerNodePoolApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+func GetContainerNodePoolApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
 	obj := make(map[string]interface{})
 	nameProp, err := expandContainerNodePoolName(d.Get("name"), d, config)
 	if err != nil {
@@ -1259,11 +1259,11 @@ func GetContainerNodePoolApiObject(d TerraformResourceData, config *transport_tp
 	return obj, nil
 }
 
-func expandContainerNodePoolName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfig(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -1373,19 +1373,19 @@ func expandContainerNodePoolNodeConfig(v interface{}, d TerraformResourceData, c
 	return transformed, nil
 }
 
-func expandContainerNodePoolNodeConfigMachineType(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigMachineType(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigDiskSizeGb(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigDiskSizeGb(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigServiceAccount(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigServiceAccount(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigMetadata(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
+func expandContainerNodePoolNodeConfigMetadata(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
 	if v == nil {
 		return map[string]string{}, nil
 	}
@@ -1396,11 +1396,11 @@ func expandContainerNodePoolNodeConfigMetadata(v interface{}, d TerraformResourc
 	return m, nil
 }
 
-func expandContainerNodePoolNodeConfigImageType(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigImageType(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigLabels(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
+func expandContainerNodePoolNodeConfigLabels(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
 	if v == nil {
 		return map[string]string{}, nil
 	}
@@ -1411,19 +1411,19 @@ func expandContainerNodePoolNodeConfigLabels(v interface{}, d TerraformResourceD
 	return m, nil
 }
 
-func expandContainerNodePoolNodeConfigLocalSsdCount(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigLocalSsdCount(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigTags(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigTags(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigPreemptible(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigPreemptible(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigGuestAccelerator(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigGuestAccelerator(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	req := make([]interface{}, 0, len(l))
 	for _, raw := range l {
@@ -1452,23 +1452,23 @@ func expandContainerNodePoolNodeConfigGuestAccelerator(v interface{}, d Terrafor
 	return req, nil
 }
 
-func expandContainerNodePoolNodeConfigGuestAcceleratorCount(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigGuestAcceleratorCount(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigGuestAcceleratorType(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigGuestAcceleratorType(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigDiskType(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigDiskType(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigMinCpuPlatform(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigMinCpuPlatform(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigTaint(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigTaint(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	req := make([]interface{}, 0, len(l))
 	for _, raw := range l {
@@ -1504,27 +1504,27 @@ func expandContainerNodePoolNodeConfigTaint(v interface{}, d TerraformResourceDa
 	return req, nil
 }
 
-func expandContainerNodePoolNodeConfigTaintKey(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigTaintKey(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigTaintValue(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigTaintValue(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigTaintEffect(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigTaintEffect(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolInitialNodeCount(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolInitialNodeCount(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolVersion(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolVersion(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolAutoscaling(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolAutoscaling(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -1557,19 +1557,19 @@ func expandContainerNodePoolAutoscaling(v interface{}, d TerraformResourceData, 
 	return transformed, nil
 }
 
-func expandContainerNodePoolAutoscalingEnabled(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolAutoscalingEnabled(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolAutoscalingMinNodeCount(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolAutoscalingMinNodeCount(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolAutoscalingMaxNodeCount(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolAutoscalingMaxNodeCount(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolManagement(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolManagement(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -1595,15 +1595,15 @@ func expandContainerNodePoolManagement(v interface{}, d TerraformResourceData, c
 	return transformed, nil
 }
 
-func expandContainerNodePoolManagementAutoUpgrade(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolManagementAutoUpgrade(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolManagementAutoRepair(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolManagementAutoRepair(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolCluster(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolCluster(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	f, err := parseGlobalFieldValue("clusters", v.(string), "project", d, config, true)
 	if err != nil {
 		return nil, fmt.Errorf("Invalid value for cluster: %s", err)
@@ -1611,6 +1611,6 @@ func expandContainerNodePoolCluster(v interface{}, d TerraformResourceData, conf
 	return f.RelativeLink(), nil
 }
 
-func expandContainerNodePoolLocation(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolLocation(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }

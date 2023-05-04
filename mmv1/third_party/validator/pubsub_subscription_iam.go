@@ -34,15 +34,15 @@ func resourceConverterPubsubSubscriptionIamMember() ResourceConverter {
 	}
 }
 
-func GetPubsubSubscriptionIamPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetPubsubSubscriptionIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newPubsubSubscriptionIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetPubsubSubscriptionIamBindingCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetPubsubSubscriptionIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newPubsubSubscriptionIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetPubsubSubscriptionIamMemberCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetPubsubSubscriptionIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newPubsubSubscriptionIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -68,9 +68,9 @@ func MergePubsubSubscriptionIamMemberDelete(existing, incoming Asset) Asset {
 }
 
 func newPubsubSubscriptionIamAsset(
-	d TerraformResourceData,
+	d tpgresource.TerraformResourceData,
 	config *transport_tpg.Config,
-	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
+	expandBindings func(d tpgresource.TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
@@ -91,7 +91,7 @@ func newPubsubSubscriptionIamAsset(
 	}}, nil
 }
 
-func FetchPubsubSubscriptionIamPolicy(d TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
+func FetchPubsubSubscriptionIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("subscription"); !ok {
 		return Asset{}, ErrEmptyIdentityField

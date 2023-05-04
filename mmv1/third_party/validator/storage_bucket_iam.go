@@ -37,15 +37,15 @@ func resourceConverterStorageBucketIamMember() ResourceConverter {
 	}
 }
 
-func GetStorageBucketIamPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetStorageBucketIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newStorageBucketIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetStorageBucketIamBindingCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetStorageBucketIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newStorageBucketIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetStorageBucketIamMemberCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetStorageBucketIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newStorageBucketIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -71,9 +71,9 @@ func MergeStorageBucketIamMemberDelete(existing, incoming Asset) Asset {
 }
 
 func newStorageBucketIamAsset(
-	d TerraformResourceData,
+	d tpgresource.TerraformResourceData,
 	config *transport_tpg.Config,
-	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
+	expandBindings func(d tpgresource.TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
@@ -94,7 +94,7 @@ func newStorageBucketIamAsset(
 	}}, nil
 }
 
-func FetchStorageBucketIamPolicy(d TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
+func FetchStorageBucketIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("bucket"); !ok {
 		return Asset{}, ErrEmptyIdentityField

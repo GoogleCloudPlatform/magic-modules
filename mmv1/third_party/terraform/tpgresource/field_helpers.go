@@ -1,4 +1,4 @@
-package google
+package tpgresource
 
 import (
 	"fmt"
@@ -9,18 +9,18 @@ import (
 )
 
 const (
-	globalLinkTemplate             = "projects/%s/global/%s/%s"
-	globalLinkBasePattern          = "projects/(.+)/global/%s/(.+)"
-	zonalLinkTemplate              = "projects/%s/zones/%s/%s/%s"
-	zonalLinkBasePattern           = "projects/(.+)/zones/(.+)/%s/(.+)"
-	zonalPartialLinkBasePattern    = "zones/(.+)/%s/(.+)"
-	regionalLinkTemplate           = "projects/%s/regions/%s/%s/%s"
-	regionalLinkBasePattern        = "projects/(.+)/regions/(.+)/%s/(.+)"
-	regionalPartialLinkBasePattern = "regions/(.+)/%s/(.+)"
-	projectLinkTemplate            = "projects/%s/%s/%s"
-	projectBasePattern             = "projects/(.+)/%s/(.+)"
-	organizationLinkTemplate       = "organizations/%s/%s/%s"
-	organizationBasePattern        = "organizations/(.+)/%s/(.+)"
+	GlobalLinkTemplate             = "projects/%s/global/%s/%s"
+	GlobalLinkBasePattern          = "projects/(.+)/global/%s/(.+)"
+	ZonalLinkTemplate              = "projects/%s/zones/%s/%s/%s"
+	ZonalLinkBasePattern           = "projects/(.+)/zones/(.+)/%s/(.+)"
+	ZonalPartialLinkBasePattern    = "zones/(.+)/%s/(.+)"
+	RegionalLinkTemplate           = "projects/%s/regions/%s/%s/%s"
+	RegionalLinkBasePattern        = "projects/(.+)/regions/(.+)/%s/(.+)"
+	RegionalPartialLinkBasePattern = "regions/(.+)/%s/(.+)"
+	ProjectLinkTemplate            = "projects/%s/%s/%s"
+	ProjectBasePattern             = "projects/(.+)/%s/(.+)"
+	OrganizationLinkTemplate       = "organizations/%s/%s/%s"
+	OrganizationBasePattern        = "organizations/(.+)/%s/(.+)"
 )
 
 // ------------------------------------------------------------
@@ -111,7 +111,7 @@ func (f GlobalFieldValue) RelativeLink() string {
 		return ""
 	}
 
-	return fmt.Sprintf(globalLinkTemplate, f.Project, f.resourceType, f.Name)
+	return fmt.Sprintf(GlobalLinkTemplate, f.Project, f.resourceType, f.Name)
 }
 
 // Parses a global field supporting 5 different formats:
@@ -130,7 +130,7 @@ func parseGlobalFieldValue(resourceType, fieldValue, projectSchemaField string, 
 		return nil, fmt.Errorf("The global field for resource %s cannot be empty", resourceType)
 	}
 
-	r := regexp.MustCompile(fmt.Sprintf(globalLinkBasePattern, resourceType))
+	r := regexp.MustCompile(fmt.Sprintf(GlobalLinkBasePattern, resourceType))
 	if parts := r.FindStringSubmatch(fieldValue); parts != nil {
 		return &GlobalFieldValue{
 			Project: parts[1],
@@ -166,7 +166,7 @@ func (f ZonalFieldValue) RelativeLink() string {
 		return ""
 	}
 
-	return fmt.Sprintf(zonalLinkTemplate, f.Project, f.Zone, f.resourceType, f.Name)
+	return fmt.Sprintf(ZonalLinkTemplate, f.Project, f.Zone, f.resourceType, f.Name)
 }
 
 // Parses a zonal field supporting 5 different formats:
@@ -186,7 +186,7 @@ func parseZonalFieldValue(resourceType, fieldValue, projectSchemaField, zoneSche
 		return nil, fmt.Errorf("The zonal field for resource %s cannot be empty.", resourceType)
 	}
 
-	r := regexp.MustCompile(fmt.Sprintf(zonalLinkBasePattern, resourceType))
+	r := regexp.MustCompile(fmt.Sprintf(ZonalLinkBasePattern, resourceType))
 	if parts := r.FindStringSubmatch(fieldValue); parts != nil {
 		return &ZonalFieldValue{
 			Project:      parts[1],
@@ -201,7 +201,7 @@ func parseZonalFieldValue(resourceType, fieldValue, projectSchemaField, zoneSche
 		return nil, err
 	}
 
-	r = regexp.MustCompile(fmt.Sprintf(zonalPartialLinkBasePattern, resourceType))
+	r = regexp.MustCompile(fmt.Sprintf(ZonalPartialLinkBasePattern, resourceType))
 	if parts := r.FindStringSubmatch(fieldValue); parts != nil {
 		return &ZonalFieldValue{
 			Project:      project,
@@ -212,7 +212,7 @@ func parseZonalFieldValue(resourceType, fieldValue, projectSchemaField, zoneSche
 	}
 
 	if len(zoneSchemaField) == 0 {
-		return nil, fmt.Errorf("Invalid field format. Got '%s', expected format '%s'", fieldValue, fmt.Sprintf(globalLinkTemplate, "{project}", resourceType, "{name}"))
+		return nil, fmt.Errorf("Invalid field format. Got '%s', expected format '%s'", fieldValue, fmt.Sprintf(GlobalLinkTemplate, "{project}", resourceType, "{name}"))
 	}
 
 	zone, ok := d.GetOk(zoneSchemaField)
@@ -265,7 +265,7 @@ func (f OrganizationFieldValue) RelativeLink() string {
 		return ""
 	}
 
-	return fmt.Sprintf(organizationLinkTemplate, f.OrgId, f.resourceType, f.Name)
+	return fmt.Sprintf(OrganizationLinkTemplate, f.OrgId, f.resourceType, f.Name)
 }
 
 // Parses an organization field with the following formats:
@@ -278,7 +278,7 @@ func parseOrganizationFieldValue(resourceType, fieldValue string, isEmptyValid b
 		return nil, fmt.Errorf("The organization field for resource %s cannot be empty", resourceType)
 	}
 
-	r := regexp.MustCompile(fmt.Sprintf(organizationBasePattern, resourceType))
+	r := regexp.MustCompile(fmt.Sprintf(OrganizationBasePattern, resourceType))
 	if parts := r.FindStringSubmatch(fieldValue); parts != nil {
 		return &OrganizationFieldValue{
 			OrgId: parts[1],
@@ -288,7 +288,7 @@ func parseOrganizationFieldValue(resourceType, fieldValue string, isEmptyValid b
 		}, nil
 	}
 
-	return nil, fmt.Errorf("Invalid field format. Got '%s', expected format '%s'", fieldValue, fmt.Sprintf(organizationLinkTemplate, "{org_id}", resourceType, "{name}"))
+	return nil, fmt.Errorf("Invalid field format. Got '%s', expected format '%s'", fieldValue, fmt.Sprintf(OrganizationLinkTemplate, "{org_id}", resourceType, "{name}"))
 }
 
 type RegionalFieldValue struct {
@@ -304,7 +304,7 @@ func (f RegionalFieldValue) RelativeLink() string {
 		return ""
 	}
 
-	return fmt.Sprintf(regionalLinkTemplate, f.Project, f.Region, f.resourceType, f.Name)
+	return fmt.Sprintf(RegionalLinkTemplate, f.Project, f.Region, f.resourceType, f.Name)
 }
 
 // Parses a regional field supporting 5 different formats:
@@ -324,7 +324,7 @@ func parseRegionalFieldValue(resourceType, fieldValue, projectSchemaField, regio
 		return nil, fmt.Errorf("The regional field for resource %s cannot be empty.", resourceType)
 	}
 
-	r := regexp.MustCompile(fmt.Sprintf(regionalLinkBasePattern, resourceType))
+	r := regexp.MustCompile(fmt.Sprintf(RegionalLinkBasePattern, resourceType))
 	if parts := r.FindStringSubmatch(fieldValue); parts != nil {
 		return &RegionalFieldValue{
 			Project:      parts[1],
@@ -339,7 +339,7 @@ func parseRegionalFieldValue(resourceType, fieldValue, projectSchemaField, regio
 		return nil, err
 	}
 
-	r = regexp.MustCompile(fmt.Sprintf(regionalPartialLinkBasePattern, resourceType))
+	r = regexp.MustCompile(fmt.Sprintf(RegionalPartialLinkBasePattern, resourceType))
 	if parts := r.FindStringSubmatch(fieldValue); parts != nil {
 		return &RegionalFieldValue{
 			Project:      project,
@@ -408,7 +408,7 @@ func (f ProjectFieldValue) RelativeLink() string {
 		return ""
 	}
 
-	return fmt.Sprintf(projectLinkTemplate, f.Project, f.resourceType, f.Name)
+	return fmt.Sprintf(ProjectLinkTemplate, f.Project, f.resourceType, f.Name)
 }
 
 // Parses a project field with the following formats:
@@ -421,7 +421,7 @@ func parseProjectFieldValue(resourceType, fieldValue, projectSchemaField string,
 		return nil, fmt.Errorf("The project field for resource %s cannot be empty", resourceType)
 	}
 
-	r := regexp.MustCompile(fmt.Sprintf(projectBasePattern, resourceType))
+	r := regexp.MustCompile(fmt.Sprintf(ProjectBasePattern, resourceType))
 	if parts := r.FindStringSubmatch(fieldValue); parts != nil {
 		return &ProjectFieldValue{
 			Project: parts[1],

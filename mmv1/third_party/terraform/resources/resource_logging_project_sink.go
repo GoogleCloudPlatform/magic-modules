@@ -73,7 +73,7 @@ func resourceLoggingProjectSinkCustomizeDiff(ctx context.Context, d *schema.Reso
 	return resourceLoggingProjectSinkCustomizeDiffFunc(d)
 }
 
-func resourceLoggingProjectSinkCustomizeDiffFunc(diff TerraformResourceDiff) error {
+func resourceLoggingProjectSinkCustomizeDiffFunc(diff tpgresource.TerraformResourceDiff) error {
 	if !diff.HasChange("bigquery_options.#") {
 		return nil
 	}

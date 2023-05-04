@@ -372,7 +372,7 @@ func flattenApigeeSharedFlowLatestRevisionId(v interface{}, d *schema.ResourceDa
 	return v
 }
 
-func expandApigeeSharedFlowName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeSharedFlowName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 

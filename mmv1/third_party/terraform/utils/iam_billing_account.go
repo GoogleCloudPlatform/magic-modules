@@ -21,11 +21,11 @@ var IamBillingAccountSchema = map[string]*schema.Schema{
 
 type BillingAccountIamUpdater struct {
 	billingAccountId string
-	d                TerraformResourceData
+	d                tpgresource.TerraformResourceData
 	Config           *transport_tpg.Config
 }
 
-func NewBillingAccountIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+func NewBillingAccountIamUpdater(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
 	return &BillingAccountIamUpdater{
 		billingAccountId: canonicalBillingAccountId(d.Get("billing_account_id").(string)),
 		d:                d,

@@ -104,7 +104,7 @@ func parseProjectFieldValueFramework(resourceType, fieldValue, projectSchemaFiel
 		return nil
 	}
 
-	r := regexp.MustCompile(fmt.Sprintf(projectBasePattern, resourceType))
+	r := regexp.MustCompile(fmt.Sprintf(tpgresource.ProjectBasePattern, resourceType))
 	if parts := r.FindStringSubmatch(fieldValue); parts != nil {
 		return &ProjectFieldValue{
 			Project: parts[1],

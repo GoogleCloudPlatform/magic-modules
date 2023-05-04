@@ -14,7 +14,7 @@ func resourceConverterBigtableCluster() ResourceConverter {
 	}
 }
 
-func GetBigtableClusterCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetBigtableClusterCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 
 	objs, err := GetBigtableClusterApiObjects(d, config)
 
@@ -44,12 +44,12 @@ func GetBigtableClusterCaiObject(d TerraformResourceData, config *transport_tpg.
 	return assets, nil
 }
 
-func GetBigtableClusterApiObjects(d TerraformResourceData, config *transport_tpg.Config) ([]map[string]interface{}, error) {
+func GetBigtableClusterApiObjects(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]map[string]interface{}, error) {
 	return expandBigtableClusters(d.Get("cluster"), d, config)
 
 }
 
-func expandBigtableClusters(v interface{}, d TerraformResourceData, config *transport_tpg.Config) ([]map[string]interface{}, error) {
+func expandBigtableClusters(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]map[string]interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -94,19 +94,19 @@ func expandBigtableClusters(v interface{}, d TerraformResourceData, config *tran
 	return transformedEntries, nil
 }
 
-func expandBigtableClusterLocation(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandBigtableClusterLocation(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigtableClusterServerNodes(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandBigtableClusterServerNodes(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigtableClusterDefaultStorageType(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandBigtableClusterDefaultStorageType(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigtableClusterName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandBigtableClusterName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	cluster, err := ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}/clusters/")
 	if err != nil {
 		return nil, err

@@ -971,7 +971,7 @@ func resourceComputeInstanceTemplateScratchDiskCustomizeDiff(_ context.Context, 
 	return resourceComputeInstanceTemplateScratchDiskCustomizeDiffFunc(diff)
 }
 
-func resourceComputeInstanceTemplateScratchDiskCustomizeDiffFunc(diff TerraformResourceDiff) error {
+func resourceComputeInstanceTemplateScratchDiskCustomizeDiffFunc(diff tpgresource.TerraformResourceDiff) error {
 	numDisks := diff.Get("disk.#").(int)
 	for i := 0; i < numDisks; i++ {
 		// misspelled on purpose, type is a special symbol
@@ -1146,7 +1146,7 @@ func buildDisks(d *schema.ResourceData, config *transport_tpg.Config) ([]*comput
 // 'zones/us-east1-b/acceleratorTypes/nvidia-tesla-k80'.
 // Accelerator type 'zones/us-east1-b/acceleratorTypes/nvidia-tesla-k80'
 // must be a valid resource name (not an url).
-func expandInstanceTemplateGuestAccelerators(d TerraformResourceData, config *transport_tpg.Config) []*compute.AcceleratorConfig {
+func expandInstanceTemplateGuestAccelerators(d tpgresource.TerraformResourceData, config *transport_tpg.Config) []*compute.AcceleratorConfig {
 	configs, ok := d.GetOk("guest_accelerator")
 	if !ok {
 		return nil
@@ -1169,7 +1169,7 @@ func expandInstanceTemplateGuestAccelerators(d TerraformResourceData, config *tr
 	return guestAccelerators
 }
 
-func expandInstanceTemplateResourcePolicies(d TerraformResourceData, dataKey string) []string {
+func expandInstanceTemplateResourcePolicies(d tpgresource.TerraformResourceData, dataKey string) []string {
 	return convertAndMapStringArr(d.Get(dataKey).([]interface{}), tpgresource.GetResourceNameFromSelfLink)
 }
 

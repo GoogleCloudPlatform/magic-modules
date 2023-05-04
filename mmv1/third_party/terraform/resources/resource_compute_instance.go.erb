@@ -77,7 +77,7 @@ func forceNewIfNetworkIPNotUpdatable(ctx context.Context, d *schema.ResourceDiff
 	return forceNewIfNetworkIPNotUpdatableFunc(d)
 }
 
-func forceNewIfNetworkIPNotUpdatableFunc(d TerraformResourceDiff) error {
+func forceNewIfNetworkIPNotUpdatableFunc(d tpgresource.TerraformResourceDiff) error {
 	oldCount, newCount := d.GetChange("network_interface.#")
 	if oldCount.(int) != newCount.(int) {
 		return nil
@@ -2274,7 +2274,7 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d *schema.ResourceDat
 
 // See comment on expandInstanceTemplateGuestAccelerators regarding why this
 // code is duplicated.
-func expandInstanceGuestAccelerators(d TerraformResourceData, config *transport_tpg.Config) ([]*compute.AcceleratorConfig, error) {
+func expandInstanceGuestAccelerators(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*compute.AcceleratorConfig, error) {
 	configs, ok := d.GetOk("guest_accelerator")
 	if !ok {
 		return nil, nil

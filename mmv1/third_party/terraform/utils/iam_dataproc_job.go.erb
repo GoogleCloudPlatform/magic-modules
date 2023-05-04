@@ -36,11 +36,11 @@ type DataprocJobIamUpdater struct {
 	project string
 	region  string
 	jobId   string
-	d       TerraformResourceData
+	d       tpgresource.TerraformResourceData
 	Config  *transport_tpg.Config
 }
 
-func NewDataprocJobUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+func NewDataprocJobUpdater(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
 	project, err := getProject(d, config)
 	if err != nil {
 		return nil, err

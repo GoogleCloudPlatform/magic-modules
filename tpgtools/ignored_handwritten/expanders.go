@@ -1,6 +1,6 @@
 package google
 
-func expandComputeRouteNextHopInstance(v interface{}, d TerraformResourceData, config *transport_tpg.Config) *string {
+func expandComputeRouteNextHopInstance(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) *string {
 	if v == "" {
 		return nil
 	}
@@ -15,7 +15,7 @@ func expandComputeRouteNextHopInstance(v interface{}, d TerraformResourceData, c
 	return &nextInstance.SelfLink
 }
 
-func expandComputeVpnTunnelRegion(v interface{}, d TerraformResourceData, config *transport_tpg.Config) *string {
+func expandComputeVpnTunnelRegion(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) *string {
 	if v == "" {
 		return nil
 	}
