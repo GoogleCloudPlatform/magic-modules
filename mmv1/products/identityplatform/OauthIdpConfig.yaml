@@ -26,8 +26,8 @@ description: |
   the marketplace prior to using this resource.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "identity_platform_oauth_idp_config_basic"
-    primary_resource_id: "oauth_idp_config"
+    name: 'identity_platform_oauth_idp_config_basic'
+    primary_resource_id: 'oauth_idp_config'
     vars:
       name: oidc.oauth-idp-config
     test_vars_overrides:

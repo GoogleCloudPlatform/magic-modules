@@ -52,7 +52,7 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
 exclude: true
-id_format: "projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/{{name}}"
+id_format: 'projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/{{name}}'
 skip_sweeper: true
 autogen_async: true
 parameters:
@@ -105,4 +105,3 @@ properties:
     immutable: true
     description: |
       If this map is nonempty, then this override applies only to specific values for dimensions defined in the limit unit.
-

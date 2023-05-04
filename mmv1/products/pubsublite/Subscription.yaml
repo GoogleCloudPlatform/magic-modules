@@ -27,11 +27,11 @@ update_mask: true
 update_url: projects/{{project}}/locations/{{zone}}/subscriptions/{{name}}
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "pubsub_lite_subscription_basic"
-    primary_resource_id: "example"
+    name: 'pubsub_lite_subscription_basic'
+    primary_resource_id: 'example'
     vars:
-      topic_name: "example-topic"
-      subscription_name: "example-subscription"
+      topic_name: 'example-topic'
+      subscription_name: 'example-subscription'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/pubsub_lite.erb
 
@@ -79,4 +79,3 @@ properties:
           - :DELIVER_IMMEDIATELY
           - :DELIVER_AFTER_STORED
           - :DELIVERY_REQUIREMENT_UNSPECIFIED
-

@@ -4,13 +4,15 @@ package google
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/errwrap"
 	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
@@ -65,27 +67,27 @@ func getRegionFromZone(zone string) string {
 // - region extracted from the `zone` field in resource schema
 // - provider-level region
 // - region extracted from the provider-level zone
-func getRegion(d TerraformResourceData, config *Config) (string, error) {
+func getRegion(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
 	return getRegionFromSchema("region", "zone", d, config)
 }
 
 // getProject reads the "project" field from the given resource data and falls
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
-func getProject(d TerraformResourceData, config *Config) (string, error) {
+func getProject(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
 	return getProjectFromSchema("project", d, config)
 }
 
 // getBillingProject reads the "billing_project" field from the given resource data and falls
 // back to the provider's value if not given. If no value is found, an error is returned.
-func getBillingProject(d TerraformResourceData, config *Config) (string, error) {
+func getBillingProject(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
 	return getBillingProjectFromSchema("billing_project", d, config)
 }
 
 // getProjectFromDiff reads the "project" field from the given diff and falls
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
-func getProjectFromDiff(d *schema.ResourceDiff, config *Config) (string, error) {
+func getProjectFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (string, error) {
 	res, ok := d.GetOk("project")
 	if ok {
 		return res.(string), nil
@@ -305,7 +307,7 @@ func Nprintf(format string, params map[string]interface{}) string {
 // A project is required if we are trying to build the FQN from a service account id and
 // and error will be returned in this case if no project is set in the resource or the
 // provider-level config
-func serviceAccountFQN(serviceAccount string, d TerraformResourceData, config *Config) (string, error) {
+func serviceAccountFQN(serviceAccount string, d TerraformResourceData, config *transport_tpg.Config) (string, error) {
 	// If the service account id is already the fully qualified name
 	if strings.HasPrefix(serviceAccount, "projects/") {
 		return serviceAccount, nil
@@ -326,8 +328,8 @@ func serviceAccountFQN(serviceAccount string, d TerraformResourceData, config *C
 	return fmt.Sprintf("projects/-/serviceAccounts/%s@%s.iam.gserviceaccount.com", serviceAccount, project), nil
 }
 
-func paginatedListRequest(project, baseUrl, userAgent string, config *Config, flattener func(map[string]interface{}) []interface{}) ([]interface{}, error) {
-	res, err := SendRequest(config, "GET", project, baseUrl, userAgent, nil)
+func paginatedListRequest(project, baseUrl, userAgent string, config *transport_tpg.Config, flattener func(map[string]interface{}) []interface{}) ([]interface{}, error) {
+	res, err := transport_tpg.SendRequest(config, "GET", project, baseUrl, userAgent, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -339,7 +341,7 @@ func paginatedListRequest(project, baseUrl, userAgent string, config *Config, fl
 			break
 		}
 		url := fmt.Sprintf("%s?pageToken=%s", baseUrl, pageToken.(string))
-		res, err = SendRequest(config, "GET", project, url, userAgent, nil)
+		res, err = transport_tpg.SendRequest(config, "GET", project, url, userAgent, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -350,7 +352,7 @@ func paginatedListRequest(project, baseUrl, userAgent string, config *Config, fl
 	return ls, nil
 }
 
-func getInterconnectAttachmentLink(config *Config, project, region, ic, userAgent string) (string, error) {
+func getInterconnectAttachmentLink(config *transport_tpg.Config, project, region, ic, userAgent string) (string, error) {
 	if !strings.Contains(ic, "/") {
 		icData, err := config.NewComputeClient(userAgent).InterconnectAttachments.Get(
 			project, region, ic).Do()
@@ -410,7 +412,7 @@ func migrateStateNoop(v int, is *terraform.InstanceState, meta interface{}) (*te
 	return is, nil
 }
 
-func expandString(v interface{}, d TerraformResourceData, config *Config) (string, error) {
+func expandString(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (string, error) {
 	return v.(string), nil
 }
 
@@ -428,7 +430,7 @@ func changeFieldSchemaToForceNew(sch *schema.Schema) {
 }
 
 func generateUserAgentString(d TerraformResourceData, currentUserAgent string) (string, error) {
-	var m ProviderMeta
+	var m transport_tpg.ProviderMeta
 
 	err := d.GetProviderMeta(&m)
 	if err != nil {
@@ -515,19 +517,6 @@ func retryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f fu
 	})
 }
 
-// MultiEnvDefault is a helper function that returns the value of the first
-// environment variable in the given list that returns a non-empty value. If
-// none of the environment variables return a value, the default value is
-// returned.
-func MultiEnvDefault(ks []string, dv interface{}) interface{} {
-	for _, k := range ks {
-		if v := os.Getenv(k); v != "" {
-			return v
-		}
-	}
-	return dv
-}
-
 func frameworkDiagsToSdkDiags(fwD fwDiags.Diagnostics) *diag.Diagnostics {
 	var diags diag.Diagnostics
 	for _, e := range fwD.Errors() {
@@ -548,24 +537,8 @@ func frameworkDiagsToSdkDiags(fwD fwDiags.Diagnostics) *diag.Diagnostics {
 	return &diags
 }
 
+// Deprecated: For backward compatibility isEmptyValue is still working,
+// but all new code should use IsEmptyValue in the verify package instead.
 func isEmptyValue(v reflect.Value) bool {
-	if !v.IsValid() {
-		return true
-	}
-
-	switch v.Kind() {
-	case reflect.Array, reflect.Map, reflect.Slice, reflect.String:
-		return v.Len() == 0
-	case reflect.Bool:
-		return !v.Bool()
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return v.Int() == 0
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-		return v.Uint() == 0
-	case reflect.Float32, reflect.Float64:
-		return v.Float() == 0
-	case reflect.Interface, reflect.Ptr:
-		return v.IsNil()
-	}
-	return false
+	return tpgresource.IsEmptyValue(v)
 }

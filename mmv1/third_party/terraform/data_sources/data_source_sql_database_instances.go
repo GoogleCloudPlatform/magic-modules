@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
@@ -56,7 +57,7 @@ func DataSourceSqlDatabaseInstances() *schema.Resource {
 }
 
 func dataSourceSqlDatabaseInstancesRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -98,10 +99,10 @@ func dataSourceSqlDatabaseInstancesRead(d *schema.ResourceData, meta interface{}
 	databaseInstances := make([]map[string]interface{}, 0)
 	for {
 		var instances *sqladmin.InstancesListResponse
-		err = RetryTimeDuration(func() (rerr error) {
+		err = transport_tpg.RetryTimeDuration(func() (rerr error) {
 			instances, rerr = config.NewSqlAdminClient(userAgent).Instances.List(project).Filter(filter).PageToken(pageToken).Do()
 			return rerr
-		}, d.Timeout(schema.TimeoutRead), IsSqlOperationInProgressError)
+		}, d.Timeout(schema.TimeoutRead), transport_tpg.IsSqlOperationInProgressError)
 		if err != nil {
 			return err
 		}

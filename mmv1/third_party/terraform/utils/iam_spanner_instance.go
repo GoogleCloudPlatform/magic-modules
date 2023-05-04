@@ -5,6 +5,9 @@ import (
 	"regexp"
 	"strings"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
+
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -30,10 +33,10 @@ type SpannerInstanceIamUpdater struct {
 	project  string
 	instance string
 	d        TerraformResourceData
-	Config   *Config
+	Config   *transport_tpg.Config
 }
 
-func NewSpannerInstanceIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
+func NewSpannerInstanceIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
 	project, err := getProject(d, config)
 	if err != nil {
 		return nil, err
@@ -47,7 +50,7 @@ func NewSpannerInstanceIamUpdater(d TerraformResourceData, config *Config) (Reso
 	}, nil
 }
 
-func SpannerInstanceIdParseFunc(d *schema.ResourceData, config *Config) error {
+func SpannerInstanceIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
 	id, err := extractSpannerInstanceId(d.Id())
 	if err != nil {
 		return err
@@ -157,7 +160,7 @@ func (s spannerInstanceId) instanceConfigUri(c string) string {
 }
 
 func extractSpannerInstanceId(id string) (*spannerInstanceId, error) {
-	if !regexp.MustCompile("^" + ProjectRegex + "/[a-z0-9-]+$").Match([]byte(id)) {
+	if !regexp.MustCompile("^" + verify.ProjectRegex + "/[a-z0-9-]+$").Match([]byte(id)) {
 		return nil, fmt.Errorf("Invalid spanner id format, expecting {projectId}/{instanceId}")
 	}
 	parts := strings.Split(id, "/")

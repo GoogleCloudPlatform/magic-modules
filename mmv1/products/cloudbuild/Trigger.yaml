@@ -25,61 +25,65 @@ description: |
 docs: !ruby/object:Provider::Terraform::Docs
   note: |
     You can retrieve the email of the Cloud Build Service Account used in jobs by using the `google_project_service_identity` resource.
-   # import by default only works with old-style self links ending in a name
+  # import by default only works with old-style self links ending in a name
 import_format:
-  - "projects/{{project}}/triggers/{{trigger_id}}"
-  - "projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}"
-    # For global triggers, the id format is changed to projects/{{project}}/triggers/{{trigger_id}} via code overrides.
+  - 'projects/{{project}}/triggers/{{trigger_id}}'
+  - 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
+# For global triggers, the id format is changed to projects/{{project}}/triggers/{{trigger_id}} via code overrides.
 id_format: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
 schema_version: 2
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudbuild_trigger_filename"
-    primary_resource_id: "filename-trigger"
+    name: 'cloudbuild_trigger_filename'
+    primary_resource_id: 'filename-trigger'
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudbuild_trigger_build"
-    primary_resource_id: "build-trigger"
+    name: 'cloudbuild_trigger_build'
+    primary_resource_id: 'build-trigger'
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudbuild_trigger_service_account"
-    primary_resource_id: "service-account-trigger"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "cloudbuild_trigger_include_build_logs"
-    primary_resource_id: "include-build-logs-trigger"
-    skip_test: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: "cloudbuild_trigger_pubsub_config"
-    primary_resource_id: "pubsub-config-trigger"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "cloudbuild_trigger_webhook_config"
-    primary_resource_id: "webhook-config-trigger"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "cloudbuild_trigger_manual"
-    primary_resource_id: "manual-trigger"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "cloudbuild_trigger_manual_github_enterprise"
-    primary_resource_id: "manual-ghe-trigger"
-    skip_test: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: "cloudbuild_trigger_repo"
-    min_version: beta
-    primary_resource_id: "repo-trigger"
+    name: 'cloudbuild_trigger_service_account'
+    primary_resource_id: 'service-account-trigger'
     vars:
-      installation_id: "123123"
-      pat_secret: "projects/my-project/secrets/github-pat-secret/versions/latest"
-      repo_uri: "https://github.com/myuser/my-repo.git"
+      sa_name: 'cloud-sa'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuild_trigger_include_build_logs'
+    primary_resource_id: 'include-build-logs-trigger'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuild_trigger_pubsub_config'
+    primary_resource_id: 'pubsub-config-trigger'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuild_trigger_webhook_config'
+    primary_resource_id: 'webhook-config-trigger'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuild_trigger_manual'
+    primary_resource_id: 'manual-trigger'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuild_trigger_manual_github_enterprise'
+    primary_resource_id: 'manual-ghe-trigger'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuild_trigger_repo'
+    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14390
+    skip_test: true
+    min_version: beta
+    primary_resource_id: 'repo-trigger'
+    vars:
+      installation_id: '123123'
+      pat_secret: 'projects/my-project/secrets/github-pat-secret/versions/latest'
+      repo_uri: 'https://github.com/myuser/my-repo.git'
     test_vars_overrides:
       installation_id: 31300675
       pat_secret: '"projects/gcb-terraform-creds/secrets/github-pat/versions/latest"'
       repo_uri: '"https://github.com/gcb-repos-robot/tf-demo.git"'
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudbuild_trigger_bitbucket_server_push"
-    primary_resource_id: "bbs-push-trigger"
+    name: 'cloudbuild_trigger_bitbucket_server_push'
+    primary_resource_id: 'bbs-push-trigger'
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudbuild_trigger_bitbucket_server_pull_request"
-    primary_resource_id: "bbs-pull-request-trigger"
+    name: 'cloudbuild_trigger_bitbucket_server_pull_request'
+    primary_resource_id: 'bbs-pull-request-trigger'
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudbuild_trigger_github_enterprise"
-    primary_resource_id: "ghe-trigger"
+    name: 'cloudbuild_trigger_github_enterprise'
+    primary_resource_id: 'ghe-trigger'
     skip_test: true
 
 custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -158,7 +162,7 @@ properties:
       - build
       - git_file_source
     description: |
-      Path, from the source root, to a file whose contents is used for the template. 
+      Path, from the source root, to a file whose contents is used for the template.
       Either a filename or build template must be provided. Set this only when using trigger_template or github.
       When using Pub/Sub, Webhook or Manual set the file name using git_file_source instead.
   - !ruby/object:Api::Type::String
@@ -182,13 +186,13 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'uri'
         description: |
-          The URI of the repo (optional). If unspecified, the repo from which the trigger 
+          The URI of the repo (optional). If unspecified, the repo from which the trigger
           invocation originated is assumed to be the repo from which to read the specified path.
       - !ruby/object:Api::Type::Enum
         name: 'repoType'
         required: true
         description: |
-          The type of the repo, since it may not be explicit from the repo field (e.g from a URL). 
+          The type of the repo, since it may not be explicit from the repo field (e.g from a URL).
           Values can be UNKNOWN, CLOUD_SOURCE_REPOSITORIES, GITHUB, BITBUCKET_SERVER
         values:
           - :UNKNOWN
@@ -198,8 +202,8 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'revision'
         description: |
-          The branch, tag, arbitrary ref, or SHA version of the repo to use when resolving the 
-          filename (optional). This field respects the same syntax/resolution as described here: https://git-scm.com/docs/gitrevisions 
+          The branch, tag, arbitrary ref, or SHA version of the repo to use when resolving the
+          filename (optional). This field respects the same syntax/resolution as described here: https://git-scm.com/docs/gitrevisions
           If unspecified, the revision from which the trigger invocation originated is assumed to be the revision from which to read the specified path.
       - !ruby/object:Api::Type::String
         name: 'githubEnterpriseConfig'
@@ -207,7 +211,7 @@ properties:
           The full resource name of the github enterprise config.
           Format: projects/{project}/locations/{location}/githubEnterpriseConfigs/{id}. projects/{project}/githubEnterpriseConfigs/{id}.
   - !ruby/object:Api::Type::NestedObject
-    name: "repositoryEventConfig"
+    name: 'repositoryEventConfig'
     min_version: beta
     description: |
       The configuration of a trigger that creates a build whenever an event from Repo API is received.
@@ -221,11 +225,11 @@ properties:
       - repository_event_config
     properties:
       - !ruby/object:Api::Type::String
-        name: "repository"
+        name: 'repository'
         description: |
           The resource name of the Repo API resource.
       - !ruby/object:Api::Type::NestedObject
-        name: "pullRequest"
+        name: 'pullRequest'
         description: |
           Contains filter properties for matching Pull Requests.
         exactly_one_of:
@@ -233,7 +237,7 @@ properties:
           - push
         properties:
           - !ruby/object:Api::Type::String
-            name: "branch"
+            name: 'branch'
             description: |
               Regex of branches to match.
 
@@ -242,11 +246,11 @@ properties:
             exactly_one_of:
               - branch
           - !ruby/object:Api::Type::Boolean
-            name: "invertRegex"
+            name: 'invertRegex'
             description: |
               If true, branches that do NOT match the git_ref will trigger a build.
           - !ruby/object:Api::Type::Enum
-            name: "commentControl"
+            name: 'commentControl'
             description: |
               Configure builds to run whether a repository owner or collaborator need to comment `/gcbrun`.
             values:
@@ -254,7 +258,7 @@ properties:
               - :COMMENTS_ENABLED
               - :COMMENTS_ENABLED_FOR_EXTERNAL_CONTRIBUTORS_ONLY
       - !ruby/object:Api::Type::NestedObject
-        name: "push"
+        name: 'push'
         description: |
           Contains filter properties for matching git pushes.
         exactly_one_of:
@@ -262,7 +266,7 @@ properties:
           - push
         properties:
           - !ruby/object:Api::Type::String
-            name: "branch"
+            name: 'branch'
             description: |
               Regex of branches to match.
 
@@ -272,7 +276,7 @@ properties:
               - branch
               - tag
           - !ruby/object:Api::Type::String
-            name: "tag"
+            name: 'tag'
             description: |
               Regex of tags to match.
 
@@ -282,15 +286,15 @@ properties:
               - branch
               - tag
           - !ruby/object:Api::Type::Boolean
-            name: "invertRegex"
+            name: 'invertRegex'
             description: |
               If true, only trigger a build if the revision regex does NOT match the git_ref regex.
   - !ruby/object:Api::Type::NestedObject
     name: 'sourceToBuild'
     description: |
-      The repo and ref of the repository from which to build. 
-      This field is used only for those triggers that do not respond to SCM events. 
-      Triggers that respond to such events build source at whatever commit caused the event. 
+      The repo and ref of the repository from which to build.
+      This field is used only for those triggers that do not respond to SCM events.
+      Triggers that respond to such events build source at whatever commit caused the event.
       This field is currently only used by Webhook, Pub/Sub, Manual, and Cron triggers.
 
       One of `trigger_template`, `github`, `pubsub_config` `webhook_config` or `source_to_build` must be provided.
@@ -508,7 +512,7 @@ properties:
           The resource name of the github enterprise config that should be applied to this installation.
           For example: "projects/{$projectId}/locations/{$locationId}/githubEnterpriseConfigs/{$configId}"
   - !ruby/object:Api::Type::NestedObject
-    name: "bitbucketServerTriggerConfig"
+    name: 'bitbucketServerTriggerConfig'
     description: |
       BitbucketServerTriggerConfig describes the configuration of a trigger that creates a build whenever a Bitbucket Server event is received.
     at_least_one_of:
@@ -521,18 +525,18 @@ properties:
       - repository_event_config
     properties:
       - !ruby/object:Api::Type::String
-        name: "repoSlug"
+        name: 'repoSlug'
         required: true
         description: |
           Slug of the repository. A repository slug is a URL-friendly version of a repository name, automatically generated by Bitbucket for use in the URL.
           For example, if the repository name is 'test repo', in the URL it would become 'test-repo' as in https://mybitbucket.server/projects/TEST/repos/test-repo.
       - !ruby/object:Api::Type::String
-        name: "projectKey"
+        name: 'projectKey'
         required: true
         description: |
           Key of the project that the repo is in. For example: The key for https://mybitbucket.server/projects/TEST/repos/test-repo is "TEST".
       - !ruby/object:Api::Type::String
-        name: "bitbucketServerConfigResource"
+        name: 'bitbucketServerConfigResource'
         required: true
         description: |
           The Bitbucket server config resource that this trigger config maps to.
@@ -591,7 +595,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'pubsubConfig'
     description: |
-      PubsubConfig describes the configuration of a trigger that creates 
+      PubsubConfig describes the configuration of a trigger that creates
       a build whenever a Pub/Sub message is published.
 
       One of `trigger_template`, `github`, `pubsub_config` `webhook_config` or `source_to_build` must be provided.
@@ -627,7 +631,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'webhookConfig'
     description: |
-      WebhookConfig describes the configuration of a trigger that creates 
+      WebhookConfig describes the configuration of a trigger that creates
       a build whenever a webhook is sent to a trigger's webhook URL.
 
       One of `trigger_template`, `github`, `pubsub_config` `webhook_config` or `source_to_build` must be provided.
@@ -654,8 +658,8 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'approvalConfig'
     description: |
-      Configuration for manual approval to start a build invocation of this BuildTrigger. 
-      Builds created by this trigger will require approval before they execute. 
+      Configuration for manual approval to start a build invocation of this BuildTrigger.
+      Builds created by this trigger will require approval before they execute.
       Any user with a Cloud Build Approver role for the project can approve a build.
     default_from_api: true
     custom_flatten: templates/terraform/custom_flatten/cloudbuild_approval_required.go.erb
@@ -664,7 +668,7 @@ properties:
         name: 'approvalRequired'
         default_value: false
         description: |
-          Whether or not approval is needed. If this is set on a build, it will become pending when run, 
+          Whether or not approval is needed. If this is set on a build, it will become pending when run,
           and will need to be explicitly approved to start.
   - !ruby/object:Api::Type::NestedObject
     name: 'build'
@@ -701,7 +705,7 @@ properties:
               - !ruby/object:Api::Type::String
                 name: 'generation'
                 description: |
-                  Google Cloud Storage generation for the object. 
+                  Google Cloud Storage generation for the object.
                   If the generation is omitted, the latest generation will be used
           - !ruby/object:Api::Type::NestedObject
             name: 'repoSource'
@@ -711,7 +715,7 @@ properties:
               - !ruby/object:Api::Type::String
                 name: 'projectId'
                 description: |
-                  ID of the project that owns the Cloud Source Repository. 
+                  ID of the project that owns the Cloud Source Repository.
                   If omitted, the project ID requesting the build is assumed.
               - !ruby/object:Api::Type::String
                 name: 'repoName'
@@ -722,7 +726,7 @@ properties:
                 name: 'dir'
                 description: |
                   Directory, relative to the source root, in which to run the build.
-                  This must be a relative path. If a step's dir is specified and is an absolute path, 
+                  This must be a relative path. If a step's dir is specified and is an absolute path,
                   this value is ignored for that step's execution.
               - !ruby/object:Api::Type::Boolean
                 name: 'invertRegex'
@@ -736,7 +740,7 @@ properties:
                 name: 'branchName'
                 description: |
                   Regex matching branches to build. Exactly one a of branch name, tag, or commit SHA must be provided.
-                  The syntax of the regular expressions accepted is the syntax accepted by RE2 and 
+                  The syntax of the regular expressions accepted is the syntax accepted by RE2 and
                   described at https://github.com/google/re2/wiki/Syntax
                 exactly_one_of:
                   - build.0.source.0.repo_source.0.branch_name
@@ -746,7 +750,7 @@ properties:
                 name: 'tagName'
                 description: |
                   Regex matching tags to build. Exactly one a of branch name, tag, or commit SHA must be provided.
-                  The syntax of the regular expressions accepted is the syntax accepted by RE2 and 
+                  The syntax of the regular expressions accepted is the syntax accepted by RE2 and
                   described at https://github.com/google/re2/wiki/Syntax
                 exactly_one_of:
                   - build.0.source.0.repo_source.0.branch_name
@@ -780,14 +784,14 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'queueTtl'
         description: |
-          TTL in queue for this build. If provided and the build is enqueued longer than this value, 
+          TTL in queue for this build. If provided and the build is enqueued longer than this value,
           the build will expire and the build status will be EXPIRED.
           The TTL starts ticking from createTime.
           A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
       - !ruby/object:Api::Type::String
         name: 'logsBucket'
         description: |
-          Google Cloud Storage bucket where logs should be written. 
+          Google Cloud Storage bucket where logs should be written.
           Logs file names will be of the format ${logsBucket}/log-${build_id}.txt.
       - !ruby/object:Api::Type::String
         name: 'timeout'
@@ -814,8 +818,8 @@ properties:
               name: 'secretEnv'
               description: |
                 Map of environment variable name to its encrypted value.
-                Secret environment variables must be unique across all of a build's secrets, 
-                and must be used by at least one build step. Values can be at most 64 KB in size. 
+                Secret environment variables must be unique across all of a build's secrets,
+                and must be used by at least one build step. Values can be at most 64 KB in size.
                 There can be at most 100 secret values across all of a build's secrets.
       - !ruby/object:Api::Type::NestedObject
         name: 'availableSecrets'
@@ -860,7 +864,7 @@ properties:
                 the builder service account's credentials if necessary.
 
                 The Docker daemon's cache will already have the latest versions of all of
-                the officially supported build steps (see https://github.com/GoogleCloudPlatform/cloud-builders 
+                the officially supported build steps (see https://github.com/GoogleCloudPlatform/cloud-builders
                 for images and examples).
                 The Docker daemon will also have cached many of the layers for some popular
                 images, like "ubuntu", "debian", but they will be refreshed at the time
@@ -976,7 +980,7 @@ properties:
             - !ruby/object:Api::Type::String
               name: 'script'
               description: |
-                A shell script to be executed in the step. 
+                A shell script to be executed in the step.
                 When script is provided, the user cannot specify the entrypoint or args.
       - !ruby/object:Api::Type::NestedObject
         name: 'artifacts'
@@ -1165,4 +1169,3 @@ properties:
 
                     Paths must be absolute and cannot conflict with other volume paths on the same
                     build step or with certain reserved volume paths.
-

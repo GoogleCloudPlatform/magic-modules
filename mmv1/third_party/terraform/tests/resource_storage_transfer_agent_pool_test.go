@@ -2,11 +2,13 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccStorageTransferAgentPool_agentPoolUpdate(t *testing.T) {
@@ -17,12 +19,12 @@ func TestAccStorageTransferAgentPool_agentPoolUpdate(t *testing.T) {
 	displayNameUpdate := fmt.Sprintf("tf-test-display-name-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckStorageTransferAgentPoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageTransferAgentPool_agentPoolBasic(GetTestProjectFromEnv(), agentPoolName, displayName),
+				Config: testAccStorageTransferAgentPool_agentPoolBasic(acctest.GetTestProjectFromEnv(), agentPoolName, displayName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_agent_pool.foo",
@@ -30,7 +32,7 @@ func TestAccStorageTransferAgentPool_agentPoolUpdate(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferAgentPool_agentPoolBasic(GetTestProjectFromEnv(), agentPoolName, displayNameUpdate),
+				Config: testAccStorageTransferAgentPool_agentPoolBasic(acctest.GetTestProjectFromEnv(), agentPoolName, displayNameUpdate),
 			},
 			{
 				ResourceName:      "google_storage_transfer_agent_pool.foo",
@@ -38,7 +40,7 @@ func TestAccStorageTransferAgentPool_agentPoolUpdate(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferAgentPool_updateLimitMbps(GetTestProjectFromEnv(), agentPoolName, displayNameUpdate),
+				Config: testAccStorageTransferAgentPool_updateLimitMbps(acctest.GetTestProjectFromEnv(), agentPoolName, displayNameUpdate),
 			},
 			{
 				ResourceName:      "google_storage_transfer_agent_pool.foo",
@@ -46,7 +48,7 @@ func TestAccStorageTransferAgentPool_agentPoolUpdate(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferAgentPool_omitDisplayName(GetTestProjectFromEnv(), agentPoolName),
+				Config: testAccStorageTransferAgentPool_omitDisplayName(acctest.GetTestProjectFromEnv(), agentPoolName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_agent_pool.foo",
@@ -54,7 +56,7 @@ func TestAccStorageTransferAgentPool_agentPoolUpdate(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferAgentPool_omitBandwidthLimit(GetTestProjectFromEnv(), agentPoolName, displayNameUpdate),
+				Config: testAccStorageTransferAgentPool_omitBandwidthLimit(acctest.GetTestProjectFromEnv(), agentPoolName, displayNameUpdate),
 			},
 			{
 				ResourceName:      "google_storage_transfer_agent_pool.foo",
@@ -169,7 +171,7 @@ func testAccCheckStorageTransferAgentPoolDestroyProducer(t *testing.T) func(s *t
 
 			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{StorageTransferBasePath}}projects/{{project}}/agentPools/{{name}}")
+			url, err := acctest.ReplaceVarsForTest(config, rs, "{{StorageTransferBasePath}}projects/{{project}}/agentPools/{{name}}")
 			if err != nil {
 				return err
 			}
@@ -180,7 +182,7 @@ func testAccCheckStorageTransferAgentPoolDestroyProducer(t *testing.T) func(s *t
 				billingProject = config.BillingProject
 			}
 
-			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
+			_, err = transport_tpg.SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("StorageTransferAgentPool still exists at %s", url)
 			}

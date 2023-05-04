@@ -1,9 +1,3 @@
-// ----------------------------------------------------------------------------
-//
-//     ***     HANDWRITTEN CODE    ***    Type: MMv1     ***
-//
-// ----------------------------------------------------------------------------
-
 package google
 
 import (
@@ -14,6 +8,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func init() {
@@ -28,7 +24,7 @@ func testSweepFirebaseWebApp(region string) error {
 	resourceName := "FirebaseWebApp"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
-	config, err := SharedConfigForRegion(region)
+	config, err := acctest.SharedConfigForRegion(region)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
 		return err
@@ -41,7 +37,7 @@ func testSweepFirebaseWebApp(region string) error {
 	}
 
 	t := &testing.T{}
-	billingId := GetTestBillingAccountFromEnv(t)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
 
 	// Setup variables to replace in list template
 	d := &ResourceDataMock{
@@ -61,7 +57,7 @@ func testSweepFirebaseWebApp(region string) error {
 		return nil
 	}
 
-	res, err := SendRequest(config, "GET", config.Project, listUrl, config.UserAgent, nil)
+	res, err := transport_tpg.SendRequest(config, "GET", config.Project, listUrl, config.UserAgent, nil)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", listUrl, err)
 		return nil
@@ -86,7 +82,7 @@ func testSweepFirebaseWebApp(region string) error {
 		}
 
 		// Skip resources that shouldn't be sweeped
-		if !IsSweepableTestResource(obj["displayName"].(string)) {
+		if !acctest.IsSweepableTestResource(obj["displayName"].(string)) {
 			nonPrefixCount++
 			continue
 		}
@@ -98,7 +94,7 @@ func testSweepFirebaseWebApp(region string) error {
 		body["immediate"] = true
 
 		// Don't wait on operations as we may have a lot to delete
-		_, err = SendRequest(config, "POST", config.Project, deleteUrl, config.UserAgent, body)
+		_, err = transport_tpg.SendRequest(config, "POST", config.Project, deleteUrl, config.UserAgent, body)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", deleteUrl, err)
 		} else {

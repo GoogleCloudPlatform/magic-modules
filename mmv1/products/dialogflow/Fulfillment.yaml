@@ -13,8 +13,8 @@
 
 --- !ruby/object:Api::Resource
 name: 'Fulfillment'
-base_url: "projects/{{project}}/agent/fulfillment/"
-self_link: "{{name}}"
+base_url: 'projects/{{project}}/agent/fulfillment/'
+self_link: '{{name}}'
 update_verb: :PATCH
 delete_verb: :PATCH
 create_verb: :PATCH
@@ -30,15 +30,15 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.agent/getFulfillment'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dialogflow_fulfillment_basic"
-    primary_resource_id: "basic_fulfillment"
+    name: 'dialogflow_fulfillment_basic'
+    primary_resource_id: 'basic_fulfillment'
     skip_test: true
     vars:
-      fulfillment_name: "basic-fulfillment"
-    # Skip sweeper gen since this is a child resource.
+      fulfillment_name: 'basic-fulfillment'
+# Skip sweeper gen since this is a child resource.
 skip_sweeper: true
-id_format: "{{name}}"
-import_format: ["{{name}}"]
+id_format: '{{name}}'
+import_format: ['{{name}}']
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/self_link_as_name_set_project.go.erb
   post_create: 'templates/terraform/post_create/set_computed_name.erb'
@@ -47,7 +47,7 @@ properties:
     name: 'name'
     output: true
     description: |
-      The unique identifier of the fulfillment. 
+      The unique identifier of the fulfillment.
       Format: projects/<Project ID>/agent/fulfillment - projects/<Project ID>/locations/<Location ID>/agent/fulfillment
   - !ruby/object:Api::Type::String
     name: 'displayName'

@@ -13,8 +13,8 @@
 
 --- !ruby/object:Api::Resource
 name: PolicyTag
-base_url: "{{taxonomy}}/policyTags"
-self_link: "{{name}}"
+base_url: '{{taxonomy}}/policyTags'
+self_link: '{{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -28,24 +28,26 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
   parent_resource_attribute: 'policy_tag'
-  import_format: ["{{%policy_tag}}"]
-  base_url: "{{%policy_tag}}"
-import_format: ["{{name}}"]
+  import_format: ['{{%policy_tag}}']
+  base_url: '{{%policy_tag}}'
+import_format: ['{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "data_catalog_taxonomies_policy_tag_basic"
-    primary_resource_id: "basic_policy_tag"
-    primary_resource_name: "fmt.Sprintf(\"tf_test_my_policy_tag%s\", context[\"random_suffix\"\
+    name: 'data_catalog_taxonomies_policy_tag_basic'
+    primary_resource_id: 'basic_policy_tag'
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_policy_tag%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      taxonomy_display_name: "taxonomy_display_name"
+      taxonomy_display_name: 'taxonomy_display_name'
   - !ruby/object:Provider::Terraform::Examples
-    name: "data_catalog_taxonomies_policy_tag_child_policies"
-    primary_resource_id: "child_policy"
-    primary_resource_name: "fmt.Sprintf(\"tf_test_my_child_tag%s\", context[\"random_suffix\"\
+    name: 'data_catalog_taxonomies_policy_tag_child_policies'
+    primary_resource_id: 'child_policy'
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_child_tag%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      taxonomy_display_name: "taxonomy_display_name"
+      taxonomy_display_name: 'taxonomy_display_name'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/extract_taxonomy.go.erb
 parameters:
@@ -58,35 +60,34 @@ parameters:
       Taxonomy the policy tag is associated with
 properties:
   - !ruby/object:Api::Type::String
-    name: "name"
+    name: 'name'
     description: |
       Resource name of this policy tag, whose format is:
       "projects/{project}/locations/{region}/taxonomies/{taxonomy}/policyTags/{policytag}"
     output: true
   - !ruby/object:Api::Type::String
-    name: "displayName"
+    name: 'displayName'
     description: |
       User defined name of this policy tag. It must: be unique within the parent
       taxonomy; contain only unicode letters, numbers, underscores, dashes and spaces;
       not start or end with spaces; and be at most 200 bytes long when encoded in UTF-8.
     required: true
   - !ruby/object:Api::Type::String
-    name: "description"
+    name: 'description'
     description: |
       Description of this policy tag. It must: contain only unicode characters, tabs,
       newlines, carriage returns and page breaks; and be at most 2000 bytes long when
       encoded in UTF-8. If not set, defaults to an empty description.
       If not set, defaults to an empty description.
   - !ruby/object:Api::Type::String
-    name: "parentPolicyTag"
+    name: 'parentPolicyTag'
     description: |
       Resource name of this policy tag's parent policy tag.
       If empty, it means this policy tag is a top level policy tag.
       If not set, defaults to an empty string.
   - !ruby/object:Api::Type::Array
-    name: "childPolicyTags"
+    name: 'childPolicyTags'
     description: |
       Resource names of child policy tags of this policy tag.
     item_type: Api::Type::String
     output: true
-

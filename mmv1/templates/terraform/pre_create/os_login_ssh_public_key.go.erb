@@ -15,7 +15,7 @@
 // Don't use `getProject()` because we only want to set the project in the URL
 // if the user set it explicitly on the resource.
 if p, ok := d.GetOk("project"); ok {
-	url, err = AddQueryParams(url, map[string]string{"projectId": p.(string)})
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"projectId": p.(string)})
 	if err != nil {
 		return err
 	}

@@ -10,6 +10,9 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"google.golang.org/api/googleapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -95,7 +98,7 @@ func TestIpCidrRangeDiffSuppress(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if IpCidrRangeDiffSuppress("ip_cidr_range", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if tpgresource.IpCidrRangeDiffSuppress("ip_cidr_range", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
@@ -138,7 +141,7 @@ func TestRfc3339TimeDiffSuppress(t *testing.T) {
 		},
 	}
 	for tn, tc := range cases {
-		if Rfc3339TimeDiffSuppress("time", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if tpgresource.Rfc3339TimeDiffSuppress("time", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Errorf("bad: %s, '%s' => '%s' expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
@@ -169,7 +172,7 @@ func TestGetProject(t *testing.T) {
 			// Arrange
 
 			// Create provider config
-			var config Config
+			var config transport_tpg.Config
 			if tc.ProviderProject != "" {
 				config.Project = tc.ProviderProject
 			}
@@ -277,7 +280,7 @@ func TestGetLocation(t *testing.T) {
 			// Arrange
 
 			// Create provider config
-			var config Config
+			var config transport_tpg.Config
 			if v, ok := tc.ProviderConfig["region"]; ok {
 				config.Region = v
 			}
@@ -363,7 +366,7 @@ func TestGetZone(t *testing.T) {
 			// Arrange
 
 			// Create provider config
-			var config Config
+			var config transport_tpg.Config
 			if tc.ProviderZone != "" {
 				config.Zone = tc.ProviderZone
 			}
@@ -433,7 +436,7 @@ func TestGetRegion(t *testing.T) {
 			// Arrange
 
 			// Create provider config
-			var config Config
+			var config transport_tpg.Config
 			if tc.ProviderRegion != "" {
 				config.Region = tc.ProviderRegion
 			}
@@ -698,7 +701,7 @@ func TestDatasourceSchemaFromResourceSchema(t *testing.T) {
 }
 
 func TestEmptyOrDefaultStringSuppress(t *testing.T) {
-	testFunc := EmptyOrDefaultStringSuppress("default value")
+	testFunc := tpgresource.EmptyOrDefaultStringSuppress("default value")
 
 	cases := map[string]struct {
 		Old, New           string
@@ -757,7 +760,7 @@ func TestServiceAccountFQN(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		config := &Config{Project: tc.project}
+		config := &transport_tpg.Config{Project: tc.project}
 		d := &schema.ResourceData{}
 		serviceAccountName, err := serviceAccountFQN(tc.serviceAccount, d, config)
 		if err != nil {
@@ -777,7 +780,7 @@ func TestRetryTimeDuration(t *testing.T) {
 			Code: 500,
 		}
 	}
-	if err := RetryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil || err.(*googleapi.Error).Code != 500 {
+	if err := transport_tpg.RetryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil || err.(*googleapi.Error).Code != 500 {
 		t.Errorf("unexpected error retrying: %v", err)
 	}
 	if i < 2 {
@@ -794,7 +797,7 @@ func TestRetryTimeDuration_wrapped(t *testing.T) {
 		}
 		return errwrap.Wrapf("nested error: {{err}}", err)
 	}
-	if err := RetryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil {
+	if err := transport_tpg.RetryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil {
 		t.Errorf("unexpected nil error, expected an error")
 	} else {
 		innerErr := errwrap.GetType(err, &googleapi.Error{})
@@ -819,7 +822,7 @@ func TestRetryTimeDuration_noretry(t *testing.T) {
 			Code: 400,
 		}
 	}
-	if err := RetryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil || err.(*googleapi.Error).Code != 400 {
+	if err := transport_tpg.RetryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil || err.(*googleapi.Error).Code != 400 {
 		t.Errorf("unexpected error retrying: %v", err)
 	}
 	if i != 1 {
@@ -838,7 +841,7 @@ func TestRetryTimeDuration_URLTimeoutsShouldRetry(t *testing.T) {
 		}
 		return nil
 	}
-	err := RetryTimeDuration(retryFunc, 1*time.Minute)
+	err := transport_tpg.RetryTimeDuration(retryFunc, 1*time.Minute)
 	if err != nil {
 		t.Errorf("unexpected error: got '%v' want 'nil'", err)
 	}
@@ -856,7 +859,7 @@ func TestRetryWithPolling_noRetry(t *testing.T) {
 			Code: 400,
 		}
 	}
-	result, err := retryWithPolling(retryFunc, time.Duration(1000)*time.Millisecond, time.Duration(100)*time.Millisecond)
+	result, err := transport_tpg.RetryWithPolling(retryFunc, time.Duration(1000)*time.Millisecond, time.Duration(100)*time.Millisecond)
 	if err == nil || err.(*googleapi.Error).Code != 400 || result.(string) != "" {
 		t.Errorf("unexpected error %v and result %v", err, result)
 	}
@@ -877,7 +880,7 @@ func TestRetryWithPolling_notRetryable(t *testing.T) {
 	isRetryableFunc := func(err error) (bool, string) {
 		return err.(*googleapi.Error).Code != 400, ""
 	}
-	result, err := retryWithPolling(retryFunc, time.Duration(1000)*time.Millisecond, time.Duration(100)*time.Millisecond, isRetryableFunc)
+	result, err := transport_tpg.RetryWithPolling(retryFunc, time.Duration(1000)*time.Millisecond, time.Duration(100)*time.Millisecond, isRetryableFunc)
 	if err == nil || err.(*googleapi.Error).Code != 400 || result.(string) != "" {
 		t.Errorf("unexpected error %v and result %v", err, result)
 	}
@@ -903,7 +906,7 @@ func TestRetryWithPolling_retriedAndSucceeded(t *testing.T) {
 	isRetryableFunc := func(err error) (bool, string) {
 		return err.(*googleapi.Error).Code != 400, ""
 	}
-	result, err := retryWithPolling(retryFunc, time.Duration(1000)*time.Millisecond, time.Duration(100)*time.Millisecond, isRetryableFunc)
+	result, err := transport_tpg.RetryWithPolling(retryFunc, time.Duration(1000)*time.Millisecond, time.Duration(100)*time.Millisecond, isRetryableFunc)
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
 	}
@@ -934,7 +937,7 @@ func TestRetryWithPolling_retriedAndFailed(t *testing.T) {
 	isRetryableFunc := func(err error) (bool, string) {
 		return err.(*googleapi.Error).Code != 400, ""
 	}
-	result, err := retryWithPolling(retryFunc, time.Duration(1000)*time.Millisecond, time.Duration(100)*time.Millisecond, isRetryableFunc)
+	result, err := transport_tpg.RetryWithPolling(retryFunc, time.Duration(1000)*time.Millisecond, time.Duration(100)*time.Millisecond, isRetryableFunc)
 	if err == nil || err.(*googleapi.Error).Code != 400 || result.(string) != "" {
 		t.Errorf("unexpected error %v and result %v", err, result)
 	}

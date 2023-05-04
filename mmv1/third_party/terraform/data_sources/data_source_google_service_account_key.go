@@ -5,6 +5,9 @@ import (
 
 	"regexp"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -17,7 +20,7 @@ func DataSourceGoogleServiceAccountKey() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validateRegexp(ServiceAccountKeyNameRegex),
+				ValidateFunc: verify.ValidateRegexp(verify.ServiceAccountKeyNameRegex),
 			},
 			"public_key_type": {
 				Type:         schema.TypeString,
@@ -42,7 +45,7 @@ func DataSourceGoogleServiceAccountKey() *schema.Resource {
 }
 
 func dataSourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -52,9 +55,9 @@ func dataSourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interfac
 
 	// Validate name since interpolated values (i.e from a key or service
 	// account resource) will not get validated at plan time.
-	r := regexp.MustCompile(ServiceAccountKeyNameRegex)
+	r := regexp.MustCompile(verify.ServiceAccountKeyNameRegex)
 	if !r.MatchString(keyName) {
-		return fmt.Errorf("invalid key name %q does not match regexp %q", keyName, ServiceAccountKeyNameRegex)
+		return fmt.Errorf("invalid key name %q does not match regexp %q", keyName, verify.ServiceAccountKeyNameRegex)
 	}
 
 	publicKeyType := d.Get("public_key_type").(string)
@@ -62,7 +65,7 @@ func dataSourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interfac
 	// Confirm the service account key exists
 	sak, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Keys.Get(keyName).PublicKeyType(publicKeyType).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Service Account Key %q", keyName))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Service Account Key %q", keyName))
 	}
 
 	d.SetId(sak.Name)

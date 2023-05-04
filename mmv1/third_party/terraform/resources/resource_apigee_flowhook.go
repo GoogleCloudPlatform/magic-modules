@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func ResourceApigeeFlowhook() *schema.Resource {
@@ -68,7 +69,7 @@ func ResourceApigeeFlowhook() *schema.Resource {
 }
 
 func resourceApigeeFlowhookCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -107,7 +108,7 @@ func resourceApigeeFlowhookCreate(d *schema.ResourceData, meta interface{}) erro
 		billingProject = bp
 	}
 
-	res, err := SendRequestWithTimeout(config, "PUT", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := transport_tpg.SendRequestWithTimeout(config, "PUT", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating Flowhook: %s", err)
 	}
@@ -125,7 +126,7 @@ func resourceApigeeFlowhookCreate(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceApigeeFlowhookRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -143,9 +144,9 @@ func resourceApigeeFlowhookRead(d *schema.ResourceData, meta interface{}) error 
 		billingProject = bp
 	}
 
-	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := transport_tpg.SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("ApigeeFlowhook %q", d.Id()))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ApigeeFlowhook %q", d.Id()))
 	}
 	if res["sharedFlow"] == nil || res["sharedFlow"].(string) == "" {
 		//if response does not contain shared_flow field, then nothing is attached to this flowhook, we treat this "binding" resource non-existent
@@ -166,7 +167,7 @@ func resourceApigeeFlowhookRead(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceApigeeFlowhookDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -187,9 +188,9 @@ func resourceApigeeFlowhookDelete(d *schema.ResourceData, meta interface{}) erro
 		billingProject = bp
 	}
 
-	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := transport_tpg.SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
-		return handleNotFoundError(err, d, "Flowhook")
+		return transport_tpg.HandleNotFoundError(err, d, "Flowhook")
 	}
 
 	log.Printf("[DEBUG] Finished deleting Flowhook %q: %#v", d.Id(), res)
@@ -197,7 +198,7 @@ func resourceApigeeFlowhookDelete(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceApigeeFlowhookImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	if err := ParseImportId([]string{
 		"organizations/(?P<org_id>[^/]+)/environments/(?P<environment>[^/]+)/flowhooks/(?P<flow_hook_point>[^/]+)",
 		"(?P<org_id>[^/]+)/(?P<environment>[^/]+)/(?P<flow_hook_point>[^/]+)",
@@ -215,26 +216,26 @@ func resourceApigeeFlowhookImport(d *schema.ResourceData, meta interface{}) ([]*
 	return []*schema.ResourceData{d}, nil
 }
 
-func flattenApigeeFlowhookDescription(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenApigeeFlowhookDescription(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenApigeeFlowhookSharedflow(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenApigeeFlowhookSharedflow(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenApigeeFlowhookContinueOnError(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenApigeeFlowhookContinueOnError(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func expandApigeeFlowhookDescription(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandApigeeFlowhookDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeFlowhookSharedflow(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandApigeeFlowhookSharedflow(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeFlowhookContinueOnError(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandApigeeFlowhookContinueOnError(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }

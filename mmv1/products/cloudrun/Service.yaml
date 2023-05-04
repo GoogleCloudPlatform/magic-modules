@@ -26,96 +26,105 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   parent_resource_attribute: 'service'
   base_url: v1/projects/{{project}}/locations/{{location}}/services/{{service}}
-  import_format: ["projects/{{project}}/locations/{{location}}/services/{{service}}",
-    "{{service}}"]
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/services/{{service}}',
+      '{{service}}',
+    ]
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     We recommend using the `google_cloud_run_v2_service` resource which offers a better
     developer experience and broader support of Cloud Run features.
-id_format: "locations/{{location}}/namespaces/{{project}}/services/{{name}}"
-import_format: ["locations/{{location}}/namespaces/{{project}}/services/{{name}}"]
-error_retry_predicates: ["IsCloudRunCreationConflict"]
+id_format: 'locations/{{location}}/namespaces/{{project}}/services/{{name}}'
+import_format:
+  ['locations/{{location}}/namespaces/{{project}}/services/{{name}}']
+error_retry_predicates: ['transport_tpg.IsCloudRunCreationConflict']
 async: !ruby/object:Provider::Terraform::PollAsync
   check_response_func_existence: PollCheckKnativeStatusFunc(res)
   actions: ['create', 'update']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloud_run_service_basic"
-    primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    name: 'cloud_run_service_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      cloud_run_service_name: "cloudrun-srv"
+      cloud_run_service_name: 'cloudrun-srv'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloud_run_service_sql"
-    primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    name: 'cloud_run_service_sql'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      cloud_run_service_name: "cloudrun-srv"
-      cloud_run_sql_name: "cloudrun-sql"
-      deletion_protection: "true"
+      cloud_run_service_name: 'cloudrun-srv'
+      cloud_run_sql_name: 'cloudrun-sql'
+      deletion_protection: 'true'
     test_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
     oics_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
     ignore_read_extra:
-      - "autogenerate_revision_name"
+      - 'autogenerate_revision_name'
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloud_run_service_noauth"
-    primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    name: 'cloud_run_service_noauth'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      cloud_run_service_name: "cloudrun-srv"
+      cloud_run_service_name: 'cloudrun-srv'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloud_run_service_multiple_environment_variables"
-    primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    name: 'cloud_run_service_multiple_environment_variables'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      cloud_run_service_name: "cloudrun-srv"
+      cloud_run_service_name: 'cloudrun-srv'
     test_env_vars:
       project: :PROJECT_NAME
     ignore_read_extra:
-      - "autogenerate_revision_name"
+      - 'autogenerate_revision_name'
     skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloud_run_service_secret_environment_variables"
-    primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    name: 'cloud_run_service_secret_environment_variables'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      cloud_run_service_name: "cloudrun-srv"
-      secret_id: "secret"
+      cloud_run_service_name: 'cloudrun-srv'
+      secret_id: 'secret'
     test_env_vars:
       project: :PROJECT_NAME
     ignore_read_extra:
-      - "autogenerate_revision_name"
+      - 'autogenerate_revision_name'
     skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloud_run_service_secret_volumes"
-    primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    name: 'cloud_run_service_secret_volumes'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      cloud_run_service_name: "cloudrun-srv"
-      secret_id: "secret"
+      cloud_run_service_name: 'cloudrun-srv'
+      secret_id: 'secret'
     test_env_vars:
       project: :PROJECT_NAME
     ignore_read_extra:
-      - "autogenerate_revision_name"
+      - 'autogenerate_revision_name'
     skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloud_run_service_probes"
-    min_version: beta
-    primary_resource_id: "default"
+    name: 'cloud_run_service_probes'
+    primary_resource_id: 'default'
     vars:
-      cloud_run_service_name: "cloudrun-srv"
+      cloud_run_service_name: 'cloudrun-srv'
     test_env_vars:
       project: :PROJECT_NAME
 virtual_fields:
@@ -143,7 +152,7 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: name
-  # This is a convenience field as terraform expects `name` to be a top level property
+    # This is a convenience field as terraform expects `name` to be a top level property
     url_param_only: true
     immutable: true
     description: |-
@@ -155,7 +164,8 @@ properties:
     exclude: false
   - !ruby/object:Api::Type::String
     name: apiVersion
-    description: The API version for this call such as "serving.knative.dev/v1alpha1".
+    description:
+      The API version for this call such as "serving.knative.dev/v1alpha1".
     exclude: true
   - !ruby/object:Api::Type::String
     name: kind
@@ -199,8 +209,8 @@ properties:
               name: url
               output: true
               description: |-
-                URL displays the URL for accessing tagged traffic targets. URL is displayed in status, 
-                and is disallowed on spec. URL must contain a scheme (e.g. http://) and a hostname, 
+                URL displays the URL for accessing tagged traffic targets. URL is displayed in status,
+                and is disallowed on spec. URL must contain a scheme (e.g. http://) and a hostname,
                 but may not contain anything else (e.g. basic auth, url path, etc.)
       - !ruby/object:Api::Type::NestedObject
         name: template
@@ -264,7 +274,7 @@ properties:
                   In Cloud Run the namespace must be equal to either the
                   project ID or project number. It will default to the resource's project.
                 default_from_api: true
-                custom_expand: "templates/terraform/custom_expand/default_to_project.go.erb"
+                custom_expand: 'templates/terraform/custom_expand/default_to_project.go.erb'
               - !ruby/object:Api::Type::KeyValuePairs
                 name: annotations
                 description: |-
@@ -322,8 +332,9 @@ properties:
           - !ruby/object:Api::Type::NestedObject
             name: spec
             required: true
-            description: RevisionSpec holds the desired state of the Revision (from
-              the client).
+            description:
+              RevisionSpec holds the desired state of the Revision (from the
+              client).
             default_from_api: true
             properties:
               - !ruby/object:Api::Type::Array
@@ -338,7 +349,8 @@ properties:
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::String
-                      deprecation_message: "Not supported by Cloud Run fully managed"
+                      deprecation_message:
+                        'Not supported by Cloud Run fully managed'
                       name: workingDir
                       immutable: true
                       description: |-
@@ -353,7 +365,8 @@ properties:
                       item_type: Api::Type::String
                     - !ruby/object:Api::Type::Array
                       name: envFrom
-                      deprecation_message: "Not supported by Cloud Run fully managed"
+                      deprecation_message:
+                        'Not supported by Cloud Run fully managed'
                       immutable: true
                       description: |-
                         List of sources to populate environment variables in the container.
@@ -450,10 +463,10 @@ properties:
                                     name: name
                                     required: true
                                     description: |-
-                                      The name of the secret in Cloud Secret Manager. By default, the secret is assumed to be in the same project. 
-                                      If the secret is in another project, you must define an alias. 
-                                      An alias definition has the form: :projects/{project-id|project-number}/secrets/. 
-                                      If multiple alias definitions are needed, they must be separated by commas. 
+                                      The name of the secret in Cloud Secret Manager. By default, the secret is assumed to be in the same project.
+                                      If the secret is in another project, you must define an alias.
+                                      An alias definition has the form: :projects/{project-id|project-number}/secrets/.
+                                      If multiple alias definitions are needed, they must be separated by commas.
                                       The alias definitions must be set on the run.googleapis.com/secrets annotation.
                     - !ruby/object:Api::Type::Array
                       name: ports
@@ -464,19 +477,22 @@ properties:
                         properties:
                           - !ruby/object:Api::Type::String
                             name: name
-                            description: If specified, used to specify which protocol
-                              to use. Allowed values are "http1" (HTTP/1) and "h2c"
+                            description:
+                              If specified, used to specify which protocol to
+                              use. Allowed values are "http1" (HTTP/1) and "h2c"
                               (HTTP/2 end-to-end). Defaults to "http1".
                             default_from_api: true
                           - !ruby/object:Api::Type::String
                             name: protocol
-                            description: Protocol for port. Must be "TCP". Defaults
-                              to "TCP".
+                            description:
+                              Protocol for port. Must be "TCP". Defaults to
+                              "TCP".
                           - !ruby/object:Api::Type::Integer
                             name: containerPort
-                            description: Port number the container listens on. This
-                              must be a valid port number (between 1 and 65535). Defaults
-                              to "8080".
+                            description:
+                              Port number the container listens on. This must be
+                              a valid port number (between 1 and 65535).
+                              Defaults to "8080".
                     - !ruby/object:Api::Type::NestedObject
                       name: resources
                       description: |-
@@ -518,7 +534,6 @@ properties:
                               This must match the Name of a Volume.
                     - !ruby/object:Api::Type::NestedObject
                       name: startupProbe
-                      min_version: beta
                       description: |-
                         Startup probe of application within the container.
                         All other probes are disabled if a startup probe is provided, until it
@@ -566,6 +581,7 @@ properties:
                               name: port
                               description: |-
                                 Port number to access on the container. Number must be in the range 1 to 65535.
+                                If not specified, defaults to the same value as container.ports[0].containerPort.
                               default_from_api: true
                         - !ruby/object:Api::Type::NestedObject
                           name: httpGet
@@ -582,7 +598,13 @@ properties:
                               name: path
                               description: |-
                                 Path to access on the HTTP server. If set, it should not be empty string.
-                              default_value: "/"
+                              default_value: '/'
+                            - !ruby/object:Api::Type::Integer
+                              name: port
+                              description: |-
+                                Port number to access on the container. Number must be in the range 1 to 65535.
+                                If not specified, defaults to the same value as container.ports[0].containerPort.
+                              default_from_api: true
                             - !ruby/object:Api::Type::Array
                               name: httpHeaders
                               description: |-
@@ -598,7 +620,7 @@ properties:
                                     name: value
                                     description: |-
                                       The header field value.
-                                    default_value: ""
+                                    default_value: ''
                                     send_empty_value: true
                         - !ruby/object:Api::Type::NestedObject
                           name: grpc
@@ -615,6 +637,7 @@ properties:
                               name: port
                               description: |-
                                 Port number to access on the container. Number must be in the range 1 to 65535.
+                                If not specified, defaults to the same value as container.ports[0].containerPort.
                               default_from_api: true
                             - !ruby/object:Api::Type::String
                               name: service
@@ -624,7 +647,6 @@ properties:
                                 If this is not specified, the default behavior is defined by gRPC.
                     - !ruby/object:Api::Type::NestedObject
                       name: livenessProbe
-                      min_version: beta
                       description: |-
                         Periodic probe of container liveness. Container will be restarted if the probe fails.
                       properties:
@@ -668,7 +690,13 @@ properties:
                               name: path
                               description: |-
                                 Path to access on the HTTP server. If set, it should not be empty string.
-                              default_value: "/"
+                              default_value: '/'
+                            - !ruby/object:Api::Type::Integer
+                              name: port
+                              description: |-
+                                Port number to access on the container. Number must be in the range 1 to 65535.
+                                If not specified, defaults to the same value as container.ports[0].containerPort.
+                              default_from_api: true
                             - !ruby/object:Api::Type::Array
                               name: httpHeaders
                               description: |-
@@ -684,7 +712,7 @@ properties:
                                     name: value
                                     description: |-
                                       The header field value.
-                                    default_value: ""
+                                    default_value: ''
                                     send_empty_value: true
                         - !ruby/object:Api::Type::NestedObject
                           name: grpc
@@ -700,6 +728,7 @@ properties:
                               name: port
                               description: |-
                                 Port number to access on the container. Number must be in the range 1 to 65535.
+                                If not specified, defaults to the same value as container.ports[0].containerPort.
                               default_from_api: true
                             - !ruby/object:Api::Type::String
                               name: service
@@ -803,7 +832,7 @@ properties:
                                   the result can be other mode bits set.
               - !ruby/object:Api::Type::Enum
                 name: servingState
-                deprecation_message: "Not supported by Cloud Run fully managed"
+                deprecation_message: 'Not supported by Cloud Run fully managed'
                 description: |-
                   ServingState holds a value describing the state the resources
                   are in for this Revision.
@@ -925,7 +954,7 @@ properties:
           project ID or project number.
         default_from_api: true
         custom_flatten: templates/terraform/custom_flatten/set_to_project.go.erb
-        custom_expand: "templates/terraform/custom_expand/default_to_project.go.erb"
+        custom_expand: 'templates/terraform/custom_expand/default_to_project.go.erb'
       - !ruby/object:Api::Type::KeyValuePairs
         name: annotations
         description: |-

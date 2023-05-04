@@ -54,32 +54,32 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-tcp-route'
-      backend_service_name: "my-backend-service"
-      http_health_check_name: "backend-service-health-check"
+      backend_service_name: 'my-backend-service'
+      http_health_check_name: 'backend-service-health-check'
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
     name: 'network_services_tcp_route_actions'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-tcp-route'
-      backend_service_name: "my-backend-service"
-      http_health_check_name: "backend-service-health-check"
+      backend_service_name: 'my-backend-service'
+      http_health_check_name: 'backend-service-health-check'
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
     name: 'network_services_tcp_route_mesh_basic'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-tcp-route'
-      backend_service_name: "my-backend-service"
-      http_health_check_name: "backend-service-health-check"
+      backend_service_name: 'my-backend-service'
+      http_health_check_name: 'backend-service-health-check'
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
     name: 'network_services_tcp_route_gateway_basic'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-tcp-route'
-      backend_service_name: "my-backend-service"
-      http_health_check_name: "backend-service-health-check"
+      backend_service_name: 'my-backend-service'
+      http_health_check_name: 'backend-service-health-check'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -115,30 +115,30 @@ properties:
     name: meshes
     item_type: Api::Type::String
     description: |
-          Meshes defines a list of meshes this TcpRoute is attached to, as one of the routing rules to route the requests served by the mesh.
-          Each mesh reference should match the pattern: projects/*/locations/global/meshes/<mesh_name>
-          The attached Mesh should be of a type SIDECAR
-    send_empty_value: true 
+      Meshes defines a list of meshes this TcpRoute is attached to, as one of the routing rules to route the requests served by the mesh.
+      Each mesh reference should match the pattern: projects/*/locations/global/meshes/<mesh_name>
+      The attached Mesh should be of a type SIDECAR
+    send_empty_value: true
   - !ruby/object:Api::Type::Array
     name: gateways
     item_type: Api::Type::String
     description: |
-          Gateways defines a list of gateways this TcpRoute is attached to, as one of the routing rules to route the requests served by the gateway.
-          Each gateway reference should match the pattern: projects/*/locations/global/gateways/<gateway_name>
+      Gateways defines a list of gateways this TcpRoute is attached to, as one of the routing rules to route the requests served by the gateway.
+      Each gateway reference should match the pattern: projects/*/locations/global/gateways/<gateway_name>
     send_empty_value: true
   - !ruby/object:Api::Type::Array
     name: rules
     description: |
-          Rules that define how traffic is routed and handled. At least one RouteRule must be supplied. 
-          If there are multiple rules then the action taken will be the first rule to match.
+      Rules that define how traffic is routed and handled. At least one RouteRule must be supplied.
+      If there are multiple rules then the action taken will be the first rule to match.
     required: true
     send_empty_value: true
     item_type: !ruby/object:Api::Type::NestedObject
-      properties: 
+      properties:
         - !ruby/object:Api::Type::Array
           name: matches
           description: |
-            RouteMatch defines the predicate used to match requests to a given action. Multiple match types are "OR"ed for evaluation. 
+            RouteMatch defines the predicate used to match requests to a given action. Multiple match types are "OR"ed for evaluation.
             If no routeMatch field is specified, this rule will unconditionally match traffic.
           send_empty_value: true
           item_type: !ruby/object:Api::Type::NestedObject
@@ -146,7 +146,7 @@ properties:
               - !ruby/object:Api::Type::String
                 name: address
                 description: |
-                  Must be specified in the CIDR range format. A CIDR range consists of an IP Address and a prefix length to construct the subnet mask. 
+                  Must be specified in the CIDR range format. A CIDR range consists of an IP Address and a prefix length to construct the subnet mask.
                   By default, the prefix length is 32 (i.e. matches a single IP address). Only IPV4 addresses are supported. Examples: "10.0.0.1" - matches against this exact IP address. "10.0.0.0/8" - matches against any IP address within the 10.0.0.0 subnet and 255.255.255.0 mask. "0.0.0.0/0" - matches against any IP address'.
                 required: true
               - !ruby/object:Api::Type::String
@@ -157,7 +157,7 @@ properties:
         - !ruby/object:Api::Type::NestedObject
           name: action
           description: |
-              A detailed rule defining how to route traffic.
+            A detailed rule defining how to route traffic.
           required: true
           properties:
             - !ruby/object:Api::Type::Array
@@ -180,5 +180,4 @@ properties:
             - !ruby/object:Api::Type::Boolean
               name: originalDestination
               description: |
-                If true, Router will use the destination IP and port of the original connection as the destination of the request. 
-
+                If true, Router will use the destination IP and port of the original connection as the destination of the request.

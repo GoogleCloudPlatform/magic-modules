@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 var loggingBucketConfigSchema = map[string]*schema.Schema{
@@ -88,7 +89,7 @@ See [Enabling CMEK for Logging Buckets](https://cloud.google.com/logging/docs/ro
 	},
 }
 
-type loggingBucketConfigIDFunc func(d *schema.ResourceData, config *Config) (string, error)
+type loggingBucketConfigIDFunc func(d *schema.ResourceData, config *transport_tpg.Config) (string, error)
 
 // ResourceLoggingBucketConfig creates a resource definition by merging a unique field (eg: folder) to a generic logging bucket
 // config resource. In practice the only difference between these resources is the url location.
@@ -149,7 +150,7 @@ func resourceLoggingBucketConfigImportState(parent string) schema.StateFunc {
 
 func resourceLoggingBucketConfigAcquireOrCreate(parentType string, iDFunc loggingBucketConfigIDFunc) func(*schema.ResourceData, interface{}) error {
 	return func(d *schema.ResourceData, meta interface{}) error {
-		config := meta.(*Config)
+		config := meta.(*transport_tpg.Config)
 		userAgent, err := generateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return err
@@ -169,7 +170,7 @@ func resourceLoggingBucketConfigAcquireOrCreate(parentType string, iDFunc loggin
 				return err
 			}
 
-			res, _ := SendRequest(config, "GET", "", url, userAgent, nil)
+			res, _ := transport_tpg.SendRequest(config, "GET", "", url, userAgent, nil)
 			if res == nil {
 				log.Printf("[DEGUG] Loggin Bucket not exist %s", id)
 				// we need to pass the id in here because we don't want to set it in state
@@ -185,7 +186,7 @@ func resourceLoggingBucketConfigAcquireOrCreate(parentType string, iDFunc loggin
 }
 
 func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{}, id string) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -217,7 +218,7 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{},
 		billingProject = bp
 	}
 
-	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := transport_tpg.SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating Bucket: %s", err)
 	}
@@ -230,7 +231,7 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{},
 }
 
 func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -243,7 +244,7 @@ func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	res, err := SendRequest(config, "GET", "", url, userAgent, nil)
+	res, err := transport_tpg.SendRequest(config, "GET", "", url, userAgent, nil)
 	if err != nil {
 		log.Printf("[WARN] Unable to acquire logging bucket config at %s", d.Id())
 
@@ -272,7 +273,7 @@ func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -299,11 +300,11 @@ func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{})
 	if d.HasChange("cmek_settings") {
 		updateMask = append(updateMask, "cmekSettings")
 	}
-	url, err = AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 	if err != nil {
 		return err
 	}
-	_, err = SendRequestWithTimeout(config, "PATCH", "", url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+	_, err = transport_tpg.SendRequestWithTimeout(config, "PATCH", "", url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return fmt.Errorf("Error updating Logging Bucket Config %q: %s", d.Id(), err)
 	}
@@ -321,7 +322,7 @@ func resourceLoggingBucketConfigDelete(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -330,7 +331,7 @@ func resourceLoggingBucketConfigDelete(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return err
 	}
-	if _, err := SendRequestWithTimeout(config, "DELETE", "", url, userAgent, nil, d.Timeout(schema.TimeoutUpdate)); err != nil {
+	if _, err := transport_tpg.SendRequestWithTimeout(config, "DELETE", "", url, userAgent, nil, d.Timeout(schema.TimeoutUpdate)); err != nil {
 		return fmt.Errorf("Error deleting Logging Bucket Config %q: %s", d.Id(), err)
 	}
 	return nil

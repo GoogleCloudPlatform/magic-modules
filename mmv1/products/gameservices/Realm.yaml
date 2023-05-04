@@ -41,13 +41,14 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 autogen_async: true
-import_format: ["projects/{{project}}/locations/{{location}}/realms/{{realm_id}}"]
+import_format:
+  ['projects/{{project}}/locations/{{location}}/realms/{{realm_id}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "game_service_realm_basic"
-    primary_resource_id: "default"
+    name: 'game_service_realm_basic'
+    primary_resource_id: 'default'
     vars:
-      realm_id: "tf-test-realm"
+      realm_id: 'tf-test-realm'
 parameters:
   - !ruby/object:Api::Type::String
     name: location
@@ -70,8 +71,8 @@ properties:
       example, `projects/my-project/locations/{location}/realms/my-realm`.
   - !ruby/object:Api::Type::KeyValuePairs
     name: labels
-    description: The labels associated with this realm. Each label is a key-value
-      pair.
+    description:
+      The labels associated with this realm. Each label is a key-value pair.
   - !ruby/object:Api::Type::String
     name: timeZone
     required: true
