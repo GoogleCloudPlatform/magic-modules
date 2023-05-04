@@ -33,6 +33,19 @@ TFC_LOCAL_PATH=$PWD/../tfc
 DIFFS=""
 NEWLINE=$'\n'
 
+if [ $PR_NUMBER == "7874" ]; then
+  YAMLLINT=$(yamllint mmv1/products)
+fi
+
+if [ -n "$YAMLLINT" ]; then
+  MESSAGE="Your PR produced the following yaml lint findings:${NEWLINE}${YAMLLINT}"
+  curl \
+    -X POST \
+    -H "Authorization: token ${GITHUB_TOKEN}" \
+    -d "$(jq -r --arg lint "$MESSAGE" -n "{body: \$lint}")" \
+    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}/comments"
+fi
+
 # TPG difference
 mkdir -p $TPG_LOCAL_PATH
 git clone -b $NEW_BRANCH $TPG_SCRATCH_PATH $TPG_LOCAL_PATH
