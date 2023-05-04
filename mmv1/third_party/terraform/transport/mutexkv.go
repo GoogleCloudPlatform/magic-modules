@@ -67,3 +67,10 @@ func NewMutexKV() *MutexKV {
 
 // Global MutexKV
 var MutexStore = NewMutexKV()
+
+func LockedCall(lockKey string, f func() error) error {
+	MutexStore.Lock(lockKey)
+	defer MutexStore.Unlock(lockKey)
+
+	return f()
+}
