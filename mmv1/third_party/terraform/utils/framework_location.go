@@ -50,22 +50,25 @@ func (ld *LocationDescription) getLocation() (types.String, error) {
 }
 
 func (ld *LocationDescription) getRegion() (types.String, error) {
+	// TODO(SarahFrench): Make empty strings not ignored, see https://github.com/hashicorp/terraform-provider-google/issues/14447
+	// For all checks in this function body
+
 	// Region from resource config
-	if !ld.ResourceRegion.IsNull() && !ld.ResourceRegion.IsUnknown() {
+	if !ld.ResourceRegion.IsNull() && !ld.ResourceRegion.IsUnknown() && !ld.ResourceRegion.Equal(types.StringValue("")) {
 		region := GetResourceNameFromSelfLink(ld.ResourceRegion.ValueString()) // Region could be a self link
 		return types.StringValue(region), nil
 	}
 	// Region from zone in resource config
-	if !ld.ResourceZone.IsNull() && !ld.ResourceZone.IsUnknown() {
+	if !ld.ResourceZone.IsNull() && !ld.ResourceZone.IsUnknown() && !ld.ResourceZone.Equal(types.StringValue("")) {
 		region := getRegionFromZone(ld.ResourceZone.ValueString())
 		return types.StringValue(region), nil
 	}
 	// Region from provider config
-	if !ld.ProviderRegion.IsNull() && !ld.ProviderRegion.IsUnknown() {
+	if !ld.ProviderRegion.IsNull() && !ld.ProviderRegion.IsUnknown() && !ld.ProviderRegion.Equal(types.StringValue("")) {
 		return ld.ProviderRegion, nil
 	}
 	// Region from zone in provider config
-	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() {
+	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() && !ld.ProviderZone.Equal(types.StringValue("")) {
 		region := getRegionFromZone(ld.ProviderZone.ValueString())
 		return types.StringValue(region), nil
 	}

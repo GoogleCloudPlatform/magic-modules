@@ -444,7 +444,24 @@ func TestGetRegion(t *testing.T) {
 			},
 			ExpectedRegion: "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1", // Value is not shortenedfrom URI to name
 		},
+		"returns a region derived from the zone field in resource config when region is set as an empty string": {
+			ResourceConfig: map[string]interface{}{
+				"region": "",
+				"zone":   "resource-zone-a",
+			},
+			ExpectedRegion: "resource-zone",
+		},
 		"returns the value of the region field in provider config when region/zone is unset in resource config": {
+			ProviderConfig: map[string]string{
+				"region": "provider-region",
+			},
+			ExpectedRegion: "provider-region",
+		},
+		"returns the value of the region field in provider config when region/zone set as an empty string in resource config": {
+			ResourceConfig: map[string]interface{}{
+				"region": "",
+				"zone":   "",
+			},
 			ProviderConfig: map[string]string{
 				"region": "provider-region",
 			},
@@ -455,6 +472,17 @@ func TestGetRegion(t *testing.T) {
 				"zone": "provider-zone-a",
 			},
 			ExpectedRegion: "provider-zone",
+		},
+		"returns an error if region and zone set as empty strings in both resource and provider configs": {
+			ResourceConfig: map[string]interface{}{
+				"region": "",
+				"zone":   "",
+			},
+			ProviderConfig: map[string]string{
+				"region": "",
+				"zone":   "",
+			},
+			ExpectedError: true,
 		},
 		"returns an error when region values can't be found": {
 			ExpectedError: true,
