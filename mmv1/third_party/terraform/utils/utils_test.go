@@ -251,13 +251,6 @@ func TestGetLocation(t *testing.T) {
 			},
 			ExpectedLocation: "resource-region",
 		},
-		"returns the region value set in the resource config when location is an empty string": {
-			ResourceConfig: map[string]interface{}{
-				"location": "",
-				"region":   "resource-region",
-			},
-			ExpectedLocation: "resource-region",
-		},
 		"does not shorten the region value when it is set as a self link in the resource config": {
 			ResourceConfig: map[string]interface{}{
 				"region": "https://www.googleapis.com/compute/v1/projects/my-project/region/resource-region",
@@ -267,14 +260,6 @@ func TestGetLocation(t *testing.T) {
 		"returns the zone value set in the resource config when neither location nor region in the schema": {
 			ResourceConfig: map[string]interface{}{
 				"zone": "resource-zone",
-			},
-			ExpectedLocation: "resource-zone",
-		},
-		"returns the zone value set in the resource config when both location or region are empty strings": {
-			ResourceConfig: map[string]interface{}{
-				"location": "",
-				"region":   "",
-				"zone":     "resource-zone",
 			},
 			ExpectedLocation: "resource-zone",
 		},
@@ -292,6 +277,30 @@ func TestGetLocation(t *testing.T) {
 			},
 			ExpectedLocation: "provider-zone",
 		},
+		"does not shorten the zone value when it is set as a self link in the provider config": {
+			// This behaviour makes sense because provider config values don't originate from APIs
+			// Users should always configure the provider with the short names of regions/zones
+			ProviderConfig: map[string]string{
+				"zone": "https://www.googleapis.com/compute/v1/projects/my-project/zones/provider-zone",
+			},
+			ExpectedLocation: "https://www.googleapis.com/compute/v1/projects/my-project/zones/provider-zone",
+		},
+		// Handling of empty strings
+		"returns the region value set in the resource config when location is an empty string": {
+			ResourceConfig: map[string]interface{}{
+				"location": "",
+				"region":   "resource-region",
+			},
+			ExpectedLocation: "resource-region",
+		},
+		"returns the zone value set in the resource config when both location or region are empty strings": {
+			ResourceConfig: map[string]interface{}{
+				"location": "",
+				"region":   "",
+				"zone":     "resource-zone",
+			},
+			ExpectedLocation: "resource-zone",
+		},
 		"returns the zone value from the provider config when all of location/region/zone are set as empty strings in the resource config": {
 			ResourceConfig: map[string]interface{}{
 				"location": "",
@@ -303,21 +312,25 @@ func TestGetLocation(t *testing.T) {
 			},
 			ExpectedLocation: "provider-zone",
 		},
-		"does not shorten the zone value when it is set as a self link in the provider config": {
-			// This behaviour makes sense because provider config values don't originate from APIs
-			// Users should always configure the provider with the short names of regions/zones
-			ProviderConfig: map[string]string{
-				"zone": "https://www.googleapis.com/compute/v1/projects/my-project/zones/provider-zone",
-			},
-			ExpectedLocation: "https://www.googleapis.com/compute/v1/projects/my-project/zones/provider-zone",
-		},
+		// Error states
 		"returns an error when only a region value is set in the the provider config and none of location/region/zone are set in the resource config": {
 			ProviderConfig: map[string]string{
 				"region": "provider-region",
 			},
 			ExpectError: true,
 		},
-		"an error is returned when none of location/region/zone are set on the resource, and neither region or zone is set on the provider": {
+		"returns an error when none of location/region/zone are set on the resource, and neither region or zone is set on the provider": {
+			ExpectError: true,
+		},
+		"returns an error if location/region/zone are set as empty strings in both resource and provider configs": {
+			ResourceConfig: map[string]interface{}{
+				"location": "",
+				"region":   "",
+				"zone":     "",
+			},
+			ProviderConfig: map[string]string{
+				"zone": "",
+			},
 			ExpectError: true,
 		},
 	}
@@ -381,6 +394,13 @@ func TestGetZone(t *testing.T) {
 			},
 			ExpectedZone: "us-central1-a",
 		},
+		"returns the value of the zone field in provider config when zone is unset in resource config": {
+			ProviderConfig: map[string]string{
+				"zone": "provider-zone",
+			},
+			ExpectedZone: "provider-zone",
+		},
+		// Handling of empty strings
 		"returns the value of the zone field in provider config when zone is set to an empty string in resource config": {
 			ResourceConfig: map[string]interface{}{
 				"zone": "",
@@ -390,13 +410,17 @@ func TestGetZone(t *testing.T) {
 			},
 			ExpectedZone: "provider-zone",
 		},
-		"returns the value of the zone field in provider config when zone is unset in resource config": {
-			ProviderConfig: map[string]string{
-				"zone": "provider-zone",
-			},
-			ExpectedZone: "provider-zone",
-		},
+		// Error states
 		"returns an error when a zone value can't be found": {
+			ExpectedError: true,
+		},
+		"returns an error if zone is set as an empty string in both resource and provider configs": {
+			ResourceConfig: map[string]interface{}{
+				"zone": "",
+			},
+			ProviderConfig: map[string]string{
+				"zone": "",
+			},
 			ExpectedError: true,
 		},
 	}
@@ -470,24 +494,7 @@ func TestGetRegion(t *testing.T) {
 			},
 			ExpectedRegion: "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1", // Value is not shortenedfrom URI to name
 		},
-		"returns a region derived from the zone field in resource config when region is set as an empty string": {
-			ResourceConfig: map[string]interface{}{
-				"region": "",
-				"zone":   "resource-zone-a",
-			},
-			ExpectedRegion: "resource-zone",
-		},
 		"returns the value of the region field in provider config when region/zone is unset in resource config": {
-			ProviderConfig: map[string]string{
-				"region": "provider-region",
-			},
-			ExpectedRegion: "provider-region",
-		},
-		"returns the value of the region field in provider config when region/zone set as an empty string in resource config": {
-			ResourceConfig: map[string]interface{}{
-				"region": "",
-				"zone":   "",
-			},
 			ProviderConfig: map[string]string{
 				"region": "provider-region",
 			},
@@ -499,6 +506,25 @@ func TestGetRegion(t *testing.T) {
 			},
 			ExpectedRegion: "provider-zone",
 		},
+		// Handling of empty strings
+		"returns a region derived from the zone field in resource config when region is set as an empty string": {
+			ResourceConfig: map[string]interface{}{
+				"region": "",
+				"zone":   "resource-zone-a",
+			},
+			ExpectedRegion: "resource-zone",
+		},
+		"returns the value of the region field in provider config when region/zone set as an empty string in resource config": {
+			ResourceConfig: map[string]interface{}{
+				"region": "",
+				"zone":   "",
+			},
+			ProviderConfig: map[string]string{
+				"region": "provider-region",
+			},
+			ExpectedRegion: "provider-region",
+		},
+		// Error states
 		"returns an error if region and zone set as empty strings in both resource and provider configs": {
 			ResourceConfig: map[string]interface{}{
 				"region": "",
