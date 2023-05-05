@@ -7,13 +7,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 type TagsLocationOperationWaiter struct {
-	Config    *transport_tpg.Config
-	UserAgent string
-	CommonOperationWaiter
+	Config                *transport_tpg.Config
+	UserAgent             string
+	CommonOperationWaiter tpgresource.CommonOperationWaiter
 }
 
 func (w *TagsLocationOperationWaiter) QueryOp() (interface{}, error) {

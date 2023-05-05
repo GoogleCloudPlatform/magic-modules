@@ -15,7 +15,7 @@ import (
 
 type ComposerOperationWaiter struct {
 	Service *composer.ProjectsLocationsService
-	CommonOperationWaiter
+	CommonOperationWaiter tpgresource.CommonOperationWaiter
 }
 
 func (w *ComposerOperationWaiter) QueryOp() (interface{}, error) {

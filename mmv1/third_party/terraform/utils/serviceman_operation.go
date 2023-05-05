@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/servicemanagement/v1"
 )
 
 type ServiceManagementOperationWaiter struct {
-	Service *servicemanagement.APIService
-	CommonOperationWaiter
+	Service               *servicemanagement.APIService
+	CommonOperationWaiter tpgresource.CommonOperationWaiter
 }
 
 func (w *ServiceManagementOperationWaiter) QueryOp() (interface{}, error) {

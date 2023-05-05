@@ -47,7 +47,7 @@ type gkeonpremOperationWaiter struct {
 	Config    *transport_tpg.Config
 	UserAgent string
 	Project   string
-	Op        CommonOperation
+	Op        tpgresource.CommonOperation
 }
 
 func (w *gkeonpremOperationWaiter) State() string {

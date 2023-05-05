@@ -5,16 +5,17 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"google.golang.org/api/run/v2"
 )
 
 type RunAdminV2OperationWaiter struct {
-	Config    *transport_tpg.Config
-	UserAgent string
-	Project   string
-	CommonOperationWaiter
+	Config                *transport_tpg.Config
+	UserAgent             string
+	Project               string
+	CommonOperationWaiter tpgresource.CommonOperationWaiter
 }
 
 func (w *RunAdminV2OperationWaiter) QueryOp() (interface{}, error) {

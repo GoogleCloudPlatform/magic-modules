@@ -11,7 +11,7 @@ import (
 
 type DataprocClusterOperationWaiter struct {
 	Service *dataproc.Service
-	CommonOperationWaiter
+	CommonOperationWaiter tpgresource.CommonOperationWaiter
 }
 
 func (w *DataprocClusterOperationWaiter) QueryOp() (interface{}, error) {

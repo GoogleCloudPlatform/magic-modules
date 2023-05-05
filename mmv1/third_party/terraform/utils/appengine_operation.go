@@ -18,9 +18,9 @@ var (
 )
 
 type AppEngineOperationWaiter struct {
-	Service *appengine.APIService
-	AppId   string
-	CommonOperationWaiter
+	Service               *appengine.APIService
+	AppId                 string
+	CommonOperationWaiter tpgresource.CommonOperationWaiter
 }
 
 func (w *AppEngineOperationWaiter) QueryOp() (interface{}, error) {

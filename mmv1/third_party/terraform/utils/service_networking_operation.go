@@ -3,15 +3,16 @@ package google
 import (
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/servicenetworking/v1"
 )
 
 type ServiceNetworkingOperationWaiter struct {
-	Service             *servicenetworking.APIService
-	Project             string
-	UserProjectOverride bool
-	CommonOperationWaiter
+	Service               *servicenetworking.APIService
+	Project               string
+	UserProjectOverride   bool
+	CommonOperationWaiter tpgresource.CommonOperationWaiter
 }
 
 func (w *ServiceNetworkingOperationWaiter) QueryOp() (interface{}, error) {

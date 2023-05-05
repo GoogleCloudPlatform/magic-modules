@@ -15,6 +15,7 @@ import (
   "fmt"
   "time"
 
+  "<%= import_path() -%>/tpgresource"
   transport_tpg "<%= import_path() -%>/transport"
 )
 
@@ -27,7 +28,7 @@ type <%= product_name -%>OperationWaiter struct {
 <%  if object.__product.operation_retry -%>
 	retryCount int
 <% end -%>
-  CommonOperationWaiter
+  CommonOperationWaiter tpgresource.CommonOperationWaiter
 }
 
 func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {

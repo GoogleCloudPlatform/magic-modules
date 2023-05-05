@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 type DialogflowCXOperationWaiter struct {
-	Config    *transport_tpg.Config
-	UserAgent string
-	CommonOperationWaiter
-	Location string
+	Config                *transport_tpg.Config
+	UserAgent             string
+	CommonOperationWaiter tpgresource.CommonOperationWaiter
+	Location              string
 }
 
 func (w *DialogflowCXOperationWaiter) QueryOp() (interface{}, error) {
