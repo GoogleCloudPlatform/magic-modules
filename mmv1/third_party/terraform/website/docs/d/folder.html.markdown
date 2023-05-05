@@ -4,6 +4,8 @@ description: |-
   Get information about a Google Cloud Folder.
 ---
 
+meep
+
 # google\_folder
 
 Use this data source to get information about a Google Cloud Folder.
