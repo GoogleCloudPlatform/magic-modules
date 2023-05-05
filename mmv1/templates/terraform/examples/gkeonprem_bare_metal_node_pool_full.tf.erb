@@ -72,6 +72,7 @@ resource "google_gkeonprem_bare_metal_cluster" "default-full" {
 resource "google_gkeonprem_bare_metal_node_pool" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   name =  "np-<%= ctx[:vars]['name'] %>"
+  display_name = "test-name"
   bare_metal_cluster =  google_gkeonprem_bare_metal_cluster.default-full.name
   location = "us-west1"
   annotations = {}
@@ -81,6 +82,11 @@ resource "google_gkeonprem_bare_metal_node_pool" "<%= ctx[:primary_resource_id] 
     node_configs {
       node_ip = "10.200.0.11"
       labels = {}
+    }
+    taints {
+      key = "test-key"
+      value = "test-value"
+      effect = "NO_EXECUTE"
     }
   }
 }
