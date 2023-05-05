@@ -1,7 +1,7 @@
 	// Store the name as ID
 	d.SetId(res["name"].(string))
 
-	if err = d.Set("version_id", GetResourceNameFromSelfLink(res["name"].(string))); err != nil {
+	if err = d.Set("version_id", tpgresource.GetResourceNameFromSelfLink(res["name"].(string))); err != nil {
 		return fmt.Errorf("Error setting version_id: %s", err)
 	}
 

@@ -87,7 +87,7 @@ properties:
     immutable: true
     update_id: 'urlMap'
     fingerprint_name: 'fingerprint'
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Boolean
     name: 'validateForProxyless'
     immutable: true

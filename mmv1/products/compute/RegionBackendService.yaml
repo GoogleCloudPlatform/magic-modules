@@ -181,7 +181,7 @@ properties:
         - !ruby/object:Api::Type::String
           name: 'group'
           required: true
-          diff_suppress_func: 'compareSelfLinkRelativePaths'
+          diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           custom_flatten: templates/terraform/custom_flatten/guard_self_link.go.erb
           description: |
             The fully-qualified URL of an Instance Group or Network Endpoint
@@ -728,7 +728,7 @@ properties:
       A health check must be specified unless the backend service uses an internet
       or serverless NEG as a backend.
     is_set: true
-    set_hash_func: 'selfLinkRelativePathHash'
+    set_hash_func: 'tpgresource.SelfLinkRelativePathHash'
     custom_flatten: templates/terraform/custom_flatten/guard_self_link_array.go.erb
     item_type: Api::Type::String
   - !ruby/object:Api::Type::Integer

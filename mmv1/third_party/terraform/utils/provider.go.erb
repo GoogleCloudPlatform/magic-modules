@@ -18,7 +18,10 @@ import (
 )
 
 // Global MutexKV
-var mutexKV = NewMutexKV()
+//
+// Deprecated: For backward compatibility mutexKV is still working,
+// but all new code should use MutexStore in the transport_tpg package instead.
+var mutexKV = transport_tpg.MutexStore
 
 // Provider returns a *schema.Provider.
 func Provider() *schema.Provider {
@@ -390,6 +393,7 @@ end     # products.each do
 				"google_compute_attached_disk":                 ResourceComputeAttachedDisk(),
 				"google_compute_instance":                      ResourceComputeInstance(),
 				<% unless version == 'ga' -%>
+				"google_compute_disk_async_replication":        ResourceComputeDiskAsyncReplication(),
 				"google_compute_instance_from_machine_image":   ResourceComputeInstanceFromMachineImage(),
 				<% end -%>
 				"google_compute_instance_from_template":        ResourceComputeInstanceFromTemplate(),

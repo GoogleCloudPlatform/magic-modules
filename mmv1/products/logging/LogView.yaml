@@ -48,7 +48,7 @@ parameters:
     url_param_only: true
     immutable: true
     default_from_api: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: location
     description:
@@ -57,13 +57,13 @@ parameters:
     url_param_only: true
     immutable: true
     default_from_api: true
-  - !ruby/object:Api::Type::String # Make this a String for now since we don't have a good way to reference multiple resources.
+  - !ruby/object:Api::Type::String  # Make this a String for now since we don't have a good way to reference multiple resources.
     name: bucket
     description: The bucket of the resource
     url_param_only: true
     required: true
     immutable: true
-    diff_suppress_func: 'compareResourceNames'
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -73,7 +73,7 @@ properties:
     required: true
     immutable: true
     ignore_read: true
-    diff_suppress_func: 'compareResourceNames'
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
   - !ruby/object:Api::Type::String
     name: description
     description: Describes this view.
