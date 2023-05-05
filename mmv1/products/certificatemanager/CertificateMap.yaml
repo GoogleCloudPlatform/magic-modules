@@ -58,7 +58,7 @@ parameters:
       A user-defined name of the Certificate Map. Certificate Map names must be unique
       globally and match the pattern `projects/*/locations/*/certificateMaps/*`.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'description'

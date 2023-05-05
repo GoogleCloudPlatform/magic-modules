@@ -65,7 +65,7 @@ parameters:
     description: |
       If true, fail the request if another project in the organization has a capacity commitment.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

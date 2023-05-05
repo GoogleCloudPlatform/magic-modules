@@ -40,7 +40,7 @@ examples:
       org_domain: :ORG_DOMAIN
       cust_id: :CUST_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.erb
 parameters:
   # Parent is a path parameter that _cannot_ be read or sent in the request at all.

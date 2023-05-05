@@ -51,7 +51,7 @@ examples:
       entry_id: 'my_entry'
       entry_group_id: 'my_group'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   custom_import: templates/terraform/custom_import/data_catalog_entry.go.erb
 parameters:
   - !ruby/object:Api::Type::String

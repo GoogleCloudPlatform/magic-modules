@@ -39,7 +39,7 @@ examples:
     vars:
       project_id: 'staging-project'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   post_create: templates/terraform/post_create/lien.erb
   post_import: templates/terraform/post_import/lien_import.erb
   pre_delete: templates/terraform/pre_delete/modify_delete_url.erb

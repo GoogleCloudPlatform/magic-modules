@@ -49,7 +49,7 @@ examples:
     vars:
       taxonomy_display_name: 'taxonomy_display_name'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   custom_import: templates/terraform/custom_import/extract_taxonomy.go.erb
 parameters:
   - !ruby/object:Api::Type::String

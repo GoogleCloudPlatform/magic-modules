@@ -95,7 +95,7 @@ examples:
       backend_name: 'compute-backend'
       route_name: 'route-ilb'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   decoder: templates/terraform/decoders/route.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/route.erb
 docs: !ruby/object:Provider::Terraform::Docs

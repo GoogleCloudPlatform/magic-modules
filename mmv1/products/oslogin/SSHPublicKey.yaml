@@ -32,7 +32,7 @@ examples:
     name: 'os_login_ssh_key_basic'
     primary_resource_id: 'cache'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   pre_create: templates/terraform/pre_create/os_login_ssh_public_key.go.erb
   post_create: templates/terraform/post_create/sshkeyfingerprint.go.erb
 parameters:

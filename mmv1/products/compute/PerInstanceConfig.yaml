@@ -108,7 +108,7 @@ virtual_fields:
       State will be removed on the next instance recreation or update.
     default_value: false
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   encoder: templates/terraform/encoders/compute_per_instance_config.go.erb
   update_encoder: templates/terraform/update_encoder/compute_per_instance_config.go.erb
   pre_delete: templates/terraform/pre_delete/compute_per_instance_config.go.erb

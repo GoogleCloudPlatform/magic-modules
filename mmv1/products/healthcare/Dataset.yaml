@@ -36,7 +36,7 @@ examples:
       location: 'us-central1'
       time_zone: 'America/New_York'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
 parameters:
   - !ruby/object:Api::Type::String

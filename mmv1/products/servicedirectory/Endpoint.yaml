@@ -49,7 +49,7 @@ examples:
       network_name: 'example-network'
     min_version: beta
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   custom_import: templates/terraform/custom_import/service_directory_endpoint.go.erb
 parameters:
   - !ruby/object:Api::Type::String

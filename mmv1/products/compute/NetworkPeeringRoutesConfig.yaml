@@ -75,7 +75,7 @@ examples:
       subnetwork_name: 'container-subnetwork'
       gke_cluster_name: 'private-cluster'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   encoder: 'templates/terraform/encoders/network_peering_routes_config.go.erb'
 parameters:
   - !ruby/object:Api::Type::ResourceRef

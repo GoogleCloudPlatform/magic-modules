@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"google.golang.org/api/storage/v1"
@@ -17,10 +18,10 @@ import (
 
 func ResourceStorageBucketAcl() *schema.Resource {
 	return &schema.Resource{
-		Create:        resourceStorageBucketAclCreate,
-		Read:          resourceStorageBucketAclRead,
-		Update:        resourceStorageBucketAclUpdate,
-		Delete:        resourceStorageBucketAclDelete,
+		Create: resourceStorageBucketAclCreate,
+		Read:   resourceStorageBucketAclRead,
+		Update: resourceStorageBucketAclUpdate,
+		Delete: resourceStorageBucketAclDelete,
 		CustomizeDiff: customdiff.All(
 			defaultProviderCustomizeDiff,
 			resourceStorageRoleEntityCustomizeDiff,

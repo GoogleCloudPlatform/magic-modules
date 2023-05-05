@@ -69,7 +69,7 @@ virtual_fields:
     description: |
       If set to `true`, the service will be deleted if it is the last version.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   custom_delete: templates/terraform/custom_delete/appversion_delete.go.erb
   test_check_destroy: templates/terraform/custom_check_destroy/appengine.go.erb
 examples:

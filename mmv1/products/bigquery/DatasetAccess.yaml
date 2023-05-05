@@ -83,7 +83,7 @@ examples:
       public_dataset: 'public_dataset'
       public_routine: 'public_routine'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: templates/terraform/constants/bigquery_dataset_access.go.erb
   post_create: templates/terraform/post_create/bigquery_dataset_access.go.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/bigquery_dataset_access.go.erb

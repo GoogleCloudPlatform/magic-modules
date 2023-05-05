@@ -95,7 +95,7 @@ examples:
       # Resource creation race
     skip_vcr: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   custom_import: templates/terraform/custom_import/apigee_organization.go.erb
   encoder: templates/terraform/encoders/apigee_organization.go.erb
 parameters:

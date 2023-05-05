@@ -88,7 +88,7 @@ examples:
       api_id: 'my-api'
       config_id: 'my-config'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/api_config.erb
   encoder: 'templates/terraform/encoders/api_config.go.erb'
 parameters:

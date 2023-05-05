@@ -67,7 +67,7 @@ virtual_fields:
       values are: "ABANDON", "DELETE". Defaults to "DELETE".
     default_value: 'DELETE'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   pre_delete: templates/terraform/pre_delete/sql_database_deletion_policy.erb
 parameters:
   - !ruby/object:Api::Type::String

@@ -56,7 +56,7 @@ exclude_validator: true
 id_format: 'projects/{{project}}/regions/{{region}}/routers/{{router}}/{{name}}'
 mutex: router/{{region}}/{{router}}
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: templates/terraform/constants/router_bgp_peer.erb
 examples:
   # These examples are not used to autogenerate tests, as fine-grained

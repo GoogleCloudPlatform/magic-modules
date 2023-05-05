@@ -57,7 +57,7 @@ examples:
       display_name: 'tcp-uptime-check'
       group_display_name: 'uptime-check-group'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: templates/terraform/constants/monitoring_uptime_check_config.go.erb
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
   post_create: templates/terraform/post_create/set_computed_name.erb

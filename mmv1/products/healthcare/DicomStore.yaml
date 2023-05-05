@@ -51,7 +51,7 @@ examples:
         ' BootstrapPSARoles(t, "service-", "gcp-sa-healthcare",
         []string{"roles/bigquery.dataEditor", "roles/bigquery.jobUser"})'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
   custom_import: templates/terraform/custom_import/healthcare_dicom_store.go.erb
 parameters:

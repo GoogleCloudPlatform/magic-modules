@@ -26,7 +26,7 @@ delete_verb: :PUT
 id_format: 'projects/{{project}}'
 import_format: ['projects/{{project}}']
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: 'templates/terraform/constants/binaryauthorization_policy.erb'
   pre_delete: 'templates/terraform/pre_delete/restore_default_binaryauthorization_policy.erb'
 examples:

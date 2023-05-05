@@ -37,7 +37,7 @@ examples:
     primary_resource_id: 'example-key'
     skip_test: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   custom_delete: templates/terraform/custom_delete/kms_crypto_key_version.erb
   custom_import: templates/terraform/custom_import/kms_crypto_key_version.go.erb
 parameters:

@@ -35,7 +35,7 @@ id_format: 'projects/{{project}}/locations/{{location}}/agents/{{name}}'
 import_format: ['projects/{{project}}/locations/{{location}}/agents/{{name}}']
 skip_sweeper: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

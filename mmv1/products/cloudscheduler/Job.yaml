@@ -26,7 +26,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/scheduler/docs/reference/rest/'
 id_format: 'projects/{{project}}/locations/{{region}}/jobs/{{name}}'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: templates/terraform/constants/scheduler.erb
   resource_definition: templates/terraform/resource_definition/scheduler_auth.erb
   encoder: templates/terraform/encoders/cloud_scheduler.go.erb

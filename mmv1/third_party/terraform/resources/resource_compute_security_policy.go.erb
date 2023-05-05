@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -41,11 +42,6 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 			Update: schema.DefaultTimeout(8 * time.Minute),
 			Delete: schema.DefaultTimeout(8 * time.Minute),
 		},
-
-		CustomizeDiff: customdiff.All(
-			defaultProviderCustomizeDiff,
-		),
-
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,

@@ -45,7 +45,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Creating an API organization': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-org'
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations#setaddons'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   custom_import: templates/terraform/custom_import/apigee_addons.go.erb
   test_check_destroy: templates/terraform/custom_check_destroy/apigee_addons_override.go.erb
 examples:

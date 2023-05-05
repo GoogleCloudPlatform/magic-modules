@@ -26,7 +26,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/binary-authorization/docs/reference/rest/'
 import_format: ['projects/{{project}}/attestors/{{name}}']
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: 'templates/terraform/constants/binaryauthorization_attestor.go'
 examples:
   - !ruby/object:Provider::Terraform::Examples

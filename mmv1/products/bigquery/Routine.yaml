@@ -53,7 +53,7 @@ examples:
       dataset_id: 'dataset_id'
       routine_id: 'routine_id'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
 properties:
   - !ruby/object:Api::Type::NestedObject
     name: routineReference

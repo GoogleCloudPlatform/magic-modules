@@ -37,7 +37,7 @@ examples:
       node_name: 'test-tpu'
       global_address_name: 'my-global-address'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: 'templates/terraform/constants/tpu_node.erb'
   resource_definition: 'templates/terraform/resource_definition/tpu_node.erb'
 parameters:
