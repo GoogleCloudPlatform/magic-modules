@@ -1,7 +1,6 @@
 package tpgresource
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -42,7 +41,7 @@ func TestConvertStringArr(t *testing.T) {
 	input[2] = "aaa"
 
 	expected := []string{"aaa", "bbb", "ccc"}
-	actual := convertStringArr(input)
+	actual := ConvertStringArr(input)
 
 	if reflect.DeepEqual(expected, actual) {
 		t.Fatalf("(%s) did not match expected value: %s", actual, expected)
@@ -56,7 +55,7 @@ func TestConvertAndMapStringArr(t *testing.T) {
 	input[2] = "aaa"
 
 	expected := []string{"AAA", "BBB", "CCC"}
-	actual := convertAndMapStringArr(input, strings.ToUpper)
+	actual := ConvertAndMapStringArr(input, strings.ToUpper)
 
 	if reflect.DeepEqual(expected, actual) {
 		t.Fatalf("(%s) did not match expected value: %s", actual, expected)
@@ -70,7 +69,7 @@ func TestConvertStringMap(t *testing.T) {
 	input["three"] = "3"
 
 	expected := map[string]string{"one": "1", "two": "2", "three": "3"}
-	actual := convertStringMap(input)
+	actual := ConvertStringMap(input)
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("%s did not match expected value: %s", actual, expected)
@@ -164,6 +163,7 @@ func TestRfc3339TimeDiffSuppress(t *testing.T) {
 	}
 }
 
+<<<<<<< HEAD
 func TestGetProject(t *testing.T) {
 	cases := map[string]struct {
 		ResourceConfig  map[string]interface{}
@@ -222,6 +222,8 @@ func TestGetProject(t *testing.T) {
 	}
 }
 
+=======
+>>>>>>> f24185623 (Move utils_test.go back to the google package)
 func TestGetLocation(t *testing.T) {
 	cases := map[string]struct {
 		ResourceConfig   map[string]interface{}
@@ -371,6 +373,7 @@ func TestGetLocation(t *testing.T) {
 	}
 }
 
+<<<<<<< HEAD
 func TestGetZone(t *testing.T) {
 	cases := map[string]struct {
 		ResourceConfig map[string]interface{}
@@ -589,6 +592,8 @@ func TestGetRegion(t *testing.T) {
 	}
 }
 
+=======
+>>>>>>> f24185623 (Move utils_test.go back to the google package)
 func TestGetRegionFromZone(t *testing.T) {
 	expected := "us-central1"
 	actual := GetRegionFromZone("us-central1-f")
@@ -936,47 +941,6 @@ func TestSnakeToPascalCase(t *testing.T) {
 	}
 }
 
-func TestCheckGCSName(t *testing.T) {
-	valid63 := RandString(t, 63)
-	cases := map[string]bool{
-		// Valid
-		"foobar":       true,
-		"foobar1":      true,
-		"12345":        true,
-		"foo_bar_baz":  true,
-		"foo-bar-baz":  true,
-		"foo-bar_baz1": true,
-		"foo--bar":     true,
-		"foo__bar":     true,
-		"foo-goog":     true,
-		"foo.goog":     true,
-		valid63:        true,
-		fmt.Sprintf("%s.%s.%s", valid63, valid63, valid63): true,
-
-		// Invalid
-		"goog-foobar":     false,
-		"foobar-google":   false,
-		"-foobar":         false,
-		"foobar-":         false,
-		"_foobar":         false,
-		"foobar_":         false,
-		"fo":              false,
-		"foo$bar":         false,
-		"foo..bar":        false,
-		RandString(t, 64): false,
-		fmt.Sprintf("%s.%s.%s.%s", valid63, valid63, valid63, valid63): false,
-	}
-
-	for bucketName, valid := range cases {
-		err := checkGCSName(bucketName)
-		if valid && err != nil {
-			t.Errorf("The bucket name %s was expected to pass validation and did not pass.", bucketName)
-		} else if !valid && err == nil {
-			t.Errorf("The bucket name %s was NOT expected to pass validation and passed.", bucketName)
-		}
-	}
-}
-
 func TestCheckGoogleIamPolicy(t *testing.T) {
 	cases := []struct {
 		valid bool
@@ -993,7 +957,7 @@ func TestCheckGoogleIamPolicy(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		err := checkGoogleIamPolicy(tc.json)
+		err := CheckGoogleIamPolicy(tc.json)
 		if tc.valid && err != nil {
 			t.Errorf("The JSON is marked as valid but triggered an error: %s", tc.json)
 		} else if !tc.valid && err == nil {
@@ -1103,7 +1067,7 @@ func TestReplaceVars(t *testing.T) {
 
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
-			d := &tpgresource.ResourceDataMock{
+			d := &ResourceDataMock{
 				FieldsInSchema: tc.SchemaValues,
 			}
 

@@ -67,7 +67,7 @@ func TestParseGlobalFieldValue(t *testing.T) {
 			fieldsInSchema[tc.ProjectSchemaField] = tc.ProjectSchemaValue
 		}
 
-		d := &tpgresource.ResourceDataMock{
+		d := &ResourceDataMock{
 			FieldsInSchema: fieldsInSchema,
 		}
 
@@ -169,7 +169,7 @@ func TestParseZonalFieldValue(t *testing.T) {
 			fieldsInSchema[tc.ZoneSchemaField] = tc.ZoneSchemaValue
 		}
 
-		d := &tpgresource.ResourceDataMock{
+		d := &ResourceDataMock{
 			FieldsInSchema: fieldsInSchema,
 		}
 
@@ -337,7 +337,7 @@ func TestParseRegionalFieldValue(t *testing.T) {
 				fieldsInSchema[tc.ZoneSchemaField] = tc.ZoneSchemaValue
 			}
 
-			d := &tpgresource.ResourceDataMock{
+			d := &ResourceDataMock{
 				FieldsInSchema: fieldsInSchema,
 			}
 
@@ -417,7 +417,7 @@ func TestParseProjectFieldValue(t *testing.T) {
 			fieldsInSchema[tc.ProjectSchemaField] = tc.ProjectSchemaValue
 		}
 
-		d := &tpgresource.ResourceDataMock{
+		d := &ResourceDataMock{
 			FieldsInSchema: fieldsInSchema,
 		}
 
