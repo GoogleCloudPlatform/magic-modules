@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/googleapi"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
@@ -53,7 +54,7 @@ func ResourceComputeNetworkPeering() *schema.Resource {
 				Required:         true,
 				ForceNew:         true,
 				ValidateFunc:     verify.ValidateRegexp(peerNetworkLinkRegex),
-				DiffSuppressFunc: compareSelfLinkRelativePaths,
+				DiffSuppressFunc: tpgresource.CompareSelfLinkRelativePaths,
 				Description:      `The primary network of the peering.`,
 			},
 
@@ -62,7 +63,7 @@ func ResourceComputeNetworkPeering() *schema.Resource {
 				Required:         true,
 				ForceNew:         true,
 				ValidateFunc:     verify.ValidateRegexp(peerNetworkLinkRegex),
-				DiffSuppressFunc: compareSelfLinkRelativePaths,
+				DiffSuppressFunc: tpgresource.CompareSelfLinkRelativePaths,
 				Description:      `The peer network in the peering. The peer network may belong to a different project.`,
 			},
 
@@ -132,8 +133,8 @@ func resourceComputeNetworkPeeringCreate(d *schema.ResourceData, meta interface{
 	// Lock on both networks, sorted so we don't deadlock for A <--> B peering pairs.
 	peeringLockNames := sortedNetworkPeeringMutexKeys(networkFieldValue, peerNetworkFieldValue)
 	for _, kn := range peeringLockNames {
-		mutexKV.Lock(kn)
-		defer mutexKV.Unlock(kn)
+		transport_tpg.MutexStore.Lock(kn)
+		defer transport_tpg.MutexStore.Unlock(kn)
 	}
 
 	addOp, err := config.NewComputeClient(userAgent).Networks.AddPeering(networkFieldValue.Project, networkFieldValue.Name, request).Do()
@@ -227,8 +228,8 @@ func resourceComputeNetworkPeeringUpdate(d *schema.ResourceData, meta interface{
 	// Lock on both networks, sorted so we don't deadlock for A <--> B peering pairs.
 	peeringLockNames := sortedNetworkPeeringMutexKeys(networkFieldValue, peerNetworkFieldValue)
 	for _, kn := range peeringLockNames {
-		mutexKV.Lock(kn)
-		defer mutexKV.Unlock(kn)
+		transport_tpg.MutexStore.Lock(kn)
+		defer transport_tpg.MutexStore.Unlock(kn)
 	}
 
 	updateOp, err := config.NewComputeClient(userAgent).Networks.UpdatePeering(networkFieldValue.Project, networkFieldValue.Name, request).Do()
@@ -270,8 +271,8 @@ func resourceComputeNetworkPeeringDelete(d *schema.ResourceData, meta interface{
 	// Lock on both networks, sorted so we don't deadlock for A <--> B peering pairs.
 	peeringLockNames := sortedNetworkPeeringMutexKeys(networkFieldValue, peerNetworkFieldValue)
 	for _, kn := range peeringLockNames {
-		mutexKV.Lock(kn)
-		defer mutexKV.Unlock(kn)
+		transport_tpg.MutexStore.Lock(kn)
+		defer transport_tpg.MutexStore.Unlock(kn)
 	}
 
 	removeOp, err := config.NewComputeClient(userAgent).Networks.RemovePeering(networkFieldValue.Project, networkFieldValue.Name, request).Do()
@@ -345,7 +346,7 @@ func resourceComputeNetworkPeeringImport(d *schema.ResourceData, meta interface{
 		return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Network %q", splits[1]))
 	}
 
-	if err := d.Set("network", ConvertSelfLinkToV1(net.SelfLink)); err != nil {
+	if err := d.Set("network", tpgresource.ConvertSelfLinkToV1(net.SelfLink)); err != nil {
 		return nil, fmt.Errorf("Error setting network: %s", err)
 	}
 	if err := d.Set("name", name); err != nil {

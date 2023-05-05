@@ -3,6 +3,7 @@ package google
 import (
 	"reflect"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
@@ -43,56 +44,56 @@ func GetBigQueryTableApiObject(d TerraformResourceData, config *transport_tpg.Co
 
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("table_reference"); !isEmptyValue(reflect.ValueOf(tableReferenceProp)) && (ok || !reflect.DeepEqual(v, tableReferenceProp)) {
+	} else if v, ok := d.GetOkExists("table_reference"); !tpgresource.IsEmptyValue(reflect.ValueOf(tableReferenceProp)) && (ok || !reflect.DeepEqual(v, tableReferenceProp)) {
 		obj["tableReference"] = tableReferenceProp
 	}
 
 	descriptionProp, err := expandBigQueryTableDescription(d.Get("description"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("description"); !isEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
+	} else if v, ok := d.GetOkExists("description"); !tpgresource.IsEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
 		obj["description"] = descriptionProp
 	}
 
 	friendlyNameProp, err := expandBigQueryTableFriendlyName(d.Get("friendly_name"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("friendly_name"); !isEmptyValue(reflect.ValueOf(friendlyNameProp)) && (ok || !reflect.DeepEqual(v, friendlyNameProp)) {
+	} else if v, ok := d.GetOkExists("friendly_name"); !tpgresource.IsEmptyValue(reflect.ValueOf(friendlyNameProp)) && (ok || !reflect.DeepEqual(v, friendlyNameProp)) {
 		obj["friendlyName"] = friendlyNameProp
 	}
 
 	labelsProp, err := expandBigQueryTableLabels(d.Get("labels"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("labels"); !isEmptyValue(reflect.ValueOf(labelsProp)) && (ok || !reflect.DeepEqual(v, labelsProp)) {
+	} else if v, ok := d.GetOkExists("labels"); !tpgresource.IsEmptyValue(reflect.ValueOf(labelsProp)) && (ok || !reflect.DeepEqual(v, labelsProp)) {
 		obj["labels"] = labelsProp
 	}
 
 	locationProp, err := expandBigQueryTableLocation(d.Get("location"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("location"); !isEmptyValue(reflect.ValueOf(locationProp)) && (ok || !reflect.DeepEqual(v, locationProp)) {
+	} else if v, ok := d.GetOkExists("location"); !tpgresource.IsEmptyValue(reflect.ValueOf(locationProp)) && (ok || !reflect.DeepEqual(v, locationProp)) {
 		obj["location"] = locationProp
 	}
 
 	expirationTimeProp, err := expandBigQueryTableExpirationTime(nil, d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("expiration_time"); !isEmptyValue(reflect.ValueOf(expirationTimeProp)) && (ok || !reflect.DeepEqual(v, expirationTimeProp)) {
+	} else if v, ok := d.GetOkExists("expiration_time"); !tpgresource.IsEmptyValue(reflect.ValueOf(expirationTimeProp)) && (ok || !reflect.DeepEqual(v, expirationTimeProp)) {
 		obj["expirationTime"] = expirationTimeProp
 	}
 
 	encryptionConfigurationProp, err := expandBigQueryTableEncyptionConfiguration(d.Get("encryption_configuration"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("encryption_configuration"); !isEmptyValue(reflect.ValueOf(encryptionConfigurationProp)) && (ok || !reflect.DeepEqual(v, encryptionConfigurationProp)) {
+	} else if v, ok := d.GetOkExists("encryption_configuration"); !tpgresource.IsEmptyValue(reflect.ValueOf(encryptionConfigurationProp)) && (ok || !reflect.DeepEqual(v, encryptionConfigurationProp)) {
 		obj["encryptionConfiguration"] = encryptionConfigurationProp
 	}
 
 	timePartitionProp, err := expandBigQueryTableTimePartition(d.Get("time_partitioning"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("time_partitioning"); !isEmptyValue(reflect.ValueOf(timePartitionProp)) && (ok || !reflect.DeepEqual(v, timePartitionProp)) {
+	} else if v, ok := d.GetOkExists("time_partitioning"); !tpgresource.IsEmptyValue(reflect.ValueOf(timePartitionProp)) && (ok || !reflect.DeepEqual(v, timePartitionProp)) {
 		obj["timePartitioning"] = timePartitionProp
 	}
 
@@ -105,21 +106,21 @@ func expandBigQueryTableTableReference(v interface{}, d TerraformResourceData, c
 	transformedProjectId, err := expandBigQueryTableTableReferenceProjectId(d.Get("project"), d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedProjectId); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedProjectId); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["project"] = transformedProjectId
 	}
 
 	transformedDatasetId, err := expandBigQueryTableTableReferenceDatasetId(d.Get("dataset_id"), d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedDatasetId); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedDatasetId); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["datasetId"] = transformedDatasetId
 	}
 
 	transformedTableId, err := expandBigQueryTableTableReferenceTableId(d.Get("table_id"), d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedTableId); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedTableId); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["tableId"] = transformedTableId
 	}
 
@@ -133,7 +134,7 @@ func expandBigQueryTableExpirationTime(v interface{}, d TerraformResourceData, c
 
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedExpirationTimeValue); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedExpirationTimeValue); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["value"] = transformedExpirationTimeValue
 	}
 
@@ -153,7 +154,7 @@ func expandBigQueryTableEncyptionConfiguration(v interface{}, d TerraformResourc
 
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedKmsKeyName); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedKmsKeyName); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["kmsKeyName"] = transformedKmsKeyName
 	}
 	return transformed, nil
@@ -192,7 +193,7 @@ func expandBigQueryTableTimePartition(v interface{}, d TerraformResourceData, co
 
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedType); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedType); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["type"] = transformedType
 	}
 
@@ -200,7 +201,7 @@ func expandBigQueryTableTimePartition(v interface{}, d TerraformResourceData, co
 
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedExpirationMs); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedExpirationMs); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["expirationMs"] = transformedExpirationMs
 	}
 
@@ -208,7 +209,7 @@ func expandBigQueryTableTimePartition(v interface{}, d TerraformResourceData, co
 
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedField); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedField); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["field"] = transformedField
 	}
 
@@ -216,7 +217,7 @@ func expandBigQueryTableTimePartition(v interface{}, d TerraformResourceData, co
 
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedRequirePartitionFilter); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedRequirePartitionFilter); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["requirePartitionFilter"] = transformedRequirePartitionFilter
 	}
 	return transformed, nil
@@ -237,7 +238,7 @@ func expandBigQueryTableTimeField(v interface{}, d TerraformResourceData, config
 
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedValue); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedValue); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["value"] = transformedValue
 	}
 

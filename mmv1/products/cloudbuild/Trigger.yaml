@@ -85,6 +85,12 @@ examples:
     name: 'cloudbuild_trigger_github_enterprise'
     primary_resource_id: 'ghe-trigger'
     skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuild_trigger_allow_failure'
+    primary_resource_id: 'allow-failure-trigger'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuild_trigger_allow_exit_codes'
+    primary_resource_id: 'allow-exit-codes-trigger'
 
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_read: templates/terraform/pre_read/cloudbuild_trigger.go.erb
@@ -982,6 +988,23 @@ properties:
               description: |
                 A shell script to be executed in the step.
                 When script is provided, the user cannot specify the entrypoint or args.
+            - !ruby/object:Api::Type::Boolean
+              name: 'allowFailure'
+              description: |
+                Allow this build step to fail without failing the entire build.
+                If false, the entire build will fail if this step fails. Otherwise, the
+                build will succeed, but this step will still have a failure status.
+                Error information will be reported in the `failureDetail` field.
+
+                `allowExitCodes` takes precedence over this field.
+            - !ruby/object:Api::Type::Array
+              name: 'allowExitCodes'
+              item_type: Api::Type::Integer
+              description: |
+                Allow this build step to fail without failing the entire build if and
+                only if the exit code is one of the specified codes.
+
+                If `allowFailure` is also specified, this field will take precedence.
       - !ruby/object:Api::Type::NestedObject
         name: 'artifacts'
         description: |

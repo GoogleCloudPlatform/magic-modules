@@ -410,4 +410,4 @@ properties:
     description: |
       URL of the managed instance group that this autoscaler will scale.
     required: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'

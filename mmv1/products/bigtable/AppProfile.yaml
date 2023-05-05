@@ -88,7 +88,7 @@ parameters:
     description: 'The name of the instance to create the app profile within.'
     immutable: true
     url_param_only: true
-    diff_suppress_func: compareResourceNames
+    diff_suppress_func: tpgresource.CompareResourceNames
   - !ruby/object:Api::Type::Boolean
     name: 'ignoreWarnings'
     description:
