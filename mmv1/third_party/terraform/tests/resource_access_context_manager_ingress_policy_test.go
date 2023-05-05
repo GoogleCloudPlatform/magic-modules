@@ -51,7 +51,7 @@ func testAccCheckAccessContextManagerIngressPolicyDestroyProducer(t *testing.T) 
 
 			config := GoogleProviderConfig(t)
 
-			url, err := acctest.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{ingress_policy_name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{ingress_policy_name}}")
 			if err != nil {
 				return err
 			}

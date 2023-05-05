@@ -176,7 +176,7 @@ func testAccCheckGoogleHealthcareFhirStoreUpdate(t *testing.T, pubsubTopic strin
 
 			config := GoogleProviderConfig(t)
 
-			gcpResourceUri, err := acctest.ReplaceVarsForTest(config, rs, "{{dataset}}/fhirStores/{{name}}")
+			gcpResourceUri, err := tpgresource.ReplaceVarsForTest(config, rs, "{{dataset}}/fhirStores/{{name}}")
 			if err != nil {
 				return err
 			}

@@ -192,7 +192,7 @@ func TestAccDataLossPreventionStoredInfoType_dlpStoredInfoTypeCustomDiffFuncForc
 			fieldAfter = "large_custom_dictionary"
 		}
 
-		d := &acctest.ResourceDiffMock{
+		d := &tpgresource.ResourceDiffMock{
 			Before: map[string]interface{}{
 				fieldBefore: tc.before[fieldBefore],
 			},

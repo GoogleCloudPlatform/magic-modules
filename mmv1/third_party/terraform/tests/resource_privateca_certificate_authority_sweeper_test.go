@@ -37,7 +37,7 @@ func testSweepCertificateAuthority(region string) error {
 	}
 
 	// Setup variables to replace in list template
-	d := &acctest.ResourceDataMock{
+	d := &tpgresource.ResourceDataMock{
 		FieldsInSchema: map[string]interface{}{
 			"project":  config.Project,
 			"location": region,

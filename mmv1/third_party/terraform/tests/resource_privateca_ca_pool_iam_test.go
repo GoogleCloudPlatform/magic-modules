@@ -35,7 +35,7 @@ func TestAccPrivatecaCaPoolIamMemberAllAuthenticatedUsersCasing(t *testing.T) {
 func testAccCheckPrivatecaCaPoolIam(t *testing.T, capool, region, project, role string, members []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 
-		d := &acctest.ResourceDataMock{
+		d := &tpgresource.ResourceDataMock{
 			FieldsInSchema: map[string]interface{}{
 				"ca_pool": capool,
 				"role":    role,

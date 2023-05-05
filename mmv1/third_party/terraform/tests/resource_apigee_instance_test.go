@@ -67,7 +67,7 @@ var apigeeInstanceDiffSuppressTestCases = []ApigeeInstanceDiffSuppressTestCase{
 }
 
 func (tc *ApigeeInstanceDiffSuppressTestCase) Test(t *testing.T) {
-	mockResourceDiff := &acctest.ResourceDiffMock{
+	mockResourceDiff := &tpgresource.ResourceDiffMock{
 		Before: tc.Before,
 		After:  tc.After,
 	}
