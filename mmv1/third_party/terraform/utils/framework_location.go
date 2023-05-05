@@ -72,7 +72,7 @@ func (ld *LocationDescription) getRegion() (types.String, error) {
 
 	var err error
 	if !ld.RegionSchemaField.IsNull() {
-		err = fmt.Errorf("region could not be identified, please add `%s` in your resource or set `region` in your provider configuration block", ld.ZoneSchemaField.ValueString())
+		err = fmt.Errorf("region could not be identified, please add `%s` in your resource or set `region` in your provider configuration block", ld.RegionSchemaField.ValueString())
 	} else {
 		err = errors.New("region could not be identified, please add `region` in your resource or provider configuration block")
 	}
