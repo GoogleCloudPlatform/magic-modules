@@ -23,7 +23,7 @@ import (
 // If there aren't enough characters in the input string, an empty string is returned
 // e.g. southamerica-west1-a => southamerica-west1
 //
-// Deprecated: For backward compatibility tpgresource.GetRegionFromZone is still working,
+// Deprecated: For backward compatibility getRegionFromZone is still working,
 // but all new code should use GetRegionFromZone in the tpgresource package instead.
 func getRegionFromZone(zone string) string {
 	return tpgresource.GetRegionFromZone(zone)
@@ -121,7 +121,7 @@ func expandBuildEnvironmentVariables(d *schema.ResourceData) map[string]string {
 	return tpgresource.ExpandBuildEnvironmentVariables(d)
 }
 
-// expandStringMap pulls the value of key out of a tpgresource.TerraformResourceData as a map[string]string.
+// expandStringMap pulls the value of key out of a TerraformResourceData as a map[string]string.
 //
 // Deprecated: For backward compatibility expandStringMap is still working,
 // but all new code should use ExpandStringMap in the tpgresource package instead.
@@ -177,8 +177,8 @@ func stringSliceFromGolangSet(sset map[string]struct{}) []string {
 	return tpgresource.StringSliceFromGolangSet(sset)
 }
 
-// Deprecated: For backward compatibility tpgresource.GetRegionFromZone is still working,
-// but all new code should use GetRegionFromZone in the tpgresource package instead.
+// Deprecated: For backward compatibility reverseStringMap is still working,
+// but all new code should use ReverseStringMap in the tpgresource package instead.
 func reverseStringMap(m map[string]string) map[string]string {
 	return tpgresource.ReverseStringMap(m)
 }
@@ -195,8 +195,8 @@ func mergeSchemas(a, b map[string]*schema.Schema) map[string]*schema.Schema {
 	return tpgresource.MergeSchemas(a, b)
 }
 
-// Deprecated: For backward compatibility tpgresource.GetRegionFromZone is still working,
-// but all new code should use GetRegionFromZone in the tpgresource package instead.
+// Deprecated: For backward compatibility StringToFixed64 is still working,
+// but all new code should use StringToFixed64 in the tpgresource package instead.
 func StringToFixed64(v string) (int64, error) {
 	return tpgresource.StringToFixed64(v)
 }
@@ -355,7 +355,7 @@ func isEmptyValue(v reflect.Value) bool {
 
 // Deprecated: For backward compatibility replaceVars is still working,
 // but all new code should use ReplaceVars in the tpgresource package instead.
-func replaceVars(d tpgresource.TerraformResourceData, config *transport_tpg.Config, linkTmpl string) (string, error) {
+func ReplaceVars(d tpgresource.TerraformResourceData, config *transport_tpg.Config, linkTmpl string) (string, error) {
 	return tpgresource.ReplaceVars(d, config, linkTmpl)
 }
 
@@ -374,7 +374,7 @@ func replaceVarsForId(d tpgresource.TerraformResourceData, config *transport_tpg
 	return tpgresource.ReplaceVarsForId(d, config, linkTmpl)
 }
 
-// tpgresource.ReplaceVars must be done recursively because there are baseUrls that can contain references to regions
+// ReplaceVars must be done recursively because there are baseUrls that can contain references to regions
 // (eg cloudrun service) there aren't any cases known for 2+ recursion but we will track a run away
 // substitution as 10+ calls to allow for future use cases.
 //
