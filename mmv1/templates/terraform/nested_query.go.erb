@@ -70,7 +70,7 @@ func resource<%=resource_name%>FindNestedObjectInList(d *schema.ResourceData, me
 
     <% object.identity.each do |prop| -%>
     item<%= titlelize_property(prop) -%> := flattenNested<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name %>"], d, meta.(*transport_tpg.Config))
-    // tpgresource.IsEmptyValue check so that if one is nil and the other is "", that's considered a match
+    // IsEmptyValue check so that if one is nil and the other is "", that's considered a match
     if !(tpgresource.IsEmptyValue(reflect.ValueOf(item<%= titlelize_property(prop) -%>)) && tpgresource.IsEmptyValue(reflect.ValueOf(expectedFlattened<%= titlelize_property(prop) -%>))) && !reflect.DeepEqual(item<%= titlelize_property(prop) -%>, expectedFlattened<%= titlelize_property(prop) -%>) {
       log.Printf("[DEBUG] Skipping item with <%= prop.api_name %>= %#v, looking for %#v)", item<%= titlelize_property(prop) -%>, expectedFlattened<%= titlelize_property(prop) -%>)
       continue
