@@ -355,6 +355,15 @@ func TestGetZone(t *testing.T) {
 			},
 			ExpectedZone: "us-central1-a",
 		},
+		"returns the value of the zone field in provider config when zone is set to an empty string in resource config": {
+			ResourceConfig: map[string]interface{}{
+				"zone": "",
+			},
+			ProviderConfig: map[string]string{
+				"zone": "provider-zone",
+			},
+			ExpectedZone: "provider-zone",
+		},
 		"returns the value of the zone field in provider config when zone is unset in resource config": {
 			ProviderConfig: map[string]string{
 				"zone": "provider-zone",

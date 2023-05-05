@@ -37,6 +37,13 @@ func TestLocationDescription_getZone(t *testing.T) {
 			},
 			ExpectedZone: types.StringValue("provider-zone"),
 		},
+		"returns the value of the zone field in provider config when zone is set to an empty string in resource config": {
+			ld: LocationDescription{
+				ResourceZone: types.StringValue(""),
+				ProviderZone: types.StringValue("provider-zone"),
+			},
+			ExpectedZone: types.StringValue("provider-zone"),
+		},
 		"returns an error when a zone value can't be found": {
 			ExpectedError: true,
 		},
