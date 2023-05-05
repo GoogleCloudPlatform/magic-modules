@@ -7,6 +7,8 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"google.golang.org/api/googleapi"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestRetryTimeDuration(t *testing.T) {
