@@ -12,16 +12,19 @@ type LocationDescriber interface {
 }
 
 type LocationDescription struct {
+	// Location - not configurable on provider
 	LocationSchemaField types.String
-	RegionSchemaField   types.String
-	ZoneSchemaField     types.String
+	ResourceLocation    types.String
 
-	ResourceLocation types.String
-	ResourceRegion   types.String
-	ResourceZone     types.String
+	// Region
+	RegionSchemaField types.String
+	ResourceRegion    types.String
+	ProviderRegion    types.String
 
-	ProviderRegion types.String
-	ProviderZone   types.String
+	// Zone
+	ZoneSchemaField types.String
+	ResourceZone    types.String
+	ProviderZone    types.String
 }
 
 func (ld *LocationDescription) getLocation() (types.String, error) {
