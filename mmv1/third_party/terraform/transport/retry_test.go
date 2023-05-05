@@ -7,8 +7,6 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"google.golang.org/api/googleapi"
-
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestRetryTimeDuration(t *testing.T) {
@@ -75,7 +73,7 @@ func TestRetryTimeDuration_URLTimeoutsShouldRetry(t *testing.T) {
 		runCount++
 		if runCount == 1 {
 			return &url.Error{
-				Err: acctest.TimeoutErr,
+				Err: TimeoutErr,
 			}
 		}
 		return nil
