@@ -1,5 +1,10 @@
 package google
 
+import (
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
 func expandComputeRouteNextHopInstance(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) *string {
 	if v == "" {
 		return nil
