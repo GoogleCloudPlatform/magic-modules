@@ -33,7 +33,9 @@ func TestLocationDescription_getZone(t *testing.T) {
 		},
 		"returns the value of the zone field in provider config when zone is unset in resource config": {
 			ld: LocationDescription{
-				ProviderZone: types.StringValue("provider-zone"),
+				ResourceLocation: types.StringValue("resource-location"), // unused
+				ResourceRegion:   types.StringValue("resource-region"),   // unused
+				ProviderZone:     types.StringValue("provider-zone"),
 			},
 			ExpectedZone: types.StringValue("provider-zone"),
 		},
@@ -47,6 +49,10 @@ func TestLocationDescription_getZone(t *testing.T) {
 		},
 		// Error states
 		"returns an error when a zone value can't be found": {
+			ld: LocationDescription{
+				ResourceLocation: types.StringValue("resource-location"), // unused
+				ResourceRegion:   types.StringValue("resource-region"),   // unused
+			},
 			ExpectedError: true,
 		},
 		"returns an error if zone is set as an empty string in both resource and provider configs": {
@@ -115,7 +121,8 @@ func TestLocationDescription_getRegion(t *testing.T) {
 		},
 		"returns a region derived from the zone field in resource config when region is unset": {
 			ld: LocationDescription{
-				ResourceZone: types.StringValue("provider-zone-a"),
+				ResourceZone:     types.StringValue("provider-zone-a"),
+				ResourceLocation: types.StringValue("resource-location"), // unused
 			},
 			ExpectedRegion: types.StringValue("provider-zone"),
 		},
@@ -128,6 +135,7 @@ func TestLocationDescription_getRegion(t *testing.T) {
 		"returns the value of the region field in provider config when region/zone is unset in resource config": {
 			ld: LocationDescription{
 				ProviderRegion: types.StringValue("provider-region"),
+				ProviderZone:   types.StringValue("provider-zone-a"), // unused
 			},
 			ExpectedRegion: types.StringValue("provider-region"),
 		},
@@ -154,6 +162,12 @@ func TestLocationDescription_getRegion(t *testing.T) {
 			ExpectedRegion: types.StringValue("provider-region"),
 		},
 		// Error states
+		"returns an error when region/zone values can't be found (location is ignored)": {
+			ld: LocationDescription{
+				ResourceLocation: types.StringValue("resource-location"),
+			},
+			ExpectedError: true,
+		},
 		"returns an error if region and zone set as empty strings in both resource and provider configs": {
 			ld: LocationDescription{
 				ResourceRegion: types.StringValue(""),
@@ -223,6 +237,7 @@ func TestLocationDescription_getLocation(t *testing.T) {
 		"returns the region value set in the resource config when location is not in the schema": {
 			ld: LocationDescription{
 				ResourceRegion: types.StringValue("resource-region"),
+				ResourceZone:   types.StringValue("resource-zone"), // unused
 			},
 			ExpectedLocation: types.StringValue("resource-region"),
 		},
@@ -246,7 +261,8 @@ func TestLocationDescription_getLocation(t *testing.T) {
 		},
 		"returns the zone value from the provider config when none of location/region/zone are set in the resource config": {
 			ld: LocationDescription{
-				ProviderZone: types.StringValue("provider-zone"),
+				ProviderRegion: types.StringValue("provider-region"), // unused
+				ProviderZone:   types.StringValue("provider-zone"),
 			},
 			ExpectedLocation: types.StringValue("provider-zone"),
 		},
@@ -284,7 +300,7 @@ func TestLocationDescription_getLocation(t *testing.T) {
 		// Error states
 		"does not use the region value set in the provider config": {
 			ld: LocationDescription{
-				ProviderRegion: types.StringValue("provider-zone"),
+				ProviderRegion: types.StringValue("provider-region"),
 			},
 			ExpectedError: true,
 		},
