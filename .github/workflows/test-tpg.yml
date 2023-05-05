@@ -1,4 +1,4 @@
-name: Terraform Build and Unit Test
+name: Provider Build and Unit Test
 
 permissions:
   actions: read
