@@ -90,12 +90,14 @@ func (ld *LocationDescription) getRegion() (types.String, error) {
 
 func (ld *LocationDescription) getZone() (types.String, error) {
 	// TODO(SarahFrench): Make empty strings not ignored, see https://github.com/hashicorp/terraform-provider-google/issues/14447
+	// For all checks in this function body
+
 	if !ld.ResourceZone.IsNull() && !ld.ResourceZone.IsUnknown() && !ld.ResourceZone.Equal(types.StringValue("")) {
 		// Zone could be a self link
 		zone := GetResourceNameFromSelfLink(ld.ResourceZone.ValueString())
 		return types.StringValue(zone), nil
 	}
-	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() {
+	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() && !ld.ProviderZone.Equal(types.StringValue("")) {
 		return ld.ProviderZone, nil
 	}
 
