@@ -3,7 +3,6 @@ package google
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 

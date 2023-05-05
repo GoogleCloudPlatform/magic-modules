@@ -2,16 +2,13 @@ package tpgresource
 
 import (
 	"fmt"
-	"net/url"
 	"reflect"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"google.golang.org/api/googleapi"

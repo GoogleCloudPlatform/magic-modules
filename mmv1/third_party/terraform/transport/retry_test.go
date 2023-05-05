@@ -1,5 +1,14 @@
 package transport
 
+import (
+	"net/url"
+	"testing"
+	"time"
+
+	"github.com/hashicorp/errwrap"
+	"google.golang.org/api/googleapi"
+)
+
 func TestRetryTimeDuration(t *testing.T) {
 	i := 0
 	f := func() error {

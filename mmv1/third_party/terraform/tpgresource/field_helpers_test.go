@@ -3,7 +3,6 @@ package tpgresource
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
