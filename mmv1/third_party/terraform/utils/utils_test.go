@@ -236,6 +236,8 @@ func TestGetLocation(t *testing.T) {
 		"returns the value of the location field in resource config": {
 			ResourceConfig: map[string]interface{}{
 				"location": "resource-location",
+				"region":   "resource-region", // unused
+				"zone":     "resource-zone-a", // unused
 			},
 			ExpectedLocation: "resource-location",
 		},
@@ -248,6 +250,7 @@ func TestGetLocation(t *testing.T) {
 		"returns the region value set in the resource config when location is not in the schema": {
 			ResourceConfig: map[string]interface{}{
 				"region": "resource-region",
+				"zone":   "resource-zone-a", // unused
 			},
 			ExpectedLocation: "resource-region",
 		},
@@ -412,6 +415,13 @@ func TestGetZone(t *testing.T) {
 		},
 		// Error states
 		"returns an error when a zone value can't be found": {
+			ResourceConfig: map[string]interface{}{
+				"location": "resource-location", // unused
+				"region":   "resource-region",   // unused
+			},
+			ProviderConfig: map[string]string{
+				"region": "provider-region", //unused
+			},
 			ExpectedError: true,
 		},
 		"returns an error if zone is set as an empty string in both resource and provider configs": {
@@ -467,8 +477,9 @@ func TestGetRegion(t *testing.T) {
 	}{
 		"returns the value of the region field in resource config": {
 			ResourceConfig: map[string]interface{}{
-				"region": "resource-region",
-				"zone":   "resource-zone-a",
+				"region":   "resource-region",
+				"zone":     "resource-zone-a",
+				"location": "resource-location", // unused
 			},
 			ProviderConfig: map[string]string{
 				"region": "provider-region",
@@ -484,7 +495,8 @@ func TestGetRegion(t *testing.T) {
 		},
 		"returns a region derived from the zone field in resource config when region is unset": {
 			ResourceConfig: map[string]interface{}{
-				"zone": "resource-zone-a",
+				"zone":     "resource-zone-a",
+				"location": "resource-location", // unused
 			},
 			ExpectedRegion: "resource-zone",
 		},
@@ -497,6 +509,7 @@ func TestGetRegion(t *testing.T) {
 		"returns the value of the region field in provider config when region/zone is unset in resource config": {
 			ProviderConfig: map[string]string{
 				"region": "provider-region",
+				"zone":   "provider-zone-a", // unused
 			},
 			ExpectedRegion: "provider-region",
 		},
@@ -525,6 +538,12 @@ func TestGetRegion(t *testing.T) {
 			ExpectedRegion: "provider-region",
 		},
 		// Error states
+		"returns an error when region values can't be found": {
+			ResourceConfig: map[string]interface{}{
+				"location": "resource-location",
+			},
+			ExpectedError: true,
+		},
 		"returns an error if region and zone set as empty strings in both resource and provider configs": {
 			ResourceConfig: map[string]interface{}{
 				"region": "",
@@ -534,9 +553,6 @@ func TestGetRegion(t *testing.T) {
 				"region": "",
 				"zone":   "",
 			},
-			ExpectedError: true,
-		},
-		"returns an error when region values can't be found": {
 			ExpectedError: true,
 		},
 	}
