@@ -64,7 +64,7 @@ parameters:
     required: true
     url_param_only: true
     description: |
-      Short name of the TslInspectionPolicy resource to be created.
+      Short name of the TlsInspectionPolicy resource to be created.
   - !ruby/object:Api::Type::String
     name: 'location'
     description: |
