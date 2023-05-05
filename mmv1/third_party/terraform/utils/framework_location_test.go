@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func TestLocationDescription_getZone(t *testing.T) {
+func TestLocationDescription_GetZone(t *testing.T) {
 	cases := map[string]struct {
 		ld            LocationDescription
 		ExpectedZone  types.String
@@ -72,7 +72,7 @@ func TestLocationDescription_getZone(t *testing.T) {
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
 
-			zone, err := tc.ld.getZone()
+			zone, err := tc.ld.GetZone()
 
 			if err != nil {
 				if tc.ExpectedError {
@@ -95,7 +95,7 @@ func TestLocationDescription_getZone(t *testing.T) {
 	}
 }
 
-func TestLocationDescription_getRegion(t *testing.T) {
+func TestLocationDescription_GetRegion(t *testing.T) {
 	cases := map[string]struct {
 		ld             LocationDescription
 		ExpectedRegion types.String
@@ -187,7 +187,7 @@ func TestLocationDescription_getRegion(t *testing.T) {
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
 
-			region, err := tc.ld.getRegion()
+			region, err := tc.ld.GetRegion()
 
 			if err != nil {
 				if tc.ExpectedError {
@@ -210,7 +210,7 @@ func TestLocationDescription_getRegion(t *testing.T) {
 	}
 }
 
-func TestLocationDescription_getLocation(t *testing.T) {
+func TestLocationDescription_GetLocation(t *testing.T) {
 	cases := map[string]struct {
 		ld               LocationDescription
 		ExpectedLocation types.String
@@ -327,7 +327,7 @@ func TestLocationDescription_getLocation(t *testing.T) {
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
 
-			region, err := tc.ld.getLocation()
+			region, err := tc.ld.GetLocation()
 
 			if err != nil {
 				if tc.ExpectedError {

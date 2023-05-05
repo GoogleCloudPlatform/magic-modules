@@ -35,7 +35,7 @@ type GoogleClientConfigModel struct {
 	AccessToken types.String `tfsdk:"access_token"`
 }
 
-func (m *GoogleClientConfigModel) getLocationDescription(providerConfig *frameworkProvider) LocationDescription {
+func (m *GoogleClientConfigModel) GetLocationDescription(providerConfig *frameworkProvider) LocationDescription {
 	return LocationDescription{
 		RegionSchemaField: types.StringValue("region"),
 		ZoneSchemaField:   types.StringValue("zone"),
@@ -123,7 +123,7 @@ func (d *GoogleClientConfigDataSource) Read(ctx context.Context, req datasource.
 		return
 	}
 
-	locationInfo := data.getLocationDescription(d.providerConfig)
+	locationInfo := data.GetLocationDescription(d.providerConfig)
 	region, err := locationInfo.getRegion()
 	if err != nil {
 		diags.AddError("Error getting region value", err.Error())

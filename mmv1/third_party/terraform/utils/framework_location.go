@@ -8,7 +8,7 @@ import (
 )
 
 type LocationDescriber interface {
-	getLocationDescription(providerConfig *frameworkProvider) LocationDescription
+	GetLocationDescription(providerConfig *frameworkProvider) LocationDescription
 }
 
 type LocationDescription struct {
@@ -27,7 +27,7 @@ type LocationDescription struct {
 	ProviderZone    types.String
 }
 
-func (ld *LocationDescription) getLocation() (types.String, error) {
+func (ld *LocationDescription) GetLocation() (types.String, error) {
 	// Location from resource config
 	if !ld.ResourceLocation.IsNull() && !ld.ResourceLocation.IsUnknown() && !ld.ResourceLocation.Equal(types.StringValue("")) {
 		return ld.ResourceLocation, nil
@@ -58,7 +58,7 @@ func (ld *LocationDescription) getLocation() (types.String, error) {
 	return types.StringNull(), err
 }
 
-func (ld *LocationDescription) getRegion() (types.String, error) {
+func (ld *LocationDescription) GetRegion() (types.String, error) {
 	// TODO(SarahFrench): Make empty strings not ignored, see https://github.com/hashicorp/terraform-provider-google/issues/14447
 	// For all checks in this function body
 
@@ -91,7 +91,7 @@ func (ld *LocationDescription) getRegion() (types.String, error) {
 	return types.StringNull(), err
 }
 
-func (ld *LocationDescription) getZone() (types.String, error) {
+func (ld *LocationDescription) GetZone() (types.String, error) {
 	// TODO(SarahFrench): Make empty strings not ignored, see https://github.com/hashicorp/terraform-provider-google/issues/14447
 	// For all checks in this function body
 
