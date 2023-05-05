@@ -22,6 +22,7 @@ import (
 	compute "google.golang.org/api/compute/v0.beta"
 <% end -%>
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
@@ -56,7 +57,7 @@ func GetComputeInstanceCaiObject(d tpgresource.TerraformResourceData, config *tr
 }
 
 func GetComputeInstanceApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +74,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 	// Get the machine type
 	var machineTypeUrl string
 	if mt, ok := d.GetOk("machine_type"); ok {
-		machineType, err := ParseMachineTypesFieldValue(mt.(string), d, config)
+		machineType, err := tpgresource.ParseMachineTypesFieldValue(mt.(string), d, config)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"Error loading machine type: %s",
@@ -158,7 +159,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Zone:                   d.Get("zone").(string),
 		NetworkInterfaces:      networkInterfaces,
 		Tags:                   resourceInstanceTags(d),
-		Labels:                 expandLabels(d),
+		Labels:                 tpgresource.ExpandLabels(d),
 		ServiceAccounts:        expandServiceAccounts(d.Get("service_account").([]interface{})),
 		GuestAccelerators:      accels,
 		MinCpuPlatform:         d.Get("min_cpu_platform").(string),
@@ -177,13 +178,13 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d tpgresource.Terrafo
 	s := diskConfig["source"].(string)
 	var sourceLink string
 	if strings.Contains(s, "regions/") {
-		source, err := ParseRegionDiskFieldValue(s, d, config)
+		source, err := tpgresource.ParseRegionDiskFieldValue(s, d, config)
 		if err != nil {
 			return nil, err
 		}
 		sourceLink = source.RelativeLink()
 	} else {
-		source, err := ParseDiskFieldValue(s, d, config)
+		source, err := tpgresource.ParseDiskFieldValue(s, d, config)
 		if err != nil {
 			return nil, err
 		}
@@ -239,7 +240,7 @@ func expandInstanceGuestAccelerators(d tpgresource.TerraformResourceData, config
 		if data["count"].(int) == 0 {
 			continue
 		}
-		at, err := ParseAcceleratorFieldValue(data["type"].(string), d, config)
+		at, err := tpgresource.ParseAcceleratorFieldValue(data["type"].(string), d, config)
 		if err != nil {
 			return nil, fmt.Errorf("cannot parse accelerator type: %v", err)
 		}
@@ -253,7 +254,7 @@ func expandInstanceGuestAccelerators(d tpgresource.TerraformResourceData, config
 }
 
 func expandBootDisk(d tpgresource.TerraformResourceData, config *transport_tpg.Config, project string) (*compute.AttachedDisk, error) {
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -284,7 +285,7 @@ func expandBootDisk(d tpgresource.TerraformResourceData, config *transport_tpg.C
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.source"); ok {
-		source, err := ParseDiskFieldValue(v.(string), d, config)
+		source, err := tpgresource.ParseDiskFieldValue(v.(string), d, config)
 		if err != nil {
 			return nil, err
 		}
@@ -318,7 +319,7 @@ func expandBootDisk(d tpgresource.TerraformResourceData, config *transport_tpg.C
 		}
 
 		if _, ok := d.GetOk("boot_disk.0.initialize_params.0.labels"); ok {
-			disk.InitializeParams.Labels = expandStringMap(d, "boot_disk.0.initialize_params.0.labels")
+			disk.InitializeParams.Labels = tpgresource.ExpandStringMap(d, "boot_disk.0.initialize_params.0.labels")
 		}
 	}
 

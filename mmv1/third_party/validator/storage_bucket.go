@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 	"google.golang.org/api/storage/v1"
 )
@@ -48,7 +49,7 @@ func GetStorageBucketCaiObject(d tpgresource.TerraformResourceData, config *tran
 }
 
 func GetStorageBucketApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
-	project, _ := getProject(d, config)
+	project, _ := tpgresource.GetProject(d, config)
 
 	// Get the bucket and location
 	bucket := d.Get("name").(string)
@@ -57,7 +58,7 @@ func GetStorageBucketApiObject(d tpgresource.TerraformResourceData, config *tran
 	// Create a bucket, setting the labels, location and name.
 	sb := &storage.Bucket{
 		Name:             bucket,
-		Labels:           expandLabels(d),
+		Labels:           tpgresource.ExpandLabels(d),
 		Location:         location,
 		IamConfiguration: expandIamConfiguration(d),
 	}

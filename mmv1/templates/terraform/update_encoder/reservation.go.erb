@@ -52,7 +52,7 @@
 			if val := reflect.ValueOf(transformedProjectId); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 				singleProject["projectId"] = transformedProjectId
 			}
-			transformedId, err := expandString(original["id"], d, config)
+			transformedId, err := tpgresource.ExpandString(original["id"], d, config)
 			if err != nil {
 				return nil, fmt.Errorf("Invalid value for id: %s", err)
 			}

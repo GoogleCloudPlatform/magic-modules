@@ -15,7 +15,7 @@ func sourceRepoImport(d *schema.ResourceData, config *transport_tpg.Config) erro
 	}
 
 	// Replace import id for the resource id
-	id, err := ReplaceVars(d, config, "projects/{{project}}/repos/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/repos/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -33,7 +33,7 @@ func runtimeconfigVariableImport(d *schema.ResourceData, config *transport_tpg.C
 	}
 
 	// Replace import id for the resource id
-	id, err := ReplaceVars(d, config, "projects/{{project}}/configs/{{parent}}/variables/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/configs/{{parent}}/variables/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

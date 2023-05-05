@@ -7,10 +7,10 @@ import (
 
 // readDiskType finds the disk type with the given name.
 func readDiskType(c *transport_tpg.Config, d tpgresource.TerraformResourceData, name string) (*tpgresource.ZonalFieldValue, error) {
-	return parseZonalFieldValue("diskTypes", name, "project", "zone", d, c, false)
+	return tpgresource.ParseZonalFieldValue("diskTypes", name, "project", "zone", d, c, false)
 }
 
 // readRegionDiskType finds the disk type with the given name.
 func readRegionDiskType(c *transport_tpg.Config, d tpgresource.TerraformResourceData, name string) (*tpgresource.RegionalFieldValue, error) {
-	return parseRegionalFieldValue("diskTypes", name, "project", "region", "zone", d, c, false)
+	return tpgresource.ParseRegionalFieldValue("diskTypes", name, "project", "region", "zone", d, c, false)
 }

@@ -4,7 +4,7 @@ func expandComputeRouteNextHopInstance(v interface{}, d tpgresource.TerraformRes
 	if v == "" {
 		return nil
 	}
-	val, err := parseZonalFieldValue("instances", v.(string), "project", "next_hop_instance_zone", d, config, true)
+	val, err := tpgresource.ParseZonalFieldValue("instances", v.(string), "project", "next_hop_instance_zone", d, config, true)
 	if err != nil {
 		return nil
 	}
@@ -23,7 +23,7 @@ func expandComputeVpnTunnelRegion(v interface{}, d tpgresource.TerraformResource
 		return &reg
 	}
 
-	f, err := parseRegionalFieldValue("targetVpnGateways", d.Get("target_vpn_gateway").(string), "project", "region", "zone", d, config, true)
+	f, err := tpgresource.ParseRegionalFieldValue("targetVpnGateways", d.Get("target_vpn_gateway").(string), "project", "region", "zone", d, config, true)
 	if err != nil {
 		return nil
 	}

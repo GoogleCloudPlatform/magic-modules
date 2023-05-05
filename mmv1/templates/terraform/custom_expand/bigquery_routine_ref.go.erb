@@ -2,7 +2,7 @@ func expandBigQueryRoutineRoutineReference(v interface{}, d tpgresource.Terrafor
 
         transformed := make(map[string]interface{})
         transformed["datasetId"] = d.Get("dataset_id")
-        project, _ := getProject(d, config)
+        project, _ := tpgresource.GetProject(d, config)
         transformed["projectId"] = project
         transformed["routineId"] = d.Get("routine_id")
 

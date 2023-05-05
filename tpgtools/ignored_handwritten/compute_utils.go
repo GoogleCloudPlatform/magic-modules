@@ -12,7 +12,7 @@ import (
 
 func deleteComputeNetworkDefaultRoutes(d *schema.ResourceData, config *transport_tpg.Config, res *compute.Network) error {
 	if d.Get("delete_default_routes_on_create").(bool) {
-		url, err := ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/global/networks")
+		url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/global/networks")
 		networkLink := fmt.Sprintf("%s/%s", url, d.Get("name").(string))
 		filter := fmt.Sprintf("(network=\"%s\") AND (destRange=\"0.0.0.0/0\")", networkLink)
 		log.Printf("[DEBUG] Getting routes for network %q with filter '%q'", d.Get("name").(string), filter)

@@ -63,7 +63,7 @@ func GetBigtableInstanceApiObject(d tpgresource.TerraformResourceData, config *t
 }
 
 func expandBigtableInstanceName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}")
+	return tpgresource.ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}")
 }
 
 func expandBigtableDisplayName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {

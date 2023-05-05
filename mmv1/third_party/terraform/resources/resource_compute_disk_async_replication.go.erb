@@ -73,7 +73,7 @@ func ResourceComputeDiskAsyncReplication() *schema.Resource {
 
 func asyncReplicationGetComputeClient(d *schema.ResourceData, meta interface{}) (*compute.Service, error) {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -90,9 +90,9 @@ func asyncReplicationGetDiskFromConfig(disk string, d *schema.ResourceData, meta
 	if err != nil {
 		return
 	}
-	zv, parseErr := ParseDiskFieldValue(disk, d, config)
+	zv, parseErr := tpgresource.ParseDiskFieldValue(disk, d, config)
 	if !zonalMatch || parseErr != nil {
-		rv, err = ParseRegionDiskFieldValue(disk, d, config)
+		rv, err = tpgresource.ParseRegionDiskFieldValue(disk, d, config)
 		if err != nil {
 			return
 		}

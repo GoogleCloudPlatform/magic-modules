@@ -3,12 +3,8 @@
 package google
 
 import (
-	"errors"
-	"fmt"
-	"net/url"
 	"reflect"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -27,7 +23,7 @@ import (
 // If there aren't enough characters in the input string, an empty string is returned
 // e.g. southamerica-west1-a => southamerica-west1
 //
-// Deprecated: For backward compatibility getRegionFromZone is still working,
+// Deprecated: For backward compatibility tpgresource.GetRegionFromZone is still working,
 // but all new code should use GetRegionFromZone in the tpgresource package instead.
 func getRegionFromZone(zone string) string {
 	return tpgresource.GetRegionFromZone(zone)
@@ -38,21 +34,30 @@ func getRegionFromZone(zone string) string {
 // - region extracted from the `zone` field in resource schema
 // - provider-level region
 // - region extracted from the provider-level zone
+//
+// Deprecated: For backward compatibility getRegion is still working,
+// but all new code should use GetRegion in the tpgresource package instead.
 func getRegion(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (string, error) {
-	return getRegionFromSchema("region", "zone", d, config)
+	return tpgresource.GetRegion(d, config)
 }
 
 // getProject reads the "project" field from the given resource data and falls
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
+//
+// Deprecated: For backward compatibility getProject is still working,
+// but all new code should use GetProject in the tpgresource package instead.
 func getProject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (string, error) {
-	return getProjectFromSchema("project", d, config)
+	return tpgresource.GetProject(d, config)
 }
 
 // getBillingProject reads the "billing_project" field from the given resource data and falls
 // back to the provider's value if not given. If no value is found, an error is returned.
+//
+// Deprecated: For backward compatibility getBillingProject is still working,
+// but all new code should use GetBillingProject in the tpgresource package instead.
 func getBillingProject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (string, error) {
-	return getBillingProjectFromSchema("billing_project", d, config)
+	return tpgresource.GetBillingProject(d, config)
 }
 
 // getProjectFromDiff reads the "project" field from the given diff and falls
@@ -172,7 +177,7 @@ func stringSliceFromGolangSet(sset map[string]struct{}) []string {
 	return tpgresource.StringSliceFromGolangSet(sset)
 }
 
-// Deprecated: For backward compatibility getRegionFromZone is still working,
+// Deprecated: For backward compatibility tpgresource.GetRegionFromZone is still working,
 // but all new code should use GetRegionFromZone in the tpgresource package instead.
 func reverseStringMap(m map[string]string) map[string]string {
 	return tpgresource.ReverseStringMap(m)
@@ -190,7 +195,7 @@ func mergeSchemas(a, b map[string]*schema.Schema) map[string]*schema.Schema {
 	return tpgresource.MergeSchemas(a, b)
 }
 
-// Deprecated: For backward compatibility getRegionFromZone is still working,
+// Deprecated: For backward compatibility tpgresource.GetRegionFromZone is still working,
 // but all new code should use GetRegionFromZone in the tpgresource package instead.
 func StringToFixed64(v string) (int64, error) {
 	return tpgresource.StringToFixed64(v)
@@ -224,25 +229,11 @@ func Nprintf(format string, params map[string]interface{}) string {
 // A project is required if we are trying to build the FQN from a service account id and
 // and error will be returned in this case if no project is set in the resource or the
 // provider-level config
+//
+// Deprecated: For backward compatibility serviceAccountFQN is still working,
+// but all new code should use ServiceAccountFQN in the tpgresource package instead.
 func serviceAccountFQN(serviceAccount string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (string, error) {
-	// If the service account id is already the fully qualified name
-	if strings.HasPrefix(serviceAccount, "projects/") {
-		return serviceAccount, nil
-	}
-
-	// If the service account id is an email
-	if strings.Contains(serviceAccount, "@") {
-		return "projects/-/serviceAccounts/" + serviceAccount, nil
-	}
-
-	// Get the project from the resource or fallback to the project
-	// in the provider configuration
-	project, err := getProject(d, config)
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("projects/-/serviceAccounts/%s@%s.iam.gserviceaccount.com", serviceAccount, project), nil
+	return tpgresource.ServiceAccountFQN(serviceAccount, d, config)
 }
 
 // Deprecated: For backward compatibility paginatedListRequest is still working,
@@ -279,8 +270,10 @@ func migrateStateNoop(v int, is *terraform.InstanceState, meta interface{}) (*te
 	return tpgresource.MigrateStateNoop(v, is, meta)
 }
 
+// Deprecated: For backward compatibility expandString is still working,
+// but all new code should use ExpandString in the tpgresource package instead.
 func expandString(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (string, error) {
-	return v.(string), nil
+	return tpgresource.ExpandString(v, d, config)
 }
 
 // Deprecated: For backward compatibility changeFieldSchemaToForceNew is still working,
@@ -289,29 +282,20 @@ func changeFieldSchemaToForceNew(sch *schema.Schema) {
 	tpgresource.ChangeFieldSchemaToForceNew(sch)
 }
 
+// Deprecated: For backward compatibility generateUserAgentString is still working,
+// but all new code should use GenerateUserAgentString in the tpgresource package instead.
 func generateUserAgentString(d tpgresource.TerraformResourceData, currentUserAgent string) (string, error) {
-	var m transport_tpg.ProviderMeta
-
-	err := d.GetProviderMeta(&m)
-	if err != nil {
-		return currentUserAgent, err
-	}
-
-	if m.ModuleName != "" {
-		return strings.Join([]string{currentUserAgent, m.ModuleName}, " "), nil
-	}
-
-	return currentUserAgent, nil
+	return tpgresource.GenerateUserAgentString(d, currentUserAgent)
 }
 
-func SnakeToPascalCase(s string) string {
-	split := strings.Split(s, "_")
-	for i := range split {
-		split[i] = strings.Title(split[i])
-	}
+// Deprecated: For backward compatibility snakeToPascalCase is still working,
+// but all new code should use SnakeToPascalCase in the tpgresource package instead.
+func snakeToPascalCase(s string) string {
 	return tpgresource.SnakeToPascalCase(s)
 }
 
+// Deprecated: For backward compatibility checkStringMap is still working,
+// but all new code should use CheckStringMap in the tpgresource package instead.
 func checkStringMap(v interface{}) map[string]string {
 	return tpgresource.CheckStringMap(v)
 }
@@ -347,7 +331,7 @@ func checkGoogleIamPolicy(value string) error {
 // completes, and the newly requested operation can begin.
 func retryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f func() error) error {
 	return resource.Retry(timeout, func() *resource.RetryError {
-		if err := lockedCall(lockKey, f); err != nil {
+		if err := transport_tpg.LockedCall(lockKey, f); err != nil {
 			if isFailedPreconditionError(err) {
 				return resource.RetryableError(err)
 			}
@@ -369,8 +353,10 @@ func isEmptyValue(v reflect.Value) bool {
 	return tpgresource.IsEmptyValue(v)
 }
 
-func ReplaceVars(d tpgresource.TerraformResourceData, config *transport_tpg.Config, linkTmpl string) (string, error) {
-	return replaceVarsRecursive(d, config, linkTmpl, false, 0)
+// Deprecated: For backward compatibility replaceVars is still working,
+// but all new code should use ReplaceVars in the tpgresource package instead.
+func replaceVars(d tpgresource.TerraformResourceData, config *transport_tpg.Config, linkTmpl string) (string, error) {
+	return tpgresource.ReplaceVars(d, config, linkTmpl)
 }
 
 // relaceVarsForId shortens variables by running them through GetResourceNameFromSelfLink
@@ -381,117 +367,29 @@ func ReplaceVars(d tpgresource.TerraformResourceData, config *transport_tpg.Conf
 // access_policy: accessPolicies/foo
 // access_level: accessPolicies/foo/accessLevels/bar
 // becomes accessPolicies/foo/accessLevels/bar
+//
+// Deprecated: For backward compatibility replaceVarsForId is still working,
+// but all new code should use ReplaceVarsForId in the tpgresource package instead.
 func replaceVarsForId(d tpgresource.TerraformResourceData, config *transport_tpg.Config, linkTmpl string) (string, error) {
-	return replaceVarsRecursive(d, config, linkTmpl, true, 0)
+	return tpgresource.ReplaceVarsForId(d, config, linkTmpl)
 }
 
-// ReplaceVars must be done recursively because there are baseUrls that can contain references to regions
+// tpgresource.ReplaceVars must be done recursively because there are baseUrls that can contain references to regions
 // (eg cloudrun service) there aren't any cases known for 2+ recursion but we will track a run away
 // substitution as 10+ calls to allow for future use cases.
+//
+// Deprecated: For backward compatibility replaceVarsRecursive is still working,
+// but all new code should use ReplaceVarsRecursive in the tpgresource package instead.
 func replaceVarsRecursive(d tpgresource.TerraformResourceData, config *transport_tpg.Config, linkTmpl string, shorten bool, depth int) (string, error) {
-	if depth > 10 {
-		return "", errors.New("Recursive substitution detcted")
-	}
-
-	// https://github.com/google/re2/wiki/Syntax
-	re := regexp.MustCompile("{{([%[:word:]]+)}}")
-	f, err := buildReplacementFunc(re, d, config, linkTmpl, shorten)
-	if err != nil {
-		return "", err
-	}
-	final := re.ReplaceAllStringFunc(linkTmpl, f)
-
-	if re.Match([]byte(final)) {
-		return replaceVarsRecursive(d, config, final, shorten, depth+1)
-	}
-
-	return final, nil
+	return tpgresource.ReplaceVarsRecursive(d, config, linkTmpl, shorten, depth)
 }
 
 // This function replaces references to Terraform properties (in the form of {{var}}) with their value in Terraform
 // It also replaces {{project}}, {{project_id_or_project}}, {{region}}, and {{zone}} with their appropriate values
 // This function supports URL-encoding the result by prepending '%' to the field name e.g. {{%var}}
+//
+// Deprecated: For backward compatibility buildReplacementFunc is still working,
+// but all new code should use BuildReplacementFunc in the tpgresource package instead.
 func buildReplacementFunc(re *regexp.Regexp, d tpgresource.TerraformResourceData, config *transport_tpg.Config, linkTmpl string, shorten bool) (func(string) string, error) {
-	var project, projectID, region, zone string
-	var err error
-
-	if strings.Contains(linkTmpl, "{{project}}") {
-		project, err = getProject(d, config)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if strings.Contains(linkTmpl, "{{project_id_or_project}}") {
-		v, ok := d.GetOkExists("project_id")
-		if ok {
-			projectID, _ = v.(string)
-		}
-		if projectID == "" {
-			project, err = getProject(d, config)
-		}
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if strings.Contains(linkTmpl, "{{region}}") {
-		region, err = getRegion(d, config)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if strings.Contains(linkTmpl, "{{zone}}") {
-		zone, err = getZone(d, config)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	f := func(s string) string {
-
-		m := re.FindStringSubmatch(s)[1]
-		if m == "project" {
-			return project
-		}
-		if m == "project_id_or_project" {
-			if projectID != "" {
-				return projectID
-			}
-			return project
-		}
-		if m == "region" {
-			return region
-		}
-		if m == "zone" {
-			return zone
-		}
-		if string(m[0]) == "%" {
-			v, ok := d.GetOkExists(m[1:])
-			if ok {
-				return url.PathEscape(fmt.Sprintf("%v", v))
-			}
-		} else {
-			v, ok := d.GetOkExists(m)
-			if ok {
-				if shorten {
-					return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v))
-				} else {
-					return fmt.Sprintf("%v", v)
-				}
-			}
-		}
-
-		// terraform-google-conversion doesn't provide a provider config in tests.
-		if config != nil {
-			// Attempt to draw values from the provider config if it's present.
-			if f := reflect.Indirect(reflect.ValueOf(config)).FieldByName(m); f.IsValid() {
-				return f.String()
-			}
-		}
-		return ""
-	}
-
-	return f, nil
+	return tpgresource.BuildReplacementFunc(re, d, config, linkTmpl, shorten)
 }

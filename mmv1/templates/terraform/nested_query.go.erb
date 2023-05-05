@@ -226,18 +226,18 @@ func resource<%= resource_name -%>PatchDeleteEncoder(d *schema.ResourceData, met
 -%>
 func resource<%= resource_name -%>ListForPatch(d *schema.ResourceData, meta interface{}) ([]interface{}, error) {
   config := meta.(*transport_tpg.Config)
-  url, err := ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+  url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
   if err != nil {
       return nil, err
   }
   <% if has_project -%>
-  project, err := getProject(d, config)
+  project, err := tpgresource.GetProject(d, config)
   if err != nil {
       return nil, err
   }
   <% end -%>
 
-  userAgent, err := generateUserAgentString(d, config.UserAgent)
+  userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
   if err != nil {
     return nil, err
   }

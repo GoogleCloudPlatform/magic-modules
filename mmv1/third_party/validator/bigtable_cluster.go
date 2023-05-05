@@ -107,7 +107,7 @@ func expandBigtableClusterDefaultStorageType(v interface{}, d tpgresource.Terraf
 }
 
 func expandBigtableClusterName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	cluster, err := ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}/clusters/")
+	cluster, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}/clusters/")
 	if err != nil {
 		return nil, err
 	}

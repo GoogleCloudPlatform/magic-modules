@@ -6,88 +6,146 @@ import (
 )
 
 const (
-	globalLinkTemplate             = "projects/%s/global/%s/%s"
-	globalLinkBasePattern          = "projects/(.+)/global/%s/(.+)"
-	zonalLinkTemplate              = "projects/%s/zones/%s/%s/%s"
-	zonalLinkBasePattern           = "projects/(.+)/zones/(.+)/%s/(.+)"
-	zonalPartialLinkBasePattern    = "zones/(.+)/%s/(.+)"
-	regionalLinkTemplate           = "projects/%s/regions/%s/%s/%s"
-	regionalLinkBasePattern        = "projects/(.+)/regions/(.+)/%s/(.+)"
-	regionalPartialLinkBasePattern = "regions/(.+)/%s/(.+)"
-	projectLinkTemplate            = "projects/%s/%s/%s"
-	projectBasePattern             = "projects/(.+)/%s/(.+)"
-	organizationLinkTemplate       = "organizations/%s/%s/%s"
-	organizationBasePattern        = "organizations/(.+)/%s/(.+)"
+	// Deprecated: For backward compatibility globalLinkTemplate is still working,
+	// but all new code should use GlobalLinkTemplate in the tpgresource package instead.
+	globalLinkTemplate = tpgresource.GlobalLinkTemplate
+	// Deprecated: For backward compatibility globalLinkBasePattern is still working,
+	// but all new code should use GlobalLinkBasePattern in the tpgresource package instead.
+	globalLinkBasePattern = tpgresource.GlobalLinkBasePattern
+	// Deprecated: For backward compatibility zonalLinkTemplate is still working,
+	// but all new code should use ZonalLinkTemplate in the tpgresource package instead.
+	zonalLinkTemplate = tpgresource.ZonalLinkTemplate
+	// Deprecated: For backward compatibility zonalLinkBasePattern is still working,
+	// but all new code should use ZonalLinkBasePattern in the tpgresource package instead.
+	zonalLinkBasePattern = tpgresource.ZonalLinkBasePattern
+	// Deprecated: For backward compatibility zonalPartialLinkBasePattern is still working,
+	// but all new code should use ZonalPartialLinkBasePattern in the tpgresource package instead.
+	zonalPartialLinkBasePattern = tpgresource.ZonalPartialLinkBasePattern
+	// Deprecated: For backward compatibility regionalLinkTemplate is still working,
+	// but all new code should use RegionalLinkTemplate in the tpgresource package instead.
+	regionalLinkTemplate = tpgresource.RegionalLinkTemplate
+	// Deprecated: For backward compatibility regionalLinkBasePattern is still working,
+	// but all new code should use RegionalLinkBasePattern in the tpgresource package instead.
+	regionalLinkBasePattern = tpgresource.RegionalLinkBasePattern
+	// Deprecated: For backward compatibility regionalPartialLinkBasePattern is still working,
+	// but all new code should use RegionalPartialLinkBasePattern in the tpgresource package instead.
+	regionalPartialLinkBasePattern = tpgresource.RegionalPartialLinkBasePattern
+	// Deprecated: For backward compatibility projectLinkTemplate is still working,
+	// but all new code should use ProjectLinkTemplate in the tpgresource package instead.
+	projectLinkTemplate = tpgresource.ProjectLinkTemplate
+	// Deprecated: For backward compatibility projectBasePattern is still working,
+	// but all new code should use ProjectBasePattern in the tpgresource package instead.
+	projectBasePattern = tpgresource.ProjectBasePattern
+	// Deprecated: For backward compatibility organizationLinkTemplate is still working,
+	// but all new code should use OrganizationLinkTemplate in the tpgresource package instead.
+	organizationLinkTemplate = tpgresource.OrganizationLinkTemplate
+	// Deprecated: For backward compatibility organizationBasePattern is still working,
+	// but all new code should use OrganizationBasePattern in the tpgresource package instead.
+	organizationBasePattern = tpgresource.OrganizationBasePattern
 )
 
 // ------------------------------------------------------------
 // Field helpers
 // ------------------------------------------------------------
 
+// Deprecated: For backward compatibility ParseNetworkFieldValue is still working,
+// but all new code should use ParseNetworkFieldValue in the tpgresource package instead.
 func ParseNetworkFieldValue(network string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*tpgresource.GlobalFieldValue, error) {
 	return tpgresource.ParseNetworkFieldValue(network, d, config)
 }
 
+// Deprecated: For backward compatibility ParseSubnetworkFieldValue is still working,
+// but all new code should use ParseSubnetworkFieldValue in the tpgresource package instead.
 func ParseSubnetworkFieldValue(subnetwork string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*tpgresource.RegionalFieldValue, error) {
 	return tpgresource.ParseSubnetworkFieldValue(subnetwork, d, config)
 }
 
+// Deprecated: For backward compatibility ParseSubnetworkFieldValueWithProjectField is still working,
+// but all new code should use ParseSubnetworkFieldValueWithProjectField in the tpgresource package instead.
 func ParseSubnetworkFieldValueWithProjectField(subnetwork, projectField string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*tpgresource.RegionalFieldValue, error) {
 	return tpgresource.ParseSubnetworkFieldValueWithProjectField(subnetwork, projectField, d, config)
 }
 
+// Deprecated: For backward compatibility ParseSslCertificateFieldValue is still working,
+// but all new code should use ParseSslCertificateFieldValue in the tpgresource package instead.
 func ParseSslCertificateFieldValue(sslCertificate string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*tpgresource.GlobalFieldValue, error) {
 	return tpgresource.ParseSslCertificateFieldValue(sslCertificate, d, config)
 }
 
+// Deprecated: For backward compatibility ParseHttpHealthCheckFieldValue is still working,
+// but all new code should use ParseHttpHealthCheckFieldValue in the tpgresource package instead.
 func ParseHttpHealthCheckFieldValue(healthCheck string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*tpgresource.GlobalFieldValue, error) {
 	return tpgresource.ParseHttpHealthCheckFieldValue(healthCheck, d, config)
 }
 
+// Deprecated: For backward compatibility ParseDiskFieldValue is still working,
+// but all new code should use ParseDiskFieldValue in the tpgresource package instead.
 func ParseDiskFieldValue(disk string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*tpgresource.ZonalFieldValue, error) {
 	return tpgresource.ParseDiskFieldValue(disk, d, config)
 }
 
+// Deprecated: For backward compatibility ParseRegionDiskFieldValue is still working,
+// but all new code should use ParseRegionDiskFieldValue in the tpgresource package instead.
 func ParseRegionDiskFieldValue(disk string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*tpgresource.RegionalFieldValue, error) {
 	return tpgresource.ParseRegionDiskFieldValue(disk, d, config)
 }
 
+// Deprecated: For backward compatibility ParseOrganizationCustomRoleName is still working,
+// but all new code should use ParseOrganizationCustomRoleName in the tpgresource package instead.
 func ParseOrganizationCustomRoleName(role string) (*tpgresource.OrganizationFieldValue, error) {
 	return tpgresource.ParseOrganizationCustomRoleName(role)
 }
 
+// Deprecated: For backward compatibility ParseAcceleratorFieldValue is still working,
+// but all new code should use ParseAcceleratorFieldValue in the tpgresource package instead.
 func ParseAcceleratorFieldValue(accelerator string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*tpgresource.ZonalFieldValue, error) {
 	return tpgresource.ParseAcceleratorFieldValue(accelerator, d, config)
 }
 
+// Deprecated: For backward compatibility ParseMachineTypesFieldValue is still working,
+// but all new code should use ParseMachineTypesFieldValue in the tpgresource package instead.
 func ParseMachineTypesFieldValue(machineType string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*tpgresource.ZonalFieldValue, error) {
 	return tpgresource.ParseMachineTypesFieldValue(machineType, d, config)
 }
 
+// Deprecated: For backward compatibility ParseInstanceFieldValue is still working,
+// but all new code should use ParseInstanceFieldValue in the tpgresource package instead.
 func ParseInstanceFieldValue(instance string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*tpgresource.ZonalFieldValue, error) {
 	return tpgresource.ParseInstanceFieldValue(instance, d, config)
 }
 
+// Deprecated: For backward compatibility ParseInstanceGroupFieldValue is still working,
+// but all new code should use ParseInstanceGroupFieldValue in the tpgresource package instead.
 func ParseInstanceGroupFieldValue(instanceGroup string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*tpgresource.ZonalFieldValue, error) {
 	return tpgresource.ParseInstanceGroupFieldValue(instanceGroup, d, config)
 }
 
+// Deprecated: For backward compatibility ParseInstanceTemplateFieldValue is still working,
+// but all new code should use ParseInstanceTemplateFieldValue in the tpgresource package instead.
 func ParseInstanceTemplateFieldValue(instanceTemplate string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*tpgresource.GlobalFieldValue, error) {
 	return tpgresource.ParseInstanceTemplateFieldValue(instanceTemplate, d, config)
 }
 
+// Deprecated: For backward compatibility ParseMachineImageFieldValue is still working,
+// but all new code should use ParseMachineImageFieldValue in the tpgresource package instead.
 func ParseMachineImageFieldValue(machineImage string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*tpgresource.GlobalFieldValue, error) {
 	return tpgresource.ParseMachineImageFieldValue(machineImage, d, config)
 }
 
+// Deprecated: For backward compatibility ParseSecurityPolicyFieldValue is still working,
+// but all new code should use ParseSecurityPolicyFieldValue in the tpgresource package instead.
 func ParseSecurityPolicyFieldValue(securityPolicy string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*tpgresource.GlobalFieldValue, error) {
 	return tpgresource.ParseSecurityPolicyFieldValue(securityPolicy, d, config)
 }
 
+// Deprecated: For backward compatibility ParseNetworkEndpointGroupFieldValue is still working,
+// but all new code should use ParseNetworkEndpointGroupFieldValue in the tpgresource package instead.
 func ParseNetworkEndpointGroupFieldValue(networkEndpointGroup string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*tpgresource.ZonalFieldValue, error) {
 	return tpgresource.ParseNetworkEndpointGroupFieldValue(networkEndpointGroup, d, config)
 }
 
+// Deprecated: For backward compatibility ParseNetworkEndpointGroupRegionalFieldValue is still working,
+// but all new code should use ParseNetworkEndpointGroupRegionalFieldValue in the tpgresource package instead.
 func ParseNetworkEndpointGroupRegionalFieldValue(networkEndpointGroup string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*tpgresource.RegionalFieldValue, error) {
 	return tpgresource.ParseNetworkEndpointGroupRegionalFieldValue(networkEndpointGroup, d, config)
 }

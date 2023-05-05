@@ -69,7 +69,7 @@ func expandContainerNodePoolMaxPodsPerNode(v interface{}, d tpgresource.Terrafor
 }
 
 func expandContainerClusterNetwork(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	fv, err := ParseNetworkFieldValue(v.(string), d, config)
+	fv, err := tpgresource.ParseNetworkFieldValue(v.(string), d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +77,7 @@ func expandContainerClusterNetwork(v interface{}, d tpgresource.TerraformResourc
 }
 
 func expandContainerClusterSubnetwork(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	fv, err := ParseNetworkFieldValue(v.(string), d, config)
+	fv, err := tpgresource.ParseNetworkFieldValue(v.(string), d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -1604,7 +1604,7 @@ func expandContainerNodePoolManagementAutoRepair(v interface{}, d tpgresource.Te
 }
 
 func expandContainerNodePoolCluster(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	f, err := parseGlobalFieldValue("clusters", v.(string), "project", d, config, true)
+	f, err := tpgresource.ParseGlobalFieldValue("clusters", v.(string), "project", d, config, true)
 	if err != nil {
 		return nil, fmt.Errorf("Invalid value for cluster: %s", err)
 	}

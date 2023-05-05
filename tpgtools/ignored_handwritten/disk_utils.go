@@ -204,7 +204,7 @@ func expandComputeDiskType(v interface{}, d tpgresource.TerraformResourceData, c
 		return nil
 	}
 
-	f, err := parseZonalFieldValue("diskTypes", v.(string), "project", "zone", d, config, true)
+	f, err := tpgresource.ParseZonalFieldValue("diskTypes", v.(string), "project", "zone", d, config, true)
 	if err != nil {
 		return nil
 	}
@@ -222,7 +222,7 @@ func expandComputeDiskSourceImage(v interface{}, d tpgresource.TerraformResource
 		return nil
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return nil
 	}
@@ -240,7 +240,7 @@ func expandComputeDiskSnapshot(v interface{}, d tpgresource.TerraformResourceDat
 		return nil
 	}
 
-	f, err := parseGlobalFieldValue("snapshots", v.(string), "project", d, config, true)
+	f, err := tpgresource.ParseGlobalFieldValue("snapshots", v.(string), "project", d, config, true)
 	if err != nil {
 		return nil
 	}
@@ -274,7 +274,7 @@ func flattenComputeDiskSnapshot(v interface{}, d *schema.ResourceData, meta inte
 		return nil
 	}
 
-	val, err := parseGlobalFieldValue("snapshots", *vptr, "project", d, config, true)
+	val, err := tpgresource.ParseGlobalFieldValue("snapshots", *vptr, "project", d, config, true)
 	if err != nil {
 		return nil
 	}
@@ -288,7 +288,7 @@ func flattenComputeDiskImage(v interface{}, d *schema.ResourceData, meta interfa
 	if v == nil {
 		return nil
 	}
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return nil
 	}

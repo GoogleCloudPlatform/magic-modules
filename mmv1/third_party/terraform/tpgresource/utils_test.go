@@ -1,4 +1,4 @@
-package google
+package tpgresource
 
 import (
 	"fmt"
@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"google.golang.org/api/googleapi"
@@ -119,7 +118,7 @@ func TestIpCidrRangeDiffSuppress(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if tpgresource.IpCidrRangeDiffSuppress("ip_cidr_range", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if IpCidrRangeDiffSuppress("ip_cidr_range", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
@@ -162,7 +161,7 @@ func TestRfc3339TimeDiffSuppress(t *testing.T) {
 		},
 	}
 	for tn, tc := range cases {
-		if tpgresource.Rfc3339TimeDiffSuppress("time", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if Rfc3339TimeDiffSuppress("time", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Errorf("bad: %s, '%s' => '%s' expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
@@ -209,7 +208,7 @@ func TestGetProject(t *testing.T) {
 			d := setupTestResourceDataFromConfigMap(t, fictionalSchema, tc.ResourceConfig)
 
 			// Act
-			project, err := getProject(d, &config)
+			project, err := GetProject(d, &config)
 
 			// Assert
 			if err != nil {
@@ -267,7 +266,7 @@ func TestGetLocation(t *testing.T) {
 			ExpectedLocation: "resource-zone-a",
 		},
 		"shortens zone values set as self links in the resource config": {
-			// Results from getLocation using getZone internally
+			// Results from GetLocation using GetZone internally
 			// This behaviour makes sense because APIs may return a self link as the zone value
 			ResourceConfig: map[string]interface{}{
 				"zone": "https://www.googleapis.com/compute/v1/projects/my-project/zones/resource-zone-a",
@@ -358,7 +357,7 @@ func TestGetLocation(t *testing.T) {
 			d := setupTestResourceDataFromConfigMap(t, fictionalSchema, tc.ResourceConfig)
 
 			// Act
-			location, err := getLocation(d, &config)
+			location, err := GetLocation(d, &config)
 
 			// Assert
 			if err != nil {
@@ -451,7 +450,7 @@ func TestGetZone(t *testing.T) {
 			d := setupTestResourceDataFromConfigMap(t, fictionalSchema, tc.ResourceConfig)
 
 			// Act
-			zone, err := getZone(d, &config)
+			zone, err := GetZone(d, &config)
 
 			// Assert
 			if err != nil {
@@ -576,7 +575,7 @@ func TestGetRegion(t *testing.T) {
 			d := setupTestResourceDataFromConfigMap(t, fictionalSchema, tc.ResourceConfig)
 
 			// Act
-			region, err := getRegion(d, &config)
+			region, err := GetRegion(d, &config)
 
 			// Assert
 			if err != nil {
@@ -595,7 +594,7 @@ func TestGetRegion(t *testing.T) {
 
 func TestGetRegionFromZone(t *testing.T) {
 	expected := "us-central1"
-	actual := getRegionFromZone("us-central1-f")
+	actual := GetRegionFromZone("us-central1-f")
 	if expected != actual {
 		t.Fatalf("Region (%s) did not match expected value: %s", actual, expected)
 	}
@@ -814,15 +813,15 @@ func TestDatasourceSchemaFromResourceSchema(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tpgresource.DatasourceSchemaFromResourceSchema(tt.args.rs); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("tpgresource.DatasourceSchemaFromResourceSchema() = %#v, want %#v", got, tt.want)
+			if got := DatasourceSchemaFromResourceSchema(tt.args.rs); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("DatasourceSchemaFromResourceSchema() = %#v, want %#v", got, tt.want)
 			}
 		})
 	}
 }
 
 func TestEmptyOrDefaultStringSuppress(t *testing.T) {
-	testFunc := tpgresource.EmptyOrDefaultStringSuppress("default value")
+	testFunc := EmptyOrDefaultStringSuppress("default value")
 
 	cases := map[string]struct {
 		Old, New           string
@@ -883,7 +882,7 @@ func TestServiceAccountFQN(t *testing.T) {
 	for tn, tc := range cases {
 		config := &transport_tpg.Config{Project: tc.project}
 		d := &schema.ResourceData{}
-		serviceAccountName, err := serviceAccountFQN(tc.serviceAccount, d, config)
+		serviceAccountName, err := ServiceAccountFQN(tc.serviceAccount, d, config)
 		if err != nil {
 			t.Fatalf("unexpected error for service account FQN: %s", err)
 		}
@@ -1071,19 +1070,19 @@ func TestConflictError(t *testing.T) {
 	confErr := &googleapi.Error{
 		Code: 409,
 	}
-	if !isConflictError(confErr) {
+	if !IsConflictError(confErr) {
 		t.Error("did not find that a 409 was a conflict error.")
 	}
-	if !isConflictError(errwrap.Wrapf("wrap", confErr)) {
+	if !IsConflictError(errwrap.Wrapf("wrap", confErr)) {
 		t.Error("did not find that a wrapped 409 was a conflict error.")
 	}
 	confErr = &googleapi.Error{
 		Code: 412,
 	}
-	if !isConflictError(confErr) {
+	if !IsConflictError(confErr) {
 		t.Error("did not find that a 412 was a conflict error.")
 	}
-	if !isConflictError(errwrap.Wrapf("wrap", confErr)) {
+	if !IsConflictError(errwrap.Wrapf("wrap", confErr)) {
 		t.Error("did not find that a wrapped 412 was a conflict error.")
 	}
 	// skipping negative tests as other cases may be added later.
@@ -1091,15 +1090,15 @@ func TestConflictError(t *testing.T) {
 
 func TestIsNotFoundGrpcErrort(t *testing.T) {
 	error_status := status.New(codes.FailedPrecondition, "FailedPrecondition error")
-	if isNotFoundGrpcError(error_status.Err()) {
+	if IsNotFoundGrpcError(error_status.Err()) {
 		t.Error("found FailedPrecondition as a NotFound error")
 	}
 	error_status = status.New(codes.OK, "OK")
-	if isNotFoundGrpcError(error_status.Err()) {
+	if IsNotFoundGrpcError(error_status.Err()) {
 		t.Error("found OK as a NotFound error")
 	}
 	error_status = status.New(codes.NotFound, "NotFound error")
-	if !isNotFoundGrpcError(error_status.Err()) {
+	if !IsNotFoundGrpcError(error_status.Err()) {
 		t.Error("expect a NotFound error")
 	}
 }
@@ -1177,5 +1176,135 @@ func TestCheckGoogleIamPolicy(t *testing.T) {
 		} else if !tc.valid && err == nil {
 			t.Errorf("The JSON is marked as not valid but failed to trigger an error: %s", tc.json)
 		}
+	}
+}
+
+func TestReplaceVars(t *testing.T) {
+	cases := map[string]struct {
+		Template      string
+		SchemaValues  map[string]interface{}
+		Config        *transport_tpg.Config
+		Expected      string
+		ExpectedError bool
+	}{
+		"unspecified project fails": {
+			Template:      "projects/{{project}}/global/images",
+			ExpectedError: true,
+		},
+		"unspecified region fails": {
+			Template: "projects/{{project}}/regions/{{region}}/subnetworks",
+			Config: &transport_tpg.Config{
+				Project: "default-project",
+			},
+			ExpectedError: true,
+		},
+		"unspecified zone fails": {
+			Template: "projects/{{project}}/zones/{{zone}}/instances",
+			Config: &transport_tpg.Config{
+				Project: "default-project",
+			},
+			ExpectedError: true,
+		},
+		"regional with default values": {
+			Template: "projects/{{project}}/regions/{{region}}/subnetworks",
+			Config: &transport_tpg.Config{
+				Project: "default-project",
+				Region:  "default-region",
+			},
+			Expected: "projects/default-project/regions/default-region/subnetworks",
+		},
+		"zonal with default values": {
+			Template: "projects/{{project}}/zones/{{zone}}/instances",
+			Config: &transport_tpg.Config{
+				Project: "default-project",
+				Zone:    "default-zone",
+			},
+			Expected: "projects/default-project/zones/default-zone/instances",
+		},
+		"regional schema values": {
+			Template: "projects/{{project}}/regions/{{region}}/subnetworks/{{name}}",
+			SchemaValues: map[string]interface{}{
+				"project": "project1",
+				"region":  "region1",
+				"name":    "subnetwork1",
+			},
+			Expected: "projects/project1/regions/region1/subnetworks/subnetwork1",
+		},
+		"regional schema self-link region": {
+			Template: "projects/{{project}}/regions/{{region}}/subnetworks/{{name}}",
+			SchemaValues: map[string]interface{}{
+				"project": "project1",
+				"region":  "https://www.googleapis.com/compute/v1/projects/project1/regions/region1",
+				"name":    "subnetwork1",
+			},
+			Expected: "projects/project1/regions/region1/subnetworks/subnetwork1",
+		},
+		"zonal schema values": {
+			Template: "projects/{{project}}/zones/{{zone}}/instances/{{name}}",
+			SchemaValues: map[string]interface{}{
+				"project": "project1",
+				"zone":    "zone1",
+				"name":    "instance1",
+			},
+			Expected: "projects/project1/zones/zone1/instances/instance1",
+		},
+		"zonal schema self-link zone": {
+			Template: "projects/{{project}}/zones/{{zone}}/instances/{{name}}",
+			SchemaValues: map[string]interface{}{
+				"project": "project1",
+				"zone":    "https://www.googleapis.com/compute/v1/projects/project1/zones/zone1",
+				"name":    "instance1",
+			},
+			Expected: "projects/project1/zones/zone1/instances/instance1",
+		},
+		"zonal schema recursive replacement": {
+			Template: "projects/{{project}}/zones/{{zone}}/instances/{{name}}",
+			SchemaValues: map[string]interface{}{
+				"project":   "project1",
+				"zone":      "wrapper{{innerzone}}wrapper",
+				"name":      "instance1",
+				"innerzone": "inner",
+			},
+			Expected: "projects/project1/zones/wrapperinnerwrapper/instances/instance1",
+		},
+		"base path recursive replacement": {
+			Template: "{{CloudRunBasePath}}namespaces/{{project}}/services",
+			Config: &transport_tpg.Config{
+				Project:          "default-project",
+				Region:           "default-region",
+				CloudRunBasePath: "https://{{region}}-run.googleapis.com/",
+			},
+			Expected: "https://default-region-run.googleapis.com/namespaces/default-project/services",
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			d := &acctest.ResourceDataMock{
+				FieldsInSchema: tc.SchemaValues,
+			}
+
+			config := tc.Config
+			if config == nil {
+				config = &transport_tpg.Config{}
+			}
+
+			v, err := ReplaceVars(d, config, tc.Template)
+
+			if err != nil {
+				if !tc.ExpectedError {
+					t.Errorf("bad: %s; unexpected error %s", tn, err)
+				}
+				return
+			}
+
+			if tc.ExpectedError {
+				t.Errorf("bad: %s; expected error", tn)
+			}
+
+			if v != tc.Expected {
+				t.Errorf("bad: %s; expected %q, got %q", tn, tc.Expected, v)
+			}
+		})
 	}
 }

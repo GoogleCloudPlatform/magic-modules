@@ -58,7 +58,7 @@ func testStringValue(sPtr *string) string {
 }
 
 // This function isn't a test of transport.go; instead, it is used as an alternative
-// to ReplaceVars inside tests.
+// to tpgresource.ReplaceVars inside tests.
 func replaceVarsForFrameworkTest(prov *frameworkProvider, rs *terraform.ResourceState, linkTmpl string) (string, error) {
 	re := regexp.MustCompile("{{([[:word:]]+)}}")
 	var project, region, zone string

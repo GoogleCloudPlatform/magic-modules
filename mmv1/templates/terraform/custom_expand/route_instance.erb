@@ -2,12 +2,12 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
 		if v == "" {
 				return v, nil
 		}
-		val, err := parseZonalFieldValue("instances", v.(string), "project", "next_hop_instance_zone", d, config, true)
+		val, err := tpgresource.ParseZonalFieldValue("instances", v.(string), "project", "next_hop_instance_zone", d, config, true)
 		if err != nil {
 				return nil, err
 		}
 
-		userAgent, err := generateUserAgentString(d, config.UserAgent)
+		userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return nil, err
 		}

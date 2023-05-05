@@ -183,7 +183,7 @@ func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresource
 	}
 
 <% if resource_params.include?('project') -%>
-	project, err := getProject(u.d, u.Config)
+	project, err := tpgresource.GetProject(u.d, u.Config)
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +207,7 @@ func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresource
 	}
 <%  end -%>
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -249,13 +249,13 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 		return err
 	}
 <% if resource_params.include?('project') -%>
-	project, err := getProject(u.d, u.Config)
+	project, err := tpgresource.GetProject(u.d, u.Config)
 	if err != nil {
 		return err
 	}
 <% end -%>
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -272,7 +272,7 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 <% string_qualifiers = extract_identifiers(resource_uri.gsub('{{name}}', "{{#{parent_resource_name}}}")).map{|param| "u.#{param.camelize(:lower)}"}.join(', ') -%>
 func (u *<%= resource_name -%>IamUpdater) qualify<%= object.name -%>Url(methodIdentifier string) (string, error) {
 	urlTemplate := fmt.Sprintf("{{<%= object.__product.name -%>BasePath}}%s<%= object.iam_policy.method_name_separator -%>%s", fmt.Sprintf("<%= import_url -%>", <%= string_qualifiers -%>), methodIdentifier)
-  url, err := ReplaceVars(u.d, u.Config, urlTemplate)
+  url, err := tpgresource.ReplaceVars(u.d, u.Config, urlTemplate)
   if err != nil {
       return "", err
   }

@@ -1,9 +1,9 @@
-    project, err := getProject(d, config)
+    project, err := tpgresource.GetProject(d, config)
     if err != nil {
         return err
     }
 
-    url, err := ReplaceVars(d, config, "{{ActiveDirectoryBasePath}}projects/{{project}}/locations/global/domains/{{domain}}:detachTrust")
+    url, err := tpgresource.ReplaceVars(d, config, "{{ActiveDirectoryBasePath}}projects/{{project}}/locations/global/domains/{{domain}}:detachTrust")
     if err != nil {
         return err
     }

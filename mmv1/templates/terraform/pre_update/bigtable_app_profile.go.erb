@@ -32,7 +32,7 @@ if newRouting != oldRouting {
 		}
 	}
 }
-// updateMask is a URL parameter but not present in the schema, so ReplaceVars
+// updateMask is a URL parameter but not present in the schema, so tpgresource.ReplaceVars
 // won't set it
 url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 if err != nil {

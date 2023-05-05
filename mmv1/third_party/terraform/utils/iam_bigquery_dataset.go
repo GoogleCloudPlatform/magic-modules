@@ -41,7 +41,7 @@ type BigqueryDatasetIamUpdater struct {
 }
 
 func NewBigqueryDatasetIamUpdater(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func NewBigqueryDatasetIamUpdater(d tpgresource.TerraformResourceData, config *t
 }
 
 func BigqueryDatasetIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
-	fv, err := parseProjectFieldValue("datasets", d.Id(), "project", d, config, false)
+	fv, err := tpgresource.ParseProjectFieldValue("datasets", d.Id(), "project", d, config, false)
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func BigqueryDatasetIdParseFunc(d *schema.ResourceData, config *transport_tpg.Co
 func (u *BigqueryDatasetIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
 	url := fmt.Sprintf("%s%s", u.Config.BigQueryBasePath, u.GetResourceId())
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (u *BigqueryDatasetIamUpdater) SetResourceIamPolicy(policy *cloudresourcema
 		"access": access,
 	}
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return err
 	}

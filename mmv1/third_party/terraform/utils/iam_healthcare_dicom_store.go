@@ -54,7 +54,7 @@ func DicomStoreIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config)
 }
 
 func (u *HealthcareDicomStoreIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func (u *HealthcareDicomStoreIamUpdater) SetResourceIamPolicy(policy *cloudresou
 		return errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return err
 	}

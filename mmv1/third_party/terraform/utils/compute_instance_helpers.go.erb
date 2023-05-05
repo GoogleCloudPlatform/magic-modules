@@ -274,7 +274,7 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 		var ac []map[string]interface{}
 		ac, externalIP = flattenAccessConfigs(iface.AccessConfigs)
 
-		subnet, err := ParseSubnetworkFieldValue(iface.Subnetwork, d, config)
+		subnet, err := tpgresource.ParseSubnetworkFieldValue(iface.Subnetwork, d, config)
 		if err != nil {
 			return nil, "", "", "", err
 		}
@@ -352,13 +352,13 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 			return nil, fmt.Errorf("exactly one of network or subnetwork must be provided")
 		}
 
-		nf, err := ParseNetworkFieldValue(network, d, config)
+		nf, err := tpgresource.ParseNetworkFieldValue(network, d, config)
 		if err != nil {
 			return nil, fmt.Errorf("cannot determine self_link for network %q: %s", network, err)
 		}
 
 		subnetProjectField := fmt.Sprintf("network_interface.%d.subnetwork_project", i)
-		sf, err := ParseSubnetworkFieldValueWithProjectField(subnetwork, subnetProjectField, d, config)
+		sf, err := tpgresource.ParseSubnetworkFieldValueWithProjectField(subnetwork, subnetProjectField, d, config)
 		if err != nil {
 			return nil, fmt.Errorf("cannot determine self_link for subnetwork %q: %s", subnetwork, err)
 		}

@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"regexp"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
@@ -152,7 +153,7 @@ func assetName(d tpgresource.TerraformResourceData, config *transport_tpg.Config
 		placeholderSet = true
 	}
 
-	f, err := buildReplacementFunc(re, d, config, linkTmpl, false)
+	f, err := tpgresource.BuildReplacementFunc(re, d, config, linkTmpl, false)
 	if err != nil {
 		return "", err
 	}
