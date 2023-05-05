@@ -13,7 +13,7 @@ import (
 // Since each test here is acting on the same organization and only one AccessPolicy
 // can exist, they need to be run serially. See AccessPolicy for the test runner.
 
-func TestAccAccessContextManagerServicePerimeterIngressPolicy_basicTest(t *testing.T) {
+func testAccAccessContextManagerServicePerimeterIngressPolicy_basicTest(t *testing.T) {
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
 	org := acctest.GetTestOrgFromEnv(t)
@@ -43,7 +43,7 @@ func TestAccAccessContextManagerServicePerimeterIngressPolicy_basicTest(t *testi
 func testAccCheckAccessContextManagerServicePerimeterIngressPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_access_context_manager_ingress_policy" {
+			if rs.Type != "google_access_context_manager_service_perimeter_ingress_policy" {
 				continue
 			}
 
