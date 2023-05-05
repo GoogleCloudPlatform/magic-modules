@@ -71,19 +71,19 @@ func testAccFirestoreField_runUpdateTest(updateConfig string, t *testing.T, cont
 func testAccFirestoreField_firestoreFieldUpdateInitialExample(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_firestore_field" "%{resource_name}" {
-  project = "%{project_id}"
-  collection = "chatrooms_%{random_suffix}"
-  field = "%{resource_name}"
+	project = "%{project_id}"
+	collection = "chatrooms_%{random_suffix}"
+	field = "%{resource_name}"
 
-  index_config {
-    indexes {
-        order = "ASCENDING"
-        query_scope = "COLLECTION_GROUP"
-    }
-    indexes {
-        array_config = "CONTAINS"
-    }
-  }
+	index_config {
+		indexes {
+			order = "ASCENDING"
+			query_scope = "COLLECTION_GROUP"
+		}
+		indexes {
+			array_config = "CONTAINS"
+		}
+	}
 }
 `, context)
 }
@@ -91,21 +91,21 @@ resource "google_firestore_field" "%{resource_name}" {
 func testAccFirestoreField_firestoreFieldUpdateAddTTLExample(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_firestore_field" "%{resource_name}" {
-  project = "%{project_id}"
-  collection = "chatrooms_%{random_suffix}"
-  field = "%{resource_name}"
+	project = "%{project_id}"
+	collection = "chatrooms_%{random_suffix}"
+	field = "%{resource_name}"
 
-  index_config {
-    indexes {
-        order = "ASCENDING"
-        query_scope = "COLLECTION_GROUP"
-    }
-    indexes {
-        array_config = "CONTAINS"
-    }
-  }
+	index_config {
+		indexes {
+			order = "ASCENDING"
+			query_scope = "COLLECTION_GROUP"
+		}
+		indexes {
+			array_config = "CONTAINS"
+		}
+	}
 
-  ttl_config {}
+	ttl_config {}
 }
 `, context)
 }
@@ -113,23 +113,23 @@ resource "google_firestore_field" "%{resource_name}" {
 func testAccFirestoreField_firestoreFieldUpdateAddIndexExample(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_firestore_field" "%{resource_name}" {
-  project = "%{project_id}"
-  collection = "chatrooms_%{random_suffix}"
-  field = "%{resource_name}"
+	project = "%{project_id}"
+	collection = "chatrooms_%{random_suffix}"
+	field = "%{resource_name}"
 
-  index_config {
-    indexes {
-        order = "ASCENDING"
-        query_scope = "COLLECTION_GROUP"
-    }
-	indexes {
-		array_config = "CONTAINS"
+	index_config {
+		indexes {
+			order = "ASCENDING"
+			query_scope = "COLLECTION_GROUP"
+		}
+		indexes {
+			array_config = "CONTAINS"
+		}
+		indexes {
+			order = "DESCENDING"
+			query_scope = "COLLECTION_GROUP"
+		}
 	}
-	indexes {
-		order = "DESCENDING"
-		query_scope = "COLLECTION_GROUP"
-	}
-  }
 }
 `, context)
 }
