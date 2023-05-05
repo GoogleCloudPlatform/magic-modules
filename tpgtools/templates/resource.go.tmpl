@@ -229,8 +229,8 @@ func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) erro
 	if err != nil {
 		return err
 	}
-	mutexKV.Lock(lockName)
-	defer mutexKV.Unlock(lockName)
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 {{ end }}
 
 {{ if $.PreCreateFunction }}
@@ -430,8 +430,8 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	if err != nil {
 		return err
 	}
-	mutexKV.Lock(lockName)
-	defer mutexKV.Unlock(lockName)
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 
 {{ end }}
 	directive := UpdateDirective
@@ -502,8 +502,8 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 	if err != nil {
 		return err
 	}
-	mutexKV.Lock(lockName)
-	defer mutexKV.Unlock(lockName)
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 
 {{ end }}
 {{ if $.PreDeleteFunction }}
