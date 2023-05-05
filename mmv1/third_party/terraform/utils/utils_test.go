@@ -188,7 +188,7 @@ func TestGetProject(t *testing.T) {
 			ProviderConfig: map[string]string{
 				"project": "provider-project",
 			},
-			ExpectedProject: "bar",
+			ExpectedProject: "provider-project",
 		},
 		"error returned when project not set on either provider or resource": {
 			ExpectedError: true,
