@@ -251,6 +251,13 @@ func TestGetLocation(t *testing.T) {
 			},
 			ExpectedLocation: "resource-region",
 		},
+		"returns the region value set in the resource config when location is an empty string": {
+			ResourceConfig: map[string]interface{}{
+				"location": "",
+				"region":   "resource-region",
+			},
+			ExpectedLocation: "resource-region",
+		},
 		"does not shorten the region value when it is set as a self link in the resource config": {
 			ResourceConfig: map[string]interface{}{
 				"region": "https://www.googleapis.com/compute/v1/projects/my-project/region/resource-region",
@@ -263,6 +270,14 @@ func TestGetLocation(t *testing.T) {
 			},
 			ExpectedLocation: "resource-zone",
 		},
+		"returns the zone value set in the resource config when both location or region are empty strings": {
+			ResourceConfig: map[string]interface{}{
+				"location": "",
+				"region":   "",
+				"zone":     "resource-zone",
+			},
+			ExpectedLocation: "resource-zone",
+		},
 		"shortens zone values set as self links in the resource config": {
 			// Results from getLocation using getZone internally
 			// This behaviour makes sense because APIs may return a self link as the zone value
@@ -272,6 +287,17 @@ func TestGetLocation(t *testing.T) {
 			ExpectedLocation: "resource-zone",
 		},
 		"returns the zone value from the provider config when none of location/region/zone are set in the resource config": {
+			ProviderConfig: map[string]string{
+				"zone": "provider-zone",
+			},
+			ExpectedLocation: "provider-zone",
+		},
+		"returns the zone value from the provider config when all of location/region/zone are set as empty strings in the resource config": {
+			ResourceConfig: map[string]interface{}{
+				"location": "",
+				"region":   "",
+				"zone":     "",
+			},
 			ProviderConfig: map[string]string{
 				"zone": "provider-zone",
 			},

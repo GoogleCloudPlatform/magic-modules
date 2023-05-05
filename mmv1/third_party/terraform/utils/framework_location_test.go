@@ -215,6 +215,13 @@ func TestLocationDescription_getLocation(t *testing.T) {
 			},
 			ExpectedLocation: types.StringValue("resource-region"),
 		},
+		"returns the region value set in the resource config when location is an empty string": {
+			ld: LocationDescription{
+				ResourceLocation: types.StringValue(""),
+				ResourceRegion:   types.StringValue("resource-region"),
+			},
+			ExpectedLocation: types.StringValue("resource-region"),
+		},
 		"does not shorten the region value when it is set as a self link in the resource config": {
 			ld: LocationDescription{
 				ResourceRegion: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/regions/resource-region"),
@@ -227,6 +234,14 @@ func TestLocationDescription_getLocation(t *testing.T) {
 			},
 			ExpectedLocation: types.StringValue("resource-zone"),
 		},
+		"returns the zone value set in the resource config when both location or region are empty strings": {
+			ld: LocationDescription{
+				ResourceLocation: types.StringValue(""),
+				ResourceRegion:   types.StringValue(""),
+				ResourceZone:     types.StringValue("resource-zone"),
+			},
+			ExpectedLocation: types.StringValue("resource-zone"),
+		},
 		"shortens zone values set as self links in the resource config": {
 			ld: LocationDescription{
 				ResourceZone: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/resource-zone"),
@@ -236,6 +251,15 @@ func TestLocationDescription_getLocation(t *testing.T) {
 		"returns the zone value from the provider config when none of location/region/zone are set in the resource config": {
 			ld: LocationDescription{
 				ProviderZone: types.StringValue("provider-zone"),
+			},
+			ExpectedLocation: types.StringValue("provider-zone"),
+		},
+		"returns the zone value from the provider config when all of location/region/zone are set as empty strings in the resource config": {
+			ld: LocationDescription{
+				ResourceLocation: types.StringValue(""),
+				ResourceRegion:   types.StringValue(""),
+				ResourceZone:     types.StringValue(""),
+				ProviderZone:     types.StringValue("provider-zone"),
 			},
 			ExpectedLocation: types.StringValue("provider-zone"),
 		},
