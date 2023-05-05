@@ -47,7 +47,6 @@ jobs:
       run: |
         cd provider
         gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
-        echo "url=${html_url}" >> $GITHUB_OUTPUT
         if [ -z "$gofiles" ]; then
           echo "has_changes=false" >> $GITHUB_OUTPUT
         else
