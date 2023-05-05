@@ -46,7 +46,13 @@ func (ld *LocationDescription) getLocation() (types.String, error) {
 		return ld.ProviderZone, nil
 	}
 
-	return types.StringNull(), nil
+	var err error
+	if !ld.LocationSchemaField.IsNull() {
+		err = fmt.Errorf("location could not be identified, please add `%s` in your resource or set `region` in your provider configuration block", ld.LocationSchemaField.ValueString())
+	} else {
+		err = errors.New("location could not be identified, please add `location` in your resource or `region` in your provider configuration block")
+	}
+	return types.StringNull(), err
 }
 
 func (ld *LocationDescription) getRegion() (types.String, error) {

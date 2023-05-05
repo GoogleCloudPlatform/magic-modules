@@ -70,6 +70,9 @@ func TestLocationDescription_getZone(t *testing.T) {
 				}
 				t.Fatalf("unexpected error using test: %s", err)
 			}
+			if err == nil && tc.ExpectedError {
+				t.Fatal("expected error but got none")
+			}
 			if zone != tc.ExpectedZone {
 				t.Fatalf("Incorrect zone: got %s, want %s", zone, tc.ExpectedZone)
 			}
@@ -172,6 +175,9 @@ func TestLocationDescription_getRegion(t *testing.T) {
 				}
 				t.Fatalf("unexpected error using test: %s", err)
 			}
+			if err == nil && tc.ExpectedError {
+				t.Fatal("expected error but got none")
+			}
 			if region != tc.ExpectedRegion {
 				t.Fatalf("Incorrect region: got %s, want %s", region, tc.ExpectedRegion)
 			}
@@ -270,6 +276,9 @@ func TestLocationDescription_getLocation(t *testing.T) {
 					return
 				}
 				t.Fatalf("unexpected error using test: %s", err)
+			}
+			if err == nil && tc.ExpectedError {
+				t.Fatal("expected error but got none")
 			}
 			if region != tc.ExpectedLocation {
 				t.Fatalf("Incorrect location: got %s, want %s", region, tc.ExpectedLocation)
