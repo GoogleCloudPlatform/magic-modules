@@ -130,7 +130,7 @@ func TestLocationDescription_getRegion(t *testing.T) {
 			ld: LocationDescription{
 				ResourceZone: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a"),
 			},
-			ExpectedRegion: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1"), // Value isn't sortened from URI to name
+			ExpectedRegion: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1"), // Value isn't shortened from URI to name
 		},
 		"returns the value of the region field in provider config when region/zone is unset in resource config": {
 			ld: LocationDescription{
