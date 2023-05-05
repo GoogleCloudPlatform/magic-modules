@@ -67,4 +67,210 @@ resource "google_network_services_gateway" "foobar" {
 `, gatewayName)
 }
 
+func TestAccNetworkServicesGateway_update_swg(t *testing.T) {
+	t.Parallel()
+    
+	cmName := fmt.Sprintf("tf-test-gateway-swg-cm-%s", RandString(t, 10))
+	netName := fmt.Sprintf("tf-test-gateway-swg-net-%s", RandString(t, 10))
+	subnetName := fmt.Sprintf("tf-test-gateway-swg-subnet-%s", RandString(t, 10))
+	pSubnetName := fmt.Sprintf("tf-test-gateway-swg-proxyonly-%s", RandString(t, 10))
+	policyName := fmt.Sprintf("tf-test-gateway-swg-policy-%s", RandString(t, 10))
+	ruleName := fmt.Sprintf("tf-test-gateway-swg-rule-%s", RandString(t, 10))
+	gatewayName := fmt.Sprintf("tf-test-gateway-swg-%s", RandString(t, 10))
+	// updates
+	newCmName := fmt.Sprintf("tf-test-gateway-swg-newcm-%s", RandString(t, 10))
+	newPolicyName := fmt.Sprintf("tf-test-gateway-swg-newpolicy-%s", RandString(t, 10))
+	newRuleName := fmt.Sprintf("tf-test-gateway-swg-newrule-%s", RandString(t, 10))
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckNetworkServicesGatewayDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkServicesGateway_basic_swg(cmName, netName, subnetName, pSubnetName, policyName, ruleName, gatewayName),
+			},
+			{
+				ResourceName:      "google_network_services_gateway.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy"},
+			},
+			{
+				Config: testAccNetworkServicesGateway_update_swg(cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, gatewayName),
+			},
+			{
+				ResourceName:      "google_network_services_gateway.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy"},
+			},
+		},
+	})
+}
+
+func testAccNetworkServicesGateway_basic_swg(cmName, netName, subnetName, pSubnetName, policyName, ruleName, gatewayName string) string {
+	return fmt.Sprintf(`
+resource "google_certificate_manager_certificate" "default" {
+  name        = "%s"
+  location    = "us-east1"
+  self_managed {
+    pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
+	pem_private_key = file("test-fixtures/certificatemanager/private-key.pem")
+  }
+}
+
+resource "google_compute_network" "default" {
+  name                    = "%s"
+  routing_mode            = "REGIONAL"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "proxyonlysubnet" {
+  name          = "%s"
+  purpose       = "REGIONAL_MANAGED_PROXY"
+  ip_cidr_range = "192.168.0.0/23"
+  region        = "us-east1"
+  network       = google_compute_network.default.id
+  role          = "ACTIVE"
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "%s"
+  purpose       = "PRIVATE"
+  ip_cidr_range = "10.128.0.0/20"
+  region        = "us-east1"
+  network       = google_compute_network.default.id
+  role          = "ACTIVE"
+}
+
+resource "google_network_security_gateway_security_policy" "default" {
+  name        = "%s"
+  location    = "us-east1"
+}
+
+resource "google_network_security_gateway_security_policy_rule" "default" {
+  name                    = "%s"
+  location                = "us-east1"
+  gateway_security_policy = google_network_security_gateway_security_policy.default.name
+  enabled                 = true  
+  priority                = 1
+  session_matcher         = "host() == 'example.com'"
+  basic_profile           = "ALLOW"
+}
+	  
+resource "google_network_services_gateway" "foobar" {
+  name                                 = "%s"
+  location                             = "us-east1"
+  addresses                            = ["10.128.0.99"]
+  type                                 = "SECURE_WEB_GATEWAY"
+  ports                                = [443]
+  description                          = "my description"
+  scope                                = "default-scope-update-swg"
+  certificate_urls                     = [google_certificate_manager_certificate.default.id]
+  gateway_security_policy              = google_network_security_gateway_security_policy.default.id
+  network                              = google_compute_network.default.id
+  subnetwork                           = google_compute_subnetwork.default.id
+  delete_swg_autogen_router_on_destroy = true
+  depends_on                           = [google_compute_subnetwork.proxyonlysubnet]
+
+}
+`, cmName, netName, subnetName, pSubnetName, policyName, ruleName, gatewayName)
+}
+
+func testAccNetworkServicesGateway_update_swg(cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, gatewayName string) string {
+	return fmt.Sprintf(`
+resource "google_certificate_manager_certificate" "default" {
+  name        = "%s"
+  location    = "us-east1"
+  self_managed {
+    pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
+	pem_private_key = file("test-fixtures/certificatemanager/private-key.pem")
+  }
+}
+
+resource "google_certificate_manager_certificate" "newcm" {
+  name        = "%s"
+  location    = "us-east1"
+  self_managed {
+    pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
+	pem_private_key = file("test-fixtures/certificatemanager/private-key.pem")
+  }
+}
+
+resource "google_compute_network" "default" {
+  name                    = "%s"
+  routing_mode            = "REGIONAL"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "proxyonlysubnet" {
+  name          = "%s"
+  purpose       = "REGIONAL_MANAGED_PROXY"
+  ip_cidr_range = "192.168.0.0/23"
+  region        = "us-east1"
+  network       = google_compute_network.default.id
+  role          = "ACTIVE"
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "%s"
+  purpose       = "PRIVATE"
+  ip_cidr_range = "10.128.0.0/20"
+  region        = "us-east1"
+  network       = google_compute_network.default.id
+  role          = "ACTIVE"
+}
+
+resource "google_network_security_gateway_security_policy" "default" {
+  name        = "%s"
+  location    = "us-east1"
+}
+
+resource "google_network_security_gateway_security_policy" "newpolicy" {
+  name        = "%s"
+  location    = "us-east1"
+}
+
+resource "google_network_security_gateway_security_policy_rule" "default" {
+  name                    = "%s"
+  location                = "us-east1"
+  gateway_security_policy = google_network_security_gateway_security_policy.default.name
+  enabled                 = true  
+  priority                = 1
+  session_matcher         = "host() == 'example.com'"
+  basic_profile           = "ALLOW"
+}
+
+resource "google_network_security_gateway_security_policy_rule" "newrule" {
+  name                    = "%s"
+  location                = "us-east1"
+  gateway_security_policy = google_network_security_gateway_security_policy.newpolicy.name
+  enabled                 = true  
+  priority                = 1
+  session_matcher         = "host() == 'example.com'"
+  basic_profile           = "ALLOW"
+}
+	  
+resource "google_network_services_gateway" "foobar" {
+  name                                 = "%s"
+  location                             = "us-east1"
+  addresses                            = ["10.128.0.99"]
+  type                                 = "SECURE_WEB_GATEWAY"
+  ports                                = [443]
+  description                          = "updated description"
+  scope                                = "default-scope-update-swg"
+  certificate_urls                     = [google_certificate_manager_certificate.default.id, google_certificate_manager_certificate.newcm.id]
+  gateway_security_policy              = google_network_security_gateway_security_policy.default.id
+  # TODO(felipegc) change to the new policy once the bug is fixed.
+  # gateway_security_policy              = google_network_security_gateway_security_policy.newpolicy.id
+  network                              = google_compute_network.default.id
+  subnetwork                           = google_compute_subnetwork.default.id
+  delete_swg_autogen_router_on_destroy = true
+  depends_on                           = [google_compute_subnetwork.proxyonlysubnet]
+
+}
+`, cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, gatewayName)
+}
+
 <% end -%>

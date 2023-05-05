@@ -121,11 +121,5 @@ func IsApigeeRetryableError(err error) (bool, string) {
 }
 
 func IsSwgAutogenRouterRetryable(err error) (bool, string) {
-	if gerr, ok := err.(*googleapi.Error); ok {
-		if gerr.Code == 400 && strings.Contains(strings.ToLower(gerr.Body), "not ready") {
-			return true, "Waiting swg autogen router to be ready"
-		}
-	}
-
-	return false, ""
+	return transport_tpg.IsSwgAutogenRouterRetryable(err)
 }

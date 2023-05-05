@@ -101,7 +101,6 @@ virtual_fields:
       When deleting a SWG gateway, this boolean option will also delete auto generated RouterNat by the gateway creation. 
       If there is no other SWG gateway remaining for that region and network it will be deleted.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_create: 'templates/terraform/custom_create/network_services_gateway.go'
   post_delete: 'templates/terraform/post_delete/network_services_gateway.go.erb'
   constants: 'templates/terraform/constants/network_services_gateway.go.erb'
 parameters:
@@ -144,7 +143,6 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: 'type'
     required: true
-    immutable: true
     description: |
       Immutable. The type of the customer-managed gateway. Possible values are: * OPEN_MESH * SECURE_WEB_GATEWAY.
     values:
@@ -154,7 +152,6 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'ports'
     required: true
-    immutable: true
     description: |
       One or more port numbers (1-65535), on which the Gateway will receive traffic.
       The proxy binds to the specified ports. Gateways of type 'SECURE_WEB_GATEWAY' are
