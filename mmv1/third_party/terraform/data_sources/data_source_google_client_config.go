@@ -124,12 +124,12 @@ func (d *GoogleClientConfigDataSource) Read(ctx context.Context, req datasource.
 	}
 
 	locationInfo := data.GetLocationDescription(d.providerConfig)
-	region, err := locationInfo.getRegion()
+	region, err := locationInfo.GetRegion()
 	if err != nil {
 		diags.AddError("Error getting region value", err.Error())
 		return
 	}
-	zone, err := locationInfo.getZone()
+	zone, err := locationInfo.GetZone()
 	if err != nil {
 		diags.AddError("Error getting zone value", err.Error())
 		return
