@@ -1161,7 +1161,7 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 			return *creds, nil
 		}
 
-		creds, err := transport.Creds(c.context, option.WithCredentialsJSON([]byte(contents)), option.WithScopes(clientScopes...))
+		creds, err := transport.Creds(c.Context, option.WithCredentialsJSON([]byte(contents)), option.WithScopes(clientScopes...))
 		if err != nil {
 			return googleoauth.Credentials{}, fmt.Errorf("unable to parse credentials from '%s': %s", contents, err)
 		}
