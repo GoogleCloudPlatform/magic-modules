@@ -88,6 +88,13 @@ examples:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'workstation_config_source_snapshot'
+    min_version: beta
+    primary_resource_id: 'default'
+    vars:
+      workstation_cluster_name: 'workstation-cluster'
+      workstation_config_name: 'workstation-config'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'workstation_config_shielded_instance_config'
     min_version: beta
     primary_resource_id: 'default'
@@ -291,6 +298,11 @@ properties:
               values:
                 - :DELETE
                 - :RETAIN
+            - !ruby/object:Api::Type::String
+              name: 'sourceSnapshot'
+              description: |
+                Name of the snapshot to use as the source for the disk. If set, sizeGb and fsType must be empty.
+              immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'container'
     description: |
