@@ -36,11 +36,21 @@ parameters:
     ignore_read: true
     default_from_api: true
 properties:
+  # Admin Settings Object
+  - !ruby/object:Api::Type::NestedObject
+    name: adminSettings
+    description: |
+      Looker instance Admin settings.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'allowedEmailDomains'
+        item_type: !ruby/object:Api::Type::String
+  # Admin Settings Object - End
   - !ruby/object:Api::Type::String
     name: consumerNetwork
     description: |
       Network name in the consumer project in the format of: projects/{project}/global/networks/{network}
-      Note that the consumer network may be in a different GCP project than the consumer 
+      Note that the consumer network may be in a different GCP project than the consumer
       project that is hosting the Looker Instance.
   - !ruby/object:Api::Type::Time
     name: createTime
@@ -48,6 +58,114 @@ properties:
       The time the instance was created in RFC3339 UTC "Zulu" format,
       accurate to nanoseconds.
     output: true
+  # Custom Domian Object
+  - !ruby/object:Api::Type::NestedObject
+    name: customDomain
+    description: |
+      Looker (Google Cloud core) lets you serve your application
+      through a custom domain. If you use a custom domain, Google
+      will provide a managed auto-renewing SSL certificate for security.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'domain'
+  # Custom Domain Object - End
+  # Deny Maintenance Period Object
+  - !ruby/object:Api::Type::NestedObject
+    name: denyMaintenancePeriod
+    description: |
+      Maintenance denial period for this instance.
+
+      You must allow at least 14 days of maintenance availability
+      between any two deny maintenance periods.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'startDate'
+        required: true
+        description: |
+          Required. Start date of the deny maintenance period
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'year'
+            description: |
+              Year of the date. Must be from 1 to 9999, or 0 to specify a date without
+              a year.
+            validation: !ruby/object:Provider::Terraform::Validation
+              function: 'validation.IntBetween(0,10000)'
+          - !ruby/object:Api::Type::Integer
+            name: 'month'
+            description: |
+              Month of a year. Must be from 1 to 12, or 0 to specify a year without a
+              month and day.
+            validation: !ruby/object:Provider::Terraform::Validation
+              function: 'validation.IntBetween(0,13)'
+          - !ruby/object:Api::Type::Integer
+            name: 'day'
+            description: |
+              Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
+              to specify a year by itself or a year and month where the day isn't significant.
+            validation: !ruby/object:Provider::Terraform::Validation
+              function: 'validation.IntBetween(0,32)'
+      - !ruby/object:Api::Type::NestedObject
+        name: 'endDate'
+        required: true
+        description: |
+          Required. Start date of the deny maintenance period
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'year'
+            description: |
+              Year of the date. Must be from 1 to 9999, or 0 to specify a date without
+              a year.
+            validation: !ruby/object:Provider::Terraform::Validation
+              function: 'validation.IntBetween(0,10000)'
+          - !ruby/object:Api::Type::Integer
+            name: 'month'
+            description: |
+              Month of a year. Must be from 1 to 12, or 0 to specify a year without a
+              month and day.
+            validation: !ruby/object:Provider::Terraform::Validation
+              function: 'validation.IntBetween(0,13)'
+          - !ruby/object:Api::Type::Integer
+            name: 'day'
+            description: |
+              Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
+              to specify a year by itself or a year and month where the day isn't significant.
+            validation: !ruby/object:Provider::Terraform::Validation
+              function: 'validation.IntBetween(0,32)'
+
+
+      - !ruby/object:Api::Type::NestedObject
+        name: 'time'
+        required: true
+        description: |
+          Required. Start time of the window in UTC time.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'hours'
+            description: |
+              Hours of day in 24 hour format. Should be from 0 to 23.
+            validation: !ruby/object:Provider::Terraform::Validation
+              function: 'validation.IntBetween(0,23)'
+          - !ruby/object:Api::Type::Integer
+            name: 'minutes'
+            description: |
+              Minutes of hour of day. Must be from 0 to 59.
+            validation: !ruby/object:Provider::Terraform::Validation
+              function: 'validation.IntBetween(0,60)'
+          - !ruby/object:Api::Type::Integer
+            name: 'seconds'
+            description: |
+              Seconds of minutes of the time. Must normally be from 0 to 59.
+            validation: !ruby/object:Provider::Terraform::Validation
+              function: 'validation.IntBetween(0,60)'
+          - !ruby/object:Api::Type::Integer
+            name: 'nanos'
+            description: |
+              Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+            validation: !ruby/object:Provider::Terraform::Validation
+              function: 'validation.IntBetween(0,999999999)'
+
+  # Deny Maintenance Period Object - End
   - !ruby/object:Api::Type::String
     name: egressPublicIp
     description: |
@@ -77,7 +195,12 @@ properties:
   # Maintenance Window Object
   - !ruby/object:Api::Type::NestedObject
     name: maintenanceWindow
-    description: Maintenance window for an instance.
+    description: |
+      Maintenance window for an instance.
+
+      Maintenance of your instance takes place once a month, and will require
+      your instance to be restarted during updates, which will temporarily
+      disrupt service.
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'dayOfweek'
@@ -143,6 +266,17 @@ properties:
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     validation: !ruby/object:Provider::Terraform::Validation
       regex: '^[a-z][a-z0-9-]{0,39}[a-z0-9]$'
+  # Oauth Object
+  - !ruby/object:Api::Type::NestedObject
+    name: oauthConfig
+    description: |
+      Looker Instance OAuth login settings.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'clientId'
+      - !ruby/object:Api::Type::String
+        name: 'clientSecret'
+  # Oauth Object - End
   - !ruby/object:Api::Type::Enum
     name: platformEdition
     description: |
@@ -175,7 +309,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: reservedRange
     description: |
-      Name of a reserved IP address range within the consumer network, to be used for 
+      Name of a reserved IP address range within the consumer network, to be used for
       private servicie access connection. User may or may not specify this in a request.
   - !ruby/object:Api::Type::Time
     name: updateTime
@@ -183,3 +317,24 @@ properties:
       The time the instance was updated in RFC3339 UTC "Zulu" format,
       accurate to nanoseconds.
     output: true
+  # UserMetadata Object
+  - !ruby/object:Api::Type::NestedObject
+    name: userMetadata
+    description: |
+      Metadata about users for a Looker instance.
+
+      There are ten Standard and two Developer users included in the cost of the product.
+      You can allocate additional Standard, Viewer, and Developer users for this instance.
+      It is an optional step and can be modified later.
+
+      With the Standard edition of Looker (Google Cloud core), you can provision up to 50
+      total users, distributed across Viewer, Standard, and Developer.
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: 'additionalViewerUserCount'
+      - !ruby/object:Api::Type::Integer
+        name: 'additionalStandardUserCount'
+      - !ruby/object:Api::Type::Integer
+        name: 'additionalDeveloperUserCount'
+  # UserMetadata Object - End
+
