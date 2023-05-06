@@ -9,10 +9,10 @@ import (
 )
 
 type ServiceNetworkingOperationWaiter struct {
-	Service               *servicenetworking.APIService
-	Project               string
-	UserProjectOverride   bool
-	CommonOperationWaiter tpgresource.CommonOperationWaiter
+	Service             *servicenetworking.APIService
+	Project             string
+	UserProjectOverride bool
+	tpgresource.CommonOperationWaiter
 }
 
 func (w *ServiceNetworkingOperationWaiter) QueryOp() (interface{}, error) {

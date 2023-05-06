@@ -12,10 +12,10 @@ import (
 )
 
 type RunAdminV2OperationWaiter struct {
-	Config                *transport_tpg.Config
-	UserAgent             string
-	Project               string
-	CommonOperationWaiter tpgresource.CommonOperationWaiter
+	Config    *transport_tpg.Config
+	UserAgent string
+	Project   string
+	tpgresource.CommonOperationWaiter
 }
 
 func (w *RunAdminV2OperationWaiter) QueryOp() (interface{}, error) {

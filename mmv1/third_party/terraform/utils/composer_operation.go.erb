@@ -4,6 +4,8 @@ package google
 import (
 	"fmt"
 	"time"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
     transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 <% if version == "ga" -%>
@@ -15,7 +17,7 @@ import (
 
 type ComposerOperationWaiter struct {
 	Service *composer.ProjectsLocationsService
-	CommonOperationWaiter tpgresource.CommonOperationWaiter
+	tpgresource.CommonOperationWaiter
 }
 
 func (w *ComposerOperationWaiter) QueryOp() (interface{}, error) {

@@ -10,8 +10,8 @@ import (
 )
 
 type CloudFunctionsOperationWaiter struct {
-	Service               *cloudfunctions.Service
-	CommonOperationWaiter tpgresource.CommonOperationWaiter
+	Service *cloudfunctions.Service
+	tpgresource.CommonOperationWaiter
 }
 
 func (w *CloudFunctionsOperationWaiter) QueryOp() (interface{}, error) {

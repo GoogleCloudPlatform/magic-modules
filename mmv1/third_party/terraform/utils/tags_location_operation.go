@@ -12,9 +12,9 @@ import (
 )
 
 type TagsLocationOperationWaiter struct {
-	Config                *transport_tpg.Config
-	UserAgent             string
-	CommonOperationWaiter tpgresource.CommonOperationWaiter
+	Config    *transport_tpg.Config
+	UserAgent string
+	tpgresource.CommonOperationWaiter
 }
 
 func (w *TagsLocationOperationWaiter) QueryOp() (interface{}, error) {

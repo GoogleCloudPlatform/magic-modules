@@ -10,10 +10,10 @@ import (
 )
 
 type DialogflowCXOperationWaiter struct {
-	Config                *transport_tpg.Config
-	UserAgent             string
-	CommonOperationWaiter tpgresource.CommonOperationWaiter
-	Location              string
+	Config    *transport_tpg.Config
+	UserAgent string
+	tpgresource.CommonOperationWaiter
+	Location string
 }
 
 func (w *DialogflowCXOperationWaiter) QueryOp() (interface{}, error) {

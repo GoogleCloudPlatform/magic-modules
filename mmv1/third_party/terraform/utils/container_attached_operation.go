@@ -10,10 +10,10 @@ import (
 )
 
 type ContainerAttachedOperationWaiter struct {
-	Config                *transport_tpg.Config
-	UserAgent             string
-	Project               string
-	CommonOperationWaiter tpgresource.CommonOperationWaiter
+	Config    *transport_tpg.Config
+	UserAgent string
+	Project   string
+	tpgresource.CommonOperationWaiter
 }
 
 func (w *ContainerAttachedOperationWaiter) QueryOp() (interface{}, error) {

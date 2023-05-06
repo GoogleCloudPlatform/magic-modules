@@ -13,11 +13,11 @@ import (
 )
 
 type DatastreamOperationWaiter struct {
-	Config                *transport_tpg.Config
-	UserAgent             string
-	Project               string
-	Op                    datastream.Operation
-	CommonOperationWaiter tpgresource.CommonOperationWaiter
+	Config    *transport_tpg.Config
+	UserAgent string
+	Project   string
+	Op        datastream.Operation
+	tpgresource.CommonOperationWaiter
 }
 
 func (w *DatastreamOperationWaiter) QueryOp() (interface{}, error) {

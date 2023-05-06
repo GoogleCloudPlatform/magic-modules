@@ -11,8 +11,8 @@ import (
 )
 
 type ServiceManagementOperationWaiter struct {
-	Service               *servicemanagement.APIService
-	CommonOperationWaiter tpgresource.CommonOperationWaiter
+	Service *servicemanagement.APIService
+	tpgresource.CommonOperationWaiter
 }
 
 func (w *ServiceManagementOperationWaiter) QueryOp() (interface{}, error) {

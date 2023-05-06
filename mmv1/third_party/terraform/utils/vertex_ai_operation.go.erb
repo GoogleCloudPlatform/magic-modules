@@ -14,7 +14,7 @@ type VertexAIOperationWaiter struct {
 	Config    *transport_tpg.Config
 	UserAgent string
 	Project   string
-	CommonOperationWaiter tpgresource.CommonOperationWaiter
+	tpgresource.CommonOperationWaiter
 }
 
 func (w *VertexAIOperationWaiter) QueryOp() (interface{}, error) {
