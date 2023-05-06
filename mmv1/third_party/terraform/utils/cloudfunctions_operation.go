@@ -28,7 +28,7 @@ func cloudFunctionsOperationWait(config *transport_tpg.Config, op *cloudfunction
 	if err := w.SetOp(op); err != nil {
 		return err
 	}
-	return OperationWait(w, activity, timeout, config.PollInterval)
+	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }
 
 func IsCloudFunctionsSourceCodeError(err error) (bool, string) {

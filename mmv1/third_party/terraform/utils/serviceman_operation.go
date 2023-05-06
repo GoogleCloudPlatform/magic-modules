@@ -31,7 +31,7 @@ func ServiceManagementOperationWaitTime(config *transport_tpg.Config, op *servic
 		return nil, err
 	}
 
-	if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
+	if err := tpgresource.OperationWait(w, activity, timeout, config.PollInterval); err != nil {
 		return nil, err
 	}
 	return w.Op.Response, nil

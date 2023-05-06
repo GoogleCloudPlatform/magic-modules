@@ -75,7 +75,7 @@ func dataprocJobOperationWait(config *transport_tpg.Config, region, projectId, j
 		ProjectId: projectId,
 		JobId:     jobId,
 	}
-	return OperationWait(w, activity, timeout, config.PollInterval)
+	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }
 
 type DataprocDeleteJobOperationWaiter struct {
@@ -115,5 +115,5 @@ func dataprocDeleteOperationWait(config *transport_tpg.Config, region, projectId
 			JobId:     jobId,
 		},
 	}
-	return OperationWait(w, activity, timeout, config.PollInterval)
+	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }

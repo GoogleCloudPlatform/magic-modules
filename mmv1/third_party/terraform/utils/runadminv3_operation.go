@@ -44,7 +44,7 @@ func runAdminV2OperationWaitTimeWithResponse(config *transport_tpg.Config, op *r
 	if err != nil {
 		return err
 	}
-	if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
+	if err := tpgresource.OperationWait(w, activity, timeout, config.PollInterval); err != nil {
 		return err
 	}
 	return json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), response)
@@ -58,5 +58,5 @@ func runAdminV2OperationWaitTime(config *transport_tpg.Config, op *run.GoogleLon
 	if err != nil {
 		return err
 	}
-	return OperationWait(w, activity, timeout, config.PollInterval)
+	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }

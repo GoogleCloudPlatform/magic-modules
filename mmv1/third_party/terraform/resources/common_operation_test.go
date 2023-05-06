@@ -57,7 +57,7 @@ func TestOperationWait_TimeoutsShouldRetry(t *testing.T) {
 	testWaiter := TestWaiter{
 		runCount: 0,
 	}
-	err := OperationWait(&testWaiter, "my-activity", 1*time.Minute, 0*time.Second)
+	err := tpgresource.OperationWait(&testWaiter, "my-activity", 1*time.Minute, 0*time.Second)
 	if err != nil {
 		t.Fatalf("unexpected error waiting for operation: got '%v', want 'nil'", err)
 	}

@@ -122,5 +122,5 @@ func ContainerOperationWait(config *transport_tpg.Config, op *container.Operatio
 		return err
 	}
 
-	return OperationWait(w, activity, timeout, config.PollInterval)
+	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }

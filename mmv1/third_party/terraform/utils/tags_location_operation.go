@@ -48,7 +48,7 @@ func TagsLocationOperationWaitTimeWithResponse(config *transport_tpg.Config, op 
 	if err != nil {
 		return err
 	}
-	if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
+	if err := tpgresource.OperationWait(w, activity, timeout, config.PollInterval); err != nil {
 		return err
 	}
 	return json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), response)
@@ -64,7 +64,7 @@ func TagsLocationOperationWaitTime(config *transport_tpg.Config, op map[string]i
 		// If w is nil, the op was synchronous.
 		return err
 	}
-	return OperationWait(w, activity, timeout, config.PollInterval)
+	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }
 
 func GetLocationFromOpName(opName string) string {

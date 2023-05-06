@@ -33,5 +33,5 @@ func ServiceNetworkingOperationWaitTime(config *transport_tpg.Config, op *servic
 	if err := w.SetOp(op); err != nil {
 		return err
 	}
-	return OperationWait(w, activity, timeout, config.PollInterval)
+	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }
