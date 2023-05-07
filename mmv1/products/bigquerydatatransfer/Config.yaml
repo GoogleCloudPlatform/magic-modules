@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'Config'
 base_url: projects/{{project}}/locations/{{location}}/transferConfigs?serviceAccountName={{service_account_name}}
-self_link: "{{name}}"
+self_link: '{{name}}'
 # see comment at service_account_name, PATCHing service_account_name also required update_mask entry
 # update_url: "{{name}}?serviceAccountName={{service_account_name}}"
 update_verb: :PATCH
@@ -24,11 +24,11 @@ description: |
   contains all metadata needed to perform a data transfer.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    "Official Documentation": "https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/"
-  api: "https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/v1/projects.locations.transferConfigs/create"
-import_format: ["{{name}}"]
-id_format: "{{name}}"
-error_retry_predicates: ["IamMemberMissing"]
+    'Official Documentation': 'https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/'
+  api: 'https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/v1/projects.locations.transferConfigs/create'
+import_format: ['{{name}}']
+id_format: '{{name}}'
+error_retry_predicates: ['transport_tpg.IamMemberMissing']
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   resource_definition: templates/terraform/resource_definition/bigquery_data_transfer.go.erb
   constants: templates/terraform/constants/bigquery_data_transfer.go.erb
@@ -39,11 +39,11 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 examples:
   - !ruby/object:Provider::Terraform::Examples
     skip_test: true
-    name: "bigquerydatatransfer_config_scheduled_query"
-    primary_resource_id: "query_config"
+    name: 'bigquerydatatransfer_config_scheduled_query'
+    primary_resource_id: 'query_config'
     vars:
-      display_name: "my-query"
-      dataset_id: "my_dataset"
+      display_name: 'my-query'
+      dataset_id: 'my_dataset'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'

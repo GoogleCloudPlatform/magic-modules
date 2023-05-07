@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
@@ -47,7 +48,7 @@ func GetServiceUsageApiObject(d TerraformResourceData, config *transport_tpg.Con
 	serviceNameProp, err := expandServiceUsageServiceName(d.Get("service"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("service"); !isEmptyValue(reflect.ValueOf(serviceNameProp)) && (ok || !reflect.DeepEqual(v, serviceNameProp)) {
+	} else if v, ok := d.GetOkExists("service"); !tpgresource.IsEmptyValue(reflect.ValueOf(serviceNameProp)) && (ok || !reflect.DeepEqual(v, serviceNameProp)) {
 		obj["name"] = serviceNameProp
 	}
 

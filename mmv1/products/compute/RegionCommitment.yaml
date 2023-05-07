@@ -51,21 +51,21 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "compute_region_commitment_basic"
-    primary_resource_id: "foobar"
+    name: 'compute_region_commitment_basic'
+    primary_resource_id: 'foobar'
     # Creating a resource means signing a contract
     # Spanning years that cannot be deleted
     skip_test: true
     vars:
-      region_commitment_name: "my-region-commitment"
+      region_commitment_name: 'my-region-commitment'
   - !ruby/object:Provider::Terraform::Examples
-    name: "compute_region_commitment_full"
-    primary_resource_id: "foobar"
+    name: 'compute_region_commitment_full'
+    primary_resource_id: 'foobar'
     # Creating a resource means signing a contract
     # Spanning years that cannot be deleted
     skip_test: true
     vars:
-      region_commitment_name: "my-full-commitment"
+      region_commitment_name: 'my-full-commitment'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -96,7 +96,7 @@ properties:
       character, which cannot be a dash.
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -136,7 +136,7 @@ properties:
   - !ruby/object:Api::Type::Array
     name: resources
     description: |
-      A list of commitment amounts for particular resources. 
+      A list of commitment amounts for particular resources.
       Note that VCPU and MEMORY resource commitments must occur together.
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
@@ -160,7 +160,7 @@ properties:
     name: 'type'
     default_from_api: true
     description: |
-      The type of commitment, which affects the discount rate and the eligible resources. 
+      The type of commitment, which affects the discount rate and the eligible resources.
       Type MEMORY_OPTIMIZED specifies a commitment that will only apply to memory optimized
       machines. Type ACCELERATOR_OPTIMIZED specifies a commitment that will only apply to
       accelerator optimized machines.
@@ -200,7 +200,7 @@ properties:
     name: 'autoRenew'
     default_from_api: true
     description: |
-      Specifies whether to enable automatic renewal for the commitment. 
-      The default value is false if not specified. 
-      If the field is set to true, the commitment will be automatically renewed for either 
+      Specifies whether to enable automatic renewal for the commitment.
+      The default value is false if not specified.
+      If the field is set to true, the commitment will be automatically renewed for either
       one or three years according to the terms of the existing commitment.

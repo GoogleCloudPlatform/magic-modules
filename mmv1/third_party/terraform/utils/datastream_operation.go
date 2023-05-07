@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	datastream "google.golang.org/api/datastream/v1"
@@ -26,7 +27,7 @@ func (w *DatastreamOperationWaiter) QueryOp() (interface{}, error) {
 	// Returns the proper get.
 	url := fmt.Sprintf("%s%s", w.Config.DatastreamBasePath, w.Op.Name)
 
-	return SendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
+	return transport_tpg.SendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
 }
 
 func (w *DatastreamOperationWaiter) Error() error {
@@ -38,7 +39,7 @@ func (w *DatastreamOperationWaiter) Error() error {
 
 func (w *DatastreamOperationWaiter) SetOp(op interface{}) error {
 	w.CommonOperationWaiter.SetOp(op)
-	if err := Convert(op, &w.Op); err != nil {
+	if err := tpgresource.Convert(op, &w.Op); err != nil {
 		return err
 	}
 	return nil

@@ -21,7 +21,7 @@ if bp, err := getBillingProject(d, config); err == nil {
 	billingProject = bp
 }
 
-res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, nil, d.Timeout(schema.TimeoutCreate))
+res, err := transport_tpg.SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, nil, d.Timeout(schema.TimeoutCreate))
 if err != nil {
 	return fmt.Errorf("Error creating Config: %s", err)
 }

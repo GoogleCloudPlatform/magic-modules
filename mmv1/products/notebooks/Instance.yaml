@@ -33,43 +33,50 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   fetch_iam_policy_verb: :GET
   parent_resource_attribute: 'instance_name'
-  import_format: ["projects/{{project}}/locations/{{location}}/instances/{{instance_name}}",
-    "{{instance_name}}"]
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/instances/{{instance_name}}',
+      '{{instance_name}}',
+    ]
   base_url: projects/{{project}}/locations/{{location}}/instances/{{instance_name}}
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "notebook_instance_basic"
-    primary_resource_id: "instance"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"\
+    name: 'notebook_instance_basic'
+    primary_resource_id: 'instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\",
+      context[\"\
       random_suffix\"])"
-    region_override: "us-west1-a"
+    region_override: 'us-west1-a'
     vars:
-      instance_name: "notebooks-instance"
+      instance_name: 'notebooks-instance'
   - !ruby/object:Provider::Terraform::Examples
-    name: "notebook_instance_basic_container"
-    primary_resource_id: "instance"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"\
+    name: 'notebook_instance_basic_container'
+    primary_resource_id: 'instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\",
+      context[\"\
       random_suffix\"])"
-    region_override: "us-west1-a"
+    region_override: 'us-west1-a'
     vars:
-      instance_name: "notebooks-instance"
+      instance_name: 'notebooks-instance'
   - !ruby/object:Provider::Terraform::Examples
-    name: "notebook_instance_basic_gpu"
-    primary_resource_id: "instance"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"\
+    name: 'notebook_instance_basic_gpu'
+    primary_resource_id: 'instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\",
+      context[\"\
       random_suffix\"])"
-    region_override: "us-west1-a"
+    region_override: 'us-west1-a'
     vars:
-      instance_name: "notebooks-instance"
+      instance_name: 'notebooks-instance'
   - !ruby/object:Provider::Terraform::Examples
-    name: "notebook_instance_full"
-    primary_resource_id: "instance"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"\
+    name: 'notebook_instance_full'
+    primary_resource_id: 'instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\",
+      context[\"\
       random_suffix\"])"
-    region_override: "us-west1-a"
+    region_override: 'us-west1-a'
     vars:
-      instance_name: "notebooks-instance"
+      instance_name: 'notebooks-instance'
     test_env_vars:
       service_account: :SERVICE_ACCT
 custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -104,7 +111,7 @@ properties:
     # update_verb: :PATCH
     # update_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}:setMachineType'
     pattern: projects/{{project}}/zones/{{location}}/machineTypes/{{name}}
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'postStartupScript'
@@ -308,7 +315,7 @@ properties:
       - CMEK
     description: |
       Disk encryption method used on the boot and data disks, defaults to GMEK.
-    diff_suppress_func: 'EmptyOrDefaultStringSuppress("DISK_ENCRYPTION_UNSPECIFIED")'
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("DISK_ENCRYPTION_UNSPECIFIED")'
   - !ruby/object:Api::Type::String
     name: 'kmsKey'
     description: |
@@ -327,14 +334,14 @@ properties:
     description: |
       The name of the VPC that this instance is in.
       Format: projects/{project_id}/global/networks/{network_id}
-    diff_suppress_func: compareSelfLinkOrResourceName
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
     default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'subnet'
     description: |
       The name of the subnet that this instance is in.
       Format: projects/{project_id}/regions/{region}/subnetworks/{subnetwork_id}
-    diff_suppress_func: compareSelfLinkOrResourceName
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
     default_from_api: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'

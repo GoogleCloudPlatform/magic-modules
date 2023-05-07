@@ -6,13 +6,15 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 
 	"google.golang.org/api/appengine/v1"
 )
 
 var (
-	appEngineOperationIdRegexp = regexp.MustCompile(fmt.Sprintf("apps/%s/operations/(.*)", ProjectRegex))
+	appEngineOperationIdRegexp = regexp.MustCompile(fmt.Sprintf("apps/%s/operations/(.*)", verify.ProjectRegex))
 )
 
 type AppEngineOperationWaiter struct {
@@ -34,7 +36,7 @@ func (w *AppEngineOperationWaiter) QueryOp() (interface{}, error) {
 
 func AppEngineOperationWaitTimeWithResponse(config *transport_tpg.Config, res interface{}, response *map[string]interface{}, appId, activity, userAgent string, timeout time.Duration) error {
 	op := &appengine.Operation{}
-	err := Convert(res, op)
+	err := tpgresource.Convert(res, op)
 	if err != nil {
 		return err
 	}
@@ -55,7 +57,7 @@ func AppEngineOperationWaitTimeWithResponse(config *transport_tpg.Config, res in
 
 func AppEngineOperationWaitTime(config *transport_tpg.Config, res interface{}, appId, activity, userAgent string, timeout time.Duration) error {
 	op := &appengine.Operation{}
-	err := Convert(res, op)
+	err := tpgresource.Convert(res, op)
 	if err != nil {
 		return err
 	}

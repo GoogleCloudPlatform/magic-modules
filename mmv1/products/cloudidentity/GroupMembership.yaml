@@ -22,34 +22,36 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/identity/docs/how-to/memberships-google-groups'
   api: 'https://cloud.google.com/identity/docs/reference/rest/v1/groups.memberships'
 immutable: true
-read_error_transform: "transformCloudIdentityGroupMembershipReadError"
+read_error_transform: 'transformCloudIdentityGroupMembershipReadError'
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     If you are using User ADCs (Application Default Credentials) with this resource,
-    you must specify a `billing_project` and set `user_project_override` to true 
-    in the provider configuration. Otherwise the Cloud Identity API will return a 403 error. 
-    Your account must have the `serviceusage.services.use` permission on the 
+    you must specify a `billing_project` and set `user_project_override` to true
+    in the provider configuration. Otherwise the Cloud Identity API will return a 403 error.
+    Your account must have the `serviceusage.services.use` permission on the
     `billing_project` you defined.
-import_format: ["{{%name}}"]
+import_format: ['{{%name}}']
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloud_identity_group_membership"
-        # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+    name:
+      'cloud_identity_group_membership'
+      # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
     skip_test: true
-    primary_resource_id: "cloud_identity_group_membership_basic"
+    primary_resource_id: 'cloud_identity_group_membership_basic'
     vars:
-      id_group: "my-identity-group"
+      id_group: 'my-identity-group'
     test_env_vars:
       org_domain: :ORG_DOMAIN
       cust_id: :CUST_ID
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloud_identity_group_membership_user"
-        # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+    name:
+      'cloud_identity_group_membership_user'
+      # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
     skip_test: true
-    primary_resource_id: "cloud_identity_group_membership_basic"
+    primary_resource_id: 'cloud_identity_group_membership_basic'
     vars:
-      id_group: "my-identity-group"
+      id_group: 'my-identity-group'
     test_env_vars:
       org_domain: :ORG_DOMAIN
       cust_id: :CUST_ID
@@ -183,4 +185,3 @@ properties:
     output: true
     description: |
       The type of the membership.
-

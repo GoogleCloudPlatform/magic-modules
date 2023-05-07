@@ -269,9 +269,9 @@ properties:
                 The value of the flag. Booleans should be set to on for
                 true and off for false. This field must be omitted if the
                 flag doesn't take a value.
-      #- !ruby/object:Api::Type::Constant
-      #  name: 'kind'
-      #  value: 'sql#settings'
+    # - !ruby/object:Api::Type::Constant
+    #   name: 'kind'
+    #   value: 'sql#settings'
       - !ruby/object:Api::Type::NestedObject
         name: 'ipConfiguration'
         description: |

@@ -45,19 +45,19 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "target_http_proxy_basic"
-    primary_resource_id: "default"
+    name: 'target_http_proxy_basic'
+    primary_resource_id: 'default'
     vars:
-      target_http_proxy_name: "test-proxy"
-      url_map_name: "url-map"
-      backend_service_name: "backend-service"
-      http_health_check_name: "http-health-check"
+      target_http_proxy_name: 'test-proxy'
+      url_map_name: 'url-map'
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'http-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "target_http_proxy_https_redirect"
-    primary_resource_id: "default"
+    name: 'target_http_proxy_https_redirect'
+    primary_resource_id: 'default'
     vars:
-      target_http_proxy_name: "test-https-redirect-proxy"
-      url_map_name: "url-map"
+      target_http_proxy_name: 'test-https-redirect-proxy'
+      url_map_name: 'url-map'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'

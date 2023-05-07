@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Product
 name: CloudIot
 display_name: Cloud IoT Core
-legacy_name: "cloudiot"
+legacy_name: 'cloudiot'
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

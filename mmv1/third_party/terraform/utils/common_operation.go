@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -75,7 +77,7 @@ func (w *CommonOperationWaiter) IsRetryable(error) bool {
 }
 
 func (w *CommonOperationWaiter) SetOp(op interface{}) error {
-	if err := Convert(op, &w.Op); err != nil {
+	if err := tpgresource.Convert(op, &w.Op); err != nil {
 		return err
 	}
 	return nil
@@ -111,7 +113,7 @@ func CommonRefreshFunc(w Waiter) resource.StateRefreshFunc {
 		op, err := w.QueryOp()
 		if err != nil {
 			// Retry 404 when getting operation (not resource state)
-			if isRetryableError(err, IsNotFoundRetryableError("GET operation")) {
+			if transport_tpg.IsRetryableError(err, transport_tpg.IsNotFoundRetryableError("GET operation")) {
 				log.Printf("[DEBUG] Dismissed retryable error on GET operation %q: %s", w.OpName(), err)
 				return nil, "done: false", nil
 			}

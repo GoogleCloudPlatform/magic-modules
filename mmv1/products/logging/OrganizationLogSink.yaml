@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: "OrganizationLogSink"
+name: 'OrganizationLogSink'
 base_url: organizations/{{organization}}/sinks
 self_link: organizations/{{organization}}/sinks/{{name}}
 collection_url_key: 'sinks'

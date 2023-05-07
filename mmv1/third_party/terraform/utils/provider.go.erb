@@ -4,7 +4,6 @@ package google
 import (
 	"context"
 	"fmt"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"os"
 	"time"
 
@@ -12,11 +11,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/version"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
+
 	googleoauth "golang.org/x/oauth2/google"
 )
 
 // Global MutexKV
-var mutexKV = NewMutexKV()
+//
+// Deprecated: For backward compatibility mutexKV is still working,
+// but all new code should use MutexStore in the transport_tpg package instead.
+var mutexKV = transport_tpg.MutexStore
 
 // Provider returns a *schema.Provider.
 func Provider() *schema.Provider {
@@ -93,7 +98,7 @@ func Provider() *schema.Provider {
 						"send_after": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ValidateFunc: validateNonNegativeDuration(),
+							ValidateFunc: verify.ValidateNonNegativeDuration(),
 						},
 						"enable_batching": {
 							Type:     schema.TypeBool,
@@ -140,7 +145,7 @@ func Provider() *schema.Provider {
 			transport_tpg.IAMCustomEndpointEntryKey:                    transport_tpg.IAMCustomEndpointEntry,
 			transport_tpg.ServiceNetworkingCustomEndpointEntryKey:      transport_tpg.ServiceNetworkingCustomEndpointEntry,
 			transport_tpg.TagsLocationCustomEndpointEntryKey:           transport_tpg.TagsLocationCustomEndpointEntry,
-			
+
 			// dcl
 			transport_tpg.ContainerAwsCustomEndpointEntryKey:           transport_tpg.ContainerAwsCustomEndpointEntry,
 			transport_tpg.ContainerAzureCustomEndpointEntryKey:         transport_tpg.ContainerAzureCustomEndpointEntry,
@@ -205,7 +210,7 @@ func Provider() *schema.Provider {
 			"google_compute_regions":                           DataSourceGoogleComputeRegions(),
 			"google_compute_region_network_endpoint_group":     DataSourceGoogleComputeRegionNetworkEndpointGroup(),
 			"google_compute_region_instance_group":             DataSourceGoogleComputeRegionInstanceGroup(),
-			<% unless version == 'ga' -%>	
+			<% unless version == 'ga' -%>
 			"google_compute_region_instance_template":          DataSourceGoogleComputeRegionInstanceTemplate(),
 			<% end -%>
 			"google_compute_region_ssl_certificate":            DataSourceGoogleRegionComputeSslCertificate(),
@@ -228,6 +233,7 @@ func Provider() *schema.Provider {
 			"google_container_registry_image":                  DataSourceGoogleContainerImage(),
 			"google_container_registry_repository":             DataSourceGoogleContainerRepo(),
 			"google_dataproc_metastore_service":                DataSourceDataprocMetastoreService(),
+			"google_datastream_static_ips":                     DataSourceGoogleDatastreamStaticIps(),
 			"google_game_services_game_server_deployment_rollout":  DataSourceGameServicesGameServerDeploymentRollout(),
 			"google_iam_policy":                                DataSourceGoogleIamPolicy(),
 			"google_iam_role":                                  DataSourceGoogleIamRole(),
@@ -284,6 +290,7 @@ func Provider() *schema.Provider {
 			"google_sourcerepo_repository":                     DataSourceGoogleSourceRepoRepository(),
 			"google_spanner_instance":                          DataSourceSpannerInstance(),
 			"google_sql_ca_certs":                              DataSourceGoogleSQLCaCerts(),
+			"google_sql_tiers":                                 DataSourceGoogleSQLTiers(),
 			"google_sql_backup_run":                            DataSourceSqlBackupRun(),
 			"google_sql_databases":                             DataSourceSqlDatabases(),
 			"google_sql_database":                              DataSourceSqlDatabase(),
@@ -386,6 +393,7 @@ end     # products.each do
 				"google_compute_attached_disk":                 ResourceComputeAttachedDisk(),
 				"google_compute_instance":                      ResourceComputeInstance(),
 				<% unless version == 'ga' -%>
+				"google_compute_disk_async_replication":        ResourceComputeDiskAsyncReplication(),
 				"google_compute_instance_from_machine_image":   ResourceComputeInstanceFromMachineImage(),
 				<% end -%>
 				"google_compute_instance_from_template":        ResourceComputeInstanceFromTemplate(),
@@ -397,7 +405,7 @@ end     # products.each do
 				"google_compute_project_metadata":              ResourceComputeProjectMetadata(),
 				"google_compute_project_metadata_item":         ResourceComputeProjectMetadataItem(),
 				"google_compute_region_instance_group_manager": ResourceComputeRegionInstanceGroupManager(),
-				<% unless version == 'ga' -%>	
+				<% unless version == 'ga' -%>
 				"google_compute_region_instance_template":      ResourceComputeRegionInstanceTemplate(),
 				<% end -%>
 				"google_compute_router_interface":              ResourceComputeRouterInterface(),
@@ -584,13 +592,13 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	// only check environment variables if neither value was set in config- this
 	// means config beats env var in all cases.
 	if config.AccessToken == "" && config.Credentials == "" {
-		config.Credentials = MultiEnvSearch([]string{
+		config.Credentials = transport_tpg.MultiEnvSearch([]string{
 			"GOOGLE_CREDENTIALS",
 			"GOOGLE_CLOUD_KEYFILE_JSON",
 			"GCLOUD_KEYFILE_JSON",
 		})
 
-		config.AccessToken = MultiEnvSearch([]string{
+		config.AccessToken = transport_tpg.MultiEnvSearch([]string{
 			"GOOGLE_OAUTH_ACCESS_TOKEN",
 		})
 	}
@@ -643,7 +651,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.ServiceUsageBasePath = d.Get(transport_tpg.ServiceUsageCustomEndpointEntryKey).(string)
 	config.BigtableAdminBasePath = d.Get(transport_tpg.BigtableAdminCustomEndpointEntryKey).(string)
 	config.TagsLocationBasePath = d.Get(transport_tpg.TagsLocationCustomEndpointEntryKey).(string)
-	
+
 	// dcl
 	config.ContainerAwsBasePath = d.Get(transport_tpg.ContainerAwsCustomEndpointEntryKey).(string)
 	config.ContainerAzureBasePath = d.Get(transport_tpg.ContainerAzureCustomEndpointEntryKey).(string)
