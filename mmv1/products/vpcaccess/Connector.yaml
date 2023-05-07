@@ -42,15 +42,15 @@ async: !ruby/object:Api::OpAsync
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "vpc_access_connector"
-    primary_resource_id: "connector"
+    name: 'vpc_access_connector'
+    primary_resource_id: 'connector'
     vars:
-      name: "vpc-con"
+      name: 'vpc-con'
   - !ruby/object:Provider::Terraform::Examples
-    name: "vpc_access_connector_shared_vpc"
-    primary_resource_id: "connector"
+    name: 'vpc_access_connector_shared_vpc'
+    primary_resource_id: 'connector'
     vars:
-      name: "vpc-con"
+      name: 'vpc-con'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/no_send_name.go.erb
   post_create: templates/terraform/post_create/sleep.go.erb
@@ -79,7 +79,7 @@ properties:
       - subnet.0.name
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.erb'
-    diff_suppress_func: 'compareResourceNames'
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
     default_from_api: true
   - !ruby/object:Api::Type::String
     name: ipCidrRange
@@ -157,5 +157,4 @@ properties:
         description: |
           Project in which the subnet exists. If not set, this project is assumed to be the project for which the connector create request was issued.
         immutable: true
-
         default_from_api: true

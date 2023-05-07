@@ -13,8 +13,8 @@ lockName, err := ReplaceVars(d, config, "apps/{{project}}/services/{{service}}")
 if err != nil {
 	return err
 }
-mutexKV.Lock(lockName)
-defer mutexKV.Unlock(lockName)
+transport_tpg.MutexStore.Lock(lockName)
+defer transport_tpg.MutexStore.Unlock(lockName)
 
 if d.Get("delete_service_on_destroy") == true {
 	url, err := ReplaceVars(d, config, "{{AppEngineBasePath}}apps/{{project}}/services/{{service}}")
@@ -23,9 +23,9 @@ if d.Get("delete_service_on_destroy") == true {
 	}
 	var obj map[string]interface{}
 	log.Printf("[DEBUG] Deleting Service %q", d.Id())
-	res, err := SendRequestWithTimeout(config, "DELETE", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+	res, err := transport_tpg.SendRequestWithTimeout(config, "DELETE", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 	if err != nil {
-		return handleNotFoundError(err, d, "Service")
+		return transport_tpg.HandleNotFoundError(err, d, "Service")
 	}
 	err = AppEngineOperationWaitTime(
 		config, res, project, "Deleting Service", userAgent,
@@ -43,9 +43,9 @@ if d.Get("delete_service_on_destroy") == true {
 	}
 	var obj map[string]interface{}
 	log.Printf("[DEBUG] Deleting AppVersion %q", d.Id())
-	res, err := SendRequestWithTimeout(config, "DELETE", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+	res, err := transport_tpg.SendRequestWithTimeout(config, "DELETE", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 	if err != nil {
-		return handleNotFoundError(err, d, "AppVersion")
+		return transport_tpg.HandleNotFoundError(err, d, "AppVersion")
 	}
 	err = AppEngineOperationWaitTime(
 		config, res, project, "Deleting AppVersion", userAgent,

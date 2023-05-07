@@ -5,7 +5,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 	"google.golang.org/api/cloudfunctions/v1"
 
 	"fmt"
@@ -77,7 +79,7 @@ func parseCloudFunctionId(d *schema.ResourceData, config *transport_tpg.Config) 
 // at start/end
 func validateResourceCloudFunctionsFunctionName(v interface{}, k string) (ws []string, errors []error) {
 	re := `^(?:[a-zA-Z](?:[-_a-zA-Z0-9]{0,61}[a-zA-Z0-9])?)$`
-	return validateRegexp(re)(v, k)
+	return verify.ValidateRegexp(re)(v, k)
 }
 
 func partsCompare(a, b, reg string) bool {
@@ -110,7 +112,7 @@ func partsCompare(a, b, reg string) bool {
 	return true
 }
 
-// based on compareSelfLinkOrResourceName, but less reusable and allows multi-/
+// based on CompareSelfLinkOrResourceName, but less reusable and allows multi-/
 // strings in the new state (config) part
 func compareSelfLinkOrResourceNameWithMultipleParts(_, old, new string, _ *schema.ResourceData) bool {
 	// two formats based on expandEventTrigger()
@@ -273,7 +275,7 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 			"vpc_connector": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 				Description:      `The VPC Network Connector that this cloud function can connect to. It can be either the fully-qualified URI, or the short name of the network connector resource. The format of this field is projects/*/locations/*/connectors/*.`,
 			},
 
@@ -594,7 +596,7 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 	// We retry the whole create-and-wait because Cloud Functions
 	// will sometimes fail a creation operation entirely if it fails to pull
 	// source code and we need to try the whole creation again.
-	rerr := RetryTimeDuration(func() error {
+	rerr := transport_tpg.RetryTimeDuration(func() error {
 		op, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Create(
 			cloudFuncId.locationId(), function).Do()
 		if err != nil {
@@ -628,7 +630,7 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 
 	function, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Get(cloudFuncId.cloudFunctionId()).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Target CloudFunctions Function %q", cloudFuncId.Name))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Target CloudFunctions Function %q", cloudFuncId.Name))
 	}
 
 	if err := d.Set("name", cloudFuncId.Name); err != nil {
@@ -764,7 +766,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	// The full function needs to supplied in the PATCH call to evaluate some Organization Policies. https://github.com/hashicorp/terraform-provider-google/issues/6603
 	function, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Get(cloudFuncId.cloudFunctionId()).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Target CloudFunctions Function %q", cloudFuncId.Name))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Target CloudFunctions Function %q", cloudFuncId.Name))
 	}
 
 	// The full function may contain a reference to manually uploaded code if the function was imported from gcloud
@@ -893,7 +895,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	if len(updateMaskArr) > 0 {
 		log.Printf("[DEBUG] Send Patch CloudFunction Configuration request: %#v", function)
 		updateMask := strings.Join(updateMaskArr, ",")
-		rerr := RetryTimeDuration(func() error {
+		rerr := transport_tpg.RetryTimeDuration(func() error {
 			op, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Patch(function.Name, function).
 				UpdateMask(updateMask).Do()
 			if err != nil {

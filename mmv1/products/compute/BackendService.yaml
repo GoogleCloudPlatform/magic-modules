@@ -48,62 +48,69 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_basic"
-    primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-backend-service%s\", context[\"\
+    name: 'backend_service_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-backend-service%s\",
+      context[\"\
       random_suffix\"])"
     vars:
-      backend_service_name: "backend-service"
-      http_health_check_name: "health-check"
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_cache_simple"
-    primary_resource_id: "default"
+    name: 'backend_service_cache_simple'
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
-      http_health_check_name: "health-check"
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_cache_include_http_headers"
-    primary_resource_id: "default"
+    name: 'backend_service_cache_include_http_headers'
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
+      backend_service_name: 'backend-service'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_cache_include_named_cookies"
-    primary_resource_id: "default"
+    name: 'backend_service_cache_include_named_cookies'
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
+      backend_service_name: 'backend-service'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_cache"
-    primary_resource_id: "default"
+    name: 'backend_service_cache'
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
-      http_health_check_name: "health-check"
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_traffic_director_round_robin"
+    name: 'backend_service_cache_bypass_cache_on_request_headers'
+    primary_resource_id: 'default'
+    vars:
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'backend_service_traffic_director_round_robin'
     min_version: beta
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
-      health_check_name: "health-check"
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_traffic_director_ring_hash"
+    name: 'backend_service_traffic_director_ring_hash'
     min_version: beta
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
-      health_check_name: "health-check"
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_network_endpoint"
+    name: 'backend_service_network_endpoint'
     min_version: beta
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
-      neg_name: "network-endpoint"
+      backend_service_name: 'backend-service'
+      neg_name: 'network-endpoint'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_external_managed"
-    primary_resource_id: "default"
+    name: 'backend_service_external_managed'
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
-      health_check_name: "health-check"
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: '/'
   fetch_iam_policy_verb: :GET
@@ -192,7 +199,7 @@ properties:
             partial URL.
           required: true
           custom_flatten: templates/terraform/custom_flatten/guard_self_link.go.erb
-          diff_suppress_func: 'compareSelfLinkRelativePaths'
+          diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
         - !ruby/object:Api::Type::Integer
           name: 'maxConnections'
           default_from_api: true
@@ -646,6 +653,18 @@ properties:
         description: |
           Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
         default_from_api: true
+      - !ruby/object:Api::Type::Array
+        name: 'bypassCacheOnRequestHeaders'
+        description: |
+          Bypass the cache when the specified request headers are matched - e.g. Pragma or Authorization headers. Up to 5 headers can be specified.
+          The cache is bypassed for all cdnPolicy.cacheMode settings.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'headerName'
+              required: true
+              description: |
+                The header field name to match on when bypassing cache. Values are case-insensitive.
   - !ruby/object:Api::Type::NestedObject
     name: 'connectionDraining'
     description: |
@@ -706,14 +725,15 @@ properties:
 
       For internal load balancing, a URL to a HealthCheck resource must be specified instead.
     is_set: true
-    set_hash_func: 'selfLinkRelativePathHash'
+    set_hash_func: 'tpgresource.SelfLinkRelativePathHash'
     custom_flatten: templates/terraform/custom_flatten/guard_self_link_array.go.erb
     item_type: Api::Type::String
   - !ruby/object:Api::Type::Integer
     name: 'generated_id'
     api_name: 'id'
-    description: 'The unique identifier for the resource. This identifier is defined
-      by the server.'
+    description:
+      'The unique identifier for the resource. This identifier is defined by the
+      server.'
     output: true
   - !ruby/object:Api::Type::NestedObject
     name: 'iap'
@@ -924,7 +944,7 @@ properties:
               name: 'data'
               description: |
                 An optional, arbitrary JSON object with configuration data, understood
-                by a locally installed custom policy implementation.          
+                by a locally installed custom policy implementation.
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
@@ -1202,18 +1222,18 @@ properties:
       - :TCP
       - :SSL
       - :GRPC
-  # TODO: make a ResourceRef to Security Policy
+    # TODO: make a ResourceRef to Security Policy
     default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'securityPolicy'
     description: |
       The security policy associated with this backend service.
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: 'edgeSecurityPolicy'
     description: |
       The resource URL for the edge security policy associated with this backend service.
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::NestedObject
     name: 'securitySettings'
     description: |
@@ -1224,7 +1244,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::ResourceRef
         name: 'clientTlsPolicy'
-        resource: 'Region' # TODO: 'Region' is incorrect and should be 'ClientTlsPolicy'
+        resource: 'Region'  # TODO: 'Region' is incorrect and should be 'ClientTlsPolicy'
         imports: 'name'
         description: |
           ClientTlsPolicy is a resource that specifies how a client should authenticate

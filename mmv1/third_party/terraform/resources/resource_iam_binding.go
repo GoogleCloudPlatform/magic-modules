@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/davecgh/go-spew/spew"
@@ -24,7 +25,7 @@ var iamBindingSchema = map[string]*schema.Schema{
 		Required: true,
 		Elem: &schema.Schema{
 			Type:             schema.TypeString,
-			DiffSuppressFunc: CaseDiffSuppress,
+			DiffSuppressFunc: tpgresource.CaseDiffSuppress,
 			ValidateFunc:     validateIAMMember,
 		},
 		Set: func(v interface{}) int {
@@ -138,7 +139,7 @@ func resourceIamBindingRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.Rea
 		eCondition := conditionKeyFromCondition(eBinding.Condition)
 		p, err := iamPolicyReadWithRetry(updater)
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Resource %q with IAM Binding (Role %q)", updater.DescribeResource(), eBinding.Role))
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %q with IAM Binding (Role %q)", updater.DescribeResource(), eBinding.Role))
 		}
 		log.Print(spew.Sprintf("[DEBUG] Retrieved policy for %s: %#v", updater.DescribeResource(), p))
 		log.Printf("[DEBUG] Looking for binding with role %q and condition %#v", eBinding.Role, eCondition)
@@ -281,7 +282,7 @@ func resourceIamBindingDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBa
 			err = iamPolicyReadModifyWrite(updater, modifyF)
 		}
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Resource %q for IAM binding with role %q", updater.DescribeResource(), binding.Role))
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %q for IAM binding with role %q", updater.DescribeResource(), binding.Role))
 		}
 
 		return resourceIamBindingRead(newUpdaterFunc)(d, meta)

@@ -3,9 +3,11 @@ package google
 import (
 	"encoding/base64"
 	"fmt"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"log"
 	"regexp"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -22,7 +24,7 @@ func DataSourceSecretManagerSecretVersion() *schema.Resource {
 			"secret": {
 				Type:             schema.TypeString,
 				Required:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 			},
 			"version": {
 				Type:     schema.TypeString,
@@ -92,7 +94,7 @@ func dataSourceSecretManagerSecretVersionRead(d *schema.ResourceData, meta inter
 	}
 
 	var version map[string]interface{}
-	version, err = SendRequest(config, "GET", project, url, userAgent, nil)
+	version, err = transport_tpg.SendRequest(config, "GET", project, url, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("Error retrieving available secret manager secret versions: %s", err.Error())
 	}
@@ -112,7 +114,7 @@ func dataSourceSecretManagerSecretVersionRead(d *schema.ResourceData, meta inter
 	}
 
 	url = fmt.Sprintf("%s:access", url)
-	resp, err := SendRequest(config, "GET", project, url, userAgent, nil)
+	resp, err := transport_tpg.SendRequest(config, "GET", project, url, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("Error retrieving available secret manager secret version access: %s", err.Error())
 	}

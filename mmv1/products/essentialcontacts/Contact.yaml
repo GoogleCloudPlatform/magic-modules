@@ -27,15 +27,15 @@ description: |
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     If you are using User ADCs (Application Default Credentials) with this resource,
-    you must specify a `billing_project` and set `user_project_override` to true 
-    in the provider configuration. Otherwise the Essential Contacts API will return a 403 error. 
-    Your account must have the `serviceusage.services.use` permission on the 
+    you must specify a `billing_project` and set `user_project_override` to true
+    in the provider configuration. Otherwise the Essential Contacts API will return a 403 error.
+    Your account must have the `serviceusage.services.use` permission on the
     `billing_project` you defined.
-import_format: ["{{%name}}"]
+import_format: ['{{%name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "essential_contact"
-    primary_resource_id: "contact"
+    name: 'essential_contact'
+    primary_resource_id: 'contact'
 
 parameters:
   - !ruby/object:Api::Type::String
@@ -68,4 +68,3 @@ properties:
     required: true
     description: |
       The preferred language for notifications, as a ISO 639-1 language code. See Supported languages for a list of supported languages.
-

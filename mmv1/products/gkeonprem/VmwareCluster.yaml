@@ -12,19 +12,20 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: "VmwareCluster"
+name: 'VmwareCluster'
 min_version: beta
-base_url: "projects/{{project}}/locations/{{location}}/vmwareClusters"
-create_url: "projects/{{project}}/locations/{{location}}/vmwareClusters?vmware_cluster_id={{name}}"
-update_url: "projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}"
-delete_url: "projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}?force=true"
-self_link: "projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}"
+base_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters'
+create_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters?vmware_cluster_id={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}'
+delete_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}?force=true'
+self_link: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}'
 update_verb: :PATCH
 update_mask: true
-description: "A Google VMware User Cluster."
+description: 'A Google VMware User Cluster.'
 autogen_async: false
-id_format: "projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}"
-import_format: ["projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}"]
+id_format: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}'
+import_format:
+  ['projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}']
 taint_resource_on_failed_create: true
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 60
@@ -32,45 +33,45 @@ timeouts: !ruby/object:Api::Timeouts
   update_minutes: 60
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "gkeonprem_vmware_cluster_basic"
+    name: 'gkeonprem_vmware_cluster_basic'
     min_version: beta
-    primary_resource_id: "cluster-basic"
+    primary_resource_id: 'cluster-basic'
     vars:
-      name: "basic"
+      name: 'basic'
     test_env_vars:
-      project: "fake-backend-360322"
+      project: 'fake-backend-360322'
   - !ruby/object:Provider::Terraform::Examples
-    name: "gkeonprem_vmware_cluster_f5lb"
+    name: 'gkeonprem_vmware_cluster_f5lb'
     min_version: beta
-    primary_resource_id: "cluster-f5lb"
+    primary_resource_id: 'cluster-f5lb'
     vars:
-      name: "f5lb"
+      name: 'f5lb'
     test_env_vars:
-      project: "fake-backend-360322"
+      project: 'fake-backend-360322'
   - !ruby/object:Provider::Terraform::Examples
-    name: "gkeonprem_vmware_cluster_manuallb"
+    name: 'gkeonprem_vmware_cluster_manuallb'
     min_version: beta
-    primary_resource_id: "cluster-manuallb"
+    primary_resource_id: 'cluster-manuallb'
     vars:
-      name: "manuallb"
+      name: 'manuallb'
     test_env_vars:
-      project: "fake-backend-360322"
+      project: 'fake-backend-360322'
 parameters:
   - !ruby/object:Api::Type::String
-    name: "name"
+    name: 'name'
     description: The VMware cluster name.
     immutable: true
     url_param_only: true
     required: true
   - !ruby/object:Api::Type::String
-    name: "location"
+    name: 'location'
     description: The location of the resource.
     immutable: true
     url_param_only: true
     required: true
 properties:
   - !ruby/object:Api::Type::String
-    name: "adminClusterMembership"
+    name: 'adminClusterMembership'
     required: true
     immutable: true
     description: |
@@ -78,18 +79,18 @@ properties:
       This is the full resource name of the admin cluster's hub membership.
       In the future, references to other resource types might be allowed if
       admin clusters are modeled as their own resources.
-    diff_suppress_func: ProjectNumberDiffSuppress
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
   - !ruby/object:Api::Type::String
-    name: "description"
+    name: 'description'
     description: |
       A human readable description of this VMware User Cluster.
   - !ruby/object:Api::Type::String
-    name: "onPremVersion"
+    name: 'onPremVersion'
     required: true
     description: |
       The Anthos clusters on the VMware version for your user cluster.
   - !ruby/object:Api::Type::KeyValuePairs
-    name: "annotations"
+    name: 'annotations'
     description: |
       Annotations on the VMware User Cluster.
       This field has the same restrictions as Kubernetes annotations.
@@ -101,7 +102,7 @@ properties:
       with dashes (-), underscores (_), dots (.), and alphanumerics between.
     default_from_api: true
   - !ruby/object:Api::Type::NestedObject
-    name: "controlPlaneNode"
+    name: 'controlPlaneNode'
     description: |
       VMware User Cluster control plane nodes must have either 1 or 3 replicas.
     required: true
@@ -174,22 +175,22 @@ properties:
     description: The VMware User Cluster network configuration.
     properties:
       - !ruby/object:Api::Type::Array
-        name: "serviceAddressCidrBlocks"
+        name: 'serviceAddressCidrBlocks'
         item_type: Api::Type::String
         required: true
         description: |
-          All services in the cluster are assigned an RFC1918 IPv4 address 
-          from these ranges. Only a single range is supported.. This field 
+          All services in the cluster are assigned an RFC1918 IPv4 address
+          from these ranges. Only a single range is supported.. This field
           cannot be changed after creation.
       - !ruby/object:Api::Type::Array
-        name: "podAddressCidrBlocks"
+        name: 'podAddressCidrBlocks'
         item_type: Api::Type::String
         required: true
         description: |
-          All pods in the cluster are assigned an RFC1918 IPv4 address from these ranges. 
+          All pods in the cluster are assigned an RFC1918 IPv4 address from these ranges.
           Only a single range is supported. This field cannot be changed after creation.
       - !ruby/object:Api::Type::NestedObject
-        name: "staticIpConfig"
+        name: 'staticIpConfig'
         description: Configuration settings for a static IP configuration.
         exactly_one_of:
           - network_config.0.static_ip_config
@@ -197,38 +198,43 @@ properties:
         properties:
           - !ruby/object:Api::Type::Array
             name: ipBlocks
-            description: Represents the configuration values for static IP allocation
-              to nodes.
+            description:
+              Represents the configuration values for static IP allocation to
+              nodes.
             required: true
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
-                  name: "netmask"
+                  name: 'netmask'
                   description: The netmask used by the VMware User Cluster.
                   required: true
                 - !ruby/object:Api::Type::String
-                  name: "gateway"
-                  description: The network gateway used by the VMware User Cluster.
+                  name: 'gateway'
+                  description:
+                    The network gateway used by the VMware User Cluster.
                   required: true
                 - !ruby/object:Api::Type::Array
-                  name: "ips"
-                  description: The node's network configurations used by the VMware
-                    User Cluster.
+                  name: 'ips'
+                  description:
+                    The node's network configurations used by the VMware User
+                    Cluster.
                   required: true
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                       - !ruby/object:Api::Type::String
-                        name: "ip"
-                        description: IP could be an IP address (like 1.2.3.4) or a
-                          CIDR (like 1.2.3.0/24).
+                        name: 'ip'
+                        description:
+                          IP could be an IP address (like 1.2.3.4) or a CIDR
+                          (like 1.2.3.0/24).
                         required: true
                       - !ruby/object:Api::Type::String
-                        name: "hostname"
-                        description: Hostname of the machine. VM's name will be used
-                          if this field is empty.
+                        name: 'hostname'
+                        description:
+                          Hostname of the machine. VM's name will be used if
+                          this field is empty.
                         required: true
       - !ruby/object:Api::Type::NestedObject
-        name: "dhcpIpConfig"
+        name: 'dhcpIpConfig'
         description: Configuration settings for a DHCP IP configuration.
         exactly_one_of:
           - network_config.0.static_ip_config
@@ -238,79 +244,87 @@ properties:
           - !ruby/object:Api::Type::Boolean
             name: enabled
             description: |
-              enabled is a flag to mark if DHCP IP allocation is 
+              enabled is a flag to mark if DHCP IP allocation is
               used for VMware user clusters.
             required: true
       - !ruby/object:Api::Type::String
-        name: "vcenterNetwork"
-        description: vcenter_network specifies vCenter network name. Inherited from
-          the admin cluster.
+        name: 'vcenterNetwork'
+        description:
+          vcenter_network specifies vCenter network name. Inherited from the
+          admin cluster.
         output: true
       - !ruby/object:Api::Type::NestedObject
-        name: "hostConfig"
-        description: Represents common network settings irrespective of the host's
-          IP address.
+        name: 'hostConfig'
+        description:
+          Represents common network settings irrespective of the host's IP
+          address.
         default_from_api: true
         properties:
           - !ruby/object:Api::Type::Array
-            name: "dnsServers"
+            name: 'dnsServers'
             description: DNS servers.
             item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
-            name: "ntpServers"
+            name: 'ntpServers'
             description: NTP servers.
             item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
-            name: "dnsSearchDomains"
+            name: 'dnsSearchDomains'
             description: DNS search domains.
             item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
-        name: "controlPlaneV2Config"
+        name: 'controlPlaneV2Config'
         description: Configuration for control plane V2 mode.
         properties:
           - !ruby/object:Api::Type::NestedObject
-            name: "controlPlaneIpBlock"
+            name: 'controlPlaneIpBlock'
             description: Static IP addresses for the control plane nodes.
             properties:
               - !ruby/object:Api::Type::String
-                name: "netmask"
+                name: 'netmask'
                 description: The netmask used by the VMware User Cluster.
               - !ruby/object:Api::Type::String
-                name: "gateway"
-                description: The network gateway used by the VMware User Cluster.
+                name: 'gateway'
+                description:
+                  The network gateway used by the VMware User Cluster.
               - !ruby/object:Api::Type::Array
-                name: "ips"
-                description: The node's network configurations used by the VMware
-                  User Cluster.
+                name: 'ips'
+                description:
+                  The node's network configurations used by the VMware User
+                  Cluster.
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::String
-                      name: "ip"
-                      description: IP could be an IP address (like 1.2.3.4) or a CIDR
-                        (like 1.2.3.0/24).
+                      name: 'ip'
+                      description:
+                        IP could be an IP address (like 1.2.3.4) or a CIDR (like
+                        1.2.3.0/24).
                     - !ruby/object:Api::Type::String
-                      name: "hostname"
-                      description: Hostname of the machine. VM's name will be used
-                        if this field is empty.
+                      name: 'hostname'
+                      description:
+                        Hostname of the machine. VM's name will be used if this
+                        field is empty.
                       default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: loadBalancer
     description: Load Balancer configuration.
     properties:
       - !ruby/object:Api::Type::NestedObject
-        name: "vipConfig"
+        name: 'vipConfig'
         description: The VIPs used by the load balancer.
         properties:
           - !ruby/object:Api::Type::String
-            name: "controlPlaneVip"
-            description: The VIP which you previously set aside for the Kubernetes
-              API of this cluster.
+            name: 'controlPlaneVip'
+            description:
+              The VIP which you previously set aside for the Kubernetes API of
+              this cluster.
           - !ruby/object:Api::Type::String
-            name: "ingressVip"
-            description: The VIP which you previously set aside for ingress traffic
-              into this cluster.
+            name: 'ingressVip'
+            description:
+              The VIP which you previously set aside for ingress traffic into
+              this cluster.
       - !ruby/object:Api::Type::NestedObject
-        name: "f5Config"
+        name: 'f5Config'
         description: Configuration for F5 Big IP typed load balancers.
         exactly_one_of:
           - loadBalancer.0.f5_config
@@ -318,20 +332,20 @@ properties:
           - loadBalancer.0.metal_lb_config
         properties:
           - !ruby/object:Api::Type::String
-            name: "address"
+            name: 'address'
             description: The load balancer's IP address.
           - !ruby/object:Api::Type::String
-            name: "partition"
+            name: 'partition'
             description: |
               he preexisting partition to be used by the load balancer. T
               his partition is usually created for the admin cluster for example:
               'my-f5-admin-partition'.
           - !ruby/object:Api::Type::String
-            name: "snatPool"
+            name: 'snatPool'
             description: The pool name. Only necessary, if using SNAT.
             default_from_api: true
       - !ruby/object:Api::Type::NestedObject
-        name: "manualLbConfig"
+        name: 'manualLbConfig'
         description: Manually configured load balancers.
         exactly_one_of:
           - loadBalancer.0.f5_config
@@ -339,31 +353,31 @@ properties:
           - loadBalancer.0.metal_lb_config
         properties:
           - !ruby/object:Api::Type::Integer
-            name: "ingressHttpNodePort"
+            name: 'ingressHttpNodePort'
             description: |
               NodePort for ingress service's http. The ingress service in the admin
               cluster is implemented as a Service of type NodePort (ex. 32527).
             default_from_api: true
           - !ruby/object:Api::Type::Integer
-            name: "ingressHttpsNodePort"
+            name: 'ingressHttpsNodePort'
             description: |
               NodePort for ingress service's https. The ingress service in the admin
               cluster is implemented as a Service of type NodePort (ex. 30139).
             default_from_api: true
           - !ruby/object:Api::Type::Integer
-            name: "controlPlaneNodePort"
+            name: 'controlPlaneNodePort'
             description: |
               NodePort for control plane service. The Kubernetes API server in the admin
               cluster is implemented as a Service of type NodePort (ex. 30968).
             default_from_api: true
           - !ruby/object:Api::Type::Integer
-            name: "konnectivityServerNodePort"
+            name: 'konnectivityServerNodePort'
             description: |
               NodePort for konnectivity server service running as a sidecar in each
               kube-apiserver pod (ex. 30564).
             default_from_api: true
       - !ruby/object:Api::Type::NestedObject
-        name: "metalLbConfig"
+        name: 'metalLbConfig'
         description: Configuration for MetalLB typed load balancers.
         exactly_one_of:
           - loadBalancer.0.f5_config
@@ -371,7 +385,7 @@ properties:
           - loadBalancer.0.metal_lb_config
         properties:
           - !ruby/object:Api::Type::Array
-            name: "addressPools"
+            name: 'addressPools'
             description: |
               AddressPools is a list of non-overlapping IP pools used by load balancer
               typed services. All addresses must be routable to load balancer nodes.
@@ -380,33 +394,34 @@ properties:
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
-                  name: "pool"
+                  name: 'pool'
                   description: |
                     The name of the address pool.
                   required: true
                 - !ruby/object:Api::Type::Array
-                  name: "addresses"
+                  name: 'addresses'
                   item_type: Api::Type::String
                   description: |
-                    The addresses that are part of this pool. Each address 
-                    must be either in the CIDR form (1.2.3.0/24) or range 
+                    The addresses that are part of this pool. Each address
+                    must be either in the CIDR form (1.2.3.0/24) or range
                     form (1.2.3.1-1.2.3.5).
                   required: true
                 - !ruby/object:Api::Type::Boolean
-                  name: "avoidBuggyIps"
+                  name: 'avoidBuggyIps'
                   description: |
                     If true, avoid using IPs ending in .0 or .255.
                     This avoids buggy consumer devices mistakenly dropping IPv4 traffic for
                     those special IP addresses.
                   default_from_api: true
                 - !ruby/object:Api::Type::Boolean
-                  name: "manualAssign"
+                  name: 'manualAssign'
                   description: |
                     If true, prevent IP addresses from being automatically assigned.
                   default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: dataplaneV2
-    description: VmwareDataplaneV2Config specifies configuration for Dataplane V2.
+    description:
+      VmwareDataplaneV2Config specifies configuration for Dataplane V2.
     default_from_api: true
     properties:
       - !ruby/object:Api::Type::Boolean
@@ -417,8 +432,9 @@ properties:
         description: Enable Dataplane V2 for clusters with Windows nodes.
       - !ruby/object:Api::Type::Boolean
         name: advancedNetworking
-        description: Enable advanced networking which requires dataplane_v2_enabled
-          to be set true.
+        description:
+          Enable advanced networking which requires dataplane_v2_enabled to be
+          set true.
   - !ruby/object:Api::Type::Boolean
     name: vmTrackingEnabled
     description: Enable VM tracking.
@@ -449,11 +465,12 @@ properties:
               description: The name of the user, e.g. `my-gcp-id@gmail.com`.
   - !ruby/object:Api::Type::NestedObject
     name: validationCheck
-    description: ValidationCheck represents the result of the preflight check job.
+    description:
+      ValidationCheck represents the result of the preflight check job.
     output: true
     properties:
       - !ruby/object:Api::Type::Enum
-        name: "options"
+        name: 'options'
         description: Options used for the validation check.
         output: true
         values:
@@ -461,20 +478,21 @@ properties:
           - SKIP_VALIDATION_CHECK_BLOCKING
           - SKIP_VALIDATION_ALL
       - !ruby/object:Api::Type::NestedObject
-        name: "status"
+        name: 'status'
         output: true
         description: |
           Specifies the detailed validation check status
         properties:
           - !ruby/object:Api::Type::Array
-            name: "result"
-            description: Individual checks which failed as part of the Preflight check
+            name: 'result'
+            description:
+              Individual checks which failed as part of the Preflight check
               execution.
             output: true
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::Enum
-                  name: "options"
+                  name: 'options'
                   description: Options used for the validation check.
                   output: true
                   values:
@@ -485,27 +503,27 @@ properties:
                     - STATE_FATAL
                     - STATE_WARNING
                 - !ruby/object:Api::Type::String
-                  name: "description"
+                  name: 'description'
                   description: |
                     The description of the validation check.
                   output: true
                 - !ruby/object:Api::Type::String
-                  name: "category"
+                  name: 'category'
                   description: |
                     The category of the validation.
                   output: true
                 - !ruby/object:Api::Type::String
-                  name: "reason"
+                  name: 'reason'
                   description: |
                     A human-readable message of the check failure.
                   output: true
                 - !ruby/object:Api::Type::String
-                  name: "details"
+                  name: 'details'
                   description: |
                     Detailed failure information, which might be unformatted.
                   output: true
       - !ruby/object:Api::Type::Enum
-        name: "scenario"
+        name: 'scenario'
         description: The scenario when the preflight checks were run..
         output: true
         values:
@@ -513,15 +531,15 @@ properties:
           - CREATE
           - UPDATE
   - !ruby/object:Api::Type::Boolean
-    name: "enableControlPlaneV2"
+    name: 'enableControlPlaneV2'
     description: Enable control plane V2. Default to false.
   - !ruby/object:Api::Type::String
-    name: "uid"
+    name: 'uid'
     description: |
       The unique identifier of the VMware User Cluster.
     output: true
   - !ruby/object:Api::Type::Enum
-    name: "state"
+    name: 'state'
     description: The current state of this cluster.
     output: true
     values:
@@ -533,32 +551,32 @@ properties:
       - ERROR
       - DEGRADED
   - !ruby/object:Api::Type::String
-    name: "endpoint"
+    name: 'endpoint'
     description: |
       The DNS name of VMware User Cluster's API server.
     output: true
   - !ruby/object:Api::Type::Boolean
-    name: "reconciling"
+    name: 'reconciling'
     description: |
       If set, there are currently changes in flight to the VMware User Cluster.
     output: true
   - !ruby/object:Api::Type::Time
-    name: "createTime"
+    name: 'createTime'
     description: |
       The time at which VMware User Cluster was created.
     output: true
   - !ruby/object:Api::Type::Time
-    name: "updateTime"
+    name: 'updateTime'
     description: |
       The time at which VMware User Cluster was last updated.
     output: true
   - !ruby/object:Api::Type::Time
-    name: "deleteTime"
+    name: 'deleteTime'
     description: |
       The time at which VMware User Cluster was deleted.
     output: true
   - !ruby/object:Api::Type::String
-    name: "localName"
+    name: 'localName'
     description: |
       The object name of the VMware OnPremUserCluster custom resource on the
       associated admin cluster. This field is used to support conflicting
@@ -573,7 +591,7 @@ properties:
       cluster controller logs.
     output: true
   - !ruby/object:Api::Type::String
-    name: "etag"
+    name: 'etag'
     description: |
       This checksum is computed by the server based on the value of other
       fields, and may be sent on update and delete requests to ensure the
@@ -587,7 +605,7 @@ properties:
     output: true
     properties:
       - !ruby/object:Api::Type::String
-        name: "membership"
+        name: 'membership'
         description: |
           The name of the managed Hub Membership resource associated to this cluster.
           Membership names are formatted as
@@ -601,31 +619,32 @@ properties:
     output: true
     properties:
       - !ruby/object:Api::Type::String
-        name: "resourcePool"
+        name: 'resourcePool'
         description: The name of the vCenter resource pool for the user cluster.
         output: true
       - !ruby/object:Api::Type::String
-        name: "datastore"
+        name: 'datastore'
         description: The name of the vCenter datastore for the user cluster.
         output: true
       - !ruby/object:Api::Type::String
-        name: "datacenter"
+        name: 'datacenter'
         description: The name of the vCenter datacenter for the user cluster.
         output: true
       - !ruby/object:Api::Type::String
-        name: "cluster"
+        name: 'cluster'
         description: The name of the vCenter cluster for the user cluster.
         output: true
       - !ruby/object:Api::Type::String
-        name: "folder"
+        name: 'folder'
         description: The name of the vCenter folder for the user cluster.
         output: true
       - !ruby/object:Api::Type::String
-        name: "caCertData"
-        description: Contains the vCenter CA certificate public key for SSL verification.
+        name: 'caCertData'
+        description:
+          Contains the vCenter CA certificate public key for SSL verification.
         output: true
       - !ruby/object:Api::Type::String
-        name: "address"
+        name: 'address'
         description: The vCenter IP address.
         output: true
   - !ruby/object:Api::Type::NestedObject
@@ -634,7 +653,7 @@ properties:
     output: true
     properties:
       - !ruby/object:Api::Type::String
-        name: "errorMessage"
+        name: 'errorMessage'
         description: |
           Human-friendly representation of the error message from the user cluster
           controller. The error message can be temporary as the user cluster
@@ -643,35 +662,35 @@ properties:
           indicate real problems requiring user intervention.
         output: true
       - !ruby/object:Api::Type::Array
-        name: "conditions"
+        name: 'conditions'
         description: |
           ResourceConditions provide a standard mechanism for higher-level status reporting from user cluster controller.
         output: true
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
-              name: "type"
+              name: 'type'
               description: |
                 Type of the condition.
                 (e.g., ClusterRunning, NodePoolRunning or ServerSidePreflightReady)
               output: true
             - !ruby/object:Api::Type::String
-              name: "reason"
+              name: 'reason'
               description: |
                 Machine-readable message indicating details about last transition.
               output: true
             - !ruby/object:Api::Type::String
-              name: "message"
+              name: 'message'
               description: |
                 Human-readable message indicating details about last transition.
               output: true
             - !ruby/object:Api::Type::Time
-              name: "lastTransitionTime"
+              name: 'lastTransitionTime'
               description: |
                 Last time the condition transit from one status to another.
               output: true
             - !ruby/object:Api::Type::Enum
-              name: "state"
+              name: 'state'
               description: The lifecycle state of the condition.
               output: true
               values:

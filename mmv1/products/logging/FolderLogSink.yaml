@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: "FolderLogSink"
+name: 'FolderLogSink'
 base_url: folders/{{folder}}/sinks
 self_link: folders/{{folder}}/sinks/{{name}}
 collection_url_key: 'sinks'
@@ -52,4 +52,3 @@ properties:
       available for export. If the field is true, then logs from all the projects, folders, and
       billing accounts contained in the sink's parent resource are also available for export.
       Whether a particular log entry from the children is exported depends on the sink's filter expression.
-

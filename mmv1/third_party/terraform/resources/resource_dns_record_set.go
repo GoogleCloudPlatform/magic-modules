@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/dns/v1"
 )
@@ -85,7 +86,7 @@ func ResourceDnsRecordSet() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 				Description:      `The name of the zone in which this record set will reside.`,
 			},
 
@@ -279,7 +280,7 @@ var healthCheckedTargetSchema *schema.Resource = &schema.Resource{
 					"network_url": {
 						Type:             schema.TypeString,
 						Required:         true,
-						DiffSuppressFunc: compareSelfLinkOrResourceName,
+						DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 						Description:      "The fully qualified url of the network in which the load balancer belongs. This should be formatted like `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`.",
 					},
 					"project": {
@@ -397,14 +398,14 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 	dnsType := d.Get("type").(string)
 
 	var resp *dns.ResourceRecordSetsListResponse
-	err = retry(func() error {
+	err = transport_tpg.Retry(func() error {
 		var reqErr error
 		resp, reqErr = config.NewDnsClient(userAgent).ResourceRecordSets.List(
 			project, zone).Name(name).Type(dnsType).Do()
 		return reqErr
 	})
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("DNS Record Set %q", d.Get("name").(string)))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("DNS Record Set %q", d.Get("name").(string)))
 	}
 	if len(resp.Rrsets) == 0 {
 		// The resource doesn't exist anymore
@@ -494,7 +495,7 @@ func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error 
 	log.Printf("[DEBUG] DNS Record delete request: %#v", chg)
 	chg, err = config.NewDnsClient(userAgent).Changes.Create(project, zone, chg).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, "google_dns_record_set")
+		return transport_tpg.HandleNotFoundError(err, d, "google_dns_record_set")
 	}
 
 	w := &DnsChangeWaiter{
@@ -769,7 +770,7 @@ func expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancerNetworkUrl(v inte
 	if err != nil {
 		return "", err
 	}
-	return ConvertSelfLinkToV1(url), nil
+	return tpgresource.ConvertSelfLinkToV1(url), nil
 }
 
 func expandDnsRecordSetRoutingPolicyPrimaryBackup(configured []interface{}, d TerraformResourceData, config *transport_tpg.Config) (*dns.RRSetRoutingPolicyPrimaryBackupPolicy, error) {

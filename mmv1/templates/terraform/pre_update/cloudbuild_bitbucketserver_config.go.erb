@@ -10,7 +10,7 @@ url, err = ReplaceVars(d, config, "{{CloudBuildBasePath}}projects/{{project}}/lo
 if err != nil {
     return err
 }
-url, err = AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 if err != nil {
     return err
 }

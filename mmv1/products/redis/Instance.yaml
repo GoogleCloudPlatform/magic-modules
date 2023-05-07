@@ -36,56 +36,56 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   resource_definition: templates/terraform/resource_definition/redis_instance.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "redis_instance_basic"
-    primary_resource_id: "cache"
+    name: 'redis_instance_basic'
+    primary_resource_id: 'cache'
     vars:
-      instance_name: "memory-cache"
+      instance_name: 'memory-cache'
   - !ruby/object:Provider::Terraform::Examples
-    name: "redis_instance_full"
-    primary_resource_id: "cache"
+    name: 'redis_instance_full'
+    primary_resource_id: 'cache'
     vars:
-      instance_name: "ha-memory-cache"
-      network_name: "redis-test-network"
+      instance_name: 'ha-memory-cache'
+      network_name: 'redis-test-network'
     test_vars_overrides:
       network_name: 'BootstrapSharedTestNetwork(t, "redis-full")'
   - !ruby/object:Provider::Terraform::Examples
-    name: "redis_instance_full_with_persistence_config"
-    primary_resource_id: "cache-persis"
+    name: 'redis_instance_full_with_persistence_config'
+    primary_resource_id: 'cache-persis'
     vars:
-      instance_name: "ha-memory-cache-persis"
-      network_name: "redis-test-network"
+      instance_name: 'ha-memory-cache-persis'
+      network_name: 'redis-test-network'
     test_vars_overrides:
       network_name: 'BootstrapSharedTestNetwork(t, "redis-full-persis")'
   - !ruby/object:Provider::Terraform::Examples
-    name: "redis_instance_private_service"
-        # Temporary for servicenetworking problems
+    name: 'redis_instance_private_service'
+    # Temporary for servicenetworking problems
     skip_vcr: true
-    primary_resource_id: "cache"
+    primary_resource_id: 'cache'
     vars:
-      instance_name: "private-cache"
-      address_name: "address"
-      network_name: "redis-test-network"
+      instance_name: 'private-cache'
+      address_name: 'address'
+      network_name: 'redis-test-network'
     test_vars_overrides:
       network_name: 'BootstrapSharedTestNetwork(t, "redis-private")'
   - !ruby/object:Provider::Terraform::Examples
-    name: "redis_instance_mrr"
-    primary_resource_id: "cache"
+    name: 'redis_instance_mrr'
+    primary_resource_id: 'cache'
     vars:
-      instance_name: "mrr-memory-cache"
-      network_name: "redis-test-network"
+      instance_name: 'mrr-memory-cache'
+      network_name: 'redis-test-network'
     test_vars_overrides:
       network_name: 'BootstrapSharedTestNetwork(t, "redis-mrr")'
   - !ruby/object:Provider::Terraform::Examples
-    name: "redis_instance_cmek"
-    primary_resource_id: "cache"
+    name: 'redis_instance_cmek'
+    primary_resource_id: 'cache'
     skip_test: true
     vars:
-      instance_name: "cmek-memory-cache"
-      network_name: "redis-test-network"
+      instance_name: 'cmek-memory-cache'
+      network_name: 'redis-test-network'
     test_vars_overrides:
       network_name: 'BootstrapSharedTestNetwork(t, "redis-cmek")'
 parameters:
-                                   # TODO: resourceref?
+  # TODO: resourceref?
   - !ruby/object:Api::Type::String
     name: 'region'
     description: |
@@ -121,7 +121,7 @@ properties:
     immutable: true
     default_from_api: true
     custom_expand: 'templates/terraform/custom_expand/redis_instance_authorized_network.erb'
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Enum
     name: connectMode
     description: |
@@ -517,4 +517,3 @@ properties:
     description: |
       Optional. The KMS key reference that you want to use to encrypt the data at rest for this Redis
       instance. If this is provided, CMEK is enabled.
-

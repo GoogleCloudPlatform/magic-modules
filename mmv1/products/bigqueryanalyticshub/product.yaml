@@ -11,8 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-!ruby/object:Api::Product
+--- !ruby/object:Api::Product
 name: BigqueryAnalyticsHub
 display_name: Bigquery Analytics Hub
 scopes:
@@ -23,7 +22,7 @@ versions:
     base_url: https://analyticshub.googleapis.com/v1beta1/
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://analyticshub.googleapis.com/v1/    
+    base_url: https://analyticshub.googleapis.com/v1/
 apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Bigquery Analytics Hub API

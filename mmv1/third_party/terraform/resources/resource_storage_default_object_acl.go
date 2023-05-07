@@ -57,8 +57,8 @@ func resourceStorageDefaultObjectAclCreateUpdate(d *schema.ResourceData, meta in
 	if err != nil {
 		return err
 	}
-	mutexKV.Lock(lockName)
-	defer mutexKV.Unlock(lockName)
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 
 	res, err := config.NewStorageClient(userAgent).Buckets.Get(bucket).Do()
 	if err != nil {
@@ -92,7 +92,7 @@ func resourceStorageDefaultObjectAclRead(d *schema.ResourceData, meta interface{
 	bucket := d.Get("bucket").(string)
 	res, err := config.NewStorageClient(userAgent).Buckets.Get(bucket).Projection("full").Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Default Storage Object ACL for Bucket %q", d.Get("bucket").(string)))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Default Storage Object ACL for Bucket %q", d.Get("bucket").(string)))
 	}
 
 	var roleEntities []string
@@ -122,8 +122,8 @@ func resourceStorageDefaultObjectAclDelete(d *schema.ResourceData, meta interfac
 	if err != nil {
 		return err
 	}
-	mutexKV.Lock(lockName)
-	defer mutexKV.Unlock(lockName)
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 
 	bucket := d.Get("bucket").(string)
 	res, err := config.NewStorageClient(userAgent).Buckets.Get(bucket).Do()

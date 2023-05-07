@@ -136,8 +136,8 @@ func resourceStorageBucketAclCreate(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return err
 	}
-	mutexKV.Lock(lockName)
-	defer mutexKV.Unlock(lockName)
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 
 	if len(predefined_acl) > 0 {
 		res, err := config.NewStorageClient(userAgent).Buckets.Get(bucket).Do()
@@ -231,7 +231,7 @@ func resourceStorageBucketAclRead(d *schema.ResourceData, meta interface{}) erro
 		res, err := config.NewStorageClient(userAgent).BucketAccessControls.List(bucket).Do()
 
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Storage Bucket ACL for bucket %q", d.Get("bucket").(string)))
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Storage Bucket ACL for bucket %q", d.Get("bucket").(string)))
 		}
 		entities := make([]string, 0, len(res.Items))
 		for _, item := range res.Items {
@@ -268,8 +268,8 @@ func resourceStorageBucketAclUpdate(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return err
 	}
-	mutexKV.Lock(lockName)
-	defer mutexKV.Unlock(lockName)
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 
 	if d.HasChange("role_entity") {
 		bkt, err := config.NewStorageClient(userAgent).Buckets.Get(bucket).Do()
@@ -366,8 +366,8 @@ func resourceStorageBucketAclDelete(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return err
 	}
-	mutexKV.Lock(lockName)
-	defer mutexKV.Unlock(lockName)
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 
 	bkt, err := config.NewStorageClient(userAgent).Buckets.Get(bucket).Do()
 	if err != nil {
