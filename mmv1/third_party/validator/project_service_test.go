@@ -1,6 +1,7 @@
 package google
 
 import (
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	"testing"
 )
 
