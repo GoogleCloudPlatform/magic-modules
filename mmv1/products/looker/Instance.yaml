@@ -52,6 +52,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::Array
         name: 'allowedEmailDomains'
+        item_type: Api::Type::String
         description: |
           Email domain allowlist for the instance.
 
@@ -59,7 +60,6 @@ properties:
           Updating this list will restart the instance. Updating the allowed email domains from terraform
           means the value provided will be considered as the entire list and not an amendment to the
           existing list of allowed email domains.
-        item_type: !ruby/object:Api::Type::String
   # Admin Settings Object - End
   - !ruby/object:Api::Type::String
     name: consumerNetwork
@@ -83,6 +83,8 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'domain'
+        description: |
+          The domain name to serve your application through.
   # Custom Domain Object - End
   # Deny Maintenance Period Object
   - !ruby/object:Api::Type::NestedObject
@@ -289,8 +291,12 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'clientId'
+        description: |
+          The client ID for the Oauth config.
       - !ruby/object:Api::Type::String
         name: 'clientSecret'
+        description: |
+          The client secret for the Oauth config.
   # Oauth Object - End
   - !ruby/object:Api::Type::Enum
     name: platformEdition
@@ -347,9 +353,15 @@ properties:
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'additionalViewerUserCount'
+        description: |
+          Number of additional Viewer Users to allocate to the Looker Instance.
       - !ruby/object:Api::Type::Integer
         name: 'additionalStandardUserCount'
+        description: |
+          Number of additional Standard Users to allocate to the Looker Instance.
       - !ruby/object:Api::Type::Integer
         name: 'additionalDeveloperUserCount'
+        description: |
+          Number of additional Developer Users to allocate to the Looker Instance.
   # UserMetadata Object - End
 
