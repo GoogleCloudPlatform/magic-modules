@@ -85,7 +85,7 @@ parameters:
     required: true
     url_param_only: true
     ignore_read: true
-    diff_suppress_func: compareResourceNames
+    diff_suppress_func: tpgresource.CompareResourceNames
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'port'

@@ -83,7 +83,7 @@ properties:
       this API has been activated. If none is provided, "default" will be
       used.
     default_from_api: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: 'cidrBlock'
     immutable: true

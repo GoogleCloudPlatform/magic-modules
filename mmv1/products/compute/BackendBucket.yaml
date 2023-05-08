@@ -251,7 +251,7 @@ properties:
     name: 'edgeSecurityPolicy'
     description: |
       The security policy associated with this backend bucket.
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Array
     name: 'customResponseHeaders'
     description: |
