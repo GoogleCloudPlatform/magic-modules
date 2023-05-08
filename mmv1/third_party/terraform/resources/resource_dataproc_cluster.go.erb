@@ -218,8 +218,12 @@ func ResourceDataprocCluster() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				// GCP automatically adds labels
-				DiffSuppressFunc: resourceDataprocLabelDiffSuppress,
+				Description: `The list of labels (key/value pairs) to be applied to instances in the cluster. GCP generates some itself including goog-dataproc-cluster-name which is the name of the cluster.`,
+			},
+
+			"effective_labels": {
+				Type:     schema.TypeMap,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed:    true,
 				Description: `The list of labels (key/value pairs) to be applied to instances in the cluster. GCP generates some itself including goog-dataproc-cluster-name which is the name of the cluster.`,
 			},
@@ -2083,8 +2087,30 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("region", region); err != nil {
 		return fmt.Errorf("Error setting region: %s", err)
 	}
-	if err := d.Set("labels", cluster.Labels); err != nil {
-		return fmt.Errorf("Error setting labels: %s", err)
+
+
+	log.Printf("[DEBUG] cluster.Labels %#v", cluster.Labels)
+
+	log.Printf("[DEBUG] labels in state before %#v", d.Get("labels"))
+
+	clusterLabels := make(map[string]interface{})
+
+	if v, ok := d.GetOk("labels"); ok {
+		if cluster.Labels != nil {
+			for k, _ := range v.(map[string]interface{}) {
+				clusterLabels[k] = cluster.Labels[k]
+			}
+		}
+
+		if err := d.Set("labels", clusterLabels); err != nil {
+			return fmt.Errorf("Error setting labels: %s", err)
+		}
+	}
+
+	log.Printf("[DEBUG] labels in state after %#v", d.Get("labels"))
+
+	if err := d.Set("effective_labels", cluster.Labels); err != nil {
+		return fmt.Errorf("Error setting effective_labels: %s", err)
 	}
 
 	var cfg []map[string]interface{}
