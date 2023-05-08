@@ -556,6 +556,7 @@ properties:
                         The different types of medium supported for EmptyDir.
                       values:
                         - :MEMORY
+                      default_value: :MEMORY
                     - !ruby/object:Api::Type::String
                       name: 'sizeLimit'
                       description: |-
