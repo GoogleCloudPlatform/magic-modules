@@ -174,9 +174,9 @@ func TestAccDataflowFlexTemplateJob_withNetwork(t *testing.T) {
 	topic := "tf-test-topic" + randStr
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowFlexTemplateJob_network(job, network1, bucket, topic),
@@ -223,9 +223,9 @@ func TestAccDataflowFlexTemplateJob_withSubNetwork(t *testing.T) {
 	topic := "tf-test-topic" + randStr
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowFlexTemplateJob_subnetwork(job, network, subnetwork1, bucket, topic),
@@ -271,9 +271,9 @@ func TestAccDataflowFlexTemplateJob_withIpConfig(t *testing.T) {
 	subnetwork := "tf-test-dataflow-subnetwork" + randStr
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowFlexTemplateJob_ipConfig(job, network, subnetwork, bucket, topic),
@@ -305,9 +305,9 @@ func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 	topic := "tf-test-topic" + randStr
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowFlexTemplateJob_kms(job, key_ring, crypto_key, bucket, topic),
@@ -338,9 +338,9 @@ func TestAccDataflowFlexTemplateJob_withAdditionalExperiments(t *testing.T) {
 	topic := "tf-test-topic" + randStr
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowFlexTemplateJob_additionalExperiments(job, bucket, topic, additionalExperiments),
