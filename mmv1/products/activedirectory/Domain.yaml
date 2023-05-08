@@ -16,7 +16,7 @@ name: 'Domain'
 kind: 'activedirectory#domain'
 base_url: projects/{{project}}/locations/global/domains
 create_url: projects/{{project}}/locations/global/domains?domainName={{domain_name}}
-delete_url: projects/{{project}}/locations/global/domains/{{domain_name}} # equivalent to {{name}}, but makes sweepers work
+delete_url: projects/{{project}}/locations/global/domains/{{domain_name}}  # equivalent to {{name}}, but makes sweepers work
 update_verb: :PATCH
 update_mask: true
 self_link: '{{name}}'

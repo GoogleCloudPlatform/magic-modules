@@ -13,8 +13,8 @@ lockName, err := ReplaceVars(d, config, "apps/{{project}}/services/{{service}}")
 if err != nil {
 	return err
 }
-mutexKV.Lock(lockName)
-defer mutexKV.Unlock(lockName)
+transport_tpg.MutexStore.Lock(lockName)
+defer transport_tpg.MutexStore.Unlock(lockName)
 
 if d.Get("delete_service_on_destroy") == true {
 	url, err := ReplaceVars(d, config, "{{AppEngineBasePath}}apps/{{project}}/services/{{service}}")

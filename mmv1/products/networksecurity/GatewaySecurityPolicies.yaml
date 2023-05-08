@@ -22,7 +22,7 @@ update_mask: true
 description: |
   The GatewaySecurityPolicy resource contains a collection of GatewaySecurityPolicyRules and associated metadata.
 references:
-  !ruby/object:Api::Resource::ReferenceLinks # TODO(felipegc): change the url to beta once it is available.
+  !ruby/object:Api::Resource::ReferenceLinks  # TODO(felipegc): change the url to beta once it is available.
   api: 'https://cloud.google.com/secure-web-proxy/docs/reference/network-security/rest/v1alpha1/projects.locations.gatewaySecurityPolicies'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation

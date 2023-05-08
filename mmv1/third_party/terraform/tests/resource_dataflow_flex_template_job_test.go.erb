@@ -13,6 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
@@ -1203,7 +1205,7 @@ func testAccDataflowFlexJobHasOption(t *testing.T, res, option, expectedValue st
 			return fmt.Errorf("dataflow job does not exist")
 		}
 
-		sdkPipelineOptions, err := ConvertToMap(job.Environment.SdkPipelineOptions)
+		sdkPipelineOptions, err := tpgresource.ConvertToMap(job.Environment.SdkPipelineOptions)
 		if err != nil {
 			return fmt.Errorf("error from ConvertToMap: %s", err)
 		}

@@ -334,4 +334,4 @@ properties:
         description: |
           Primary disk for asynchronous disk replication.
         required: true
-    diff_suppress_func: 'compareSelfLinkRelativePaths'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'

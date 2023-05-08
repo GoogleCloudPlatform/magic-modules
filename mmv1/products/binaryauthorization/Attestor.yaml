@@ -81,7 +81,7 @@ properties:
         required: true
         immutable: true
         custom_expand: 'templates/terraform/custom_expand/container_analysis_note.erb'
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
       - !ruby/object:Api::Type::Array
         name: publicKeys
         description: |

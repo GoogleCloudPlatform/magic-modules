@@ -150,7 +150,7 @@ properties:
                     Apply transformation to all findings not specified in other
                     ImageTransformation's selectedInfoTypes.
                   properties:
-                    [] # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#allinfotypes
+                    []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#allinfotypes
                     # The fields below are necessary to include the "allInfoTypes" transformation in the payload
                   send_empty_value: true
                   allow_empty_object: true
@@ -160,7 +160,7 @@ properties:
                     Apply transformation to all text that doesn't match an
                     infoType.
                   properties:
-                    [] # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#alltext
+                    []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#alltext
                     # The fields below are necessary to include the "allText" transformation in the payload
                   send_empty_value: true
                   allow_empty_object: true
@@ -532,11 +532,11 @@ properties:
                           description: |
                             Common alphabets.
                           values:
-                            - :FFX_COMMON_NATIVE_ALPHABET_UNSPECIFIED #Unused.
-                            - :NUMERIC #[0-9] (radix of 10)
-                            - :HEXADECIMAL #[0-9A-F] (radix of 16)
-                            - :UPPER_CASE_ALPHA_NUMERIC #[0-9A-Z] (radix of 36)
-                            - :ALPHA_NUMERIC #[0-9A-Za-z] (radix of 62)
+                            - :FFX_COMMON_NATIVE_ALPHABET_UNSPECIFIED  # Unused.
+                            - :NUMERIC  # [0-9] (radix of 10)
+                            - :HEXADECIMAL  # [0-9A-F] (radix of 16)
+                            - :UPPER_CASE_ALPHA_NUMERIC  # [0-9A-Z] (radix of 36)
+                            - :ALPHA_NUMERIC  # [0-9A-Za-z] (radix of 62)
                         - !ruby/object:Api::Type::String
                           name: 'customAlphabet'
                           description: |
@@ -687,7 +687,7 @@ properties:
                                             validation:
                                               !ruby/object:Provider::Terraform::Validation
                                               function:
-                                                'validation.IntBetween(0, 24)' # "An API may choose to allow the value "24:00:00" for scenarios like business closing time."
+                                                'validation.IntBetween(0, 24)'  # "An API may choose to allow the value "24:00:00" for scenarios like business closing time."
                                           - !ruby/object:Api::Type::Integer
                                             name: minutes
                                             description:
@@ -707,7 +707,7 @@ properties:
                                             validation:
                                               !ruby/object:Provider::Terraform::Validation
                                               function:
-                                                'validation.IntBetween(0, 60)' # "An API may allow the value 60 if it allows leap-seconds."
+                                                'validation.IntBetween(0, 60)'  # "An API may allow the value 60 if it allows leap-seconds."
                                           - !ruby/object:Api::Type::Integer
                                             name: nanos
                                             description:
@@ -816,7 +816,7 @@ properties:
                                     Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
                                   validation:
                                     !ruby/object:Provider::Terraform::Validation
-                                    function: 'validation.IntBetween(0, 24)' # "An API may choose to allow the value "24:00:00" for scenarios like business closing time."
+                                    function: 'validation.IntBetween(0, 24)'  # "An API may choose to allow the value "24:00:00" for scenarios like business closing time."
                                 - !ruby/object:Api::Type::Integer
                                   name: minutes
                                   description:
@@ -833,7 +833,7 @@ properties:
                                     the value 60 if it allows leap-seconds.
                                   validation:
                                     !ruby/object:Provider::Terraform::Validation
-                                    function: 'validation.IntBetween(0, 60)' # "An API may allow the value 60 if it allows leap-seconds."
+                                    function: 'validation.IntBetween(0, 60)'  # "An API may allow the value 60 if it allows leap-seconds."
                                 - !ruby/object:Api::Type::Integer
                                   name: nanos
                                   description:
@@ -889,7 +889,7 @@ properties:
                       name: redactConfig
                       description: |
                         Redact a given value. For example, if used with an InfoTypeTransformation transforming PHONE_NUMBER, and input 'My phone number is 206-555-0123', the output would be 'My phone number is '.
-                      properties: [] # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#redactconfig
+                      properties: []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#redactconfig
                       # The fields below are necessary to include the "redactConfig" transformation in the payload
                       # A side-effect is null values when the field is unused, see: https://github.com/hashicorp/terraform-provider-google/issues/13201
                       send_empty_value: true
@@ -1043,11 +1043,11 @@ properties:
                           description: |
                             Common alphabets.
                           values:
-                            - :FFX_COMMON_NATIVE_ALPHABET_UNSPECIFIED #Unused.
-                            - :NUMERIC #[0-9] (radix of 10)
-                            - :HEXADECIMAL #[0-9A-F] (radix of 16)
-                            - :UPPER_CASE_ALPHA_NUMERIC #[0-9A-Z] (radix of 36)
-                            - :ALPHA_NUMERIC #[0-9A-Za-z] (radix of 62)
+                            - :FFX_COMMON_NATIVE_ALPHABET_UNSPECIFIED  # Unused.
+                            - :NUMERIC  # [0-9] (radix of 10)
+                            - :HEXADECIMAL  # [0-9A-F] (radix of 16)
+                            - :UPPER_CASE_ALPHA_NUMERIC  # [0-9A-Z] (radix of 36)
+                            - :ALPHA_NUMERIC  # [0-9A-Za-z] (radix of 62)
                         - !ruby/object:Api::Type::String
                           name: 'customAlphabet'
                           description: |
@@ -1518,12 +1518,12 @@ properties:
                           name: partToExtract
                           description: The part of the time to keep.
                           values:
-                            - :YEAR # [0-9999]
-                            - :MONTH # [1-12]
-                            - :DAY_OF_MONTH # [1-31]
-                            - :DAY_OF_WEEK # [1-7]
-                            - :WEEK_OF_YEAR # [1-53]
-                            - :HOUR_OF_DAY # [0-23]
+                            - :YEAR  # [0-9999]
+                            - :MONTH  # [1-12]
+                            - :DAY_OF_MONTH  # [1-31]
+                            - :DAY_OF_WEEK  # [1-7]
+                            - :WEEK_OF_YEAR  # [1-53]
+                            - :HOUR_OF_DAY  # [0-23]
                     - !ruby/object:Api::Type::NestedObject
                       name: cryptoHashConfig
                       description: |

@@ -124,7 +124,7 @@ parameters:
           (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
           `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
           See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
       - !ruby/object:Api::Type::String
         name: 'kmsKeyServiceAccount'
         description: |
@@ -185,7 +185,7 @@ parameters:
           (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
           `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
           See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
       - !ruby/object:Api::Type::String
         name: 'kmsKeyServiceAccount'
         description: |
@@ -229,7 +229,7 @@ parameters:
           (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
           `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
           See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
       - !ruby/object:Api::Type::String
         name: 'sha256'
         description: |
@@ -443,4 +443,4 @@ properties:
         description: |
           Primary disk for asynchronous disk replication.
         required: true
-    diff_suppress_func: 'compareSelfLinkRelativePaths'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'

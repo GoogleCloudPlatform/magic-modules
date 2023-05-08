@@ -70,7 +70,7 @@ properties:
             This should be formatted like
             `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
           custom_expand: templates/terraform/custom_expand/network_full_url.erb
-          diff_suppress_func: 'compareSelfLinkOrResourceName'
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Array
     name: 'gkeClusters'
     description:
