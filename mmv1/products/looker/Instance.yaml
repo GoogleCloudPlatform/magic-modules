@@ -286,6 +286,7 @@ properties:
   # Oauth Object
   - !ruby/object:Api::Type::NestedObject
     name: oauthConfig
+    ignore_read: true
     description: |
       Looker Instance OAuth login settings.
     properties:
