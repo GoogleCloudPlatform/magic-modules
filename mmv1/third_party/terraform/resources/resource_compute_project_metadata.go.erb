@@ -89,9 +89,9 @@ func resourceComputeProjectMetadataRead(d *schema.ResourceData, meta interface{}
 	}
 
 	// At import time, we have no state to draw from. We'll wrongly pull the
-	// provider default project if we use a normal tpgresource.GetProject, so we need to
+	// provider default project if we use a normal GetProject, so we need to
 	// rely on the `id` field being set to the project.
-	// At any other time we can use tpgresource.GetProject, as state will have the correct
+	// At any other time we can use GetProject, as state will have the correct
 	// value; the project pulled from config / the provider / at import time.
 	//
 	// Note that if a user imports a project other than their provider project

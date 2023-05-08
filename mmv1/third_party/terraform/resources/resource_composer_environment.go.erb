@@ -944,11 +944,11 @@ func resourceComposerEnvironmentRead(d *schema.ResourceData, meta interface{}) e
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComposerEnvironment %q", d.Id()))
 	}
 
-	// Set from tpgresource.GetProject(d)
+	// Set from GetProject(d)
 	if err := d.Set("project", envName.Project); err != nil {
 		return fmt.Errorf("Error setting Environment: %s", err)
 	}
-	// Set from tpgresource.GetRegion(d)
+	// Set from GetRegion(d)
 	if err := d.Set("region", envName.Region); err != nil {
 		return fmt.Errorf("Error setting Environment: %s", err)
 	}

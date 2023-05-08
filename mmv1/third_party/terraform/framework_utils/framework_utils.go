@@ -61,7 +61,7 @@ func generateFrameworkUserAgentString(metaData *ProviderMetaModel, currUserAgent
 	return currUserAgent
 }
 
-// tpgresource.GetProject reads the "project" field from the given resource and falls
+// GetProject reads the "project" field from the given resource and falls
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
 func getProjectFramework(rVal, pVal types.String, diags *diag.Diagnostics) types.String {

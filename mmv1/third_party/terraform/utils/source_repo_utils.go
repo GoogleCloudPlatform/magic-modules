@@ -8,7 +8,7 @@ import (
 )
 
 func expandSourceRepoRepositoryPubsubConfigsTopic(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (string, error) {
-	// short-circuit if the topic is a full uri so we don't need to tpgresource.GetProject
+	// short-circuit if the topic is a full uri so we don't need to GetProject
 	ok, err := regexp.MatchString(PubsubTopicRegex, v.(string))
 	if err != nil {
 		return "", err
