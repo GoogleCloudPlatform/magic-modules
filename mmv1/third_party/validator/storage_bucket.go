@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 	"google.golang.org/api/storage/v1"
 )
@@ -26,7 +27,7 @@ func resourceConverterStorageBucket() ResourceConverter {
 	}
 }
 
-func GetStorageBucketCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetStorageBucketCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//storage.googleapis.com/{{name}}")
 	if err != nil {
 		return []Asset{}, err
@@ -47,8 +48,8 @@ func GetStorageBucketCaiObject(d TerraformResourceData, config *transport_tpg.Co
 	}
 }
 
-func GetStorageBucketApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
-	project, _ := getProject(d, config)
+func GetStorageBucketApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+	project, _ := tpgresource.GetProject(d, config)
 
 	// Get the bucket and location
 	bucket := d.Get("name").(string)
@@ -57,7 +58,7 @@ func GetStorageBucketApiObject(d TerraformResourceData, config *transport_tpg.Co
 	// Create a bucket, setting the labels, location and name.
 	sb := &storage.Bucket{
 		Name:             bucket,
-		Labels:           expandLabels(d),
+		Labels:           tpgresource.ExpandLabels(d),
 		Location:         location,
 		IamConfiguration: expandIamConfiguration(d),
 	}
@@ -218,7 +219,7 @@ func expandBucketRetentionPolicy(configured interface{}) *storage.BucketRetentio
 	return bucketRetentionPolicy
 }
 
-func resourceGCSBucketLifecycleCreateOrUpdate(d TerraformResourceData, sb *storage.Bucket) error {
+func resourceGCSBucketLifecycleCreateOrUpdate(d tpgresource.TerraformResourceData, sb *storage.Bucket) error {
 	if v, ok := d.GetOk("lifecycle_rule"); ok {
 		lifecycle_rules := v.([]interface{})
 
@@ -294,7 +295,7 @@ func resourceGCSBucketLifecycleCreateOrUpdate(d TerraformResourceData, sb *stora
 	return nil
 }
 
-func expandIamConfiguration(d TerraformResourceData) *storage.BucketIamConfiguration {
+func expandIamConfiguration(d tpgresource.TerraformResourceData) *storage.BucketIamConfiguration {
 	return &storage.BucketIamConfiguration{
 		ForceSendFields: []string{"UniformBucketLevelAccess"},
 		UniformBucketLevelAccess: &storage.BucketIamConfigurationUniformBucketLevelAccess{

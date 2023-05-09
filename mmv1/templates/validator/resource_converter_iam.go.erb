@@ -37,6 +37,7 @@ package google
 import (
   "fmt"
 
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
   transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
@@ -71,15 +72,15 @@ func resourceConverter<%= resource_name -%>IamMember() ResourceConverter {
     }
 }
 
-func Get<%= resource_name -%>IamPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func Get<%= resource_name -%>IamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return new<%= resource_name -%>IamAsset(d, config, expandIamPolicyBindings)
 }
 
-func Get<%= resource_name -%>IamBindingCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func Get<%= resource_name -%>IamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return new<%= resource_name -%>IamAsset(d, config, expandIamRoleBindings)
 }
 
-func Get<%= resource_name -%>IamMemberCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func Get<%= resource_name -%>IamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return new<%= resource_name -%>IamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -105,9 +106,9 @@ func Merge<%= resource_name -%>IamMemberDelete(existing, incoming Asset) Asset {
 }
 
 func new<%= resource_name -%>IamAsset(
-	d TerraformResourceData,
+	d tpgresource.TerraformResourceData,
 	config *transport_tpg.Config,
-	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
+	expandBindings func(d tpgresource.TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
@@ -128,7 +129,7 @@ func new<%= resource_name -%>IamAsset(
 	}}, nil
 }
 
-func Fetch<%= resource_name -%>IamPolicy(d TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
+func Fetch<%= resource_name -%>IamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
 	// Check if the identity field returns a value
   <% resource_params.each do |param| -%>
   if _, ok := d.GetOk("<%= param.underscore -%>"); !ok {

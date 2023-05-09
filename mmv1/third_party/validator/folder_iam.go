@@ -3,6 +3,7 @@ package google
 import (
 	"fmt"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
@@ -34,15 +35,15 @@ func resourceConverterFolderIamMember() ResourceConverter {
 	}
 }
 
-func GetFolderIamPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetFolderIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newFolderIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetFolderIamBindingCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetFolderIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newFolderIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetFolderIamMemberCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetFolderIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newFolderIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -68,9 +69,9 @@ func MergeFolderIamMemberDelete(existing, incoming Asset) Asset {
 }
 
 func newFolderIamAsset(
-	d TerraformResourceData,
+	d tpgresource.TerraformResourceData,
 	config *transport_tpg.Config,
-	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
+	expandBindings func(d tpgresource.TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
@@ -92,7 +93,7 @@ func newFolderIamAsset(
 	}}, nil
 }
 
-func FetchFolderIamPolicy(d TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
+func FetchFolderIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
 	if _, ok := d.GetOk("folder"); !ok {
 		return Asset{}, ErrEmptyIdentityField
 	}
