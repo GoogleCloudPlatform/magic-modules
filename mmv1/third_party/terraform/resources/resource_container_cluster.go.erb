@@ -74,7 +74,6 @@ var (
 		"addons_config.0.horizontal_pod_autoscaling",
 		"addons_config.0.network_policy_config",
 		"addons_config.0.cloudrun_config",
-		"addons_config.0.gcp_filestore_csi_driver_config",
 		"addons_config.0.gcs_fuse_csi_driver_config",
 		"addons_config.0.dns_cache_config",
 		"addons_config.0.gce_persistent_disk_csi_driver_config",
@@ -83,6 +82,7 @@ var (
 	<% unless version == 'ga' -%>
 		"addons_config.0.istio_config",
 		"addons_config.0.kalm_config",
+		"addons_config.0.gcp_filestore_csi_driver_config",
 	<% end -%>
 	}
 
