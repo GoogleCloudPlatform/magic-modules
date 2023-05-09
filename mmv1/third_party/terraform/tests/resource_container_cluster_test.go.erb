@@ -3897,9 +3897,6 @@ resource "google_container_cluster" "primary" {
     gcp_filestore_csi_driver_config {
       enabled = false
     }
-    gcs_fuse_csi_driver_config {
-      enabled = false
-    }
     cloudrun_config {
       disabled = true
     }
@@ -3923,6 +3920,9 @@ resource "google_container_cluster" "primary" {
     kalm_config {
 	  enabled = false
 	}
+	gcs_fuse_csi_driver_config {
+      enabled = false
+    }
 <% end -%>
   }
 }
@@ -3959,9 +3959,6 @@ resource "google_container_cluster" "primary" {
     gcp_filestore_csi_driver_config {
       enabled = true
     }
-    gcs_fuse_csi_driver_config {
-      enabled = true
-    }
     cloudrun_config {
 	  # https://github.com/hashicorp/terraform-provider-google/issues/11943
       # disabled = false
@@ -3987,6 +3984,9 @@ resource "google_container_cluster" "primary" {
 	kalm_config {
 	  enabled = true
 	}
+	gcs_fuse_csi_driver_config {
+      enabled = true
+    }
 <% end -%>
   }
 }
