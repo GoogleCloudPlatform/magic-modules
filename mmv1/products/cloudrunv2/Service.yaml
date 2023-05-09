@@ -106,6 +106,7 @@ examples:
       secret_id: 'secret-1'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_multicontainer'
+    min_version: 'beta'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service%s\", context[\"\
       random_suffix\"])"
@@ -585,6 +586,7 @@ properties:
               name: 'dependsOn'
               description: |-
                 Containers which should be started before this container. If specified the container will wait to start until all containers with the listed names are healthy.
+              min_version: beta
               item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'volumes'
@@ -653,6 +655,7 @@ properties:
               name: 'emptyDir'
               description: |-
                 Ephemeral storage used as a shared volume.
+              min_version: beta
               # exactly_one_of:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance

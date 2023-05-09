@@ -95,6 +95,7 @@ examples:
       secret_id: 'secret'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_emptydir'
+    min_version: 'beta'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-job%s\", context[\"random_suffix\"\
       ])"
@@ -545,6 +546,7 @@ properties:
                   name: 'emptyDir'
                   description: |-
                     Ephemeral storage used as a shared volume.
+                  min_version: beta
                   # exactly_one_of:
                   #   - template.0.template.0.volumes.0.secret
                   #   - template.0.template.0.volumes.0.cloudSqlInstance

@@ -1,8 +1,9 @@
 resource "google_cloud_run_v2_service" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
   name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
   location = "us-central1"
-  ingress = "INGRESS_TRAFFIC_ALL"
   launch_stage = "BETA"
+  ingress = "INGRESS_TRAFFIC_ALL"
   template {
     containers {
       name = "hello-1"
