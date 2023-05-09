@@ -163,7 +163,6 @@ func TestRfc3339TimeDiffSuppress(t *testing.T) {
 	}
 }
 
-<<<<<<< HEAD
 func TestGetProject(t *testing.T) {
 	cases := map[string]struct {
 		ResourceConfig  map[string]interface{}
@@ -222,8 +221,6 @@ func TestGetProject(t *testing.T) {
 	}
 }
 
-=======
->>>>>>> f24185623 (Move utils_test.go back to the google package)
 func TestGetLocation(t *testing.T) {
 	cases := map[string]struct {
 		ResourceConfig   map[string]interface{}
@@ -373,7 +370,6 @@ func TestGetLocation(t *testing.T) {
 	}
 }
 
-<<<<<<< HEAD
 func TestGetZone(t *testing.T) {
 	cases := map[string]struct {
 		ResourceConfig map[string]interface{}
@@ -592,8 +588,6 @@ func TestGetRegion(t *testing.T) {
 	}
 }
 
-=======
->>>>>>> f24185623 (Move utils_test.go back to the google package)
 func TestGetRegionFromZone(t *testing.T) {
 	expected := "us-central1"
 	actual := GetRegionFromZone("us-central1-f")
