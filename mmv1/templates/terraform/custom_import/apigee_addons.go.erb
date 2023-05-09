@@ -27,7 +27,7 @@ if err := d.Set("org", projectId); err != nil {
 }
 
 // Replace import id for the resource id
-id, err := ReplaceVars(d, config, "organizations/{{org}}")
+id, err := tpgresource.ReplaceVars(d, config, "organizations/{{org}}")
 if err != nil {
 	return nil, fmt.Errorf("Error constructing id: %s", err)
 }
