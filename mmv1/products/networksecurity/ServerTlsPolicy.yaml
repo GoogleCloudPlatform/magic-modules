@@ -57,6 +57,12 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: 'network_security_server_tls_policy_server_cert'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-server-tls-policy'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
