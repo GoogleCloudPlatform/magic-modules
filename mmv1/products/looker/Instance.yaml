@@ -73,19 +73,6 @@ properties:
       The time the instance was created in RFC3339 UTC "Zulu" format,
       accurate to nanoseconds.
     output: true
-  # Custom Domian Object
-  - !ruby/object:Api::Type::NestedObject
-    name: customDomain
-    description: |
-      Looker (Google Cloud core) lets you serve your application
-      through a custom domain. If you use a custom domain, Google
-      will provide a managed auto-renewing SSL certificate for security.
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'domain'
-        description: |
-          The domain name to serve your application through.
-  # Custom Domain Object - End
   # Deny Maintenance Period Object
   - !ruby/object:Api::Type::NestedObject
     name: denyMaintenancePeriod
