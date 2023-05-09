@@ -3,6 +3,7 @@ package google
 import (
 	"fmt"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
@@ -34,15 +35,15 @@ func resourceConverterSpannerDatabaseIamMember() ResourceConverter {
 	}
 }
 
-func GetSpannerDatabaseIamPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetSpannerDatabaseIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newSpannerDatabaseIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetSpannerDatabaseIamBindingCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetSpannerDatabaseIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newSpannerDatabaseIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetSpannerDatabaseIamMemberCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetSpannerDatabaseIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newSpannerDatabaseIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -68,9 +69,9 @@ func MergeSpannerDatabaseIamMemberDelete(existing, incoming Asset) Asset {
 }
 
 func newSpannerDatabaseIamAsset(
-	d TerraformResourceData,
+	d tpgresource.TerraformResourceData,
 	config *transport_tpg.Config,
-	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
+	expandBindings func(d tpgresource.TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
@@ -91,7 +92,7 @@ func newSpannerDatabaseIamAsset(
 	}}, nil
 }
 
-func FetchSpannerDatabaseIamPolicy(d TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
+func FetchSpannerDatabaseIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("instance"); !ok {
 		return Asset{}, ErrEmptyIdentityField

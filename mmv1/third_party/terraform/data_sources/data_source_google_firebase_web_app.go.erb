@@ -28,7 +28,7 @@ func DataSourceGoogleFirebaseWebApp() *schema.Resource {
 func dataSourceGoogleFirebaseWebAppRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	appId := d.Get("app_id")
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
