@@ -16,7 +16,7 @@ autogen_exception
 # limitations under the License.
 
 <%
-  product_name = generate_product_name(product.name)
+  product_name = product_name(product.name)
 -%>
 apiVersion: core.cnrm.cloud.google.com/v1alpha1
 kind: ServiceMapping
@@ -32,7 +32,7 @@ spec:
   product.objects.reject { |r| r.exclude || r.exclude_resource || r.not_in_version?(product.version_obj_or_closest(version)) }.each do |object|
     if object.legacy_name.nil?
       if product.legacy_name.nil?
-        terraform_name = "google_" + (product.name + object.name).underscore
+        terraform_name = "google_" + (product.name + object.name.upcase_first).underscore
       else
         terraform_name = "google_" + product.legacy_name + '_' + object.name.underscore
       end
@@ -40,7 +40,7 @@ spec:
       terraform_name = object.legacy_name
     end
 
-    object_name = generate_object_name(object.name)
+    object_name = object_name(object.name)
 -%>
     - name: <%= terraform_name %>
       kind: <%= "#{product_name}#{object_name}" %>
@@ -132,7 +132,7 @@ spec:
             kind: <%= "#{product_name}#{reference.resource}" %>
             version: v1beta1
             group: <%= product_name.downcase %>.cnrm.cloud.google.com
-          targetField: <%= reference.imports %>
+          targetField: <%= reference.imports.underscore %>
 <%  if references_in_parameters.any? {|r| r.name == reference.name } -%>
           parent: true
 <%  end -%>
