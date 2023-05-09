@@ -273,6 +273,8 @@ module Provider
                         'third_party/terraform/transport/header_transport.go'],
                        ['converters/google/resources/transport/bigtable_client_factory.go',
                         'third_party/terraform/transport/bigtable_client_factory.go'],
+                       ['converters/google/resources/tpgresource/common_operation.go',
+                        'third_party/terraform/tpgresource/common_operation.go'],
                        ['converters/google/resources/common_operation.go',
                         'third_party/terraform/utils/common_operation.go'],
                        ['converters/google/resources/convert.go',
