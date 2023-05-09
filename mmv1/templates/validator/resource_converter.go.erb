@@ -17,6 +17,7 @@ import (
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
   "google.golang.org/api/bigtableadmin/v2"
 
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
   transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
@@ -47,7 +48,7 @@ func resourceConverter<%= resource_name -%>() ResourceConverter {
     }
 }
 
-func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func Get<%= resource_name -%>CaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
     name, err := assetName(d, config, "<%= asset_name_template -%>")
     if err != nil {
         return []Asset{}, err
@@ -68,7 +69,7 @@ func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *transpor
     }
 }
 
-func Get<%= resource_name -%>ApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+func Get<%= resource_name -%>ApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
     obj := make(map[string]interface{})
 <%  object.settable_properties.each do |prop| -%>
 <%    if prop.flatten_object -%>
@@ -79,7 +80,7 @@ func Get<%= resource_name -%>ApiObject(d TerraformResourceData, config *transpor
     if err != nil {
         return nil, err
 <%      unless prop.send_empty_value -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !tpgresource.IsEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
 <%      else -%>
     } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
 <%      end -%>
@@ -95,7 +96,7 @@ func Get<%= resource_name -%>ApiObject(d TerraformResourceData, config *transpor
 }
 
 <% if object.custom_code.encoder -%>
-func resource<%= resource_name -%>Encoder(d TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+func resource<%= resource_name -%>Encoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
 <%= lines(compile(pwd + '/' + object.custom_code.encoder)) -%>
 }
 <% end -%>
