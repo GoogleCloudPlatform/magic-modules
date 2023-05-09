@@ -431,23 +431,23 @@ func defaultProviderCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, 
 	if err != nil {
 		return fmt.Errorf("Failed to retrieve project, pid: %s, err: %s", project, err)
 	}
-	diff.SetNew("project", project)
-	//region
-	if region := diff.Get("region"); region != nil {
-		region, err := getRegionFromDiff(diff, config)
-		if err != nil {
-			return fmt.Errorf("Failed to retrieve region, pid: %s, err: %s", region, err)
-		}
-		diff.SetNew("region", region)
-	}
+	// diff.SetNew("project", project)
+	// //region
+	// if region := diff.Get("region"); region != nil {
+	// 	region, err := getRegionFromDiff(diff, config)
+	// 	if err != nil {
+	// 		return fmt.Errorf("Failed to retrieve region, pid: %s, err: %s", region, err)
+	// 	}
+	// 	diff.SetNew("region", region)
+	// }
 	//zone
-	if zone := diff.Get("zone"); zone != nil {
-		zone, err := getZoneFromDiff(diff, config)
-		if err != nil {
-			return fmt.Errorf("Failed to retrieve zone, pid: %s, err: %s", zone, err)
-		}
-		diff.SetNew("zone", zone)
-	}
+	// if zone := diff.Get("zone"); zone != nil {
+	// 	zone, err := getZoneFromDiff(diff, config)
+	// 	if err != nil {
+	// 		return fmt.Errorf("Failed to retrieve zone, pid: %s, err: %s", zone, err)
+	// 	}
+	// 	diff.SetNew("zone", zone)
+	// }
 
 	return nil
 }
