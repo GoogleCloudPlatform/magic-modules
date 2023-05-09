@@ -8,5 +8,5 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
   if err != nil {
     return "", err
   }
-  return ConvertSelfLinkToV1(url), nil
+  return tpgresource.ConvertSelfLinkToV1(url), nil
 }

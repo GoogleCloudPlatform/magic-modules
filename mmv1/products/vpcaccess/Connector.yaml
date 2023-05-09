@@ -79,7 +79,7 @@ properties:
       - subnet.0.name
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.erb'
-    diff_suppress_func: 'compareResourceNames'
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
     default_from_api: true
   - !ruby/object:Api::Type::String
     name: ipCidrRange

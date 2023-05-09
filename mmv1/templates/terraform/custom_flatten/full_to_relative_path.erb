@@ -2,7 +2,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	if v == nil {
 		return v
 	}
-	relative, err := getRelativePath(v.(string))
+	relative, err := tpgresource.GetRelativePath(v.(string))
 	if err != nil {
 		return v
 	}

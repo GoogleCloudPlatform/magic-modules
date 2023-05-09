@@ -202,7 +202,7 @@ properties:
             instance is connected.
           required: true
           immutable: true
-          diff_suppress_func: 'compareSelfLinkOrResourceName'
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
         - !ruby/object:Api::Type::Array
           name: 'modes'
           description: |

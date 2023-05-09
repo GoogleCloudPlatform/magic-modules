@@ -2,6 +2,8 @@ package google
 
 import (
 	"errors"
+
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
 // ErrNoConversion can be returned if a conversion is unable to be returned.
@@ -21,4 +23,7 @@ var ErrEmptyIdentityField = errors.New("empty identity field")
 var ErrResourceInaccessible = errors.New("resource does not exist or service account is lacking sufficient permissions")
 
 // Global MutexKV
-var mutexKV = NewMutexKV()
+//
+// Deprecated: For backward compatibility mutexKV is still working,
+// but all new code should use MutexStore in the transport_tpg package instead.
+var mutexKV = transport_tpg.MutexStore

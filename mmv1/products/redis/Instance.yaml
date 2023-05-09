@@ -121,7 +121,7 @@ properties:
     immutable: true
     default_from_api: true
     custom_expand: 'templates/terraform/custom_expand/redis_instance_authorized_network.erb'
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Enum
     name: connectMode
     description: |

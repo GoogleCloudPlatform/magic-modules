@@ -3,6 +3,7 @@ package google
 import (
 	"reflect"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
@@ -41,91 +42,91 @@ func GetCloudFunctionsCloudFunctionApiObject(d TerraformResourceData, config *tr
 	nameProp, err := expandCloudFunctionsCloudFunctionName(d.Get("name"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
+	} else if v, ok := d.GetOkExists("name"); !tpgresource.IsEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
 		obj["name"] = nameProp
 	}
 	descriptionProp, err := expandCloudFunctionsCloudFunctionDescription(d.Get("description"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("description"); !isEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
+	} else if v, ok := d.GetOkExists("description"); !tpgresource.IsEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
 		obj["description"] = descriptionProp
 	}
 	entryPointProp, err := expandCloudFunctionsCloudFunctionEntryPoint(d.Get("entry_point"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("entry_point"); !isEmptyValue(reflect.ValueOf(entryPointProp)) && (ok || !reflect.DeepEqual(v, entryPointProp)) {
+	} else if v, ok := d.GetOkExists("entry_point"); !tpgresource.IsEmptyValue(reflect.ValueOf(entryPointProp)) && (ok || !reflect.DeepEqual(v, entryPointProp)) {
 		obj["entryPoint"] = entryPointProp
 	}
 	runtimeProp, err := expandCloudFunctionsCloudFunctionRuntime(d.Get("runtime"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("runtime"); !isEmptyValue(reflect.ValueOf(runtimeProp)) && (ok || !reflect.DeepEqual(v, runtimeProp)) {
+	} else if v, ok := d.GetOkExists("runtime"); !tpgresource.IsEmptyValue(reflect.ValueOf(runtimeProp)) && (ok || !reflect.DeepEqual(v, runtimeProp)) {
 		obj["runtime"] = runtimeProp
 	}
 	timeoutProp, err := expandCloudFunctionsCloudFunctionTimeout(d.Get("timeout"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("timeout"); !isEmptyValue(reflect.ValueOf(timeoutProp)) && (ok || !reflect.DeepEqual(v, timeoutProp)) {
+	} else if v, ok := d.GetOkExists("timeout"); !tpgresource.IsEmptyValue(reflect.ValueOf(timeoutProp)) && (ok || !reflect.DeepEqual(v, timeoutProp)) {
 		obj["timeout"] = timeoutProp
 	}
 	availableMemoryMbProp, err := expandCloudFunctionsCloudFunctionAvailableMemoryMb(d.Get("available_memory_mb"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("available_memory_mb"); !isEmptyValue(reflect.ValueOf(availableMemoryMbProp)) && (ok || !reflect.DeepEqual(v, availableMemoryMbProp)) {
+	} else if v, ok := d.GetOkExists("available_memory_mb"); !tpgresource.IsEmptyValue(reflect.ValueOf(availableMemoryMbProp)) && (ok || !reflect.DeepEqual(v, availableMemoryMbProp)) {
 		obj["availableMemoryMb"] = availableMemoryMbProp
 	}
 	labelsProp, err := expandCloudFunctionsCloudFunctionLabels(d.Get("labels"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("labels"); !isEmptyValue(reflect.ValueOf(labelsProp)) && (ok || !reflect.DeepEqual(v, labelsProp)) {
+	} else if v, ok := d.GetOkExists("labels"); !tpgresource.IsEmptyValue(reflect.ValueOf(labelsProp)) && (ok || !reflect.DeepEqual(v, labelsProp)) {
 		obj["labels"] = labelsProp
 	}
 	environmentVariablesProp, err := expandCloudFunctionsCloudFunctionEnvironmentVariables(d.Get("environment_variables"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("environment_variables"); !isEmptyValue(reflect.ValueOf(environmentVariablesProp)) && (ok || !reflect.DeepEqual(v, environmentVariablesProp)) {
+	} else if v, ok := d.GetOkExists("environment_variables"); !tpgresource.IsEmptyValue(reflect.ValueOf(environmentVariablesProp)) && (ok || !reflect.DeepEqual(v, environmentVariablesProp)) {
 		obj["environmentVariables"] = environmentVariablesProp
 	}
 	sourceArchiveUrlProp, err := expandCloudFunctionsCloudFunctionSourceArchiveUrl(d.Get("source_archive_url"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("source_archive_url"); !isEmptyValue(reflect.ValueOf(sourceArchiveUrlProp)) && (ok || !reflect.DeepEqual(v, sourceArchiveUrlProp)) {
+	} else if v, ok := d.GetOkExists("source_archive_url"); !tpgresource.IsEmptyValue(reflect.ValueOf(sourceArchiveUrlProp)) && (ok || !reflect.DeepEqual(v, sourceArchiveUrlProp)) {
 		obj["sourceArchiveUrl"] = sourceArchiveUrlProp
 	}
 	sourceUploadUrlProp, err := expandCloudFunctionsCloudFunctionSourceUploadUrl(d.Get("source_upload_url"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("source_upload_url"); !isEmptyValue(reflect.ValueOf(sourceUploadUrlProp)) && (ok || !reflect.DeepEqual(v, sourceUploadUrlProp)) {
+	} else if v, ok := d.GetOkExists("source_upload_url"); !tpgresource.IsEmptyValue(reflect.ValueOf(sourceUploadUrlProp)) && (ok || !reflect.DeepEqual(v, sourceUploadUrlProp)) {
 		obj["sourceUploadUrl"] = sourceUploadUrlProp
 	}
 	sourceRepositoryProp, err := expandCloudFunctionsCloudFunctionSourceRepository(d.Get("source_repository"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("source_repository"); !isEmptyValue(reflect.ValueOf(sourceRepositoryProp)) && (ok || !reflect.DeepEqual(v, sourceRepositoryProp)) {
+	} else if v, ok := d.GetOkExists("source_repository"); !tpgresource.IsEmptyValue(reflect.ValueOf(sourceRepositoryProp)) && (ok || !reflect.DeepEqual(v, sourceRepositoryProp)) {
 		obj["sourceRepository"] = sourceRepositoryProp
 	}
 	httpsTriggerProp, err := expandCloudFunctionsCloudFunctionHttpsTriggerUrl(d.Get("https_trigger_url"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("https_trigger_url"); !isEmptyValue(reflect.ValueOf(httpsTriggerProp)) && (ok || !reflect.DeepEqual(v, httpsTriggerProp)) {
+	} else if v, ok := d.GetOkExists("https_trigger_url"); !tpgresource.IsEmptyValue(reflect.ValueOf(httpsTriggerProp)) && (ok || !reflect.DeepEqual(v, httpsTriggerProp)) {
 		obj["httpsTriggerUrl"] = httpsTriggerProp
 	}
 	eventTriggerProp, err := expandCloudFunctionsCloudFunctionEventTrigger(d.Get("event_trigger"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("event_trigger"); !isEmptyValue(reflect.ValueOf(eventTriggerProp)) && (ok || !reflect.DeepEqual(v, eventTriggerProp)) {
+	} else if v, ok := d.GetOkExists("event_trigger"); !tpgresource.IsEmptyValue(reflect.ValueOf(eventTriggerProp)) && (ok || !reflect.DeepEqual(v, eventTriggerProp)) {
 		obj["eventTrigger"] = eventTriggerProp
 	}
 	locationProp, err := expandCloudFunctionsCloudFunctionRegion(d.Get("region"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("region"); !isEmptyValue(reflect.ValueOf(locationProp)) && (ok || !reflect.DeepEqual(v, locationProp)) {
+	} else if v, ok := d.GetOkExists("region"); !tpgresource.IsEmptyValue(reflect.ValueOf(locationProp)) && (ok || !reflect.DeepEqual(v, locationProp)) {
 		obj["location"] = locationProp
 	}
 	trigger_httpProp, err := expandCloudFunctionsCloudFunctionTriggerHttp(d.Get("trigger_http"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("trigger_http"); !isEmptyValue(reflect.ValueOf(trigger_httpProp)) && (ok || !reflect.DeepEqual(v, trigger_httpProp)) {
+	} else if v, ok := d.GetOkExists("trigger_http"); !tpgresource.IsEmptyValue(reflect.ValueOf(trigger_httpProp)) && (ok || !reflect.DeepEqual(v, trigger_httpProp)) {
 		obj["trigger_http"] = trigger_httpProp
 	}
 
@@ -198,14 +199,14 @@ func expandCloudFunctionsCloudFunctionSourceRepository(v interface{}, d Terrafor
 	transformedUrl, err := expandCloudFunctionsCloudFunctionSourceRepositoryUrl(original["url"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedUrl); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedUrl); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["url"] = transformedUrl
 	}
 
 	transformedDeployedUrl, err := expandCloudFunctionsCloudFunctionSourceRepositoryDeployedUrl(original["deployed_url"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedDeployedUrl); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedDeployedUrl); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["deployedUrl"] = transformedDeployedUrl
 	}
 
@@ -236,21 +237,21 @@ func expandCloudFunctionsCloudFunctionEventTrigger(v interface{}, d TerraformRes
 	transformedEventType, err := expandCloudFunctionsCloudFunctionEventTriggerEventType(original["event_type"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedEventType); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedEventType); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["eventType"] = transformedEventType
 	}
 
 	transformedResource, err := expandCloudFunctionsCloudFunctionEventTriggerResource(original["resource"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedResource); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedResource); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["resource"] = transformedResource
 	}
 
 	transformedService, err := expandCloudFunctionsCloudFunctionEventTriggerService(original["service"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedService); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedService); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["service"] = transformedService
 	}
 

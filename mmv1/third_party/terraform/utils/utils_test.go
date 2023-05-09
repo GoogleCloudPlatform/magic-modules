@@ -10,6 +10,8 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -693,8 +695,8 @@ func TestDatasourceSchemaFromResourceSchema(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := datasourceSchemaFromResourceSchema(tt.args.rs); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("datasourceSchemaFromResourceSchema() = %#v, want %#v", got, tt.want)
+			if got := tpgresource.DatasourceSchemaFromResourceSchema(tt.args.rs); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("tpgresource.DatasourceSchemaFromResourceSchema() = %#v, want %#v", got, tt.want)
 			}
 		})
 	}
@@ -836,7 +838,7 @@ func TestRetryTimeDuration_URLTimeoutsShouldRetry(t *testing.T) {
 		runCount++
 		if runCount == 1 {
 			return &url.Error{
-				Err: &TimeoutError{timeout: true},
+				Err: acctest.TimeoutErr,
 			}
 		}
 		return nil
