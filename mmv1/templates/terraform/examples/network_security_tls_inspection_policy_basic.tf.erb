@@ -66,5 +66,6 @@ resource "google_network_security_tls_inspection_policy" "<%= ctx[:primary_resou
   name     = "<%= ctx[:vars]['resource_name'] %>"
   location = "us-central1"
   ca_pool  = google_privateca_ca_pool.default.id
+  exclude_public_ca_set = false
   depends_on = [google_privateca_ca_pool.default, google_privateca_certificate_authority.default]
 }

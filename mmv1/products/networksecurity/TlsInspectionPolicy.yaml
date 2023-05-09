@@ -90,3 +90,12 @@ properties:
     required: true
     description: |
       A CA pool resource used to issue interception certificates.
+  # TODO: add this field after the creation of the resource `trustConfig`.
+  # - !ruby/object:Api::Type::String
+  #   name: 'trustConfig'
+  #   description: |
+  #     A TrustConfig resource used when making a connection to the TLS server. This is a relative resource path following the form "projects/{project}/locations/{location}/trustConfigs/{trustConfig}".
+  - !ruby/object:Api::Type::Boolean
+    name: 'excludePublicCaSet'
+    description: |
+      If FALSE (the default), use our default set of public CAs in addition to any CAs specified in trustConfig. These public CAs are currently based on the Mozilla Root Program and are subject to change over time. If TRUE, do not accept our default set of public CAs. Only CAs specified in trustConfig will be accepted.
