@@ -33,7 +33,7 @@ if len(nameParts) == 4 {
 }
 
 // Replace import id for the resource id
-id, err := ReplaceVars(d, config, "{{org_id}}/envgroups/{{name}}")
+id, err := tpgresource.ReplaceVars(d, config, "{{org_id}}/envgroups/{{name}}")
 if err != nil {
 	return nil, fmt.Errorf("Error constructing id: %s", err)
 }

@@ -17,6 +17,7 @@ import (
 <% end -%>
 
   "<%= import_path() -%>/acctest"
+  "<%= import_path() -%>/tpgresource"
   transport_tpg "<%= import_path() -%>/transport"
 )
 <%
@@ -122,7 +123,7 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 		<% else -%>
 		config := GoogleProviderConfig(t)
 
-		url, err := acctest.ReplaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
 		if err != nil {
 			return err
 		}

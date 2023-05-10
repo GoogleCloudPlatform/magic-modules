@@ -5,6 +5,7 @@ import (
 	"log"
 
 	dns "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dns"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // Skip delete for DNS record set if the record is for the primary NS record
