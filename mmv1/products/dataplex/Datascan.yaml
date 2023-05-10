@@ -18,12 +18,6 @@ self_link: 'projects/{{project}}/locations/{{location}}/dataScans/{{name}}'
 exclude_resource: true
 description: |
   Only used to generate IAM resources
-properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
-    description: |
-      Dummy property.
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   exclude: false
   method_name_separator: ':'
@@ -39,3 +33,608 @@ examples:
       'fmt.Sprintf("tf-test-dataScan%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'locationId'
+    immutable: true
+    required: true
+    url_param_only: true
+    description: |
+      The location where the data scan should reside.
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    output: true
+    description: |
+      The relative resource name of the scan, of the form: projects/{project}/locations/{locationId}/dataScans/{datascan_id}, where project refers to a project_id or project_number and locationId refers to a GCP region.
+  - !ruby/object:Api::Type::String
+    name: 'uid'
+    output: true
+    description: |
+      System generated globally unique ID for the scan. This ID will be different if the scan is deleted and re-created with the same name.
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      Description of the scan.
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
+    description: |
+      User friendly display name.
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'labels'
+    description: |
+      User-defined labels for the scan. A list of key->value pairs.
+  - !ruby/object:Api::Type::Enum
+    name: 'state'
+    output: true
+    description: |
+      Current state of the DataScan.
+    values:
+      - :STATE_UNSPECIFIED
+      - :ACTIVE
+      - :CREATING
+      - :DELETING
+      - :ACTION_REQUIRED
+  - !ruby/object:Api::Type::String
+    name: 'createTime'
+    output: true
+    description: |
+      The time when the scan was created.
+  - !ruby/object:Api::Type::String
+    name: 'updateTime'
+    output: true
+    description: |
+      The time when the scan was last updated.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'data'
+    required: true
+    immutable: true
+    description: |
+      The data source for DataScan.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'entity'
+        immutable: true
+        description: |
+          The Dataplex entity that represents the data source(e.g. BigQuery table) for Datascan.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'executionSpec'
+    description: |
+      DataScan execution settings.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'trigger'
+        description: |
+          Spec related to how often and when a scan should be triggered. If not specified, the default is OnDemand, which means the scan will not run until the user calls dataScans.run API.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'onDemand'
+            description: |
+              The scan runs once via dataScans.run API.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'schedule'
+            description: |
+             The scan is scheduled to run periodically.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'cron'
+                required: true
+                description: Cron schedule for running scans periodically. This field is required for Schedule scans.
+      - !ruby/object:Api::Type::String
+        name: 'field'
+        immutable: true
+        description: |
+          The unnested field (of type Date or Timestamp) that contains values which monotonically increase over time. If not specified, a data scan will run for all data in the table.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'executionStatus'
+    output: true
+    description: |
+      Status of the data scan execution.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'latestJobEndTime'
+        description: |
+          The time when the latest DataScanJob started.
+      - !ruby/object:Api::Type::String
+        name: 'latestJobStartTime'
+        description: |
+          The time when the latest DataScanJob ended.
+  - !ruby/object:Api::Type::Enum
+    name: 'type'
+    output: true
+    description: |
+      The type of DataScan.
+    values:
+      - :DATA_SCAN_TYPE_UNSPECIFIED
+      - :DATA_QUALITY
+      - :DATA_PROFILE
+  - !ruby/object:Api::Type::NestedObject
+    name: 'dataQualitySpec'
+    description: |
+      DataQualityScan related setting.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'rules'
+        description: |
+          The list of rules to evaluate against a data source. At least one rule is required.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+             - !ruby/object:Api::Type::String
+               name: 'column'
+               description: |
+                 The unnested column which this rule is evaluated against.
+             - !ruby/object:Api::Type::Boolean
+               name: 'ignoreNull'
+               description: |
+                 Rows with null values will automatically fail a rule, unless ignoreNull is true. In that case, such null rows are trivially considered passing. Only applicable to ColumnMap rules.
+             - !ruby/object:Api::Type::String
+               name: 'dimension'
+               required: true
+               description: |
+                 The dimension a rule belongs to. Results are also aggregated at the dimension level. Supported dimensions are ["COMPLETENESS", "ACCURACY", "CONSISTENCY", "VALIDITY", "UNIQUENESS", "INTEGRITY"]
+             - !ruby/object:Api::Type::Integer
+               name: 'threshold'
+               description: |
+                The minimum ratio of passing_rows / total_rows required to pass this rule, with a range of [0.0, 1.0]. 0 indicates default value (i.e. 1.0).
+               default_value: 0
+             - !ruby/object:Api::Type::NestedObject
+               name: 'rangeExpectation'
+               description: |
+                 ColumnMap rule which evaluates whether each column value lies between a specified range.
+               properties:
+                 - !ruby/object:Api::Type::String
+                   name: 'minValue'
+                   description: |
+                     The minimum column value allowed for a row to pass this validation. At least one of minValue and maxValue need to be provided.
+                 - !ruby/object:Api::Type::String
+                   name: maxValue
+                   description: |
+                     The maximum column value allowed for a row to pass this validation. At least one of minValue and maxValue need to be provided.
+                 - !ruby/object:Api::Type::Boolean
+                   name: 'strictMinEnabled'
+                   default_value: false
+                   description: |
+                     Whether each value needs to be strictly greater than ('>') the minimum, or if equality is allowed. 
+                     Only relevant if a minValue has been defined. Default = false.
+                 - !ruby/object:Api::Type::Boolean
+                   name: 'strictMaxEnabled'
+                   default_value: false
+                   description: |
+                     Whether each value needs to be strictly lesser than ('<') the maximum, or if equality is allowed.
+                     Only relevant if a maxValue has been defined. Default = false.
+             - !ruby/object:Api::Type::NestedObject
+               name: 'nonNullExpectation'
+               description: |
+                 ColumnMap rule which evaluates whether each column value is null.
+             - !ruby/object:Api::Type::NestedObject
+               name: 'setExpectation'
+               description: |
+                 ColumnMap rule which evaluates whether each column value is contained by a specified set.
+               properties:
+                 - !ruby/object:Api::Type::Array
+                   name: 'values'
+                   description: |
+                     Expected values for the column value.
+             - !ruby/object:Api::Type::NestedObject
+               name: 'regexExpectation'
+               description: |
+                 ColumnMap rule which evaluates whether each column value matches a specified regex.
+               properties:
+                 - !ruby/object:Api::Type::String
+                   name: 'regex'
+                   description: |
+                     A regular expression the column value is expected to match.
+             - !ruby/object:Api::Type::NestedObject
+               name: 'uniquenessExpectation'
+               description: |
+                 ColumnAggregate rule which evaluates whether the column has duplicates.
+             - !ruby/object:Api::Type::NestedObject
+               name: 'statisticRangeExpectation'
+               description: |
+                 ColumnAggregate rule which evaluates whether the column aggregate statistic lies between a specified range.
+               properties:
+                 - !ruby/object:Api::Type::Enum
+                   name: 'statistic'
+                   values:
+                     - :STATISTIC_UNDEFINED
+                     - :MEAN
+                     - :MIN
+                     - :MAX
+                 - !ruby/object:Api::Type::String
+                   name: 'minValue'
+                   description: |
+                     The minimum column statistic value allowed for a row to pass this validation.
+                     At least one of minValue and maxValue need to be provided.
+                 - !ruby/object:Api::Type::String
+                   name: maxValue
+                   description: |
+                     The maximum column statistic value allowed for a row to pass this validation.
+                     At least one of minValue and maxValue need to be provided.
+                 - !ruby/object:Api::Type::Boolean
+                   name: 'strictMinEnabled'
+                   default_value: false
+                   description: |
+                     Whether column statistic needs to be strictly greater than ('>') the minimum, or if equality is allowed.
+                     Only relevant if a minValue has been defined. Default = false.
+                 - !ruby/object:Api::Type::Boolean
+                   name: 'strictMaxEnabled'
+                   default_value: false
+                   description: |
+                     Whether column statistic needs to be strictly lesser than ('<') the maximum, or if equality is allowed.
+                     Only relevant if a maxValue has been defined. Default = false.
+             - !ruby/object:Api::Type::NestedObject
+               name: 'rowConditionExpectation'
+               description: |
+                 Table rule which evaluates whether each row passes the specified condition.
+               properties:
+                 - !ruby/object:Api::Type::String
+                   name: 'sqlExpression'
+                   description: |
+                     The SQL expression.
+             - !ruby/object:Api::Type::NestedObject
+               name: 'tableConditionExpectation'
+               description: |
+                 Table rule which evaluates whether the provided expression is true.
+               properties:
+                 - !ruby/object:Api::Type::String
+                   name: 'sqlExpression'
+                   description: |
+                     The SQL expression.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'dataProfileSpec'
+    description: |
+      DataProfileScan related setting.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'dataQualityResult'
+    output: true
+    description: |
+      The result of the data quality scan.
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'passed'
+        description: |
+          Overall data quality result -- true if all rules passed.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'dimensions'
+        description: |
+          A list of results at the dimension level.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'passed'
+            description: |
+              Whether the dimension passed or failed.
+              item_type: !ruby/object:Api::Type::NestedObject
+      - !ruby/object:Api::Type::Array
+        name: 'rules'
+        description: |
+          A list of all the rules in a job, and their results.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: 'rule'
+              description: |
+                The rule specified in the DataQualitySpec, as is.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'column'
+                  description: |
+                    The unnested column which this rule is evaluated against.
+                - !ruby/object:Api::Type::Boolean
+                  name: 'ignoreNull'
+                  description: |
+                    Rows with null values will automatically fail a rule, unless ignoreNull is true. In that case, such null rows are trivially considered passing. Only applicable to ColumnMap rules.
+                - !ruby/object:Api::Type::String
+                  name: 'dimension'
+                  required: true
+                  description: |
+                    The dimension a rule belongs to. Results are also aggregated at the dimension level. Supported dimensions are ["COMPLETENESS", "ACCURACY", "CONSISTENCY", "VALIDITY", "UNIQUENESS", "INTEGRITY"]
+                - !ruby/object:Api::Type::Integer
+                  name: 'threshold'
+                  description: |
+                    The minimum ratio of passing_rows / total_rows required to pass this rule, with a range of [0.0, 1.0]. 0 indicates default value (i.e. 1.0).
+                  default_value: 0
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'rangeExpectation'
+                  description: |
+                    ColumnMap rule which evaluates whether each column value lies between a specified range.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'minValue'
+                      description: |
+                        The minimum column value allowed for a row to pass this validation. At least one of minValue and maxValue need to be provided.
+                    - !ruby/object:Api::Type::String
+                      name: maxValue
+                      description: |
+                        The maximum column value allowed for a row to pass this validation. At least one of minValue and maxValue need to be provided.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'strictMinEnabled'
+                      default_value: false
+                      description: |
+                        Whether each value needs to be strictly greater than ('>') the minimum, or if equality is allowed. 
+                        Only relevant if a minValue has been defined. Default = false.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'strictMaxEnabled'
+                      default_value: false
+                      description: |
+                        Whether each value needs to be strictly lesser than ('<') the maximum, or if equality is allowed.
+                        Only relevant if a maxValue has been defined. Default = false.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'nonNullExpectation'
+                  description: |
+                    ColumnMap rule which evaluates whether each column value is null.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'setExpectation'
+                  description: |
+                    ColumnMap rule which evaluates whether each column value is contained by a specified set.
+                  properties:
+                    - !ruby/object:Api::Type::Array
+                      name: 'values'
+                      description: |
+                        Expected values for the column value.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'regexExpectation'
+                  description: |
+                    ColumnMap rule which evaluates whether each column value matches a specified regex.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'regex'
+                      description: |
+                        A regular expression the column value is expected to match.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'uniquenessExpectation'
+                  description: |
+                    ColumnAggregate rule which evaluates whether the column has duplicates.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'statisticRangeExpectation'
+                  description: |
+                    ColumnAggregate rule which evaluates whether the column aggregate statistic lies between a specified range.
+                  properties:
+                    - !ruby/object:Api::Type::Enum
+                      name: 'statistic'
+                      values:
+                        - :STATISTIC_UNDEFINED
+                        - :MEAN
+                        - :MIN
+                        - :MAX
+                    - !ruby/object:Api::Type::String
+                      name: 'minValue'
+                      description: |
+                        The minimum column statistic value allowed for a row to pass this validation.
+                        At least one of minValue and maxValue need to be provided.
+                    - !ruby/object:Api::Type::String
+                      name: maxValue
+                      description: |
+                        The maximum column statistic value allowed for a row to pass this validation.
+                        At least one of minValue and maxValue need to be provided.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'strictMinEnabled'
+                      default_value: false
+                      description: |
+                        Whether column statistic needs to be strictly greater than ('>') the minimum, or if equality is allowed.
+                        Only relevant if a minValue has been defined. Default = false.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'strictMaxEnabled'
+                      default_value: false
+                      description: |
+                        Whether column statistic needs to be strictly lesser than ('<') the maximum, or if equality is allowed.
+                        Only relevant if a maxValue has been defined. Default = false.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'rowConditionExpectation'
+                  description: |
+                    Table rule which evaluates whether each row passes the specified condition.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'sqlExpression'
+                      description: |
+                        The SQL expression.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'tableConditionExpectation'
+                  description: |
+                    Table rule which evaluates whether the provided expression is true.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'sqlExpression'
+                      description: |
+                        The SQL expression.
+            - !ruby/object:Api::Type::Boolean
+              name: 'passed'
+              description: |
+                Whether the rule passed or failed.
+            - !ruby/object:Api::Type::String
+              name: 'evaluatedCount'
+              default_values: 0
+              description: |
+                The number of rows a rule was evaluated against. This field is only valid for ColumnMap type rules.
+                Evaluated count can be configured to either
+                1. include all rows (default) - with null rows automatically failing rule evaluation, or
+                2. exclude null rows from the evaluatedCount, by setting ignore_nulls = true.
+            - !ruby/object:Api::Type::String
+              name: 'passedCount'
+              description: |
+                The number of rows which passed a rule evaluation. This field is only valid for ColumnMap type rules.
+            - !ruby/object:Api::Type::String
+              name: 'nullCount'
+              description: |
+                The number of rows with null values in the specified column.
+            - !ruby/object:Api::Type::Integer
+              name: 'passRatio'
+              description: |
+                The ratio of passedCount / evaluatedCount. This field is only valid for ColumnMap type rules.
+            - !ruby/object:Api::Type::String
+              name: 'failingRowsQuery'
+              description: |
+                The query to find rows that did not pass this rule. Only applies to ColumnMap and RowCondition rules.
+      - !ruby/object:Api::Type::String
+        name: 'rowCount'
+        description: |
+          The count of rows processed.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'scannedData'
+        description: |
+          The data scanned for this result.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'incrementalField'
+            description: |
+              The range denoted by values of an incremental field
+            properties:
+              - !ruby/object:Api::Type::string
+                name: 'field'
+                description: |
+                  The field that contains values which monotonically increases over time (e.g. a timestamp column).
+              - !ruby/object:Api::Type::string
+                name: 'start'
+                description: |
+                  Value that marks the start of the range.
+              - !ruby/object:Api::Type::string
+                name: 'end'
+                description: Value that marks the end of the range.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'dataProfileResult'
+    output: true
+    description: |
+      The result of the data profile scan.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'rowCount'
+        description: |
+          The count of rows scanned.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'profile'
+        description: |
+          The profile information per field.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'fields'
+            description: |
+              List of fields with structural and profile information for each field.
+            item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'name'
+                description: |
+                  The name of the field.
+              - !ruby/object:Api::Type::String
+                name: 'type'
+                description: |
+                  The field data type.
+              - !ruby/object:Api::Type::String
+                name: 'mode'
+                description: |
+                  The mode of the field. Possible values include:
+                  1. REQUIRED, if it is a required field.
+                  2. NULLABLE, if it is an optional field.
+                  3. REPEATED, if it is a repeated field.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'profile'
+                description: |
+                  Profile information for the corresponding field.
+                properties:
+                   - !ruby/object:Api::Type::Integer
+                     name: 'nullRatio'
+                     description: |
+                       Ratio of rows with null value against total scanned rows.
+                   - !ruby/object:Api::Type::Integer
+                     name: 'distinctRatio'
+                     description: |  
+                       Ratio of rows with distinct values against total scanned rows. Not available for complex non-groupable field type RECORD and fields with REPEATABLE mode.
+                   - !ruby/object:Api::Type::NestedObject
+                     name: 'topNValues'
+                     description: |
+                      The list of top N non-null values and number of times they occur in the scanned data. N is 10 or equal to the number of distinct values in the field, whichever is smaller. Not available for complex non-groupable field type RECORD and fields with REPEATABLE mode.
+                     properties:
+                       - !ruby/object:Api::Type::String
+                         name: 'value'
+                         description: |
+                           String value of a top N non-null value.
+                       - !ruby/object:Api::Type::String
+                         name: 'count'
+                         description: |
+                           Count of the corresponding value in the scanned data.
+                   - !ruby/object:Api::Type::NestedObject
+                     name: 'stringProfile'
+                     description: |
+                       String type field information.
+                     properties:
+                       - !ruby/object:Api::Type::String
+                         name: 'minLength'
+                         description: |
+                          Minimum length of non-null values in the scanned data.
+                       - !ruby/object:Api::Type::String
+                         name: 'maxLength'
+                         description: |
+                           Maximum length of non-null values in the scanned data.
+                       - !ruby/object:Api::Type::Integer
+                         name: 'averageLength'
+                         description: |
+                           Average length of non-null values in the scanned data.
+                   - !ruby/object:Api::Type::NestedObject
+                     name: 'integerProfile'
+                     description: |
+                       Integer type field information.
+                     properties:
+                       - !ruby/object:Api::Type::Integer
+                         name: 'average'
+                         description: |
+                           Average of non-null values in the scanned data. NaN, if the field has a NaN.
+                       - !ruby/object:Api::Type::Integer
+                         name: 'standardDeviation'
+                         description: |
+                           Standard deviation of non-null values in the scanned data. NaN, if the field has a NaN.
+                       - !ruby/object:Api::Type::String
+                         name: 'min'
+                         description: |
+                           Minimum of non-null values in the scanned data. NaN, if the field has a NaN.
+                       - !ruby/object:Api::Type::String
+                         name: 'quartiles'
+                         description: |
+                           A quartile divides the number of data points into four parts, or quarters, of more-or-less equal size. Three main quartiles used are: The first quartile (Q1) splits off the lowest 25% of data from the highest 75%. It is also known as the lower or 25th empirical quartile, as 25% of the data is below this point. The second quartile (Q2) is the median of a data set. So, 50% of the data lies below this point. The third quartile (Q3) splits off the highest 25% of data from the lowest 75%. It is known as the upper or 75th empirical quartile, as 75% of the data lies below this point. Here, the quartiles is provided as an ordered list of quartile values for the scanned data, occurring in order Q1, median, Q3.
+                       - !ruby/object:Api::Type::String
+                         name: 'max'
+                         description: |
+                           Maximum of non-null values in the scanned data. NaN, if the field has a NaN.
+                   - !ruby/object:Api::Type::NestedObject
+                     name: 'doubleProfile'
+                     description: |
+                       Double type field information.
+                     properties:
+                       - !ruby/object:Api::Type::Integer
+                         name: 'average'
+                         description: |
+                           Average of non-null values in the scanned data. NaN, if the field has a NaN.
+                       - !ruby/object:Api::Type::Integer
+                         name: 'standardDeviation'
+                         description: |
+                           Standard deviation of non-null values in the scanned data. NaN, if the field has a NaN.
+                       - !ruby/object:Api::Type::String
+                         name: 'min'
+                         description: |
+                           Minimum of non-null values in the scanned data. NaN, if the field has a NaN.
+                       - !ruby/object:Api::Type::String
+                         name: 'quartiles'
+                         description: |
+                           A quartile divides the number of data points into four parts, or quarters, of more-or-less equal size. Three main quartiles used are: The first quartile (Q1) splits off the lowest 25% of data from the highest 75%. It is also known as the lower or 25th empirical quartile, as 25% of the data is below this point. The second quartile (Q2) is the median of a data set. So, 50% of the data lies below this point. The third quartile (Q3) splits off the highest 25% of data from the lowest 75%. It is known as the upper or 75th empirical quartile, as 75% of the data lies below this point. Here, the quartiles is provided as an ordered list of quartile values for the scanned data, occurring in order Q1, median, Q3.
+                       - !ruby/object:Api::Type::String
+                         name: 'max'
+                         description: |
+                           Maximum of non-null values in the scanned data. NaN, if the field has a NaN.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'scannedData'
+        description: The data scanned for this result.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'incrementalField'
+            description: |
+              The range denoted by values of an incremental field
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'field'
+                description: |
+                  The field that contains values which monotonically increases over time (e.g. a timestamp column).
+              - !ruby/object:Api::Type::String
+                name: 'start'
+                description: |
+                  Value that marks the start of the range.
+              - !ruby/object:Api::Type::String
+                name: 'end'
+                description: Value that marks the end of the range.
