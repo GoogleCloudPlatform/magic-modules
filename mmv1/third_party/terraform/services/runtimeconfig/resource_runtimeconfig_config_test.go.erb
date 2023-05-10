@@ -22,7 +22,7 @@ func TestAccRuntimeconfigConfig_basic(t *testing.T) {
 	configName := fmt.Sprintf("runtimeconfig-test-%s", google.RandString(t, 10))
 	description := "my test description"
 
-	VcrTest(t, resource.TestCase{
+	google.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckRuntimeconfigConfigDestroyProducer(t),
@@ -52,7 +52,7 @@ func TestAccRuntimeconfig_update(t *testing.T) {
 	firstDescription := "my test description"
 	secondDescription := "my updated test description"
 
-	VcrTest(t, resource.TestCase{
+	google.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckRuntimeconfigConfigDestroyProducer(t),
@@ -83,7 +83,7 @@ func TestAccRuntimeconfig_updateEmptyDescription(t *testing.T) {
 	configName := fmt.Sprintf("runtimeconfig-test-%s", google.RandString(t, 10))
 	description := "my test description"
 
-	VcrTest(t, resource.TestCase{
+	google.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckRuntimeconfigConfigDestroyProducer(t),
@@ -128,7 +128,7 @@ func testAccCheckRuntimeConfigExists(t *testing.T, resourceName string, runtimeC
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := GoogleProviderConfig(t)
+		config := google.GoogleProviderConfig(t)
 
 		found, err := config.NewRuntimeconfigClient(config.UserAgent).Projects.Configs.Get(rs.Primary.ID).Do()
 		if err != nil {
@@ -143,7 +143,7 @@ func testAccCheckRuntimeConfigExists(t *testing.T, resourceName string, runtimeC
 
 func testAccCheckRuntimeconfigConfigDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := google.GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_runtimeconfig_config" {
