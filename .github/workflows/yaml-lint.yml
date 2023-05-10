@@ -1,0 +1,33 @@
+name: Lint Product YAML Files
+
+permissions: read-all
+
+on:
+  workflow_dispatch:
+    inputs:
+      owner:
+        description: 'The owner of the fork'
+        required: false
+        default: 'modular-magician'
+      repo:
+        description: 'The Base Repository to pull from'
+        required: false
+        default: 'magic-modules'
+      branch:
+        description: 'The branch or sha to execute against'
+        required: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+      with:
+        repository: ${{ github.event.client_payload.owner }}/${{ github.event.client_payload.repo }}
+        ref: ${{ github.event.client_payload.branch }}
+        path: repo
+    - name: Install yamllint
+      run: pip install yamllint
+    - name: Lint YAML files
+      run: yamllint mmv1/products
