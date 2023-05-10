@@ -237,7 +237,7 @@ module Api
       check :schema_config_mode_attr, type: :boolean, default: false
 
       # technically set as a default everywhere, but only maps will use this.
-      check :key_expander, type: ::String, default: 'expandString'
+      check :key_expander, type: ::String, default: 'tpgresource.ExpandString'
       check :key_diff_suppress_func, type: ::String
 
       check :diff_suppress_func, type: ::String
