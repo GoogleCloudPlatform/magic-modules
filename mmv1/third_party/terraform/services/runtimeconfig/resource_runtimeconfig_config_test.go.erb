@@ -1,12 +1,14 @@
 <% autogen_exception -%>
-package google
+package runtimeconfig_test
 
 <% unless version == 'ga' -%>
 
 import (
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"fmt"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -17,12 +19,12 @@ func TestAccRuntimeconfigConfig_basic(t *testing.T) {
 	t.Parallel()
 
 	var runtimeConfig runtimeconfig.RuntimeConfig
-	configName := fmt.Sprintf("runtimeconfig-test-%s", RandString(t, 10))
+	configName := fmt.Sprintf("runtimeconfig-test-%s", google.RandString(t, 10))
 	description := "my test description"
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckRuntimeconfigConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -46,13 +48,13 @@ func TestAccRuntimeconfig_update(t *testing.T) {
 	t.Parallel()
 
 	var runtimeConfig runtimeconfig.RuntimeConfig
-	configName := fmt.Sprintf("runtimeconfig-test-%s", RandString(t, 10))
+	configName := fmt.Sprintf("runtimeconfig-test-%s", google.RandString(t, 10))
 	firstDescription := "my test description"
 	secondDescription := "my updated test description"
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckRuntimeconfigConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -78,12 +80,12 @@ func TestAccRuntimeconfig_updateEmptyDescription(t *testing.T) {
 	t.Parallel()
 
 	var runtimeConfig runtimeconfig.RuntimeConfig
-	configName := fmt.Sprintf("runtimeconfig-test-%s", RandString(t, 10))
+	configName := fmt.Sprintf("runtimeconfig-test-%s", google.RandString(t, 10))
 	description := "my test description"
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckRuntimeconfigConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
