@@ -16,6 +16,7 @@
   dir = @target_version_name == 'ga' ? 'google' : "google-#{@target_version_name}"
 -%>
 
+# Compile all of the terraform resources that are still hand written into the specific service folder
 <% Dir["third_party/terraform/services/**"].each do |product_path|
   product_name = product_path.split('/')[-1]
   Dir[product_path + "/*.go.erb"].each do |file_path|

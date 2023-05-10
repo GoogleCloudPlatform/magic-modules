@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/hashicorp/terraform-provider-google/google"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -172,7 +171,7 @@ func resourceRuntimeconfigConfigDelete(d *schema.ResourceData, meta interface{})
 
 func resourceRuntimeconfigConfigImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
-	if err := google.ParseImportId([]string{"projects/(?P<project>[^/]+)/configs/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
+	if err := tpgresource.ParseImportId([]string{"projects/(?P<project>[^/]+)/configs/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}
 
