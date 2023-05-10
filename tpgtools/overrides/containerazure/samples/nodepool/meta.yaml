@@ -1,2 +1,4 @@
+ignore_read:
+  - config.0.image_type
 doc_hide:
   - beta_basic.tf.tmpl

@@ -1,4 +1,5 @@
 ignore_read:
+  - config.0.image_type
   - fleet.0.project
 doc_hide:
   - beta_basic.tf.tmpl
