@@ -1,0 +1,12 @@
+resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
+  location     = "us-central1"
+  name         = "tf-test-datascan%{random_suffix}"
+  description  = "Test Datascan"
+  display_name = "Test Datascan"
+
+  data = {
+	entity = "projects/<%= ctx[:test_env_vars]['project_name'] %>/locations/us-central1/lakes/amandeep-dev-lake/zones/rawzone/entities/austin_311"
+  }
+
+  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+}  
