@@ -1,19 +1,27 @@
-resource "google_compute_region_network_firewall_policy" "basic_regional_network_firewall_policy" {
+resource "google_network_security_address_group" "basic_global_networksecurity_address_group" {
   name        = "{{policy}}"
-  description = "Sample regional network firewall policy"
-  project     = "{{project}}"
-  region      = "{{region}}"
+  parent      = "projects/{{project}}"
+  description = "Sample global networksecurity_address_group. Update"
+  location    = "global"
+  items       = ["208.80.154.224/32"]
+  type        = "IPV4"
+  capacity    = 100
 }
 
-resource "google_compute_region_network_firewall_policy_rule" "primary" {
+resource "google_compute_network_firewall_policy" "basic_network_firewall_policy" {
+  name        = "{{policy}}"
+  description = "Sample global network firewall policy"
+  project     = "{{project}}"
+}
+
+resource "google_compute_network_firewall_policy_rule" "primary" {
   action          = "deny"
   description     = "This is an updated rule description"
   direction       = "EGRESS"
   disabled        = true
   enable_logging  = false
-  firewall_policy = google_compute_region_network_firewall_policy.basic_regional_network_firewall_policy.name
+  firewall_policy = google_compute_network_firewall_policy.basic_network_firewall_policy.name
   priority        = 1000
-  region          = "{{region}}"
   rule_name       = "updated-test-rule"
 
   match {
@@ -26,6 +34,9 @@ resource "google_compute_region_network_firewall_policy_rule" "primary" {
       ip_protocol = "tcp"
       ports       = ["123"]
     }
+    
+    dest_address_groups = [google_network_security_address_group.basic_global_networksecurity_address_group.id]
+
   }
 
   target_secure_tags {
@@ -47,6 +58,7 @@ resource "google_tags_tag_key" "basic_key" {
     network = "{{project}}/${google_compute_network.basic_network.name}"
   }
 }
+
 
 resource "google_tags_tag_value" "basic_value" {
   description = "For valuename resources."
