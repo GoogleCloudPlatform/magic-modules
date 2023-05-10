@@ -89,6 +89,36 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: 'User-defined labels for the alloydb cluster.'
+  - !ruby/object:Api::Type::NestedObject
+    name: 'encryptionConfig'
+    description: |
+      EncryptionConfig describes the encryption config of a cluster or a backup that is encrypted with a CMEK (customer-managed encryption key).
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeyName'
+        description: |
+          The fully-qualified resource name of the KMS key. Each Cloud KMS key is regionalized and has the following format: projects/[PROJECT]/locations/[REGION]/keyRings/[RING]/cryptoKeys/[KEY_NAME].
+        immutable: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'encryptionInfo'
+    description: |
+      EncryptionInfo describes the encryption information of a cluster or a backup.
+    output: true
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'encryptionType'
+        description: 'Output only. Type of encryption.'
+        values:
+          - :TYPE_UNSPECIFIED
+          - :GOOGLE_DEFAULT_ENCRYPTION
+          - :CUSTOMER_MANAGED_ENCRYPTION
+        output: true
+      - !ruby/object:Api::Type::Array
+        name: kmsKeyVersions
+        item_type: Api::Type::String
+        description: |
+          Output only. Cloud KMS key versions that are being used to protect the database or the backup.
+        output: true
   - !ruby/object:Api::Type::String
     name: 'network'
     required: true
@@ -96,7 +126,7 @@ properties:
       The relative resource name of the VPC network on which the instance can be accessed. It is specified in the following form:
 
       "projects/{projectNumber}/global/networks/{network_id}".
-    diff_suppress_func: 'ProjectNumberDiffSuppress'
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
@@ -148,6 +178,15 @@ properties:
         description:
           'Labels to apply to backups created using this configuration.'
       - !ruby/object:Api::Type::NestedObject
+        name: 'encryptionConfig'
+        description: |
+          EncryptionConfig describes the encryption config of a cluster or a backup that is encrypted with a CMEK (customer-managed encryption key).
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyName'
+            description: |
+              The fully-qualified resource name of the KMS key. Each Cloud KMS key is regionalized and has the following format: projects/[PROJECT]/locations/[REGION]/keyRings/[RING]/cryptoKeys/[KEY_NAME].
+      - !ruby/object:Api::Type::NestedObject
         name: 'weeklySchedule'
         description: 'Weekly schedule for the Backup.'
         default_from_api: true
@@ -184,15 +223,15 @@ properties:
                 - !ruby/object:Api::Type::Integer
                   name: minutes
                   description: |
-                    Minutes of hour of day. Must be from 0 to 59.
+                    Minutes of hour of day. Currently, only the value 0 is supported.
                 - !ruby/object:Api::Type::Integer
                   name: seconds
                   description: |
-                    Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
+                    Seconds of minutes of the time. Currently, only the value 0 is supported.
                 - !ruby/object:Api::Type::Integer
                   name: nanos
                   description: |
-                    Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                    Fractions of seconds in nanoseconds. Currently, only the value 0 is supported.
       - !ruby/object:Api::Type::NestedObject
         name: 'timeBasedRetention'
         description: |
@@ -239,9 +278,9 @@ properties:
           'The host and port of the on-premises instance in host:port format'
       - !ruby/object:Api::Type::String
         name: 'referenceId'
-        description: "Place holder for the external source identifier(e.g DMS
-          job\
-          \ name) that created the cluster."
+        description:
+          'Place holder for the external source identifier(e.g DMS job name)
+          that created the cluster.'
       - !ruby/object:Api::Type::String
         name: 'sourceType'
         description: 'Type of migration source.'

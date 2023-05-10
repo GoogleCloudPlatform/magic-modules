@@ -16,6 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/bigquery/v2"
 )
@@ -180,7 +182,7 @@ func bigQueryTableConnectionIdSuppress(name, old, new string, _ *schema.Resource
 	// "projects/{{project}}/locations/{{location}}/connections/{{connection_id}}".
 	// but always returns "{{project}}.{{location}}.{{connection_id}}"
 
-	if isEmptyValue(reflect.ValueOf(old)) || isEmptyValue(reflect.ValueOf(new)) {
+	if tpgresource.IsEmptyValue(reflect.ValueOf(old)) || tpgresource.IsEmptyValue(reflect.ValueOf(new)) {
 		return false
 	}
 
@@ -321,7 +323,7 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error)
 	}
 }
 
-func resourceBigQueryTableSchemaCustomizeDiffFunc(d TerraformResourceDiff) error {
+func resourceBigQueryTableSchemaCustomizeDiffFunc(d tpgresource.TerraformResourceDiff) error {
 	if _, hasSchema := d.GetOk("schema"); hasSchema {
 		oldSchema, newSchema := d.GetChange("schema")
 		oldSchemaText := oldSchema.(string)
@@ -983,7 +985,7 @@ func ResourceBigQueryTable() *schema.Resource {
 func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, error) {
 	config := meta.(*transport_tpg.Config)
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -1074,12 +1076,12 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 
 func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1131,14 +1133,14 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 
 func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[INFO] Reading BigQuery table: %s", d.Id())
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1148,7 +1150,7 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 
 	res, err := config.NewBigQueryClient(userAgent).Tables.Get(project, datasetID, tableID).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("BigQuery table %q", tableID))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("BigQuery table %q", tableID))
 	}
 
 	if err := d.Set("project", project); err != nil {
@@ -1282,7 +1284,7 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1294,7 +1296,7 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 
 	log.Printf("[INFO] Updating BigQuery table: %s", d.Id())
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1314,14 +1316,14 @@ func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("cannot destroy instance without setting deletion_protection=false and running `terraform apply`")
 	}
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[INFO] Deleting BigQuery table: %s", d.Id())
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1796,7 +1798,7 @@ func resourceBigQueryTableImport(d *schema.ResourceData, meta interface{}) ([]*s
 	}
 
 	// Replace import id for the resource id
-	id, err := ReplaceVars(d, config, "projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

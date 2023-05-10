@@ -27,6 +27,7 @@ module Provider
                          BigqueryReservation: 'BigQueryReservation',
                          CloudIds: 'CloudIDS',
                          CloudIot: 'CloudIOT',
+                         Cloudfunctions2: 'CloudFunctions2',
                          Pubsub: 'PubSub' }.freeze
     OBJECT_NAME_MAP = { Api: 'API',
                         Dns: 'DNS',
@@ -48,13 +49,15 @@ module Provider
       compile_product_files(output_folder)
     end
 
-    def generate_product_name(product_name)
+    def product_name(product_name)
+      product_name = product_name.upcase_first
       PRODUCT_NAME_MAP.inject(product_name.dup) do |name, (old_value, new_value)|
         name.gsub(old_value.to_s, new_value)
       end
     end
 
-    def generate_object_name(object_name)
+    def object_name(object_name)
+      object_name = object_name.upcase_first
       OBJECT_NAME_MAP.inject(object_name.dup) do |name, (old_value, new_value)|
         name.gsub(old_value.to_s, new_value)
       end
@@ -64,8 +67,8 @@ module Provider
     # Filter out samples that have no test and that don't match the current
     # product version.
     def generate_resource(pwd, data, _generate_code, _generate_docs)
-      product_name = generate_product_name(data.product.name)
-      object_name = generate_object_name(data.name)
+      product_name = product_name(data.product.name)
+      object_name = object_name(data.name)
       kind = product_name + object_name
       # skip_test examples and examples with test_env_vars should also be
       # included. Whether and how to convert them into KCC examples will be

@@ -274,14 +274,14 @@ your resource:
   properties:
     - !ruby/object:Api::Type::String
       name: "myField"
-      diff_suppress_func: 'CaseDiffSuppress'
+      diff_suppress_func: 'tpgresource.CaseDiffSuppress'
 ```
 
 The value of diff_suppress_func can be any valid DiffSuppressFunc, including the
 result of a function call. For example:
 
 ```yaml
-diff_suppress_func: 'OptionalPrefixSuppress("folders/")'
+diff_suppress_func: 'tpgresource.OptionalPrefixSuppress("folders/")'
 ```
 
 Please make sure to add thorough unit tests (in addition to basic integration

@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
@@ -17,7 +18,7 @@ func resourceConverterOrganizationIAMCustomRole() ResourceConverter {
 	}
 }
 
-func GetOrganizationIAMCustomRoleCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetOrganizationIAMCustomRoleCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//iam.googleapis.com/organizations/{{org_id}}/roles/{{role_id}}")
 	if err != nil {
 		return []Asset{}, err
@@ -38,52 +39,52 @@ func GetOrganizationIAMCustomRoleCaiObject(d TerraformResourceData, config *tran
 	}
 }
 
-func GetOrganizationIAMCustomRoleApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+func GetOrganizationIAMCustomRoleApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
 	obj := make(map[string]interface{})
 
 	descriptionProp, err := expandOrganizationIAMCustomRoleDescription(d.Get("description"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("description"); !isEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
+	} else if v, ok := d.GetOkExists("description"); !tpgresource.IsEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
 		obj["description"] = descriptionProp
 	}
 
 	titleProp, err := expandOrganizationIAMCustomRoleTitle(d.Get("title"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("title"); !isEmptyValue(reflect.ValueOf(titleProp)) && (ok || !reflect.DeepEqual(v, titleProp)) {
+	} else if v, ok := d.GetOkExists("title"); !tpgresource.IsEmptyValue(reflect.ValueOf(titleProp)) && (ok || !reflect.DeepEqual(v, titleProp)) {
 		obj["title"] = titleProp
 	}
 
 	stageProp, err := expandOrganizationIAMCustomRoleStage(d.Get("stage"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("stage"); !isEmptyValue(reflect.ValueOf(stageProp)) && (ok || !reflect.DeepEqual(v, stageProp)) {
+	} else if v, ok := d.GetOkExists("stage"); !tpgresource.IsEmptyValue(reflect.ValueOf(stageProp)) && (ok || !reflect.DeepEqual(v, stageProp)) {
 		obj["stage"] = stageProp
 	}
 
 	includedPermissionsProp, err := expandOrganizationIAMCustomRolePermissions(d.Get("permissions"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("permissions"); !isEmptyValue(reflect.ValueOf(includedPermissionsProp)) && (ok || !reflect.DeepEqual(v, includedPermissionsProp)) {
+	} else if v, ok := d.GetOkExists("permissions"); !tpgresource.IsEmptyValue(reflect.ValueOf(includedPermissionsProp)) && (ok || !reflect.DeepEqual(v, includedPermissionsProp)) {
 		obj["includedPermissions"] = includedPermissionsProp
 	}
 
 	return obj, nil
 }
 
-func expandOrganizationIAMCustomRoleDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandOrganizationIAMCustomRoleDescription(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandOrganizationIAMCustomRoleTitle(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandOrganizationIAMCustomRoleTitle(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandOrganizationIAMCustomRoleStage(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandOrganizationIAMCustomRoleStage(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandOrganizationIAMCustomRolePermissions(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandOrganizationIAMCustomRolePermissions(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v.(*schema.Set).List(), nil
 }

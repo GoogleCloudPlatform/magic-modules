@@ -29,38 +29,41 @@ docs: !ruby/object:Provider::Terraform::Docs
     Ask your Google Cloud account team to request access to workforce identity federation for your
     billing/quota project. The account team notifies you when the project is granted access.
 autogen_async: true
-import_format: ["locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}"]
+import_format:
+  [
+    'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "iam_workforce_pool_provider_saml_basic"
-    primary_resource_id: "example"
+    name: 'iam_workforce_pool_provider_saml_basic'
+    primary_resource_id: 'example'
     vars:
-      workforce_pool_id: "example-pool"
-      provider_id: "example-prvdr"
+      workforce_pool_id: 'example-pool'
+      provider_id: 'example-prvdr'
     test_env_vars:
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
-    name: "iam_workforce_pool_provider_saml_full"
-    primary_resource_id: "example"
+    name: 'iam_workforce_pool_provider_saml_full'
+    primary_resource_id: 'example'
     vars:
-      workforce_pool_id: "example-pool"
-      provider_id: "example-prvdr"
+      workforce_pool_id: 'example-pool'
+      provider_id: 'example-prvdr'
     test_env_vars:
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
-    name: "iam_workforce_pool_provider_oidc_basic"
-    primary_resource_id: "example"
+    name: 'iam_workforce_pool_provider_oidc_basic'
+    primary_resource_id: 'example'
     vars:
-      workforce_pool_id: "example-pool"
-      provider_id: "example-prvdr"
+      workforce_pool_id: 'example-pool'
+      provider_id: 'example-prvdr'
     test_env_vars:
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
-    name: "iam_workforce_pool_provider_oidc_full"
-    primary_resource_id: "example"
+    name: 'iam_workforce_pool_provider_oidc_full'
+    primary_resource_id: 'example'
     vars:
-      workforce_pool_id: "example-pool"
-      provider_id: "example-prvdr"
+      workforce_pool_id: 'example-pool'
+      provider_id: 'example-prvdr'
     test_env_vars:
       org_id: :ORG_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -102,11 +105,14 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: 'displayName'
-    description: A user-specified display name for the provider. Cannot exceed 32
+    description:
+      A user-specified display name for the provider. Cannot exceed 32
       characters.
   - !ruby/object:Api::Type::String
     name: 'description'
-    description: A user-specified description of the provider. Cannot exceed 256 characters.
+    description:
+      A user-specified description of the provider. Cannot exceed 256
+      characters.
   - !ruby/object:Api::Type::Enum
     name: 'state'
     description: |
@@ -219,9 +225,9 @@ properties:
           The metadata xml document should satisfy the following constraints:
           1) Must contain an Identity Provider Entity ID.
           2) Must contain at least one non-expired signing key certificate.
-          3) For each signing key: 
-            a) Valid from should be no more than 7 days from now. 
-            b) Valid to should be no more than 10 years in the future. 
+          3) For each signing key:
+            a) Valid from should be no more than 7 days from now.
+            b) Valid to should be no more than 10 years in the future.
           4) Up to 3 IdP signing keys are allowed in the metadata xml.
 
           When updating the provider's metadata xml, at least one non-expired signing key
@@ -237,12 +243,14 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: issuerUri
-        description: The OIDC issuer URI. Must be a valid URI using the 'https' scheme.
+        description:
+          The OIDC issuer URI. Must be a valid URI using the 'https' scheme.
         required: true
       - !ruby/object:Api::Type::String
         name: clientId
-        description: The client ID. Must match the audience claim of the JWT issued
-          by the identity provider.
+        description:
+          The client ID. Must match the audience claim of the JWT issued by the
+          identity provider.
         required: true
       - !ruby/object:Api::Type::NestedObject
         name: 'webSsoConfig'

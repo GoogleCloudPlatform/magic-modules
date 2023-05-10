@@ -4,8 +4,10 @@ package google
 import (
 	"encoding/json"
 	"fmt"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"time"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -45,7 +47,7 @@ type gkeonpremOperationWaiter struct {
 	Config    *transport_tpg.Config
 	UserAgent string
 	Project   string
-	Op        CommonOperation
+	Op        tpgresource.CommonOperation
 }
 
 func (w *gkeonpremOperationWaiter) State() string {
@@ -68,7 +70,7 @@ func (w *gkeonpremOperationWaiter) IsRetryable(error) bool {
 }
 
 func (w *gkeonpremOperationWaiter) SetOp(op interface{}) error {
-	if err := Convert(op, &w.Op); err != nil {
+	if err := tpgresource.Convert(op, &w.Op); err != nil {
 		return err
 	}
 	return nil
@@ -97,7 +99,7 @@ func (w *gkeonpremOperationWaiter) QueryOp() (interface{}, error) {
 	// Returns the proper get.
 	url := fmt.Sprintf("%s%s", w.Config.GkeonpremBasePath, w.Op.Name)
 
-	return SendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
+	return transport_tpg.SendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
 }
 
 func creategkeonpremWaiter(config *transport_tpg.Config, op map[string]interface{}, project, activity, userAgent string) (*gkeonpremOperationWaiter, error) {
@@ -118,7 +120,7 @@ func GkeonpremOperationWaitTimeWithResponse(config *transport_tpg.Config, op map
 	if err != nil {
 		return err
 	}
-	if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
+	if err := tpgresource.OperationWait(w, activity, timeout, config.PollInterval); err != nil {
 		return err
 	}
 	return json.Unmarshal([]byte(w.Op.Response), response)
@@ -134,6 +136,6 @@ func GkeonpremOperationWaitTime(config *transport_tpg.Config, op map[string]inte
 		// If w is nil, the op was synchronous.
 		return err
 	}
-	return OperationWait(w, activity, timeout, config.PollInterval)
+	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }
 <% end -%>

@@ -375,7 +375,7 @@ func (r Resource) SweeperFunctionArgs() string {
 func (r Resource) IDFunction() string {
 	for _, p := range r.Properties {
 		if p.forwardSlashAllowed {
-			return "ReplaceVars"
+			return "tpgresource.ReplaceVars"
 		}
 	}
 	return "replaceVarsForId"

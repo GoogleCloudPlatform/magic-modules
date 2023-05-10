@@ -44,7 +44,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 autogen_async: true
 import_format: ['{{org_id}}/instances/{{name}}', '{{org_id}}/{{name}}']
 mutex: '{{org_id}}/apigeeInstances'
-error_retry_predicates: ['IsApigeeRetryableError']
+error_retry_predicates: ['transport_tpg.IsApigeeRetryableError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_instance_basic'

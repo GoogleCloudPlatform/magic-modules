@@ -26,7 +26,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   exclude: false
   parent_resource_attribute: 'name'
-  import_format: ["projects/{{project}}/global/snapshots/{{name}}", "{{name}}"]
+  import_format: ['projects/{{project}}/global/snapshots/{{name}}', '{{name}}']
 description: |
   Represents a Persistent Disk Snapshot resource.
 
@@ -63,21 +63,23 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "snapshot_basic"
-    primary_resource_id: "snapshot"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-snapshot%s\", context[\"random_suffix\"\
+    name: 'snapshot_basic'
+    primary_resource_id: 'snapshot'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-snapshot%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      snapshot_name: "my-snapshot"
-      disk_name: "debian-disk"
+      snapshot_name: 'my-snapshot'
+      disk_name: 'debian-disk'
   - !ruby/object:Provider::Terraform::Examples
-    name: "snapshot_chainname"
-    primary_resource_id: "snapshot"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-snapshot-chainname%s\", context[\"\
+    name: 'snapshot_chainname'
+    primary_resource_id: 'snapshot'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-snapshot-chainname%s\",
+      context[\"\
       random_suffix\"])"
     vars:
-      snapshot_name: "my-snapshot"
-      disk_name: "debian-disk"
+      snapshot_name: 'my-snapshot'
+      disk_name: 'debian-disk'
       chain_name: 'snapshot-chain'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/snapshot.go.erb
@@ -90,8 +92,8 @@ parameters:
     description: 'A reference to the disk used to create this snapshot.'
     immutable: true
     required: true
-  # ignore_read in providers - this is only used in Create
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    # ignore_read in providers - this is only used in Create
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
     resource: 'Zone'
@@ -134,7 +136,7 @@ parameters:
         output: true
         # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
       - !ruby/object:Api::Type::String
-        name: "kmsKeySelfLink"
+        name: 'kmsKeySelfLink'
         api_name: 'kmsKeyName'
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
@@ -157,7 +159,7 @@ parameters:
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
-      # The docs list this field but it is never returned.
+        # The docs list this field but it is never returned.
         sensitive: true
       - !ruby/object:Api::Type::String
         name: 'sha256'
@@ -195,11 +197,11 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'chainName'
     description: |
-      Creates the new snapshot in the snapshot chain labeled with the 
-      specified name. The chain name must be 1-63 characters long and 
-      comply with RFC1035. This is an uncommon option only for advanced 
-      service owners who needs to create separate snapshot chains, for 
-      example, for chargeback tracking.  When you describe your snapshot 
+      Creates the new snapshot in the snapshot chain labeled with the
+      specified name. The chain name must be 1-63 characters long and
+      comply with RFC1035. This is an uncommon option only for advanced
+      service owners who needs to create separate snapshot chains, for
+      example, for chargeback tracking.  When you describe your snapshot
       resource, this field is visible only if it has a non-empty value.
   - !ruby/object:Api::Type::String
     name: 'name'

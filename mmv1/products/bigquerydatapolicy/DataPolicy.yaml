@@ -44,7 +44,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_datapolicy_data_policy_basic'
     primary_resource_id: 'data_policy'
-    primary_resource_name: 'fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])'
+    primary_resource_name:
+      'fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])'
     vars:
       data_policy_id: 'data_policy'
       taxonomy: 'taxonomy'
@@ -72,7 +73,7 @@ properties:
     description: |-
       Policy tag resource name, in the format of projects/{project_number}/locations/{locationId}/taxonomies/{taxonomyId}/policyTags/{policyTag_id}.
     required: true
-    diff_suppress_func: 'ProjectNumberDiffSuppress'
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - !ruby/object:Api::Type::Enum
     name: dataPolicyType
     description: |

@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleLoggingSink() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceLoggingSinkSchema())
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(resourceLoggingSinkSchema())
 	dsSchema["id"] = &schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
@@ -23,7 +24,7 @@ func DataSourceGoogleLoggingSink() *schema.Resource {
 
 func dataSourceGoogleLoggingSinkRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -32,7 +33,7 @@ func dataSourceGoogleLoggingSinkRead(d *schema.ResourceData, meta interface{}) e
 
 	sink, err := config.NewLoggingClient(userAgent).Sinks.Get(sinkId).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Logging Sink %s", d.Id()))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Logging Sink %s", d.Id()))
 	}
 
 	if err := flattenResourceLoggingSink(d, sink); err != nil {

@@ -43,7 +43,7 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 autogen_async: true
 skip_sweeper: true
-import_format: ["{{name}}"]
+import_format: ['{{name}}']
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     This resource creates a Firestore Index on a project that already has
@@ -56,11 +56,12 @@ docs: !ruby/object:Provider::Terraform::Docs
     the App Engine location specified.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firestore_index_basic"
-    primary_resource_id: "my-index"
-        # This example relies on a well-known collection having been created and
-        # Firestore being enabled on the project. We can't do that automatically
-        # so we need a pre-created project.
+    name: 'firestore_index_basic'
+    primary_resource_id:
+      'my-index'
+      # This example relies on a well-known collection having been created and
+      # Firestore being enabled on the project. We can't do that automatically
+      # so we need a pre-created project.
     test_env_vars:
       project_id: :FIRESTORE_PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
