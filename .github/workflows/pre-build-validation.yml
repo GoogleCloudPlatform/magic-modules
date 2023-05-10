@@ -1,4 +1,4 @@
-name: Lint Product YAML Files
+name: Pre-Build Validation
 
 permissions: read-all
 
@@ -24,8 +24,8 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v2
       with:
-        repository: ${{ github.event.client_payload.owner }}/${{ github.event.client_payload.repo }}
-        ref: ${{ github.event.client_payload.branch }}
+        repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}
+        ref: ${{ github.event.inputs.branch }}
         path: repo
     - name: Install yamllint
       run: pip install yamllint
