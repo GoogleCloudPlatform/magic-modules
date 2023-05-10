@@ -2422,6 +2422,9 @@ func flattenInitializationActions(nia []*dataproc.NodeInitializationAction) ([]m
 }
 
 func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterConfig) []map[string]interface{} {
+	if gcc == nil {
+		return []map[string]interface{}{}
+	}
 
 	gceConfig := map[string]interface{}{
 		"tags":             schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(gcc.Tags)),
