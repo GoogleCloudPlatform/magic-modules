@@ -2,13 +2,15 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccApigeeSharedflowDeployment_apigeeSharedflowDeploymentTestExample(t *testing.T) {
@@ -132,7 +134,7 @@ func testAccCheckApigeeSharedflowDeploymentDestroyProducer(t *testing.T) func(s 
 
 			config := GoogleProviderConfig(t)
 
-			url, err := acctest.ReplaceVarsForTest(config, rs, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/sharedflows/{{sharedflow_id}}/revisions/{{revision}}/deployments")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/sharedflows/{{sharedflow_id}}/revisions/{{revision}}/deployments")
 			if err != nil {
 				return err
 			}

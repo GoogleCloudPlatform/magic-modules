@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
@@ -27,7 +28,7 @@ func resourceConverterSQLDatabaseInstance() ResourceConverter {
 	}
 }
 
-func GetSQLDatabaseInstanceCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetSQLDatabaseInstanceCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}")
 	if err != nil {
 		return []Asset{}, err
@@ -48,13 +49,13 @@ func GetSQLDatabaseInstanceCaiObject(d TerraformResourceData, config *transport_
 	}
 }
 
-func GetSQLDatabaseInstanceApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
-	project, err := getProject(d, config)
+func GetSQLDatabaseInstanceApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := tpgresource.GetRegion(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +81,7 @@ func GetSQLDatabaseInstanceApiObject(d TerraformResourceData, config *transport_
 }
 
 // Detects whether a database is 1st Generation by inspecting the tier name
-func isFirstGen(d TerraformResourceData) bool {
+func isFirstGen(d tpgresource.TerraformResourceData) bool {
 	settingsList := d.Get("settings").([]interface{})
 	settings := settingsList[0].(map[string]interface{})
 	tier := settings["tier"].(string)

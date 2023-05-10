@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
 
 // expandIamPolicyBindings is used in google_<type>_iam_policy resources.
-func expandIamPolicyBindings(d TerraformResourceData) ([]IAMBinding, error) {
+func expandIamPolicyBindings(d tpgresource.TerraformResourceData) ([]IAMBinding, error) {
 	ps := d.Get("policy_data").(string)
 	var bindings []IAMBinding
 	// policy_data is (known after apply) in terraform plan, hence an empty string
@@ -35,7 +36,7 @@ func expandIamPolicyBindings(d TerraformResourceData) ([]IAMBinding, error) {
 }
 
 // expandIamRoleBindings is used in google_<type>_iam_binding resources.
-func expandIamRoleBindings(d TerraformResourceData) ([]IAMBinding, error) {
+func expandIamRoleBindings(d tpgresource.TerraformResourceData) ([]IAMBinding, error) {
 	var members []string
 	for _, m := range d.Get("members").(*schema.Set).List() {
 		members = append(members, m.(string))
@@ -49,7 +50,7 @@ func expandIamRoleBindings(d TerraformResourceData) ([]IAMBinding, error) {
 }
 
 // expandIamMemberBindings is used in google_<type>_iam_member resources.
-func expandIamMemberBindings(d TerraformResourceData) ([]IAMBinding, error) {
+func expandIamMemberBindings(d tpgresource.TerraformResourceData) ([]IAMBinding, error) {
 	return []IAMBinding{
 		{
 			Role:    d.Get("role").(string),
@@ -196,7 +197,7 @@ func mergeDeleteAuthoritativeBindings(existing, incoming []IAMBinding) []IAMBind
 
 func fetchIamPolicy(
 	newUpdaterFunc newResourceIamUpdaterFunc,
-	d TerraformResourceData,
+	d tpgresource.TerraformResourceData,
 	config *transport_tpg.Config,
 	assetNameTmpl string,
 	assetType string,
