@@ -217,6 +217,7 @@ func TestProvider_providerConfigure_credentials(t *testing.T) {
 			ExpectFieldUnset:    true,
 			ExpectedSchemaValue: "",
 		},
+		// Handling empty strings in config
 		"when credentials is set to an empty string in the config (and access_token unset), GOOGLE_APPLICATION_CREDENTIALS is used": {
 			ConfigValues: map[string]interface{}{
 				"credentials": "",
@@ -227,6 +228,7 @@ func TestProvider_providerConfigure_credentials(t *testing.T) {
 			ExpectFieldUnset:    true,
 			ExpectedSchemaValue: "",
 		},
+		// Error states
 		// NOTE: these tests can't run in Cloud Build due to ADC locating credentials despite `GOOGLE_APPLICATION_CREDENTIALS` being unset
 		// See https://cloud.google.com/docs/authentication/application-default-credentials#search_order
 		// Also, when running these tests locally you need to run `gcloud auth application-default revoke` to ensure your machine isn't supplying ADCs
@@ -334,16 +336,6 @@ func TestProvider_providerConfigure_accessToken(t *testing.T) {
 			ExpectedSchemaValue: "",
 			ExpectedConfigValue: "value-from-GOOGLE_OAUTH_ACCESS_TOKEN",
 		},
-		"when access_token is set as an empty string in the config, an environment variable is used but doesn't update the schema data": {
-			ConfigValues: map[string]interface{}{
-				"access_token": "",
-			},
-			EnvVariables: map[string]string{
-				"GOOGLE_OAUTH_ACCESS_TOKEN": "value-from-GOOGLE_OAUTH_ACCESS_TOKEN",
-			},
-			ExpectedSchemaValue: "",
-			ExpectedConfigValue: "value-from-GOOGLE_OAUTH_ACCESS_TOKEN",
-		},
 		"when no values are provided via config or environment variables, the field remains unset without error": {
 			ConfigValues: map[string]interface{}{
 				// access_token unset
@@ -354,7 +346,8 @@ func TestProvider_providerConfigure_accessToken(t *testing.T) {
 			ExpectedSchemaValue: "",
 			ExpectedConfigValue: "",
 		},
-		"when access_token is set as an empty array the field is treated as if it's unset, without error": {
+		// Handle empty strings in config
+		"when access_token is set as an empty string the field is treated as if it's unset, without error": {
 			ConfigValues: map[string]interface{}{
 				"access_token": "",
 				"credentials":  testFakeCredentialsPath,
@@ -363,6 +356,23 @@ func TestProvider_providerConfigure_accessToken(t *testing.T) {
 			ExpectFieldUnset:    true,
 			ExpectedSchemaValue: "",
 			ExpectedConfigValue: "",
+		},
+		"when access_token is set as an empty string in the config, an environment variable is used but doesn't update the schema data": {
+			ConfigValues: map[string]interface{}{
+				"access_token": "",
+			},
+			EnvVariables: map[string]string{
+				"GOOGLE_OAUTH_ACCESS_TOKEN": "value-from-GOOGLE_OAUTH_ACCESS_TOKEN",
+			},
+			ExpectedSchemaValue: "",
+			ExpectedConfigValue: "value-from-GOOGLE_OAUTH_ACCESS_TOKEN",
+		},
+		// Error states
+		"access_token cannot be set at the same time as credentials": {
+			ConfigValues: map[string]interface{}{
+				"access_token": "",
+				"credentials":  "", // TODO
+			},
 		},
 	}
 
@@ -456,6 +466,7 @@ func TestProvider_providerConfigure_impersonateServiceAccount(t *testing.T) {
 			ExpectFieldUnset: true,
 			ExpectedValue:    "",
 		},
+		// Handling empty strings in config
 		"when impersonate_service_account is set as an empty array the field is treated as if it's unset, without error": {
 			ConfigValues: map[string]interface{}{
 				"impersonate_service_account": "",
@@ -551,6 +562,7 @@ func TestProvider_providerConfigure_impersonateServiceAccountDelegates(t *testin
 			ExpectFieldUnset: true,
 			ExpectedValue:    nil,
 		},
+		// Handling empty values in config
 		"when project is set as an empty array the field is treated as if it's unset, without error": {
 			ConfigValues: map[string]interface{}{
 				"impersonate_service_account_delegates": []string{},
@@ -704,13 +716,25 @@ func TestProvider_providerConfigure_project(t *testing.T) {
 			},
 			ExpectedValue: "",
 		},
+		// Handling empty strings in config
 		"when project is set as an empty string the field is treated as if it's unset, without error": {
 			ConfigValues: map[string]interface{}{
 				"project":     "",
 				"credentials": testFakeCredentialsPath,
 			},
+			ExpectError:      false,
 			ExpectFieldUnset: true,
 			ExpectedValue:    "",
+		},
+		"when project is set as an empty string an environment variable will be used": {
+			ConfigValues: map[string]interface{}{
+				"project":     "",
+				"credentials": testFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"GOOGLE_PROJECT":        "project-from-GOOGLE_PROJECT",
+			}
+			ExpectedValue:    "project-from-GOOGLE_PROJECT",
 		},
 	}
 
@@ -804,6 +828,7 @@ func TestProvider_providerConfigure_billingProject(t *testing.T) {
 			ExpectFieldUnset: true,
 			ExpectedValue:    "",
 		},
+		// Handling empty strings in config
 		"when billing_project is set as an empty string the field is treated as if it's unset, without error": {
 			ConfigValues: map[string]interface{}{
 				"billing_project": "",
@@ -811,6 +836,16 @@ func TestProvider_providerConfigure_billingProject(t *testing.T) {
 			},
 			ExpectFieldUnset: true,
 			ExpectedValue:    "",
+		},
+		"when billing_project is set as an empty string an environment variable will be used": {
+			ConfigValues: map[string]interface{}{
+				"billing_project":     "",
+				"credentials": testFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"GOOGLE_BILLING_PROJECT": "my-billing-project-from-env",
+			},
+			ExpectedValue: "my-billing-project-from-env",
 		},
 	}
 
@@ -900,6 +935,7 @@ func TestProvider_providerConfigure_region(t *testing.T) {
 			ExpectFieldUnset: true,
 			ExpectedValue:    "",
 		},
+		// Handling empty strings in config
 		"when region is set as an empty string the field is treated as if it's unset, without error": {
 			ConfigValues: map[string]interface{}{
 				"region":      "",
@@ -907,6 +943,16 @@ func TestProvider_providerConfigure_region(t *testing.T) {
 			},
 			ExpectFieldUnset: true,
 			ExpectedValue:    "",
+		},
+		"when region is set as an empty string an environment variable will be used": {
+			ConfigValues: map[string]interface{}{
+				"region":     "",
+				"credentials": testFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"GOOGLE_REGION": "region-from-env",
+			},
+			ExpectedValue: "region-from-env",
 		},
 	}
 
@@ -1022,6 +1068,7 @@ func TestProvider_providerConfigure_zone(t *testing.T) {
 			ExpectFieldUnset: true,
 			ExpectedValue:    "",
 		},
+		// Handling empty strings in config
 		"when zone is set as an empty string the field is treated as if it's unset, without error": {
 			ConfigValues: map[string]interface{}{
 				"zone":        "",
@@ -1029,6 +1076,16 @@ func TestProvider_providerConfigure_zone(t *testing.T) {
 			},
 			ExpectFieldUnset: true,
 			ExpectedValue:    "",
+		},
+		"when zone is set as an empty string an environment variable will be used": {
+			ConfigValues: map[string]interface{}{
+				"zone":     "",
+				"credentials": testFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"GOOGLE_ZONE": "zone-from-env",
+			},
+			ExpectedValue: "zone-from-env",
 		},
 	}
 
@@ -1237,6 +1294,7 @@ func TestProvider_providerConfigure_scopes(t *testing.T) {
 			ExpectedSchemaValue: nil,
 			ExpectedConfigValue: transport_tpg.DefaultClientScopes,
 		},
+		// Handling empty values in config
 		"scopes set as an empty list the field is treated as if it's unset and a default value is used without errors": {
 			ConfigValues: map[string]interface{}{
 				"scopes":      []string{},
