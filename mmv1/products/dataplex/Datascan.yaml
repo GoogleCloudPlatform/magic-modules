@@ -477,7 +477,7 @@ properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: 'uniquenessExpectation'
                   allow_empty_object: true
-                  send_empty_value: true      
+                  send_empty_value: true
                   description: |
                     ColumnAggregate rule which evaluates whether the column has duplicates.
                   properties: []
