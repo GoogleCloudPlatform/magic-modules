@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"time"
 	"log"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -71,7 +73,7 @@ func ResourceComputeDiskAsyncReplication() *schema.Resource {
 
 func asyncReplicationGetComputeClient(d *schema.ResourceData, meta interface{}) (*compute.Service, error) {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -80,34 +82,34 @@ func asyncReplicationGetComputeClient(d *schema.ResourceData, meta interface{}) 
 	return clientCompute, nil
 }
 
-func asyncReplicationGetDiskFromConfig(disk string, d *schema.ResourceData, meta interface{}) (zv *ZonalFieldValue, rv *RegionalFieldValue, resourceId string, err error) {
+func asyncReplicationGetDiskFromConfig(disk string, d *schema.ResourceData, meta interface{}) (zv *tpgresource.ZonalFieldValue, rv *tpgresource.RegionalFieldValue, resourceId string, err error) {
 	config := meta.(*transport_tpg.Config)
 
 	var zonalMatch bool
-	zonalMatch, err = regexp.MatchString(fmt.Sprintf(zonalLinkBasePattern, "disks"), disk)
+	zonalMatch, err = regexp.MatchString(fmt.Sprintf(tpgresource.ZonalLinkBasePattern, "disks"), disk)
 	if err != nil {
 		return
 	}
-	zv, parseErr := ParseDiskFieldValue(disk, d, config)
+	zv, parseErr := tpgresource.ParseDiskFieldValue(disk, d, config)
 	if !zonalMatch || parseErr != nil {
-		rv, err = ParseRegionDiskFieldValue(disk, d, config)
+		rv, err = tpgresource.ParseRegionDiskFieldValue(disk, d, config)
 		if err != nil {
 			return
 		}
 		var regionalMatch bool
-		regionalMatch, err = regexp.MatchString(fmt.Sprintf(regionalLinkBasePattern, "disks"), disk)
+		regionalMatch, err = regexp.MatchString(fmt.Sprintf(tpgresource.RegionalLinkBasePattern, "disks"), disk)
 		if !regionalMatch || err != nil {
 			err = fmt.Errorf("regional disk expected: %s", disk)
 			return
 		}
-		resourceId = fmt.Sprintf(regionalLinkTemplate, rv.Project, rv.Region, "disks", rv.Name)
+		resourceId = fmt.Sprintf(tpgresource.RegionalLinkTemplate, rv.Project, rv.Region, "disks", rv.Name)
 	} else {
-		resourceId = fmt.Sprintf(zonalLinkTemplate, zv.Project, zv.Zone, "disks", zv.Name)
+		resourceId = fmt.Sprintf(tpgresource.ZonalLinkTemplate, zv.Project, zv.Zone, "disks", zv.Name)
 	}
 	return
 }
 
-func asyncReplicationGetDiskStatus(client *compute.Service, zv *ZonalFieldValue, rv *RegionalFieldValue) (diskStatus *compute.Disk, err error) {
+func asyncReplicationGetDiskStatus(client *compute.Service, zv *tpgresource.ZonalFieldValue, rv *tpgresource.RegionalFieldValue) (diskStatus *compute.Disk, err error) {
 	if rv == nil { // Zonal disk
 		diskStatus, err = client.Disks.Get(zv.Project, zv.Zone, zv.Name).Do()
 		log.Printf("[DEBUG] Get disk zones/%s/%s: %v", zv.Zone, zv.Name, diskStatus)

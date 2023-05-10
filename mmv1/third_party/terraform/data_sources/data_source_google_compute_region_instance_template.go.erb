@@ -48,12 +48,12 @@ func DataSourceGoogleComputeRegionInstanceTemplate() *schema.Resource {
 func datasourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	region, err := getRegion(d, config)
+	region, err := tpgresource.GetRegion(d, config)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func datasourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta in
 		return retrieveInstances(d, meta, project, region, v.(string))
 	}
 	if v, ok := d.GetOk("filter"); ok {
-		userAgent, err := generateUserAgentString(d, config.UserAgent)
+		userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return err
 		}
@@ -71,7 +71,7 @@ func datasourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta in
 			"filter": v.(string),
 		}
 
-		url, err := ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates")
+		url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates")
 		if err != nil {
 			return err
 		}

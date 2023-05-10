@@ -11,18 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: minimal_release
-description: Creates a minimal Firebase Rules Release
+name: firestore_release
+description: Creates a Firebase Rules Release to Cloud Firestore
 type: release
 versions:
 - ga
-resource: samples/minimal.release.json
-dependencies:
-- samples/minimal.ruleset.json
+- beta
+resource: ./firestore_release.tf.tmpl
+updates:
+- resource: ./firestore_release_update.tf.tmpl
 variables:
 - name: project
   type: project
-- name: release
-  type: resource_name
-- name: ruleset
-  type: resource_name
