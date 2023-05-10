@@ -143,6 +143,17 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: 'type'
     required: true
+    # TODO(gfelipe) this generates 3 things when removing the immutable:
+    # 1- the forceNew is removed(so the user thinks this field might be updatable);
+    # 2- this field is put on the payload request regardless if is being updated or not;
+    # 3- the mask is generated when used;
+    # Currently the api is not sending the UpdateMask even if you set it so the update only works when sending the 
+    # entire payload(step 2 listed above).
+    # Ideally we should set the immutable to true if the Api works properly because only the updatable fields would be sent over.
+    # 1- forceNew would not be removed;
+    # 2- this field would not be necessary to be present in the request payload;
+    # 3- the mask for this field would not be generated.
+    # immutable: true
     description: |
       Immutable. The type of the customer-managed gateway. Possible values are: * OPEN_MESH * SECURE_WEB_GATEWAY.
     values:
@@ -152,6 +163,7 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'ports'
     required: true
+    # immutable: true
     description: |
       One or more port numbers (1-65535), on which the Gateway will receive traffic.
       The proxy binds to the specified ports. Gateways of type 'SECURE_WEB_GATEWAY' are
