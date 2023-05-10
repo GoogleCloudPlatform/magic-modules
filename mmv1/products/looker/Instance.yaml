@@ -207,7 +207,7 @@ properties:
       disrupt service.
     properties:
       - !ruby/object:Api::Type::Enum
-        name: 'dayOfweek'
+        name: 'dayOfWeek'
         required: true
         description: |
           Required. Day of the week for this MaintenanceWindow (in UTC).
