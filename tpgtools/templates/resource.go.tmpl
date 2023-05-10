@@ -566,7 +566,7 @@ func resource{{$.PathType}}Import(d *schema.ResourceData, meta interface{}) ([]*
 	}
 {{ else -}}
 	{{$allowForwardSlash := shouldAllowForwardSlashInFormat $.ID $.Properties}}
-	if err := ParseImportId([]string{
+	if err := tpgresource.ParseImportId([]string{
 	{{- range $format := $.ImportFormats }}
 	"{{patternToRegex $format $allowForwardSlash}}",
 	{{- end }}
