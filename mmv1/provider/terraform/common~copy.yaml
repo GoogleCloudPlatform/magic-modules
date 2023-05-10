@@ -18,9 +18,7 @@
 
 # Copy all of the terraform resources that are still hand written into the specific service folder
 <% Dir["third_party/terraform/services/**"].each do |product_path|
-  puts product_path
   product_name = product_path.split('/')[-1]
-  puts product_name
   Dir[product_path + "/*.go"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
