@@ -49,6 +49,7 @@ objects:
           "LOCATION_ID is the canonical ID for the pipeline's location. The list of available locations can be obtained by calling google.cloud.location.Locations.ListLocations. Note that the Data Pipelines service is not available in all regions. It depends on Cloud Scheduler, an App Engine application, so it's only available in App Engine regions."
           "PIPELINE_ID is the ID of the pipeline. Must be unique for the selected project and location."
         required: true
+        immutable: true
         pattern: projects/{{project}}/locations/{{region}}/functions/{{name}}
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
         custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
@@ -56,6 +57,7 @@ objects:
         name: 'displayName'
         description: |
           The display name of the pipeline. It can contain only letters ([A-Za-z]), numbers ([0-9]), hyphens (-), and underscores (_).
+        immutable: true
       - !ruby/object:Api::Type::Enum
         name: 'type'
         description: |
@@ -72,6 +74,7 @@ objects:
           The state of the pipeline. When the pipeline is created, the state is set to 'PIPELINE_STATE_ACTIVE' by default. State changes can be requested by setting the state to stopping, paused, or resuming. State cannot be changed through pipelines.patch requests.
           https://cloud.google.com/dataflow/docs/reference/data-pipelines/rest/v1/projects.locations.pipelines#state
         required: true
+        immutable: true
         values:
           - :STATE_UNSPECIFIED
           - :STATE_RESUMING
@@ -244,6 +247,7 @@ objects:
                     description: |
                       The job name to use for the created job. For an update job request, the job name should be the same as the existing running job.
                     required: true
+                    immutable: true
                   - !ruby/object:Api::Type::KeyValuePairs
                     name: 'parameters'
                     description: |
@@ -393,3 +397,4 @@ objects:
         description: |
            The sources of the pipeline (for example, Dataplex). The keys and values are set by the corresponding sources during pipeline creation.
            An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+        immutable: true
