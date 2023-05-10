@@ -30,4 +30,4 @@ jobs:
     - name: Install yamllint
       run: pip install yamllint
     - name: Lint YAML files
-      run: yamllint mmv1/products
+      run: yamllint repo/mmv1/products
