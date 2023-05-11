@@ -1015,13 +1015,13 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_imageTran
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"organization":  GetTestOrgFromEnv(t),
+		"organization":  acctest.GetTestOrgFromEnv(t),
 		"random_suffix": RandString(t, 10),
 		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -1774,6 +1774,154 @@ resource "google_data_loss_prevention_deidentify_template" "config" {
               float_value = 20.5
             }
             bucket_size = 20
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_dateShiftConfig(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"organization":  acctest.GetTestOrgFromEnv(t),
+		"random_suffix": RandString(t, 10),
+		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_dateShiftConfig_transient(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_deidentify_template.config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_dateShiftConfig_unwrapped(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_deidentify_template.config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_dateShiftConfig_kmsWrapped(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_deidentify_template.config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_dateShiftConfig_transient(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_deidentify_template" "config" {
+  parent = "organizations/%{organization}"
+  description = "Description"
+  display_name = "Displayname"
+
+  deidentify_config {
+    info_type_transformations {
+      transformations {
+        info_types {
+          name = "DATE_SHIFT_EXAMPLE"
+        }
+
+        primitive_transformation {
+          date_shift_config {
+            upper_bound_days = 30
+            lower_bound_days = -30
+            context {
+              name = "some-context-field"
+            }
+            crypto_key {
+              transient {
+                name = "someRandomTerraformKey"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_dateShiftConfig_unwrapped(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_deidentify_template" "config" {
+  parent = "organizations/%{organization}"
+  description = "Description"
+  display_name = "Displayname"
+
+  deidentify_config {
+    info_type_transformations {
+      transformations {
+        info_types {
+          name = "DATE_SHIFT_EXAMPLE"
+        }
+
+        primitive_transformation {
+          date_shift_config {
+            upper_bound_days = 30
+            lower_bound_days = -30
+            context {
+              name = "some-context-field"
+            }
+            crypto_key {
+              unwrapped {
+                key = "0836c61118ac590243bdadb25f0bb08e"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_dateShiftConfig_kmsWrapped(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_deidentify_template" "config" {
+  parent = "organizations/%{organization}"
+  description = "Description"
+  display_name = "Displayname"
+
+  deidentify_config {
+    info_type_transformations {
+      transformations {
+        info_types {
+          name = "DATE_SHIFT_EXAMPLE"
+        }
+
+        primitive_transformation {
+          date_shift_config {
+            upper_bound_days = 30
+            lower_bound_days = -30
+            context {
+              name = "some-context-field"
+            }
+            crypto_key {
+              kms_wrapped {
+                wrapped_key     = "B64/WRAPPED/TOKENIZATION/KEY"
+                crypto_key_name = "%{kms_key_name}"
+              }
+            }
           }
         }
       }
