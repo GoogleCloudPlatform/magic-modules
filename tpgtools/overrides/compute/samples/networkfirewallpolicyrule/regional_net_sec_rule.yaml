@@ -1,5 +1,5 @@
 versions:
-- ga
+- beta
 updates:
 - resource: ./regional_net_sec_rule_update.tf.tmpl
 variables:
