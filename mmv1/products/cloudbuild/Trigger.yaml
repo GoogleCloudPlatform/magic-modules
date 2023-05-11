@@ -339,7 +339,7 @@ properties:
         name: 'repository'
         min_version: beta
         description: |
-          The qualified resource name of the Repo API repository. 
+          The qualified resource name of the Repo API repository.
           Either uri or repository can be specified and is required.
       - !ruby/object:Api::Type::String
         name: 'ref'
