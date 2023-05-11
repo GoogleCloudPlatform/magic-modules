@@ -92,7 +92,7 @@ func <%= resource_name -%>IamUpdaterProducer(d tpgresource.TerraformResourceData
 <% import_format = object.iam_policy.import_format || object.import_format -%>
 
 	// We may have gotten either a long or short name, so attempt to parse long name if possible
-	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(import_format, object.identity, object.base_url).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{parent_resource_name}>")}.join('","') -%>"}, d, config, d.Get("<%= parent_resource_name -%>").(string))
+	m, err := tpgresource.GetImportIdQualifiers([]string{"<%= import_id_formats(import_format, object.identity, object.base_url).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{parent_resource_name}>")}.join('","') -%>"}, d, config, d.Get("<%= parent_resource_name -%>").(string))
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +145,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *transport_
 <% end # if provider_default_values.include? -%>
 <% end # resource_params.each -%>
 
-	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(import_format, object.identity, object.base_url).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{parent_resource_name}>")}.join('","') -%>"}, d, config, d.Id())
+	m, err := tpgresource.GetImportIdQualifiers([]string{"<%= import_id_formats(import_format, object.identity, object.base_url).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{parent_resource_name}>")}.join('","') -%>"}, d, config, d.Id())
 	if err != nil {
 		return err
 	}
