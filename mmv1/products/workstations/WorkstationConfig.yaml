@@ -301,8 +301,9 @@ properties:
             - !ruby/object:Api::Type::String
               name: 'sourceSnapshot'
               description: |
-                Name of the snapshot to use as the source for the disk. If set, sizeGb and fsType must be empty.
+                The snapshot to use as the source for the disk. This can be the snapshot's `self_link`, `id`, or a string in the format of `projects/{project}/global/snapshots/{snapshot}`. If set, sizeGb and fsType must be empty.
               immutable: true
+              # TODO(esu): Add conflicting fields once complex lists are supported.
   - !ruby/object:Api::Type::NestedObject
     name: 'container'
     description: |
