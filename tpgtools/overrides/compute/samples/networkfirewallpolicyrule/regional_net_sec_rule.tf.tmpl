@@ -1,4 +1,18 @@
+resource "google_network_security_address_group" "basic_regional_networksecurity_address_group" {
+  provider = google-beta
+
+  name        = "{{policy}}"
+  parent      = "projects/{{project}}"
+  description = "Sample regional networksecurity_address_group"
+  location    = "{{region}}"
+  items       = ["208.80.154.224/32"]
+  type        = "IPV4"
+  capacity    = 100
+}
+
 resource "google_compute_region_network_firewall_policy" "basic_regional_network_firewall_policy" {
+  provider = google-beta
+
   name        = "{{policy}}"
   description = "Sample regional network firewall policy"
   project     = "{{project}}"
@@ -6,6 +20,8 @@ resource "google_compute_region_network_firewall_policy" "basic_regional_network
 }
 
 resource "google_compute_region_network_firewall_policy_rule" "primary" {
+  provider = google-beta
+
   action                  = "allow"
   description             = "This is a simple rule description"
   direction               = "INGRESS"
@@ -30,14 +46,20 @@ resource "google_compute_region_network_firewall_policy_rule" "primary" {
     src_secure_tags {
       name = "tagValues/${google_tags_tag_value.basic_value.name}"
     }
+    
+    src_address_groups = [google_network_security_address_group.basic_regional_networksecurity_address_group.id]
   }
 }
 
 resource "google_compute_network" "basic_network" {
+  provider = google-beta
+
   name = "{{network}}"
 }
 
 resource "google_tags_tag_key" "basic_key" {
+  provider = google-beta
+
   description = "For keyname resources."
   parent      = "organizations/{{org_id}}"
   purpose     = "GCE_FIREWALL"
@@ -49,6 +71,8 @@ resource "google_tags_tag_key" "basic_key" {
 }
 
 resource "google_tags_tag_value" "basic_value" {
+  provider = google-beta
+
   description = "For valuename resources."
   parent      = "tagKeys/${google_tags_tag_key.basic_key.name}"
   short_name  = "{{tagvalue}}"
