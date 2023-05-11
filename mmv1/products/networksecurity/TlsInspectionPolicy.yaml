@@ -11,8 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-!ruby/object:Api::Resource
+--- !ruby/object:Api::Resource
 name: 'TlsInspectionPolicy'
 base_url: 'projects/{{project}}/locations/{{location}}/tlsInspectionPolicies'
 create_url: 'projects/{{project}}/locations/{{location}}/tlsInspectionPolicies?tlsInspectionPolicyId={{name}}'
@@ -20,9 +19,10 @@ self_link: 'projects/{{project}}/locations/{{location}}/tlsInspectionPolicies/{{
 min_version: beta
 update_verb: :PATCH
 update_mask: true
-description: 'The TlsInspectionPolicy resource contains references to CA pools in Certificate Authority Service and associated metadata.'
-references:
-  !ruby/object:Api::Resource::ReferenceLinks 
+description:
+  'The TlsInspectionPolicy resource contains references to CA pools in
+  Certificate Authority Service and associated metadata.'
+references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/secure-web-proxy/docs/reference/network-security/rest/v1beta1/projects.locations.tlsInspectionPolicies'
   guides:
     'Use TlsInspectionPolicy': 'https://cloud.google.com/secure-web-proxy/docs/tls-inspection-overview'
