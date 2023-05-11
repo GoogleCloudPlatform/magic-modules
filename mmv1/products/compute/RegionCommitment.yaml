@@ -158,7 +158,7 @@ properties:
             Name of the accelerator type resource. Applicable only when the type is ACCELERATOR.
   - !ruby/object:Api::Type::String
     name: 'type'
-    output: true
+    default_from_api: true
     description: |
       The type of commitment, which affects the discount rate and the eligible resources.
       The type could be one of the following value: `MEMORY_OPTIMIZED`, `ACCELERATOR_OPTIMIZED`, 
