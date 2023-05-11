@@ -1,4 +1,4 @@
-project, err := getProject(d, meta.(*transport_tpg.Config))
+project, err := tpgresource.GetProject(d, meta.(*transport_tpg.Config))
 if err != nil {
 	return nil, err
 }

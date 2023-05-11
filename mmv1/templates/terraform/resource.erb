@@ -173,7 +173,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%  if object.custom_code.custom_create -%>
     <%= lines(compile(pwd + '/' + object.custom_code.custom_create))  -%>
 <%  else  -%>
-    userAgent, err := generateUserAgentString(d, config.UserAgent)
+    userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
         return err
     }
@@ -187,9 +187,9 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%    if prop.send_empty_value -%>
     } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
 <%    elsif prop.flatten_object -%>
-    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
+    } else if !tpgresource.IsEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
 <%    else -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !tpgresource.IsEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
 <%    end -%>
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
     }
@@ -203,7 +203,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%  end -%>
 
 <%  if object.mutex -%>
-    lockName, err := ReplaceVars(d, config, "<%= object.mutex -%>")
+    lockName, err := tpgresource.ReplaceVars(d, config, "<%= object.mutex -%>")
     if err != nil {
         return err
     }
@@ -211,7 +211,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 <%  end -%>
 
-    url, err := ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.create_uri}" -%>")
+    url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.create_uri}" -%>")
     if err != nil {
         return err
     }
@@ -233,7 +233,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     billingProject := ""
 
 <%  if has_project -%>
-    project, err := getProject(d, config)
+    project, err := tpgresource.GetProject(d, config)
     if err != nil {
         return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
     }
@@ -247,7 +247,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%  end -%>
 
     // err == nil indicates that the billing_project value was found
-    if bp, err := getBillingProject(d, config); err == nil {
+    if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
       billingProject = bp
     }
 
@@ -271,7 +271,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <% end -%>
 
     // Store the ID now
-    id, err := ReplaceVars(d, config, "<%= id_format(object) -%>")
+    id, err := tpgresource.ReplaceVars(d, config, "<%= id_format(object) -%>")
     if err != nil {
         return fmt.Errorf("Error constructing id: %s", err)
     }
@@ -328,7 +328,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     <% end -%>
 
     // This may have caused the ID to update - update it if so.
-    id, err = ReplaceVars(d, config, "<%= id_format(object) -%>")
+    id, err = tpgresource.ReplaceVars(d, config, "<%= id_format(object) -%>")
     if err != nil {
         return fmt.Errorf("Error constructing id: %s", err)
     }
@@ -380,14 +380,14 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 }
 
 <%  if object.async&.is_a? Provider::Terraform::PollAsync -%>
-func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interface{}) PollReadFunc {
+func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
     return func() (map[string]interface{}, error) {
 <%    if object.async.custom_poll_read -%>
 <%= lines(compile(pwd + '/' + object.async.custom_poll_read)) -%>
 <%    else -%>
         config := meta.(*transport_tpg.Config)
 
-        url, err := ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+        url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
         if err != nil {
             return nil, err
         }
@@ -395,7 +395,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
         billingProject := ""
 
 <%  if has_project -%>
-        project, err := getProject(d, config)
+        project, err := tpgresource.GetProject(d, config)
         if err != nil {
             return nil, fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
         }
@@ -409,11 +409,11 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
 <%  end -%>
 
         // err == nil indicates that the billing_project value was found
-        if bp, err := getBillingProject(d, config); err == nil {
+        if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
         billingProject = bp
         }
 
-        userAgent, err := generateUserAgentString(d, config.UserAgent)
+        userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
         if err != nil {
             return nil, err
         }
@@ -451,12 +451,12 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
 
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*transport_tpg.Config)
-    userAgent, err := generateUserAgentString(d, config.UserAgent)
+    userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
         return err
     }
 
-    url, err := ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}#{object.read_query_params}" -%>")
+    url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}#{object.read_query_params}" -%>")
     if err != nil {
         return err
     }
@@ -464,7 +464,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     billingProject := ""
 
 <%  if has_project -%>
-    project, err := getProject(d, config)
+    project, err := tpgresource.GetProject(d, config)
     if err != nil {
         return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
     }
@@ -478,7 +478,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  end -%>
 
     // err == nil indicates that the billing_project value was found
-    if bp, err := getBillingProject(d, config); err == nil {
+    if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
       billingProject = bp
     }
 
@@ -540,7 +540,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  end -%>
 
 <%  if has_region -%>
-    region, err := getRegion(d, config)
+    region, err := tpgresource.GetRegion(d, config)
     if err != nil {
         return err
     }
@@ -587,7 +587,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     var project string
 <% end -%>
     config := meta.(*transport_tpg.Config)
-    userAgent, err := generateUserAgentString(d, config.UserAgent)
+    userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
     	return err
     }
@@ -595,7 +595,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     billingProject := ""
 
 <%  if has_project -%>
-    project, err := getProject(d, config)
+    project, err := tpgresource.GetProject(d, config)
     if err != nil {
         return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
     }
@@ -614,9 +614,9 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%      if prop.send_empty_value -%>
     } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
 <%      elsif prop.flatten_object -%>
-    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
+    } else if !tpgresource.IsEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
 <%      else -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
 <%      end -%>
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
     }
@@ -636,7 +636,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%  end -%>
 
 <%  if object.mutex -%>
-    lockName, err := ReplaceVars(d, config, "<%= object.mutex -%>")
+    lockName, err := tpgresource.ReplaceVars(d, config, "<%= object.mutex -%>")
     if err != nil {
         return err
     }
@@ -644,7 +644,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 <%  end -%>
 
-    url, err := ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, object.update_url)}" -%>")
+    url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, object.update_url)}" -%>")
     if err != nil {
         return err
     }
@@ -666,7 +666,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%  end -%>
 
     // err == nil indicates that the billing_project value was found
-    if bp, err := getBillingProject(d, config); err == nil {
+    if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
       billingProject = bp
     }
 
@@ -717,7 +717,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         obj := make(map[string]interface{})
 
 <%-      unless key[:fingerprint_name] == nil -%>
-        getUrl, err := ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+        getUrl, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
         if err != nil {
             return err
         }
@@ -728,7 +728,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <%         end -%>
 
         // err == nil indicates that the billing_project value was found
-        if bp, err := getBillingProject(d, config); err == nil {
+        if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
         billingProject = bp
         }
 
@@ -767,9 +767,9 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <%          if prop.send_empty_value -%>
         } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
 <%          elsif prop.flatten_object -%>
-        } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
+        } else if !tpgresource.IsEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
 <%          else -%>
-        } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+        } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
 <%          end -%>
             obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
         }
@@ -784,7 +784,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <%  end -%>
 
 <%      if object.mutex -%>
-        lockName, err := ReplaceVars(d, config, "<%= object.mutex -%>")
+        lockName, err := tpgresource.ReplaceVars(d, config, "<%= object.mutex -%>")
         if err != nil {
             return err
         }
@@ -792,7 +792,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         defer transport_tpg.MutexStore.Unlock(lockName)
 <%      end -%>
 
-        url, err := ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, key[:update_url])}" -%>")
+        url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, key[:update_url])}" -%>")
         if err != nil {
             return err
         }
@@ -805,7 +805,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <%      end -%>
 
         // err == nil indicates that the billing_project value was found
-        if bp, err := getBillingProject(d, config); err == nil {
+        if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
         billingProject = bp
         }
 
@@ -859,7 +859,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     return nil
 <% else -%>
     config := meta.(*transport_tpg.Config)
-    userAgent, err := generateUserAgentString(d, config.UserAgent)
+    userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
     	return err
     }
@@ -871,7 +871,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     billingProject := ""
 
 <%  if has_project -%>
-    project, err := getProject(d, config)
+    project, err := tpgresource.GetProject(d, config)
     if err != nil {
         return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
     }
@@ -879,7 +879,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%  end -%>
 
 <%  if object.mutex -%>
-    lockName, err := ReplaceVars(d, config, "<%= object.mutex -%>")
+    lockName, err := tpgresource.ReplaceVars(d, config, "<%= object.mutex -%>")
     if err != nil {
         return err
     }
@@ -887,7 +887,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 <%  end -%>
 
-    url, err := ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.delete_uri}" -%>")
+    url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.delete_uri}" -%>")
     if err != nil {
         return err
     }
@@ -918,7 +918,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
 
     // err == nil indicates that the billing_project value was found
-    if bp, err := getBillingProject(d, config); err == nil {
+    if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
       billingProject = bp
     }
 
@@ -970,7 +970,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
     }
 
     // Replace import id for the resource id
-    id, err := ReplaceVars(d, config, "<%= id_format(object) -%>")
+    id, err := tpgresource.ReplaceVars(d, config, "<%= id_format(object) -%>")
     if err != nil {
         return nil, fmt.Errorf("Error constructing id: %s", err)
     }
