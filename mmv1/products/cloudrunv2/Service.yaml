@@ -104,6 +104,14 @@ examples:
     vars:
       cloud_run_service_name: 'cloudrun-service'
       secret_id: 'secret-1'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_service_multicontainer'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service%s\", context[\"\
+      random_suffix\"])"
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -253,7 +261,7 @@ properties:
       - !ruby/object:Api::Type::Array
         name: 'containers'
         description: |-
-          Holds the single container that defines the unit of execution for this task.
+          Holds the containers that define the unit of execution for this Service.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
@@ -574,6 +582,12 @@ properties:
                         The name of the service to place in the gRPC HealthCheckRequest
                         (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
                         If this is not specified, the default behavior is defined by gRPC.
+            - !ruby/object:Api::Type::Array
+              name: 'dependsOn'
+              description: |-
+                Containers which should be started before this container. If specified the container will wait to start until all containers with the listed names are healthy.
+              min_version: beta
+              item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'volumes'
         description: |-
@@ -592,6 +606,7 @@ properties:
               # exactly_one_of:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance
+              #   - template.0.volumes.0.emptyDir
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'secret'
@@ -629,12 +644,34 @@ properties:
               # exactly_one_of:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance
+              #   - template.0.volumes.0.emptyDir
               properties:
                 - !ruby/object:Api::Type::Array
                   name: 'instances'
                   description: |-
                     The Cloud SQL instance connection names, as can be found in https://console.cloud.google.com/sql/instances. Visit https://cloud.google.com/sql/docs/mysql/connect-run for more information on how to connect Cloud SQL and Cloud Run. Format: {project}:{location}:{instance}
                   item_type: Api::Type::String
+            - !ruby/object:Api::Type::NestedObject
+              name: 'emptyDir'
+              description: |-
+                Ephemeral storage used as a shared volume.
+              min_version: beta
+              # exactly_one_of:
+              #   - template.0.volumes.0.secret
+              #   - template.0.volumes.0.cloudSqlInstance
+              #   - template.0.volumes.0.emptyDir
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: 'medium'
+                  description: |-
+                    The different types of medium supported for EmptyDir.
+                  values:
+                    - :MEMORY
+                  default_value: :MEMORY
+                - !ruby/object:Api::Type::String
+                  name: 'sizeLimit'
+                  description: |-
+                      Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: http://kubernetes.io/docs/user-guide/volumes#emptydir.
       - !ruby/object:Api::Type::Enum
         name: 'executionEnvironment'
         description: |-

@@ -1,5 +1,7 @@
+versions:
+- ga
 updates:
-- resource: ./regional_update.tf.tmpl
+- resource: ./regional_net_sec_rule_update.tf.tmpl
 variables:
 - name: policy
   type: resource_name

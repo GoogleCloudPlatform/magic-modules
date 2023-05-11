@@ -1,8 +1,5 @@
 from golang:1.19-bullseye as resource
 SHELL ["/bin/bash", "-c"]
-# Set up Github SSH cloning.
-RUN ssh-keyscan github.com >> /known_hosts
-RUN echo "UserKnownHostsFile /known_hosts" >> /etc/ssh/ssh_config
 
 RUN apt-get update
 RUN apt-get install -y git jq

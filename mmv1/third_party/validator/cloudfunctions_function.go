@@ -7,7 +7,7 @@ import (
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
-func GetCloudFunctionsFunctionCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetCloudFunctionsFunctionCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//cloudfunctions.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/functions/{{name}}")
 	if err != nil {
 		return []Asset{}, err
@@ -28,7 +28,7 @@ func GetCloudFunctionsFunctionCaiObject(d TerraformResourceData, config *transpo
 	}
 }
 
-func GetCloudFunctionsFunctionApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+func GetCloudFunctionsFunctionApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
 	obj := make(map[string]interface{})
 	runtimeProp, err := expandCloudFunctionsFunctionRuntime(d.Get("runtime"), d, config)
 	if err != nil {
@@ -129,35 +129,35 @@ func GetCloudFunctionsFunctionApiObject(d TerraformResourceData, config *transpo
 	return obj, nil
 }
 
-func expandCloudFunctionsFunctionRuntime(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandCloudFunctionsFunctionRuntime(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsFunctionName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandCloudFunctionsFunctionName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsFunctionDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandCloudFunctionsFunctionDescription(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsFunctionMaxInstances(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandCloudFunctionsFunctionMaxInstances(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsFunctionRegion(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandCloudFunctionsFunctionRegion(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsFunctionEntryPoint(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandCloudFunctionsFunctionEntryPoint(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsFunctionMemoryMb(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandCloudFunctionsFunctionMemoryMb(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsFunctionLabels(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
+func expandCloudFunctionsFunctionLabels(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
 	if v == nil {
 		return map[string]string{}, nil
 	}
@@ -168,7 +168,7 @@ func expandCloudFunctionsFunctionLabels(v interface{}, d TerraformResourceData, 
 	return m, nil
 }
 
-func expandCloudFunctionsFunctionEnvironmentVariables(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
+func expandCloudFunctionsFunctionEnvironmentVariables(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
 	if v == nil {
 		return map[string]string{}, nil
 	}
@@ -179,7 +179,7 @@ func expandCloudFunctionsFunctionEnvironmentVariables(v interface{}, d Terraform
 	return m, nil
 }
 
-func expandCloudFunctionsFunctionBuildEnvironmentVariables(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
+func expandCloudFunctionsFunctionBuildEnvironmentVariables(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
 	if v == nil {
 		return map[string]string{}, nil
 	}
@@ -190,18 +190,18 @@ func expandCloudFunctionsFunctionBuildEnvironmentVariables(v interface{}, d Terr
 	return m, nil
 }
 
-func expandCloudFunctionsFunctionVpcConnector(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandCloudFunctionsFunctionVpcConnector(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsFunctionVpcConnectorEgressSettings(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandCloudFunctionsFunctionVpcConnectorEgressSettings(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsFunctionIngressSettings(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandCloudFunctionsFunctionIngressSettings(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsFunctionServiceAccountEmail(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandCloudFunctionsFunctionServiceAccountEmail(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
