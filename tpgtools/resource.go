@@ -378,7 +378,7 @@ func (r Resource) IDFunction() string {
 			return "tpgresource.ReplaceVars"
 		}
 	}
-	return "replaceVarsForId"
+	return "tpgresource.ReplaceVarsForId"
 }
 
 // ResourceInput is a Resource along with additional generation metadata.
