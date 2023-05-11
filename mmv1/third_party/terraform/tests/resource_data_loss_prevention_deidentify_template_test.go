@@ -1667,13 +1667,13 @@ resource "google_data_loss_prevention_deidentify_template" "config" {
           bucketing_config {
             buckets {
               min {
-                date_of_the_week_value = "FRIDAY"
+                day_of_the_week_value = "FRIDAY"
               }
               max {
-                date_of_the_week_value = "SUNDAY"
+                day_of_the_week_value = "SUNDAY"
               }
               replacement_value {
-                date_of_the_week_value = "MONDAY"
+                day_of_the_week_value = "MONDAY"
               }
             }
           }
