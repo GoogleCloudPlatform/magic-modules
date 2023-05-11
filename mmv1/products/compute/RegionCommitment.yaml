@@ -156,30 +156,15 @@ properties:
           name: 'acceleratorType'
           description: |
             Name of the accelerator type resource. Applicable only when the type is ACCELERATOR.
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'type'
-    default_from_api: true
+    output: true
     description: |
       The type of commitment, which affects the discount rate and the eligible resources.
-      Type MEMORY_OPTIMIZED specifies a commitment that will only apply to memory optimized
-      machines. Type ACCELERATOR_OPTIMIZED specifies a commitment that will only apply to
-      accelerator optimized machines. The others match compute types (N1, N2, T2D, ...)
-    values:
-      - :MEMORY_OPTIMIZED
-      - :ACCELERATOR_OPTIMIZED
-      - :GENERAL_PURPOSE_N1
-      - :GENERAL_PURPOSE_N2
-      - :GENERAL_PURPOSE_N2D
-      - :GENERAL_PURPOSE_E2
-      - :GENERAL_PURPOSE_T2D
-      - :GENERAL_PURPOSE_C3
-      - :COMPUTE_OPTIMIZED_C2
-      - :COMPUTE_OPTIMIZED_C2D
-      - :GRAPHICS_OPTIMIZED_G2
-      # I don't know the real value of the following types vs first items:
-      # - :MEMORY_OPTIMIZED_M3
-      # - :MEMORY_OPTIMIZED_M1_M2
-      # - :ACCELERATOR_OPTIMIZED_A2
+      The type could be one of the following value: `MEMORY_OPTIMIZED`, `ACCELERATOR_OPTIMIZED`, 
+      `GENERAL_PURPOSE_N1`, `GENERAL_PURPOSE_N2`, `GENERAL_PURPOSE_N2D`, `GENERAL_PURPOSE_E2`,
+      `GENERAL_PURPOSE_T2D`, `GENERAL_PURPOSE_C3`, `COMPUTE_OPTIMIZED_C2`, `COMPUTE_OPTIMIZED_C2D` and
+      `GRAPHICS_OPTIMIZED_G2`
   - !ruby/object:Api::Type::Enum
     name: 'category'
     default_from_api: true
