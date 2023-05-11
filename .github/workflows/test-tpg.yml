@@ -25,11 +25,7 @@ on:
       sha:
         description: "The commit SHA in magic-modules repository where the status result will be posted"
         required: true
-
-concurrency:
-  group: test-tpg-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.branch }}
-  cancel-in-progress: true
-
+        
 jobs:
   build-and-unit-test:
     runs-on: ubuntu-latest
