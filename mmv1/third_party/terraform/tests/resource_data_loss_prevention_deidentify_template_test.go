@@ -1684,3 +1684,101 @@ resource "google_data_loss_prevention_deidentify_template" "config" {
 }
 `, context)
 }
+
+func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_fixedSizeBucketingConfig(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"organization":  acctest.GetTestOrgFromEnv(t),
+		"random_suffix": RandString(t, 10),
+		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_fixedSizeBucketingConfig_integerValue(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_deidentify_template.config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_fixedSizeBucketingConfig_floatValue(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_deidentify_template.config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_fixedSizeBbucketingConfig_integerValue(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_deidentify_template" "config" {
+  parent = "organizations/%{organization}"
+  description = "Description"
+  display_name = "Displayname"
+
+  deidentify_config {
+    info_type_transformations {
+      transformations {
+        info_types {
+          name = "FIXED_BUCKETING_EXAMPLE"
+        }
+
+        primitive_transformation {
+          fixed_size_bucketing_config {
+            lower_bound {
+              integer_value = 0
+            }
+            upper_bound {
+              integer_value = 200
+            }
+            bucket_size = 20
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_fixedSizeBucketingConfig_floatValue(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_deidentify_template" "config" {
+  parent = "organizations/%{organization}"
+  description = "Description"
+  display_name = "Displayname"
+
+  deidentify_config {
+    info_type_transformations {
+      transformations {
+        info_types {
+          name = "FIXED_BUCKETING_EXAMPLE"
+        }
+
+        primitive_transformation {
+          fixed_size_bucketing_config {
+            lower_bound {
+              float_value = 0.5
+            }
+            upper_bound {
+              float_value = 20.5
+            }
+            bucket_size = 20
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}
