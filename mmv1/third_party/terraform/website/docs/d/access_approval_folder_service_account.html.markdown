@@ -41,4 +41,4 @@ The following attributes are exported:
 * `name` - The Access Approval service account resource name. Format is "folders/{folder_id}/serviceAccount".
 
 * `account_email` - The email address of the service account. This value is
-often used to refer to the service account in order to grant IAM permissions.
+often used to refer to the service account in order to grant IAM permissions
