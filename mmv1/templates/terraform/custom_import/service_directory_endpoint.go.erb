@@ -29,7 +29,7 @@ if len(nameParts) == 10 {
 	d.SetId(id)
 } else if len(nameParts) == 4 {
 	// `{{location}}/{{namespace_id}}/{{service_id}}/{{endpoint_id}}`
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 			return nil, err
 	}

@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package google
+<% if version != "ga" -%>
 
 import (
 	"fmt"
@@ -154,3 +156,4 @@ resource "google_compute_disk_async_replication" "replication" {
 }	  
 `, region, primaryDisk, region, region, secondaryRegion, secondaryDisk, secondaryRegion, secondaryRegion)
 }
+<% end -%>
