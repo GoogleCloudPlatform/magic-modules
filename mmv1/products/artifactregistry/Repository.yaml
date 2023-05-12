@@ -205,20 +205,20 @@ properties:
           Policies that configure the upstream artifacts distributed by the Virtual
           Repository. Upstream policies cannot be set on a standard repository.
         item_type: !ruby/object:Api::Type::NestedObject
-        properties:
-          - !ruby/object:Api::Type::String
-            name: 'id'
-            description: |-
-              The user-provided ID of the upstream policy.
-          - !ruby/object:Api::Type::String
-            name: 'repository'
-            description: |
-              A reference to the repository resource, for example:
-              "projects/p1/locations/us-central1/repository/repo1".
-          - !ruby/object:Api::Type::Integer
-            name: 'priority'
-            description: |-
-              Entries with a greater priority value take precedence in the pull order.
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'id'
+              description: |-
+                The user-provided ID of the upstream policy.
+            - !ruby/object:Api::Type::String
+              name: 'repository'
+              description: |
+                A reference to the repository resource, for example:
+                "projects/p1/locations/us-central1/repository/repo1".
+            - !ruby/object:Api::Type::Integer
+              name: 'priority'
+              description: |-
+                Entries with a greater priority value take precedence in the pull order.
   - !ruby/object:Api::Type::NestedObject
     name: 'remoteRepositoryConfig'
     conflicts:
