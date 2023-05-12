@@ -15,6 +15,10 @@ func cloudrunAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) 
 		return true
 	}
 
+  	if strings.HasSuffix(k, "run.googleapis.com/ingress") {
+	      	return old == "all" && new == ""
+	}
+
 	// Let diff be determined by annotations (above)
 	if strings.Contains(k, "annotations.%") {
 		return true
