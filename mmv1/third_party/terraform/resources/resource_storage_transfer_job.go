@@ -444,7 +444,7 @@ func awsS3DataSchema() *schema.Resource {
 				Description: `S3 Bucket name.`,
 			},
 			"path": {
-				Required:    true,
+				Required:    false,
 				Type:        schema.TypeString,
 				Description: `S3 Bucket path in bucket to transfer.`,
 			},
