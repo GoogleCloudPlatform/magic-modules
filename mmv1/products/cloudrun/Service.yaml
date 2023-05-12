@@ -342,9 +342,7 @@ properties:
                 update_verb: :PUT
                 required: true
                 description: |-
-                  Container defines the unit of execution for this Revision.
-                  In the context of a Revision, we disallow a number of the fields of
-                  this Container, including: name, ports, and volumeMounts.
+                  Containers defines the unit of execution for this Revision.
                 default_from_api: true
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
