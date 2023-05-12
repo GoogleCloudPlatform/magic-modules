@@ -349,6 +349,10 @@ properties:
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::String
+                      name: name
+                      description: Name of the container
+                      default_from_api: true
+                    - !ruby/object:Api::Type::String
                       deprecation_message:
                         'Not supported by Cloud Run fully managed'
                       name: workingDir
