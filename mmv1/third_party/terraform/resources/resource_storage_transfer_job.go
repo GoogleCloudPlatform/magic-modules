@@ -944,17 +944,12 @@ func expandAwsS3Data(awsS3Datas []interface{}) *storagetransfer.AwsS3Data {
 		return nil
 	}
 
-	awsS3Data := awsS3Datas[0].(map[string]interface{})
-	var apiData = &storagetransfer.AwsS3Data{
+	return &storagetransfer.AwsS3Data{
 		BucketName:   awsS3Data["bucket_name"].(string),
 		AwsAccessKey: expandAwsAccessKeys(awsS3Data["aws_access_key"].([]interface{})),
 		RoleArn:      awsS3Data["role_arn"].(string),
+		Path:         awsS3Data["path"].(string),
 	}
-
-	var path = gcsData["path"].(string)
-	apiData.Path = path
-
-	return apiData
 }
 
 func flattenAwsS3Data(awsS3Data *storagetransfer.AwsS3Data, d *schema.ResourceData) []map[string]interface{} {
