@@ -10,11 +10,19 @@ test_hide:
 
 doc_hide_conditional:
   - location: global
+    file_name: regional_net_sec_rule.tf.tmpl
+  - location: region
+    file_name: global_net_sec_rule.tf.tmpl
+  - location: global
     file_name: regional.tf.tmpl
   - location: region
     file_name: global.tf.tmpl
 
 test_hide_conditional:
+  - location: global
+    file_name: regional_net_sec_rule.tf.tmpl
+  - location: region
+    file_name: global_net_sec_rule.tf.tmpl
   - location: global
     file_name: regional.tf.tmpl
   - location: region

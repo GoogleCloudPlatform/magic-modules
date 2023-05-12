@@ -95,7 +95,7 @@ properties:
       URL of the underlying Interconnect object that this attachment's
       traffic will traverse through. Required if type is DEDICATED, must not
       be set if type is PARTNER.
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -214,7 +214,7 @@ properties:
       Cloud Router is configured.
     required: true
     immutable: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: |

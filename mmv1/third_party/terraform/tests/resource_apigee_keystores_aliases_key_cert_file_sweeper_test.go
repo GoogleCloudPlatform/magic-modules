@@ -7,7 +7,9 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -39,7 +41,7 @@ func testSweepApigeeKeystoresAliasesKeyCertFile(region string) error {
 	billingId := acctest.GetTestBillingAccountFromEnv(t)
 
 	// Setup variables to replace in list template
-	d := &ResourceDataMock{
+	d := &tpgresource.ResourceDataMock{
 		FieldsInSchema: map[string]interface{}{
 			"project":         config.Project,
 			"region":          region,
@@ -50,7 +52,7 @@ func testSweepApigeeKeystoresAliasesKeyCertFile(region string) error {
 	}
 
 	listTemplate := strings.Split("https://apigee.googleapis.com/v1/organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}", "?")[0]
-	listUrl, err := ReplaceVars(d, config, listTemplate)
+	listUrl, err := tpgresource.ReplaceVars(d, config, listTemplate)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error preparing sweeper list url: %s", err)
 		return nil
@@ -78,9 +80,9 @@ func testSweepApigeeKeystoresAliasesKeyCertFile(region string) error {
 		var name string
 		// Id detected in the delete URL, attempt to use id.
 		if obj["id"] != nil {
-			name = GetResourceNameFromSelfLink(obj["id"].(string))
+			name = tpgresource.GetResourceNameFromSelfLink(obj["id"].(string))
 		} else if obj["alias"] != nil {
-			name = GetResourceNameFromSelfLink(obj["alias"].(string))
+			name = tpgresource.GetResourceNameFromSelfLink(obj["alias"].(string))
 		} else {
 			log.Printf("[INFO][SWEEPER_LOG] %s resource name and id were nil", resourceName)
 			return nil
@@ -92,7 +94,7 @@ func testSweepApigeeKeystoresAliasesKeyCertFile(region string) error {
 		}
 
 		deleteTemplate := "https://apigee.googleapis.com/v1/organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}"
-		deleteUrl, err := ReplaceVars(d, config, deleteTemplate)
+		deleteUrl, err := tpgresource.ReplaceVars(d, config, deleteTemplate)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] error preparing delete url: %s", err)
 			return nil

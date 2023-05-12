@@ -273,7 +273,7 @@ func buildGetter(p Property, rawGetter string) string {
 		}
 		return fmt.Sprintf("dcl.Int64(int64(%s.(int)))", rawGetter)
 	case SchemaTypeMap:
-		return fmt.Sprintf("checkStringMap(%s)", rawGetter)
+		return fmt.Sprintf("tpgresource.CheckStringMap(%s)", rawGetter)
 	case SchemaTypeList, SchemaTypeSet:
 		if p.Type.IsEnumArray() {
 			return fmt.Sprintf("expand%s%sArray(%s)", p.resource.PathType(), p.PackagePath(), rawGetter)

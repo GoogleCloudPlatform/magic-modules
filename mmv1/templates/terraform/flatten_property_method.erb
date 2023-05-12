@@ -113,12 +113,12 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
   if v == nil {
     return v
   }
-  return convertAndMapStringArr(v.([]interface{}), ConvertSelfLinkToV1)
+  return convertAndMapStringArr(v.([]interface{}), tpgresource.ConvertSelfLinkToV1)
 <% elsif property.is_a?(Api::Type::ResourceRef) -%>
   if v == nil {
     return v
   }
-  return ConvertSelfLinkToV1(v.(string))
+  return tpgresource.ConvertSelfLinkToV1(v.(string))
 <% elsif property.is_set # item_type won't be NestedObject -%>
   if v == nil {
     return v
