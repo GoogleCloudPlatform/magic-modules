@@ -81,6 +81,7 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
+    ignore_read: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

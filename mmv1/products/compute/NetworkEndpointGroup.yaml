@@ -78,6 +78,7 @@ parameters:
       Zone where the network endpoint group is located.
     required: false
     default_from_api: true
+    ignore_read: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   resource_definition: templates/terraform/resource_definition/default_provider_values.erb
 properties:
