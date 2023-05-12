@@ -116,22 +116,6 @@ var (
 	}
 )
 
-const resourceDataprocGoogleProvidedLabelPrefix = "labels.goog-dataproc"
-
-func resourceDataprocLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	if strings.HasPrefix(k, resourceDataprocGoogleProvidedLabelPrefix) && new == "" {
-		return true
-	}
-
-	// Let diff be determined by labels (above)
-	if strings.HasPrefix(k, "labels.%") {
-		return true
-	}
-
-	// For other keys, don't suppress diff.
-	return false
-}
-
 const resourceDataprocGoogleProvidedDPGKEPrefix = "virtual_cluster_config.0.kubernetes_cluster_config.0.kubernetes_software_config.0.properties.dpgke"
 const resourceDataprocGoogleProvidedSparkPrefix = "virtual_cluster_config.0.kubernetes_cluster_config.0.kubernetes_software_config.0.properties.spark"
 
@@ -160,6 +144,15 @@ func ResourceDataprocCluster() *schema.Resource {
 			Create: schema.DefaultTimeout(45 * time.Minute),
 			Update: schema.DefaultTimeout(45 * time.Minute),
 			Delete: schema.DefaultTimeout(45 * time.Minute),
+		},
+
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    resourceDataprocClusterResourceV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: ResourceDataprocClusterStateUpgradeV0,
+				Version: 0,
+			},
 		},
 
 		Schema: map[string]*schema.Schema{
