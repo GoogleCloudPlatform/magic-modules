@@ -1,10 +1,9 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 <%
   product_name = object.__product.name
   has_project = object.base_url.include?("{{project}}")
   has_project = has_project || (object.async.is_a? Api::OpAsync and object.async.include_project)
 -%>
+<%= lines(hashicorp_copyright_header(:go, pwd)) -%>
 
 <%= lines(autogen_notice(:go, pwd)) -%>
 
