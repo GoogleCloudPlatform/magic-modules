@@ -202,12 +202,12 @@ module Provider
       
       # Prevent adding copyright header to files with paths matching the strings below
       # This will be refactored
-      ignored_files = [ "go.mod", ".goreleaser.yml", ".golangci.yml", "terraform-registry-manifest.json", ".github/", ".release/", ".changelog/", "examples/", "run_diff.sh"]
+      ignored_files = [ 'go.mod', '.goreleaser.yml', '.golangci.yml', 'terraform-registry-manifest.json', '.github/', '.release/', '.changelog/', 'examples/', 'run_diff.sh']
       ignored_files.each do |name|
           return if target.contains? name
       end
       data = File.read("#{output_folder}/#{target}")
-      File.write("#{output_folder}/#{target}", "// Copyright (c) HashiCorp, Inc.\n// SPDX-License-Identifier: MPL-2.0\nThis header was added by the `add_hashicorp_copyright_header` method\n")
+      File.write("#{output_folder}/#{target}", '// Copyright (c) HashiCorp, Inc.\n// SPDX-License-Identifier: MPL-2.0\nThis header was added by the `add_hashicorp_copyright_header` method\n')
       File.write("#{output_folder}/#{target}", data, mode: "a") # append mode adds file content after previous write
     end
 
