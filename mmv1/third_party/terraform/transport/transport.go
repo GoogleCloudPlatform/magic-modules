@@ -38,8 +38,8 @@ func SendRequest(opt SendRequestOptions) (map[string]interface{}, error) {
 		if opt.Project == "NO_BILLING_PROJECT_OVERRIDE" {
 			reqHeaders.Set("X-Goog-User-Project", "")
 		} else {
-			// Pass the opt.Project into this fn instead of parsing it from the URL because
-			// both opt.Project names and URLs can have colons in them.
+			// Pass the project into this fn instead of parsing it from the URL because
+			// both project names and URLs can have colons in them.
 			reqHeaders.Set("X-Goog-User-Project", opt.Project)
 		}
 	}
@@ -95,7 +95,7 @@ func SendRequest(opt SendRequestOptions) (map[string]interface{}, error) {
 	// The defer call must be made outside of the retryFunc otherwise it's closed too soon.
 	defer googleapi.CloseBody(res)
 
-	// 204 responses will have no opt.Body, so we're going to error with "EOF" if we
+	// 204 responses will have no body, so we're going to error with "EOF" if we
 	// try to parse it. Instead, we can just return nil.
 	if res.StatusCode == 204 {
 		return nil, nil

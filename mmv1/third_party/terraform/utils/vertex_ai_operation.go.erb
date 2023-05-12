@@ -31,7 +31,13 @@ func (w *VertexAIOperationWaiter) QueryOp() (interface{}, error) {
 	url := fmt.Sprintf("https://%s-aiplatform.googleapis.com/v1beta1/%s", region, w.CommonOperationWaiter.Op.Name)
 <% end -%>
 
-	return transport_tpg.SendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
+	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: w.Config,
+		Method: "GET",
+		Project: w.Project,
+		RawURL: url,
+		UserAgent: w.UserAgent,
+	})
 }
 
 func createVertexAIWaiter(config *transport_tpg.Config, op map[string]interface{}, project, activity, userAgent string) (*VertexAIOperationWaiter, error) {
