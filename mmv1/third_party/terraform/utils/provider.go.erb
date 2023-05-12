@@ -308,6 +308,28 @@ func Provider() *schema.Provider {
 			"google_tpu_tensorflow_versions":                   DataSourceTpuTensorflowVersions(),
 			"google_vpc_access_connector":                      DataSourceVPCAccessConnector(),
 			"google_redis_instance":                            DataSourceGoogleRedisInstance(),
+			<%
+			products.each do |product|
+				product_definition = product[:definitions]
+				config = product[:overrides]
+				sorted =  product_definition.objects.sort_by { |obj| obj.name }
+				sorted.each do |object|
+				next if object.exclude || object.not_in_version?(product_definition.version_obj_or_closest(version))
+				tf_product = (object.__product.legacy_name || product_definition.name).underscore
+				terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
+			-%>
+			<%
+			iam_policy = object&.iam_policy
+			unless iam_policy.nil? || iam_policy.exclude ||
+				(iam_policy.min_version && iam_policy.min_version < version)
+				iam_class_name = product_definition.name + object.name
+		-%>
+			"<%= terraform_name -%>_iam_policy":               DataSourceIamPolicy(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer),
+		<%
+			end # unless iam_policy.nil? || iam_policy.exclude
+			end   # product_definition.objects.each do
+	  	end     # products.each do
+		-%>
 			// ####### END datasources ###########
 		},
 		ResourcesMap: ResourceMap(),
