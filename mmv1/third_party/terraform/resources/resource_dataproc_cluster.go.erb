@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -2089,7 +2090,10 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 
 	var cfg []map[string]interface{}
 
+	log.Println(spew.Sdump(cluster.Config))
+	log.Println(spew.Sdump(cluster.VirtualClusterConfig))
 	if cluster.Config != nil {
+		log.Println("Flattening cluster config")
 		cfg, err = flattenClusterConfig(d, cluster.Config)
 
 		if err != nil {
@@ -2098,6 +2102,7 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 
 		err = d.Set("cluster_config", cfg)
 	} else {
+		log.Println("Flattening virtual cluster config")
 		cfg, err = flattenVirtualClusterConfig(d, cluster.VirtualClusterConfig)
 
 		if err != nil {
