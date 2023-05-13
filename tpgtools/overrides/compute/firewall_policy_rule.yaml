@@ -1,4 +1,4 @@
-- type: DIFF_SUPPRESS_FUNC
-  field: target_resources
+- type: CUSTOM_RESOURCE_NAME
   details:
-    diffsuppressfunc: compareSelfLinkOrResourceName
+    title: firewall_policy_rule
+    
