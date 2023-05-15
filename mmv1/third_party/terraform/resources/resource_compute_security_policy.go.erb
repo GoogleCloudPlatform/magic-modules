@@ -67,8 +67,8 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: `The type indicates the intended use of the security policy. CLOUD_ARMOR - Cloud Armor backend security policies can be configured to filter incoming HTTP requests targeting backend services. They filter requests before they hit the origin servers. CLOUD_ARMOR_EDGE - Cloud Armor edge security policies can be configured to filter incoming HTTP requests targeting backend services (including Cloud CDN-enabled) as well as backend buckets (Cloud Storage). They filter requests before the request is served from Google's cache.`,
-				ValidateFunc: validation.StringInSlice([]string{"CLOUD_ARMOR", "CLOUD_ARMOR_EDGE", "CLOUD_ARMOR_INTERNAL_SERVICE"}, false),
+				Description: `The type indicates the intended use of the security policy. CLOUD_ARMOR - Cloud Armor backend security policies can be configured to filter incoming HTTP requests targeting backend services. They filter requests before they hit the origin servers. CLOUD_ARMOR_EDGE - Cloud Armor edge security policies can be configured to filter incoming HTTP requests targeting backend services (including Cloud CDN-enabled) as well as backend buckets (Cloud Storage). They filter requests before the request is served from Google's cache. CLOUD_ARMOR_NETWORK: Cloud Armor network policies can be configured to filter packets targeting network load balancing resources such as backend services, target pools, target instances, and instances with external IPs. They filter requests before the request is served from the application.`,
+				ValidateFunc: validation.StringInSlice([]string{"CLOUD_ARMOR", "CLOUD_ARMOR_EDGE", "CLOUD_ARMOR_INTERNAL_SERVICE", "CLOUD_ARMOR_NETWORK"}, false),
 			},
 
 			"rule": {
@@ -529,6 +529,26 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 					},
 				},
 			},
+
+			"ddos_protection_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				Description: `Ddos Protection Config of this security policy.`,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"ddos_protection": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validation.StringInSlice([]string{"STANDARD", "ADVANCED"}, false),
+							Description:  `DDOS protection. Supported values include: "STANDARD", "ADVANCED".`,
+						},
+					},
+				},
+			},
+
 			"recaptcha_options_config": {
 				Type: schema.TypeList,
 				Optional: true,
@@ -625,6 +645,10 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 		securityPolicy.AdaptiveProtectionConfig = expandSecurityPolicyAdaptiveProtectionConfig(v.([]interface{}))
 	}
 
+	if v, ok := d.GetOk("ddos_protection_config"); ok {
+		securityPolicy.DdosProtectionConfig = expandSecurityPolicyDdosProtectionConfig(v.([]interface{}))
+	}
+
 	log.Printf("[DEBUG] SecurityPolicy insert request: %#v", securityPolicy)
 
 	if v, ok := d.GetOk("recaptcha_options_config"); ok{
@@ -702,7 +726,9 @@ func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{})
 	if err := d.Set("adaptive_protection_config", flattenSecurityPolicyAdaptiveProtectionConfig(securityPolicy.AdaptiveProtectionConfig)); err != nil {
 		return fmt.Errorf("Error setting adaptive_protection_config: %s", err)
 	}
-
+	if err := d.Set("ddos_protection_config", flattenSecurityPolicyDdosProtectionConfig(securityPolicy.DdosProtectionConfig)); err != nil {
+		return fmt.Errorf("Error setting ddos_protection_config: %s", err)
+	}
 	if err := d.Set("recaptcha_options_config", flattenSecurityPolicyRecaptchaOptionConfig(securityPolicy.RecaptchaOptionsConfig)); err != nil {
 		return fmt.Errorf("Error setting recaptcha_options_config: %s", err)
 	}
@@ -750,6 +776,11 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 		<% unless version == 'ga' -%>
 		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "adaptiveProtectionConfig.autoDeployConfig.loadThreshold", "adaptiveProtectionConfig.autoDeployConfig.confidenceThreshold", "adaptiveProtectionConfig.autoDeployConfig.impactedBaselineThreshold", "adaptiveProtectionConfig.autoDeployConfig.expirationSec")
 		<% end -%>
+	}
+
+	if d.HasChange("ddos_protection_config") {
+		securityPolicy.DdosProtectionConfig = expandSecurityPolicyDdosProtectionConfig(d.Get("ddos_protection_config").([]interface{}))
+		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "DdosProtectionConfig", "ddosProtectionConfig.jsonParsing", "ddosProtectionConfig.jsonCustomConfig", "ddosProtectionConfig.logLevel")
 	}
 
 	if d.HasChange("recaptcha_options_config") {
@@ -1207,6 +1238,29 @@ func flattenSecurityPolicyAdaptiveProtectionConfig(conf *compute.SecurityPolicyA
 		<% unless version == 'ga' -%>
 		"auto_deploy_config": flattenAutoDeployConfig(conf.AutoDeployConfig),
 		<% end -%>
+	}
+
+	return []map[string]interface{}{data}
+}
+
+func expandSecurityPolicyDdosProtectionConfig(configured []interface{}) *compute.SecurityPolicyDdosProtectionConfig {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+
+	data := configured[0].(map[string]interface{})
+	return &compute.SecurityPolicyDdosProtectionConfig{
+		DdosProtection: data["ddos_protection"].(string),
+	}
+}
+
+func flattenSecurityPolicyDdosProtectionConfig(conf *compute.SecurityPolicyDdosProtectionConfig) []map[string]interface{} {
+	if conf == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{
+		"ddos_protection": conf.DdosProtection,
 	}
 
 	return []map[string]interface{}{data}
