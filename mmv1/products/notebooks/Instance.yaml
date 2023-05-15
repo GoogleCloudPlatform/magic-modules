@@ -81,6 +81,7 @@ examples:
       service_account: :SERVICE_ACCT
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/notebooks_instance.go
+  update_encoder: templates/terraform/update_encoder/notebooks_instance.go
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'location'
@@ -363,6 +364,8 @@ properties:
       Custom metadata to apply to this instance.
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
     ignore_read: true
+    update_verb: :PATCH
+    update_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}:updateMetadataItems'
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: 'Instance creation time'
