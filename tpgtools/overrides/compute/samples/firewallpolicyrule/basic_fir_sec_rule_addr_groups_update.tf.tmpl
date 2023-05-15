@@ -24,7 +24,7 @@ resource "google_compute_firewall_policy" "default" {
 
 resource "google_compute_firewall_policy_rule" "primary" {
   provider        = google-beta
-  firewall_policy = google_compute_firewall_policy.default.id
+  firewall_policy = google_compute_firewall_policy.default.name
   description     = "Resource created for Terraform acceptance testing - Updated"
   priority        = 9000
   enable_logging  = true
