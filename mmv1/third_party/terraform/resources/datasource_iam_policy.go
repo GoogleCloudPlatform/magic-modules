@@ -5,7 +5,7 @@ import (
 
 	"fmt"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 var IamPolicyBaseDataSourceSchema = map[string]*schema.Schema{
