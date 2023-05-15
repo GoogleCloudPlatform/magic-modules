@@ -956,7 +956,7 @@ func expandAwsS3Data(awsS3Datas []interface{}) *storagetransfer.AwsS3Data {
 func flattenAwsS3Data(awsS3Data *storagetransfer.AwsS3Data, d *schema.ResourceData) []map[string]interface{} {
 	data := map[string]interface{}{
 		"bucket_name": awsS3Data.BucketName,
-		"path": awsS3Data.Path,
+		"path":        awsS3Data.Path,
 		"role_arn":    awsS3Data.RoleArn,
 	}
 	if awsS3Data.AwsAccessKey != nil {
