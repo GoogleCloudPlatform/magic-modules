@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -22,44 +22,74 @@ description: |
   affect billing. You cannot update the source representation instance.
 base_url: projects/{{project}}/instances
 immutable: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'sql_source_representation_instance_basic'
+    primary_resource_id: 'instance'
+    vars:
+      name: 'my-instance'
+    ignore_read_extra:
+      - 'password'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'sql_source_representation_instance_postgres'
+    primary_resource_id: 'instance'
+    vars:
+      name: 'my-instance'
+    ignore_read_extra:
+      - 'password'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: 'templates/terraform/encoders/sql_source_representation_instance.go.erb'
+  decoder: 'templates/terraform/decoders/sql_source_representation_instance.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
-        The name of the source representation instance. Use any valid Cloud SQL instance name.
+      The name of the source representation instance. Use any valid Cloud SQL instance name.
     required: true
   - !ruby/object:Api::Type::String
     name: 'region'
     description: |
-      The region where you want your Cloud SQL replicas to reside.
-    required: true
+      The Region in which the created instance should reside.
+      If it is not provided, the provider region is used.
+    required: false
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'databaseVersion'
     description: |
       The MySQL version running on your source database server.
     required: true
     values:
-      - :MYSQL_5_5
       - :MYSQL_5_6
       - :MYSQL_5_7
       - :MYSQL_8_0
+      - :POSTGRES_9_6
+      - :POSTGRES_10
+      - :POSTGRES_11
+      - :POSTGRES_12
+      - :POSTGRES_13
+      - :POSTGRES_14
   - !ruby/object:Api::Type::NestedObject
     name: 'onPremisesConfiguration'
     description: |
       Configuration specific to on-premises instances.
     required: true
+    flatten_object: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'host'
         description: |
           The externally accessible IPv4 address for the source database server.
         required: true
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'verify.ValidateIpAddress'
       - !ruby/object:Api::Type::Integer
         name: 'port'
         default_value: 3306
         description: |
           The externally accessible port for the source database server.
           Defaults to 3306.
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0, 65535)'
       - !ruby/object:Api::Type::String
         name: 'username'
         description: |
@@ -68,6 +98,8 @@ properties:
         name: 'password'
         description: |
           The password for the replication user account.
+        sensitive: true
+        custom_flatten: templates/terraform/custom_flatten/source_representation_instance_configuration_password.go.erb
       - !ruby/object:Api::Type::String
         name: 'dumpFilePath'
         description: |
@@ -84,5 +116,3 @@ properties:
         name: 'clientKey'
         description: |
           The private key file for the client certificate on the external server. Required only for server-client authentication. Include only if SSL/TLS is used on the external server.
-
-

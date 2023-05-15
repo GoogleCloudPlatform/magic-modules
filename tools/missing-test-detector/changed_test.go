@@ -1,24 +1,39 @@
 package main
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 
+	newProvider "google/provider/new/google-beta"
+	oldProvider "google/provider/old/google-beta"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+func TestNewProviderOldProviderChanges(t *testing.T) {
+	changes := resourceMapChanges(oldProvider.ResourceMap(), newProvider.ResourceMap())
+
+	jsonChanges, err := json.MarshalIndent(changes, "", "  ")
+	if err != nil {
+		t.Fatalf("Error marshalling resource map changes to json: %s", err)
+	}
+
+	t.Logf("Changes between old and new providers: %s", jsonChanges)
+}
 
 func TestResourceMapChanges(t *testing.T) {
 	for _, test := range []struct {
 		name                  string
 		oldResourceMap        map[string]*schema.Resource
 		newResourceMap        map[string]*schema.Resource
-		expectedChangedFields map[string]FieldCoverage
+		expectedChangedFields map[string]ResourceChanges
 	}{
 		{
 			name:                  "empty-maps",
 			oldResourceMap:        map[string]*schema.Resource{},
 			newResourceMap:        map[string]*schema.Resource{},
-			expectedChangedFields: map[string]FieldCoverage{},
+			expectedChangedFields: map[string]ResourceChanges{},
 		},
 		{
 			name:           "empty-resources",
@@ -27,7 +42,49 @@ func TestResourceMapChanges(t *testing.T) {
 				"google_service_one_resource_one": {},
 				"google_service_one_resource_two": {},
 			},
-			expectedChangedFields: map[string]FieldCoverage{},
+			expectedChangedFields: map[string]ResourceChanges{},
+		},
+		{
+			name: "unchanged-nested-field",
+			oldResourceMap: map[string]*schema.Resource{
+				"google_service_one_resource_one": {
+					Schema: map[string]*schema.Schema{
+						"field_one": {
+							Type: schema.TypeString,
+						},
+						"field_two": {
+							Type: schema.TypeList,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"field_three": {
+										Type: schema.TypeString,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"google_service_one_resource_one": {
+					Schema: map[string]*schema.Schema{
+						"field_one": {
+							Type: schema.TypeString,
+						},
+						"field_two": {
+							Type: schema.TypeList,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"field_three": {
+										Type: schema.TypeString,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			expectedChangedFields: map[string]ResourceChanges{},
 		},
 		{
 			name: "new-nested-field",
@@ -106,8 +163,12 @@ func TestResourceMapChanges(t *testing.T) {
 					},
 				},
 			},
-			expectedChangedFields: map[string]FieldCoverage{
-				"google_service_one_resource_two": {"field_two": FieldCoverage{"field_four": false}},
+			expectedChangedFields: map[string]ResourceChanges{
+				"google_service_one_resource_two": {
+					"field_two": ResourceChanges{
+						"field_four": &Field{Added: true},
+					},
+				},
 			},
 		},
 		{
@@ -190,9 +251,17 @@ func TestResourceMapChanges(t *testing.T) {
 					},
 				},
 			},
-			expectedChangedFields: map[string]FieldCoverage{
-				"google_service_one_resource_one": {"field_two": FieldCoverage{"field_four": false}},
-				"google_service_one_resource_two": {"field_two": FieldCoverage{"field_four": false}},
+			expectedChangedFields: map[string]ResourceChanges{
+				"google_service_one_resource_one": {
+					"field_two": ResourceChanges{
+						"field_four": &Field{Added: true},
+					},
+				},
+				"google_service_one_resource_two": {
+					"field_two": ResourceChanges{
+						"field_four": &Field{Added: true},
+					},
+				},
 			},
 		},
 		{
@@ -211,7 +280,7 @@ func TestResourceMapChanges(t *testing.T) {
 					Schema: map[string]*schema.Schema{},
 				},
 			},
-			expectedChangedFields: map[string]FieldCoverage{},
+			expectedChangedFields: map[string]ResourceChanges{},
 		},
 		{
 			name: "deleted-resource",
@@ -224,7 +293,7 @@ func TestResourceMapChanges(t *testing.T) {
 					},
 				},
 			},
-			expectedChangedFields: map[string]FieldCoverage{},
+			expectedChangedFields: map[string]ResourceChanges{},
 		},
 		{
 			name: "new-resource",
@@ -237,7 +306,11 @@ func TestResourceMapChanges(t *testing.T) {
 					},
 				},
 			},
-			expectedChangedFields: map[string]FieldCoverage{"google_service_one_resource_one": {"field_one": false}},
+			expectedChangedFields: map[string]ResourceChanges{
+				"google_service_one_resource_one": {
+					"field_one": &Field{Added: true},
+				},
+			},
 		},
 	} {
 		changedFields := resourceMapChanges(test.oldResourceMap, test.newResourceMap)

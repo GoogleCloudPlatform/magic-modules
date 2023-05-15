@@ -27,7 +27,7 @@ if d.HasChange("credentials") {
 log.Printf("[DEBUG] updateMask after adding extra schema entries %q: %v", d.Id(), updateMask)
 
 // Refreshing updateMask after adding extra schema entries
-url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 if err != nil {
 	return err
 }

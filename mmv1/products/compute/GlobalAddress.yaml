@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -22,8 +22,7 @@ description: |
   HTTP(S) load balancing.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Reserving a Static External IP Address':
-      'https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address'
+    'Reserving a Static External IP Address': 'https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address'
   api: 'https://cloud.google.com/compute/docs/reference/v1/globalAddresses'
 immutable: true
 async: !ruby/object:Api::OpAsync
@@ -44,17 +43,33 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'global_address_basic'
+    primary_resource_id: 'default'
+    vars:
+      global_address_name: 'global-appserver-ip'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'global_address_private_services_connect'
+    min_version: beta
+    primary_resource_id: 'default'
+    vars:
+      global_address_name: 'global-psconnect-ip'
+      network_name: 'my-network-name'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: templates/terraform/post_create/labels.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'address'
     description: |
-     The IP address or beginning of the address range represented by this
-     resource. This can be supplied as an input to reserve a specific
-     address or omitted to allow GCP to choose a valid one for you.
+      The IP address or beginning of the address range represented by this
+      resource. This can be supplied as an input to reserve a specific
+      address or omitted to allow GCP to choose a valid one for you.
+    default_from_api: true
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: |
-     Creation timestamp in RFC3339 text format.
+      Creation timestamp in RFC3339 text format.
     output: true
   - !ruby/object:Api::Type::String
     name: 'description'
@@ -66,6 +81,7 @@ properties:
       The unique identifier for the resource. This identifier is defined by
       the server.
     output: true
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -92,6 +108,7 @@ properties:
     update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'
     update_verb: :POST
     min_version: beta
+    exclude: false
   - !ruby/object:Api::Type::Enum
     name: 'ipVersion'
     description: |
@@ -99,6 +116,7 @@ properties:
     values:
       - :IPV4
       - :IPV6
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("IPV4")'
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
@@ -106,6 +124,7 @@ properties:
     description: |
       A reference to the region where the regional address resides.
     output: true
+    exclude: true
   - !ruby/object:Api::Type::Integer
     name: 'prefixLength'
     description: |
@@ -122,9 +141,10 @@ properties:
       * EXTERNAL indicates public/external single IP address.
       * INTERNAL indicates internal IP ranges belonging to some network.
     values:
-    - :EXTERNAL
-    - :INTERNAL
+      - :EXTERNAL
+      - :INTERNAL
     default_value: :EXTERNAL
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("EXTERNAL")'
   - !ruby/object:Api::Type::String
     name: 'purpose'
     description: |

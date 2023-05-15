@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -15,7 +15,7 @@
 name: 'NodeGroup'
 kind: 'compute#NodeGroup'
 base_url: projects/{{project}}/zones/{{zone}}/nodeGroups
-create_url: projects/{{project}}/zones/{{zone}}/nodeGroups?initialNodeCount={{size}}
+create_url: projects/{{project}}/zones/{{zone}}/nodeGroups?initialNodeCount=PRE_CREATE_REPLACE_ME
 has_self_link: true
 description: |
   Represents a NodeGroup resource to manage a group of sole-tenant nodes.
@@ -43,14 +43,47 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+docs: !ruby/object:Provider::Terraform::Docs
+  warning: |
+    Due to limitations of the API, Terraform cannot update the
+    number of nodes in a node group and changes to node group size either
+    through Terraform config or through external changes will cause
+    Terraform to delete and recreate the node group.
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'node_group_basic'
+    primary_resource_id: 'nodes'
+    vars:
+      group_name: 'soletenant-group'
+      template_name: 'soletenant-tmpl'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'node_group_autoscaling_policy'
+    primary_resource_id: 'nodes'
+    vars:
+      group_name: 'soletenant-group'
+      template_name: 'soletenant-tmpl'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'node_group_share_settings'
+    primary_resource_id: 'nodes'
+    vars:
+      group_name: 'soletenant-group'
+      template_name: 'soletenant-tmpl'
+      guest_project_id: 'project-id'
+      guest_project_name: 'project-name'
+    test_env_vars:
+      org_id: :ORG_ID
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_create: templates/terraform/pre_create/compute_node_group_url_replace.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
     resource: 'Zone'
     imports: 'selfLink'
-    required: true
+    required: false
     description: |
       Zone where this node group is located
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -77,9 +110,13 @@ properties:
   - !ruby/object:Api::Type::Integer
     name: 'size'
     description: |
-      The total number of nodes in the node group.
+      The total number of nodes in the node group. One of `initial_size` or `size` must be specified.
     immutable: true
     send_empty_value: true
+    default_from_api: true
+    exactly_one_of:
+      - size
+      - initial_size
   - !ruby/object:Api::Type::Integer
     name: 'initialSize'
     description: |
@@ -108,6 +145,7 @@ properties:
     description: |
       If you use sole-tenant nodes for your workloads, you can use the node
       group autoscaler to automatically manage the sizes of your node groups.
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'mode'
@@ -123,43 +161,47 @@ properties:
           - :OFF
           - :ON
           - :ONLY_SCALE_OUT
+        default_from_api: true
       - !ruby/object:Api::Type::Integer
         name: 'minNodes'
         description: |
           Minimum size of the node group. Must be less
           than or equal to max-nodes. The default value is 0.
+        default_from_api: true
       - !ruby/object:Api::Type::Integer
         name: 'maxNodes'
         description: |
           Maximum size of the node group. Set to a value less than or equal
           to 100 and greater than or equal to min-nodes.
         required: true
+        default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'shareSettings'
     description: |
       Share settings for the node group.
+    default_from_api: true
     properties:
-    - !ruby/object:Api::Type::Enum
-      name: 'shareType'
-      required: true
-      description: |
-        Node group sharing type.
-      values:
-      - :ORGANIZATION
-      - :SPECIFIC_PROJECTS
-      - :LOCAL
-    - !ruby/object:Api::Type::Map
-      name: 'projectMap'
-      description: |
-        A map of project id and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
-      key_name: id
-      key_description: |
-        The project ID.
-      value_type: !ruby/object:Api::Type::NestedObject
-        name: projectConfig
-        properties:
-        - !ruby/object:Api::Type::String
-          name: 'projectId'
-          required: true
-          description: |
-            The project id/number should be the same as the key of this project config in the project map.
+      - !ruby/object:Api::Type::Enum
+        name: 'shareType'
+        required: true
+        description: |
+          Node group sharing type.
+        values:
+          - :ORGANIZATION
+          - :SPECIFIC_PROJECTS
+          - :LOCAL
+      - !ruby/object:Api::Type::Map
+        name: 'projectMap'
+        description: |
+          A map of project id and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
+        key_name: id
+        key_description: |
+          The project ID.
+        value_type: !ruby/object:Api::Type::NestedObject
+          name: projectConfig
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'projectId'
+              required: true
+              description: |
+                The project id/number should be the same as the key of this project config in the project map.

@@ -26,10 +26,12 @@
 //
 // ----------------------------------------------------------------------------
 
-package google
+package transport
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	framework_schema "github.com/hashicorp/terraform-plugin-framework/provider/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // empty string is passed for dcl default since dcl
@@ -40,9 +42,6 @@ var {{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey = "{{$pkg.BasePathIdenti
 var {{$pkg.BasePathIdentifier.ToTitle}}EndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
 	Optional:     true,
-	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_{{$pkg.BasePathIdentifier.ToUpper}}_CUSTOM_ENDPOINT",
-	}, ""),
 }
 {{- end}}
 {{end}}
@@ -63,6 +62,32 @@ func ConfigureDCLProvider(provider *schema.Provider) {
 {{- end}}
 }
 
+func HandleDCLCustomEndpointDefaults(d *schema.ResourceData) {
+{{- range $index, $pkg := . }}
+{{- if $pkg.ShouldWriteProductBasePath }}
+	if d.Get({{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey) == "" {
+		d.Set({{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey, MultiEnvDefault([]string{
+			"GOOGLE_{{$pkg.BasePathIdentifier.ToUpper}}_CUSTOM_ENDPOINT",
+		}, ""))
+	}
+{{- end}}
+{{- end}}
+}
+
+// plugin-framework provider set-up
+func ConfigureDCLCustomEndpointAttributesFramework(frameworkSchema *framework_schema.Schema) {
+{{- range $index, $pkg := . }}
+{{- if $pkg.ShouldWriteProductBasePath }}
+	frameworkSchema.Attributes["{{$pkg.BasePathIdentifier}}_custom_endpoint"] = framework_schema.StringAttribute{
+		Optional: true,
+        Validators: []validator.String{
+            CustomEndpointValidator(),
+        },
+	}
+{{- end}}
+{{- end}}
+}
+
 func ProviderDCLConfigure(d *schema.ResourceData, config *Config) interface{} {
 {{- range $index, $pkg := . }}
 {{- if $pkg.ShouldWriteProductBasePath }}
@@ -72,4 +97,3 @@ func ProviderDCLConfigure(d *schema.ResourceData, config *Config) interface{} {
 	config.CloudBuildWorkerPoolBasePath = d.Get(CloudBuildWorkerPoolEndpointEntryKey).(string)
 	return config
 }
-

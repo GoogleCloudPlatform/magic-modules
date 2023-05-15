@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -23,6 +23,18 @@ description: |
   Cloud IDS is an intrusion detection service that provides threat detection for intrusions, malware, spyware, and command-and-control attacks on your network.
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/intrusion-detection-system/docs/configuring-ids'
+id_format: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
+import_format:
+  ['projects/{{project}}/locations/{{location}}/endpoints/{{name}}']
+autogen_async: true
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudids_endpoint'
+    primary_resource_id:
+      'example-endpoint'
+    # skip_test set to true since the example is identical to what's in the _test.go file.
+    skip_test: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -31,6 +43,7 @@ parameters:
     immutable: true
     description: |
       The location for the endpoint.
+    ignore_read: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -38,6 +51,8 @@ properties:
     immutable: true
     description: |
       Name of the endpoint in the format projects/{project_id}/locations/{locationId}/endpoints/{endpointId}.
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.erb'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
   - !ruby/object:Api::Type::String
     name: 'createTime'
     output: true
@@ -86,4 +101,3 @@ properties:
     description: |
       Configuration for threat IDs excluded from generating alerts. Limit: 99 IDs.
     item_type: Api::Type::String
-

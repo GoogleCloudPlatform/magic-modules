@@ -14,6 +14,7 @@
 --- !ruby/object:Api::Product
 name: IAM2
 display_name: Cloud IAM
+legacy_name: iam
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
@@ -36,7 +37,7 @@ async: !ruby/object:Api::OpAsync
     path: 'targetLink'
   status: !ruby/object:Api::OpAsync::Status
     path: 'done'
-    complete: True
+    complete: true
     allowed:
       - true
       - false

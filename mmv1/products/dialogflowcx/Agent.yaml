@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -13,22 +13,34 @@
 
 --- !ruby/object:Api::Resource
 name: 'Agent'
-base_url: "projects/{{project}}/locations/{{location}}/agents"
+base_url: 'projects/{{project}}/locations/{{location}}/agents'
 update_verb: :PATCH
 update_mask: true
 description: |
   Agents are best described as Natural Language Understanding (NLU) modules that transform user requests into actionable data. You can include agents in your app, product, or service to determine user intent and respond to the user in a natural way.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/dialogflow/cx/docs'
+    'Official Documentation': 'https://cloud.google.com/dialogflow/cx/docs'
   api: 'https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents'
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 40
+  update_minutes: 40
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dialogflowcx_agent_full'
+    primary_resource_id: 'full_agent'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+id_format: 'projects/{{project}}/locations/{{location}}/agents/{{name}}'
+import_format: ['projects/{{project}}/locations/{{location}}/agents/{{name}}']
+skip_sweeper: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     output: true
     description: |
       The unique identifier of the agent.
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'location'
     description: |
@@ -48,29 +60,31 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'defaultLanguageCode'
     description: |
-     The default language of the agent as a language tag. [See Language Support](https://cloud.google.com/dialogflow/cx/docs/reference/language)
-     for a list of the currently supported language codes. This field cannot be updated after creation.
+      The default language of the agent as a language tag. [See Language Support](https://cloud.google.com/dialogflow/cx/docs/reference/language)
+      for a list of the currently supported language codes. This field cannot be updated after creation.
     immutable: true
     required: true
   - !ruby/object:Api::Type::Array
     name: 'supportedLanguageCodes'
     item_type: Api::Type::String
     description: |
-     The list of all languages supported by this agent (except for the default_language_code).
+      The list of all languages supported by this agent (except for the default_language_code).
   - !ruby/object:Api::Type::String
     name: 'timeZone'
     description: |
-     The time zone of this agent from the [time zone database](https://www.iana.org/time-zones), e.g., America/New_York,
-     Europe/Paris.
+      The time zone of this agent from the [time zone database](https://www.iana.org/time-zones), e.g., America/New_York,
+      Europe/Paris.
     required: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
-     The description of this agent. The maximum length is 500 characters. If exceeded, the request is rejected.
+      The description of this agent. The maximum length is 500 characters. If exceeded, the request is rejected.
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validation.StringLenBetween(0, 500)'
   - !ruby/object:Api::Type::String
     name: 'avatarUri'
     description: |
-     The URI of the agent's avatar. Avatars are used throughout the Dialogflow console and in the self-hosted Web Demo integration.
+      The URI of the agent's avatar. Avatars are used throughout the Dialogflow console and in the self-hosted Web Demo integration.
   - !ruby/object:Api::Type::NestedObject
     name: 'speechToTextSettings'
     description: |
@@ -84,16 +98,16 @@ properties:
     name: 'startFlow'
     output: true
     description: |
-     Name of the start flow in this agent. A start flow will be automatically created when the agent is created, and can only be deleted by deleting the agent. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
+      Name of the start flow in this agent. A start flow will be automatically created when the agent is created, and can only be deleted by deleting the agent. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
   - !ruby/object:Api::Type::String
     name: 'securitySettings'
     description: |
-     Name of the SecuritySettings reference for the agent. Format: projects/<Project ID>/locations/<Location ID>/securitySettings/<Security Settings ID>.
+      Name of the SecuritySettings reference for the agent. Format: projects/<Project ID>/locations/<Location ID>/securitySettings/<Security Settings ID>.
   - !ruby/object:Api::Type::Boolean
     name: 'enableStackdriverLogging'
     description: |
-     Determines whether this agent should log conversation queries.
+      Determines whether this agent should log conversation queries.
   - !ruby/object:Api::Type::Boolean
     name: 'enableSpellCorrection'
     description: |
-     Indicates if automatic spell correction is enabled in detect intent requests.
+      Indicates if automatic spell correction is enabled in detect intent requests.

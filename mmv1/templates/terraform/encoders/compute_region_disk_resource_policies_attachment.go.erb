@@ -1,10 +1,10 @@
-config := meta.(*Config)
-project, err := getProject(d, config)
+config := meta.(*transport_tpg.Config)
+project, err := tpgresource.GetProject(d, config)
 if err != nil {
   return nil, err
 }
 
-region, err := getRegion(d, config)
+region, err := tpgresource.GetRegion(d, config)
 if err != nil {
 	return nil, err
 }

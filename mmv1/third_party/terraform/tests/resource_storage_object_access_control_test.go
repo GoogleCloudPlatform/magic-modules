@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -22,10 +24,10 @@ func TestAccStorageObjectAccessControl_update(t *testing.T) {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
-			testAccPreCheck(t)
+			acctest.AccTestPreCheck(t)
 		},
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckStorageObjectAccessControlDestroyProducer(t),
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckStorageObjectAccessControlDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleStorageObjectAccessControlBasic(bucketName, objectName, "READER", "allUsers"),
@@ -61,10 +63,10 @@ func TestAccStorageObjectAccessControl_updateWithSlashes(t *testing.T) {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
-			testAccPreCheck(t)
+			acctest.AccTestPreCheck(t)
 		},
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckStorageObjectAccessControlDestroyProducer(t),
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckStorageObjectAccessControlDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleStorageObjectAccessControlBasic(bucketName, objectName, "READER", "allUsers"),

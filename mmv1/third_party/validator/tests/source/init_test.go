@@ -13,13 +13,12 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/GoogleCloudPlatform/terraform-validator/converters/google"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
 )
 
 var (
-	data      *testData
-	tfvBinary string
-	tmpDir    = os.TempDir()
+	data   *testData
+	tmpDir = os.TempDir()
 )
 
 // testData represents the full dataset that is used for templating terraform
@@ -39,24 +38,17 @@ type testData struct {
 
 // testAsset is similar to Asset but with AncestryPath.
 type testAsset struct {
-	google.Asset
+	caiasset.Asset
 	Ancestry string `json:"ancestry_path"`
 }
 
 // init initializes the variables used for testing. As tests rely on
 // environment variables, the parsing of those are only done once.
 func init() {
-	// don't raise errors in glog
-
-	cwd, err := os.Getwd()
-	if err != nil {
-		log.Fatalf("cannot get current directory: %v", err)
-	}
-	tfvBinary = filepath.Join(cwd, "..", "bin", "terraform-validator")
-	credentials := GetTestCredsFromEnv()
-	project := GetTestProjectFromEnv()
-	org := GetTestOrgFromEnv(nil)
-	billingAccount := GetTestBillingAccountFromEnv(nil)
+	credentials := getTestCredsFromEnv()
+	project := getTestProjectFromEnv()
+	org := getTestOrgFromEnv(nil)
+	billingAccount := getTestBillingAccountFromEnv(nil)
 	folder, ok := os.LookupEnv("TEST_FOLDER_ID")
 	if !ok {
 		log.Printf("Missing required env var TEST_FOLDER_ID. Default (%s) will be used.", defaultFolder)
@@ -123,9 +115,9 @@ func generateTestFiles(t *testing.T, sourceDir string, targetDir string, selecto
 	}
 }
 
-func normalizeAssets(t *testing.T, assets []google.Asset, offline bool) []google.Asset {
+func normalizeAssets(t *testing.T, assets []caiasset.Asset, offline bool) []caiasset.Asset {
 	t.Helper()
-	ret := make([]google.Asset, len(assets))
+	ret := make([]caiasset.Asset, len(assets))
 	re := regexp.MustCompile(`/placeholder-[^/]+`)
 	for i := range assets {
 		// Get conformity by converting to/from json.
@@ -134,7 +126,7 @@ func normalizeAssets(t *testing.T, assets []google.Asset, offline bool) []google
 			t.Fatalf("marshaling: %v", err)
 		}
 
-		var asset google.Asset
+		var asset caiasset.Asset
 		err = json.Unmarshal(bytes, &asset)
 		if err != nil {
 			t.Fatalf("marshaling: %v", err)
@@ -200,7 +192,7 @@ func formatAncestryPath(s string) string {
 	return ret
 }
 
-func readExpectedTestFile(f string) ([]google.Asset, error) {
+func readExpectedTestFile(f string) ([]caiasset.Asset, error) {
 	payload, err := ioutil.ReadFile(f)
 	if err != nil {
 		return nil, fmt.Errorf("cannot open %s, got: %s", f, err)
@@ -217,7 +209,7 @@ func readExpectedTestFile(f string) ([]google.Asset, error) {
 		want[ix].Ancestors = ancestors
 	}
 
-	ret := make([]google.Asset, len(want))
+	ret := make([]caiasset.Asset, len(want))
 	for ix := range want {
 		ret[ix] = want[ix].Asset
 	}

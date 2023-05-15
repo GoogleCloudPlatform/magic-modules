@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -45,6 +45,52 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Controlling access to datasets': 'https://cloud.google.com/bigquery/docs/dataset-access-controls'
   api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets'
+exclude_import: true
+skip_sweeper: true
+exclude_validator: true
+error_retry_predicates: ['transport_tpg.IsBigqueryIAMQuotaError']
+mutex: '{{dataset_id}}'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_dataset_access_basic_user'
+    skip_test: true  # not importable
+    primary_resource_id: 'access'
+    vars:
+      dataset_id: 'example_dataset'
+      account_name: 'bqowner'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_dataset_access_view'
+    skip_test: true  # not importable
+    primary_resource_id: 'access'
+    vars:
+      dataset_id: 'example_dataset'
+      dataset_id2: 'example_dataset2'
+      table_id: 'example_table'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_dataset_access_authorized_dataset'
+    skip_test: true  # not importable
+    primary_resource_id: 'access'
+    vars:
+      private: 'private'
+      public: 'public'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_dataset_access_authorized_routine'
+    skip_test: true  # not importable
+    primary_resource_type: 'google_bigquery_dataset_access'
+    primary_resource_id: 'authorized_routine'
+    vars:
+      private_dataset: 'private_dataset'
+      public_dataset: 'public_dataset'
+      public_routine: 'public_routine'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/bigquery_dataset_access.go.erb
+  post_create: templates/terraform/post_create/bigquery_dataset_access.go.erb
+  extra_schema_entry: templates/terraform/extra_schema_entry/bigquery_dataset_access.go.erb
+docs: !ruby/object:Provider::Terraform::Docs
+  warning: |
+    You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`.
+    The API does accept both formats but it will always return the legacy format which results in Terraform
+    showing permanent diff on each plan and apply operation.
 properties:
   - !ruby/object:Api::Type::String
     name: 'datasetId'
@@ -53,6 +99,7 @@ properties:
       must contain only letters (a-z, A-Z), numbers (0-9), or
       underscores (_). The maximum length is 1,024 characters.
     required: true
+    ignore_read: true
   - !ruby/object:Api::Type::String
     name: 'role'
     description: |
@@ -62,6 +109,8 @@ properties:
       swapped by the API to their basic counterparts, and will show a diff
       post-create. See
       [official docs](https://cloud.google.com/bigquery/docs/access-control).
+    diff_suppress_func: 'resourceBigQueryDatasetAccessRoleDiffSuppress'
+    custom_expand: 'templates/terraform/custom_expand/bigquery_access_role.go.erb'
   - !ruby/object:Api::Type::String
     name: 'userByEmail'
     description: |
@@ -76,6 +125,7 @@ properties:
       - view
       - dataset
       - routine
+    diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
   - !ruby/object:Api::Type::String
     name: 'groupByEmail'
     description: An email address of a Google Group to grant access to.
@@ -88,6 +138,7 @@ properties:
       - view
       - dataset
       - routine
+    diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
   - !ruby/object:Api::Type::String
     name: 'domain'
     description: |
@@ -102,6 +153,7 @@ properties:
       - view
       - dataset
       - routine
+    diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
   - !ruby/object:Api::Type::String
     name: 'specialGroup'
     description: |
@@ -127,6 +179,7 @@ properties:
       - view
       - dataset
       - routine
+    diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
   - !ruby/object:Api::Type::String
     name: 'iamMember'
     description: |
@@ -141,6 +194,7 @@ properties:
       - view
       - dataset
       - routine
+    diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
   - !ruby/object:Api::Type::NestedObject
     name: 'view'
     description: |

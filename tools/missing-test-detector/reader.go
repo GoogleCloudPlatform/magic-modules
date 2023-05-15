@@ -220,6 +220,13 @@ func readConfigBasicLit(configBasicLit *ast.BasicLit) (Step, error) {
 					Type:       "data",
 					LabelNames: []string{"type", "name"},
 				},
+				{
+					Type:       "output",
+					LabelNames: []string{"name"},
+				},
+				{
+					Type: "locals",
+				},
 			},
 		})
 		if diagnostics.HasErrors() {
@@ -228,6 +235,9 @@ func readConfigBasicLit(configBasicLit *ast.BasicLit) (Step, error) {
 		m := make(map[string]Resources)
 		errs := make([]error, 0)
 		for _, block := range content.Blocks {
+			if len(block.Labels) != 2 {
+				continue
+			}
 			if _, ok := m[block.Labels[0]]; !ok {
 				// Create an empty map for this resource type.
 				m[block.Labels[0]] = make(Resources)
@@ -250,11 +260,9 @@ func readHCLBlockBody(body hcl.Body, fileBytes []byte) (Resource, error) {
 	var m Resource
 	gohcl.DecodeBody(body, nil, &m)
 	for k, v := range m {
-		attr, ok := v.(*hcl.Attribute)
-		if !ok {
-			continue
+		if attr, ok := v.(*hcl.Attribute); ok {
+			m[k] = string(attr.Expr.Range().SliceBytes(fileBytes))
 		}
-		m[k] = string(attr.Expr.Range().SliceBytes(fileBytes))
 	}
 	syntaxBody, ok := body.(*hclsyntax.Body)
 	if !ok {
@@ -266,10 +274,32 @@ func readHCLBlockBody(body hcl.Body, fileBytes []byte) (Resource, error) {
 		if err != nil {
 			errs = append(errs, err)
 		}
-		m[block.Type] = blockConfig
+		if existing, ok := m[block.Type]; ok {
+			// Merge the fields from the current block into the existing resource config.
+			if existingResource, ok := existing.(Resource); ok {
+				mergeResources(existingResource, blockConfig)
+			}
+		} else {
+			m[block.Type] = blockConfig
+		}
 	}
 	if len(errs) > 0 {
 		return m, fmt.Errorf("errors reading hcl blocks: %v", errs)
 	}
 	return m, nil
+}
+
+// Perform a recursive one-way merge of b into a.
+func mergeResources(a, b Resource) {
+	for k, bv := range b {
+		if av, ok := a[k]; ok {
+			if avr, ok := av.(Resource); ok {
+				if bvr, ok := bv.(Resource); ok {
+					mergeResources(avr, bvr)
+				}
+			}
+		} else {
+			a[k] = bv
+		}
+	}
 }

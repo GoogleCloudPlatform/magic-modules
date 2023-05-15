@@ -5,12 +5,13 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccDataSourceMonitoringService_AppEngine(t *testing.T) {
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: TestAccProviders,
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceMonitoringService_AppEngine(),
@@ -20,7 +21,7 @@ func TestAccDataSourceMonitoringService_AppEngine(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"data.google_monitoring_app_engine_service.default",
 						"telemetry.0.resource_name",
-						fmt.Sprintf("//appengine.googleapis.com/apps/%s/services/default", GetTestProjectFromEnv()),
+						fmt.Sprintf("//appengine.googleapis.com/apps/%s/services/default", acctest.GetTestProjectFromEnv()),
 					),
 				),
 			},

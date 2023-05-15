@@ -58,6 +58,7 @@ func ResourceConverters() map[string][]ResourceConverter {
 		"google_bigquery_dataset_iam_binding":             {resourceConverterBigqueryDatasetIamBinding()},
 		"google_bigquery_dataset_iam_member":              {resourceConverterBigqueryDatasetIamMember()},
 		"google_bigquery_table":                           {resourceConverterBigQueryTable()},
+		"google_org_policy_policy":			   {resourceConverterOrgPolicyPolicy()},
 		"google_redis_instance":                           {resourceConverterRedisInstance()},
 		"google_spanner_database":                         {resourceConverterSpannerDatabase()},
 		"google_spanner_database_iam_policy":              {resourceConverterSpannerDatabaseIamPolicy()},
@@ -94,7 +95,7 @@ func ResourceConverters() map[string][]ResourceConverter {
             <% (product[:definitions].objects || []).each do |object| -%>
                 <% if object.min_version.name == "ga" -%>
                     <% if !object.exclude && !object.exclude_validator -%>
-						<% tf_product = (product[:overrides].legacy_name || object.__product.name).underscore -%>
+						<% tf_product = (object.__product.legacy_name || object.__product.name).underscore -%>
 						<% terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}" -%>
                         <% cai_name =  object.__product.name + object.name -%>
                         <% if (!object.iam_policy.nil?) && (!object.iam_policy.exclude) && (!object.iam_policy.exclude_validator) -%>
@@ -119,6 +120,7 @@ func ResourceConverters() map[string][]ResourceConverter {
 		"google_organization_iam_member": {resourceConverterOrganizationIamMember()},
 		"google_organization_policy": {resourceConverterOrganizationPolicy()},
 		"google_project_organization_policy": {resourceConverterProjectOrgPolicy()},
+		"google_folder": {resourceConverterFolder()},
 		"google_folder_iam_policy": {resourceConverterFolderIamPolicy()},
 		"google_folder_iam_binding": {resourceConverterFolderIamBinding()},
 		"google_folder_iam_member": {resourceConverterFolderIamMember()},

@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -45,6 +45,34 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  allowed_iam_role: 'roles/compute.admin'
+  parent_resource_attribute: 'machine_image'
+  iam_conditions_request_type: :QUERY_PARAM
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'machine_image_basic'
+    primary_resource_id: 'image'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])'
+    vars:
+      vm_name: 'my-vm'
+      image_name: 'my-image'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'compute_machine_image_kms'
+    primary_resource_id: 'image'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])'
+    vars:
+      vm_name: 'my-vm'
+      image_name: 'my-image'
+      key_name: 'key'
+      keyring_name: 'keyring'
+    test_vars_overrides:
+      policyChanged:
+        'BootstrapPSARole(t, "service-", "compute-system",
+        "roles/cloudkms.cryptoKeyEncrypterDecrypter")'
+
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -55,7 +83,9 @@ properties:
     description: 'A text description of the resource.'
   - !ruby/object:Api::Type::ResourceRef
     name: sourceInstance
-    description: 'The source instance used to create the machine image. You can provide this as a partial or full URL to the resource.'
+    description:
+      'The source instance used to create the machine image. You can provide
+      this as a partial or full URL to the resource.'
     resource: 'Instance'
     imports: 'selfLink'
     required: true
@@ -94,6 +124,7 @@ properties:
         name: 'kmsKeyName'
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
+        diff_suppress_func: compareCryptoKeyVersions
       - !ruby/object:Api::Type::String
         name: 'kmsKeyServiceAccount'
         description: |

@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -33,6 +33,17 @@ description: |
   object is always an OWNER.
   For more information, see Access Control, with the caveat that this API
   uses READER and OWNER instead of READ and FULL_CONTROL.
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'storage_object_access_control_public_object'
+    primary_resource_id: 'public_rule'
+    vars:
+      bucket_name: 'static-content-bucket'
+      object_name: 'public-object'
+id_format: '{{bucket}}/{{object}}/{{entity}}'
+import_format: ['{{bucket}}/{{%object}}/{{entity}}']
+mutex: 'storage/buckets/{{bucket}}/objects/{{object}}'
+skip_sweeper: true
 properties:
   - !ruby/object:Api::Type::ResourceRef
     name: 'bucket'
@@ -40,6 +51,7 @@ properties:
     imports: 'name'
     description: 'The name of the bucket.'
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
   - !ruby/object:Api::Type::String
     name: 'domain'
     description: 'The domain associated with the entity.'
@@ -68,15 +80,17 @@ properties:
   # | 'etag' is not applicable for state convergence.
   - !ruby/object:Api::Type::Integer
     name: 'generation'
-    description: 'The content generation of the object, if applied to an object.'
+    description:
+      'The content generation of the object, if applied to an object.'
     output: true
   - !ruby/object:Api::Type::String
     name: 'id'
     description: 'The ID of the access-control entry.'
     output: true
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'object'
-    description: 'The name of the object, if applied to an object.'
+    description: 'The name of the object to apply the access control to.'
     required: true
   - !ruby/object:Api::Type::NestedObject
     name: 'projectTeam'

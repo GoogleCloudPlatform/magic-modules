@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccStorageDefaultObjectAccessControl_update(t *testing.T) {
@@ -16,10 +17,10 @@ func TestAccStorageDefaultObjectAccessControl_update(t *testing.T) {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
-			testAccPreCheck(t)
+			acctest.AccTestPreCheck(t)
 		},
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckStorageDefaultObjectAccessControlDestroyProducer(t),
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckStorageDefaultObjectAccessControlDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleStorageDefaultObjectAccessControlBasic(bucketName, "READER", "allUsers"),

@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"golang.org/x/oauth2/google"
 )
 
@@ -103,8 +104,8 @@ func TestAccStorageSignedUrl_basic(t *testing.T) {
 	t.Parallel()
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: TestAccProviders,
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleSignedUrlConfig,
@@ -118,7 +119,7 @@ func TestAccStorageSignedUrl_basic(t *testing.T) {
 
 func TestAccStorageSignedUrl_accTest(t *testing.T) {
 	// URL includes an expires time
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
@@ -129,8 +130,8 @@ func TestAccStorageSignedUrl_accTest(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: TestAccProviders,
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccTestGoogleStorageObjectSignedURL(bucketName),

@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -55,6 +55,77 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'health_check_tcp'
+    primary_resource_id: 'tcp-health-check'
+    vars:
+      health_check_name: 'tcp-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'health_check_tcp_full'
+    primary_resource_id: 'tcp-health-check'
+    vars:
+      health_check_name: 'tcp-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'health_check_ssl'
+    primary_resource_id: 'ssl-health-check'
+    vars:
+      health_check_name: 'ssl-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'health_check_ssl_full'
+    primary_resource_id: 'ssl-health-check'
+    vars:
+      health_check_name: 'ssl-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'health_check_http'
+    primary_resource_id: 'http-health-check'
+    vars:
+      health_check_name: 'http-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'health_check_http_full'
+    primary_resource_id: 'http-health-check'
+    vars:
+      health_check_name: 'http-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'health_check_https'
+    primary_resource_id: 'https-health-check'
+    vars:
+      health_check_name: 'https-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'health_check_https_full'
+    primary_resource_id: 'https-health-check'
+    vars:
+      health_check_name: 'https-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'health_check_http2'
+    primary_resource_id: 'http2-health-check'
+    vars:
+      health_check_name: 'http2-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'health_check_http2_full'
+    primary_resource_id: 'http2-health-check'
+    vars:
+      health_check_name: 'http2-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'health_check_grpc'
+    primary_resource_id: 'grpc-health-check'
+    vars:
+      health_check_name: 'grpc-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'health_check_grpc_full'
+    primary_resource_id: 'grpc-health-check'
+    vars:
+      health_check_name: 'grpc-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'health_check_with_logging'
+    primary_resource_id: 'health-check-with-logging'
+    min_version: beta
+    vars:
+      health_check_name: 'tcp-health-check'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/health_check_type.erb
+  constants: templates/terraform/constants/health_check.erb
+  resource_definition: templates/terraform/resource_definition/health_check.erb
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'checkIntervalSec'
@@ -84,6 +155,7 @@ properties:
       The unique identifier for the resource. This identifier is defined by
       the server.
     output: true
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
@@ -111,17 +183,15 @@ properties:
     default_value: 2
   - !ruby/object:Api::Type::Enum
     name: 'type'
-    description: |
-      Specifies the type of the healthCheck, either TCP, SSL, HTTP or
-      HTTPS. If not specified, the default is TCP. Exactly one of the
-      protocol-specific health check field must be specified, which must
-      match type field.
+    description: |-
+      The type of the health check. One of HTTP, HTTPS, TCP, or SSL.
     values:
       - :TCP
       - :SSL
       - :HTTP
       - :HTTPS
       - :HTTP2
+    output: true
   - !ruby/object:Api::Type::NestedObject
     name: 'httpHealthCheck'
     exactly_one_of:
@@ -131,121 +201,122 @@ properties:
       - tcp_health_check
       - ssl_health_check
       - grpc_health_check
+    diff_suppress_func: 'portDiffSuppress'
     properties:
-        - !ruby/object:Api::Type::String
-          name: 'host'
-          at_least_one_of:
-            - http_health_check.0.host
-            - http_health_check.0.request_path
-            - http_health_check.0.response
-            - http_health_check.0.port
-            - http_health_check.0.port_name
-            - http_health_check.0.proxy_header
-            - http_health_check.0.port_specification
-          description: |
-            The value of the host header in the HTTP health check request.
-            If left empty (default value), the public IP on behalf of which this health
-            check is performed will be used.
-        - !ruby/object:Api::Type::String
-          name: 'requestPath'
-          at_least_one_of:
-            - http_health_check.0.host
-            - http_health_check.0.request_path
-            - http_health_check.0.response
-            - http_health_check.0.port
-            - http_health_check.0.port_name
-            - http_health_check.0.proxy_header
-            - http_health_check.0.port_specification
-          description: |
-            The request path of the HTTP health check request.
-            The default value is /.
-          default_value: "/"
-        - !ruby/object:Api::Type::String
-          name: 'response'
-          at_least_one_of:
-            - http_health_check.0.host
-            - http_health_check.0.request_path
-            - http_health_check.0.response
-            - http_health_check.0.port
-            - http_health_check.0.port_name
-            - http_health_check.0.proxy_header
-            - http_health_check.0.port_specification
-          description: |
-            The bytes to match against the beginning of the response data. If left empty
-            (the default value), any response will indicate health. The response data
-            can only be ASCII.
-        - !ruby/object:Api::Type::Integer
-          name: 'port'
-          at_least_one_of:
-            - http_health_check.0.host
-            - http_health_check.0.request_path
-            - http_health_check.0.response
-            - http_health_check.0.port
-            - http_health_check.0.port_name
-            - http_health_check.0.proxy_header
-            - http_health_check.0.port_specification
-          description: |
-            The TCP port number for the HTTP health check request.
-            The default value is 80.
-        - !ruby/object:Api::Type::String
-          name: 'portName'
-          at_least_one_of:
-            - http_health_check.0.host
-            - http_health_check.0.request_path
-            - http_health_check.0.response
-            - http_health_check.0.port
-            - http_health_check.0.port_name
-            - http_health_check.0.proxy_header
-            - http_health_check.0.port_specification
-          description: |
-            Port name as defined in InstanceGroup#NamedPort#name. If both port and
-            port_name are defined, port takes precedence.
-        - !ruby/object:Api::Type::Enum
-          name: 'proxyHeader'
-          at_least_one_of:
-            - http_health_check.0.host
-            - http_health_check.0.request_path
-            - http_health_check.0.response
-            - http_health_check.0.port
-            - http_health_check.0.port_name
-            - http_health_check.0.proxy_header
-            - http_health_check.0.port_specification
-          description: |
-            Specifies the type of proxy header to append before sending data to the
-            backend.
-          values:
-            - :NONE
-            - :PROXY_V1
-          default_value: :NONE
-        - !ruby/object:Api::Type::Enum
-          name: 'portSpecification'
-          at_least_one_of:
-            - http_health_check.0.host
-            - http_health_check.0.request_path
-            - http_health_check.0.response
-            - http_health_check.0.port
-            - http_health_check.0.port_name
-            - http_health_check.0.proxy_header
-            - http_health_check.0.port_specification
-          description: |
-            Specifies how port is selected for health checking, can be one of the
-            following values:
+      - !ruby/object:Api::Type::String
+        name: 'host'
+        at_least_one_of:
+          - http_health_check.0.host
+          - http_health_check.0.request_path
+          - http_health_check.0.response
+          - http_health_check.0.port
+          - http_health_check.0.port_name
+          - http_health_check.0.proxy_header
+          - http_health_check.0.port_specification
+        description: |
+          The value of the host header in the HTTP health check request.
+          If left empty (default value), the public IP on behalf of which this health
+          check is performed will be used.
+      - !ruby/object:Api::Type::String
+        name: 'requestPath'
+        at_least_one_of:
+          - http_health_check.0.host
+          - http_health_check.0.request_path
+          - http_health_check.0.response
+          - http_health_check.0.port
+          - http_health_check.0.port_name
+          - http_health_check.0.proxy_header
+          - http_health_check.0.port_specification
+        description: |
+          The request path of the HTTP health check request.
+          The default value is /.
+        default_value: '/'
+      - !ruby/object:Api::Type::String
+        name: 'response'
+        at_least_one_of:
+          - http_health_check.0.host
+          - http_health_check.0.request_path
+          - http_health_check.0.response
+          - http_health_check.0.port
+          - http_health_check.0.port_name
+          - http_health_check.0.proxy_header
+          - http_health_check.0.port_specification
+        description: |
+          The bytes to match against the beginning of the response data. If left empty
+          (the default value), any response will indicate health. The response data
+          can only be ASCII.
+      - !ruby/object:Api::Type::Integer
+        name: 'port'
+        at_least_one_of:
+          - http_health_check.0.host
+          - http_health_check.0.request_path
+          - http_health_check.0.response
+          - http_health_check.0.port
+          - http_health_check.0.port_name
+          - http_health_check.0.proxy_header
+          - http_health_check.0.port_specification
+        description: |
+          The TCP port number for the HTTP health check request.
+          The default value is 80.
+      - !ruby/object:Api::Type::String
+        name: 'portName'
+        at_least_one_of:
+          - http_health_check.0.host
+          - http_health_check.0.request_path
+          - http_health_check.0.response
+          - http_health_check.0.port
+          - http_health_check.0.port_name
+          - http_health_check.0.proxy_header
+          - http_health_check.0.port_specification
+        description: |
+          Port name as defined in InstanceGroup#NamedPort#name. If both port and
+          port_name are defined, port takes precedence.
+      - !ruby/object:Api::Type::Enum
+        name: 'proxyHeader'
+        at_least_one_of:
+          - http_health_check.0.host
+          - http_health_check.0.request_path
+          - http_health_check.0.response
+          - http_health_check.0.port
+          - http_health_check.0.port_name
+          - http_health_check.0.proxy_header
+          - http_health_check.0.port_specification
+        description: |
+          Specifies the type of proxy header to append before sending data to the
+          backend.
+        values:
+          - :NONE
+          - :PROXY_V1
+        default_value: :NONE
+      - !ruby/object:Api::Type::Enum
+        name: 'portSpecification'
+        at_least_one_of:
+          - http_health_check.0.host
+          - http_health_check.0.request_path
+          - http_health_check.0.response
+          - http_health_check.0.port
+          - http_health_check.0.port_name
+          - http_health_check.0.proxy_header
+          - http_health_check.0.port_specification
+        description: |
+          Specifies how port is selected for health checking, can be one of the
+          following values:
 
-              * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+            * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
 
-              * `USE_NAMED_PORT`: The `portName` is used for health checking.
+            * `USE_NAMED_PORT`: The `portName` is used for health checking.
 
-              * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
-              network endpoint is used for health checking. For other backends, the
-              port or named port specified in the Backend Service is used for health
-              checking.
+            * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+            network endpoint is used for health checking. For other backends, the
+            port or named port specified in the Backend Service is used for health
+            checking.
 
-            If not specified, HTTP health check follows behavior specified in `port` and
-            `portName` fields.
-          values:
-            - :USE_FIXED_PORT
-            - :USE_NAMED_PORT
-            - :USE_SERVING_PORT
+          If not specified, HTTP health check follows behavior specified in `port` and
+          `portName` fields.
+        values:
+          - :USE_FIXED_PORT
+          - :USE_NAMED_PORT
+          - :USE_SERVING_PORT
   - !ruby/object:Api::Type::NestedObject
     name: 'httpsHealthCheck'
     exactly_one_of:
@@ -255,121 +326,122 @@ properties:
       - tcp_health_check
       - ssl_health_check
       - grpc_health_check
+    diff_suppress_func: 'portDiffSuppress'
     properties:
-        - !ruby/object:Api::Type::String
-          name: 'host'
-          at_least_one_of:
-            - https_health_check.0.host
-            - https_health_check.0.request_path
-            - https_health_check.0.response
-            - https_health_check.0.port
-            - https_health_check.0.port_name
-            - https_health_check.0.proxy_header
-            - https_health_check.0.port_specification
-          description: |
-            The value of the host header in the HTTPS health check request.
-            If left empty (default value), the public IP on behalf of which this health
-            check is performed will be used.
-        - !ruby/object:Api::Type::String
-          name: 'requestPath'
-          at_least_one_of:
-            - https_health_check.0.host
-            - https_health_check.0.request_path
-            - https_health_check.0.response
-            - https_health_check.0.port
-            - https_health_check.0.port_name
-            - https_health_check.0.proxy_header
-            - https_health_check.0.port_specification
-          description: |
-            The request path of the HTTPS health check request.
-            The default value is /.
-          default_value: "/"
-        - !ruby/object:Api::Type::String
-          name: 'response'
-          at_least_one_of:
-            - https_health_check.0.host
-            - https_health_check.0.request_path
-            - https_health_check.0.response
-            - https_health_check.0.port
-            - https_health_check.0.port_name
-            - https_health_check.0.proxy_header
-            - https_health_check.0.port_specification
-          description: |
-            The bytes to match against the beginning of the response data. If left empty
-            (the default value), any response will indicate health. The response data
-            can only be ASCII.
-        - !ruby/object:Api::Type::Integer
-          name: 'port'
-          at_least_one_of:
-            - https_health_check.0.host
-            - https_health_check.0.request_path
-            - https_health_check.0.response
-            - https_health_check.0.port
-            - https_health_check.0.port_name
-            - https_health_check.0.proxy_header
-            - https_health_check.0.port_specification
-          description: |
-            The TCP port number for the HTTPS health check request.
-            The default value is 443.
-        - !ruby/object:Api::Type::String
-          name: 'portName'
-          at_least_one_of:
-            - https_health_check.0.host
-            - https_health_check.0.request_path
-            - https_health_check.0.response
-            - https_health_check.0.port
-            - https_health_check.0.port_name
-            - https_health_check.0.proxy_header
-            - https_health_check.0.port_specification
-          description: |
-            Port name as defined in InstanceGroup#NamedPort#name. If both port and
-            port_name are defined, port takes precedence.
-        - !ruby/object:Api::Type::Enum
-          name: 'proxyHeader'
-          at_least_one_of:
-            - https_health_check.0.host
-            - https_health_check.0.request_path
-            - https_health_check.0.response
-            - https_health_check.0.port
-            - https_health_check.0.port_name
-            - https_health_check.0.proxy_header
-            - https_health_check.0.port_specification
-          description: |
-            Specifies the type of proxy header to append before sending data to the
-            backend.
-          values:
-            - :NONE
-            - :PROXY_V1
-          default_value: :NONE
-        - !ruby/object:Api::Type::Enum
-          name: 'portSpecification'
-          at_least_one_of:
-            - https_health_check.0.host
-            - https_health_check.0.request_path
-            - https_health_check.0.response
-            - https_health_check.0.port
-            - https_health_check.0.port_name
-            - https_health_check.0.proxy_header
-            - https_health_check.0.port_specification
-          description: |
-            Specifies how port is selected for health checking, can be one of the
-            following values:
+      - !ruby/object:Api::Type::String
+        name: 'host'
+        at_least_one_of:
+          - https_health_check.0.host
+          - https_health_check.0.request_path
+          - https_health_check.0.response
+          - https_health_check.0.port
+          - https_health_check.0.port_name
+          - https_health_check.0.proxy_header
+          - https_health_check.0.port_specification
+        description: |
+          The value of the host header in the HTTPS health check request.
+          If left empty (default value), the public IP on behalf of which this health
+          check is performed will be used.
+      - !ruby/object:Api::Type::String
+        name: 'requestPath'
+        at_least_one_of:
+          - https_health_check.0.host
+          - https_health_check.0.request_path
+          - https_health_check.0.response
+          - https_health_check.0.port
+          - https_health_check.0.port_name
+          - https_health_check.0.proxy_header
+          - https_health_check.0.port_specification
+        description: |
+          The request path of the HTTPS health check request.
+          The default value is /.
+        default_value: '/'
+      - !ruby/object:Api::Type::String
+        name: 'response'
+        at_least_one_of:
+          - https_health_check.0.host
+          - https_health_check.0.request_path
+          - https_health_check.0.response
+          - https_health_check.0.port
+          - https_health_check.0.port_name
+          - https_health_check.0.proxy_header
+          - https_health_check.0.port_specification
+        description: |
+          The bytes to match against the beginning of the response data. If left empty
+          (the default value), any response will indicate health. The response data
+          can only be ASCII.
+      - !ruby/object:Api::Type::Integer
+        name: 'port'
+        at_least_one_of:
+          - https_health_check.0.host
+          - https_health_check.0.request_path
+          - https_health_check.0.response
+          - https_health_check.0.port
+          - https_health_check.0.port_name
+          - https_health_check.0.proxy_header
+          - https_health_check.0.port_specification
+        description: |
+          The TCP port number for the HTTPS health check request.
+          The default value is 443.
+      - !ruby/object:Api::Type::String
+        name: 'portName'
+        at_least_one_of:
+          - https_health_check.0.host
+          - https_health_check.0.request_path
+          - https_health_check.0.response
+          - https_health_check.0.port
+          - https_health_check.0.port_name
+          - https_health_check.0.proxy_header
+          - https_health_check.0.port_specification
+        description: |
+          Port name as defined in InstanceGroup#NamedPort#name. If both port and
+          port_name are defined, port takes precedence.
+      - !ruby/object:Api::Type::Enum
+        name: 'proxyHeader'
+        at_least_one_of:
+          - https_health_check.0.host
+          - https_health_check.0.request_path
+          - https_health_check.0.response
+          - https_health_check.0.port
+          - https_health_check.0.port_name
+          - https_health_check.0.proxy_header
+          - https_health_check.0.port_specification
+        description: |
+          Specifies the type of proxy header to append before sending data to the
+          backend.
+        values:
+          - :NONE
+          - :PROXY_V1
+        default_value: :NONE
+      - !ruby/object:Api::Type::Enum
+        name: 'portSpecification'
+        at_least_one_of:
+          - https_health_check.0.host
+          - https_health_check.0.request_path
+          - https_health_check.0.response
+          - https_health_check.0.port
+          - https_health_check.0.port_name
+          - https_health_check.0.proxy_header
+          - https_health_check.0.port_specification
+        description: |
+          Specifies how port is selected for health checking, can be one of the
+          following values:
 
-              * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+            * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
 
-              * `USE_NAMED_PORT`: The `portName` is used for health checking.
+            * `USE_NAMED_PORT`: The `portName` is used for health checking.
 
-              * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
-              network endpoint is used for health checking. For other backends, the
-              port or named port specified in the Backend Service is used for health
-              checking.
+            * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+            network endpoint is used for health checking. For other backends, the
+            port or named port specified in the Backend Service is used for health
+            checking.
 
-            If not specified, HTTPS health check follows behavior specified in `port` and
-            `portName` fields.
-          values:
-            - :USE_FIXED_PORT
-            - :USE_NAMED_PORT
-            - :USE_SERVING_PORT
+          If not specified, HTTPS health check follows behavior specified in `port` and
+          `portName` fields.
+        values:
+          - :USE_FIXED_PORT
+          - :USE_NAMED_PORT
+          - :USE_SERVING_PORT
   - !ruby/object:Api::Type::NestedObject
     name: 'tcpHealthCheck'
     exactly_one_of:
@@ -379,102 +451,103 @@ properties:
       - tcp_health_check
       - ssl_health_check
       - grpc_health_check
+    diff_suppress_func: 'portDiffSuppress'
     properties:
-        - !ruby/object:Api::Type::String
-          name: 'request'
-          at_least_one_of:
-            - tcp_health_check.0.request
-            - tcp_health_check.0.response
-            - tcp_health_check.0.port
-            - tcp_health_check.0.port_name
-            - tcp_health_check.0.proxy_header
-            - tcp_health_check.0.port_specification
-          description: |
-            The application data to send once the TCP connection has been
-            established (default value is empty). If both request and response are
-            empty, the connection establishment alone will indicate health. The request
-            data can only be ASCII.
-        - !ruby/object:Api::Type::String
-          name: 'response'
-          at_least_one_of:
-            - tcp_health_check.0.request
-            - tcp_health_check.0.response
-            - tcp_health_check.0.port
-            - tcp_health_check.0.port_name
-            - tcp_health_check.0.proxy_header
-            - tcp_health_check.0.port_specification
-          description: |
-            The bytes to match against the beginning of the response data. If left empty
-            (the default value), any response will indicate health. The response data
-            can only be ASCII.
-        - !ruby/object:Api::Type::Integer
-          name: 'port'
-          at_least_one_of:
-            - tcp_health_check.0.request
-            - tcp_health_check.0.response
-            - tcp_health_check.0.port
-            - tcp_health_check.0.port_name
-            - tcp_health_check.0.proxy_header
-            - tcp_health_check.0.port_specification
-          description: |
-            The TCP port number for the TCP health check request.
-            The default value is 443.
-        - !ruby/object:Api::Type::String
-          name: 'portName'
-          at_least_one_of:
-            - tcp_health_check.0.request
-            - tcp_health_check.0.response
-            - tcp_health_check.0.port
-            - tcp_health_check.0.port_name
-            - tcp_health_check.0.proxy_header
-            - tcp_health_check.0.port_specification
-          description: |
-            Port name as defined in InstanceGroup#NamedPort#name. If both port and
-            port_name are defined, port takes precedence.
-        - !ruby/object:Api::Type::Enum
-          name: 'proxyHeader'
-          at_least_one_of:
-            - tcp_health_check.0.request
-            - tcp_health_check.0.response
-            - tcp_health_check.0.port
-            - tcp_health_check.0.port_name
-            - tcp_health_check.0.proxy_header
-            - tcp_health_check.0.port_specification
-          description: |
-            Specifies the type of proxy header to append before sending data to the
-            backend.
-          values:
-            - :NONE
-            - :PROXY_V1
-          default_value: :NONE
-        - !ruby/object:Api::Type::Enum
-          name: 'portSpecification'
-          at_least_one_of:
-            - tcp_health_check.0.request
-            - tcp_health_check.0.response
-            - tcp_health_check.0.port
-            - tcp_health_check.0.port_name
-            - tcp_health_check.0.proxy_header
-            - tcp_health_check.0.port_specification
-          description: |
-            Specifies how port is selected for health checking, can be one of the
-            following values:
+      - !ruby/object:Api::Type::String
+        name: 'request'
+        at_least_one_of:
+          - tcp_health_check.0.request
+          - tcp_health_check.0.response
+          - tcp_health_check.0.port
+          - tcp_health_check.0.port_name
+          - tcp_health_check.0.proxy_header
+          - tcp_health_check.0.port_specification
+        description: |
+          The application data to send once the TCP connection has been
+          established (default value is empty). If both request and response are
+          empty, the connection establishment alone will indicate health. The request
+          data can only be ASCII.
+      - !ruby/object:Api::Type::String
+        name: 'response'
+        at_least_one_of:
+          - tcp_health_check.0.request
+          - tcp_health_check.0.response
+          - tcp_health_check.0.port
+          - tcp_health_check.0.port_name
+          - tcp_health_check.0.proxy_header
+          - tcp_health_check.0.port_specification
+        description: |
+          The bytes to match against the beginning of the response data. If left empty
+          (the default value), any response will indicate health. The response data
+          can only be ASCII.
+      - !ruby/object:Api::Type::Integer
+        name: 'port'
+        at_least_one_of:
+          - tcp_health_check.0.request
+          - tcp_health_check.0.response
+          - tcp_health_check.0.port
+          - tcp_health_check.0.port_name
+          - tcp_health_check.0.proxy_header
+          - tcp_health_check.0.port_specification
+        description: |
+          The TCP port number for the TCP health check request.
+          The default value is 443.
+      - !ruby/object:Api::Type::String
+        name: 'portName'
+        at_least_one_of:
+          - tcp_health_check.0.request
+          - tcp_health_check.0.response
+          - tcp_health_check.0.port
+          - tcp_health_check.0.port_name
+          - tcp_health_check.0.proxy_header
+          - tcp_health_check.0.port_specification
+        description: |
+          Port name as defined in InstanceGroup#NamedPort#name. If both port and
+          port_name are defined, port takes precedence.
+      - !ruby/object:Api::Type::Enum
+        name: 'proxyHeader'
+        at_least_one_of:
+          - tcp_health_check.0.request
+          - tcp_health_check.0.response
+          - tcp_health_check.0.port
+          - tcp_health_check.0.port_name
+          - tcp_health_check.0.proxy_header
+          - tcp_health_check.0.port_specification
+        description: |
+          Specifies the type of proxy header to append before sending data to the
+          backend.
+        values:
+          - :NONE
+          - :PROXY_V1
+        default_value: :NONE
+      - !ruby/object:Api::Type::Enum
+        name: 'portSpecification'
+        at_least_one_of:
+          - tcp_health_check.0.request
+          - tcp_health_check.0.response
+          - tcp_health_check.0.port
+          - tcp_health_check.0.port_name
+          - tcp_health_check.0.proxy_header
+          - tcp_health_check.0.port_specification
+        description: |
+          Specifies how port is selected for health checking, can be one of the
+          following values:
 
-              * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+            * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
 
-              * `USE_NAMED_PORT`: The `portName` is used for health checking.
+            * `USE_NAMED_PORT`: The `portName` is used for health checking.
 
-              * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
-              network endpoint is used for health checking. For other backends, the
-              port or named port specified in the Backend Service is used for health
-              checking.
+            * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+            network endpoint is used for health checking. For other backends, the
+            port or named port specified in the Backend Service is used for health
+            checking.
 
-            If not specified, TCP health check follows behavior specified in `port` and
-            `portName` fields.
-          values:
-            - :USE_FIXED_PORT
-            - :USE_NAMED_PORT
-            - :USE_SERVING_PORT
+          If not specified, TCP health check follows behavior specified in `port` and
+          `portName` fields.
+        values:
+          - :USE_FIXED_PORT
+          - :USE_NAMED_PORT
+          - :USE_SERVING_PORT
   - !ruby/object:Api::Type::NestedObject
     name: 'sslHealthCheck'
     exactly_one_of:
@@ -484,102 +557,103 @@ properties:
       - tcp_health_check
       - ssl_health_check
       - grpc_health_check
+    diff_suppress_func: 'portDiffSuppress'
     properties:
-        - !ruby/object:Api::Type::String
-          name: 'request'
-          at_least_one_of:
-            - ssl_health_check.0.request
-            - ssl_health_check.0.response
-            - ssl_health_check.0.port
-            - ssl_health_check.0.port_name
-            - ssl_health_check.0.proxy_header
-            - ssl_health_check.0.port_specification
-          description: |
-            The application data to send once the SSL connection has been
-            established (default value is empty). If both request and response are
-            empty, the connection establishment alone will indicate health. The request
-            data can only be ASCII.
-        - !ruby/object:Api::Type::String
-          name: 'response'
-          at_least_one_of:
-            - ssl_health_check.0.request
-            - ssl_health_check.0.response
-            - ssl_health_check.0.port
-            - ssl_health_check.0.port_name
-            - ssl_health_check.0.proxy_header
-            - ssl_health_check.0.port_specification
-          description: |
-            The bytes to match against the beginning of the response data. If left empty
-            (the default value), any response will indicate health. The response data
-            can only be ASCII.
-        - !ruby/object:Api::Type::Integer
-          name: 'port'
-          at_least_one_of:
-            - ssl_health_check.0.request
-            - ssl_health_check.0.response
-            - ssl_health_check.0.port
-            - ssl_health_check.0.port_name
-            - ssl_health_check.0.proxy_header
-            - ssl_health_check.0.port_specification
-          description: |
-            The TCP port number for the SSL health check request.
-            The default value is 443.
-        - !ruby/object:Api::Type::String
-          name: 'portName'
-          at_least_one_of:
-            - ssl_health_check.0.request
-            - ssl_health_check.0.response
-            - ssl_health_check.0.port
-            - ssl_health_check.0.port_name
-            - ssl_health_check.0.proxy_header
-            - ssl_health_check.0.port_specification
-          description: |
-            Port name as defined in InstanceGroup#NamedPort#name. If both port and
-            port_name are defined, port takes precedence.
-        - !ruby/object:Api::Type::Enum
-          name: 'proxyHeader'
-          at_least_one_of:
-            - ssl_health_check.0.request
-            - ssl_health_check.0.response
-            - ssl_health_check.0.port
-            - ssl_health_check.0.port_name
-            - ssl_health_check.0.proxy_header
-            - ssl_health_check.0.port_specification
-          description: |
-            Specifies the type of proxy header to append before sending data to the
-            backend.
-          values:
-            - :NONE
-            - :PROXY_V1
-          default_value: :NONE
-        - !ruby/object:Api::Type::Enum
-          name: 'portSpecification'
-          at_least_one_of:
-            - ssl_health_check.0.request
-            - ssl_health_check.0.response
-            - ssl_health_check.0.port
-            - ssl_health_check.0.port_name
-            - ssl_health_check.0.proxy_header
-            - ssl_health_check.0.port_specification
-          description: |
-            Specifies how port is selected for health checking, can be one of the
-            following values:
+      - !ruby/object:Api::Type::String
+        name: 'request'
+        at_least_one_of:
+          - ssl_health_check.0.request
+          - ssl_health_check.0.response
+          - ssl_health_check.0.port
+          - ssl_health_check.0.port_name
+          - ssl_health_check.0.proxy_header
+          - ssl_health_check.0.port_specification
+        description: |
+          The application data to send once the SSL connection has been
+          established (default value is empty). If both request and response are
+          empty, the connection establishment alone will indicate health. The request
+          data can only be ASCII.
+      - !ruby/object:Api::Type::String
+        name: 'response'
+        at_least_one_of:
+          - ssl_health_check.0.request
+          - ssl_health_check.0.response
+          - ssl_health_check.0.port
+          - ssl_health_check.0.port_name
+          - ssl_health_check.0.proxy_header
+          - ssl_health_check.0.port_specification
+        description: |
+          The bytes to match against the beginning of the response data. If left empty
+          (the default value), any response will indicate health. The response data
+          can only be ASCII.
+      - !ruby/object:Api::Type::Integer
+        name: 'port'
+        at_least_one_of:
+          - ssl_health_check.0.request
+          - ssl_health_check.0.response
+          - ssl_health_check.0.port
+          - ssl_health_check.0.port_name
+          - ssl_health_check.0.proxy_header
+          - ssl_health_check.0.port_specification
+        description: |
+          The TCP port number for the SSL health check request.
+          The default value is 443.
+      - !ruby/object:Api::Type::String
+        name: 'portName'
+        at_least_one_of:
+          - ssl_health_check.0.request
+          - ssl_health_check.0.response
+          - ssl_health_check.0.port
+          - ssl_health_check.0.port_name
+          - ssl_health_check.0.proxy_header
+          - ssl_health_check.0.port_specification
+        description: |
+          Port name as defined in InstanceGroup#NamedPort#name. If both port and
+          port_name are defined, port takes precedence.
+      - !ruby/object:Api::Type::Enum
+        name: 'proxyHeader'
+        at_least_one_of:
+          - ssl_health_check.0.request
+          - ssl_health_check.0.response
+          - ssl_health_check.0.port
+          - ssl_health_check.0.port_name
+          - ssl_health_check.0.proxy_header
+          - ssl_health_check.0.port_specification
+        description: |
+          Specifies the type of proxy header to append before sending data to the
+          backend.
+        values:
+          - :NONE
+          - :PROXY_V1
+        default_value: :NONE
+      - !ruby/object:Api::Type::Enum
+        name: 'portSpecification'
+        at_least_one_of:
+          - ssl_health_check.0.request
+          - ssl_health_check.0.response
+          - ssl_health_check.0.port
+          - ssl_health_check.0.port_name
+          - ssl_health_check.0.proxy_header
+          - ssl_health_check.0.port_specification
+        description: |
+          Specifies how port is selected for health checking, can be one of the
+          following values:
 
-              * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+            * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
 
-              * `USE_NAMED_PORT`: The `portName` is used for health checking.
+            * `USE_NAMED_PORT`: The `portName` is used for health checking.
 
-              * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
-              network endpoint is used for health checking. For other backends, the
-              port or named port specified in the Backend Service is used for health
-              checking.
+            * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+            network endpoint is used for health checking. For other backends, the
+            port or named port specified in the Backend Service is used for health
+            checking.
 
-            If not specified, SSL health check follows behavior specified in `port` and
-            `portName` fields.
-          values:
-            - :USE_FIXED_PORT
-            - :USE_NAMED_PORT
-            - :USE_SERVING_PORT
+          If not specified, SSL health check follows behavior specified in `port` and
+          `portName` fields.
+        values:
+          - :USE_FIXED_PORT
+          - :USE_NAMED_PORT
+          - :USE_SERVING_PORT
   - !ruby/object:Api::Type::NestedObject
     name: 'http2HealthCheck'
     exactly_one_of:
@@ -589,121 +663,122 @@ properties:
       - tcp_health_check
       - ssl_health_check
       - grpc_health_check
+    diff_suppress_func: 'portDiffSuppress'
     properties:
-        - !ruby/object:Api::Type::String
-          name: 'host'
-          at_least_one_of:
-            - http2_health_check.0.host
-            - http2_health_check.0.request_path
-            - http2_health_check.0.response
-            - http2_health_check.0.port
-            - http2_health_check.0.port_name
-            - http2_health_check.0.proxy_header
-            - http2_health_check.0.port_specification
-          description: |
-            The value of the host header in the HTTP2 health check request.
-            If left empty (default value), the public IP on behalf of which this health
-            check is performed will be used.
-        - !ruby/object:Api::Type::String
-          name: 'requestPath'
-          at_least_one_of:
-            - http2_health_check.0.host
-            - http2_health_check.0.request_path
-            - http2_health_check.0.response
-            - http2_health_check.0.port
-            - http2_health_check.0.port_name
-            - http2_health_check.0.proxy_header
-            - http2_health_check.0.port_specification
-          description: |
-            The request path of the HTTP2 health check request.
-            The default value is /.
-          default_value: "/"
-        - !ruby/object:Api::Type::String
-          name: 'response'
-          at_least_one_of:
-            - http2_health_check.0.host
-            - http2_health_check.0.request_path
-            - http2_health_check.0.response
-            - http2_health_check.0.port
-            - http2_health_check.0.port_name
-            - http2_health_check.0.proxy_header
-            - http2_health_check.0.port_specification
-          description: |
-            The bytes to match against the beginning of the response data. If left empty
-            (the default value), any response will indicate health. The response data
-            can only be ASCII.
-        - !ruby/object:Api::Type::Integer
-          name: 'port'
-          at_least_one_of:
-            - http2_health_check.0.host
-            - http2_health_check.0.request_path
-            - http2_health_check.0.response
-            - http2_health_check.0.port
-            - http2_health_check.0.port_name
-            - http2_health_check.0.proxy_header
-            - http2_health_check.0.port_specification
-          description: |
-            The TCP port number for the HTTP2 health check request.
-            The default value is 443.
-        - !ruby/object:Api::Type::String
-          name: 'portName'
-          at_least_one_of:
-            - http2_health_check.0.host
-            - http2_health_check.0.request_path
-            - http2_health_check.0.response
-            - http2_health_check.0.port
-            - http2_health_check.0.port_name
-            - http2_health_check.0.proxy_header
-            - http2_health_check.0.port_specification
-          description: |
-            Port name as defined in InstanceGroup#NamedPort#name. If both port and
-            port_name are defined, port takes precedence.
-        - !ruby/object:Api::Type::Enum
-          name: 'proxyHeader'
-          at_least_one_of:
-            - http2_health_check.0.host
-            - http2_health_check.0.request_path
-            - http2_health_check.0.response
-            - http2_health_check.0.port
-            - http2_health_check.0.port_name
-            - http2_health_check.0.proxy_header
-            - http2_health_check.0.port_specification
-          description: |
-            Specifies the type of proxy header to append before sending data to the
-            backend.
-          values:
-            - :NONE
-            - :PROXY_V1
-          default_value: :NONE
-        - !ruby/object:Api::Type::Enum
-          name: 'portSpecification'
-          at_least_one_of:
-            - http2_health_check.0.host
-            - http2_health_check.0.request_path
-            - http2_health_check.0.response
-            - http2_health_check.0.port
-            - http2_health_check.0.port_name
-            - http2_health_check.0.proxy_header
-            - http2_health_check.0.port_specification
-          description: |
-            Specifies how port is selected for health checking, can be one of the
-            following values:
+      - !ruby/object:Api::Type::String
+        name: 'host'
+        at_least_one_of:
+          - http2_health_check.0.host
+          - http2_health_check.0.request_path
+          - http2_health_check.0.response
+          - http2_health_check.0.port
+          - http2_health_check.0.port_name
+          - http2_health_check.0.proxy_header
+          - http2_health_check.0.port_specification
+        description: |
+          The value of the host header in the HTTP2 health check request.
+          If left empty (default value), the public IP on behalf of which this health
+          check is performed will be used.
+      - !ruby/object:Api::Type::String
+        name: 'requestPath'
+        at_least_one_of:
+          - http2_health_check.0.host
+          - http2_health_check.0.request_path
+          - http2_health_check.0.response
+          - http2_health_check.0.port
+          - http2_health_check.0.port_name
+          - http2_health_check.0.proxy_header
+          - http2_health_check.0.port_specification
+        description: |
+          The request path of the HTTP2 health check request.
+          The default value is /.
+        default_value: '/'
+      - !ruby/object:Api::Type::String
+        name: 'response'
+        at_least_one_of:
+          - http2_health_check.0.host
+          - http2_health_check.0.request_path
+          - http2_health_check.0.response
+          - http2_health_check.0.port
+          - http2_health_check.0.port_name
+          - http2_health_check.0.proxy_header
+          - http2_health_check.0.port_specification
+        description: |
+          The bytes to match against the beginning of the response data. If left empty
+          (the default value), any response will indicate health. The response data
+          can only be ASCII.
+      - !ruby/object:Api::Type::Integer
+        name: 'port'
+        at_least_one_of:
+          - http2_health_check.0.host
+          - http2_health_check.0.request_path
+          - http2_health_check.0.response
+          - http2_health_check.0.port
+          - http2_health_check.0.port_name
+          - http2_health_check.0.proxy_header
+          - http2_health_check.0.port_specification
+        description: |
+          The TCP port number for the HTTP2 health check request.
+          The default value is 443.
+      - !ruby/object:Api::Type::String
+        name: 'portName'
+        at_least_one_of:
+          - http2_health_check.0.host
+          - http2_health_check.0.request_path
+          - http2_health_check.0.response
+          - http2_health_check.0.port
+          - http2_health_check.0.port_name
+          - http2_health_check.0.proxy_header
+          - http2_health_check.0.port_specification
+        description: |
+          Port name as defined in InstanceGroup#NamedPort#name. If both port and
+          port_name are defined, port takes precedence.
+      - !ruby/object:Api::Type::Enum
+        name: 'proxyHeader'
+        at_least_one_of:
+          - http2_health_check.0.host
+          - http2_health_check.0.request_path
+          - http2_health_check.0.response
+          - http2_health_check.0.port
+          - http2_health_check.0.port_name
+          - http2_health_check.0.proxy_header
+          - http2_health_check.0.port_specification
+        description: |
+          Specifies the type of proxy header to append before sending data to the
+          backend.
+        values:
+          - :NONE
+          - :PROXY_V1
+        default_value: :NONE
+      - !ruby/object:Api::Type::Enum
+        name: 'portSpecification'
+        at_least_one_of:
+          - http2_health_check.0.host
+          - http2_health_check.0.request_path
+          - http2_health_check.0.response
+          - http2_health_check.0.port
+          - http2_health_check.0.port_name
+          - http2_health_check.0.proxy_header
+          - http2_health_check.0.port_specification
+        description: |
+          Specifies how port is selected for health checking, can be one of the
+          following values:
 
-              * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+            * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
 
-              * `USE_NAMED_PORT`: The `portName` is used for health checking.
+            * `USE_NAMED_PORT`: The `portName` is used for health checking.
 
-              * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
-              network endpoint is used for health checking. For other backends, the
-              port or named port specified in the Backend Service is used for health
-              checking.
+            * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+            network endpoint is used for health checking. For other backends, the
+            port or named port specified in the Backend Service is used for health
+            checking.
 
-            If not specified, HTTP2 health check follows behavior specified in `port` and
-            `portName` fields.
-          values:
-            - :USE_FIXED_PORT
-            - :USE_NAMED_PORT
-            - :USE_SERVING_PORT
+          If not specified, HTTP2 health check follows behavior specified in `port` and
+          `portName` fields.
+        values:
+          - :USE_FIXED_PORT
+          - :USE_NAMED_PORT
+          - :USE_SERVING_PORT
   - !ruby/object:Api::Type::NestedObject
     name: 'grpcHealthCheck'
     exactly_one_of:
@@ -713,75 +788,78 @@ properties:
       - tcp_health_check
       - ssl_health_check
       - grpc_health_check
+    diff_suppress_func: 'portDiffSuppress'
     properties:
-        - !ruby/object:Api::Type::Integer
-          name: 'port'
-          at_least_one_of:
-            - grpc_health_check.0.port
-            - grpc_health_check.0.port_name
-            - grpc_health_check.0.port_specification
-            - grpc_health_check.0.grpc_service_name
-          description: |
-            The port number for the health check request.
-            Must be specified if portName and portSpecification are not set
-            or if port_specification is USE_FIXED_PORT. Valid values are 1 through 65535.
-        - !ruby/object:Api::Type::String
-          name: 'portName'
-          at_least_one_of:
-            - grpc_health_check.0.port
-            - grpc_health_check.0.port_name
-            - grpc_health_check.0.port_specification
-            - grpc_health_check.0.grpc_service_name
-          description: |
-            Port name as defined in InstanceGroup#NamedPort#name. If both port and
-            port_name are defined, port takes precedence.
-        - !ruby/object:Api::Type::Enum
-          name: 'portSpecification'
-          at_least_one_of:
-            - grpc_health_check.0.port
-            - grpc_health_check.0.port_name
-            - grpc_health_check.0.port_specification
-            - grpc_health_check.0.grpc_service_name
-          description: |
-            Specifies how port is selected for health checking, can be one of the
-            following values:
+      - !ruby/object:Api::Type::Integer
+        name: 'port'
+        at_least_one_of:
+          - grpc_health_check.0.port
+          - grpc_health_check.0.port_name
+          - grpc_health_check.0.port_specification
+          - grpc_health_check.0.grpc_service_name
+        description: |
+          The port number for the health check request.
+          Must be specified if portName and portSpecification are not set
+          or if port_specification is USE_FIXED_PORT. Valid values are 1 through 65535.
+      - !ruby/object:Api::Type::String
+        name: 'portName'
+        at_least_one_of:
+          - grpc_health_check.0.port
+          - grpc_health_check.0.port_name
+          - grpc_health_check.0.port_specification
+          - grpc_health_check.0.grpc_service_name
+        description: |
+          Port name as defined in InstanceGroup#NamedPort#name. If both port and
+          port_name are defined, port takes precedence.
+      - !ruby/object:Api::Type::Enum
+        name: 'portSpecification'
+        at_least_one_of:
+          - grpc_health_check.0.port
+          - grpc_health_check.0.port_name
+          - grpc_health_check.0.port_specification
+          - grpc_health_check.0.grpc_service_name
+        description: |
+          Specifies how port is selected for health checking, can be one of the
+          following values:
 
-              * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+            * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
 
-              * `USE_NAMED_PORT`: The `portName` is used for health checking.
+            * `USE_NAMED_PORT`: The `portName` is used for health checking.
 
-              * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
-              network endpoint is used for health checking. For other backends, the
-              port or named port specified in the Backend Service is used for health
-              checking.
+            * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+            network endpoint is used for health checking. For other backends, the
+            port or named port specified in the Backend Service is used for health
+            checking.
 
-            If not specified, gRPC health check follows behavior specified in `port` and
-            `portName` fields.
-          values:
-            - :USE_FIXED_PORT
-            - :USE_NAMED_PORT
-            - :USE_SERVING_PORT
-        - !ruby/object:Api::Type::String
-          name: 'grpcServiceName'
-          at_least_one_of:
-            - grpc_health_check.0.port
-            - grpc_health_check.0.port_name
-            - grpc_health_check.0.port_specification
-            - grpc_health_check.0.grpc_service_name
-          description: |
-            The gRPC service name for the health check.
-            The value of grpcServiceName has the following meanings by convention:
-              - Empty serviceName means the overall status of all services at the backend.
-              - Non-empty serviceName means the health of that gRPC service, as defined by the owner of the service.
-            The grpcServiceName can only be ASCII.
+          If not specified, gRPC health check follows behavior specified in `port` and
+          `portName` fields.
+        values:
+          - :USE_FIXED_PORT
+          - :USE_NAMED_PORT
+          - :USE_SERVING_PORT
+      - !ruby/object:Api::Type::String
+        name: 'grpcServiceName'
+        at_least_one_of:
+          - grpc_health_check.0.port
+          - grpc_health_check.0.port_name
+          - grpc_health_check.0.port_specification
+          - grpc_health_check.0.grpc_service_name
+        description: |
+          The gRPC service name for the health check.
+          The value of grpcServiceName has the following meanings by convention:
+            - Empty serviceName means the overall status of all services at the backend.
+            - Non-empty serviceName means the health of that gRPC service, as defined by the owner of the service.
+          The grpcServiceName can only be ASCII.
   - !ruby/object:Api::Type::NestedObject
     name: 'logConfig'
     description: |
       Configure logging on this health check.
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/health_check_log_config.go.erb'
     properties:
-        - !ruby/object:Api::Type::Boolean
-          name: 'enable'
-          description: |
-            Indicates whether or not to export logs. This is false by default,
-            which means no health check logging will be done.
-          default_value: false
+      - !ruby/object:Api::Type::Boolean
+        name: 'enable'
+        description: |
+          Indicates whether or not to export logs. This is false by default,
+          which means no health check logging will be done.
+        default_value: false

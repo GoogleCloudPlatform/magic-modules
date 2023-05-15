@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -44,19 +44,24 @@ async: !ruby/object:Api::OpAsync
     resource_inside_response: true
   status: !ruby/object:Api::OpAsync::Status
     path: 'done'
-    complete: True
+    complete: true
     allowed:
-      - True
-      - False
+      - true
+      - false
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
+exclude: true
+id_format: 'projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/{{name}}'
+skip_sweeper: true
+autogen_async: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
     output: true
     description: |
       The server-generated name of the quota override.
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::Boolean
     name: 'force'
     url_param_only: true
@@ -94,9 +99,9 @@ properties:
     required: true
     description: |
       The overriding quota limit value. Can be any nonnegative integer, or -1 (unlimited quota).
+    custom_flatten: 'templates/terraform/custom_flatten/consumer_quote_override_override_value.go.erb'
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'dimensions'
     immutable: true
     description: |
       If this map is nonempty, then this override applies only to specific values for dimensions defined in the limit unit.
-

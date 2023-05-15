@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'VpnGateway'
+name: 'HaVpnGateway'
 kind: 'compute#vpnGateway'
 base_url: projects/{{project}}/regions/{{region}}/vpnGateways
 collection_url_key: 'items'
@@ -45,6 +45,48 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'ha_vpn_gateway_basic'
+    primary_resource_id: 'ha_gateway1'
+    vars:
+      ha_vpn_gateway1_name: 'ha-vpn-1'
+      network1_name: 'network1'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'ha_vpn_gateway_ipv6'
+    primary_resource_id: 'ha_gateway1'
+    vars:
+      ha_vpn_gateway1_name: 'ha-vpn-1'
+      network1_name: 'network1'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'ha_vpn_gateway_gcp_to_gcp'
+    primary_resource_id:
+      'ha_gateway1'
+      # Multiple fine-grained resources
+    skip_vcr: true
+    skip_test: true
+    skip_docs: true
+    vars:
+      ha_vpn_gateway1_name: 'ha-vpn-1'
+      network1_name: 'network1'
+      router1_name: 'ha-vpn-router1'
+      ha_vpn_gateway2_name: 'ha-vpn-2'
+      network2_name: 'network2'
+      router2_name: 'ha-vpn-router2'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'compute_ha_vpn_gateway_encrypted_interconnect'
+    primary_resource_id:
+      'vpn-gateway'
+      # TODO: https://github.com/hashicorp/terraform-provider-google/issues/11504
+    skip_test: true
+    vars:
+      ha_vpn_gateway_name: 'test-ha-vpngw'
+      interconnect_attachment1_name: 'test-interconnect-attachment1'
+      interconnect_attachment2_name: 'test-interconnect-attachment2'
+      address1_name: 'test-address1'
+      address2_name: 'test-address2'
+      router_name: 'test-router'
+      network_name: 'test-network'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -52,12 +94,15 @@ parameters:
     imports: 'name'
     description: |
       The region this gateway should sit in.
-    required: true
+    required: false
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: 'An optional description of this resource.'
@@ -74,10 +119,13 @@ properties:
       character, which cannot be a dash.
     required: true
     immutable: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::Integer
     name: 'id'
     description: 'The unique identifier for the resource.'
     output: true
+    exclude: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'network'
     resource: 'Network'
@@ -86,10 +134,22 @@ properties:
       The network this VPN gateway is accepting traffic for.
     required: true
     immutable: true
+  - !ruby/object:Api::Type::Enum
+    name: 'stackType'
+    description: |
+      The stack type for this VPN gateway to identify the IP protocols that are enabled.
+      If not specified, IPV4_ONLY will be used.
+    default_value: :IPV4_ONLY
+    values:
+      - :IPV4_ONLY
+      - :IPV4_IPV6
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   - !ruby/object:Api::Type::Array
     name: 'vpnInterfaces'
     description: |
       A list of interfaces on this VPN gateway.
+    default_from_api: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::Integer
@@ -104,11 +164,11 @@ properties:
           resource: 'InterconnectAttachment'
           imports: 'selfLink'
           description: |
-              URL of the interconnect attachment resource. When the value
-              of this field is present, the VPN Gateway will be used for
-              IPsec-encrypted Cloud Interconnect; all Egress or Ingress
-              traffic for this VPN Gateway interface will go through the
-              specified interconnect attachment resource.
+            URL of the interconnect attachment resource. When the value
+            of this field is present, the VPN Gateway will be used for
+            IPsec-encrypted Cloud Interconnect; all Egress or Ingress
+            traffic for this VPN Gateway interface will go through the
+            specified interconnect attachment resource.
 
-              Not currently available publicly.
+            Not currently available publicly.
           immutable: true

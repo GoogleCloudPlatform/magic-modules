@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'Service'
-base_url: "projects/{{project}}/locations/{{location}}/services"
+base_url: 'projects/{{project}}/locations/{{location}}/services'
 create_url: 'projects/{{project}}/locations/{{location}}/services?serviceId={{service_id}}'
-self_link: "projects/{{project}}/locations/{{location}}/services/{{service_id}}"
+self_link: 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -28,7 +28,11 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: service_id
   exclude: false
   method_name_separator: ':'
-  import_format: ["projects/{{project}}/locations/{{location}}/services/{{service_id}}", "{{service_id}}"]
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/services/{{service_id}}',
+      '{{service_id}}',
+    ]
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -49,6 +53,69 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
+autogen_async: true
+import_format:
+  ['projects/{{project}}/locations/{{location}}/services/{{service_id}}']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_metastore_service_basic'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
+    primary_resource_id: 'default'
+    vars:
+      metastore_service_name: 'metastore-srv'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_metastore_service_cmek_test'
+    skip_docs: true
+    primary_resource_id: 'default'
+    vars:
+      metastore_service_name: 'example-service'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_metastore_service_cmek_example'
+    skip_test: true
+    primary_resource_id: 'default'
+    vars:
+      metastore_service_name: 'example-service'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_metastore_service_endpoint'
+    min_version: beta
+    skip_docs: true
+    skip_test: true  # https://github.com/hashicorp/terraform-provider-google/issues/13710
+    primary_resource_id: 'endpoint'
+    vars:
+      metastore_service_name: 'metastore-endpoint'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_metastore_service_aux'
+    min_version: beta
+    skip_docs: true
+    primary_resource_id: 'aux'
+    vars:
+      metastore_service_name: 'metastore-aux'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_metastore_service_metadata'
+    min_version: beta
+    skip_docs: true
+    primary_resource_id: 'metadata'
+    vars:
+      metastore_service_name: 'metastore-metadata'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_metastore_service_private_service_connect'
+    skip_test: true
+    primary_resource_id: default
+    vars:
+      metastore_service_name: 'metastore-srv'
+      network_name: 'my-network'
+      subnet_name: 'my-subnetwork'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_metastore_service_telemetry'
+    skip_docs: true
+    primary_resource_id: 'telemetry'
+    vars:
+      metastore_service_name: 'telemetry'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'serviceId'
@@ -84,6 +151,7 @@ properties:
       The relative resource name of the VPC network on which the instance can be accessed. It is specified in the following form:
 
       "projects/{projectNumber}/global/networks/{network_id}".
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'endpointUri'
     output: true
@@ -93,6 +161,7 @@ properties:
     name: 'port'
     description: |
       The TCP port at which the metastore service is reached. Default: 9083.
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'state'
     output: true
@@ -115,6 +184,7 @@ properties:
     values:
       - :DEVELOPER
       - :ENTERPRISE
+    default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'maintenanceWindow'
     description: |
@@ -128,11 +198,11 @@ properties:
           The hour of day (0-23) when the window starts.
         required: true
       - !ruby/object:Api::Type::Enum
-          name: 'dayOfWeek'
-          description: |
-            The day of week, when the window starts.
-          required: true
-          values:
+        name: 'dayOfWeek'
+        description: |
+          The day of week, when the window starts.
+        required: true
+        values:
           - :MONDAY
           - :TUESDAY
           - :WEDNESDAY
@@ -156,7 +226,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'hiveMetastoreConfig'
     description: |
-     Configuration information specific to running Hive metastore software as the metastore service.
+      Configuration information specific to running Hive metastore software as the metastore service.
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'endpointProtocol'
@@ -167,7 +237,7 @@ properties:
           The protocol to use for the metastore service endpoint. If unspecified, defaults to `THRIFT`.
         values:
           - :THRIFT
-          - :GRPC         
+          - :GRPC
       - !ruby/object:Api::Type::String
         name: 'version'
         immutable: true
@@ -179,6 +249,8 @@ properties:
         description: |
           A mapping of Hive metastore configuration key-value pairs to apply to the Hive metastore (configured in hive-site.xml).
           The mappings override system defaults (some keys cannot be overridden)
+        default_from_api: true
+        diff_suppress_func: 'dataprocMetastoreServiceOverrideSuppress'
       - !ruby/object:Api::Type::NestedObject
         name: 'kerberosConfig'
         description: |
@@ -211,11 +283,11 @@ properties:
         name: 'auxiliaryVersions'
         min_version: beta
         description: |
-              A mapping of Hive metastore version to the auxiliary version configuration.
-              When specified, a secondary Hive metastore service is created along with the primary service.
-              All auxiliary versions must be less than the service's primary version.
-              The key is the auxiliary service name and it must match the regular expression a-z?.
-              This means that the first character must be a lowercase letter, and all the following characters must be hyphens, lowercase letters, or digits, except the last character, which cannot be a hyphen.
+          A mapping of Hive metastore version to the auxiliary version configuration.
+          When specified, a secondary Hive metastore service is created along with the primary service.
+          All auxiliary versions must be less than the service's primary version.
+          The key is the auxiliary service name and it must match the regular expression a-z?.
+          This means that the first character must be a lowercase letter, and all the following characters must be hyphens, lowercase letters, or digits, except the last character, which cannot be a hyphen.
         key_name: 'key'
         key_description: |
           The auxiliary service name
@@ -237,27 +309,27 @@ properties:
     description: |
       The configuration specifying the network settings for the Dataproc Metastore service.
     properties:
-    - !ruby/object:Api::Type::Array
-      name: 'consumers'
-      description: |
-        The consumer-side network configuration for the Dataproc Metastore instance.
-      required: true
-      immutable: true
-      item_type: !ruby/object:Api::Type::NestedObject
-        properties:
-        - !ruby/object:Api::Type::String
-          name: 'endpointUri'
-          description: |
-            The URI of the endpoint used to access the metastore service.
-          output: true
-        - !ruby/object:Api::Type::String
-          name: 'subnetwork'
-          required: true
-          description: |
-            The subnetwork of the customer project from which an IP address is reserved and used as the Dataproc Metastore service's endpoint.
-            It is accessible to hosts in the subnet and to all hosts in a subnet in the same region and same network.
-            There must be at least one IP address available in the subnet's primary range. The subnet is specified in the following form:
-            `projects/{projectNumber}/regions/{region_id}/subnetworks/{subnetwork_id}
+      - !ruby/object:Api::Type::Array
+        name: 'consumers'
+        description: |
+          The consumer-side network configuration for the Dataproc Metastore instance.
+        required: true
+        immutable: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'endpointUri'
+              description: |
+                The URI of the endpoint used to access the metastore service.
+              output: true
+            - !ruby/object:Api::Type::String
+              name: 'subnetwork'
+              required: true
+              description: |
+                The subnetwork of the customer project from which an IP address is reserved and used as the Dataproc Metastore service's endpoint.
+                It is accessible to hosts in the subnet and to all hosts in a subnet in the same region and same network.
+                There must be at least one IP address available in the subnet's primary range. The subnet is specified in the following form:
+                `projects/{projectNumber}/regions/{region_id}/subnetworks/{subnetwork_id}
   - !ruby/object:Api::Type::Enum
     name: 'databaseType'
     immutable: true
@@ -297,14 +369,15 @@ properties:
             name: 'enabled'
             required: true
             description: |
-              Defines whether the metastore metadata should be synced to Data Catalog. The default value is to disable syncing metastore metadata to Data Catalog.      
+              Defines whether the metastore metadata should be synced to Data Catalog. The default value is to disable syncing metastore metadata to Data Catalog.
   - !ruby/object:Api::Type::NestedObject
-    name: "telemetryConfig"
+    name: 'telemetryConfig'
     description: |
       The configuration specifying telemetry settings for the Dataproc Metastore service. If unspecified defaults to JSON.
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::Enum
-        name: "logFormat"
+        name: 'logFormat'
         default_value: :JSON
         description: |
           The output format of the Dataproc Metastore service's logs.

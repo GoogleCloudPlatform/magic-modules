@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -12,18 +12,56 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: "Release"
+name: 'Release'
 min_version: beta
-base_url: "sites/{{site_id}}/channels/{{channel_id}}/releases"
-self_link: "sites/{{site_id}}/channels/{{channel_id}}/releases/{{release_id}}"
-create_url: "sites/{{site_id}}/channels/{{channel_id}}/releases?versionName={{version_name}}"
-immutable: true # not updatable
+base_url: 'sites/{{site_id}}/channels/{{channel_id}}/releases'
+self_link: 'sites/{{site_id}}/channels/{{channel_id}}/releases/{{release_id}}'
+create_url: 'sites/{{site_id}}/channels/{{channel_id}}/releases?versionName={{version_name}}'
+immutable: true  # not updatable
 description: |
   A Release is a particular collection of configurations that is set to be public at a particular time.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    "Official Documentation": "https://firebase.google.com/docs/hosting"
-  api: "https://firebase.google.com/docs/reference/hosting/rest/v1beta1/sites.releases"
+    'Official Documentation': 'https://firebase.google.com/docs/hosting'
+  api: 'https://firebase.google.com/docs/reference/hosting/rest/v1beta1/sites.releases'
+import_format:
+  [
+    'sites/{{site_id}}/releases/{{release_id}}',
+    'sites/{{site_id}}/channels/{{channel_id}}/releases/{{release_id}}',
+    '{{site_id}}/{{release_id}}',
+    '{{site_id}}/{{channel_id}}/{{release_id}}',
+  ]
+skip_delete: true
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firebasehosting_release_in_site'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      site_id: site-id
+    test_env_vars:
+      project_id: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firebasehosting_release_in_channel'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      site_id: site-with-channel
+      channel_id: channel-id
+    test_env_vars:
+      project_id: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firebasehosting_release_disable'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      site_id: site-id
+    test_env_vars:
+      project_id: :PROJECT_NAME
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  decoder: templates/terraform/decoders/firebasehosting_release.go.erb
+  post_create: templates/terraform/post_create/firebasehosting_release.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: site_id
@@ -63,6 +101,7 @@ properties:
     name: release_id
     description: The unique identifier for the Release.
     output: true
+    ignore_read: true
   - !ruby/object:Api::Type::Enum
     name: type
     description: |
@@ -75,6 +114,7 @@ properties:
       - :DEPLOY
       - :ROLLBACK
       - :SITE_DISABLE
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: message
     description: |

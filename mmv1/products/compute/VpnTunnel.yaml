@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -42,17 +42,65 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vpn_tunnel_basic'
+    primary_resource_id: 'tunnel1'
+    vars:
+      vpn_tunnel_name: 'tunnel-1'
+      target_vpn_gateway_name: 'vpn-1'
+      network_name: 'network-1'
+      address_name: 'vpn-static-ip'
+      esp_forwarding_rule_name: 'fr-esp'
+      udp500_forwarding_rule_name: 'fr-udp500'
+      udp4500_forwarding_rule_name: 'fr-udp4500'
+      route_name: 'route1'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vpn_tunnel_beta'
+    primary_resource_id: 'tunnel1'
+    min_version: beta
+    vars:
+      vpn_tunnel_name: 'tunnel-1'
+      target_vpn_gateway_name: 'vpn-1'
+      network_name: 'network-1'
+      address_name: 'vpn-static-ip'
+      esp_forwarding_rule_name: 'fr-esp'
+      udp500_forwarding_rule_name: 'fr-udp500'
+      udp4500_forwarding_rule_name: 'fr-udp4500'
+      route_name:
+        'route1'
+        # Add test_vars_overrides and oics_vars_overrides to fix the failing test,
+        # which is caused by upgradting terraform-plugin-sdk to 2.24.0.
+      provider_name: 'google-beta'
+      provider_alias: ''
+    test_vars_overrides:
+      provider_name: '"google-beta.us-central1"'
+      provider_alias: '"alias  = \"us-central1\""'
+    oics_vars_overrides:
+      provider_name: 'google-beta'
+      provider_alias: ''
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/vpn_tunnel.erb
+  encoder: templates/terraform/encoders/vpn_tunnel.go.erb
+  post_create: templates/terraform/post_create/labels.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
     imports: 'name'
-    description: 'The region where the tunnel is located.'
-    required: true
+    description:
+      'The region where the tunnel is located. If unset, is set to the region of
+      `target_vpn_gateway`.'
+    required: false
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 properties:
   - !ruby/object:Api::Type::String
-    name: 'id'
-    description: 'The unique identifier for the resource. This identifier is defined by the server.'
+    name: 'tunnel_id'
+    api_name: 'id'
+    description:
+      'The unique identifier for the resource. This identifier is defined by the
+      server.'
     output: true
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -79,7 +127,7 @@ properties:
     description: |
       URL of the Target VPN gateway with which this VPN tunnel is
       associated.
-    resource: 'TargetVpnGateway'
+    resource: 'VpnGateway'
     imports: 'selfLink'
     immutable: true
   - !ruby/object:Api::Type::ResourceRef
@@ -87,7 +135,8 @@ properties:
     description: |
       URL of the VPN gateway with which this VPN tunnel is associated.
       This must be used if a High Availability VPN gateway resource is created.
-    resource: 'VpnGateway'
+      This field must reference a `google_compute_ha_vpn_gateway` resource.
+    resource: 'HaVpnGateway'
     imports: 'selfLink'
     immutable: true
   - !ruby/object:Api::Type::Integer
@@ -118,7 +167,8 @@ properties:
       URL of the peer side HA GCP VPN gateway to which this VPN tunnel is connected.
       If provided, the VPN tunnel will automatically use the same vpn_gateway_interface
       ID in the peer GCP VPN gateway.
-    resource: 'VpnGateway'
+      This field must reference a `google_compute_ha_vpn_gateway` resource.
+    resource: 'HaVpnGateway'
     imports: 'selfLink'
   - !ruby/object:Api::Type::ResourceRef
     name: 'router'
@@ -127,16 +177,22 @@ properties:
     resource: 'Router'
     imports: 'selfLink'
     immutable: true
+    custom_expand: 'templates/terraform/custom_expand/compute_full_url.erb'
   - !ruby/object:Api::Type::String
     name: 'peerIp'
     description: |
       IP address of the peer VPN gateway. Only IPv4 is supported.
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validatePeerAddr'
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'sharedSecret'
     description: |
       Shared secret used to set the secure session between the Cloud VPN
       gateway and the peer VPN gateway.
     required: true
+    sensitive: true
+    ignore_read: true
   - !ruby/object:Api::Type::String
     name: 'sharedSecretHash'
     description: |
@@ -156,6 +212,8 @@ properties:
       peer VPN gateway. The value should be a CIDR formatted string,
       for example `192.168.0.0/16`. The ranges should be disjoint.
       Only IPv4 is supported.
+    is_set: true
+    default_from_api: true
     item_type: Api::Type::String
   - !ruby/object:Api::Type::Array
     name: 'remoteTrafficSelector'
@@ -164,6 +222,8 @@ properties:
       peer VPN gateway. The value should be a CIDR formatted string,
       for example `192.168.0.0/16`. The ranges should be disjoint.
       Only IPv4 is supported.
+    is_set: true
+    default_from_api: true
     item_type: Api::Type::String
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
@@ -179,8 +239,9 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}/setLabels'
     update_verb: :POST
     min_version: beta
+    exclude: false
   - !ruby/object:Api::Type::String
-    exclude: true
+    exclude: false
     name: 'detailedStatus'
     output: true
     description: 'Detailed status message for the VPN tunnel.'

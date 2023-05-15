@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -25,10 +25,61 @@ description: |
   App profile is a configuration object describing how Cloud Bigtable should treat traffic from a particular end user application.
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/bigtable/docs/reference/admin/rest/v2/projects.instances.appProfiles'
+id_format: 'projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}'
+import_format:
+  ['projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}']
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigtable_app_profile_anycluster'
+    primary_resource_id: 'ap'
+    vars:
+      instance_name: 'bt-instance'
+      app_profile_name: 'bt-profile'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
+    ignore_read_extra:
+      - 'ignore_warnings'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigtable_app_profile_singlecluster'
+    primary_resource_id: 'ap'
+    vars:
+      instance_name: 'bt-instance'
+      app_profile_name: 'bt-profile'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
+    ignore_read_extra:
+      - 'ignore_warnings'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigtable_app_profile_multicluster'
+    primary_resource_id: 'ap'
+    vars:
+      instance_name: 'bt-instance'
+      app_profile_name: 'bt-profile'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
+    ignore_read_extra:
+      - 'ignore_warnings'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/bigtable_app_profile.go.erb
+  extra_schema_entry: templates/terraform/extra_schema_entry/bigtable_app_profile.go.erb
+  pre_update: templates/terraform/pre_update/bigtable_app_profile.go.erb
+
 parameters:
   - !ruby/object:Api::Type::String
     name: 'appProfileId'
-    description: 'The unique name of the app profile in the form `[_a-zA-Z0-9][-_.a-zA-Z0-9]*`.'
+    description:
+      'The unique name of the app profile in the form
+      `[_a-zA-Z0-9][-_.a-zA-Z0-9]*`.'
     required: true
     immutable: true
     url_param_only: true
@@ -37,15 +88,19 @@ parameters:
     description: 'The name of the instance to create the app profile within.'
     immutable: true
     url_param_only: true
+    diff_suppress_func: tpgresource.CompareResourceNames
   - !ruby/object:Api::Type::Boolean
     name: 'ignoreWarnings'
-    description: 'If true, ignore safety checks when deleting/updating the app profile.'
+    description:
+      'If true, ignore safety checks when deleting/updating the app profile.'
     default_value: false
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
-    description: 'The unique name of the requested app profile. Values are of the form `projects/<project>/instances/<instance>/appProfiles/<appProfileId>`.'
+    description:
+      'The unique name of the requested app profile. Values are of the form
+      `projects/<project>/instances/<instance>/appProfiles/<appProfileId>`.'
     output: true
   - !ruby/object:Api::Type::String
     name: 'description'
@@ -60,6 +115,8 @@ properties:
       If true, read/write requests are routed to the nearest cluster in the instance, and will fail over to the nearest cluster that is available
       in the event of transient errors or delays. Clusters in a region are considered equidistant. Choosing this option sacrifices read-your-writes
       consistency to improve availability.
+    custom_expand: 'templates/terraform/custom_expand/bigtable_app_profile_routing.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/bigtable_app_profile_routing.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'singleClusterRouting'
     exactly_one_of:
@@ -68,14 +125,13 @@ properties:
     description: |
       Use a single-cluster routing policy.
     properties:
-        - !ruby/object:Api::Type::String
-          name: 'clusterId'
-          required: true
-          description: |
-            The cluster to which read/write requests should be routed.
-        - !ruby/object:Api::Type::Boolean
-          name: 'allowTransactionalWrites'
-          description: |
-            If true, CheckAndMutateRow and ReadModifyWriteRow requests are allowed by this app profile.
-            It is unsafe to send these requests to the same table/row/column in multiple clusters.
-
+      - !ruby/object:Api::Type::String
+        name: 'clusterId'
+        required: true
+        description: |
+          The cluster to which read/write requests should be routed.
+      - !ruby/object:Api::Type::Boolean
+        name: 'allowTransactionalWrites'
+        description: |
+          If true, CheckAndMutateRow and ReadModifyWriteRow requests are allowed by this app profile.
+          It is unsafe to send these requests to the same table/row/column in multiple clusters.

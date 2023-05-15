@@ -15,11 +15,15 @@ import (
 <% unless object.skip_delete -%>
   "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 <% end -%>
+
+  "<%= import_path() -%>/acctest"
+  "<%= import_path() -%>/tpgresource"
+  transport_tpg "<%= import_path() -%>/transport"
 )
 <%
 
 resource_name = product_ns + object.name
-tf_product = (@config.legacy_name || product_ns).underscore
+tf_product = (object.__product.legacy_name || product_ns).underscore
 tf_resource = object.name.underscore
 terraform_name = object.legacy_name || "google_#{tf_product}_#{tf_resource}"
 -%>
@@ -49,7 +53,7 @@ object.examples
 
 func TestAcc<%= test_slug -%>(t *testing.T) {
 <% if example.skip_vcr -%>
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 <% end -%>
   t.Parallel()
 
@@ -65,11 +69,11 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 
 <% versioned_provider = !example_version.nil? && example_version != 'ga' -%>
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		<% unless versioned_provider -%>
-		Providers: TestAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		<% else -%>
-		Providers: TestAccProvidersOiCS,
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		<% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -119,7 +123,7 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 		<% else -%>
 		config := GoogleProviderConfig(t)
 
-		url, err := replaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
 		if err != nil {
 			return err
 		}
@@ -130,7 +134,7 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 			billingProject = config.BillingProject
 		}
 
-		_, err = SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, config.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+		_, err = transport_tpg.SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, config.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 		if err == nil {
 				return fmt.Errorf("<%= resource_name -%> still exists at %s", url)
 			}

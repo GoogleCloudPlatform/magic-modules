@@ -128,9 +128,6 @@ module Api
       # This should be avoided for new fields, and only used with old ones.
       attr_reader :schema_config_mode_attr
 
-      # Names of attributes that can't be set alongside this one
-      attr_reader :conflicts_with
-
       # Names of fields that should be included in the updateMask.
       attr_reader :update_mask_fields
 
@@ -240,7 +237,7 @@ module Api
       check :schema_config_mode_attr, type: :boolean, default: false
 
       # technically set as a default everywhere, but only maps will use this.
-      check :key_expander, type: ::String, default: 'expandString'
+      check :key_expander, type: ::String, default: 'tpgresource.ExpandString'
       check :key_diff_suppress_func, type: ::String
 
       check :diff_suppress_func, type: ::String
@@ -599,6 +596,24 @@ module Api
         super
         check :values, type: ::Array, item_type: [Symbol, ::String, ::Integer], required: true
         check :skip_docs_values, type: :boolean
+      end
+
+      def merge(other)
+        result = self.class.new
+        instance_variables.each do |v|
+          result.instance_variable_set(v, instance_variable_get(v))
+        end
+
+        other.instance_variables.each do |v|
+          if other.instance_variable_get(v).instance_of?(Array)
+            result.instance_variable_set(v, deep_merge(result.instance_variable_get(v),
+                                                       other.instance_variable_get(v)))
+          else
+            result.instance_variable_set(v, other.instance_variable_get(v))
+          end
+        end
+
+        result
       end
     end
 

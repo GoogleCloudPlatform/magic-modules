@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -22,8 +22,7 @@ description: |
   balancer.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/load-balancing/docs/tcp/internal-proxy'
+    'Official Documentation': 'https://cloud.google.com/load-balancing/docs/tcp/internal-proxy'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionTargetTcpProxies'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -43,15 +42,26 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_target_tcp_proxy_basic'
+    primary_resource_id: 'default'
+    vars:
+      region_target_tcp_proxy_name: 'test-proxy'
+      region_backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
     imports: 'name'
-    required: true
+    required: false
     immutable: true
     description: |
-      The region where the regional proxy resides.
+      The Region in which the created target TCP proxy should reside.
+      If it is not provided, the provider region is used.
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -88,7 +98,8 @@ properties:
       - :PROXY_V1
     default_value: :NONE
   - !ruby/object:Api::Type::ResourceRef
-    name: 'service'
+    name: 'backendService'
+    api_name: 'service'
     resource: 'RegionBackendService'
     imports: 'selfLink'
     description: |
@@ -99,3 +110,4 @@ properties:
     description: |
       This field only applies when the forwarding rule that references
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
+    default_from_api: true

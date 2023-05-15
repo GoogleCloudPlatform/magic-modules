@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccComputeBackendBucket_basicModified(t *testing.T) {
@@ -15,9 +16,9 @@ func TestAccComputeBackendBucket_basicModified(t *testing.T) {
 	secondStorageName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckComputeBackendBucketDestroyProducer(t),
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeBackendBucket_basic(backendName, storageName),
@@ -47,9 +48,9 @@ func TestAccComputeBackendBucket_withCdnPolicy(t *testing.T) {
 	storageName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckComputeBackendBucketDestroyProducer(t),
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeBackendBucket_withCdnPolicy(backendName, storageName),
@@ -91,6 +92,14 @@ func TestAccComputeBackendBucket_withCdnPolicy(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccComputeBackendBucket_withCdnPolicy4(backendName, storageName, 0, 404, 0),
+			},
+			{
+				ResourceName:      "google_compute_backend_bucket.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -102,9 +111,9 @@ func TestAccComputeBackendBucket_withSecurityPolicy(t *testing.T) {
 	polName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeBackendBucket_withSecurityPolicy(bucketName, polName, "google_compute_security_policy.policy.self_link"),
@@ -133,9 +142,9 @@ func TestAccComputeBackendBucket_withCompressionMode(t *testing.T) {
 	storageName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeBackendBucket_withCompressionMode(backendName, storageName, "DISABLED"),
@@ -310,4 +319,28 @@ resource "google_storage_bucket" "bucket_one" {
   location = "EU"
 }
 `, backendName, compressionMode, storageName)
+}
+
+func testAccComputeBackendBucket_withCdnPolicy4(backendName, storageName string, age, code, ttl int) string {
+	return fmt.Sprintf(`
+resource "google_compute_backend_bucket" "foobar" {
+  name        = "%s"
+  bucket_name = google_storage_bucket.bucket.name
+  enable_cdn  = true
+  cdn_policy {
+	cache_mode                   = "USE_ORIGIN_HEADERS"
+	signed_url_cache_max_age_sec = %d
+	serve_while_stale            = %d
+	negative_caching_policy {
+		code = %d
+		ttl = %d
+	}
+	negative_caching = true
+  }
+}
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "EU"
+}
+`, backendName, age, ttl, code, ttl, storageName)
 }

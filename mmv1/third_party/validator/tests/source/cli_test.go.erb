@@ -30,7 +30,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/GoogleCloudPlatform/terraform-validator/converters/google"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
 )
 
 // TestCLI tests the "convert" and "validate" subcommand against a generated .tfplan file.
@@ -39,20 +39,10 @@ func TestCLI(t *testing.T) {
 		t.Skip("skipping integration test in short mode.")
 		return
 	}
-	// Define the reusable constraints to be use for the test cases.
-	type constraint struct {
-		name            string
-		wantViolation   bool
-		wantOutputRegex string
-	}
-	// Currently, we only test one rule. Moving forward, resource specific rules
-	// should be added to increase the coverage.
-	alwaysViolate := constraint{name: "always_violate", wantViolation: true, wantOutputRegex: "Constraint GCPAlwaysViolatesConstraintV1.always_violates_all on resource"}
 
 	// Test cases for each type of resource is defined here.
 	cases := []struct {
 		name                 string
-		constraints          []constraint
 		compareConvertOutput compareConvertOutputFunc
 	}{
 		// cli-only, the following tests are not in read_test or
@@ -69,8 +59,8 @@ func TestCLI(t *testing.T) {
 		{name: "example_storage_bucket"},
 		{name: "example_folder_iam_binding", compareConvertOutput: compareMergedIamBindingOutput},
 		{name: "example_folder_iam_member", compareConvertOutput: compareMergedIamMemberOutput},
-		{name: "example_project_create", constraints: []constraint{alwaysViolate, constraint{name: "project_match_target", wantViolation: false, wantOutputRegex: ""}}},
-		{name: "example_project_update", constraints: []constraint{alwaysViolate, constraint{name: "project_match_target", wantViolation: true, wantOutputRegex: "Constraint GCPAlwaysViolatesConstraintV1.always_violates_project_match_target on resource"}}},
+		{name: "example_project_create"},
+		{name: "example_project_update"},
 		{name: "example_project_iam_binding", compareConvertOutput: compareMergedIamBindingOutput},
 		{name: "example_project_iam_member", compareConvertOutput: compareMergedIamMemberOutput},
 		{name: "example_storage_bucket_iam_binding", compareConvertOutput: compareMergedIamBindingOutput},
@@ -98,10 +88,6 @@ func TestCLI(t *testing.T) {
 	for i := range cases {
 		// Allocate a variable to make sure test can run in parallel.
 		c := cases[i]
-		// Add default constraints if not set.
-		if len(c.constraints) == 0 {
-			c.constraints = []constraint{alwaysViolate}
-		}
 
 		// Add default convert comparison func if not set
 		if c.compareConvertOutput == nil {
@@ -148,15 +134,6 @@ func TestCLI(t *testing.T) {
 					}
 					testConvertCommand(t, dir, c.name, c.name, offline, true, c.compareConvertOutput)
 				})
-
-				for _, ct := range c.constraints {
-					t.Run(fmt.Sprintf("cmd=validate/constraint=%s", ct.name), func(t *testing.T) {
-						if reason, exists := skipCases[t.Name()]; exists {
-							t.Skip(reason)
-						}
-						testValidateCommand(t, ct.wantViolation, ct.wantOutputRegex, dir, c.name, offline, true, ct.name)
-					})
-				}
 			})
 		}
 	}
@@ -170,20 +147,10 @@ func TestCLIWithoutProject(t *testing.T) {
 		t.Skip("skipping integration test in short mode.")
 		return
 	}
-	// Define the reusable constraints to be use for the test cases.
-	type constraint struct {
-		name            string
-		wantViolation   bool
-		wantOutputRegex string
-	}
-	// Currently, we only test one rule. Moving forward, resource specific rules
-	// should be added to increase the coverage.
-	alwaysViolate := constraint{name: "always_violate", wantViolation: true, wantOutputRegex: "Constraint GCPAlwaysViolatesConstraintV1.always_violates_all on resource"}
 
 	// Test cases for each type of resource is defined here.
 	cases := []struct {
 		name                 string
-		constraints          []constraint
 		compareConvertOutput compareConvertOutputFunc
 	}{
 		{name: "example_project_create_empty_project_id"},
@@ -194,10 +161,6 @@ func TestCLIWithoutProject(t *testing.T) {
 	for i := range cases {
 		// Allocate a variable to make sure test can run in parallel.
 		c := cases[i]
-		// Add default constraints if not set.
-		if len(c.constraints) == 0 {
-			c.constraints = []constraint{alwaysViolate}
-		}
 
 		// Add default convert comparison func if not set
 		if c.compareConvertOutput == nil {
@@ -242,28 +205,23 @@ func TestCLIWithoutProject(t *testing.T) {
 					testConvertCommand(t, dir, c.name, c.name+"_without_default_project", offline, false, c.compareConvertOutput)
 				})
 
-				for _, ct := range c.constraints {
-					t.Run(fmt.Sprintf("cmd=validate/constraint=%s", ct.name), func(t *testing.T) {
-						testValidateCommand(t, ct.wantViolation, ct.wantOutputRegex, dir, c.name, offline, false, ct.name)
-					})
-				}
 			})
 		}
 	}
 }
 
 
-type compareConvertOutputFunc func(t *testing.T, expected []google.Asset, actual []google.Asset, offline bool)
+type compareConvertOutputFunc func(t *testing.T, expected []caiasset.Asset, actual []caiasset.Asset, offline bool)
 
-func compareUnmergedConvertOutput(t *testing.T, expected []google.Asset, actual []google.Asset, offline bool) {
+func compareUnmergedConvertOutput(t *testing.T, expected []caiasset.Asset, actual []caiasset.Asset, offline bool) {
 	expectedAssets := normalizeAssets(t, expected, offline)
 	actualAssets := normalizeAssets(t, actual, offline)
 	require.ElementsMatch(t, expectedAssets, actualAssets)
 }
 
 // For merged IAM members, only consider whether the expected members are present.
-func compareMergedIamMemberOutput(t *testing.T, expected []google.Asset, actual []google.Asset, offline bool) {
-	var normalizedActual []google.Asset
+func compareMergedIamMemberOutput(t *testing.T, expected []caiasset.Asset, actual []caiasset.Asset, offline bool) {
+	var normalizedActual []caiasset.Asset
 	for i := range expected {
 		expectedAsset := expected[i]
 		actualAsset := actual[i]
@@ -279,10 +237,10 @@ func compareMergedIamMemberOutput(t *testing.T, expected []google.Asset, actual 
 			}
 		}
 
-		iamPolicy := google.IAMPolicy{}
+		iamPolicy := caiasset.IAMPolicy{}
 		for _, binding := range actualAsset.IAMPolicy.Bindings {
 			if expectedMembers, exists := expectedBindings[binding.Role]; exists {
-				iamBinding := google.IAMBinding{
+				iamBinding := caiasset.IAMBinding{
 					Role: binding.Role,
 				}
 				for _, member := range binding.Members {
@@ -303,8 +261,8 @@ func compareMergedIamMemberOutput(t *testing.T, expected []google.Asset, actual 
 }
 
 // For merged IAM bindings, only consider whether the expected bindings are as expected.
-func compareMergedIamBindingOutput(t *testing.T, expected []google.Asset, actual []google.Asset, offline bool) {
-	var normalizedActual []google.Asset
+func compareMergedIamBindingOutput(t *testing.T, expected []caiasset.Asset, actual []caiasset.Asset, offline bool) {
+	var normalizedActual []caiasset.Asset
 	for i := range expected {
 		expectedAsset := expected[i]
 		actualAsset := actual[i]
@@ -317,7 +275,7 @@ func compareMergedIamBindingOutput(t *testing.T, expected []google.Asset, actual
 			expectedBindings[binding.Role] = struct{}{}
 		}
 
-		iamPolicy := google.IAMPolicy{}
+		iamPolicy := caiasset.IAMPolicy{}
 		for _, binding := range actualAsset.IAMPolicy.Bindings {
 			if _, exists := expectedBindings[binding.Role]; exists {
 				iamPolicy.Bindings = append(iamPolicy.Bindings, binding)

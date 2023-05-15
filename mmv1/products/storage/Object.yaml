@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -18,6 +18,7 @@ self_link: b/{{bucket}}/o/{{object}}
 collection_url_key: items
 description: |
   Information about an object stored in a GCS bucket
+exclude: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'bucket'
@@ -42,10 +43,13 @@ properties:
     description: 'The object entity tag.'
   - !ruby/object:Api::Type::Integer
     name: 'generation'
-    description: 'The content generation of this object. Used for object versioning.'
+    description:
+      'The content generation of this object. Used for object versioning.'
   - !ruby/object:Api::Type::String
     name: 'id'
-    description: 'The ID of the object, including the bucket name, object name, and generation number.'
+    description:
+      'The ID of the object, including the bucket name, object name, and
+      generation number.'
   - !ruby/object:Api::Type::String
     name: 'md5Hash'
     description: 'MD5 hash of the data; encoded using base64.'

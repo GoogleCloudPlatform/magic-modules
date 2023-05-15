@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -24,6 +24,18 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/dataform/docs/'
   api: 'https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories'
+id_format: projects/{{project}}/locations/{{region}}/repositories/{{name}}
+import_format:
+  ['projects/{{project}}/locations/{{region}}/repositories/{{name}}']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataform_repository'
+    primary_resource_id: dataform_respository
+    min_version: beta
+    vars:
+      git_repository_name: 'my/repository'
+      dataform_repository_name: 'dataform_repository'
+      data: secret-data
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -36,9 +48,11 @@ properties:
     description: The repository's name.
     immutable: true
     required: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'gitRemoteSettings'
-    description: Optional. If set, configures this repository to be linked to a Git remote.
+    description:
+      Optional. If set, configures this repository to be linked to a Git remote.
     properties:
       - !ruby/object:Api::Type::String
         name: 'url'
@@ -51,10 +65,12 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'authenticationTokenSecretVersion'
         required: true
-        description: The name of the Secret Manager secret version to use as an authentication token for Git operations. Must be in the format projects/*/secrets/*/versions/*.
+        description:
+          The name of the Secret Manager secret version to use as an
+          authentication token for Git operations. Must be in the format
+          projects/*/secrets/*/versions/*.
       - !ruby/object:Api::Type::String
         name: 'tokenStatus'
         output: true
         description: |
           Indicates the status of the Git access token. https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories#TokenStatus
-

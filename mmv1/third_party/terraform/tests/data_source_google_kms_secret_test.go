@@ -8,16 +8,17 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"google.golang.org/api/cloudkms/v1"
 )
 
 func TestAccKmsSecret_basic(t *testing.T) {
 	// Nested tests confuse VCR
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	projectOrg := GetTestOrgFromEnv(t)
-	projectBillingAccount := GetTestBillingAccountFromEnv(t)
+	projectOrg := acctest.GetTestOrgFromEnv(t)
+	projectBillingAccount := acctest.GetTestBillingAccountFromEnv(t)
 
 	projectId := "tf-test-" + RandString(t, 10)
 	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -28,8 +29,8 @@ func TestAccKmsSecret_basic(t *testing.T) {
 
 	// The first test creates resources needed to encrypt plaintext and produce ciphertext
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: TestAccProviders,
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -42,11 +43,11 @@ func TestAccKmsSecret_basic(t *testing.T) {
 
 					// The second test asserts that the data source has the correct plaintext, given the created ciphertext
 					VcrTest(t, resource.TestCase{
-						PreCheck:  func() { testAccPreCheck(t) },
-						Providers: TestAccProviders,
+						PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+						ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 						Steps: []resource.TestStep{
 							{
-								Config: testGoogleKmsSecret_datasource(cryptoKeyId.terraformId(), ciphertext),
+								Config: testGoogleKmsSecret_datasource(cryptoKeyId.TerraformId(), ciphertext),
 								Check:  resource.TestCheckResourceAttr("data.google_kms_secret.acceptance", "plaintext", plaintext),
 							},
 						},
@@ -67,11 +68,11 @@ func TestAccKmsSecret_basic(t *testing.T) {
 
 					// The second test asserts that the data source has the correct plaintext, given the created ciphertext
 					VcrTest(t, resource.TestCase{
-						PreCheck:  func() { testAccPreCheck(t) },
-						Providers: TestAccProviders,
+						PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+						ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 						Steps: []resource.TestStep{
 							{
-								Config: testGoogleKmsSecret_aadDatasource(cryptoKeyId.terraformId(), ciphertext, base64.StdEncoding.EncodeToString([]byte(aad))),
+								Config: testGoogleKmsSecret_aadDatasource(cryptoKeyId.TerraformId(), ciphertext, base64.StdEncoding.EncodeToString([]byte(aad))),
 								Check:  resource.TestCheckResourceAttr("data.google_kms_secret.acceptance", "plaintext", plaintext),
 							},
 						},
@@ -92,7 +93,7 @@ func testAccEncryptSecretDataWithCryptoKey(t *testing.T, s *terraform.State, cry
 		return "", nil, fmt.Errorf("Resource not found: %s", cryptoKeyResourceName)
 	}
 
-	cryptoKeyId, err := parseKmsCryptoKeyId(rs.Primary.Attributes["id"], config)
+	cryptoKeyId, err := ParseKmsCryptoKeyId(rs.Primary.Attributes["id"], config)
 
 	if err != nil {
 		return "", nil, err
@@ -106,7 +107,7 @@ func testAccEncryptSecretDataWithCryptoKey(t *testing.T, s *terraform.State, cry
 		kmsEncryptRequest.AdditionalAuthenticatedData = base64.StdEncoding.EncodeToString([]byte(aad))
 	}
 
-	encryptResponse, err := config.NewKmsClient(config.UserAgent).Projects.Locations.KeyRings.CryptoKeys.Encrypt(cryptoKeyId.cryptoKeyId(), kmsEncryptRequest).Do()
+	encryptResponse, err := config.NewKmsClient(config.UserAgent).Projects.Locations.KeyRings.CryptoKeys.Encrypt(cryptoKeyId.CryptoKeyId(), kmsEncryptRequest).Do()
 
 	if err != nil {
 		return "", nil, fmt.Errorf("Error encrypting plaintext: %s", err)

@@ -11,7 +11,7 @@ For resources implemented through the MMv1 engine, the majority of configuration
 for IAM support can be inferred based on the preexisting YAML specification file.
 
 To add support for IAM resources based on an existing resource, add an
-`iam_policy` block to the resource's definition in `api.yaml`, such as the
+`iam_policy` block to the resource's definition in its `.yaml` file, such as the
 following:
 
 ```yaml
@@ -45,7 +45,7 @@ symbol, prefixed with a `:`. For example, for `GET`, you would specify `:GET`.
 
 `import_format` - (Optional) A list of templated strings used to determine the
 Terraform import format. If the resource has a custom `import_format` or
-`id_format` defined in `terraform.yaml`, this must be supplied.
+`id_format` defined in `ResourceName.yaml`, this must be supplied.
 
   * If an `import_format` is set on the parent resource use that set of values exactly, substituting `parent_resource_attribute` for the field name of the **final** templated value.
   * If an `id_format` is set on the parent resource use that as the first entry (substituting the final templated value, as with `import_format`) and define a second format with **only** the templated values, `/`-separated. For example, `projects/{{project}}/locations/{{region}}/myResources/{{name}}` -> `["projects/{{project}}/locations/{{region}}/myResources/{{myResource}}", "{{project}}/{{region}}/{{myResource}}"]`. 
@@ -70,7 +70,7 @@ you may want to consult https://github.com/GoogleCloudPlatform/magic-modules/blo
 for additional configuration options.
 
 Additionally, in order to generate IAM tests based on a preexisting resource
-configuration, the first `examples` entry in `terraform.yaml` must be modified
+configuration, the first `examples` entry in `ResourceName.yaml` must be modified
 to include a `primary_resource_name` entry:
 
 ```diff
@@ -98,8 +98,8 @@ the IAM resources you've added, alongside documentation, and tests.
 Some IAM targets don't exist as distinct resources, such as IAP, or their target
 is supported through an engine other than MMv1 (i.e. through tpgtools/DCL or a
 handwritten resource). For these resources, the `exclude_resource: true`
-annotation can be used. To use it, partially define the resource in the
-product's `api.yaml` file and apply the annotation. MMv1 won't attempt to
+annotation can be used. To use it, partially define the resource in its own
+resource `ResourceName.yaml` file and apply the annotation. MMv1 won't attempt to
 generate the resource itself and will only generate IAM resources targeting it.
 
 For tpgtools/DCL resources, you may need to set the `PRODUCT_BASE_PATH` override

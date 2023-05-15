@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -16,7 +16,7 @@ name: 'SslCert'
 kind: 'sql#sslCert'
 base_url: projects/{{project}}/instances/{{instance}}/sslCerts
 self_link: 'projects/{{project}}/instances/{{instance}}/sslCerts/{{sha1_fingerprint}}'
-readonly: true # we're not enforcing state as it is all server-side driven.
+readonly: true  # we're not enforcing state as it is all server-side driven.
 description: |
   Represents an SSL certificate created for a Cloud SQL instance. To use the
   SSL certificate you must have the SSL Client Certificate and the
@@ -24,6 +24,7 @@ description: |
   SSL certificate is created with the insert method.
 identity:
   - sha1Fingerprint
+exclude: true
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'instance'

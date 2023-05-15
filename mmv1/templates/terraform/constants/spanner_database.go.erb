@@ -13,7 +13,7 @@
 	# limitations under the License.
 -%>
 // customizeDiff func for additional checks on google_spanner_database properties:
-func resourceSpannerDBDdlCustomDiffFunc(diff TerraformResourceDiff) error {
+func resourceSpannerDBDdlCustomDiffFunc(diff tpgresource.TerraformResourceDiff) error {
 	old, new := diff.GetChange("ddl")
 	oldDdls := old.([]interface{})
 	newDdls := new.([]interface{})
@@ -44,7 +44,7 @@ func resourceSpannerDBDdlCustomDiff(_ context.Context, diff *schema.ResourceDiff
 	return resourceSpannerDBDdlCustomDiffFunc(diff)
 }
 
-func validateDatabaseRetentionPeriod(v interface{}, k string) (ws []string, errors []error) {
+func ValidateDatabaseRetentionPeriod(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 	valueError := fmt.Errorf("version_retention_period should be in range [1h, 7d], in a format resembling 1d, 24h, 1440m, or 86400s")
 

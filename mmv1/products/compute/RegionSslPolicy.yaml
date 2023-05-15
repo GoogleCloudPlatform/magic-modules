@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -23,9 +23,9 @@ description: |
   Represents a Regional SSL policy. SSL policies give you the ability to control the
   features of SSL that your SSL proxy or HTTPS load balancer negotiates.
 references: !ruby/object:Api::Resource::ReferenceLinks
-      guides:
-        'Using SSL Policies': 'https://cloud.google.com/compute/docs/load-balancing/ssl-policies'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionSslPolicies'
+  guides:
+    'Using SSL Policies': 'https://cloud.google.com/compute/docs/load-balancing/ssl-policies'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionSslPolicies'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
@@ -44,6 +44,9 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: 'templates/terraform/constants/region_ssl_policy.erb'
+  resource_definition: 'templates/terraform/resource_definition/region_ssl_policy.erb'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -66,6 +69,7 @@ properties:
     name: 'id'
     description: 'The unique identifier for the resource.'
     output: true
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -85,11 +89,16 @@ properties:
       load balancer when negotiating SSL with clients. If using `CUSTOM`,
       the set of SSL features to enable must be specified in the
       `customFeatures` field.
+
+      See the [official documentation](https://cloud.google.com/compute/docs/load-balancing/ssl-policies#profilefeaturesupport)
+      for information on what cipher suites each profile provides. If
+      `CUSTOM` is used, the `custom_features` attribute **must be set**.
     values:
       - :COMPATIBLE
       - :MODERN
       - :RESTRICTED
       - :CUSTOM
+    default_value: :COMPATIBLE
   - !ruby/object:Api::Type::Enum
     name: 'minTlsVersion'
     description: |
@@ -99,10 +108,12 @@ properties:
       - :TLS_1_0
       - :TLS_1_1
       - :TLS_1_2
+    default_value: :TLS_1_0
   - !ruby/object:Api::Type::Array
     name: 'enabledFeatures'
     description: 'The list of features enabled in the SSL policy.'
     output: true
+    is_set: true
     item_type: Api::Type::String
   - !ruby/object:Api::Type::Array
     name: 'customFeatures'
@@ -110,6 +121,13 @@ properties:
       A list of features enabled when the selected profile is CUSTOM. The
       method returns the set of features that can be specified in this
       list. This field must be empty if the profile is not CUSTOM.
+
+      See the [official documentation](https://cloud.google.com/compute/docs/load-balancing/ssl-policies#profilefeaturesupport)
+      for which ciphers are available to use. **Note**: this argument
+      *must* be present when using the `CUSTOM` profile. This argument
+      *must not* be present when using any other profile.
+    is_set: true
+    send_empty_value: true
     item_type: Api::Type::String
   - !ruby/object:Api::Type::Fingerprint
     name: 'fingerprint'
@@ -123,6 +141,7 @@ properties:
       If potential misconfigurations are detected for this SSL policy, this
       field will be populated with warning messages.
     output: true
+    exclude: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String

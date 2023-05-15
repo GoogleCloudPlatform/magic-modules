@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -13,20 +13,79 @@
 
 --- !ruby/object:Api::Resource
 name: 'Instance'
-base_url: "projects/{{project}}/locations/{{region}}/instances"
+base_url: 'projects/{{project}}/locations/{{region}}/instances'
 create_url: projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}
 update_verb: :PATCH
 description: |
   Represents a Data Fusion instance.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/data-fusion/docs/'
+    'Official Documentation': 'https://cloud.google.com/data-fusion/docs/'
   api: 'https://cloud.google.com/data-fusion/docs/reference/rest/v1beta1/projects.locations.instances'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'name'
   method_name_separator: ':'
-  import_format: ["projects/{{project}}/locations/{{location}}/instances/{{name}}", "{{name}}"]         
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/instances/{{name}}',
+      '{{name}}',
+    ]
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 90
+  update_minutes: 25
+  delete_minutes: 50
+autogen_async: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'data_fusion_instance_basic'
+    primary_resource_id: 'basic_instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      instance_name: 'my-instance'
+      prober_test_run: ''
+    test_vars_overrides:
+      # Mark for testing to avoid service networking connection usage that is not cleaned up
+      prober_test_run: '`options = { prober_test_run = "true" }`'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'data_fusion_instance_full'
+    primary_resource_id: 'extended_instance'
+    vars:
+      instance_name: 'my-instance'
+      ip_alloc: 'datafusion-ip-alloc'
+      network_name: 'datafusion-full-network'
+      prober_test_run: ''
+    test_vars_overrides:
+      # Mark for testing to avoid service networking connection usage that is not cleaned up
+      prober_test_run: '`options = { prober_test_run = "true" }`'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'data_fusion_instance_cmek'
+    primary_resource_id: 'cmek'
+    vars:
+      instance_name: 'my-instance'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'data_fusion_instance_enterprise'
+    primary_resource_id: 'enterprise_instance'
+    vars:
+      instance_name: 'my-instance'
+      prober_test_run: ''
+    test_vars_overrides:
+      # Mark for testing to avoid service networking connection usage that is not cleaned up
+      prober_test_run: '`options = { prober_test_run = "true" }`'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'data_fusion_instance_event'
+    primary_resource_id: 'event'
+    vars:
+      instance_name: 'my-instance'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'data_fusion_instance_zone'
+    primary_resource_id: 'zone'
+    vars:
+      instance_name: 'my-instance'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_update: templates/terraform/pre_update/datafusion_instance_update.go.erb
+  constants: templates/terraform/constants/data_fusion_instance_option.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -34,6 +93,9 @@ parameters:
     immutable: true
     description: |
       The region of the Data Fusion instance.
+    ignore_read: true
+    required: false
+    default_from_api: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -41,10 +103,12 @@ properties:
     immutable: true
     description: |
       The ID of the instance or a fully qualified identifier for the instance.
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
-     An optional description of the instance.
+      An optional description of the instance.
     immutable: true
   - !ruby/object:Api::Type::Enum
     name: 'type'
@@ -58,7 +122,7 @@ properties:
       - ENTERPRISE: Enterprise Data Fusion instance. In Enterprise type, the user will have more features
       available, such as support for streaming pipelines, higher number of concurrent pipelines, etc.
       - DEVELOPER: Developer Data Fusion instance. In Developer type, the user will have all features available but
-      with restrictive capabilities. This is to help enterprises design and develop their data ingestion and integration 
+      with restrictive capabilities. This is to help enterprises design and develop their data ingestion and integration
       pipelines at low cost.
     values:
       - :BASIC
@@ -87,6 +151,8 @@ properties:
     description: |
       Map of additional options used to configure the behavior of Data Fusion instance.
     immutable: true
+    default_from_api: true
+    diff_suppress_func: 'instanceOptionsDiffSuppress'
   - !ruby/object:Api::Type::String
     name: 'createTime'
     output: true
@@ -129,10 +195,12 @@ properties:
     name: 'version'
     description: |
       Current version of the Data Fusion.
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'serviceAccount'
-    min_version: beta # This field is deprecated and needs to be absent in GA provider.
-    deprecation_message: Use `tenant_project_id` instead to extract the tenant project ID.
+    min_version: beta  # This field is deprecated and needs to be absent in GA provider.
+    deprecation_message:
+      Use `tenant_project_id` instead to extract the tenant project ID.
     output: true
     description: |
       Deprecated. Use `tenant_project_id` instead to extract the tenant project ID.
@@ -184,6 +252,7 @@ properties:
     description: |
       Name of the zone in which the Data Fusion instance will be created. Only DEVELOPER instances use this field.
     immutable: true
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
@@ -226,30 +295,30 @@ properties:
         description: |
           The resource name of the Pub/Sub topic. Format: projects/{projectId}/topics/{topic_id}
         required: true
-        immutable: true            
+        immutable: true
   - !ruby/object:Api::Type::Array
-      name: 'accelerators'
-      description: |
-        List of accelerators enabled for this CDF instance.
+    name: 'accelerators'
+    description: |
+      List of accelerators enabled for this CDF instance.
 
-        If accelerators are enabled it is possible a permadiff will be created with the Options field. 
-        Users will need to either manually update their state file to include these diffed options, or include the field in a [lifecycle ignore changes block](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#ignore_changes).
-      item_type: !ruby/object:Api::Type::NestedObject
-        properties:
-          - !ruby/object:Api::Type::Enum
-            name: 'acceleratorType'
-            description: |
-              The type of an accelator for a CDF instance.
-            values:
-              - :CDC
-              - :HEALTHCARE
-              - :CCAI_INSIGHTS
-            required: true
-          - !ruby/object:Api::Type::Enum
-            name: 'state'
-            description: |
-              The type of an accelator for a CDF instance.
-            values:
-              - :ENABLED
-              - :DISABLED
-            required: true
+      If accelerators are enabled it is possible a permadiff will be created with the Options field.
+      Users will need to either manually update their state file to include these diffed options, or include the field in a [lifecycle ignore changes block](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#ignore_changes).
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::Enum
+          name: 'acceleratorType'
+          description: |
+            The type of an accelator for a CDF instance.
+          values:
+            - :CDC
+            - :HEALTHCARE
+            - :CCAI_INSIGHTS
+          required: true
+        - !ruby/object:Api::Type::Enum
+          name: 'state'
+          description: |
+            The type of an accelator for a CDF instance.
+          values:
+            - :ENABLED
+            - :DISABLED
+          required: true

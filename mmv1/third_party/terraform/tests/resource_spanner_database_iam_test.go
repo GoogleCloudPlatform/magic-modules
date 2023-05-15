@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccSpannerDatabaseIamBinding(t *testing.T) {
@@ -12,13 +13,13 @@ func TestAccSpannerDatabaseIamBinding(t *testing.T) {
 
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	role := "roles/spanner.databaseAdmin"
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	database := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	instance := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: TestAccProviders,
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSpannerDatabaseIamBinding_basic(account, instance, database, role),
@@ -29,7 +30,7 @@ func TestAccSpannerDatabaseIamBinding(t *testing.T) {
 					Project:  project,
 					Instance: instance,
 					Database: database,
-				}.terraformId(), role),
+				}.TerraformId(), role),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -43,7 +44,7 @@ func TestAccSpannerDatabaseIamBinding(t *testing.T) {
 					Project:  project,
 					Instance: instance,
 					Database: database,
-				}.terraformId(), role),
+				}.TerraformId(), role),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -54,7 +55,7 @@ func TestAccSpannerDatabaseIamBinding(t *testing.T) {
 func TestAccSpannerDatabaseIamMember(t *testing.T) {
 	t.Parallel()
 
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	role := "roles/spanner.databaseAdmin"
 	database := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -62,8 +63,8 @@ func TestAccSpannerDatabaseIamMember(t *testing.T) {
 	conditionTitle := "Access only database one"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: TestAccProviders,
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
@@ -75,7 +76,7 @@ func TestAccSpannerDatabaseIamMember(t *testing.T) {
 					Instance: instance,
 					Database: database,
 					Project:  project,
-				}.terraformId(), role, account, project, conditionTitle),
+				}.TerraformId(), role, account, project, conditionTitle),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -86,15 +87,15 @@ func TestAccSpannerDatabaseIamMember(t *testing.T) {
 func TestAccSpannerDatabaseIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	role := "roles/spanner.databaseAdmin"
 	database := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	instance := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: TestAccProviders,
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSpannerDatabaseIamPolicy_basic(account, instance, database, role),
@@ -106,7 +107,7 @@ func TestAccSpannerDatabaseIamPolicy(t *testing.T) {
 					Instance: instance,
 					Database: database,
 					Project:  project,
-				}.terraformId(),
+				}.TerraformId(),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},

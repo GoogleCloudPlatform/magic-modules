@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -13,16 +13,33 @@
 
 --- !ruby/object:Api::Resource
 name: 'Flow'
-base_url: "{{parent}}/flows"
+base_url: '{{parent}}/flows'
 update_verb: :PATCH
 update_mask: true
 description: |
   Flows represents the conversation flows when you build your chatbot agent.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/dialogflow/cx/docs'
+    'Official Documentation': 'https://cloud.google.com/dialogflow/cx/docs'
   api: 'https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.flows'
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 40
+  update_minutes: 40
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/dialogflowcx_flow.go.erb
+  pre_create: templates/terraform/pre_create/dialogflow_set_location.go.erb
+  pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
+  pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.erb
+  pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dialogflowcx_flow_full'
+    primary_resource_id: 'basic_flow'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+skip_sweeper: true
+id_format: '{{parent}}/flows/{{name}}'
+import_format: ['{{parent}}/flows/{{name}}']
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
@@ -48,6 +65,7 @@ properties:
     description: |
       The unique identifier of the flow.
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'displayName'
     required: true
@@ -57,6 +75,8 @@ properties:
     name: 'description'
     description: |
       The description of the flow. The maximum length is 500 characters. If exceeded, the request is rejected.
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validation.StringLenBetween(0, 500)'
   - !ruby/object:Api::Type::Array
     name: 'transitionRoutes'
     description: |
@@ -140,6 +160,7 @@ properties:
       They are responsible for handling events (e.g. no match, webhook errors) in the flow.
       They are inherited by every page's [event handlers][Page.event_handlers], which can be used to handle common events regardless of the current page. Event handlers defined in the page have higher priority than those defined in the flow.
       Unlike transitionRoutes, these handlers are evaluated on a first-match basis. The first one that matches the event get executed, with the rest being ignored.
+    default_from_api: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String

@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -22,11 +22,40 @@ description: |
   OAuth brand data. Only "Organization Internal" brands can be created
   programmatically via API. To convert it into an external brands
   please use the GCP Console.
+
+
+  ~> **Note:** Brands can only be created once for a Google Cloud
+  project and the underlying Google API doesn't not support DELETE or PATCH methods.
+  Destroying a Terraform-managed Brand will remove it from state
+  but *will not delete it from Google Cloud.*
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Setting up IAP Brand':
-      'https://cloud.google.com/iap/docs/tutorial-gce#set_up_iap'
+    'Setting up IAP Brand': 'https://cloud.google.com/iap/docs/tutorial-gce#set_up_iap'
   api: 'https://cloud.google.com/iap/docs/reference/rest/v1/projects.brands'
+async: !ruby/object:Provider::Terraform::PollAsync
+  check_response_func_existence: PollCheckForExistence
+  target_occurrences: 5
+  actions: ['create']
+id_format: '{{name}}'
+import_format:
+  [
+    'projects/{{project_number}}/brands/{{brand_id}}',
+    'projects/{{project_id}}/brands/{{brand_id}}',
+  ]
+skip_delete: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'iap_brand'
+    primary_resource_id: 'project_brand'
+    vars:
+      project_id: 'my-project'
+    test_env_vars:
+      org_id: :ORG_ID
+      org_domain: :ORG_DOMAIN
+    skip_test: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/iap_brand.go.erb
+  post_create: templates/terraform/post_create/set_computed_name.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'

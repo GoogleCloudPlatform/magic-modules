@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -14,29 +14,45 @@
 --- !ruby/object:Api::Resource
 name: 'TagKey'
 base_url: tagKeys
-self_link: "tagKeys/{{name}}"
+self_link: 'tagKeys/{{name}}'
 update_verb: :PATCH
 update_mask: true
 description: A TagKey, used to group a set of TagValues.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
+    'Official Documentation': 'https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
   api: 'https://cloud.google.com/resource-manager/reference/rest/v3/tagKeys'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   parent_resource_attribute: 'tag_key'
   fetch_iam_policy_verb: :POST
+autogen_async: true
+exclude_validator: true
+mutex: tagKeys/{{parent}}
+id_format: 'tagKeys/{{name}}'
+import_format: ['tagKeys/{{name}}', '{{name}}']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'tag_key_basic'
+    skip_test: true
+    primary_resource_id: 'key'
+    vars:
+      short_name: 'keyname'
+    test_vars_overrides:
+      short_name: '"tf-test-key-" + RandString(t, 10)'
+    test_env_vars:
+      org_id: :ORG_ID
 properties:
   - !ruby/object:Api::Type::String
     name: name
     description: |
       The generated numeric id for the TagKey.
     output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
     name: parent
     description: |
-      Input only. The resource name of the new TagKey's parent. Must be of the form organizations/{org_id}.
+      Input only. The resource name of the new TagKey's parent. Must be of the form organizations/{org_id} or projects/{project_id_or_number}.
     immutable: true
     required: true
   - !ruby/object:Api::Type::String
@@ -47,6 +63,8 @@ properties:
       The short name must be 1-63 characters, beginning and ending with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.
     immutable: true
     required: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validation.StringLenBetween(1, 63)'
   - !ruby/object:Api::Type::String
     name: namespacedName
     description: |
@@ -56,6 +74,8 @@ properties:
     name: description
     description: |
       User-assigned description of the TagKey. Must not exceed 256 characters.
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validation.StringLenBetween(0, 256)'
   - !ruby/object:Api::Type::String
     name: createTime
     description: |
@@ -74,7 +94,7 @@ properties:
     name: purpose
     description: |
       Optional. A purpose cannot be changed once set.
-      
+
       A purpose denotes that this Tag is intended for use in policies of a specific policy engine, and will involve that policy engine in management operations involving this Tag.
     values:
       - :GCE_FIREWALL
@@ -83,7 +103,7 @@ properties:
     name: purposeData
     description: |
       Optional. Purpose data cannot be changed once set.
-      
+
       Purpose data corresponds to the policy system that the tag is intended for. For example, the GCE_FIREWALL purpose expects data in the following format: `network = "<project-name>/<vpc-name>"`.
     immutable: true
-
+    ignore_read: true

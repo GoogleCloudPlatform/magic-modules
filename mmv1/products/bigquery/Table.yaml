@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -14,9 +14,35 @@
 --- !ruby/object:Api::Resource
 name: 'Table'
 kind: 'bigquery#table'
-base_url: projects/{{project}}/datasets/{{dataset}}/tables
+base_url: 'projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}'
 description: |
   A Table that belongs to a Dataset
+self_link: 'projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}'
+exclude_resource: true
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  method_name_separator: ':'
+  parent_resource_type: 'google_bigquery_table'
+  parent_resource_attribute: 'table_id'
+  fetch_iam_policy_verb: :POST
+  allowed_iam_role: 'roles/bigquery.dataOwner'
+  iam_conditions_request_type: :REQUEST_BODY
+  iam_policy_version: '1'
+id_format: '{{table_id}}'
+import_format:
+  [
+    'projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}',
+    '{{table_id}}',
+  ]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_bigquery_table'
+    primary_resource_id: 'test'
+    primary_resource_name: "fmt.Sprintf(\"tf_test_dataset_id%s\",
+      context[\"random_suffix\"\
+      ]), fmt.Sprintf(\"tf_test_table_id%s\", context[\"random_suffix\"])"
+    vars:
+      dataset_id: 'dataset_id'
+      table_id: 'table_id'
 parameters:
   # TODO(alexstephen): Remove once we have support for placing
   # nested object fields in URL
@@ -38,14 +64,14 @@ properties:
         name: 'tableId'
         description: The ID of the the table
   - !ruby/object:Api::Type::Array
-        name: 'clustering'
-        description: |
-          One or more fields on which data should be clustered. Only
-          top-level, non-repeated, simple-type fields are supported. When
-          you cluster a table using multiple columns, the order of columns
-          you specify is important. The order of the specified columns
-          determines the sort order of the data.
-        item_type: Api::Type::String
+    name: 'clustering'
+    description: |
+      One or more fields on which data should be clustered. Only
+      top-level, non-repeated, simple-type fields are supported. When
+      you cluster a table using multiple columns, the order of columns
+      you specify is important. The order of the specified columns
+      determines the sort order of the data.
+    item_type: Api::Type::String
   - !ruby/object:Api::Type::Integer
     name: 'creationTime'
     output: true
@@ -291,6 +317,8 @@ properties:
           - :DATASTORE_BACKUP
           - :BIGTABLE
           - :ORC
+          - :PARQUET
+          - :ICEBERG
       # TODO: Investigate if this is feasible as a ResourceRef
       # This is a very complicated ResourceRef (one-to-many, where the many are cross-product).
       - !ruby/object:Api::Type::Array
@@ -308,7 +336,8 @@ properties:
         item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: 'schema'
-        description: 'The schema for the data. Schema is required for CSV and JSON formats'
+        description:
+          'The schema for the data. Schema is required for CSV and JSON formats'
         properties:
           - !ruby/object:Api::Type::Array
             name: 'fields'
@@ -349,7 +378,8 @@ properties:
                     - :RECORD
       - !ruby/object:Api::Type::NestedObject
         name: 'googleSheetsOptions'
-        description: 'Additional options if sourceFormat is set to GOOGLE_SHEETS.'
+        description:
+          'Additional options if sourceFormat is set to GOOGLE_SHEETS.'
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'skipLeadingRows'
@@ -382,7 +412,8 @@ properties:
             description: 'The separator for fields in a CSV file'
           - !ruby/object:Api::Type::String
             name: 'quote'
-            description: 'The value that is used to quote data sections in a CSV file'
+            description:
+              'The value that is used to quote data sections in a CSV file'
           - !ruby/object:Api::Type::Integer
             name: 'skipLeadingRows'
             description: |
@@ -413,43 +444,46 @@ properties:
                 - !ruby/object:Api::Type::Array
                   name: 'columns'
                   description: |
-                     Lists of columns that should be exposed as individual
-                     fields as opposed to a list of (column name, value) pairs.
+                    Lists of columns that should be exposed as individual
+                    fields as opposed to a list of (column name, value) pairs.
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                       - !ruby/object:Api::Type::Enum
                         name: 'encoding'
-                        description: The encoding of the values when the type is not STRING
+                        description:
+                          The encoding of the values when the type is not STRING
                         values:
                           - :TEXT
                           - :BINARY
                       - !ruby/object:Api::Type::String
-                         name: 'fieldName'
-                         description: |
-                           If the qualifier is not a valid BigQuery field
-                           identifier, a valid identifier must be provided as
-                           the column field name and is used as field name in
-                           queries.
+                        name: 'fieldName'
+                        description: |
+                          If the qualifier is not a valid BigQuery field
+                          identifier, a valid identifier must be provided as
+                          the column field name and is used as field name in
+                          queries.
                       - !ruby/object:Api::Type::Boolean
-                         name: 'onlyReadLatest'
-                         description: |
-                           If this is set, only the latest version of value in this column are exposed
+                        name: 'onlyReadLatest'
+                        description: |
+                          If this is set, only the latest version of value in this column are exposed
                       - !ruby/object:Api::Type::String
-                         name: 'qualifierString'
-                         description: Qualifier of the column
-                         required: true
+                        name: 'qualifierString'
+                        description: Qualifier of the column
+                        required: true
                       - !ruby/object:Api::Type::Enum
-                         name: 'type'
-                         description: The type to convert the value in cells of this column
-                         values:
-                           - :BYTES
-                           - :STRING
-                           - :INTEGER
-                           - :FLOAT
-                           - :BOOLEAN
+                        name: 'type'
+                        description:
+                          The type to convert the value in cells of this column
+                        values:
+                          - :BYTES
+                          - :STRING
+                          - :INTEGER
+                          - :FLOAT
+                          - :BOOLEAN
                 - !ruby/object:Api::Type::Enum
                   name: 'encoding'
-                  description: The encoding of the values when the type is not STRING
+                  description:
+                    The encoding of the values when the type is not STRING
                   values:
                     - :TEXT
                     - :BINARY
@@ -463,7 +497,8 @@ properties:
                     exposed for all columns in this column family
                 - !ruby/object:Api::Type::Enum
                   name: 'type'
-                  description: The type to convert the value in cells of this column family
+                  description:
+                    The type to convert the value in cells of this column family
                   values:
                     - :BYTES
                     - :STRING

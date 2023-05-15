@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -24,15 +24,30 @@ description: |
   monitor, etc.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/security-command-center/docs'
+    'Official Documentation': 'https://cloud.google.com/security-command-center/docs'
   api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/organizations.sources'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
   parent_resource_attribute: 'source'
   base_url: organizations/{{organization}}/sources/{{source}}
-  import_format: ["organizations/{{organization}}/sources/{{source}}", "{{source}}"]
+  import_format:
+    ['organizations/{{organization}}/sources/{{source}}', '{{source}}']
+skip_delete: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name:
+      'scc_source_basic'
+      # resource can't be destroyed, so checkdestroy fails unnecessarily
+    skip_test: true
+    primary_resource_id: 'custom_source'
+    vars:
+      source_display_name: 'My Source'
+    test_env_vars:
+      org_id: :ORG_ID
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/scc_source_self_link_as_name_set_organization.go.erb
+  post_create: templates/terraform/post_create/set_computed_name.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: organization
@@ -53,6 +68,8 @@ properties:
     name: description
     description: |
       The description of the source (max of 1024 characters).
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validation.StringLenBetween(0, 1024)'
   - !ruby/object:Api::Type::String
     name: displayName
     required: true
@@ -62,3 +79,5 @@ properties:
       can't share the same display name. The display name must start and end
       with a letter or digit, may contain letters, digits, spaces, hyphens,
       and underscores, and can be no longer than 32 characters.
+    validation: !ruby/object:Provider::Terraform::Validation
+      regex: '[\p{L}\p{N}]({\p{L}\p{N}_- ]{0,30}[\p{L}\p{N}])?'

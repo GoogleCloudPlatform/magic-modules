@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
 )
 
@@ -13,13 +14,13 @@ func TestAccFolderIamPolicy_basic(t *testing.T) {
 	t.Parallel()
 
 	folderDisplayName := "tf-test-" + RandString(t, 10)
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	parent := "organizations/" + org
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckGoogleFolderIamPolicyDestroyProducer(t),
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGoogleFolderIamPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFolderIamPolicy_basic(folderDisplayName, parent, "roles/viewer", "user:admin@hashicorptest.com"),
@@ -45,13 +46,13 @@ func TestAccFolderIamPolicy_auditConfigs(t *testing.T) {
 	t.Parallel()
 
 	folderDisplayName := "tf-test-" + RandString(t, 10)
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	parent := "organizations/" + org
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckGoogleFolderIamPolicyDestroyProducer(t),
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGoogleFolderIamPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFolderIamPolicy_auditConfigs(folderDisplayName, parent, "roles/viewer", "user:admin@hashicorptest.com"),
@@ -90,7 +91,7 @@ func testAccFolderExistingPolicy(t *testing.T, org, fname string) resource.TestC
 	return func(s *terraform.State) error {
 		c := GoogleProviderConfig(t)
 		var err error
-		OriginalPolicy, err = getFolderIamPolicyByParentAndDisplayName("organizations/"+org, fname, c)
+		OriginalPolicy, err := getFolderIamPolicyByParentAndDisplayName("organizations/"+org, fname, c)
 		if err != nil {
 			return fmt.Errorf("Failed to retrieve IAM Policy for folder %q: %s", fname, err)
 		}

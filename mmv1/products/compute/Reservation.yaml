@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -50,6 +50,28 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'reservation_basic'
+    primary_resource_id: 'gce_reservation'
+    vars:
+      reservation_name: 'gce-reservation'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'shared_reservation_basic'
+    primary_resource_id: 'gce_reservation'
+    test_env_vars:
+      project: :PROJECT_NAME
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+    vars:
+      reservation_name: 'gce-shared-reservation'
+    skip_docs:
+      true
+      # Resource creation race
+    skip_vcr: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  update_encoder: templates/terraform/update_encoder/reservation.go.erb
+  pre_update: templates/terraform/pre_update/shared_reservation_update.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
@@ -75,6 +97,7 @@ properties:
     output: true
     description: |
       The unique identifier for the resource.
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
@@ -112,6 +135,8 @@ properties:
     name: 'shareSettings'
     description: |
       The share setting for reservations.
+    default_from_api: true
+    ignore_read: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'shareType'
@@ -120,6 +145,7 @@ properties:
           - :SPECIFIC_PROJECTS
         description: |
           Type of sharing for this shared-reservation
+        default_from_api: true
       - !ruby/object:Api::Type::Map
         name: 'projectMap'
         description: |
@@ -133,7 +159,7 @@ properties:
             - !ruby/object:Api::Type::String
               name: 'projectId'
               description: |
-                The project id/number should be the same as the key of this project config in the project map.
+                The project id/number, should be same as the key of this project config in the project map.
   - !ruby/object:Api::Type::NestedObject
     name: 'specificReservation'
     required: true
@@ -146,7 +172,9 @@ properties:
         name: 'count'
         required: true
         description: |
-         The number of resources that are allocated.
+          The number of resources that are allocated.
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntAtLeast(1)'
       - !ruby/object:Api::Type::Integer
         name: 'inUseCount'
         output: true
@@ -173,6 +201,7 @@ properties:
               `"Intel Skylake"`. See
               the CPU platform availability reference](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform#availablezones)
               for information on available CPU platforms.
+            default_from_api: true
           - !ruby/object:Api::Type::Array
             name: 'guestAccelerators'
             description: |
@@ -219,4 +248,4 @@ properties:
                   required: true
                   immutable: true
                   description: |
-                   The size of the disk in base-2 GB.
+                    The size of the disk in base-2 GB.

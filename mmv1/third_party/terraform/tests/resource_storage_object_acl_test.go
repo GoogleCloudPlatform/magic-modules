@@ -10,6 +10,9 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -36,9 +39,9 @@ func TestAccStorageObjectAcl_basic(t *testing.T) {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
-			testAccPreCheck(t)
+			acctest.AccTestPreCheck(t)
 		},
-		Providers: TestAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleStorageObjectsAclBasic1(bucketName, objectName),
@@ -67,10 +70,10 @@ func TestAccStorageObjectAcl_upgrade(t *testing.T) {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
-			testAccPreCheck(t)
+			acctest.AccTestPreCheck(t)
 		},
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccStorageObjectAclDestroyProducer(t),
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleStorageObjectsAclBasic1(bucketName, objectName),
@@ -121,10 +124,10 @@ func TestAccStorageObjectAcl_downgrade(t *testing.T) {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
-			testAccPreCheck(t)
+			acctest.AccTestPreCheck(t)
 		},
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccStorageObjectAclDestroyProducer(t),
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleStorageObjectsAclBasic2(bucketName, objectName),
@@ -175,10 +178,10 @@ func TestAccStorageObjectAcl_predefined(t *testing.T) {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
-			testAccPreCheck(t)
+			acctest.AccTestPreCheck(t)
 		},
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccStorageObjectAclDestroyProducer(t),
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleStorageObjectsAclPredefined(bucketName, objectName),
@@ -201,10 +204,10 @@ func TestAccStorageObjectAcl_predefinedToExplicit(t *testing.T) {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
-			testAccPreCheck(t)
+			acctest.AccTestPreCheck(t)
 		},
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccStorageObjectAclDestroyProducer(t),
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleStorageObjectsAclPredefined(bucketName, objectName),
@@ -236,10 +239,10 @@ func TestAccStorageObjectAcl_explicitToPredefined(t *testing.T) {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
-			testAccPreCheck(t)
+			acctest.AccTestPreCheck(t)
 		},
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccStorageObjectAclDestroyProducer(t),
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleStorageObjectsAclBasic1(bucketName, objectName),
@@ -272,10 +275,10 @@ func TestAccStorageObjectAcl_unordered(t *testing.T) {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
-			testAccPreCheck(t)
+			acctest.AccTestPreCheck(t)
 		},
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccStorageObjectAclDestroyProducer(t),
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleStorageObjectAclUnordered(bucketName, objectName),
@@ -322,7 +325,7 @@ func (t *testRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
 
 // Test that we don't fail if there's no owner for object
 func TestAccStorageObjectAcl_noOwner(t *testing.T) {
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	bucketName := testBucketName(t)
@@ -331,11 +334,17 @@ func TestAccStorageObjectAcl_noOwner(t *testing.T) {
 	if err := ioutil.WriteFile(tfObjectAcl.Name(), objectData, 0644); err != nil {
 		t.Errorf("error writing file: %v", err)
 	}
+
+	// TODO (mbang) we can leave this one using the SDK provider as we need to overwrite the configure function,
+	// which we can't do in the plugin-framework version of the provider. When this resource does get updated to
+	// use plugin-framework, best I can guess we'll want to do something similar to NewFrameworkTestProvider where
+	// we have a nested production version of the provider, we re-write configure to call the production version and
+	// add the additional things inside there.
 	provider := Provider()
 	oldConfigureFunc := provider.ConfigureContextFunc
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		c, diagnostics := oldConfigureFunc(ctx, d)
-		config := c.(*Config)
+		config := c.(*transport_tpg.Config)
 		roundTripper := &testRoundTripper{RoundTripper: config.Client.Transport, bucketName: bucketName, objectName: objectName}
 		config.Client.Transport = roundTripper
 		return c, diagnostics
@@ -348,7 +357,7 @@ func TestAccStorageObjectAcl_noOwner(t *testing.T) {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
-			testAccPreCheck(t)
+			acctest.AccTestPreCheck(t)
 		},
 		Providers: providers,
 		Steps: []resource.TestStep{

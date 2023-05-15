@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,16 +21,33 @@ description: |
   A Cloud TPU instance.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/tpu/docs/'
+    'Official Documentation': 'https://cloud.google.com/tpu/docs/'
   api: 'https://cloud.google.com/tpu/docs/reference/rest/v1/projects.locations.nodes'
+autogen_async: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'tpu_node_basic'
+    primary_resource_id: 'tpu'
+    vars:
+      node_name: 'test-tpu'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'tpu_node_full'
+    primary_resource_id: 'tpu'
+    vars:
+      node_name: 'test-tpu'
+      global_address_name: 'my-global-address'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: 'templates/terraform/constants/tpu_node.erb'
+  resource_definition: 'templates/terraform/resource_definition/tpu_node.erb'
 parameters:
-  - !ruby/object:Api::Type::String # TODO: resourceref?
+  # TODO: resourceref?
+  - !ruby/object:Api::Type::String
     name: 'zone'
     description: |
       The GCP location for the TPU. If it is not provided, the provider zone is used.
     immutable: true
     url_param_only: true
+    default_from_api: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -38,6 +55,7 @@ properties:
     immutable: true
     description: |
       The immutable name of the TPU.
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
     name: 'description'
     immutable: true
@@ -64,6 +82,8 @@ properties:
       preexisting Compute Engine network inside of the project on which
       this API has been activated. If none is provided, "default" will be
       used.
+    default_from_api: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: 'cidrBlock'
     immutable: true
@@ -79,6 +99,7 @@ properties:
       currently existing TPU node, the CIDR block conflicts with any
       subnetworks in the user's provided network, or the provided network
       is peered with another network that is using that CIDR block.
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'serviceAccount'
     output: true
@@ -103,12 +124,14 @@ properties:
     immutable: true
     description: |
       Sets the scheduling options for this TPU instance.
+    diff_suppress_func: 'compareTpuNodeSchedulingConfig'
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'preemptible'
         description: |
           Defines whether the TPU instance is preemptible.
         required: true
+        diff_suppress_func: 'compareTpuNodeSchedulingConfig'
   - !ruby/object:Api::Type::Array
     name: 'networkEndpoints'
     output: true
@@ -132,4 +155,3 @@ properties:
     name: 'labels'
     immutable: true
     description: Resource labels to represent user provided metadata.
-

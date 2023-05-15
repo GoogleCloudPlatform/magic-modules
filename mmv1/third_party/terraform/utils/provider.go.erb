@@ -9,15 +9,19 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/version"
+	"github.com/hashicorp/terraform-provider-google/version"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 
 	googleoauth "golang.org/x/oauth2/google"
 )
 
-const TestEnvVar = "TF_ACC"
-
 // Global MutexKV
-var mutexKV = NewMutexKV()
+//
+// Deprecated: For backward compatibility mutexKV is still working,
+// but all new code should use MutexStore in the transport_tpg package instead.
+var mutexKV = transport_tpg.MutexStore
 
 // Provider returns a *schema.Provider.
 func Provider() *schema.Provider {
@@ -28,8 +32,8 @@ func Provider() *schema.Provider {
 	// mtls is enabled.
 	if isMtls() {
 		// if mtls is enabled switch all default endpoints to use the mtls endpoint
-		for key, bp := range DefaultBasePaths {
-			DefaultBasePaths[key] = getMtlsEndpoint(bp)
+		for key, bp := range transport_tpg.DefaultBasePaths {
+			transport_tpg.DefaultBasePaths[key] = getMtlsEndpoint(bp)
 		}
 	}
 
@@ -51,9 +55,6 @@ func Provider() *schema.Provider {
 			"impersonate_service_account": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
-				}, nil),
 			},
 
 			"impersonate_service_account_delegates": {
@@ -62,46 +63,27 @@ func Provider() *schema.Provider {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
-			"project": &schema.Schema{
+			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_PROJECT",
-					"GOOGLE_CLOUD_PROJECT",
-					"GCLOUD_PROJECT",
-					"CLOUDSDK_CORE_PROJECT",
-				}, nil),
 			},
 
-			"billing_project": &schema.Schema{
+			"billing_project": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_BILLING_PROJECT",
-				}, nil),
 			},
 
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_REGION",
-					"GCLOUD_REGION",
-					"CLOUDSDK_COMPUTE_REGION",
-				}, nil),
 			},
 
-			"zone": &schema.Schema{
+			"zone": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_ZONE",
-					"GCLOUD_ZONE",
-					"CLOUDSDK_COMPUTE_ZONE",
-				}, nil),
 			},
 
-			"scopes": &schema.Schema{
+			"scopes": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -116,13 +98,11 @@ func Provider() *schema.Provider {
 						"send_after": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Default:  "10s",
-							ValidateFunc: validateNonNegativeDuration(),
+							ValidateFunc: verify.ValidateNonNegativeDuration(),
 						},
 						"enable_batching": {
 							Type:     schema.TypeBool,
 							Optional: true,
-							Default:  true,
 						},
 					},
 				},
@@ -131,9 +111,6 @@ func Provider() *schema.Provider {
 			"user_project_override": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"USER_PROJECT_OVERRIDE",
-				}, nil),
 			},
 
 			"request_timeout": {
@@ -144,42 +121,34 @@ func Provider() *schema.Provider {
 			"request_reason": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"CLOUDSDK_CORE_REQUEST_REASON",
-				}, nil),
 			},
 
 			// Generated Products
 			<% products.each do |product| -%>
-			"<%= product[:definitions].name.underscore -%>_custom_endpoint": &schema.Schema{
+			"<%= product[:definitions].name.underscore -%>_custom_endpoint": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validateCustomEndpoint,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_<%= product[:definitions].name.underscore.upcase -%>_CUSTOM_ENDPOINT",
-				}, DefaultBasePaths[<%= product[:definitions].name -%>BasePathKey]),
+				ValidateFunc: transport_tpg.ValidateCustomEndpoint,
 			},
 			<% end -%>
 
 			// Handwritten Products / Versioned / Atypical Entries
-			CloudBillingCustomEndpointEntryKey:           CloudBillingCustomEndpointEntry,
-			ComposerCustomEndpointEntryKey:               ComposerCustomEndpointEntry,
-			ContainerCustomEndpointEntryKey:              ContainerCustomEndpointEntry,
-			DataflowCustomEndpointEntryKey:               DataflowCustomEndpointEntry,
-			IamCredentialsCustomEndpointEntryKey:         IamCredentialsCustomEndpointEntry,
-			ResourceManagerV3CustomEndpointEntryKey:      ResourceManagerV3CustomEndpointEntry,
+			transport_tpg.CloudBillingCustomEndpointEntryKey:           transport_tpg.CloudBillingCustomEndpointEntry,
+			transport_tpg.ComposerCustomEndpointEntryKey:               transport_tpg.ComposerCustomEndpointEntry,
+			transport_tpg.ContainerCustomEndpointEntryKey:              transport_tpg.ContainerCustomEndpointEntry,
+			transport_tpg.DataflowCustomEndpointEntryKey:               transport_tpg.DataflowCustomEndpointEntry,
+			transport_tpg.IamCredentialsCustomEndpointEntryKey:         transport_tpg.IamCredentialsCustomEndpointEntry,
+			transport_tpg.ResourceManagerV3CustomEndpointEntryKey:      transport_tpg.ResourceManagerV3CustomEndpointEntry,
 			<% unless version == "ga" -%>
-			RuntimeConfigCustomEndpointEntryKey:          RuntimeConfigCustomEndpointEntry,
+			transport_tpg.RuntimeConfigCustomEndpointEntryKey:          transport_tpg.RuntimeConfigCustomEndpointEntry,
 			<% end -%>
-			IAMCustomEndpointEntryKey:                    IAMCustomEndpointEntry,
-			ServiceNetworkingCustomEndpointEntryKey:      ServiceNetworkingCustomEndpointEntry,
-			ServiceUsageCustomEndpointEntryKey:           ServiceUsageCustomEndpointEntry,
-			BigtableAdminCustomEndpointEntryKey:          BigtableAdminCustomEndpointEntry,
-			TagsLocationCustomEndpointEntryKey:           TagsLocationCustomEndpointEntry,
-			
+			transport_tpg.IAMCustomEndpointEntryKey:                    transport_tpg.IAMCustomEndpointEntry,
+			transport_tpg.ServiceNetworkingCustomEndpointEntryKey:      transport_tpg.ServiceNetworkingCustomEndpointEntry,
+			transport_tpg.TagsLocationCustomEndpointEntryKey:           transport_tpg.TagsLocationCustomEndpointEntry,
+
 			// dcl
-			ContainerAwsCustomEndpointEntryKey:           ContainerAwsCustomEndpointEntry,
-			ContainerAzureCustomEndpointEntryKey:         ContainerAzureCustomEndpointEntry,
+			transport_tpg.ContainerAwsCustomEndpointEntryKey:           transport_tpg.ContainerAwsCustomEndpointEntry,
+			transport_tpg.ContainerAzureCustomEndpointEntryKey:         transport_tpg.ContainerAzureCustomEndpointEntry,
 		},
 
 		ProviderMetaSchema: map[string]*schema.Schema{
@@ -195,6 +164,8 @@ func Provider() *schema.Provider {
 			"google_access_approval_organization_service_account": DataSourceAccessApprovalOrganizationServiceAccount(),
 			"google_access_approval_project_service_account":   DataSourceAccessApprovalProjectServiceAccount(),
 			"google_active_folder":                             DataSourceGoogleActiveFolder(),
+			"google_alloydb_locations":                         DataSourceAlloydbLocations(),
+ 			"google_alloydb_supported_database_flags":          DataSourceAlloydbSupportedDatabaseFlags(),
 			"google_artifact_registry_repository":              DataSourceArtifactRegistryRepository(),
 			"google_app_engine_default_service_account":        DataSourceGoogleAppEngineDefaultServiceAccount(),
 			"google_beyondcorp_app_connection":                 DataSourceGoogleBeyondcorpAppConnection(),
@@ -202,8 +173,6 @@ func Provider() *schema.Provider {
 			"google_beyondcorp_app_gateway":                    DataSourceGoogleBeyondcorpAppGateway(),
 			"google_billing_account":                           DataSourceGoogleBillingAccount(),
 			"google_bigquery_default_service_account":          DataSourceGoogleBigqueryDefaultServiceAccount(),
-			"google_client_config":                             DataSourceGoogleClientConfig(),
-			"google_client_openid_userinfo":                    DataSourceGoogleClientOpenIDUserinfo(),
 			"google_cloudbuild_trigger":                        DataSourceGoogleCloudBuildTrigger(),
 			"google_cloudfunctions_function":                   DataSourceGoogleCloudFunctionsFunction(),
 			"google_cloudfunctions2_function":                  DataSourceGoogleCloudFunctions2Function(),
@@ -241,6 +210,9 @@ func Provider() *schema.Provider {
 			"google_compute_regions":                           DataSourceGoogleComputeRegions(),
 			"google_compute_region_network_endpoint_group":     DataSourceGoogleComputeRegionNetworkEndpointGroup(),
 			"google_compute_region_instance_group":             DataSourceGoogleComputeRegionInstanceGroup(),
+			<% unless version == 'ga' -%>
+			"google_compute_region_instance_template":          DataSourceGoogleComputeRegionInstanceTemplate(),
+			<% end -%>
 			"google_compute_region_ssl_certificate":            DataSourceGoogleRegionComputeSslCertificate(),
 			"google_compute_resource_policy":                   DataSourceGoogleComputeResourcePolicy(),
 			"google_compute_router":                            DataSourceGoogleComputeRouter(),
@@ -261,9 +233,7 @@ func Provider() *schema.Provider {
 			"google_container_registry_image":                  DataSourceGoogleContainerImage(),
 			"google_container_registry_repository":             DataSourceGoogleContainerRepo(),
 			"google_dataproc_metastore_service":                DataSourceDataprocMetastoreService(),
-			"google_dns_keys":                                  DataSourceDNSKeys(),
-			"google_dns_managed_zone":                          DataSourceDnsManagedZone(),
-			"google_dns_record_set":                            DataSourceDnsRecordSet(),
+			"google_datastream_static_ips":                     DataSourceGoogleDatastreamStaticIps(),
 			"google_game_services_game_server_deployment_rollout":  DataSourceGameServicesGameServerDeploymentRollout(),
 			"google_iam_policy":                                DataSourceGoogleIamPolicy(),
 			"google_iam_role":                                  DataSourceGoogleIamRole(),
@@ -282,10 +252,8 @@ func Provider() *schema.Provider {
 			"google_kms_secret_asymmetric":                     DataSourceGoogleKmsSecretAsymmetric(),
 			"google_firebase_android_app":                      DataSourceGoogleFirebaseAndroidApp(),
 			"google_firebase_apple_app":                        DataSourceGoogleFirebaseAppleApp(),
-			"google_firebase_apple_app_config":                 DataSourceGoogleFirebaseAppleAppConfig(),
 			"google_firebase_hosting_channel":                  DataSourceGoogleFirebaseHostingChannel(),
 			"google_firebase_web_app":                          DataSourceGoogleFirebaseWebApp(),
-			"google_firebase_web_app_config":                   DataSourceGoogleFirebaseWebappConfig(),
 			<% end -%>
 			"google_folder":                                    DataSourceGoogleFolder(),
 			"google_folders":                                   DataSourceGoogleFolders(),
@@ -322,6 +290,7 @@ func Provider() *schema.Provider {
 			"google_sourcerepo_repository":                     DataSourceGoogleSourceRepoRepository(),
 			"google_spanner_instance":                          DataSourceSpannerInstance(),
 			"google_sql_ca_certs":                              DataSourceGoogleSQLCaCerts(),
+			"google_sql_tiers":                                 DataSourceGoogleSQLTiers(),
 			"google_sql_backup_run":                            DataSourceSqlBackupRun(),
 			"google_sql_databases":                             DataSourceSqlDatabases(),
 			"google_sql_database":                              DataSourceSqlDatabase(),
@@ -348,7 +317,7 @@ func Provider() *schema.Provider {
 		return providerConfigure(ctx, d, provider)
 	}
 
-	ConfigureDCLProvider(provider)
+	transport_tpg.ConfigureDCLProvider(provider)
 
 	return provider
 }
@@ -385,7 +354,7 @@ products.each do |product|
   sorted =  product_definition.objects.sort_by { |obj| obj.name }
   sorted.each do |object|
 	next if object.exclude || object.not_in_version?(product_definition.version_obj_or_closest(version))
-	tf_product = (config.legacy_name || product_definition.name).underscore
+	tf_product = (object.__product.legacy_name || product_definition.name).underscore
 	terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
 -%>
 <% 	unless object&.exclude_resource -%>
@@ -412,6 +381,8 @@ end     # products.each do
 				"google_apigee_sharedflow":                     ResourceApigeeSharedFlow(),
 				"google_apigee_sharedflow_deployment":          ResourceApigeeSharedFlowDeployment(),
 				"google_apigee_flowhook":                       ResourceApigeeFlowhook(),
+				"google_apigee_keystores_aliases_pkcs12":       ResourceApigeeKeystoresAliasesPkcs12(),
+				"google_apigee_keystores_aliases_key_cert_file": ResourceApigeeKeystoresAliasesKeyCertFile(),
 				"google_bigquery_table":                        ResourceBigQueryTable(),
 				"google_bigtable_gc_policy":                    ResourceBigtableGCPolicy(),
 				"google_bigtable_instance":                     ResourceBigtableInstance(),
@@ -422,6 +393,7 @@ end     # products.each do
 				"google_compute_attached_disk":                 ResourceComputeAttachedDisk(),
 				"google_compute_instance":                      ResourceComputeInstance(),
 				<% unless version == 'ga' -%>
+				"google_compute_disk_async_replication":        ResourceComputeDiskAsyncReplication(),
 				"google_compute_instance_from_machine_image":   ResourceComputeInstanceFromMachineImage(),
 				<% end -%>
 				"google_compute_instance_from_template":        ResourceComputeInstanceFromTemplate(),
@@ -433,6 +405,9 @@ end     # products.each do
 				"google_compute_project_metadata":              ResourceComputeProjectMetadata(),
 				"google_compute_project_metadata_item":         ResourceComputeProjectMetadataItem(),
 				"google_compute_region_instance_group_manager": ResourceComputeRegionInstanceGroupManager(),
+				<% unless version == 'ga' -%>
+				"google_compute_region_instance_template":      ResourceComputeRegionInstanceTemplate(),
+				<% end -%>
 				"google_compute_router_interface":              ResourceComputeRouterInterface(),
 				"google_compute_security_policy":               ResourceComputeSecurityPolicy(),
 				"google_compute_shared_vpc_host_project":       ResourceComputeSharedVpcHostProject(),
@@ -567,7 +542,13 @@ end     # products.each do
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Provider) (interface{}, diag.Diagnostics) {
-	config := Config{
+	err := transport_tpg.HandleSDKDefaults(d)
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
+	transport_tpg.HandleDCLCustomEndpointDefaults(d)
+
+	config := transport_tpg.Config{
 		Project:             d.Get("project").(string),
 		Region:              d.Get("region").(string),
 		Zone:                d.Get("zone").(string),
@@ -611,13 +592,13 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	// only check environment variables if neither value was set in config- this
 	// means config beats env var in all cases.
 	if config.AccessToken == "" && config.Credentials == "" {
-		config.Credentials = MultiEnvSearch([]string{
+		config.Credentials = transport_tpg.MultiEnvSearch([]string{
 			"GOOGLE_CREDENTIALS",
 			"GOOGLE_CLOUD_KEYFILE_JSON",
 			"GCLOUD_KEYFILE_JSON",
 		})
 
-		config.AccessToken = MultiEnvSearch([]string{
+		config.AccessToken = transport_tpg.MultiEnvSearch([]string{
 			"GOOGLE_OAUTH_ACCESS_TOKEN",
 		})
 	}
@@ -644,7 +625,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		config.Scopes[i] = scope.(string)
 	}
 
-	batchCfg, err := ExpandProviderBatchingConfig(d.Get("batching"))
+	batchCfg, err := transport_tpg.ExpandProviderBatchingConfig(d.Get("batching"))
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
@@ -656,24 +637,24 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	<% end -%>
 
 	// Handwritten Products / Versioned / Atypical Entries
-	config.CloudBillingBasePath = d.Get(CloudBillingCustomEndpointEntryKey).(string)
-	config.ComposerBasePath = d.Get(ComposerCustomEndpointEntryKey).(string)
-	config.ContainerBasePath = d.Get(ContainerCustomEndpointEntryKey).(string)
-	config.DataflowBasePath = d.Get(DataflowCustomEndpointEntryKey).(string)
-	config.IamCredentialsBasePath = d.Get(IamCredentialsCustomEndpointEntryKey).(string)
-	config.ResourceManagerV3BasePath = d.Get(ResourceManagerV3CustomEndpointEntryKey).(string)
+	config.CloudBillingBasePath = d.Get(transport_tpg.CloudBillingCustomEndpointEntryKey).(string)
+	config.ComposerBasePath = d.Get(transport_tpg.ComposerCustomEndpointEntryKey).(string)
+	config.ContainerBasePath = d.Get(transport_tpg.ContainerCustomEndpointEntryKey).(string)
+	config.DataflowBasePath = d.Get(transport_tpg.DataflowCustomEndpointEntryKey).(string)
+	config.IamCredentialsBasePath = d.Get(transport_tpg.IamCredentialsCustomEndpointEntryKey).(string)
+	config.ResourceManagerV3BasePath = d.Get(transport_tpg.ResourceManagerV3CustomEndpointEntryKey).(string)
 	<% unless version == "ga" -%>
-	config.RuntimeConfigBasePath = d.Get(RuntimeConfigCustomEndpointEntryKey).(string)
+	config.RuntimeConfigBasePath = d.Get(transport_tpg.RuntimeConfigCustomEndpointEntryKey).(string)
 	<% end -%>
-	config.IAMBasePath = d.Get(IAMCustomEndpointEntryKey).(string)
-	config.ServiceNetworkingBasePath = d.Get(ServiceNetworkingCustomEndpointEntryKey).(string)
-	config.ServiceUsageBasePath = d.Get(ServiceUsageCustomEndpointEntryKey).(string)
-	config.BigtableAdminBasePath = d.Get(BigtableAdminCustomEndpointEntryKey).(string)
-	config.TagsLocationBasePath = d.Get(TagsLocationCustomEndpointEntryKey).(string)
-	
+	config.IAMBasePath = d.Get(transport_tpg.IAMCustomEndpointEntryKey).(string)
+	config.ServiceNetworkingBasePath = d.Get(transport_tpg.ServiceNetworkingCustomEndpointEntryKey).(string)
+	config.ServiceUsageBasePath = d.Get(transport_tpg.ServiceUsageCustomEndpointEntryKey).(string)
+	config.BigtableAdminBasePath = d.Get(transport_tpg.BigtableAdminCustomEndpointEntryKey).(string)
+	config.TagsLocationBasePath = d.Get(transport_tpg.TagsLocationCustomEndpointEntryKey).(string)
+
 	// dcl
-	config.ContainerAwsBasePath = d.Get(ContainerAwsCustomEndpointEntryKey).(string)
-	config.ContainerAzureBasePath = d.Get(ContainerAzureCustomEndpointEntryKey).(string)
+	config.ContainerAwsBasePath = d.Get(transport_tpg.ContainerAwsCustomEndpointEntryKey).(string)
+	config.ContainerAzureBasePath = d.Get(transport_tpg.ContainerAzureCustomEndpointEntryKey).(string)
 
 	stopCtx, ok := schema.StopContext(ctx)
 	if !ok {
@@ -683,7 +664,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		return nil, diag.FromErr(err)
 	}
 
-	return ProviderDCLConfigure(d, &config), nil
+	return transport_tpg.ProviderDCLConfigure(d, &config), nil
 }
 
 func validateCredentials(v interface{}, k string) (warnings []string, errors []error) {
@@ -701,4 +682,26 @@ func validateCredentials(v interface{}, k string) (warnings []string, errors []e
 	}
 
 	return
+}
+
+func mergeResourceMaps(ms ...map[string]*schema.Resource) (map[string]*schema.Resource, error) {
+	merged := make(map[string]*schema.Resource)
+	duplicates := []string{}
+
+	for _, m := range ms {
+		for k, v := range m {
+			if _, ok := merged[k]; ok {
+				duplicates = append(duplicates, k)
+			}
+
+			merged[k] = v
+		}
+	}
+
+	var err error
+	if len(duplicates) > 0 {
+		err = fmt.Errorf("saw duplicates in mergeResourceMaps: %v", duplicates)
+	}
+
+	return merged, err
 }

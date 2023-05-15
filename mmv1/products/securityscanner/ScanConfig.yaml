@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: ScanConfig
 base_url: projects/{{project}}/scanConfigs
-self_link: "{{name}}"
+self_link: '{{name}}'
 update_verb: :PATCH
 update_mask: true
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -23,6 +23,17 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/security-scanner/docs/reference/rest/v1beta/projects.scanConfigs'
 description: |
   A ScanConfig resource contains the configurations to launch a scan.
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'scan_config_basic'
+    primary_resource_id: 'scan-config'
+    min_version: beta
+    vars:
+      address_name: 'scan-basic-static-ip'
+      scan_config_name: 'terraform-scan-config'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: templates/terraform/post_create/set_computed_name.erb
+  custom_import: templates/terraform/custom_import/self_link_as_name.erb
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -41,6 +52,8 @@ properties:
       The maximum QPS during scanning. A valid value ranges from 5 to 20 inclusively.
       Defaults to 15.
     default_value: 15
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validation.IntBetween(5, 20)'
   - !ruby/object:Api::Type::Array
     name: startingUrls
     description: |
@@ -73,6 +86,8 @@ properties:
             description: |
               The password of the Google account. The credential is stored encrypted
               in GCP.
+            sensitive: true
+            custom_flatten: 'templates/terraform/custom_flatten/scan_config_auth_custom_password.go.erb'
       - !ruby/object:Api::Type::NestedObject
         name: customAccount
         at_least_one_of:
@@ -93,6 +108,8 @@ properties:
             description: |
               The password of the custom account. The credential is stored encrypted
               in GCP.
+            sensitive: true
+            custom_flatten: 'templates/terraform/custom_flatten/scan_config_auth_google_password.go.erb'
           - !ruby/object:Api::Type::String
             name: loginUrl
             required: true

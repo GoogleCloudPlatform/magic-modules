@@ -7,8 +7,8 @@ mm_commit_sha=$2
 build_id=$3
 project_id=$4
 build_step=$5
+gh_repo=$6
 github_username=modular-magician
-gh_repo=terraform-validator
 
 
 new_branch="auto-pr-$pr_number"
@@ -44,7 +44,7 @@ else
     echo "exiting ..."
 	  state="failure"
     post_body=$( jq -n \
-      --arg context "terraform-validator-test-integration-${TERRAFORM_VERSION}" \
+      --arg context "${gh_repo}-test-integration-${TERRAFORM_VERSION}" \
       --arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
       --arg state "$state" \
       '{context: $context, target_url: $target_url, state: $state}')
@@ -52,7 +52,7 @@ else
 fi
 
 post_body=$( jq -n \
-	--arg context "terraform-validator-test-integration-${TERRAFORM_VERSION}" \
+	--arg context "${gh_repo}-test-integration-${TERRAFORM_VERSION}" \
 	--arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
 	--arg state "pending" \
 	'{context: $context, target_url: $target_url, state: $state}')
@@ -79,7 +79,7 @@ else
 fi
 
 post_body=$( jq -n \
-	--arg context "terraform-validator-test-integration-${TERRAFORM_VERSION}" \
+	--arg context "${gh_repo}-test-integration-${TERRAFORM_VERSION}" \
 	--arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
 	--arg state "${state}" \
 	'{context: $context, target_url: $target_url, state: $state}')

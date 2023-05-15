@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -46,6 +46,44 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_network_endpoint_group_functions'
+    primary_resource_id: 'function_neg'
+    vars:
+      neg_name: 'function-neg'
+      function_name: 'function-neg'
+      bucket_name: 'cloudfunctions-function-example-bucket'
+      zip_path: 'path/to/index.zip'
+    test_vars_overrides:
+      zip_path: 'createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_network_endpoint_group_cloudrun'
+    primary_resource_id: 'cloudrun_neg'
+    vars:
+      neg_name: 'cloudrun-neg'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_network_endpoint_group_appengine'
+    primary_resource_id: 'appengine_neg'
+    vars:
+      neg_name: 'appengine-neg'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_network_endpoint_group_psc'
+    primary_resource_id: 'psc_neg'
+    vars:
+      neg_name: 'psc-neg'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_network_endpoint_group_psc_service_attachment'
+    primary_resource_id: 'psc_neg_service_attachment'
+    vars:
+      neg_name: 'psc-neg'
+      network_name: 'psc-network'
+      subnetwork_name: 'psc-subnetwork'
+      psc_subnetwork_name: 'psc-subnetwork-nat'
+      backend_service_name: 'psc-backend'
+      forwarding_rule_name: 'psc-forwarding-rule'
+      service_attachment_name: 'psc-service-attachment'
+      health_check_name: 'psc-healthcheck'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -66,6 +104,8 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
     required: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |

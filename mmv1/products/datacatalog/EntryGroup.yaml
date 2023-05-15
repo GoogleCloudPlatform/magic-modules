@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -15,7 +15,7 @@
 name: EntryGroup
 base_url: projects/{{project}}/locations/{{region}}/entryGroups
 create_url: projects/{{project}}/locations/{{region}}/entryGroups?entryGroupId={{entry_group_id}}
-self_link: "{{name}}"
+self_link: '{{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -28,8 +28,32 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
   parent_resource_attribute: 'entry_group'
-  import_format: ["projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}", "{{entry_group}}"]
+  import_format:
+    [
+      'projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}',
+      '{{entry_group}}',
+    ]
   base_url: projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}
+import_format: ['{{name}}']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'data_catalog_entry_group_basic'
+    primary_resource_id: 'basic_entry_group'
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_group%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      entry_group_id: 'my_group'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'data_catalog_entry_group_full'
+    primary_resource_id: 'basic_entry_group'
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_group%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      entry_group_id: 'my_group'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/data_catalog_entry_group.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: region
@@ -37,6 +61,9 @@ parameters:
     immutable: true
     description: |
       EntryGroup location region.
+    ignore_read: true
+    required: false
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: entryGroupId
     required: true
@@ -45,6 +72,8 @@ parameters:
     description: |
       The id of the entry group to create. The id must begin with a letter or underscore,
       contain only English letters, numbers and underscores, and be at most 64 characters.
+    validation: !ruby/object:Provider::Terraform::Validation
+      regex: '^[A-z_][A-z0-9_]{0,63}$'
 properties:
   - !ruby/object:Api::Type::String
     name: name

@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -24,14 +24,59 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/scheduler/'
   api: 'https://cloud.google.com/scheduler/docs/reference/rest/'
+id_format: 'projects/{{project}}/locations/{{region}}/jobs/{{name}}'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/scheduler.erb
+  resource_definition: templates/terraform/resource_definition/scheduler_auth.erb
+  encoder: templates/terraform/encoders/cloud_scheduler.go.erb
+  update_encoder: templates/terraform/update_encoder/cloud_scheduler.go.erb
+  post_create: templates/terraform/post_create/cloud_scheduler.go.erb
+  post_update: templates/terraform/post_update/cloud_scheduler.go.erb
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'scheduler_job_pubsub'
+    primary_resource_id: 'job'
+    vars:
+      job_name: 'test-job'
+      topic_name: 'job-topic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'scheduler_job_http'
+    primary_resource_id: 'job'
+    vars:
+      job_name: 'test-job'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'scheduler_job_paused'
+    primary_resource_id: 'job'
+    vars:
+      job_name: 'test-job'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'scheduler_job_app_engine'
+    primary_resource_id: 'job'
+    vars:
+      job_name: 'test-job'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'scheduler_job_oauth'
+    primary_resource_id: 'job'
+    vars:
+      job_name: 'test-job'
+    test_env_vars:
+      project_name: :PROJECT_NAME
+      region: :REGION
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'scheduler_job_oidc'
+    primary_resource_id: 'job'
+    vars:
+      job_name: 'test-job'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
     description: |
-      Region where the scheduler job resides
-    required: true
+      Region where the scheduler job resides. If it is not provided, Terraform will use the provider default.
+    required: false
     immutable: true
     url_param_only: true
+    default_from_api: true
+    ignore_read: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -39,10 +84,12 @@ properties:
       The name of the job.
     required: true
     immutable: true
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
     name: description
     description: |
-      A human-readable description for the job. 
+      A human-readable description for the job.
       This string must not contain more than 500 characters.
     required: false
   - !ruby/object:Api::Type::String
@@ -66,6 +113,9 @@ properties:
     name: paused
     description: |
       Sets the job to a paused state. Jobs default to being enabled when this property is not set.
+    required: false
+    default_from_api: true
+    custom_flatten: templates/terraform/custom_flatten/cloud_scheduler_paused.go.erb
   - !ruby/object:Api::Type::String
     name: attemptDeadline
     description: |
@@ -79,18 +129,19 @@ properties:
       A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s"
     required: false
     default_value: '180s'
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("180s")'
   - !ruby/object:Api::Type::NestedObject
     name: retryConfig
     description: |
-      By default, if a job does not complete successfully, 
-      meaning that an acknowledgement is not received from the handler, 
+      By default, if a job does not complete successfully,
+      meaning that an acknowledgement is not received from the handler,
       then it will be retried with exponential backoff according to the settings
     required: false
     properties:
       - !ruby/object:Api::Type::Integer
         name: retryCount
         description: |
-          The number of attempts that the system will make to run a 
+          The number of attempts that the system will make to run a
           job using the exponential backoff procedure described by maxDoublings.
           Values greater than 5 and negative values are not allowed.
         required: false
@@ -100,10 +151,11 @@ properties:
           - retry_config.0.min_backoff_duration
           - retry_config.0.max_backoff_duration
           - retry_config.0.max_doublings
+        default_from_api: true
       - !ruby/object:Api::Type::String
         name: maxRetryDuration
         description: |
-          The time limit for retrying a failed job, measured from time when an execution was first attempted. 
+          The time limit for retrying a failed job, measured from time when an execution was first attempted.
           If specified with retryCount, the job will be retried until both limits are reached.
           A duration in seconds with up to nine fractional digits, terminated by 's'.
         required: false
@@ -113,6 +165,7 @@ properties:
           - retry_config.0.min_backoff_duration
           - retry_config.0.max_backoff_duration
           - retry_config.0.max_doublings
+        default_from_api: true
       - !ruby/object:Api::Type::String
         name: minBackoffDuration
         description: |
@@ -125,6 +178,7 @@ properties:
           - retry_config.0.min_backoff_duration
           - retry_config.0.max_backoff_duration
           - retry_config.0.max_doublings
+        default_from_api: true
       - !ruby/object:Api::Type::String
         name: maxBackoffDuration
         description: |
@@ -137,12 +191,13 @@ properties:
           - retry_config.0.min_backoff_duration
           - retry_config.0.max_backoff_duration
           - retry_config.0.max_doublings
+        default_from_api: true
       - !ruby/object:Api::Type::Integer
         name: maxDoublings
         description: |
           The time between retries will double maxDoublings times.
-          A job's retry interval starts at minBackoffDuration, 
-          then doubles maxDoublings times, then increases linearly, 
+          A job's retry interval starts at minBackoffDuration,
+          then doubles maxDoublings times, then increases linearly,
           and finally retries retries at intervals of maxBackoffDuration up to retryCount times.
         required: false
         at_least_one_of:
@@ -151,6 +206,7 @@ properties:
           - retry_config.0.min_backoff_duration
           - retry_config.0.max_backoff_duration
           - retry_config.0.max_doublings
+        default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: pubsubTarget
     description: |
@@ -178,6 +234,8 @@ properties:
 
            A base64-encoded string.
         required: false
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'verify.ValidateBase64String'
       - !ruby/object:Api::Type::KeyValuePairs
         name: attributes
         description: |
@@ -188,7 +246,7 @@ properties:
     name: appEngineHttpTarget
     description: |
       App Engine HTTP target.
-      If the job providers a App Engine HTTP target the cron will 
+      If the job providers a App Engine HTTP target the cron will
       send a request to the service instance
     exactly_one_of:
       - pubsub_target
@@ -205,6 +263,7 @@ properties:
         description: |
           App Engine Routing setting for the job.
         required: false
+        custom_flatten: templates/terraform/custom_flatten/cloudscheduler_job_appenginerouting.go.erb
         properties:
           - !ruby/object:Api::Type::String
             name: service
@@ -240,32 +299,37 @@ properties:
         name: relativeUri
         description: |
           The relative URI.
-          The relative URL must begin with "/" and must be a valid HTTP relative URL. 
-          It can contain a path, query string arguments, and \# fragments. 
-          If the relative URL is empty, then the root path "/" will be used. 
+          The relative URL must begin with "/" and must be a valid HTTP relative URL.
+          It can contain a path, query string arguments, and \# fragments.
+          If the relative URL is empty, then the root path "/" will be used.
           No spaces are allowed, and the maximum length allowed is 2083 characters
         required: true
       - !ruby/object:Api::Type::String
         name: body
         description: |
-          HTTP request body. 
-          A request body is allowed only if the HTTP method is POST or PUT. 
+          HTTP request body.
+          A request body is allowed only if the HTTP method is POST or PUT.
           It will result in invalid argument error to set a body on a job with an incompatible HttpMethod.
 
           A base64-encoded string.
         required: false
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'verify.ValidateBase64String'
       - !ruby/object:Api::Type::KeyValuePairs
         name: headers
         description: |
           HTTP request headers.
-          This map contains the header field names and values. 
+          This map contains the header field names and values.
           Headers can be set when the job is created.
         required: false
+        custom_flatten: 'templates/terraform/custom_flatten/http_headers.erb'
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateHttpHeaders()'
   - !ruby/object:Api::Type::NestedObject
     name: httpTarget
     description: |
       HTTP target.
-      If the job providers a http_target the cron will 
+      If the job providers a http_target the cron will
       send a request to the targeted url
     exactly_one_of:
       - pubsub_target
@@ -277,6 +341,7 @@ properties:
         description: |
           The full URI path that the request will be sent to.
         required: true
+        diff_suppress_func: 'tpgresource.LastSlashDiffSuppress'
       - !ruby/object:Api::Type::String
         name: httpMethod
         description: |
@@ -285,23 +350,29 @@ properties:
       - !ruby/object:Api::Type::String
         name: body
         description: |
-          HTTP request body. 
-          A request body is allowed only if the HTTP method is POST, PUT, or PATCH. 
+          HTTP request body.
+          A request body is allowed only if the HTTP method is POST, PUT, or PATCH.
           It is an error to set body on a job with an incompatible HttpMethod.
 
           A base64-encoded string.
         required: false
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'verify.ValidateBase64String'
       - !ruby/object:Api::Type::KeyValuePairs
         name: headers
         description: |
-          This map contains the header field names and values. 
+          This map contains the header field names and values.
           Repeated headers are not supported, but a header value can contain commas.
         required: false
+        custom_flatten: 'templates/terraform/custom_flatten/http_headers.erb'
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateHttpHeaders()'
       - !ruby/object:Api::Type::NestedObject
         name: 'oauthToken'
         description: |
           Contains information needed for generating an OAuth token.
           This type of authorization should be used when sending requests to a GCP endpoint.
+        diff_suppress_func: 'authHeaderDiffSuppress'
         properties:
           - !ruby/object:Api::Type::String
             name: serviceAccountEmail
@@ -319,6 +390,7 @@ properties:
         description: |
           Contains information needed for generating an OpenID Connect token.
           This type of authorization should be used when sending requests to third party endpoints or Cloud Run.
+        diff_suppress_func: 'authHeaderDiffSuppress'
         properties:
           - !ruby/object:Api::Type::String
             name: serviceAccountEmail
@@ -331,4 +403,3 @@ properties:
             description: |
               Audience to be used when generating OIDC token. If not specified,
               the URI specified in target will be used.
-

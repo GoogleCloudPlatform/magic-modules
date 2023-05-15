@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'TargetVpnGateway'
+name: 'VpnGateway'
 kind: 'compute#targetVpnGateway'
 base_url: projects/{{project}}/regions/{{region}}/targetVpnGateways
 collection_url_key: 'items'
@@ -41,6 +41,23 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+docs: !ruby/object:Provider::Terraform::Docs
+  warning: |
+    Classic VPN is deprecating certain functionality on October 31, 2021. For more information,
+    see the [Classic VPN partial deprecation page](https://cloud.google.com/network-connectivity/docs/vpn/deprecations/classic-vpn-deprecation).
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'target_vpn_gateway_basic'
+    primary_resource_id: 'target_gateway'
+    vars:
+      target_vpn_gateway_name: 'vpn-1'
+      network_name: 'network-1'
+      address_name: 'vpn-static-ip'
+      esp_forwarding_rule_name: 'fr-esp'
+      udp500_forwarding_rule_name: 'fr-udp500'
+      udp4500_forwarding_rule_name: 'fr-udp4500'
+      vpn_tunnel_name: 'tunnel1'
+      route_name: 'route1'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -48,7 +65,9 @@ parameters:
     imports: 'name'
     description: |
       The region this gateway should sit in.
-    required: true
+    required: false
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -71,7 +90,8 @@ properties:
     required: true
     immutable: true
   - !ruby/object:Api::Type::Integer
-    name: 'id'
+    name: 'gateway_id'
+    api_name: 'id'
     description: 'The unique identifier for the resource.'
     output: true
   - !ruby/object:Api::Type::ResourceRef
@@ -86,23 +106,25 @@ properties:
     name: 'tunnels'
     description: |
       A list of references to VpnTunnel resources associated with this VPN gateway.
+    output: true
+    exclude: true
     item_type: !ruby/object:Api::Type::ResourceRef
       name: 'tunnel'
       resource: 'VpnTunnel'
       imports: 'selfLink'
       description: |
         A VpnTunnel resource associated with this VPN gateway.
-    output: true
   - !ruby/object:Api::Type::Array
     name: 'forwardingRules'
     description: |
       A list of references to the ForwardingRule resources associated with this VPN
       gateway.
+    output: true
+    # status is not useful for state convergence
+    exclude: true
     item_type: !ruby/object:Api::Type::ResourceRef
       name: 'forwardingRule'
       resource: 'ForwardingRule'
       imports: 'selfLink'
       description: |
         A ForwardingRule resource associated with this VPN gateway.
-    output: true
-    # status is not useful for state convergence

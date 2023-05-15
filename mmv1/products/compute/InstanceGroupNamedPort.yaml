@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'InstanceGroupNamedPort'
-base_url:  'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
+base_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
 self_link: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
 immutable: true
 description: |
@@ -54,6 +54,25 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+id_format: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/{{port}}/{{name}}'
+import_format:
+  [
+    'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/{{port}}/{{name}}',
+  ]
+mutex: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'instance_group_named_port_gke'
+    primary_resource_id:
+      'my_port'
+      # Multiple fine-grained resources
+    skip_vcr: true
+    vars:
+      network_name: 'container-network'
+      subnetwork_name: 'container-subnetwork'
+      gke_cluster_name: 'my-cluster'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: 'templates/terraform/encoders/normalize_group.go.erb'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'group'
@@ -63,14 +82,17 @@ parameters:
     url_param_only: true
     description: |
       The name of the instance group.
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
     resource: 'Zone'
     imports: 'name'
-    required: true
+    required: false
     url_param_only: true
     description: |
       The zone of the instance group.
+    default_from_api: true
+    ignore_read: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -81,5 +103,4 @@ properties:
   - !ruby/object:Api::Type::Integer
     name: 'port'
     required: true
-    description:
-      The port number, which can be a value between 1 and 65535.
+    description: The port number, which can be a value between 1 and 65535.

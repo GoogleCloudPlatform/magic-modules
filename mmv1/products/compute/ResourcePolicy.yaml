@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -38,6 +38,44 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'resource_policy_basic'
+    primary_resource_id: 'foo'
+    vars:
+      name: 'gce-policy'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'resource_policy_full'
+    primary_resource_id: 'bar'
+    vars:
+      name: 'gce-policy'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'resource_policy_placement_policy'
+    primary_resource_id: 'baz'
+    vars:
+      name: 'gce-policy'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'resource_policy_placement_policy_max_distance'
+    min_version: 'beta'
+    primary_resource_id: 'baz'
+    vars:
+      name: 'gce-policy'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'resource_policy_instance_schedule_policy'
+    primary_resource_id: 'hourly'
+    vars:
+      name: 'gce-policy'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'resource_policy_snapshot_schedule_chain_name'
+    primary_resource_id: 'hourly'
+    vars:
+      name: 'gce-policy'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'resource_policy_consistency_group'
+    min_version: 'beta'
+    primary_resource_id: 'cgroup'
+    vars:
+      name: 'gce-policy'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: region
@@ -45,7 +83,8 @@ parameters:
     imports: name
     description: Region where resource policy resides.
     immutable: true
-    required: true
+    required: false
+    default_from_api: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -67,6 +106,7 @@ properties:
     conflicts:
       - 'group_placement_policy'
       - 'instance_schedule_policy'
+      - 'disk_consistency_group_policy'
     description: |
       Policy for creating snapshots of persistent disks.
     properties:
@@ -98,6 +138,8 @@ properties:
                   where HH : [00-23] and MM : [00] GMT.
                   eg: 21:00
                 required: true
+                validation: !ruby/object:Provider::Terraform::Validation
+                  function: 'verify.ValidateHourlyOnly'
           - !ruby/object:Api::Type::NestedObject
             name: 'dailySchedule'
             description: |
@@ -119,6 +161,8 @@ properties:
                   00:00, 04:00, 08:00, 12:00, 16:00, or 20:00. For example,
                   both 13:00-5 and 08:00 are valid.
                 required: true
+                validation: !ruby/object:Provider::Terraform::Validation
+                  function: 'verify.ValidateHourlyOnly'
           - !ruby/object:Api::Type::NestedObject
             name: 'weeklySchedule'
             description: |
@@ -135,6 +179,7 @@ properties:
                 required: true
                 min_size: 1
                 max_size: 7
+                is_set: true
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::String
@@ -198,6 +243,7 @@ properties:
             description: |
               Cloud Storage bucket location to store the auto snapshot
               (regional or multi-regional)
+            is_set: true
             item_type: Api::Type::String
           - !ruby/object:Api::Type::Boolean
             name: 'guestFlush'
@@ -211,14 +257,15 @@ properties:
           - !ruby/object:Api::Type::String
             name: 'chainName'
             description: |
-              Creates the new snapshot in the snapshot chain labeled with the 
-              specified name. The chain name must be 1-63 characters long and comply 
+              Creates the new snapshot in the snapshot chain labeled with the
+              specified name. The chain name must be 1-63 characters long and comply
               with RFC1035.
   - !ruby/object:Api::Type::NestedObject
     name: 'groupPlacementPolicy'
     conflicts:
       - 'instance_schedule_policy'
       - 'snapshot_schedule_policy'
+      - 'disk_consistency_group_policy'
     description: |
       Resource policy for instances used for placement configuration.
     properties:
@@ -252,6 +299,7 @@ properties:
     conflicts:
       - 'snapshot_schedule_policy'
       - 'group_placement_policy'
+      - 'disk_consistency_group_policy'
     description: |
       Resource policy for scheduling instance operations.
     properties:
@@ -295,3 +343,22 @@ properties:
         name: 'expirationTime'
         description: |
           The expiration time of the schedule. The timestamp is an RFC3339 string.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'diskConsistencyGroupPolicy'
+    min_version: 'beta'
+    conflicts:
+      - 'snapshot_schedule_policy'
+      - 'group_placement_policy'
+      - 'instance_schedule_policy'
+    description: |
+      Replication consistency group for asynchronous disk replication.
+    send_empty_value: true
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        immutable: true
+        required: true
+        description: |
+          Enable disk consistency on the resource policy.
+    custom_expand: 'templates/terraform/custom_expand/disk_consistency_group_policy.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/disk_consistency_group_policy.erb'

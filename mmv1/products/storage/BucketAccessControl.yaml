@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -22,8 +22,12 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/storage/docs/access-control/lists'
   api: 'https://cloud.google.com/storage/docs/json_api/v1/bucketAccessControls'
 description: |
-  The BucketAccessControls resource represents the Access Control Lists
-  (ACLs) for buckets within Google Cloud Storage. ACLs let you specify who
+  Bucket ACLs can be managed authoritatively using the
+  [`storage_bucket_acl`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket_acl)
+  resource. Do not use these two resources in conjunction to manage the same bucket.
+
+  The BucketAccessControls resource manages the Access Control List
+  (ACLs) for a single entity/role pairing on a bucket. ACLs let you specify who
   has access to your data and to what extent.
 
   There are three roles that can be assigned to an entity:
@@ -37,6 +41,16 @@ description: |
   READER, WRITER, and OWNER instead of READ, WRITE, and FULL_CONTROL.
 identity:
   - entity
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'storage_bucket_access_control_public_bucket'
+    primary_resource_id: 'public_rule'
+    vars:
+      bucket_name: 'static-content-bucket'
+id_format: '{{bucket}}/{{entity}}'
+import_format: ['{{bucket}}/{{entity}}']
+mutex: 'storage/buckets/{{bucket}}'
+skip_sweeper: true
 properties:
   - !ruby/object:Api::Type::ResourceRef
     name: 'bucket'
@@ -45,6 +59,7 @@ properties:
     description: 'The name of the bucket.'
     required: true
     immutable: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
   - !ruby/object:Api::Type::String
     name: 'domain'
     description: 'The domain associated with the entity.'
@@ -77,15 +92,18 @@ properties:
     name: 'entityId'
     description: 'The ID for the entity'
     output: true
-  # | 'etag' is not applicable for state convergence.
+    # | 'etag' is not applicable for state convergence.
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'id'
     description: 'The ID of the access-control entry.'
     output: true
+    exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: 'projectTeam'
     description: 'The project team associated with the entity'
     output: true
+    exclude: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'projectNumber'

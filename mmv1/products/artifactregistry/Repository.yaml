@@ -12,34 +12,88 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-  name: 'Repository'
-  base_url: projects/{{project}}/locations/{{location}}/repositories
-  create_url: projects/{{project}}/locations/{{location}}/repositories?repository_id={{repository_id}}
-  self_link: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
-  update_verb: :PATCH
-  update_mask: true
-  description: A repository for storing artifacts
-  references: !ruby/object:Api::Resource::ReferenceLinks
-    guides:
-      'Official Documentation':
-        'https://cloud.google.com/artifact-registry/docs/overview'
-    api: 'https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories'
-  iam_policy: !ruby/object:Api::Resource::IamPolicy
-    exclude: false
-    method_name_separator: ':'
+name: 'Repository'
+base_url: projects/{{project}}/locations/{{location}}/repositories
+create_url: projects/{{project}}/locations/{{location}}/repositories?repository_id={{repository_id}}
+self_link: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
+update_verb: :PATCH
+update_mask: true
+description: A repository for storing artifacts
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/artifact-registry/docs/overview'
+  api: 'https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  exclude: false
+  method_name_separator:
+    ':'
     # TODO (camthornton): Change to repository_id in 4.0
-    parent_resource_attribute: 'repository'
-    import_format: ["projects/{{project}}/locations/{{location}}/repositories/{{repository}}", "{{repository}}"]
-    base_url: projects/{{project}}/locations/{{location}}/repositories/{{name}}
-    self_link: projects/{{project}}/locations/{{location}}/repositories/{{name}}
-    allowed_iam_role: 'roles/artifactregistry.reader'
-  properties:
+  parent_resource_attribute: 'repository'
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/repositories/{{repository}}',
+      '{{repository}}',
+    ]
+  base_url: projects/{{project}}/locations/{{location}}/repositories/{{name}}
+  self_link: projects/{{project}}/locations/{{location}}/repositories/{{name}}
+  allowed_iam_role: 'roles/artifactregistry.reader'
+id_format: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}',
+    '{{repository_id}}',
+  ]
+autogen_async: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_basic'
+    primary_resource_id: 'my-repo'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-repository%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      repository_id: 'my-repository'
+      description: 'example docker repository'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_docker'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'my-repository'
+      description: 'example docker repository'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_cmek'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'my-repository'
+      kms_key_name: 'kms-key'
+    test_vars_overrides:
+      kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_virtual'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'my-repository'
+      description: 'example virtual docker repository'
+      upstream_repository_id: 'my-repository-upstream'
+      upstream_description: 'example docker repository (upstream source)'
+      upstream_policy_id: 'my-repository-upstream'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_remote'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'my-repository'
+      description: 'example remote docker repository'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/location_from_region.go.erb
+properties:
   - !ruby/object:Api::Type::String
     name: name
     description: |-
       The name of the repository, for example:
-      "projects/p1/locations/us-central1/repositories/repo1"
+      "repo1"
     output: true
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
     name: repository_id
     description: |-
@@ -48,13 +102,15 @@
     required: true
     immutable: true
     url_param_only: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
     name: 'location'
     description: |
       The name of the location this repository is located in.
-    required: true
+    required: false
     immutable: true
     url_param_only: true
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: format
     description: |-
@@ -64,6 +120,7 @@
       [alpha user group](https://cloud.google.com/artifact-registry/docs/supported-formats#alpha-access).
     required: true
     immutable: true
+    diff_suppress_func: 'compareCaseInsensitive'
   - !ruby/object:Api::Type::String
     name: description
     description: |-
@@ -93,6 +150,15 @@
     description: The time when the repository was last updated.
     output: true
   - !ruby/object:Api::Type::NestedObject
+    name: 'dockerConfig'
+    description: |-
+      Docker repository config contains repository level configuration for the repositories of docker type.
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'immutableTags'
+        description: |-
+          The repository which enabled this flag prevents all tags from being modified, moved or deleted. This does not prevent tags from being created.
+  - !ruby/object:Api::Type::NestedObject
     name: 'mavenConfig'
     description: |-
       MavenRepositoryConfig is maven related repository details.
@@ -112,13 +178,12 @@
           Version policy defines the versions that the registry will accept.
         immutable: true
         values:
-        - :VERSION_POLICY_UNSPECIFIED
-        - :RELEASE
-        - :SNAPSHOT
+          - :VERSION_POLICY_UNSPECIFIED
+          - :RELEASE
+          - :SNAPSHOT
         default_value: :VERSION_POLICY_UNSPECIFIED
   - !ruby/object:Api::Type::Enum
     name: 'mode'
-    min_version: beta
     description: |-
       The mode configures the repository to serve artifacts from different sources.
     immutable: true
@@ -129,7 +194,6 @@
     default_value: :STANDARD_REPOSITORY
   - !ruby/object:Api::Type::NestedObject
     name: 'virtualRepositoryConfig'
-    min_version: beta
     conflicts:
       - remote_repository_config
     description: |-
@@ -148,7 +212,7 @@
                 The user-provided ID of the upstream policy.
             - !ruby/object:Api::Type::String
               name: 'repository'
-              description: |+
+              description: |
                 A reference to the repository resource, for example:
                 "projects/p1/locations/us-central1/repository/repo1".
             - !ruby/object:Api::Type::Integer
@@ -157,7 +221,6 @@
                 Entries with a greater priority value take precedence in the pull order.
   - !ruby/object:Api::Type::NestedObject
     name: 'remoteRepositoryConfig'
-    min_version: beta
     conflicts:
       - virtual_repository_config
     description: |-

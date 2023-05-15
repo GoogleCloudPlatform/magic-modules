@@ -77,7 +77,7 @@ module Api
       attr_reader :test_project_name
 
       # Resource name may need a custom diff suppress function. Default is to use
-      # compareSelfLinkOrResourceName
+      # CompareSelfLinkOrResourceName
       attr_reader :custom_diff_suppress
 
       # Some resources (IAP) use fields named differently from the parent resource.
@@ -110,6 +110,10 @@ module Api
       # If unset, defaults to 'ga'
       attr_reader :min_version
 
+      # [Optional] Check to see if zone value should be replaced with GOOGLE_ZONE in iam tests
+      # Defaults to true
+      attr_reader :substitute_zone_value
+
       def validate
         super
 
@@ -138,6 +142,7 @@ module Api
         )
         check :iam_policy_version, type: String
         check :min_version, type: String
+        check :substitute_zone_value, type: :boolean, default: true
       end
     end
   end

@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: "Listing"
+name: 'Listing'
 base_url: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings
 create_url: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings?listing_id={{listing_id}}
 self_link: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}
@@ -21,14 +21,37 @@ update_mask: true
 description: A Bigquery Analytics Hub data exchange listing
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    "Official Documentation": "https://cloud.google.com/bigquery/docs/analytics-hub-introduction"
-  api: "https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.dataExchanges.listings"
+    'Official Documentation': 'https://cloud.google.com/bigquery/docs/analytics-hub-introduction'
+  api: 'https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.dataExchanges.listings'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   exclude: false
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
   parent_resource_attribute: 'listing_id'
-  import_format: ["projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}", "{{listing_id}}"]
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}',
+      '{{listing_id}}',
+    ]
+id_format: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}',
+  ]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_analyticshub_listing_basic'
+    primary_resource_id: 'listing'
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_data_exchange%s\",
+      context[\"\
+      random_suffix\"]), fmt.Sprintf(\"tf_test_my_listing%s\",
+      context[\"random_suffix\"\
+      ])"
+    region_override: 'US'
+    vars:
+      data_exchange_id: 'my_data_exchange'
+      listing_id: 'my_listing'
+      description: 'example data exchange'
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -48,9 +71,9 @@ properties:
       The ID of the listing. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
     required: true
     immutable: true
-    url_param_only: true   
+    url_param_only: true
   - !ruby/object:Api::Type::String
-    name: "location"
+    name: 'location'
     description: |
       The name of the location this data exchange listing.
     required: true
@@ -62,9 +85,9 @@ properties:
       Human-readable display name of the listing. The display name must contain only Unicode letters, numbers (0-9), underscores (_), dashes (-), spaces ( ), ampersands (&) and can't start or end with spaces.
     required: true
   - !ruby/object:Api::Type::String
-    name: description 
+    name: description
     description: |-
-      Short description of the listing. The description must not contain Unicode non-characters and C0 and C1 control codes except tabs (HT), new lines (LF), carriage returns (CR), and page breaks (FF). 
+      Short description of the listing. The description must not contain Unicode non-characters and C0 and C1 control codes except tabs (HT), new lines (LF), carriage returns (CR), and page breaks (FF).
   - !ruby/object:Api::Type::String
     name: primaryContact
     description: |-
@@ -94,7 +117,9 @@ properties:
         description: Email or URL of the data provider.
   - !ruby/object:Api::Type::NestedObject
     name: publisher
-    description: Details of the publisher who owns the listing and who can share the source data.
+    description:
+      Details of the publisher who owns the listing and who can share the source
+      data.
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -115,5 +140,8 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'dataset'
-        description: Resource name of the dataset source for this listing. e.g. projects/myproject/datasets/123
+        description:
+          Resource name of the dataset source for this listing. e.g.
+          projects/myproject/datasets/123
         required: true
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'

@@ -6,6 +6,8 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -13,11 +15,11 @@ import (
 func TestAccHealthcareDicomStoreIamBinding(t *testing.T) {
 	t.Parallel()
 
-	projectId := GetTestProjectFromEnv()
+	projectId := acctest.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.dicomStoreAdmin"
 	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	datasetId := &healthcareDatasetId{
+	datasetId := &HealthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
@@ -25,8 +27,8 @@ func TestAccHealthcareDicomStoreIamBinding(t *testing.T) {
 	dicomStoreName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: TestAccProviders,
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Binding creation
@@ -37,7 +39,7 @@ func TestAccHealthcareDicomStoreIamBinding(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_healthcare_dicom_store_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("%s/%s %s", datasetId.terraformId(), dicomStoreName, roleId),
+				ImportStateId:     fmt.Sprintf("%s/%s %s", datasetId.TerraformId(), dicomStoreName, roleId),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -51,7 +53,7 @@ func TestAccHealthcareDicomStoreIamBinding(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_healthcare_dicom_store_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("%s/%s %s", datasetId.terraformId(), dicomStoreName, roleId),
+				ImportStateId:     fmt.Sprintf("%s/%s %s", datasetId.TerraformId(), dicomStoreName, roleId),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -62,11 +64,11 @@ func TestAccHealthcareDicomStoreIamBinding(t *testing.T) {
 func TestAccHealthcareDicomStoreIamMember(t *testing.T) {
 	t.Parallel()
 
-	projectId := GetTestProjectFromEnv()
+	projectId := acctest.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.dicomEditor"
 	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	datasetId := &healthcareDatasetId{
+	datasetId := &HealthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
@@ -74,8 +76,8 @@ func TestAccHealthcareDicomStoreIamMember(t *testing.T) {
 	dicomStoreName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: TestAccProviders,
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
@@ -86,7 +88,7 @@ func TestAccHealthcareDicomStoreIamMember(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_healthcare_dicom_store_iam_member.foo",
-				ImportStateId:     fmt.Sprintf("%s/%s %s serviceAccount:%s@%s.iam.gserviceaccount.com", datasetId.terraformId(), dicomStoreName, roleId, account, projectId),
+				ImportStateId:     fmt.Sprintf("%s/%s %s serviceAccount:%s@%s.iam.gserviceaccount.com", datasetId.TerraformId(), dicomStoreName, roleId, account, projectId),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -97,11 +99,11 @@ func TestAccHealthcareDicomStoreIamMember(t *testing.T) {
 func TestAccHealthcareDicomStoreIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	projectId := GetTestProjectFromEnv()
+	projectId := acctest.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.dicomViewer"
 	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	datasetId := &healthcareDatasetId{
+	datasetId := &HealthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
@@ -109,8 +111,8 @@ func TestAccHealthcareDicomStoreIamPolicy(t *testing.T) {
 	dicomStoreName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: TestAccProviders,
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Policy creation (no update for policy, no need to test)
@@ -121,7 +123,7 @@ func TestAccHealthcareDicomStoreIamPolicy(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_healthcare_dicom_store_iam_policy.foo",
-				ImportStateId:     fmt.Sprintf("%s/%s", datasetId.terraformId(), dicomStoreName),
+				ImportStateId:     fmt.Sprintf("%s/%s", datasetId.TerraformId(), dicomStoreName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -137,13 +139,13 @@ func testAccCheckGoogleHealthcareDicomStoreIamBindingExists(t *testing.T, bindin
 		}
 
 		config := GoogleProviderConfig(t)
-		dicomStoreId, err := parseHealthcareDicomStoreId(bindingRs.Primary.Attributes["dicom_store_id"], config)
+		dicomStoreId, err := ParseHealthcareDicomStoreId(bindingRs.Primary.Attributes["dicom_store_id"], config)
 
 		if err != nil {
 			return err
 		}
 
-		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.DicomStores.GetIamPolicy(dicomStoreId.dicomStoreId()).Do()
+		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.DicomStores.GetIamPolicy(dicomStoreId.DicomStoreId()).Do()
 		if err != nil {
 			return err
 		}
@@ -173,13 +175,13 @@ func testAccCheckGoogleHealthcareDicomStoreIamMemberExists(t *testing.T, n, role
 		}
 
 		config := GoogleProviderConfig(t)
-		dicomStoreId, err := parseHealthcareDicomStoreId(rs.Primary.Attributes["dicom_store_id"], config)
+		dicomStoreId, err := ParseHealthcareDicomStoreId(rs.Primary.Attributes["dicom_store_id"], config)
 
 		if err != nil {
 			return err
 		}
 
-		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.DicomStores.GetIamPolicy(dicomStoreId.dicomStoreId()).Do()
+		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.DicomStores.GetIamPolicy(dicomStoreId.DicomStoreId()).Do()
 		if err != nil {
 			return err
 		}
@@ -208,13 +210,13 @@ func testAccCheckGoogleHealthcareDicomStoreIamPolicyExists(t *testing.T, n, role
 		}
 
 		config := GoogleProviderConfig(t)
-		dicomStoreId, err := parseHealthcareDicomStoreId(rs.Primary.Attributes["dicom_store_id"], config)
+		dicomStoreId, err := ParseHealthcareDicomStoreId(rs.Primary.Attributes["dicom_store_id"], config)
 
 		if err != nil {
 			return err
 		}
 
-		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.DicomStores.GetIamPolicy(dicomStoreId.dicomStoreId()).Do()
+		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.DicomStores.GetIamPolicy(dicomStoreId.DicomStoreId()).Do()
 		if err != nil {
 			return err
 		}

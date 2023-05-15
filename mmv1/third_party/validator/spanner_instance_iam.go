@@ -1,6 +1,11 @@
 package google
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+)
 
 func resourceConverterSpannerInstanceIamPolicy() ResourceConverter {
 	return ResourceConverter{
@@ -30,15 +35,15 @@ func resourceConverterSpannerInstanceIamMember() ResourceConverter {
 	}
 }
 
-func GetSpannerInstanceIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetSpannerInstanceIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newSpannerInstanceIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetSpannerInstanceIamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetSpannerInstanceIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newSpannerInstanceIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetSpannerInstanceIamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetSpannerInstanceIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newSpannerInstanceIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -64,9 +69,9 @@ func MergeSpannerInstanceIamMemberDelete(existing, incoming Asset) Asset {
 }
 
 func newSpannerInstanceIamAsset(
-	d TerraformResourceData,
-	config *Config,
-	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
+	d tpgresource.TerraformResourceData,
+	config *transport_tpg.Config,
+	expandBindings func(d tpgresource.TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
@@ -87,7 +92,7 @@ func newSpannerInstanceIamAsset(
 	}}, nil
 }
 
-func FetchSpannerInstanceIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+func FetchSpannerInstanceIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("instance"); !ok {
 		return Asset{}, ErrEmptyIdentityField

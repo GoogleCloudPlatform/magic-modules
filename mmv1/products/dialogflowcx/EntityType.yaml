@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'EntityType'
-base_url: "{{parent}}/entityTypes"
+base_url: '{{parent}}/entityTypes'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -21,9 +21,26 @@ description: |
   For example, a date range, a proper name such as a geographic location or landmark, and so on. Entities represent actionable data for your application.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/dialogflow/cx/docs'
+    'Official Documentation': 'https://cloud.google.com/dialogflow/cx/docs'
   api: 'https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.entityTypes'
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 40
+  update_minutes: 40
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/dialogflowcx_entity_type.go.erb
+  pre_create: templates/terraform/pre_create/dialogflow_set_location.go.erb
+  pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
+  pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.erb
+  pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dialogflowcx_entity_type_full'
+    primary_resource_id: 'basic_entity_type'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+skip_sweeper: true
+id_format: '{{parent}}/entityTypes/{{name}}'
+import_format: ['{{parent}}/entityTypes/{{name}}']
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
@@ -49,11 +66,14 @@ properties:
     description: |
       The unique identifier of the entity type.
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/entityTypes/<Entity Type ID>.
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'displayName'
     required: true
     description: |
       The human-readable name of the entity type, unique within the agent.
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validation.StringLenBetween(0, 64)'
   - !ruby/object:Api::Type::Enum
     name: 'kind'
     required: true

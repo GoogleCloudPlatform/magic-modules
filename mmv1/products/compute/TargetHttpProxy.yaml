@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -23,8 +23,7 @@ description: |
   forwarding rule to route incoming HTTP requests to a URL map.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
+    'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
   api: 'https://cloud.google.com/compute/docs/reference/v1/targetHttpProxies'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -44,6 +43,21 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'target_http_proxy_basic'
+    primary_resource_id: 'default'
+    vars:
+      target_http_proxy_name: 'test-proxy'
+      url_map_name: 'url-map'
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'http-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'target_http_proxy_https_redirect'
+    primary_resource_id: 'default'
+    vars:
+      target_http_proxy_name: 'test-https-redirect-proxy'
+      url_map_name: 'url-map'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -53,7 +67,8 @@ properties:
     name: 'description'
     description: 'An optional description of this resource.'
   - !ruby/object:Api::Type::Integer
-    name: 'id'
+    name: 'proxyId'
+    api_name: 'id'
     description: 'The unique identifier for the resource.'
     output: true
   - !ruby/object:Api::Type::String
@@ -82,3 +97,4 @@ properties:
     description: |
       This field only applies when the forwarding rule that references
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
+    default_from_api: true

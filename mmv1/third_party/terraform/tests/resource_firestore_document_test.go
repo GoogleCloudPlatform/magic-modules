@@ -5,17 +5,18 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccFirestoreDocument_update(t *testing.T) {
 	t.Parallel()
 
 	name := fmt.Sprintf("tf-test-%d", RandInt(t))
-	project := GetTestFirestoreProjectFromEnv(t)
+	project := acctest.GetTestFirestoreProjectFromEnv(t)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: TestAccProviders,
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirestoreDocument_update(project, name),

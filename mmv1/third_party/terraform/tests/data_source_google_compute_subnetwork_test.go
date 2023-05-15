@@ -6,14 +6,16 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
 func TestAccDataSourceGoogleSubnetwork(t *testing.T) {
 	t.Parallel()
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: TestAccProviders,
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleSubnetwork(fmt.Sprintf("tf-test-subnetwork-ds-%d", RandInt(t)), fmt.Sprintf("tf-test-subnetwork-ds-%d", RandInt(t))),
@@ -61,11 +63,11 @@ func testAccDataSourceGoogleSubnetworkCheck(data_source_name string, resource_na
 			}
 		}
 
-		if !compareSelfLinkOrResourceName("", ds_attr["network"], rs_attr["network"], nil) && ds_attr["network"] != rs_attr["network"] {
+		if !tpgresource.CompareSelfLinkOrResourceName("", ds_attr["network"], rs_attr["network"], nil) && ds_attr["network"] != rs_attr["network"] {
 			return fmt.Errorf("network does not match: %s vs %s", ds_attr["network"], rs_attr["network"])
 		}
 
-		if !compareSelfLinkOrResourceName("", ds_attr["self_link"], rs_attr["self_link"], nil) && ds_attr["self_link"] != rs_attr["self_link"] {
+		if !tpgresource.CompareSelfLinkOrResourceName("", ds_attr["self_link"], rs_attr["self_link"], nil) && ds_attr["self_link"] != rs_attr["self_link"] {
 			return fmt.Errorf("self link does not match: %s vs %s", ds_attr["self_link"], rs_attr["self_link"])
 		}
 

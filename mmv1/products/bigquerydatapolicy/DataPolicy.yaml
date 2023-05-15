@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -12,8 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: "DataPolicy"
-min_version: beta
+name: 'DataPolicy'
 base_url: projects/{{project}}/locations/{{location}}/dataPolicies
 create_url: projects/{{project}}/locations/{{location}}/dataPolicies
 self_link: projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}
@@ -22,18 +21,34 @@ update_mask: true
 description: A BigQuery Data Policy
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    "Official Documentation": "https://cloud.google.com/bigquery/docs/column-data-masking-intro"
-  api: "https://cloud.google.com/bigquery/docs/reference/bigquerydatapolicy/rest/v1beta1/projects.locations.dataPolicies/create"
+    'Official Documentation': 'https://cloud.google.com/bigquery/docs/column-data-masking-intro'
+  api: 'https://cloud.google.com/bigquery/docs/reference/bigquerydatapolicy/rest/v1beta1/projects.locations.dataPolicies/create'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   exclude: false
-  method_name_separator: ":"
+  method_name_separator: ':'
   fetch_iam_policy_verb: :POST
-  parent_resource_attribute: "data_policy_id"
+  parent_resource_attribute: 'data_policy_id'
   import_format:
     [
-      "projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}",
-      "{{data_policy_id}}"
+      'projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}',
+      '{{data_policy_id}}',
     ]
+id_format: projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}',
+    '{{project}}/{{location}}/{{data_policy_id}}',
+    '{{location}}/{{data_policy_id}}',
+  ]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_datapolicy_data_policy_basic'
+    primary_resource_id: 'data_policy'
+    primary_resource_name:
+      'fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])'
+    vars:
+      data_policy_id: 'data_policy'
+      taxonomy: 'taxonomy'
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -58,6 +73,7 @@ properties:
     description: |-
       Policy tag resource name, in the format of projects/{project_number}/locations/{locationId}/taxonomies/{taxonomyId}/policyTags/{policyTag_id}.
     required: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - !ruby/object:Api::Type::Enum
     name: dataPolicyType
     description: |
@@ -67,12 +83,12 @@ properties:
       - :COLUMN_LEVEL_SECURITY_POLICY
       - :DATA_MASKING_POLICY
   - !ruby/object:Api::Type::NestedObject
-    name: "dataMaskingPolicy"
+    name: 'dataMaskingPolicy'
     description: |
       The data masking policy that specifies the data masking rule to use.
     properties:
       - !ruby/object:Api::Type::Enum
-        name: "predefinedExpression"
+        name: 'predefinedExpression'
         required: true
         description: |-
           The available masking rules. Learn more here: https://cloud.google.com/bigquery/docs/column-data-masking-intro#masking_options.
@@ -84,4 +100,3 @@ properties:
           - :FIRST_FOUR_CHARACTERS
           - :EMAIL_MASK
           - :DATE_YEAR_MASK
-

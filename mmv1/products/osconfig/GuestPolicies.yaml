@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -13,10 +13,10 @@
 
 --- !ruby/object:Api::Resource
 name: 'GuestPolicies'
-base_url: "projects/{{project}}/guestPolicies"
-create_url: "projects/{{project}}/guestPolicies?guestPolicyId={{guest_policy_id}}"
+base_url: 'projects/{{project}}/guestPolicies'
+create_url: 'projects/{{project}}/guestPolicies?guestPolicyId={{guest_policy_id}}'
 update_verb: :PATCH
-self_link: "projects/{{project}}/guestPolicies/{{guest_policy_id}}"
+self_link: 'projects/{{project}}/guestPolicies/{{guest_policy_id}}'
 min_version: beta
 identity:
   - guestPolicyId
@@ -26,9 +26,34 @@ description: |
   package repository configurations, and software to install.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/compute/docs/os-config-management'
+    'Official Documentation': 'https://cloud.google.com/compute/docs/os-config-management'
   api: 'https://cloud.google.com/compute/docs/osconfig/rest'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'os_config_guest_policies_basic'
+    primary_resource_id: 'guest_policies'
+    vars:
+      instance_name: 'guest-policy-inst'
+      guest_policy_id: 'guest-policy'
+    ignore_read_extra:
+      - 'project'  # project number is returned in rest response
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'os_config_guest_policies_packages'
+    primary_resource_id: 'guest_policies'
+    vars:
+      guest_policy_id: 'guest-policy'
+    ignore_read_extra:
+      - 'project'  # project number is returned in rest response
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'os_config_guest_policies_recipes'
+    primary_resource_id: 'guest_policies'
+    vars:
+      guest_policy_id: 'guest-policy'
+    ignore_read_extra:
+      - 'project'  # project number is returned in rest response
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: templates/terraform/post_create/set_computed_name.erb
+
 parameters:
   - !ruby/object:Api::Type::String
     name: 'guestPolicyId'
@@ -41,6 +66,8 @@ parameters:
       * Must be unique within the project.
     required: true
     url_param_only: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      regex: "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))"
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -76,7 +103,7 @@ properties:
           for example "env=prod or env=staging".
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
-             - !ruby/object:Api::Type::KeyValuePairs
+            - !ruby/object:Api::Type::KeyValuePairs
               name: 'labels'
               required: true
               description: |
@@ -135,15 +162,15 @@ properties:
           VM instances must match all supplied criteria for a given OsType to be included.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
-             - !ruby/object:Api::Type::String
+            - !ruby/object:Api::Type::String
               name: 'osShortName'
               description: |
                 Targets VM instances with OS Inventory enabled and having the following OS short name, for example "debian" or "windows".
-             - !ruby/object:Api::Type::String
+            - !ruby/object:Api::Type::String
               name: 'osVersion'
               description: |
                 Targets VM instances with OS Inventory enabled and having the following following OS version.
-             - !ruby/object:Api::Type::String
+            - !ruby/object:Api::Type::String
               name: 'osArchitecture'
               description: |
                 Targets VM instances with OS Inventory enabled and having the following OS architecture.
@@ -334,7 +361,7 @@ properties:
                 name: 'remote'
                 description: |
                   A generic remote artifact.
-                # TODO (mbang): add conflicts_with when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+                # TODO (mbang): add `conflicts` when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - !ruby/object:Api::Type::String
                     name: 'uri'
@@ -350,7 +377,7 @@ properties:
                 name: 'gcs'
                 description: |
                   A Google Cloud Storage artifact.
-                # TODO (mbang): add conflicts_with when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+                # TODO (mbang): add `conflicts` when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - !ruby/object:Api::Type::String
                     name: 'bucket'
@@ -421,6 +448,7 @@ properties:
                     name: 'destination'
                     description: |
                       Directory to extract archive to. Defaults to / on Linux or C:\ on Windows.
+                    default_from_api: true
                   - !ruby/object:Api::Type::Enum
                     name: 'type'
                     description: |
@@ -448,11 +476,13 @@ properties:
                     name: 'flags'
                     description: |
                       The flags to use when installing the MSI. Defaults to the install flag.
+                    default_from_api: true
                     item_type: Api::Type::String
                   - !ruby/object:Api::Type::Array
                     name: 'allowedExitCodes'
                     description: |
                       Return codes that indicate that the software installed or updated successfully. Behaviour defaults to [0]
+                    default_from_api: true
                     item_type: Api::Type::Integer
               - !ruby/object:Api::Type::NestedObject
                 name: 'dpkgInstallation'
@@ -491,6 +521,7 @@ properties:
                     name: 'allowedExitCodes'
                     description: |
                       A list of possible return values that the program can return to indicate a success. Defaults to [0].
+                    default_from_api: true
                   - !ruby/object:Api::Type::String
                     name: 'artifactId'
                     description: |
@@ -516,6 +547,7 @@ properties:
                     name: 'allowedExitCodes'
                     description: |
                       Return codes that indicate that the software installed or updated successfully. Behaviour defaults to [0]
+                    default_from_api: true
                     item_type: Api::Type::Integer
                   - !ruby/object:Api::Type::Enum
                     name: 'interpreter'
@@ -579,6 +611,7 @@ properties:
                     name: 'destination'
                     description: |
                       Directory to extract archive to. Defaults to / on Linux or C:\ on Windows.
+                    default_from_api: true
                   - !ruby/object:Api::Type::Enum
                     name: 'type'
                     description: |
@@ -606,11 +639,13 @@ properties:
                     name: 'flags'
                     description: |
                       The flags to use when installing the MSI. Defaults to the install flag.
+                    default_from_api: true
                     item_type: Api::Type::String
                   - !ruby/object:Api::Type::Array
                     name: 'allowedExitCodes'
                     description: |
                       Return codes that indicate that the software installed or updated successfully. Behaviour defaults to [0]
+                    default_from_api: true
                     item_type: Api::Type::Integer
               - !ruby/object:Api::Type::NestedObject
                 name: 'dpkgInstallation'
@@ -649,6 +684,7 @@ properties:
                     name: 'allowedExitCodes'
                     description: |
                       A list of possible return values that the program can return to indicate a success. Defaults to [0].
+                    default_from_api: true
                     item_type: Api::Type::Integer
                   - !ruby/object:Api::Type::String
                     name: 'artifactId'
@@ -675,6 +711,7 @@ properties:
                     name: 'allowedExitCodes'
                     description: |
                       Return codes that indicate that the software installed or updated successfully. Behaviour defaults to [0]
+                    default_from_api: true
                     item_type: Api::Type::Integer
                   - !ruby/object:Api::Type::Enum
                     name: 'interpreter'
@@ -715,3 +752,4 @@ properties:
     description: |
       The etag for this guest policy. If this is provided on update, it must match the server's etag.
 
+    default_from_api: true

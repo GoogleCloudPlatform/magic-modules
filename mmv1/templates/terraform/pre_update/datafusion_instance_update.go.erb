@@ -26,10 +26,10 @@ if d.HasChange("enable_rbac") {
     updateMask = append(updateMask, "enableRbac")
 }
 
-// updateMask is a URL parameter but not present in the schema, so replaceVars
+// updateMask is a URL parameter but not present in the schema, so ReplaceVars
 // won't set it
 
-url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 if err != nil {
     return err
 }

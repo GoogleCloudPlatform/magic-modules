@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -22,35 +22,56 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   fetch_iam_policy_verb: :POST
-  import_format: ["projects/{{project}}/locations/{{location}}/queues/{{name}}", "{{name}}"]      
+  import_format:
+    ['projects/{{project}}/locations/{{location}}/queues/{{name}}', '{{name}}']
+id_format: 'projects/{{project}}/locations/{{location}}/queues/{{name}}'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: 'templates/terraform/constants/cloud_tasks_retry_config_custom_diff.go'
+docs: !ruby/object:Provider::Terraform::Docs
+  warning: |
+    This resource requires an App Engine application to be created on the
+    project you're provisioning it on. If you haven't already enabled it, you
+    can create a `google_app_engine_application` resource to do so. This
+    resource's location will be the same as the App Engine location specified.
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'queue_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloud-tasks-queue-test%s\",
+      context[\"\
+      random_suffix\"])"
+    vars:
+      name: 'cloud-tasks-queue-test'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloud_tasks_queue_advanced'
+    primary_resource_id: 'advanced_configuration'
+    ignore_read_extra:
+      - 'app_engine_routing_override.0.service'
+      - 'app_engine_routing_override.0.version'
+      - 'app_engine_routing_override.0.instance'
+    vars:
+      name: 'instance-name'
 parameters:
-  - !ruby/object:Api::Type::Enum
-    name: 'status'
-    api_name: 'state'
-    # This is output-only in the API but we need to alter it in order to pause/resume the
-    # task queue.
-    output: false
-    description: The current state of the queue.
-    values:
-      - RUNNING
-      - PAUSED
-      - DISABLED
   - !ruby/object:Api::Type::String
     name: 'location'
     required: true
     immutable: true
     description: The location of the queue
+    url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     immutable: true
     description: The queue name.
     pattern: projects/{{project}}/locations/{{location}}/queues/{{name}}
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+    custom_expand: templates/terraform/custom_expand/qualify_queue_name.go.erb
   - !ruby/object:Api::Type::NestedObject
     name: 'appEngineRoutingOverride'
     description: |
       Overrides for task-level appEngineRouting. These settings apply only
       to App Engine tasks in this queue
+    custom_flatten: templates/terraform/custom_flatten/cloudtasks_queue_appenginerouting.go.erb
     properties:
       - !ruby/object:Api::Type::String
         name: 'service'
@@ -86,6 +107,7 @@ properties:
       * System throttling due to 429 (Too Many Requests) or 503 (Service
         Unavailable) responses from the worker, high error rates, or to
         smooth sudden large traffic spikes.
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::Double
         name: 'maxDispatchesPerSecond'
@@ -93,6 +115,7 @@ properties:
           The maximum rate at which tasks are dispatched from this queue.
 
           If unspecified when the queue is created, Cloud Tasks will pick the default.
+        default_from_api: true
       - !ruby/object:Api::Type::Integer
         name: 'maxConcurrentDispatches'
         description: |
@@ -100,6 +123,7 @@ properties:
           be dispatched for this queue. After this threshold has been
           reached, Cloud Tasks stops dispatching tasks until the number of
           concurrent requests decreases.
+        default_from_api: true
       - !ruby/object:Api::Type::Integer
         name: 'maxBurstSize'
         output: true
@@ -113,6 +137,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'retryConfig'
     description: Settings that determine the retry behavior.
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'maxAttempts'
@@ -127,6 +152,7 @@ properties:
           the default.
 
           -1 indicates unlimited attempts.
+        default_from_api: true
       - !ruby/object:Api::Type::String
         name: 'maxRetryDuration'
         description: |
@@ -137,18 +163,22 @@ properties:
           made and the task will be deleted.
 
           If zero, then the task age is unlimited.
+        default_from_api: true
+        diff_suppress_func: 'suppressOmittedMaxDuration'
       - !ruby/object:Api::Type::String
         name: 'minBackoff'
         description: |
           A task will be scheduled for retry between minBackoff and
           maxBackoff duration after it fails, if the queue's RetryConfig
           specifies that the task should be retried.
+        default_from_api: true
       - !ruby/object:Api::Type::String
         name: 'maxBackoff'
         description: |
           A task will be scheduled for retry between minBackoff and
           maxBackoff duration after it fails, if the queue's RetryConfig
           specifies that the task should be retried.
+        default_from_api: true
       - !ruby/object:Api::Type::Integer
         name: 'maxDoublings'
         description: |
@@ -157,10 +187,12 @@ properties:
           A task's retry interval starts at minBackoff, then doubles maxDoublings times,
           then increases linearly, and finally retries retries at intervals of maxBackoff
           up to maxAttempts times.
+        default_from_api: true
       - !ruby/object:Api::Type::Time
         name: 'purgeTime'
         output: true
         description: The last time this queue was purged.
+        exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: 'stackdriverLoggingConfig'
     description: |
@@ -173,8 +205,3 @@ properties:
           Specifies the fraction of operations to write to Stackdriver Logging.
           This field may contain any value between 0.0 and 1.0, inclusive. 0.0 is the
           default and means that no operations are logged.
-
-
-
-
-

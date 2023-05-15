@@ -20,6 +20,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/googleapi"
 )
 
@@ -60,11 +62,10 @@ func ResourceApigeeSharedFlow() *schema.Resource {
 				Description: `The ID of the shared flow.`,
 			},
 			"org_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-				Description: `The Apigee Organization associated with the Apigee instance,
-in the format 'organizations/{{org_name}}'.`,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: `The Apigee Organization name associated with the Apigee instance.`,
 			},
 			"latest_revision_id": {
 				Type:        schema.TypeString,
@@ -106,7 +107,7 @@ in the format 'organizations/{{org_name}}'.`,
 			"config_bundle": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: `A path to the config bundle zip you want to upload. Must be defined if content is not.`,
+				Description: `Path to the config zip bundle`,
 			},
 			"md5hash": {
 				Type:        schema.TypeString,
@@ -150,8 +151,8 @@ func resourceApigeeSharedFlowCreate(d *schema.ResourceData, meta interface{}) er
 	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, org_id=, 			%s", d.Get("org_id").(string))
 	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, config_bundle=, 	%s", d.Get("config_bundle").(string))
 
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -169,14 +170,14 @@ func resourceApigeeSharedFlowCreate(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error, \"config_bundle\" must be specified")
 	}
 
-	url, err := replaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows?name={{name}}&action=import")
+	url, err := tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows?name={{name}}&action=import")
 	if err != nil {
 		return err
 	}
 	billingProject := ""
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
@@ -189,7 +190,7 @@ func resourceApigeeSharedFlowCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	// Store the ID now
-	id, err := replaceVars(d, config, "organizations/{{org_id}}/sharedflows/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/sharedflows/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -212,13 +213,13 @@ func resourceApigeeSharedFlowUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceApigeeSharedFlowRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows/{{name}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows/{{name}}")
 	if err != nil {
 		return err
 	}
@@ -227,14 +228,14 @@ func resourceApigeeSharedFlowRead(d *schema.ResourceData, meta interface{}) erro
 	billingProject := ""
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 	log.Printf("[DEBUG] resourceApigeeSharedFlowRead sendRequest")
 	log.Printf("[DEBUG] resourceApigeeSharedFlowRead, url=, 	%s", url)
-	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := transport_tpg.SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("ApigeeSharedFlow %q", d.Id()))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ApigeeSharedFlow %q", d.Id()))
 	}
 	log.Printf("[DEBUG] resourceApigeeSharedFlowRead sendRequest completed")
 	previousLastModifiedAt := getApigeeSharedFlowLastModifiedAt(d)
@@ -280,15 +281,15 @@ func getApigeeSharedFlowLastModifiedAt(d *schema.ResourceData) string {
 
 func resourceApigeeSharedFlowDelete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] resourceApigeeSharedFlowDelete")
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	billingProject := ""
 
-	url, err := replaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows/{{name}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows/{{name}}")
 	if err != nil {
 		return err
 	}
@@ -297,13 +298,13 @@ func resourceApigeeSharedFlowDelete(d *schema.ResourceData, meta interface{}) er
 	log.Printf("[DEBUG] Deleting SharedFlow %q", d.Id())
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
-	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := transport_tpg.SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
-		return handleNotFoundError(err, d, "SharedFlow")
+		return transport_tpg.HandleNotFoundError(err, d, "SharedFlow")
 	}
 
 	log.Printf("[DEBUG] Finished deleting SharedFlow %q: %#v", d.Id(), res)
@@ -311,8 +312,8 @@ func resourceApigeeSharedFlowDelete(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceApigeeSharedFlowImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
-	if err := parseImportId([]string{
+	config := meta.(*transport_tpg.Config)
+	if err := tpgresource.ParseImportId([]string{
 		"organizations/(?P<org_id>[^/]+)/sharedflows/(?P<name>[^/]+)",
 		"(?P<org_id>[^/]+)/(?P<name>[^/]+)",
 	}, d, config); err != nil {
@@ -320,7 +321,7 @@ func resourceApigeeSharedFlowImport(d *schema.ResourceData, meta interface{}) ([
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "organizations/{{org_id}}/sharedflows/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/sharedflows/{{name}}")
 
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
@@ -331,7 +332,7 @@ func resourceApigeeSharedFlowImport(d *schema.ResourceData, meta interface{}) ([
 	return []*schema.ResourceData{d}, nil
 }
 
-func flattenApigeeSharedFlowMetaData(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenApigeeSharedFlowMetaData(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return nil
 	}
@@ -348,36 +349,36 @@ func flattenApigeeSharedFlowMetaData(v interface{}, d *schema.ResourceData, conf
 		flattenApigeeSharedFlowMetaDataSubType(original["subType"], d, config)
 	return []interface{}{transformed}
 }
-func flattenApigeeSharedFlowMetaDataCreatedAt(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenApigeeSharedFlowMetaDataCreatedAt(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenApigeeSharedFlowMetaDataLastModifiedAt(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenApigeeSharedFlowMetaDataLastModifiedAt(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenApigeeSharedFlowMetaDataSubType(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenApigeeSharedFlowMetaDataSubType(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenApigeeSharedFlowName(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenApigeeSharedFlowName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenApigeeSharedFlowRevision(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenApigeeSharedFlowRevision(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenApigeeSharedFlowLatestRevisionId(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenApigeeSharedFlowLatestRevisionId(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func expandApigeeSharedFlowName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandApigeeSharedFlowName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
 // sendRequestRawBodyWithTimeout is derived from sendRequestWithTimeout with direct pass through of request body
-func sendRequestRawBodyWithTimeout(config *Config, method, project, rawurl, userAgent string, body io.Reader, contentType string, timeout time.Duration, errorRetryPredicates ...RetryErrorPredicateFunc) (map[string]interface{}, error) {
+func sendRequestRawBodyWithTimeout(config *transport_tpg.Config, method, project, rawurl, userAgent string, body io.Reader, contentType string, timeout time.Duration, errorRetryPredicates ...transport_tpg.RetryErrorPredicateFunc) (map[string]interface{}, error) {
 	log.Printf("[DEBUG] sendRequestRawBodyWithTimeout start")
 	reqHeaders := make(http.Header)
 	reqHeaders.Set("User-Agent", userAgent)
@@ -397,7 +398,7 @@ func sendRequestRawBodyWithTimeout(config *Config, method, project, rawurl, user
 
 	log.Printf("[DEBUG] sendRequestRawBodyWithTimeout sending request")
 
-	err := RetryTimeDuration(
+	err := transport_tpg.RetryTimeDuration(
 		func() error {
 			req, err := http.NewRequest(method, rawurl, body)
 			if err != nil {
