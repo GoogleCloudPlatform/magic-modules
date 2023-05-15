@@ -143,4 +143,4 @@ func testAccCheckVertexAIIndexEndpointDestroyProducer(t *testing.T) func(s *terr
 
 		return nil
 	}
-} mmv1/third_party/terraform/tests/resource_vertex_ai_index_endpoint_test.go
+}
