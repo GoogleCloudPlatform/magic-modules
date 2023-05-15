@@ -251,6 +251,8 @@ module Provider
                         'third_party/terraform/utils/image.go'],
                        ['converters/google/resources/import.go',
                         'third_party/terraform/utils/import.go'],
+                       ['converters/google/resources/tpgresource/import.go',
+                        'third_party/terraform/tpgresource/import.go'],
                        ['converters/google/resources/disk_type.go',
                         'third_party/terraform/utils/disk_type.go'],
                        ['converters/google/resources/verify/validation.go',
