@@ -3,6 +3,7 @@ package google
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -48,7 +49,7 @@ func TestAccNotebooksInstance_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"vm_image"},
 			},
 			{
-				Config: testAccNotebooksInstance_update(context, false),
+				Config: testAccNotebooksInstance_update(context, true),
 			},
 			{
 				ResourceName:            "google_notebooks_instance.instance",
@@ -120,13 +121,7 @@ resource "google_notebooks_instance" "instance" {
 }
 
 func testAccNotebooksInstance_update(context map[string]interface{}, preventDestroy bool) string {
-	context["lifecycle_block"] = ""
-	if preventDestroy {
-		context["lifecycle_block"] = `
-		lifecycle {
-			prevent_destroy = true
-		}`
-	}
+	context["prevent_destroy"] = strconv.FormatBool(preventDestroy)
 
 	return Nprintf(`
 resource "google_notebooks_instance" "instance" {
@@ -154,7 +149,10 @@ resource "google_notebooks_instance" "instance" {
   labels = {
     key = "value"
   }
-	%{lifecycle_block}
+
+  lifecycle {
+  	prevent_destroy = %{prevent_destroy}
+  }
 }
 `, context)
 }
