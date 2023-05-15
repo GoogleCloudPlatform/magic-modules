@@ -1,8 +1,6 @@
 <% autogen_exception -%>
 package google
 
-<% unless version == 'ga' %>
-
 import (
 	"fmt"
 	"testing"
@@ -50,7 +48,7 @@ func TestAccNotebooksInstance_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"vm_image"},
 			},
 			{
-				Config: testAccNotebooksInstance_update(context),
+				Config: testAccNotebooksInstance_update(context, false),
 			},
 			{
 				ResourceName:            "google_notebooks_instance.instance",
@@ -59,7 +57,7 @@ func TestAccNotebooksInstance_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"vm_image"},
 			},
 			{
-				Config: testAccNotebooksInstance_basic(context),
+				Config: testAccNotebooksInstance_update(context, false),
 			},
 			{
 				ResourceName:            "google_notebooks_instance.instance",
@@ -108,11 +106,28 @@ resource "google_notebooks_instance" "instance" {
     project      = "deeplearning-platform-release"
     image_family = "tf-latest-cpu"
   }
+
+  metadata = {
+    proxy-mode = "service_account"
+    terraform  = "true"
+  }
+
+  lifecycle {
+  	prevent_destroy = true
+  }
 }
 `, context)
 }
 
-func testAccNotebooksInstance_update(context map[string]interface{}) string {
+func testAccNotebooksInstance_update(context map[string]interface{}, preventDestroy bool) string {
+	context["lifecycle_block"] = ""
+	if preventDestroy {
+		context["lifecycle_block"] = `
+		lifecycle {
+			prevent_destroy = true
+		}`
+	}
+
 	return Nprintf(`
 resource "google_notebooks_instance" "instance" {
   name = "tf-test-notebooks-instance%{random_suffix}"
@@ -130,12 +145,16 @@ resource "google_notebooks_instance" "instance" {
     image_family = "tf-latest-cpu"
   }
 
+  metadata = {
+    proxy-mode = "service_account"
+    terraform  = "true"
+    notebook-upgrade-schedule = "0 * * * *"
+  }
+
   labels = {
     key = "value"
   }
+	%{lifecycle_block}
 }
 `, context)
 }
-
-
-<% end -%>
