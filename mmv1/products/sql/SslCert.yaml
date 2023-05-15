@@ -16,7 +16,7 @@ name: 'SslCert'
 kind: 'sql#sslCert'
 base_url: projects/{{project}}/instances/{{instance}}/sslCerts
 self_link: 'projects/{{project}}/instances/{{instance}}/sslCerts/{{sha1_fingerprint}}'
-readonly: true # we're not enforcing state as it is all server-side driven.
+readonly: true  # we're not enforcing state as it is all server-side driven.
 description: |
   Represents an SSL certificate created for a Cloud SQL instance. To use the
   SSL certificate you must have the SSL Client Certificate and the

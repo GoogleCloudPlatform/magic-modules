@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 type DialogflowCXOperationWaiter struct {
 	Config    *transport_tpg.Config
 	UserAgent string
-	CommonOperationWaiter
+	tpgresource.CommonOperationWaiter
 	Location string
 }
 
@@ -22,7 +23,7 @@ func (w *DialogflowCXOperationWaiter) QueryOp() (interface{}, error) {
 	// Returns the proper get.
 	url := fmt.Sprintf("https://%s-dialogflow.googleapis.com/v3/%s", w.Location, w.CommonOperationWaiter.Op.Name)
 
-	return SendRequest(w.Config, "GET", "", url, w.UserAgent, nil)
+	return transport_tpg.SendRequest(w.Config, "GET", "", url, w.UserAgent, nil)
 }
 
 func createDialogflowCXWaiter(config *transport_tpg.Config, op map[string]interface{}, activity, userAgent, location string) (*DialogflowCXOperationWaiter, error) {
@@ -43,7 +44,7 @@ func DialogflowCXOperationWaitTimeWithResponse(config *transport_tpg.Config, op 
 	if err != nil {
 		return err
 	}
-	if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
+	if err := tpgresource.OperationWait(w, activity, timeout, config.PollInterval); err != nil {
 		return err
 	}
 	return json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), response)
@@ -59,5 +60,5 @@ func DialogflowCXOperationWaitTime(config *transport_tpg.Config, op map[string]i
 		// If w is nil, the op was synchronous.
 		return err
 	}
-	return OperationWait(w, activity, timeout, config.PollInterval)
+	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }

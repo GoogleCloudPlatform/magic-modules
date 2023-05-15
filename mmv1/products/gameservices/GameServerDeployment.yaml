@@ -41,13 +41,16 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 autogen_async: true
-import_format: ["projects/{{project}}/locations/{{location}}/gameServerDeployments/{{deployment_id}}"]
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/gameServerDeployments/{{deployment_id}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "game_service_deployment_basic"
-    primary_resource_id: "default"
+    name: 'game_service_deployment_basic'
+    primary_resource_id: 'default'
     vars:
-      deployment_id: "tf-test-deployment"
+      deployment_id: 'tf-test-deployment'
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -71,8 +74,8 @@ properties:
       A unique id for the deployment.
   - !ruby/object:Api::Type::String
     name: location
-  # The only acceptable location currently is 'global'
-  # TODO - either hard code or set as computed
+    # The only acceptable location currently is 'global'
+    # TODO - either hard code or set as computed
     url_param_only: true
     default_value: global
     description: Location of the Deployment.

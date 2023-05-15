@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	datastream "google.golang.org/api/datastream/v1"
@@ -16,7 +17,7 @@ type DatastreamOperationWaiter struct {
 	UserAgent string
 	Project   string
 	Op        datastream.Operation
-	CommonOperationWaiter
+	tpgresource.CommonOperationWaiter
 }
 
 func (w *DatastreamOperationWaiter) QueryOp() (interface{}, error) {
@@ -26,7 +27,7 @@ func (w *DatastreamOperationWaiter) QueryOp() (interface{}, error) {
 	// Returns the proper get.
 	url := fmt.Sprintf("%s%s", w.Config.DatastreamBasePath, w.Op.Name)
 
-	return SendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
+	return transport_tpg.SendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
 }
 
 func (w *DatastreamOperationWaiter) Error() error {
@@ -38,7 +39,7 @@ func (w *DatastreamOperationWaiter) Error() error {
 
 func (w *DatastreamOperationWaiter) SetOp(op interface{}) error {
 	w.CommonOperationWaiter.SetOp(op)
-	if err := Convert(op, &w.Op); err != nil {
+	if err := tpgresource.Convert(op, &w.Op); err != nil {
 		return err
 	}
 	return nil
@@ -62,7 +63,7 @@ func DatastreamOperationWaitTimeWithResponse(config *transport_tpg.Config, op ma
 	if err != nil {
 		return err
 	}
-	if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
+	if err := tpgresource.OperationWait(w, activity, timeout, config.PollInterval); err != nil {
 		return err
 	}
 	return json.Unmarshal([]byte(w.Op.Response), response)
@@ -78,7 +79,7 @@ func DatastreamOperationWaitTime(config *transport_tpg.Config, op map[string]int
 		// If w is nil, the op was synchronous.
 		return err
 	}
-	return OperationWait(w, activity, timeout, config.PollInterval)
+	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }
 
 // DatastreamOperationError wraps datastream.Status and implements the

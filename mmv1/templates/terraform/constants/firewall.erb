@@ -28,7 +28,7 @@ func resourceComputeFirewallRuleHash(v interface{}) int {
 		}
 	}
 
-	return hashcode(buf.String())
+	return tpgresource.Hashcode(buf.String())
 }
 
 func compareCaseInsensitive(k, old, new string, d *schema.ResourceData) bool {

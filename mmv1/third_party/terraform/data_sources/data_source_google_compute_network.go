@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -48,19 +49,19 @@ func DataSourceGoogleComputeNetwork() *schema.Resource {
 
 func dataSourceGoogleComputeNetworkRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 	name := d.Get("name").(string)
 	network, err := config.NewComputeClient(userAgent).Networks.Get(project, name).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Network Not Found : %s", name))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Network Not Found : %s", name))
 	}
 	if err := d.Set("gateway_ipv4", network.GatewayIPv4); err != nil {
 		return fmt.Errorf("Error setting gateway_ipv4: %s", err)

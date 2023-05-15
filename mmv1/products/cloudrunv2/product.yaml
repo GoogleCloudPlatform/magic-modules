@@ -11,8 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-!ruby/object:Api::Product
+--- !ruby/object:Api::Product
 name: CloudRunV2
 display_name: Cloud Run (v2 API)
 scopes:
@@ -20,6 +19,9 @@ scopes:
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
+    base_url: https://run.googleapis.com/v2/
+  - !ruby/object:Api::Product::Version
+    name: beta
     base_url: https://run.googleapis.com/v2/
 apis_required:
   - !ruby/object:Api::Product::ApiReference

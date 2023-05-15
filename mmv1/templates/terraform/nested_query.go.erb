@@ -70,8 +70,8 @@ func resource<%=resource_name%>FindNestedObjectInList(d *schema.ResourceData, me
 
     <% object.identity.each do |prop| -%>
     item<%= titlelize_property(prop) -%> := flattenNested<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name %>"], d, meta.(*transport_tpg.Config))
-    // isEmptyValue check so that if one is nil and the other is "", that's considered a match
-    if !(isEmptyValue(reflect.ValueOf(item<%= titlelize_property(prop) -%>)) && isEmptyValue(reflect.ValueOf(expectedFlattened<%= titlelize_property(prop) -%>))) && !reflect.DeepEqual(item<%= titlelize_property(prop) -%>, expectedFlattened<%= titlelize_property(prop) -%>) {
+    // IsEmptyValue check so that if one is nil and the other is "", that's considered a match
+    if !(tpgresource.IsEmptyValue(reflect.ValueOf(item<%= titlelize_property(prop) -%>)) && tpgresource.IsEmptyValue(reflect.ValueOf(expectedFlattened<%= titlelize_property(prop) -%>))) && !reflect.DeepEqual(item<%= titlelize_property(prop) -%>, expectedFlattened<%= titlelize_property(prop) -%>) {
       log.Printf("[DEBUG] Skipping item with <%= prop.api_name %>= %#v, looking for %#v)", item<%= titlelize_property(prop) -%>, expectedFlattened<%= titlelize_property(prop) -%>)
       continue
     }
@@ -226,23 +226,23 @@ func resource<%= resource_name -%>PatchDeleteEncoder(d *schema.ResourceData, met
 -%>
 func resource<%= resource_name -%>ListForPatch(d *schema.ResourceData, meta interface{}) ([]interface{}, error) {
   config := meta.(*transport_tpg.Config)
-  url, err := ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+  url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
   if err != nil {
       return nil, err
   }
   <% if has_project -%>
-  project, err := getProject(d, config)
+  project, err := tpgresource.GetProject(d, config)
   if err != nil {
       return nil, err
   }
   <% end -%>
 
-  userAgent, err := generateUserAgentString(d, config.UserAgent)
+  userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
   if err != nil {
     return nil, err
   }
 
-  res, err := SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project %>project<% else %>""<% end %>, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+  res, err := transport_tpg.SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project %>project<% else %>""<% end %>, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
   if err != nil {
     return nil, err
   }

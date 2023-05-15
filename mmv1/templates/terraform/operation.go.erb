@@ -14,11 +14,9 @@ import (
 <% end -%>
   "fmt"
   "time"
-<% if version == 'private' -%>
-  transport_tpg "internal/terraform-next/google-private/transport"
-<% else -%>
-  transport_tpg "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/transport"
-<% end -%>
+
+  "<%= import_path() -%>/tpgresource"
+  transport_tpg "<%= import_path() -%>/transport"
 )
 
 type <%= product_name -%>OperationWaiter struct {
@@ -30,7 +28,7 @@ type <%= product_name -%>OperationWaiter struct {
 <%  if object.__product.operation_retry -%>
 	retryCount int
 <% end -%>
-  CommonOperationWaiter
+  tpgresource.CommonOperationWaiter
 }
 
 func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
@@ -44,7 +42,7 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
   url := fmt.Sprintf("%s<%= [async.operation.base_url].flatten.join.gsub('{{op_id}}', '%s')-%>", w.Config.<%= product_name -%>BasePath, w.CommonOperationWaiter.Op.Name)
   <% end -%>
 
-  return SendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, w.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+  return transport_tpg.SendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, w.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 }
 
 <%  if object.__product.operation_retry -%>
@@ -79,7 +77,7 @@ func <%= product_name.camelize() -%>OperationWaitTimeWithResponse(config *transp
   if err != nil {
       return err
   }
-  if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
+  if err := tpgresource.OperationWait(w, activity, timeout, config.PollInterval); err != nil {
       return err
   }
   return json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), response)
@@ -96,5 +94,5 @@ func <%= product_name.camelize() -%>OperationWaitTime(config *transport_tpg.Conf
       // If w is nil, the op was synchronous.
       return err
   }
-  return OperationWait(w, activity, timeout, config.PollInterval)
+  return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }

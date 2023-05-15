@@ -46,8 +46,9 @@ parameters:
     required: true
   - !ruby/object:Api::Type::Boolean
     name: 'isDefault'
-    description: If true, this version will be used to handle prediction requests
-      that do not specify a version
+    description:
+      If true, this version will be used to handle prediction requests that do
+      not specify a version
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -61,8 +62,8 @@ properties:
     description: The description specified for the version when it was created.
   - !ruby/object:Api::Type::String
     name: 'deploymentUri'
-    description: The Cloud Storage location of the trained model used to create the
-      version
+    description:
+      The Cloud Storage location of the trained model used to create the version
     required: true
   - !ruby/object:Api::Type::Time
     name: 'createTime'
@@ -77,8 +78,9 @@ properties:
     description: The AI Platform runtime version to use for this deployment
   - !ruby/object:Api::Type::Enum
     name: 'machineType'
-    description: The type of machine on which to serve the model. Currently only applies
-      to online prediction service.
+    description:
+      The type of machine on which to serve the model. Currently only applies to
+      online prediction service.
     values:
       - mls1-c1-m2
       - mls1-c4-m2
@@ -99,18 +101,21 @@ properties:
     output: true
   - !ruby/object:Api::Type::Array
     name: 'packageUris'
-    description: Cloud Storage paths (gs://…) of packages for custom prediction routines
-      or scikit-learn pipelines with custom code.
+    description:
+      Cloud Storage paths (gs://…) of packages for custom prediction routines or
+      scikit-learn pipelines with custom code.
     output: true
     item_type: Api::Type::String
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
-    description: One or more labels that you can add, to organize your model versions
-    # no etag since it's immutable: true
+    description:
+      One or more labels that you can add, to organize your model versions
+  # no etag since it's immutable: true
   - !ruby/object:Api::Type::Enum
     name: 'framework'
-    description: The machine learning framework AI Platform uses to train this version
-      of the model
+    description:
+      The machine learning framework AI Platform uses to train this version of
+      the model
     values:
       - FRAMEWORK_UNSPECIFIED
       - TENSORFLOW
@@ -153,8 +158,9 @@ properties:
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'nodes'
-        description: The number of nodes to allocate for this model. These nodes are
-          always up, starting from the time the model is deployed
+        description:
+          The number of nodes to allocate for this model. These nodes are always
+          up, starting from the time the model is deployed
   - !ruby/object:Api::Type::String
     name: 'predictionClass'
     description: |
@@ -162,5 +168,3 @@ properties:
       implements the Predictor interface described in this reference
       field. The module containing this class should be included in a
       package provided to the packageUris field.
-
-

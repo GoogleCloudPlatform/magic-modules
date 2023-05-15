@@ -22,11 +22,11 @@
       </tr>
       <tr>
         <th>PRODUCT <span class="reduce-impact">(optional)</span></td>
-        <td>Specifies the product to build. Equivalent to the folder name within <code>/mmv1/products</code> or <code>/tpgtools/api</code>. Useful to scope the build to your changes. Note: mmv1 files in <code>mmv1/third_party/terraform</code> on run of make provider are always built. So if youve only modified files in this directory you can set the PRODUCT to a non-existant one to skip the generation of non-handwritten, code.</td>
+        <td>Specifies the product to build. Equivalent to the folder name within <code>/mmv1/products</code> or <code>/tpgtools/api</code>. Useful to scope the build to your changes. Note: mmv1 files in <code>mmv1/third_party/terraform</code> on run of make provider are always built. So if you've only modified files in this directory you can set the PRODUCT to a non-existant one to skip the generation of non-handwritten code. Note: If you receive compilation errors after a rebase, you may need to run this again without specifying this option.</td>
       </tr>
       <tr>
         <th>RESOURCE <span class="reduce-impact">(optional)</span></th>
-        <td>Specifies the resource to build. Equivalent to the product name within the <code>product.yaml</code> file for <code>mmv1</code> or the terraform resource name for <code>tpgtools</code> resources. If filtering for mmv1 <code>PRODUCT</code> must be defined.</td>
+        <td>Specifies the resource to build. Equivalent to the product name within the <code>product.yaml</code> file for <code>mmv1</code> or the terraform resource name for <code>tpgtools</code> resources. If filtering for mmv1 <code>PRODUCT</code> must be defined. Note: If you receive compilation errors after a rebase, you may need to run this again without specifying this option.</td>
       </tr>
     </tbody>
   </table>

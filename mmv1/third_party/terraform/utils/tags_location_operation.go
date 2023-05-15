@@ -7,13 +7,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 type TagsLocationOperationWaiter struct {
 	Config    *transport_tpg.Config
 	UserAgent string
-	CommonOperationWaiter
+	tpgresource.CommonOperationWaiter
 }
 
 func (w *TagsLocationOperationWaiter) QueryOp() (interface{}, error) {
@@ -24,10 +25,10 @@ func (w *TagsLocationOperationWaiter) QueryOp() (interface{}, error) {
 	if location != w.CommonOperationWaiter.Op.Name {
 		// Found location in Op.Name, fill it in TagsLocationBasePath and rewrite URL
 		url := fmt.Sprintf("%s%s", strings.Replace(w.Config.TagsLocationBasePath, "{{location}}", location, 1), w.CommonOperationWaiter.Op.Name)
-		return SendRequest(w.Config, "GET", "", url, w.UserAgent, nil)
+		return transport_tpg.SendRequest(w.Config, "GET", "", url, w.UserAgent, nil)
 	} else {
 		url := fmt.Sprintf("%s%s", w.Config.TagsBasePath, w.CommonOperationWaiter.Op.Name)
-		return SendRequest(w.Config, "GET", "", url, w.UserAgent, nil)
+		return transport_tpg.SendRequest(w.Config, "GET", "", url, w.UserAgent, nil)
 	}
 }
 
@@ -47,7 +48,7 @@ func TagsLocationOperationWaitTimeWithResponse(config *transport_tpg.Config, op 
 	if err != nil {
 		return err
 	}
-	if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
+	if err := tpgresource.OperationWait(w, activity, timeout, config.PollInterval); err != nil {
 		return err
 	}
 	return json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), response)
@@ -63,7 +64,7 @@ func TagsLocationOperationWaitTime(config *transport_tpg.Config, op map[string]i
 		// If w is nil, the op was synchronous.
 		return err
 	}
-	return OperationWait(w, activity, timeout, config.PollInterval)
+	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }
 
 func GetLocationFromOpName(opName string) string {

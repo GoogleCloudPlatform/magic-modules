@@ -16,12 +16,12 @@
 //Use it to delete TagTemplate Field
 func deleteTagTemplateField(d *schema.ResourceData, config *transport_tpg.Config, name, billingProject, userAgent string) (error) {
 
-	url_delete, err := ReplaceVars(d, config, "{{DataCatalogBasePath}}{{name}}/fields/"+name+"?force={{force_delete}}")
+	url_delete, err := tpgresource.ReplaceVars(d, config, "{{DataCatalogBasePath}}{{name}}/fields/"+name+"?force={{force_delete}}")
 	if err != nil {
 		return err
 	}
 	var obj map[string]interface{}
-	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url_delete, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := transport_tpg.SendRequestWithTimeout(config, "DELETE", billingProject, url_delete, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return fmt.Errorf("Error deleting TagTemplate Field %v: %s", name, err)
 	}
@@ -33,17 +33,17 @@ func deleteTagTemplateField(d *schema.ResourceData, config *transport_tpg.Config
 //Use it to create TagTemplate Field
 func createTagTemplateField(d *schema.ResourceData, config *transport_tpg.Config, body map[string]interface{}, name, billingProject, userAgent string) (error) {
 
-	url_create, err := ReplaceVars(d, config, "{{DataCatalogBasePath}}{{name}}/fields")
+	url_create, err := tpgresource.ReplaceVars(d, config, "{{DataCatalogBasePath}}{{name}}/fields")
 	if err != nil {
 		return err
 	}
 
-	url_create, err = AddQueryParams(url_create, map[string]string{"tagTemplateFieldId": name})
+	url_create, err = transport_tpg.AddQueryParams(url_create, map[string]string{"tagTemplateFieldId": name})
 	if err != nil {
 		return err
 	}
 
-	res_create, err := SendRequestWithTimeout(config, "POST", billingProject, url_create, userAgent, body, d.Timeout(schema.TimeoutCreate))
+	res_create, err := transport_tpg.SendRequestWithTimeout(config, "POST", billingProject, url_create, userAgent, body, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating TagTemplate Field: %s", err)
 	}
