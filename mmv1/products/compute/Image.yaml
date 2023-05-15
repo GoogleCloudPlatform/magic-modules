@@ -149,6 +149,7 @@ properties:
       (regional or multi-regional). 
       Reference link: https://cloud.google.com/compute/docs/reference/rest/v1/images
     item_type: Api::Type::String
+    default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: 'diskSizeGb'
     description: |
