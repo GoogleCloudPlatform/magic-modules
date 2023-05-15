@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_network_peering"
 description: |-
   Manages a network peering within GCE.
 ---
@@ -66,6 +65,9 @@ Whether subnet routes with public IP range are exported. The default value is tr
 * `import_subnet_routes_with_public_ip` - (Optional)
 Whether subnet routes with public IP range are imported. The default value is false. The IPv4 special-use ranges (https://en.wikipedia.org/wiki/IPv4#Special_addresses) are always imported from peers and are not controlled by this field.
 
+* `stack_type` - (Optional)
+Which IP version(s) of traffic and routes are allowed to be imported or exported between peer networks. The default value is IPV4_ONLY. Possible values: ["IPV4_ONLY", "IPV4_IPV6"].
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
@@ -81,7 +83,7 @@ exported:
 ## Timeouts
 
 This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
 - `create` - Default is 4 minutes.
 - `delete` - Default is 4 minutes.

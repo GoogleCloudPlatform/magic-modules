@@ -5,22 +5,23 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccBigqueryDatasetIamMember_basic(t *testing.T) {
 	t.Parallel()
 
-	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
-	saID := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	saID := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	expected := map[string]interface{}{
 		"role":        "roles/viewer",
-		"userByEmail": fmt.Sprintf("%s@%s.iam.gserviceaccount.com", saID, getTestProjectFromEnv()),
+		"userByEmail": fmt.Sprintf("%s@%s.iam.gserviceaccount.com", saID, acctest.GetTestProjectFromEnv()),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryDatasetIamMember_basic(datasetID, saID),

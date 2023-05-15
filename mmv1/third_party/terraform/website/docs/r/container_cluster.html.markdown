@@ -1,6 +1,5 @@
 ---
 subcategory: "Kubernetes (Container) Engine"
-page_title: "Google: google_container_cluster"
 description: |-
   Creates a Google Kubernetes Engine (GKE) cluster.
 ---
@@ -355,6 +354,12 @@ subnetwork in which the cluster's instances are launched.
 * `dns_config` - (Optional)
   Configuration for [Using Cloud DNS for GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/cloud-dns). Structure is [documented below](#nested_dns_config).
 
+* `gateway_api_config` - (Optional)
+  Configuration for [GKE Gateway API controller](https://cloud.google.com/kubernetes-engine/docs/concepts/gateway-api). Structure is [documented below](#nested_gateway_api_config).
+
+* `protect_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  Enable/Disable Protect API features for the cluster. Structure is [documented below](#nested_protect_config).
+
 <a name="nested_default_snat_status"></a>The `default_snat_status` block supports
 
 *  `disabled` - (Required) Whether the cluster disables default in-node sNAT rules. In-node sNAT rules will be disabled when defaultSnatStatus is disabled.When disabled is set to false, default IP masquerade rules will be applied to the nodes to prevent sNAT on cluster internal traffic
@@ -386,6 +391,10 @@ subnetwork in which the cluster's instances are launched.
     which allows the usage of filestore instance as volumes.
     It is disabled by default; set `enabled = true` to enable.
 
+* `gcs_fuse_csi_driver_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))) The status of the GCSFuse CSI driver addon,
+    which allows the usage of a gcs bucket as volumes.
+    It is disabled by default; set `enabled = true` to enable.
+
 * `cloudrun_config` - (Optional). Structure is [documented below](#nested_cloudrun_config).
 
 * `istio_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
@@ -403,14 +412,15 @@ subnetwork in which the cluster's instances are launched.
 * `gce_persistent_disk_csi_driver_config` - (Optional).
     Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Defaults to disabled; set `enabled = true` to enabled.
 
+*  `gke_backup_agent_config` -  (Optional).
+    The status of the Backup for GKE agent addon. It is disabled by default; Set `enabled = true` to enable.
+
 * `kalm_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     Configuration for the KALM addon, which manages the lifecycle of k8s. It is disabled by default; Set `enabled = true` to enable.
 
-*  `config_connector_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+*  `config_connector_config` -  (Optional).
     The status of the ConfigConnector addon. It is disabled by default; Set `enabled = true` to enable.
 
-*  `gke_backup_agent_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
-    The status of the Backup for GKE agent addon. It is disabled by default; Set `enabled = true` to enable.
 
 This example `addons_config` disables two addons:
 
@@ -527,6 +537,32 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 This block also contains several computed attributes, documented below.
 
+* `upgrade_settings` - (Optional) Specifies the upgrade settings for NAP created node pools. Structure is [documented below](#nested_upgrade_settings).
+
+<a name="nested_upgrade_settings"></a>The `upgrade_settings` block supports:
+
+* `strategy` - (Optional) Strategy used for node pool update. Strategy can only be one of BLUE_GREEN or SURGE. The default is value is SURGE.
+
+* `max_surge` - (Optional) The maximum number of nodes that can be created beyond the current size of the node pool during the upgrade process. To be used when strategy is set to SURGE. Default is 0.
+
+* `max_unavailable` - (Optional) The maximum number of nodes that can be simultaneously unavailable during the upgrade process. To be used when strategy is set to SURGE. Default is 0.
+
+* `blue_green_settings` - (Optional) Settings for blue-green upgrade strategy. To be specified when strategy is set to BLUE_GREEN. Structure is [documented below](#nested_blue_green_settings).
+
+<a name="nested_blue_green_settings"></a>The `blue_green_settings` block supports:
+
+* `node_pool_soak_duration` - (Optional) Time needed after draining entire blue pool. After this period, blue pool will be cleaned up. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+
+* `standard_rollout_policy`: (Optional) Standard policy for the blue-green upgrade. To be specified when strategy is set to BLUE_GREEN. Structure is [documented below](#nested_standard_rollout_policy).
+
+<a name="nested_standard_rollout_policy"></a>The `standard_rollout_policy` block supports:
+
+* `batch_percentage`: (Optional) Percentage of the bool pool nodes to drain in a batch. The range of this field should be (0.0, 1.0). Only one of the batch_percentage or batch_node_count can be specified.
+
+* `batch_node_count` - (Optional) Number of blue nodes to drain in a batch. Only one of the batch_percentage or batch_node_count can be specified.
+
+* `batch_soak_duration` - (Optional) Soak time after each batch gets drained. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".`.
+
 <a name="nested_authenticator_groups_config"></a>The `authenticator_groups_config` block supports:
 
 * `security_group` - (Required) The name of the RBAC security group for use with Google security groups in Kubernetes RBAC. Group name must be in format `gke-security-groups@yourdomain.com`.
@@ -540,7 +576,7 @@ This block also contains several computed attributes, documented below.
 
 *  `enable_components` - (Optional) The GKE components exposing metrics. Supported values include: `SYSTEM_COMPONENTS`, `APISERVER`, `CONTROLLER_MANAGER`, and `SCHEDULER`. In beta provider, `WORKLOADS` is supported on top of those 4 values. (`WORKLOADS` is deprecated and removed in GKE 1.24.)
 
-*  `managed_prometheus` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for Managed Service for Prometheus. Structure is [documented below](#nested_managed_prometheus).
+*  `managed_prometheus` - (Optional) Configuration for Managed Service for Prometheus. Structure is [documented below](#nested_managed_prometheus).
 
 <a name="nested_managed_prometheus"></a>The `managed_prometheus` block supports:
 
@@ -659,6 +695,10 @@ to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.
 from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to
 pick a specific range to use.
 
+* `stack_type` - (Optional) The IP Stack Type of the cluster. 
+Default value is `IPV4`.
+Possible values are `IPV4` and `IPV4_IPV6`.
+
 <a name="nested_master_auth"></a>The `master_auth` block supports:
 
 * `client_certificate_config` - (Required) Whether client certificate authorization is enabled for this cluster.  For example:
@@ -709,6 +749,15 @@ ephemeral_storage_config {
   local_ssd_count = 2
 }
 ```
+* `ephemeral_storage_local_ssd_config` - (Optional) Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk. Structure is [documented below](#nested_ephemeral_storage_local_ssd_config).
+
+```hcl
+ephemeral_storage_local_ssd_config {
+  local_ssd_count = 2
+}
+```
+
+* `local_nvme_ssd_block_config` - (Optional) Parameters for the local NVMe SSDs. Structure is [documented below](#nested_local_nvme_ssd_block_config).
 
 * `logging_variant` (Optional) Parameter for specifying the type of logging agent used in a node pool. This will override any [cluster-wide default value](#nested_node_pool_defaults). Valid values include DEFAULT and MAX_THROUGHPUT. See [Increasing logging agent throughput](https://cloud.google.com/stackdriver/docs/solutions/gke/managing-logs#throughput) for more information.
 
@@ -813,7 +862,7 @@ recommended. Structure is [documented below](#nested_taint).
 * `workload_metadata_config` - (Optional) Metadata configuration to expose to workloads on the node pool.
     Structure is [documented below](#nested_workload_metadata_config).
 
-* `kubelet_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `kubelet_config` - (Optional)
 Kubelet configuration, currently supported attributes can be found [here](https://cloud.google.com/sdk/gcloud/reference/beta/container/node-pools/create#--system-config-from-file).
 Structure is [documented below](#nested_kubelet_config).
 
@@ -822,10 +871,11 @@ kubelet_config {
   cpu_manager_policy   = "static"
   cpu_cfs_quota        = true
   cpu_cfs_quota_period = "100us"
+  pod_pids_limit       = 1024
 }
 ```
 
-* `linux_node_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `linux_node_config` - (Optional)
 Linux node configuration, currently supported attributes can be found [here](https://cloud.google.com/sdk/gcloud/reference/beta/container/node-pools/create#--system-config-from-file).
 Note that validations happen all server side. All attributes are optional.
 Structure is [documented below](#nested_linux_node_config).
@@ -841,9 +891,25 @@ linux_node_config {
 
 * `node_group` - (Optional) Setting this field will assign instances of this pool to run on the specified node group. This is useful for running workloads on [sole tenant nodes](https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes).
 
+* `advanced_machine_features` - (Optional) Specifies options for controlling
+  advanced machine features. Structure is documented below.
+
+<a name="nested_advanced_machine_features"></a>The `advanced_machine_features` block supports:
+
+* `threads_per_core` - (Required) The number of threads per physical core. To disable simultaneous multithreading (SMT) set this to 1. If unset, the maximum number of threads supported per core by the underlying processor is assumed.
+
 <a name="nested_ephemeral_storage_config"></a>The `ephemeral_storage_config` block supports:
 
 * `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
+
+<a name="nested_ephemeral_storage_local_ssd_config"></a>The `ephemeral_storage_local_ssd_config` block supports:
+
+* `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
+
+<a name="nested_local_nvme_ssd_block_config"></a>The `local_nvme_ssd_block_config` block supports:
+
+* `local_ssd_count` (Required) - Number of raw-block local NVMe SSD disks to be attached to the node. Each local SSD is 375 GB in size. If zero, it means no raw-block local NVMe SSD disks to be attached to the node.
+-> Note: Local NVMe SSD storage available in GKE versions v1.25.3-gke.1800 and later.
 
 <a name="nested_gcfs_config"></a>The `gcfs_config` block supports:
 
@@ -1087,6 +1153,8 @@ value and accepts an invalid `default` value instead. While this remains true,
 not specifying the `kubelet_config` block should be the equivalent of specifying
 `none`.
 
+* `pod_pids_limit` - (Optional) Controls the maximum number of processes allowed to run in a pod. The value must be greater than or equal to 1024 and less than 4194304.
+
 <a name="nested_linux_node_config"></a>The `linux_node_config` block supports:
 
 * `sysctls` - (Required)  The Linux kernel parameters to be applied to the nodes
@@ -1104,6 +1172,20 @@ and all pods running on the nodes. Specified as a map from the key, such as
 * `cluster_dns_scope` - (Optional) The scope of access to cluster DNS records. `DNS_SCOPE_UNSPECIFIED` (default) or `CLUSTER_SCOPE` or `VPC_SCOPE`.
 
 * `cluster_dns_domain` - (Optional) The suffix used for all cluster service records.
+
+<a name="nested_gateway_api_config"></a>The `gateway_api_config` block supports:
+
+* `channel` - (Required) Which Gateway Api channel should be used. `CHANNEL_DISABLED`, `CHANNEL_EXPERIMENTAL` or `CHANNEL_STANDARD`.
+
+<a name="nested_protect_config"></a>The `protect_config` block supports:
+
+* `workload_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) WorkloadConfig defines which actions are enabled for a cluster's workload configurations. Structure is [documented below](#nested_workload_config)
+
+* `workload_vulnerability_mode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Sets which mode to use for Protect workload vulnerability scanning feature. Accepted values are DISABLED, BASIC.
+
+<a name="nested_workload_config"></a>The `protect_config.workload_config` block supports:
+
+* `audit_mode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Sets which mode of auditing should be used for the cluster's workloads. Accepted values are DISABLED, BASIC.
 
 ## Attributes Reference
 
@@ -1149,7 +1231,7 @@ exported:
 ## Timeouts
 
 This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
 - `create` - Default is 40 minutes.
 - `read`   - Default is 40 minutes.

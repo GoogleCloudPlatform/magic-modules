@@ -5,19 +5,20 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccLoggingMetric_update(t *testing.T) {
 	t.Parallel()
 
-	suffix := randString(t, 10)
+	suffix := RandString(t, 10)
 	filter := "resource.type=gae_app AND severity>=ERROR"
 	updatedFilter := "resource.type=gae_app AND severity=ERROR"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLoggingMetricDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckLoggingMetricDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingMetric_update(suffix, filter),
@@ -42,13 +43,13 @@ func TestAccLoggingMetric_update(t *testing.T) {
 func TestAccLoggingMetric_explicitBucket(t *testing.T) {
 	t.Parallel()
 
-	suffix := randString(t, 10)
+	suffix := RandString(t, 10)
 	filter := "resource.type=gae_app AND severity>=ERROR"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLoggingMetricDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckLoggingMetricDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingMetric_explicitBucket(suffix, filter),
@@ -62,15 +63,55 @@ func TestAccLoggingMetric_explicitBucket(t *testing.T) {
 	})
 }
 
+func TestAccLoggingMetric_loggingBucket(t *testing.T) {
+	t.Parallel()
+
+	filter := "resource.type=gae_app AND severity>=ERROR"
+	project_id := acctest.GetTestProjectFromEnv()
+	suffix := RandString(t, 10)
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckLoggingMetricDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingMetric_loggingBucketBase(suffix, filter),
+			},
+			{
+				ResourceName:      "google_logging_metric.logging_metric",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccLoggingMetric_loggingBucket(suffix, filter, project_id),
+			},
+			{
+				ResourceName:      "google_logging_metric.logging_metric",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccLoggingMetric_loggingBucketBase(suffix, filter),
+			},
+			{
+				ResourceName:      "google_logging_metric.logging_metric",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccLoggingMetric_descriptionUpdated(t *testing.T) {
 	t.Parallel()
 
-	suffix := randString(t, 10)
+	suffix := RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLoggingMetricDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckLoggingMetricDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingMetric_descriptionUpdated(suffix, "original"),
@@ -128,11 +169,36 @@ resource "google_logging_metric" "logging_metric" {
 `, suffix, filter)
 }
 
+func testAccLoggingMetric_loggingBucketBase(suffix string, filter string) string {
+	return fmt.Sprintf(`
+resource "google_logging_metric" "logging_metric" {
+  name        = "my-custom-metric-%s"
+  filter      = "%s"
+}
+`, suffix, filter)
+}
+
+func testAccLoggingMetric_loggingBucket(suffix string, filter string, project_id string) string {
+	return fmt.Sprintf(`
+resource "google_logging_project_bucket_config" "logging_bucket" {
+  location  = "global"
+  project   = "%s"
+  bucket_id = "_Default"
+}
+
+resource "google_logging_metric" "logging_metric" {
+  name        = "my-custom-metric-%s"
+  bucket_name = google_logging_project_bucket_config.logging_bucket.id
+  filter      = "%s"
+}
+`, project_id, suffix, filter)
+}
+
 func testAccLoggingMetric_descriptionUpdated(suffix, description string) string {
 	return fmt.Sprintf(`
 resource "google_logging_metric" "logging_metric" {
 	name        = "my-custom-metric-%s"
-	description = "Counter for  VM instances that have hostError's"
+	description = "Counter for VM instances that have hostError's"
 	filter      = "resource.type=gce_instance AND protoPayload.methodName=compute.instances.hostError"
 	metric_descriptor {
 	  metric_kind = "DELTA"

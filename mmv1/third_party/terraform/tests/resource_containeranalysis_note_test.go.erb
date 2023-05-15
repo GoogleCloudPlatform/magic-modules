@@ -7,17 +7,18 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccContainerAnalysisNote_basic(t *testing.T) {
 	t.Parallel()
 
-	name := randString(t, 10)
-	readableName := randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerAnalysisNoteDestroyProducer(t),
+	name := RandString(t, 10)
+	readableName := RandString(t, 10)
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerAnalysisNoteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerAnalysisNoteBasic(name, readableName),
@@ -34,13 +35,13 @@ func TestAccContainerAnalysisNote_basic(t *testing.T) {
 func TestAccContainerAnalysisNote_update(t *testing.T) {
 	t.Parallel()
 
-	name := randString(t, 10)
-	readableName := randString(t, 10)
-	readableName2 := randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerAnalysisNoteDestroyProducer(t),
+	name := RandString(t, 10)
+	readableName := RandString(t, 10)
+	readableName2 := RandString(t, 10)
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerAnalysisNoteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerAnalysisNoteBasic(name, readableName),

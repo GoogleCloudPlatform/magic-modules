@@ -10,19 +10,20 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccComputeNodeGroup_updateNodeTemplate(t *testing.T) {
 	t.Parallel()
 
-	groupName := fmt.Sprintf("group--%d", randInt(t))
-	tmplPrefix := fmt.Sprintf("tmpl--%d", randInt(t))
+	groupName := fmt.Sprintf("group--%d", RandInt(t))
+	tmplPrefix := fmt.Sprintf("tmpl--%d", RandInt(t))
 
 	var timeCreated time.Time
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeNodeGroupDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeNodeGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeNodeGroup_updateNodeTemplate(groupName, tmplPrefix, "tmpl1"),

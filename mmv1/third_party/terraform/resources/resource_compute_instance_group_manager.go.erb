@@ -4,12 +4,16 @@ package google
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 <% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
@@ -18,7 +22,7 @@ import (
 <% end -%>
 )
 
-func resourceComputeInstanceGroupManager() *schema.Resource {
+func ResourceComputeInstanceGroupManager() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeInstanceGroupManagerCreate,
 		Read:   resourceComputeInstanceGroupManagerRead,
@@ -55,7 +59,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 						"instance_template": {
 							Type:             schema.TypeString,
 							Required:         true,
-							DiffSuppressFunc: compareSelfLinkRelativePaths,
+							DiffSuppressFunc: compareSelfLinkRelativePathsIgnoreParams,
 							Description:      `The full URL to an instance template from which all new instances of this version will be created.`,
 						},
 
@@ -159,7 +163,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Set:         selfLinkRelativePathHash,
+				Set:         tpgresource.SelfLinkRelativePathHash,
 				Description: `The full URL of all target pools to which new instances in the group are added. Updating the target pools attribute does not affect existing instances.`,
 			},
 
@@ -188,7 +192,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 						"health_check": {
 							Type:             schema.TypeString,
 							Required:         true,
-							DiffSuppressFunc: compareSelfLinkRelativePaths,
+							DiffSuppressFunc: tpgresource.CompareSelfLinkRelativePaths,
 							Description:      `The health check resource that signals autohealing.`,
 						},
 
@@ -275,12 +279,34 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"RECREATE", "SUBSTITUTE", ""}, false),
-							DiffSuppressFunc: emptyOrDefaultStringSuppress("SUBSTITUTE"),
+							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("SUBSTITUTE"),
 							Description:      `The instance replacement method for managed instance groups. Valid values are: "RECREATE", "SUBSTITUTE". If SUBSTITUTE (default), the group replaces VM instances with new instances that have randomly generated names. If RECREATE, instance names are preserved.  You must also set max_unavailable_fixed or max_unavailable_percent to be greater than 0.`,
 						},
 					},
 				},
 			},
+
+			<% unless version == "ga" -%>
+			"instance_lifecycle_policy": {
+				Computed:    true,
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: `The instance lifecycle policy for this managed instance group.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"force_update_on_repair": {
+							Type:         schema.TypeString,
+							Default:      "NO",
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"YES", "NO"}, true),
+							Description:  `Specifies whether to apply the group's latest configuration when repairing a VM. Valid options are: YES, NO. If YES and you updated the group's instance template or per-instance configurations after the VM was created, then these changes are applied when VM is repaired. If NO (default), then updates are applied in accordance with the group's update policy type.`,
+						},
+					},
+				},
+			},
+			<% end -%>
+
 			<% unless version == "ga" -%>
 			"all_instances_config": {
 				Type:        schema.TypeList,
@@ -325,6 +351,50 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				Description: `When used with wait_for_instances specifies the status to wait for. When STABLE is specified this resource will wait until the instances are stable before returning. When UPDATED is set, it will wait for the version target to be reached and any per instance configs to be effective and all instances configs to be effective as well as all instances to be stable before returning.`,
 				<% end -%>
 			},
+			<% unless version == "ga" -%>
+			"stateful_internal_ip": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: `External IPs considered stateful by the instance group. `,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"interface_name": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `The network interface name`,
+						},
+						"delete_rule": {
+							Type:         schema.TypeString,
+							Default:      "NEVER",
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"NEVER", "ON_PERMANENT_INSTANCE_DELETION"}, true),
+							Description:  `A value that prescribes what should happen to an associated static Address resource when a VM instance is permanently deleted. The available options are NEVER and ON_PERMANENT_INSTANCE_DELETION. NEVER - detach the IP when the VM is deleted, but do not delete the address resource. ON_PERMANENT_INSTANCE_DELETION will delete the stateful address when the VM is permanently deleted from the instance group. The default is NEVER.`,
+						},
+					},
+				},
+			},
+			"stateful_external_ip": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: `External IPs considered stateful by the instance group. `,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"interface_name": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `The network interface name`,
+						},
+						"delete_rule": {
+							Type:         schema.TypeString,
+							Default:      "NEVER",
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"NEVER", "ON_PERMANENT_INSTANCE_DELETION"}, true),
+							Description:  `A value that prescribes what should happen to an associated static Address resource when a VM instance is permanently deleted. The available options are NEVER and ON_PERMANENT_INSTANCE_DELETION. NEVER - detach the IP when the VM is deleted, but do not delete the address resource. ON_PERMANENT_INSTANCE_DELETION will delete the stateful address when the VM is permanently deleted from the instance group. The default is NEVER.`,
+						},
+					},
+				},
+			},
+			<% end -%>
 			"stateful_disk": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -429,6 +499,33 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 	}
 }
 
+func parseUniqueId(s string) (string, string) {
+	splits:= strings.SplitN(s, "?uniqueId=", 2)
+	if len(splits) == 2 {
+		return splits[0], splits[1]
+	}
+	return s, ""
+}
+
+func compareSelfLinkRelativePathsIgnoreParams(_unused1, old, new string, _unused2 *schema.ResourceData) bool {
+	oldName, oldUniqueId:= parseUniqueId(old)
+	newName, newUniqueId:= parseUniqueId(new)
+	if oldUniqueId != "" && newUniqueId != "" && oldUniqueId != newUniqueId {
+		return false
+	}
+	return tpgresource.CompareSelfLinkRelativePaths(_unused1, oldName, newName, _unused2)
+}
+
+func ConvertToUniqueIdWhenPresent(s string) string {
+	original, uniqueId:= parseUniqueId(s)
+	if uniqueId != "" {
+		splits:= strings.Split(original, "/")
+		splits[len(splits)-1] = uniqueId
+		return strings.Join(splits, "/")
+	}
+	return s
+}
+
 func getNamedPorts(nps []interface{}) []*compute.NamedPort {
 	namedPorts := make([]*compute.NamedPort, 0, len(nps))
 	for _, v := range nps {
@@ -456,18 +553,18 @@ func getNamedPortsBeta(nps []interface{}) []*compute.NamedPort {
 }
 
 func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := tpgresource.GetZone(d, config)
 	if err != nil {
 		return err
 	}
@@ -484,10 +581,14 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 		AutoHealingPolicies:         expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})),
 		Versions:                    expandVersions(d.Get("version").([]interface{})),
 		UpdatePolicy:                expandUpdatePolicy(d.Get("update_policy").([]interface{})),
+		<% unless version == "ga" -%>
+		InstanceLifecyclePolicy:     expandInstanceLifecyclePolicy(d.Get("instance_lifecycle_policy").([]interface{})),
+		<% end -%>
     <% unless version == "ga" -%>
 		AllInstancesConfig:          expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})),
 		<% end -%>
-		StatefulPolicy:              expandStatefulPolicy(d.Get("stateful_disk").(*schema.Set).List()),
+		StatefulPolicy:              expandStatefulPolicy(d),
+
 		// Force send TargetSize to allow a value of 0.
 		ForceSendFields: []string{"TargetSize"},
 	}
@@ -501,21 +602,21 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 	}
 
 	// It probably maybe worked, so store the ID now
-	id, err := replaceVars(d, config, "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}")
 	if err != nil {
 		return err
 	}
 	d.SetId(id)
 
 	// Wait for the operation to complete
-	err = computeOperationWaitTime(config, op, project, "Creating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutCreate))
+	err = ComputeOperationWaitTime(config, op, project, "Creating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		// Check if the create operation failed because Terraform was prematurely terminated. If it was we can persist the
 		// operation id to state so that a subsequent refresh of this resource will wait until the operation has terminated
 		// before attempting to Read the state of the manager. This allows a graceful resumption of a Create that was killed
 		// by the upstream Terraform process exiting early such as a sigterm.
 		select {
-		case <-config.context.Done():
+		case <-config.Context.Done():
 			log.Printf("[DEBUG] Persisting %s so this operation can be resumed \n", op.Name)
 			if err := d.Set("operation", op.Name); err != nil {
 				return fmt.Errorf("Error setting operation: %s", err)
@@ -554,7 +655,7 @@ func flattenVersions(versions []*compute.InstanceGroupManagerVersion) []map[stri
 	for _, version := range versions {
 		versionMap := make(map[string]interface{})
 		versionMap["name"] = version.Name
-		versionMap["instance_template"] = ConvertSelfLinkToV1(version.InstanceTemplate)
+		versionMap["instance_template"] = tpgresource.ConvertSelfLinkToV1(version.InstanceTemplate)
 		versionMap["target_size"] = flattenFixedOrPercent(version.TargetSize)
 		result = append(result, versionMap)
 	}
@@ -575,24 +676,24 @@ func flattenFixedOrPercent(fixedOrPercent *compute.FixedOrPercent) []map[string]
 }
 
 func getManager(d *schema.ResourceData, meta interface{}) (*compute.InstanceGroupManager, error) {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
 
-	zone, _ := getZone(d, config)
+	zone, _ := tpgresource.GetZone(d, config)
 	name := d.Get("name").(string)
 
 	manager, err := config.NewComputeClient(userAgent).InstanceGroupManagers.Get(project, zone, name).Do()
 	if err != nil {
-		return nil, handleNotFoundError(err, d, fmt.Sprintf("Instance Group Manager %q", name))
+		return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Instance Group Manager %q", name))
 	}
 
 	if manager == nil {
@@ -607,13 +708,13 @@ func getManager(d *schema.ResourceData, meta interface{}) (*compute.InstanceGrou
 }
 
 func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -621,7 +722,7 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	operation := d.Get("operation").(string)
 	if operation != "" {
 		log.Printf("[DEBUG] in progress operation detected at %v, attempting to resume", operation)
-		zone, _ := getZone(d, config)
+		zone, _ := tpgresource.GetZone(d, config)
 		op := &compute.Operation{
 			Name: operation,
 			Zone: zone,
@@ -629,7 +730,7 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 		if err := d.Set("operation", op.Name); err != nil {
 			return fmt.Errorf("Error setting operation: %s", err)
 		}
-		err = computeOperationWaitTime(config, op, project, "Creating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutCreate))
+		err = ComputeOperationWaitTime(config, op, project, "Creating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
 			// remove from state to allow refresh to finish
 			log.Printf("[DEBUG] Resumed operation returned an error, removing from state: %s", err)
@@ -654,7 +755,7 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err := d.Set("name", manager.Name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
-	if err := d.Set("zone", GetResourceNameFromSelfLink(manager.Zone)); err != nil {
+	if err := d.Set("zone", tpgresource.GetResourceNameFromSelfLink(manager.Zone)); err != nil {
 		return fmt.Errorf("Error setting zone: %s", err)
 	}
 	if err := d.Set("description", manager.Description); err != nil {
@@ -669,7 +770,7 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err := d.Set("list_managed_instances_results", manager.ListManagedInstancesResults); err != nil {
 		return fmt.Errorf("Error setting list_managed_instances_results: %s", err)
 	}
-	if err = d.Set("target_pools", mapStringArr(manager.TargetPools, ConvertSelfLinkToV1)); err != nil {
+	if err = d.Set("target_pools", mapStringArr(manager.TargetPools, tpgresource.ConvertSelfLinkToV1)); err != nil {
 		return fmt.Errorf("Error setting target_pools in state: %s", err.Error())
 	}
 	if err = d.Set("named_port", flattenNamedPortsBeta(manager.NamedPorts)); err != nil {
@@ -678,13 +779,21 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err = d.Set("stateful_disk", flattenStatefulPolicy(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_disk in state: %s", err.Error())
 	}
+	<% unless version == "ga" -%>
+	if err = d.Set("stateful_internal_ip", flattenStatefulPolicyStatefulInternalIps(manager.StatefulPolicy)); err != nil {
+		return fmt.Errorf("Error setting stateful_internal_ip in state: %s", err.Error())
+	}
+	if err = d.Set("stateful_external_ip", flattenStatefulPolicyStatefulExternalIps(manager.StatefulPolicy)); err != nil {
+		return fmt.Errorf("Error setting stateful_external_ip in state: %s", err.Error())
+	}
+	<% end -%>
 	if err := d.Set("fingerprint", manager.Fingerprint); err != nil {
 		return fmt.Errorf("Error setting fingerprint: %s", err)
 	}
-	if err := d.Set("instance_group", ConvertSelfLinkToV1(manager.InstanceGroup)); err != nil {
+	if err := d.Set("instance_group", tpgresource.ConvertSelfLinkToV1(manager.InstanceGroup)); err != nil {
 		return fmt.Errorf("Error setting instance_group: %s", err)
 	}
-	if err := d.Set("self_link", ConvertSelfLinkToV1(manager.SelfLink)); err != nil {
+	if err := d.Set("self_link", tpgresource.ConvertSelfLinkToV1(manager.SelfLink)); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
 
@@ -697,6 +806,11 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err = d.Set("update_policy", flattenUpdatePolicy(manager.UpdatePolicy)); err != nil {
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
 	}
+	<% unless version == "ga" -%>
+	if err = d.Set("instance_lifecycle_policy", flattenInstanceLifecyclePolicy(manager.InstanceLifecyclePolicy)); err != nil {
+		return fmt.Errorf("Error setting instance lifecycle policy in state: %s", err.Error())
+	}
+	<% end -%>
 	<% unless version == "ga" -%>
 	if manager.AllInstancesConfig != nil {
 		if err = d.Set("all_instances_config", flattenAllInstancesConfig(manager.AllInstancesConfig)); err != nil {
@@ -719,19 +833,19 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 }
 
 func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := tpgresource.GetZone(d, config)
 	if err != nil {
 		return err
 	}
@@ -770,6 +884,13 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 	}
 
 	<% unless version == "ga" -%>
+	if d.HasChange("instance_lifecycle_policy") {
+		updatedManager.InstanceLifecyclePolicy = expandInstanceLifecyclePolicy(d.Get("instance_lifecycle_policy").([]interface{}))
+		change = true
+	}
+	<% end -%>
+
+	<% unless version == "ga" -%>
 	if d.HasChange("all_instances_config") {
 		oldAic, newAic := d.GetChange("all_instances_config")
 		if newAic == nil || len(newAic.([]interface{})) == 0 {
@@ -781,10 +902,17 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 	}
 	<% end -%>
 
-	if d.HasChange("stateful_disk") {
-		updatedManager.StatefulPolicy = expandStatefulPolicy(d.Get("stateful_disk").(*schema.Set).List())
+	<% unless version == "ga" -%>
+	if d.HasChange("stateful_internal_ip") || d.HasChange("stateful_external_ip") || d.HasChange("stateful_disk") {
+		updatedManager.StatefulPolicy = expandStatefulPolicy(d)
 		change = true
 	}
+	<% else -%>
+	if d.HasChange("stateful_disk") {
+		updatedManager.StatefulPolicy = expandStatefulPolicy(d)
+		change = true
+	}
+	<% end -%>
 
 	if d.HasChange("list_managed_instances_results") {
 		updatedManager.ListManagedInstancesResults = d.Get("list_managed_instances_results").(string)
@@ -797,7 +925,7 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 			return fmt.Errorf("Error updating managed group instances: %s", err)
 		}
 
-		err = computeOperationWaitTime(config, op, project, "Updating managed group instances", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = ComputeOperationWaitTime(config, op, project, "Updating managed group instances", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -823,7 +951,7 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 		}
 
 		// Wait for the operation to complete:
-		err = computeOperationWaitTime(config, op, project, "Updating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = ComputeOperationWaitTime(config, op, project, "Updating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -842,7 +970,7 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 		}
 
 		// Wait for the operation to complete
-		err = computeOperationWaitTime(config, op, project, "Updating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = ComputeOperationWaitTime(config, op, project, "Updating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -861,26 +989,34 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 }
 
 func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	if d.Get("wait_for_instances").(bool) {
 		err := computeIGMWaitForInstanceStatus(d, meta)
 		if err != nil {
+			notFound, reErr := regexp.MatchString(`not found`, err.Error())
+			if reErr != nil {
+				return reErr
+			}
+			if notFound {
+				// manager was not found, we can exit gracefully
+				return nil
+			}
 			return err
 		}
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	zone, _ := getZone(d, config)
+	zone, _ := tpgresource.GetZone(d, config)
 	name := d.Get("name").(string)
 
 	op, err := config.NewComputeClient(userAgent).InstanceGroupManagers.Delete(project, zone, name).Do()
@@ -898,7 +1034,7 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 	currentSize := int64(d.Get("target_size").(int))
 
 	// Wait for the operation to complete
-	err = computeOperationWaitTime(config, op, project, "Deleting InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutDelete))
+	err = ComputeOperationWaitTime(config, op, project, "Deleting InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutDelete))
 
 	for err != nil && currentSize > 0 {
 		if !strings.Contains(err.Error(), "timeout") {
@@ -919,7 +1055,7 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 
 		log.Printf("[INFO] timeout occurred, but instance group is shrinking (%d < %d)", instanceGroupSize, currentSize)
 		currentSize = instanceGroupSize
-		err = computeOperationWaitTime(config, op, project, "Deleting InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutDelete))
+		err = ComputeOperationWaitTime(config, op, project, "Deleting InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutDelete))
 	}
 
 	d.SetId("")
@@ -959,20 +1095,102 @@ func expandAutoHealingPolicies(configured []interface{}) []*compute.InstanceGrou
 	return autoHealingPolicies
 }
 
-func expandStatefulPolicy(configured []interface{}) *compute.StatefulPolicy {
-	disks := make(map[string]compute.StatefulPolicyPreservedStateDiskDevice)
-	for _, raw := range configured {
+func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
+
+	preservedState := &compute.StatefulPolicyPreservedState{}
+
+	isRemovingAStatefulDisk := false
+	if d.HasChange("stateful_disk") {
+		oldDisks, newDisks := d.GetChange("stateful_disk")
+		preservedState.Disks = expandStatefulDisks(newDisks.(*schema.Set).List())
+		// Remove Disks
+		for _, raw := range oldDisks.(*schema.Set).List() {
+			data := raw.(map[string]interface{})
+			deviceName := data["device_name"].(string)
+			if _, exist := preservedState.Disks[deviceName]; !exist {
+				isRemovingAStatefulDisk = true
+				preservedState.NullFields = append(preservedState.NullFields, "Disks." + deviceName)
+			}
+		}
+		preservedState.ForceSendFields = append(preservedState.ForceSendFields, "Disks")
+	}
+	if !isRemovingAStatefulDisk {
+		preservedState := &compute.StatefulPolicyPreservedState{}
+		stateful_disks := d.Get("stateful_disk").(*schema.Set).List()
+		disks := make(map[string]compute.StatefulPolicyPreservedStateDiskDevice)
+		for _, raw := range stateful_disks {
+			data := raw.(map[string]interface{})
+			disk := compute.StatefulPolicyPreservedStateDiskDevice{
+				AutoDelete: data["delete_rule"].(string),
+			}
+			disks[data["device_name"].(string)] = disk
+		}
+		preservedState.Disks = disks
+	}
+
+	<% unless version == "ga" -%>
+	if d.HasChange("stateful_internal_ip") {
+		oldInternalIps, newInternalIps := d.GetChange("stateful_internal_ip")
+		preservedState.InternalIPs = expandStatefulIps(newInternalIps.([]interface{}))
+		// Remove Internal Ips
+		for _, raw := range oldInternalIps.([]interface{}) {
+			data := raw.(map[string]interface{})
+			networkIp := data["interface_name"].(string)
+			if _, exist := preservedState.InternalIPs[networkIp]; !exist {
+				preservedState.NullFields = append(preservedState.NullFields, "InternalIPs." + networkIp)
+			}
+		}
+		preservedState.ForceSendFields = append(preservedState.ForceSendFields, "InternalIPs")
+	}
+
+	if d.HasChange("stateful_external_ip") {
+		oldExternalIps, newExternalIps := d.GetChange("stateful_external_ip")
+		preservedState.ExternalIPs = expandStatefulIps(newExternalIps.([]interface{}))
+		// Remove External Ips
+		for _, raw := range oldExternalIps.([]interface{}) {
+			data := raw.(map[string]interface{})
+			networkIp := data["interface_name"].(string)
+			if _, exist := preservedState.ExternalIPs[networkIp]; !exist {
+				preservedState.NullFields = append(preservedState.NullFields, "ExternalIPs." + networkIp)
+			}
+		}
+		preservedState.ForceSendFields = append(preservedState.ForceSendFields, "ExternalIPs")
+	}
+
+	<% end -%>
+	statefulPolicy := &compute.StatefulPolicy{PreservedState: preservedState}
+	statefulPolicy.ForceSendFields = append(statefulPolicy.ForceSendFields, "PreservedState")
+
+	return statefulPolicy
+}
+
+func expandStatefulDisks(statefulDisk []interface{}) map[string]compute.StatefulPolicyPreservedStateDiskDevice {
+	statefulDisksMap :=	make(map[string]compute.StatefulPolicyPreservedStateDiskDevice)
+
+	for _, raw := range statefulDisk {
 		data := raw.(map[string]interface{})
-		disk := compute.StatefulPolicyPreservedStateDiskDevice{
+		deviceName := compute.StatefulPolicyPreservedStateDiskDevice{
 			AutoDelete: data["delete_rule"].(string),
 		}
-		disks[data["device_name"].(string)] = disk
+		statefulDisksMap[data["device_name"].(string)] = deviceName
 	}
-	if len(disks) > 0 {
-		return &compute.StatefulPolicy{PreservedState: &compute.StatefulPolicyPreservedState{Disks: disks}}
-	}
-	return nil
+	return statefulDisksMap
 }
+
+<% unless version == "ga" -%>
+func expandStatefulIps(statefulIP []interface{}) map[string]compute.StatefulPolicyPreservedStateNetworkIp {
+	statefulIpsMap :=	make(map[string]compute.StatefulPolicyPreservedStateNetworkIp)
+
+	for _, raw := range statefulIP {
+		data := raw.(map[string]interface{})
+		networkIp := compute.StatefulPolicyPreservedStateNetworkIp{
+			AutoDelete: data["delete_rule"].(string),
+		}
+		statefulIpsMap[data["interface_name"].(string)] = networkIp
+	}
+	return statefulIpsMap
+}
+<% end -%>
 
 func expandVersions(configured []interface{}) []*compute.InstanceGroupManagerVersion {
 	versions := make([]*compute.InstanceGroupManagerVersion, 0, len(configured))
@@ -981,7 +1199,7 @@ func expandVersions(configured []interface{}) []*compute.InstanceGroupManagerVer
 
 		version := compute.InstanceGroupManagerVersion{
 			Name:             data["name"].(string),
-			InstanceTemplate: data["instance_template"].(string),
+			InstanceTemplate: ConvertToUniqueIdWhenPresent(data["instance_template"].(string)),
 			TargetSize:       expandFixedOrPercent(data["target_size"].([]interface{})),
 		}
 
@@ -1006,6 +1224,18 @@ func expandFixedOrPercent(configured []interface{}) *compute.FixedOrPercent {
 	}
 	return fixedOrPercent
 }
+
+<% unless version == "ga" -%>
+func expandInstanceLifecyclePolicy(configured []interface{}) *compute.InstanceGroupManagerInstanceLifecyclePolicy {
+	instanceLifecyclePolicy := &compute.InstanceGroupManagerInstanceLifecyclePolicy{}
+
+	for _, raw := range configured {
+		data := raw.(map[string]interface{})
+		instanceLifecyclePolicy.ForceUpdateOnRepair = data["force_update_on_repair"].(string)
+	}
+	return instanceLifecyclePolicy
+}
+<% end -%>
 
 func expandUpdatePolicy(configured []interface{}) *compute.InstanceGroupManagerUpdatePolicy {
 	updatePolicy := &compute.InstanceGroupManagerUpdatePolicy{}
@@ -1088,7 +1318,39 @@ func flattenStatefulPolicy(statefulPolicy *compute.StatefulPolicy) []map[string]
 	}
 	return result
 }
+<% unless version == "ga" -%>
+func flattenStatefulPolicyStatefulInternalIps(statefulPolicy *compute.StatefulPolicy) []map[string]interface{} {
+	if statefulPolicy == nil || statefulPolicy.PreservedState == nil || statefulPolicy.PreservedState.InternalIPs == nil {
+		return make([]map[string]interface{}, 0, 0)
+	}
+	result := make([]map[string]interface{}, 0, len(statefulPolicy.PreservedState.InternalIPs))
+	for interfaceName, internalIp := range statefulPolicy.PreservedState.InternalIPs {
+		data := map[string]interface{}{
+			"interface_name": interfaceName,
+			"delete_rule": internalIp.AutoDelete,
+		}
 
+		result = append(result, data)
+	}
+	return result
+}
+
+func flattenStatefulPolicyStatefulExternalIps(statefulPolicy *compute.StatefulPolicy) []map[string]interface{} {
+	if statefulPolicy == nil || statefulPolicy.PreservedState == nil || statefulPolicy.PreservedState.ExternalIPs == nil {
+		return make([]map[string]interface{}, 0, 0)
+	}
+	result := make([]map[string]interface{}, 0, len(statefulPolicy.PreservedState.ExternalIPs))
+	for interfaceName, externalIp := range statefulPolicy.PreservedState.ExternalIPs {
+		data := map[string]interface{}{
+			"interface_name": interfaceName,
+			"delete_rule": externalIp.AutoDelete,
+		}
+
+		result = append(result, data)
+	}
+	return result
+}
+<% end -%>
 func flattenUpdatePolicy(updatePolicy *compute.InstanceGroupManagerUpdatePolicy) []map[string]interface{} {
 	results := []map[string]interface{}{}
 	if updatePolicy != nil {
@@ -1118,6 +1380,18 @@ func flattenUpdatePolicy(updatePolicy *compute.InstanceGroupManagerUpdatePolicy)
 	}
 	return results
 }
+
+<% unless version == "ga" -%>
+func flattenInstanceLifecyclePolicy(instanceLifecyclePolicy *compute.InstanceGroupManagerInstanceLifecyclePolicy) []map[string]interface{} {
+	results := []map[string]interface{}{}
+	if instanceLifecyclePolicy != nil {
+		ilp := map[string]interface{}{}
+		ilp["force_update_on_repair"] = instanceLifecyclePolicy.ForceUpdateOnRepair
+		results = append(results, ilp)
+	}
+	return results
+}
+<% end -%>
 
 <% unless version == "ga" -%>
 func expandAllInstancesConfig(old []interface{}, new []interface{}) *compute.InstanceGroupManagerAllInstancesConfig {
@@ -1235,13 +1509,13 @@ func resourceInstanceGroupManagerStateImporter(d *schema.ResourceData, meta inte
 	if err := d.Set("wait_for_instances_status", "STABLE"); err != nil {
 		return nil, fmt.Errorf("Error setting wait_for_instances_status: %s", err)
 	}
-	config := meta.(*Config)
-	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/zones/(?P<zone>[^/]+)/instanceGroupManagers/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<zone>[^/]+)/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
+	config := meta.(*transport_tpg.Config)
+	if err := tpgresource.ParseImportId([]string{"projects/(?P<project>[^/]+)/zones/(?P<zone>[^/]+)/instanceGroupManagers/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<zone>[^/]+)/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

@@ -3,12 +3,12 @@
 package google
 
 import (
-<% if object.min_version.name == "ga" -%>
 	"fmt"
-<% end -%>
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
+	"<%= import_path() -%>/acctest"
 )
 
 <%# Since most resources define a "basic" config as their first example, we can reuse that config to create a resource to test IAM resources with. -%>
@@ -20,7 +20,7 @@ import (
 individual_url = object.iam_policy.self_link || object.self_link_url
 -%>
 <%
-  tf_product = (@config.legacy_name || product_ns).underscore
+  tf_product = (object.__product.legacy_name || product_ns).underscore
   resource_ns = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   resource_ns_iam = resource_ns + '_iam'
 -%>
@@ -39,16 +39,16 @@ import_url = import_format.gsub(/({{)%?(\w+)(}})/, '%s').gsub(object.__product.b
 		<% if i != params.size - 1 -%>
 			<%# If the last parameter is project then we want to create a new project to use for the test, so don't default from the environment -%>
 			<% if object.iam_policy.test_project_name.nil? -%>
-				<% import_qualifiers.push('getTestProjectFromEnv()') -%>
+				<% import_qualifiers.push('acctest.GetTestProjectFromEnv()') -%>
 			<% else -%>
 				<% import_qualifiers.push('context["project_id"]') -%>
 			<% end -%>
 		<% end -%>
-	<% elsif param == 'zone' -%>
-		<% import_qualifiers.push('getTestZoneFromEnv()') -%>
+        <% elsif param == 'zone' and object.iam_policy.substitute_zone_value -%>
+                <% import_qualifiers.push('acctest.GetTestZoneFromEnv()') -%>
 	<% elsif param == 'region' || param == 'location' -%>
 		<% if example.region_override.nil? -%>
-				<% import_qualifiers.push('getTestRegionFromEnv()') -%>
+				<% import_qualifiers.push('acctest.GetTestRegionFromEnv()') -%>
 			<% else -%>
 				<% import_qualifiers.push("\"#{example.region_override}\"") -%>
 			<% end -%>
@@ -59,12 +59,12 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		Providers:    testAccProvidersOiCS,
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
-		Providers:    testAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
@@ -76,7 +76,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 			{
 				Config: testAcc<%= resource_name -%>IamBinding_basicGenerated(context),
 			},
-<% if object.min_version.name == "ga" -%>
+<% unless object.iam_policy.skip_import_test -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_binding.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
@@ -88,7 +88,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 				// Test Iam Binding update
 				Config: testAcc<%= resource_name -%>IamBinding_updateGenerated(context),
 			},
-<% if object.min_version.name == "ga" -%>
+<% unless object.iam_policy.skip_import_test -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_binding.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
@@ -105,12 +105,12 @@ func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		Providers: testAccProvidersOiCS,
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
-		Providers: testAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 <% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -123,7 +123,7 @@ func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 				// Test Iam Member creation (no update for member, no need to test)
 				Config: testAcc<%= resource_name -%>IamMember_basicGenerated(context),
 			},
-<% if object.min_version.name == "ga" -%>
+<% unless object.iam_policy.skip_import_test -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_member.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> user:admin@hashicorptest.com"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
@@ -140,19 +140,19 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 
 <% unless object.iam_policy.admin_iam_role.nil? -%>
 	// This may skip test, so do it first
-	sa := getTestServiceAccountFromEnv(t)
+	sa := acctest.GetTestServiceAccountFromEnv(t)
 <% end -%>
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 <% unless object.iam_policy.admin_iam_role.nil? -%>
 	context["service_account"] = sa
 <% end -%>
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		Providers: testAccProvidersOiCS,
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
-		Providers: testAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 <% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -164,7 +164,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 			{
 				Config: testAcc<%= resource_name -%>IamPolicy_basicGenerated(context),
 			},
-<% if object.min_version.name == "ga" -%>
+<% unless object.iam_policy.skip_import_test -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_policy.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
@@ -175,7 +175,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 			{
 				Config: testAcc<%= resource_name -%>IamPolicy_emptyBinding(context),
 			},
-<% if object.min_version.name == "ga" -%>
+<% unless object.iam_policy.skip_import_test -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_policy.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
@@ -193,12 +193,12 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T)
 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		Providers: testAccProvidersOiCS,
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
-		Providers: testAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 <% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -210,7 +210,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T)
 			{
 				Config: testAcc<%= resource_name -%>IamBinding_withConditionGenerated(context),
 			},
-<% if object.min_version.name == "ga" -%>
+<% unless object.iam_policy.skip_import_test -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_binding.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title"]),
@@ -224,17 +224,17 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T)
 
 func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *testing.T) {
 	// Multiple fine-grained resources
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		Providers: testAccProvidersOiCS,
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
-		Providers: testAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 <% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -246,23 +246,19 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *
 			{
 				Config: testAcc<%= resource_name -%>IamBinding_withAndWithoutConditionGenerated(context),
 			},
-<% if object.min_version.name == "ga" -%>
+<% unless object.iam_policy.skip_import_test -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_binding.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
-<% if object.min_version.name == "ga" -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_binding.foo2",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
-<% if object.min_version.name == "ga" -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_binding.foo3",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title_no_desc"]),
@@ -279,12 +275,12 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) 
 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		Providers: testAccProvidersOiCS,
+	ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
-		Providers: testAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 <% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -296,7 +292,7 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) 
 			{
 				Config: testAcc<%= resource_name -%>IamMember_withConditionGenerated(context),
 			},
-<% if object.min_version.name == "ga" -%>
+<% unless object.iam_policy.skip_import_test -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_member.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> user:admin@hashicorptest.com %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title"]),
@@ -310,17 +306,17 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) 
 
 func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *testing.T) {
 	// Multiple fine-grained resources
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		Providers: testAccProvidersOiCS,
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
-		Providers: testAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 <% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -332,23 +328,19 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *t
 			{
 				Config: testAcc<%= resource_name -%>IamMember_withAndWithoutConditionGenerated(context),
 			},
-<% if object.min_version.name == "ga" -%>
+<% unless object.iam_policy.skip_import_test -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_member.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> user:admin@hashicorptest.com"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
-<% if object.min_version.name == "ga" -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_member.foo2",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> user:admin@hashicorptest.com %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
-<% if object.min_version.name == "ga" -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_member.foo3",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> user:admin@hashicorptest.com %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title_no_desc"]),
@@ -365,7 +357,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 
 <% unless object.iam_policy.admin_iam_role.nil? -%>
 	// This may skip test, so do it first
-	sa := getTestServiceAccountFromEnv(t)
+	sa := acctest.GetTestServiceAccountFromEnv(t)
 <% end -%>
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 <% unless object.iam_policy.admin_iam_role.nil? -%>
@@ -381,12 +373,12 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 <% end -%>
 	expectedPolicyData = strings.Replace(expectedPolicyData, "<", "\\u003c", -1)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		Providers: testAccProvidersOiCS,
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
-		Providers: testAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 <% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -404,7 +396,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 					resource.TestCheckResourceAttrWith("data.google_iam_policy.foo", "policy_data", checkGoogleIamPolicy),
 				),
 			},
-<% if object.min_version.name == "ga" -%>
+<% unless object.iam_policy.skip_import_test -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_policy.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),

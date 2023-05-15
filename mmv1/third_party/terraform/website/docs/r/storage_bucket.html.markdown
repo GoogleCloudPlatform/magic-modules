@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Storage"
-page_title: "Google: google_storage_bucket"
 description: |-
   Creates a new bucket in Google Cloud Storage.
 ---
@@ -58,6 +57,15 @@ resource "google_storage_bucket" "auto-expire" {
       type = "Delete"
     }
   }
+
+  lifecycle_rule {
+    condition {
+      age = 1
+    }
+    action {
+      type = "AbortIncompleteMultipartUpload"
+    }
+  }
 }
 ```
 
@@ -91,6 +99,8 @@ The following arguments are supported:
     is not provided, the provider project is used.
 
 * `storage_class` - (Optional, Default: 'STANDARD') The [Storage Class](https://cloud.google.com/storage/docs/storage-classes) of the new bucket. Supported values include: `STANDARD`, `MULTI_REGIONAL`, `REGIONAL`, `NEARLINE`, `COLDLINE`, `ARCHIVE`.
+
+* `autoclass` - (Optional) The bucket's [Autoclass](https://cloud.google.com/storage/docs/autoclass) configuration.  Structure is [documented below](#nested_autoclass).
 
 * `lifecycle_rule` - (Optional) The bucket's [Lifecycle Rules](https://cloud.google.com/storage/docs/lifecycle#configuration) configuration. Multiple blocks of this type are permitted. Structure is [documented below](#nested_lifecycle_rule).
 
@@ -126,7 +136,7 @@ The following arguments are supported:
 
 <a name="nested_action"></a>The `action` block supports:
 
-* `type` - The type of the action of this Lifecycle Rule. Supported values include: `Delete` and `SetStorageClass`.
+* `type` - The type of the action of this Lifecycle Rule. Supported values include: `Delete`, `SetStorageClass` and `AbortIncompleteMultipartUpload`.
 
 * `storage_class` - (Required if action type is `SetStorageClass`) The target [Storage Class](https://cloud.google.com/storage/docs/storage-classes) of objects affected by this Lifecycle Rule. Supported values include: `STANDARD`, `MULTI_REGIONAL`, `REGIONAL`, `NEARLINE`, `COLDLINE`, `ARCHIVE`.
 
@@ -153,6 +163,10 @@ The following arguments are supported:
 * `days_since_noncurrent_time` - (Optional) Relevant only for versioned objects. Number of days elapsed since the noncurrent timestamp of an object.
 
 * `noncurrent_time_before` - (Optional) Relevant only for versioned objects. The date in RFC 3339 (e.g. `2017-06-13`) when the object became nonconcurrent.
+
+<a name="nested_autoclass"></a>The `autoclass` block supports:
+
+* `enabled` - (Required) While set to `true`, autoclass automatically transitions objects in your bucket to appropriate storage classes based on each object's access pattern.
 
 <a name="nested_versioning"></a>The `versioning` block supports:
 
@@ -222,7 +236,7 @@ exported:
 ## Timeouts
 
 This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
 - `create` - Default is 4 minutes.
 - `update` - Default is 4 minutes.

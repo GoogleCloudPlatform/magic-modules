@@ -5,24 +5,36 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccCloudIdsEndpoint_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCloudIdsEndpointDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudIdsEndpointDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testCloudIds_basic(context),
+			},
+			{
+				ResourceName:      "google_cloud_ids_endpoint.endpoint",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testCloudIds_basicUpdate(context),
 			},
 			{
 				ResourceName:      "google_cloud_ids_endpoint.endpoint",
@@ -52,11 +64,41 @@ resource "google_service_networking_connection" "private_service_connection" {
 }
   
 resource "google_cloud_ids_endpoint" "endpoint" {
-	name     = "cloud-ids-test-%{random_suffix}"
-	location = "us-central1-f"
-	network  = google_compute_network.default.id
-	severity = "INFORMATIONAL"
-	depends_on = [google_service_networking_connection.private_service_connection]
+	name              = "cloud-ids-test-%{random_suffix}"
+	location          = "us-central1-f"
+	network           = google_compute_network.default.id
+	severity          = "INFORMATIONAL"
+	threat_exceptions = ["12", "67"]
+	depends_on        = [google_service_networking_connection.private_service_connection]
+}
+`, context)
+}
+
+func testCloudIds_basicUpdate(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_compute_network" "default" {
+	name = "tf-test-my-network%{random_suffix}"
+}
+resource "google_compute_global_address" "service_range" {
+	name          = "address"
+	purpose       = "VPC_PEERING"
+	address_type  = "INTERNAL"
+	prefix_length = 16
+	network       = google_compute_network.default.id
+}
+resource "google_service_networking_connection" "private_service_connection" {
+	network                 = google_compute_network.default.id
+	service                 = "servicenetworking.googleapis.com"
+	reserved_peering_ranges = [google_compute_global_address.service_range.name]
+}
+  
+resource "google_cloud_ids_endpoint" "endpoint" {
+	name              = "cloud-ids-test-%{random_suffix}"
+	location          = "us-central1-f"
+	network           = google_compute_network.default.id
+	severity          = "INFORMATIONAL"
+	threat_exceptions = ["33"]
+	depends_on        = [google_service_networking_connection.private_service_connection]
 }
 `, context)
 }
@@ -71,9 +113,9 @@ func testAccCheckCloudIdsEndpointDestroyProducer(t *testing.T) func(s *terraform
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{CloudIdsBasePath}}projects/{{project}}/locations/{{location}}/endpoints/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{CloudIdsBasePath}}projects/{{project}}/locations/{{location}}/endpoints/{{name}}")
 			if err != nil {
 				return err
 			}
@@ -84,7 +126,7 @@ func testAccCheckCloudIdsEndpointDestroyProducer(t *testing.T) func(s *terraform
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = transport_tpg.SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("CloudIdsEndpoint still exists at %s", url)
 			}

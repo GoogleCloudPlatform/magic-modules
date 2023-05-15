@@ -4,15 +4,20 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	datastream "google.golang.org/api/datastream/v1"
 	"time"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	datastream "google.golang.org/api/datastream/v1"
 )
 
 type DatastreamOperationWaiter struct {
-	Config    *Config
+	Config    *transport_tpg.Config
 	UserAgent string
 	Project   string
-	CommonOperationWaiter
+	Op        datastream.Operation
+	tpgresource.CommonOperationWaiter
 }
 
 func (w *DatastreamOperationWaiter) QueryOp() (interface{}, error) {
@@ -20,43 +25,51 @@ func (w *DatastreamOperationWaiter) QueryOp() (interface{}, error) {
 		return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
 	}
 	// Returns the proper get.
-	url := fmt.Sprintf("%s%s", w.Config.DatastreamBasePath, w.CommonOperationWaiter.Op.Name)
+	url := fmt.Sprintf("%s%s", w.Config.DatastreamBasePath, w.Op.Name)
 
-	return sendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
+	return transport_tpg.SendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
 }
 
 func (w *DatastreamOperationWaiter) Error() error {
 	if w != nil && w.Op.Error != nil {
-		return DatastreamError(*w.Op.Error)
+		return &DatastreamOperationError{Op: w.Op}
 	}
 	return nil
 }
 
-func createDatastreamWaiter(config *Config, op map[string]interface{}, project, activity, userAgent string) (*DatastreamOperationWaiter, error) {
+func (w *DatastreamOperationWaiter) SetOp(op interface{}) error {
+	w.CommonOperationWaiter.SetOp(op)
+	if err := tpgresource.Convert(op, &w.Op); err != nil {
+		return err
+	}
+	return nil
+}
+
+func createDatastreamWaiter(config *transport_tpg.Config, op map[string]interface{}, project, activity, userAgent string) (*DatastreamOperationWaiter, error) {
 	w := &DatastreamOperationWaiter{
 		Config:    config,
 		UserAgent: userAgent,
 		Project:   project,
 	}
-	if err := w.CommonOperationWaiter.SetOp(op); err != nil {
+	if err := w.SetOp(op); err != nil {
 		return nil, err
 	}
 	return w, nil
 }
 
 // nolint: deadcode,unused
-func datastreamOperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
+func DatastreamOperationWaitTimeWithResponse(config *transport_tpg.Config, op map[string]interface{}, response *map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
 	w, err := createDatastreamWaiter(config, op, project, activity, userAgent)
 	if err != nil {
 		return err
 	}
-	if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
+	if err := tpgresource.OperationWait(w, activity, timeout, config.PollInterval); err != nil {
 		return err
 	}
-	return json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), response)
+	return json.Unmarshal([]byte(w.Op.Response), response)
 }
 
-func datastreamOperationWaitTime(config *Config, op map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
+func DatastreamOperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
 	if val, ok := op["name"]; !ok || val == "" {
 		// This was a synchronous call - there is no operation to wait for.
 		return nil
@@ -66,20 +79,55 @@ func datastreamOperationWaitTime(config *Config, op map[string]interface{}, proj
 		// If w is nil, the op was synchronous.
 		return err
 	}
-	return OperationWait(w, activity, timeout, config.PollInterval)
+	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }
 
-// DatastreamError wraps datastream.Status and implements the
+// DatastreamOperationError wraps datastream.Status and implements the
 // error interface so it can be returned.
-type DatastreamError datastream.Status
+type DatastreamOperationError struct {
+	Op datastream.Operation
+}
 
-func (e DatastreamError) Error() string {
+func (e DatastreamOperationError) Error() string {
 	var buf bytes.Buffer
 
-	for _, err := range e.Details {
+	for _, err := range e.Op.Error.Details {
 		buf.Write(err)
+		buf.WriteString("\n")
+	}
+	if validations := e.extractFailedValidationResult(); validations != nil {
+		buf.Write(validations)
 		buf.WriteString("\n")
 	}
 
 	return buf.String()
+}
+
+// extractFailedValidationResult extracts the internal failed validations
+// if there are any.
+func (e DatastreamOperationError) extractFailedValidationResult() []byte {
+	var metadata datastream.OperationMetadata
+	data, err := e.Op.Metadata.MarshalJSON()
+	if err != nil {
+		return nil
+	}
+	err = json.Unmarshal(data, &metadata)
+	if err != nil {
+		return nil
+	}
+	if metadata.ValidationResult == nil {
+		return nil
+	}
+	var res []byte
+	for _, v := range metadata.ValidationResult.Validations {
+		if v.State == "FAILED" {
+			data, err := v.MarshalJSON()
+			if err != nil {
+				return nil
+			}
+			res = append(res, data...)
+			res = append(res, []byte("\n")...)
+		}
+	}
+	return res
 }

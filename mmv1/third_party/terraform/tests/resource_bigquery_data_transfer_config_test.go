@@ -8,7 +8,148 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
+
+func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForceNew(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		before   map[string]interface{}
+		after    map[string]interface{}
+		forcenew bool
+	}{
+		"changing_data_path_template": {
+			before: map[string]interface{}{
+				"data_source_id": "google_cloud_storage",
+				"params": map[string]interface{}{
+					"data_path_template":              "gs://bq-bucket-temp/*.json",
+					"destination_table_name_template": "table-old",
+					"file_format":                     "JSON",
+					"max_bad_records":                 10,
+					"write_disposition":               "APPEND",
+				},
+			},
+			after: map[string]interface{}{
+				"data_source_id": "google_cloud_storage",
+				"params": map[string]interface{}{
+					"data_path_template":              "gs://bq-bucket-temp-new/*.json",
+					"destination_table_name_template": "table-old",
+					"file_format":                     "JSON",
+					"max_bad_records":                 10,
+					"write_disposition":               "APPEND",
+				},
+			},
+			forcenew: true,
+		},
+		"changing_destination_table_name_template": {
+			before: map[string]interface{}{
+				"data_source_id": "google_cloud_storage",
+				"params": map[string]interface{}{
+					"data_path_template":              "gs://bq-bucket-temp/*.json",
+					"destination_table_name_template": "table-old",
+					"file_format":                     "JSON",
+					"max_bad_records":                 10,
+					"write_disposition":               "APPEND",
+				},
+			},
+			after: map[string]interface{}{
+				"data_source_id": "google_cloud_storage",
+				"params": map[string]interface{}{
+					"data_path_template":              "gs://bq-bucket-temp/*.json",
+					"destination_table_name_template": "table-new",
+					"file_format":                     "JSON",
+					"max_bad_records":                 10,
+					"write_disposition":               "APPEND",
+				},
+			},
+			forcenew: true,
+		},
+		"changing_non_force_new_fields": {
+			before: map[string]interface{}{
+				"data_source_id": "google_cloud_storage",
+				"params": map[string]interface{}{
+					"data_path_template":              "gs://bq-bucket-temp/*.json",
+					"destination_table_name_template": "table-old",
+					"file_format":                     "JSON",
+					"max_bad_records":                 10,
+					"write_disposition":               "APPEND",
+				},
+			},
+			after: map[string]interface{}{
+				"data_source_id": "google_cloud_storage",
+				"params": map[string]interface{}{
+					"data_path_template":              "gs://bq-bucket-temp/*.json",
+					"destination_table_name_template": "table-old",
+					"file_format":                     "JSON",
+					"max_bad_records":                 1000,
+					"write_disposition":               "APPEND",
+				},
+			},
+			forcenew: false,
+		},
+		"changing_destination_table_name_template_for_different_data_source_id": {
+			before: map[string]interface{}{
+				"data_source_id": "scheduled_query",
+				"params": map[string]interface{}{
+					"destination_table_name_template": "table-old",
+					"query":                           "SELECT 1 AS a",
+					"write_disposition":               "WRITE_APPEND",
+				},
+			},
+			after: map[string]interface{}{
+				"data_source_id": "scheduled_query",
+				"params": map[string]interface{}{
+					"destination_table_name_template": "table-new",
+					"query":                           "SELECT 1 AS a",
+					"write_disposition":               "WRITE_APPEND",
+				},
+			},
+			forcenew: false,
+		},
+		"changing_data_path_template_for_different_data_source_id": {
+			before: map[string]interface{}{
+				"data_source_id": "scheduled_query",
+				"params": map[string]interface{}{
+					"data_path_template": "gs://bq-bucket/*.json",
+					"query":              "SELECT 1 AS a",
+					"write_disposition":  "WRITE_APPEND",
+				},
+			},
+			after: map[string]interface{}{
+				"data_source_id": "scheduled_query",
+				"params": map[string]interface{}{
+					"data_path_template": "gs://bq-bucket-new/*.json",
+					"query":              "SELECT 1 AS a",
+					"write_disposition":  "WRITE_APPEND",
+				},
+			},
+			forcenew: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		d := &tpgresource.ResourceDiffMock{
+			Before: map[string]interface{}{
+				"params":         tc.before["params"],
+				"data_source_id": tc.before["data_source_id"],
+			},
+			After: map[string]interface{}{
+				"params":         tc.after["params"],
+				"data_source_id": tc.after["data_source_id"],
+			},
+		}
+		err := ParamsCustomizeDiffFunc(d)
+		if err != nil {
+			t.Errorf("failed, expected no error but received - %s for the condition %s", err, tn)
+		}
+		if d.IsForceNew != tc.forcenew {
+			t.Errorf("ForceNew not setup correctly for the condition-'%s', expected:%v; actual:%v", tn, tc.forcenew, d.IsForceNew)
+		}
+	}
+}
 
 // The service account TF uses needs the permission granted in the configs
 // but it will get deleted by parallel tests, so they need to be run serially.
@@ -19,6 +160,7 @@ func TestAccBigqueryDataTransferConfig(t *testing.T) {
 		"service_account": testAccBigqueryDataTransferConfig_scheduledQuery_with_service_account,
 		"no_destintation": testAccBigqueryDataTransferConfig_scheduledQuery_no_destination,
 		"booleanParam":    testAccBigqueryDataTransferConfig_copy_booleanParam,
+		"update_params":   testAccBigqueryDataTransferConfig_force_new_update_params,
 	}
 
 	for name, tc := range testCases {
@@ -35,16 +177,16 @@ func TestAccBigqueryDataTransferConfig(t *testing.T) {
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
 	// Uses time.Now
-	skipIfVcr(t)
-	random_suffix := randString(t, 10)
+	acctest.SkipIfVcr(t)
+	random_suffix := RandString(t, 10)
 	now := time.Now().UTC()
 	start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
 	end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryDataTransferConfig_scheduledQuery(random_suffix, random_suffix, "third", start_time, end_time, "y"),
@@ -61,19 +203,19 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_update(t *testing.T) {
 	// Uses time.Now
-	skipIfVcr(t)
-	random_suffix := randString(t, 10)
+	acctest.SkipIfVcr(t)
+	random_suffix := RandString(t, 10)
 	now := time.Now().UTC()
 	first_start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
 	first_end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
 	second_start_time := now.Add(2 * time.Hour).Format(time.RFC3339)
 	second_end_time := now.AddDate(0, 2, 0).Format(time.RFC3339)
-	random_suffix2 := randString(t, 10)
+	random_suffix2 := RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryDataTransferConfig_scheduledQuery(random_suffix, random_suffix, "first", first_start_time, first_end_time, "y"),
@@ -102,16 +244,16 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_update(t *testing.T) {
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_no_destination(t *testing.T) {
 	// Uses time.Now
-	skipIfVcr(t)
-	random_suffix := randString(t, 10)
+	acctest.SkipIfVcr(t)
+	random_suffix := RandString(t, 10)
 	now := time.Now().UTC()
 	start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
 	end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryDataTransferConfig_scheduledQueryNoDestination(random_suffix, "third", start_time, end_time, "y"),
@@ -127,12 +269,12 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_no_destination(t *testing.
 }
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_with_service_account(t *testing.T) {
-	random_suffix := randString(t, 10)
+	random_suffix := RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryDataTransferConfig_scheduledQuery_service_account(random_suffix),
@@ -148,18 +290,57 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_with_service_account(t *te
 }
 
 func testAccBigqueryDataTransferConfig_copy_booleanParam(t *testing.T) {
-	random_suffix := randString(t, 10)
+	random_suffix := RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryDataTransferConfig_booleanParam(random_suffix),
 			},
 			{
 				ResourceName:            "google_bigquery_data_transfer_config.copy_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+		},
+	})
+}
+
+func testAccBigqueryDataTransferConfig_force_new_update_params(t *testing.T) {
+	random_suffix := RandString(t, 10)
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigqueryDataTransferConfig_update_params_force_new(random_suffix, "old", "old"),
+			},
+			{
+				ResourceName:            "google_bigquery_data_transfer_config.update_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+			{
+				Config: testAccBigqueryDataTransferConfig_update_params_force_new(random_suffix, "new", "old"),
+			},
+			{
+				ResourceName:            "google_bigquery_data_transfer_config.update_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+			{
+				Config: testAccBigqueryDataTransferConfig_update_params_force_new(random_suffix, "new", "new"),
+			},
+			{
+				ResourceName:            "google_bigquery_data_transfer_config.update_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
@@ -178,14 +359,14 @@ func testAccCheckBigqueryDataTransferConfigDestroyProducer(t *testing.T) func(s 
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{BigqueryDataTransferBasePath}}{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{BigqueryDataTransferBasePath}}{{name}}")
 			if err != nil {
 				return err
 			}
 
-			_, err = sendRequest(config, "GET", "", url, config.userAgent, nil)
+			_, err = transport_tpg.SendRequest(config, "GET", "", url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("BigqueryDataTransferConfig still exists at %s", url)
 			}
@@ -202,7 +383,7 @@ data "google_project" "project" {}
 resource "google_project_iam_member" "permissions" {
   project = data.google_project.project.project_id
 
-  role   = "roles/iam.serviceAccountShortTermTokenMinter"
+  role   = "roles/iam.serviceAccountTokenCreator"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
 }
 
@@ -292,7 +473,7 @@ data "google_project" "project" {}
 
 resource "google_project_iam_member" "permissions" {
   project = data.google_project.project.project_id
-  role   = "roles/iam.serviceAccountShortTermTokenMinter"
+  role   = "roles/iam.serviceAccountTokenCreator"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
 }
 
@@ -331,7 +512,7 @@ data "google_project" "project" {}
 
 resource "google_project_iam_member" "permissions" {
   project = data.google_project.project.project_id
-  role   = "roles/iam.serviceAccountShortTermTokenMinter"
+  role   = "roles/iam.serviceAccountTokenCreator"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
 }
 
@@ -368,4 +549,30 @@ resource "google_bigquery_data_transfer_config" "copy_config" {
   }
 }
 `, random_suffix, random_suffix, random_suffix)
+}
+
+func testAccBigqueryDataTransferConfig_update_params_force_new(random_suffix, path, table string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id       = "tf_test_%s"
+  friendly_name    = "foo"
+  description      = "bar"
+  location         = "US"
+}
+
+resource "google_bigquery_data_transfer_config" "update_config" {
+  display_name           = "tf-test-%s"
+  data_source_id         = "google_cloud_storage"
+  destination_dataset_id = google_bigquery_dataset.dataset.dataset_id
+  location               = google_bigquery_dataset.dataset.location
+
+  params = {
+    data_path_template              = "gs://bq-bucket-%s-%s/*.json"
+    destination_table_name_template = "the-table-%s-%s"
+    file_format                     = "JSON"
+    max_bad_records                 = 0
+    write_disposition               = "APPEND"
+  }
+}
+`, random_suffix, random_suffix, random_suffix, path, random_suffix, table)
 }

@@ -5,18 +5,19 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccAccessContextManagerAccessPolicyIamBinding(t *testing.T) {
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 
-	org := getTestOrgFromEnv(t)
-	account := "tf-acm-iam-" + randString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	account := "tf-acm-iam-" + RandString(t, 10)
 	role := "roles/accesscontextmanager.policyAdmin"
 	policy := createScopedPolicy(t, org)
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -31,15 +32,15 @@ func TestAccAccessContextManagerAccessPolicyIamBinding(t *testing.T) {
 }
 
 func TestAccAccessContextManagerAccessPolicyIamMember(t *testing.T) {
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 
-	org := getTestOrgFromEnv(t)
-	account := "tf-acm-iam-" + randString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	account := "tf-acm-iam-" + RandString(t, 10)
 	role := "roles/accesscontextmanager.policyAdmin"
 	policy := createScopedPolicy(t, org)
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -56,15 +57,15 @@ func TestAccAccessContextManagerAccessPolicyIamMember(t *testing.T) {
 }
 
 func TestAccAccessContextManagerAccessPolicyIamPolicy(t *testing.T) {
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 
-	org := getTestOrgFromEnv(t)
-	account := "tf-acm-iam-" + randString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	account := "tf-acm-iam-" + RandString(t, 10)
 	role := "roles/accesscontextmanager.policyAdmin"
 	policy := createScopedPolicy(t, org)
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -130,7 +131,7 @@ resource google_access_context_manager_access_policy_iam_policy policy {
 }
 
 func createScopedPolicy(t *testing.T, org string) string {
-	rand := randString(t, 10)
+	rand := RandString(t, 10)
 	return fmt.Sprintf(`
 		resource "google_project" "project" {
 		project_id      = "acm-tf-test-%s"

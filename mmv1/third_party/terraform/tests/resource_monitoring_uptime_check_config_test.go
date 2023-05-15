@@ -5,20 +5,21 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccMonitoringUptimeCheckConfig_update(t *testing.T) {
 	t.Parallel()
-	project := getTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	host := "192.168.1.1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckMonitoringUptimeCheckConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringUptimeCheckConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMonitoringUptimeCheckConfig_update(randString(t, 4), "mypath", "password1", project, host),
+				Config: testAccMonitoringUptimeCheckConfig_update(RandString(t, 4), "mypath", "password1", project, host),
 			},
 			{
 				ResourceName:            "google_monitoring_uptime_check_config.http",
@@ -27,7 +28,7 @@ func TestAccMonitoringUptimeCheckConfig_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"http_check.0.auth_info.0.password"},
 			},
 			{
-				Config: testAccMonitoringUptimeCheckConfig_update(randString(t, 4), "", "password2", project, host),
+				Config: testAccMonitoringUptimeCheckConfig_update(RandString(t, 4), "", "password2", project, host),
 			},
 			{
 				ResourceName:            "google_monitoring_uptime_check_config.http",
@@ -43,15 +44,15 @@ func TestAccMonitoringUptimeCheckConfig_update(t *testing.T) {
 // updatable in place
 func TestAccMonitoringUptimeCheckConfig_changeNonUpdatableFields(t *testing.T) {
 	t.Parallel()
-	project := getTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckMonitoringUptimeCheckConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringUptimeCheckConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMonitoringUptimeCheckConfig_update(randString(t, 4), "mypath", "password1", project, "192.168.1.1"),
+				Config: testAccMonitoringUptimeCheckConfig_update(RandString(t, 4), "mypath", "password1", project, "192.168.1.1"),
 			},
 			{
 				ResourceName:            "google_monitoring_uptime_check_config.http",
@@ -60,7 +61,7 @@ func TestAccMonitoringUptimeCheckConfig_changeNonUpdatableFields(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"http_check.0.auth_info.0.password"},
 			},
 			{
-				Config: testAccMonitoringUptimeCheckConfig_update(randString(t, 4), "mypath", "password1", project, "192.168.1.2"),
+				Config: testAccMonitoringUptimeCheckConfig_update(RandString(t, 4), "mypath", "password1", project, "192.168.1.2"),
 			},
 			{
 				ResourceName:            "google_monitoring_uptime_check_config.http",
@@ -69,7 +70,7 @@ func TestAccMonitoringUptimeCheckConfig_changeNonUpdatableFields(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"http_check.0.auth_info.0.password"},
 			},
 			{
-				Config: testAccMonitoringUptimeCheckConfig_update(randString(t, 4), "mypath", "password2", project, "192.168.1.2"),
+				Config: testAccMonitoringUptimeCheckConfig_update(RandString(t, 4), "mypath", "password2", project, "192.168.1.2"),
 			},
 			{
 				ResourceName:            "google_monitoring_uptime_check_config.http",
@@ -83,14 +84,14 @@ func TestAccMonitoringUptimeCheckConfig_changeNonUpdatableFields(t *testing.T) {
 
 func TestAccMonitoringUptimeCheckConfig_jsonPathUpdate(t *testing.T) {
 	t.Parallel()
-	project := getTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	host := "192.168.1.1"
-	suffix := randString(t, 4)
+	suffix := RandString(t, 4)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckMonitoringUptimeCheckConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringUptimeCheckConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMonitoringUptimeCheckConfig_jsonPathUpdate(suffix, project, host, "123", "$.path", "EXACT_MATCH"),

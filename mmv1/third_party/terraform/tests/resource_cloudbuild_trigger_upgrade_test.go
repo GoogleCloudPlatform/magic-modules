@@ -6,14 +6,15 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 // Tests schema version migration by creating a trigger with an old version of the provider (4.30.0)
 // and then updating it with the current version the provider.
 func TestAccCloudBuildTrigger_migration(t *testing.T) {
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
-	name := fmt.Sprintf("tf-test-%d", randInt(t))
+	name := fmt.Sprintf("tf-test-%d", RandInt(t))
 
 	oldVersion := map[string]resource.ExternalProvider{
 		"google": {
@@ -22,11 +23,11 @@ func TestAccCloudBuildTrigger_migration(t *testing.T) {
 		},
 	}
 	newVersion := map[string]func() (*schema.Provider, error){
-		"mynewprovider": func() (*schema.Provider, error) { return testAccProviders["google"], nil },
+		"mynewprovider": func() (*schema.Provider, error) { return TestAccProviders["google"], nil },
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		CheckDestroy: testAccCheckCloudBuildTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -34,10 +35,10 @@ func TestAccCloudBuildTrigger_migration(t *testing.T) {
 				ExternalProviders: oldVersion,
 			},
 			{
-				ResourceName:      "google_cloudbuild_trigger.simple-trigger",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ExternalProviders: oldVersion,
+				ResourceName:            "google_cloudbuild_trigger.simple-trigger",
+				ImportState:             true,
+				ImportStateVerifyIgnore: []string{"location"},
+				ExternalProviders:       oldVersion,
 			},
 			{
 				Config:            newConfigWithFilename(name),

@@ -1,12 +1,12 @@
-config := meta.(*Config)
-if err := parseImportId([]string{
+config := meta.(*transport_tpg.Config)
+if err := tpgresource.ParseImportId([]string{
 	"(?P<featurestore>.+)/entityTypes/(?P<name>[^/]+)",
 }, d, config); err != nil {
 	return nil, err
 }
 
 // Replace import id for the resource id
-id, err := replaceVars(d, config, "{{featurestore}}/entityTypes/{{name}}")
+id, err := tpgresource.ReplaceVars(d, config, "{{featurestore}}/entityTypes/{{name}}")
 if err != nil {
 	return nil, fmt.Errorf("Error constructing id: %s", err)
 }

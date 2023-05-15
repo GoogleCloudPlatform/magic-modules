@@ -5,20 +5,22 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccBillingBudget_billingBudgetCurrencycode(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_acct":  getTestBillingAccountFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"billing_acct":  acctest.GetTestMasterBillingAccountFromEnv(t),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBillingBudgetDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBillingBudget_billingBudgetCurrencycode(context),
@@ -69,14 +71,14 @@ func TestAccBillingBudget_billingBudgetUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_acct":  getTestBillingAccountFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"billing_acct":  acctest.GetTestMasterBillingAccountFromEnv(t),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBillingBudgetDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBillingBudget_billingBudgetUpdateStart(context),
@@ -120,6 +122,121 @@ func TestAccBillingBudget_billingBudgetUpdate(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccBillingBudget_billingFilterSubaccounts(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"master_billing_acct": acctest.GetTestMasterBillingAccountFromEnv(t),
+		"random_suffix":       RandString(t, 10),
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBillingBudget_billingFilterSubaccounts(context),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBillingBudget_billingFilterRemoveSubaccounts(context),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccBillingBudget_billingFilterSubaccounts(context map[string]interface{}) string {
+	return Nprintf(`
+data "google_billing_account" "account" {
+  billing_account = "%{master_billing_acct}"
+}
+
+data "google_project" "project" {
+}
+
+resource "google_billing_subaccount" "subaccount" {
+  display_name = "My Billing Account"
+  master_billing_account = data.google_billing_account.account.id
+}
+
+resource "google_billing_budget" "budget" {
+  billing_account = data.google_billing_account.account.id
+  display_name    = "Example Billing Budget%{random_suffix}"
+
+  budget_filter {
+    projects = ["projects/${data.google_project.project.number}"]
+    labels  = {
+      label = "bar"
+    }
+
+    subaccounts = ["billingAccounts/${google_billing_subaccount.subaccount.billing_account_id}"]
+  }
+
+  amount {
+    specified_amount {
+      units = "100000"
+    }
+  }
+
+  threshold_rules {
+    threshold_percent = 1.0
+  }
+  threshold_rules {
+    threshold_percent = 1.0
+    spend_basis       = "FORECASTED_SPEND"
+  }
+}
+`, context)
+}
+
+func testAccBillingBudget_billingFilterRemoveSubaccounts(context map[string]interface{}) string {
+	return Nprintf(`
+data "google_billing_account" "account" {
+  billing_account = "%{master_billing_acct}"
+}
+
+data "google_project" "project" {
+}
+
+resource "google_billing_budget" "budget" {
+  billing_account = data.google_billing_account.account.id
+  display_name    = "Example Billing Budget%{random_suffix}"
+
+  budget_filter {
+    projects = ["projects/${data.google_project.project.number}"]
+    labels  = {
+      label = "bar"
+    }
+    subaccounts = []
+  }
+
+  amount {
+    specified_amount {
+      units = "100000"
+    }
+  }
+
+  threshold_rules {
+    threshold_percent = 1.0
+  }
+  threshold_rules {
+    threshold_percent = 1.0
+    spend_basis       = "FORECASTED_SPEND"
+  }
+}
+`, context)
 }
 
 func testAccBillingBudget_billingBudgetUpdateStart(context map[string]interface{}) string {
@@ -242,8 +359,9 @@ resource "google_billing_budget" "budget" {
     labels  = {
       label1 = "bar2"
     }
-    credit_types_treatment = "INCLUDE_ALL_CREDITS"
-    services = ["services/24E6-581D-38E5"] # Bigquery
+    credit_types_treatment = "INCLUDE_SPECIFIED_CREDITS"
+    services               = ["services/24E6-581D-38E5"] # Bigquery
+    credit_types           = ["PROMOTION", "FREE_TIER"]
   }
 
   amount {
@@ -350,8 +468,9 @@ resource "google_billing_budget" "budget" {
 		year = 2023
 		month = 12
 		day = 31
-	  }		
+	  }
 	}
+	credit_types = []
   }
 
   amount {
@@ -390,7 +509,7 @@ func TestBillingBudgetStateUpgradeV0(t *testing.T) {
 			Expected: map[string]string{
 				"name": "9188612e-e4c0-4e69-9d14-9befebbcb87d",
 			},
-			Meta: &Config{},
+			Meta: &transport_tpg.Config{},
 		},
 		"short name stays": {
 			Attributes: map[string]interface{}{
@@ -399,12 +518,12 @@ func TestBillingBudgetStateUpgradeV0(t *testing.T) {
 			Expected: map[string]string{
 				"name": "9188612e-e4c0-4e69-9d14-9befebbcb87d",
 			},
-			Meta: &Config{},
+			Meta: &transport_tpg.Config{},
 		},
 	}
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
-			actual, err := resourceBillingBudgetUpgradeV0(context.Background(), tc.Attributes, tc.Meta)
+			actual, err := ResourceBillingBudgetUpgradeV0(context.Background(), tc.Attributes, tc.Meta)
 
 			if err != nil {
 				t.Error(err)
@@ -424,16 +543,17 @@ func TestAccBillingBudget_budgetFilterProjectsOrdering(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org":             getTestOrgFromEnv(t),
-		"billing_acct":    getTestBillingAccountFromEnv(t),
-		"random_suffix_1": randString(t, 10),
-		"random_suffix_2": randString(t, 10),
+		"org":                  acctest.GetTestOrgFromEnv(t),
+		"billing_acct":         acctest.GetTestMasterBillingAccountFromEnv(t),
+		"project_billing_acct": acctest.GetTestBillingAccountFromEnv(t),
+		"random_suffix_1":      RandString(t, 10),
+		"random_suffix_2":      RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBillingBudgetDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBillingBudget_budgetFilterProjectsOrdering1(context),
@@ -469,14 +589,14 @@ resource "google_project" "project1" {
 	project_id      = "tf-test-%{random_suffix_1}"
 	name            = "tf-test-%{random_suffix_1}"
 	org_id          = "%{org}"
-	billing_account = data.google_billing_account.account.id
+	billing_account = "%{project_billing_acct}"
 }
 
 resource "google_project" "project2" {
 	project_id      = "tf-test-%{random_suffix_2}"
 	name            = "tf-test-%{random_suffix_2}"
 	org_id          = "%{org}"
-	billing_account = data.google_billing_account.account.id
+	billing_account = "%{project_billing_acct}"
 }
 
 resource "google_billing_budget" "budget" {
@@ -513,14 +633,14 @@ resource "google_project" "project1" {
 	project_id      = "tf-test-%{random_suffix_1}"
 	name            = "tf-test-%{random_suffix_1}"
 	org_id          = "%{org}"
-	billing_account = data.google_billing_account.account.id
+	billing_account = "%{project_billing_acct}"
 }
 
 resource "google_project" "project2" {
 	project_id      = "tf-test-%{random_suffix_2}"
 	name            = "tf-test-%{random_suffix_2}"
 	org_id          = "%{org}"
-	billing_account = data.google_billing_account.account.id
+	billing_account = "%{project_billing_acct}"
 }
 
 resource "google_billing_budget" "budget" {

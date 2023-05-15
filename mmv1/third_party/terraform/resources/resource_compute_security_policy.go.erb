@@ -11,6 +11,11 @@ import (
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
+
 <% if version == 'ga' -%>
 	"google.golang.org/api/compute/v1"
 <% else -%>
@@ -18,7 +23,7 @@ import (
 <% end -%>
 )
 
-func resourceComputeSecurityPolicy() *schema.Resource {
+func ResourceComputeSecurityPolicy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeSecurityPolicyCreate,
 		Read:   resourceComputeSecurityPolicyRead,
@@ -40,7 +45,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validateGCEName,
+				ValidateFunc: verify.ValidateGCEName,
 				Description:  `The name of the security policy.`,
 			},
 
@@ -173,7 +178,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 												"request_uri": resourceComputeSecurityPolicyRulePreconfiguredWafConfigExclusionFieldParamsSchema(
 													`Request URI from the request line to be excluded from inspection during preconfigured WAF evaluation. When specifying this field, the query or fragment part should be excluded.`,
 												),
-												
+
 												"request_query_param": resourceComputeSecurityPolicyRulePreconfiguredWafConfigExclusionFieldParamsSchema(
 													`Request query parameter whose value will be excluded from inspection during preconfigured WAF evaluation.  Note that the parameter can be in the query string or in the POST body.`,
 												),
@@ -262,7 +267,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 										Optional:     true,
 										Default:      "ALL",
 										Description:  `Determines the key to enforce the rateLimitThreshold on`,
-										ValidateFunc: validation.StringInSlice([]string{"ALL", "IP", "HTTP_HEADER", "XFF_IP", "HTTP_COOKIE"}, false),
+										ValidateFunc: validation.StringInSlice([]string{"ALL", "IP", "HTTP_HEADER", "XFF_IP", "HTTP_COOKIE", "HTTP_PATH", "SNI", "REGION_CODE", ""}, false),
 									},
 
 									"enforce_on_key_name": {
@@ -270,6 +275,30 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 										Optional:    true,
 										Description: `Rate limit key name applicable only for the following key types: HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.`,
 									},
+
+									<% unless version == 'ga' -%>
+									"enforce_on_key_configs": {
+										Type:        schema.TypeList,
+										Description: `Enforce On Key Config of this security policy`,
+										ForceNew:    true,
+										Optional:    true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"enforce_on_key_type": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													Description:  `Determines the key to enforce the rate_limit_threshold on`,
+													ValidateFunc: validation.StringInSlice([]string{"ALL", "IP", "HTTP_HEADER", "XFF_IP", "HTTP_COOKIE", "HTTP_PATH", "SNI", "REGION_CODE"}, false),
+												},
+												"enforce_on_key_name": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: `Rate limit key name applicable only for the following key types: HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.`,
+												},
+											},
+										},
+									},
+									<% end -%>
 
 									"ban_threshold": {
 										Type:        schema.TypeList,
@@ -346,6 +375,35 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 								},
 							},
 							Description: `Parameters defining the redirect action. Cannot be specified for any other actions.`,
+						},
+						"header_action": {
+							Type: schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Description: `Additional actions that are performed on headers.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"request_headers_to_adds": {
+										Type: schema.TypeList,
+										Required: true,
+										Description: `The list of request headers to add or overwrite if they're already present.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"header_name": {
+													Type: schema.TypeString,
+													Required: true,
+													Description: `The name of the header to set.`,
+												},
+												"header_value": {
+													Type: schema.TypeString,
+													Optional: true,
+													Description: `The value to set the named header to.`,
+												},
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -436,6 +494,53 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 								},
 							},
 						},
+						<% unless version == 'ga' -%>
+						"auto_deploy_config": {
+							Type:        schema.TypeList,
+							Description: `Auto Deploy Config of this security policy`,
+							Optional:    true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"load_threshold": {
+										Type:        schema.TypeFloat,
+										Optional:    true,
+										Description: `Identifies new attackers only when the load to the backend service that is under attack exceeds this threshold.`,
+									},
+									"confidence_threshold": {
+										Type:        schema.TypeFloat,
+										Optional:    true,
+										Description: `Rules are only automatically deployed for alerts on potential attacks with confidence scores greater than this threshold.`,
+									},
+									"impacted_baseline_threshold": {
+										Type:        schema.TypeFloat,
+										Optional:    true,
+										Description: `Rules are only automatically deployed when the estimated impact to baseline traffic from the suggested mitigation is below this threshold.`,
+									},
+									"expiration_sec": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Description: `Google Cloud Armor stops applying the action in the automatically deployed rule to an identified attacker after this duration. The rule continues to operate against new requests.`,
+									},
+								},
+							},
+						},
+						<% end -%>
+					},
+				},
+			},
+			"recaptcha_options_config": {
+				Type: schema.TypeList,
+				Optional: true,
+				Description: `reCAPTCHA configuration options to be applied for the security policy.`,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"redirect_site_key": {
+							Type: schema.TypeString,
+							Required: true,
+							Description: `A field to supply a reCAPTCHA site key to be used for all the rules using the redirect action with the type of GOOGLE_RECAPTCHA under the security policy. The specified site key needs to be created from the reCAPTCHA API. The user is responsible for the validity of the specified site key. If not specified, a Google-managed site key is used.`,
+						},
 					},
 				},
 			},
@@ -487,13 +592,13 @@ func rulesCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, _ interfac
 }
 
 func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -522,6 +627,10 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 
 	log.Printf("[DEBUG] SecurityPolicy insert request: %#v", securityPolicy)
 
+	if v, ok := d.GetOk("recaptcha_options_config"); ok{
+		securityPolicy.RecaptchaOptionsConfig = expandSecurityPolicyRecaptchaOptionsConfig(v.([]interface{}), d)
+	}
+
 	client := config.NewComputeClient(userAgent)
 
 	op, err := client.SecurityPolicies.Insert(project, securityPolicy).Do()
@@ -530,13 +639,13 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 		return errwrap.Wrapf("Error creating SecurityPolicy: {{err}}", err)
 	}
 
-	id, err := replaceVars(d, config, "projects/{{project}}/global/securityPolicies/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/global/securityPolicies/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
 
-	err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Creating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutCreate))
+	err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Creating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return err
 	}
@@ -545,13 +654,13 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 }
 
 func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -562,7 +671,7 @@ func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{})
 
 	securityPolicy, err := client.SecurityPolicies.Get(project, sp).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("SecurityPolicy %q", d.Id()))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("SecurityPolicy %q", d.Id()))
 	}
 
 	if err := d.Set("name", securityPolicy.Name); err != nil {
@@ -583,7 +692,7 @@ func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{})
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-	if err := d.Set("self_link", ConvertSelfLinkToV1(securityPolicy.SelfLink)); err != nil {
+	if err := d.Set("self_link", tpgresource.ConvertSelfLinkToV1(securityPolicy.SelfLink)); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
 	if err := d.Set("advanced_options_config", flattenSecurityPolicyAdvancedOptionsConfig(securityPolicy.AdvancedOptionsConfig)); err != nil {
@@ -594,17 +703,21 @@ func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error setting adaptive_protection_config: %s", err)
 	}
 
+	if err := d.Set("recaptcha_options_config", flattenSecurityPolicyRecaptchaOptionConfig(securityPolicy.RecaptchaOptionsConfig)); err != nil {
+		return fmt.Errorf("Error setting recaptcha_options_config: %s", err)
+	}
+
 	return nil
 }
 
 func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -634,6 +747,14 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 	if d.HasChange("adaptive_protection_config") {
 		securityPolicy.AdaptiveProtectionConfig = expandSecurityPolicyAdaptiveProtectionConfig(d.Get("adaptive_protection_config").([]interface{}))
 		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "AdaptiveProtectionConfig", "adaptiveProtectionConfig.layer7DdosDefenseConfig.enable", "adaptiveProtectionConfig.layer7DdosDefenseConfig.ruleVisibility")
+		<% unless version == 'ga' -%>
+		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "adaptiveProtectionConfig.autoDeployConfig.loadThreshold", "adaptiveProtectionConfig.autoDeployConfig.confidenceThreshold", "adaptiveProtectionConfig.autoDeployConfig.impactedBaselineThreshold", "adaptiveProtectionConfig.autoDeployConfig.expirationSec")
+		<% end -%>
+	}
+
+	if d.HasChange("recaptcha_options_config") {
+		securityPolicy.RecaptchaOptionsConfig = expandSecurityPolicyRecaptchaOptionsConfig(d.Get("recaptcha_options_config").([]interface{}), d)
+		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "RecaptchaOptionsConfig")
 	}
 
 	if len(securityPolicy.ForceSendFields) > 0 {
@@ -645,7 +766,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 			return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
 		}
 
-		err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -680,7 +801,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
 				}
 
-				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
+				err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
 				if err != nil {
 					return err
 				}
@@ -698,7 +819,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
 				}
 
-				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
+				err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
 				if err != nil {
 					return err
 				}
@@ -721,7 +842,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
 				}
 
-				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
+				err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
 				if err != nil {
 					return err
 				}
@@ -733,13 +854,13 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 }
 
 func resourceComputeSecurityPolicyDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -752,7 +873,7 @@ func resourceComputeSecurityPolicyDelete(d *schema.ResourceData, meta interface{
 		return errwrap.Wrapf("Error deleting SecurityPolicy: {{err}}", err)
 	}
 
-	err = computeOperationWaitTime(config, op, project, "Deleting SecurityPolicy", userAgent, d.Timeout(schema.TimeoutDelete))
+	err = ComputeOperationWaitTime(config, op, project, "Deleting SecurityPolicy", userAgent, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return err
 	}
@@ -782,6 +903,7 @@ func expandSecurityPolicyRule(raw interface{}) *compute.SecurityPolicyRule {
 	<% end -%>
 		RateLimitOptions:       expandSecurityPolicyRuleRateLimitOptions(data["rate_limit_options"].([]interface{})),
 		RedirectOptions:        expandSecurityPolicyRuleRedirectOptions(data["redirect_options"].([]interface{})),
+		HeaderAction:           expandSecurityPolicyRuleHeaderAction(data["header_action"].([]interface{})),
 		ForceSendFields:        []string{"Description", "Preview"},
 	}
 }
@@ -888,8 +1010,8 @@ func flattenSecurityPolicyRules(rules []*compute.SecurityPolicyRule) []map[strin
 		<% end -%>
 			"rate_limit_options":	      flattenSecurityPolicyRuleRateLimitOptions(rule.RateLimitOptions),
 			"redirect_options":         flattenSecurityPolicyRedirectOptions(rule.RedirectOptions),
+			"header_action":            flattenSecurityPolicyRuleHeaderAction(rule.HeaderAction),
 		}
-
 		rulesSchema = append(rulesSchema, data)
 	}
 	return rulesSchema
@@ -1039,6 +1161,10 @@ func expandSecurityPolicyAdaptiveProtectionConfig(configured []interface{}) *com
 	data := configured[0].(map[string]interface{})
 	return &compute.SecurityPolicyAdaptiveProtectionConfig{
 		Layer7DdosDefenseConfig: expandLayer7DdosDefenseConfig(data["layer_7_ddos_defense_config"].([]interface{})),
+		<% unless version == 'ga' -%>
+		AutoDeployConfig: expandAutoDeployConfig(data["auto_deploy_config"].([]interface{})),
+		<% end -%>
+
 	}
 }
 
@@ -1055,6 +1181,22 @@ func expandLayer7DdosDefenseConfig(configured []interface{}) *compute.SecurityPo
 	}
 }
 
+<% unless version == 'ga' -%>
+func expandAutoDeployConfig(configured []interface{}) *compute.SecurityPolicyAdaptiveProtectionConfigAutoDeployConfig {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+
+	data := configured[0].(map[string]interface{})
+	return &compute.SecurityPolicyAdaptiveProtectionConfigAutoDeployConfig{
+		LoadThreshold: data["load_threshold"].(float64),
+		ConfidenceThreshold: data["confidence_threshold"].(float64),
+		ImpactedBaselineThreshold: data["impacted_baseline_threshold"].(float64),
+		ExpirationSec: int64(data["expiration_sec"].(int)),
+	}
+}
+<% end -%>
+
 func flattenSecurityPolicyAdaptiveProtectionConfig(conf *compute.SecurityPolicyAdaptiveProtectionConfig) []map[string]interface{} {
 	if conf == nil {
 		return nil
@@ -1062,6 +1204,9 @@ func flattenSecurityPolicyAdaptiveProtectionConfig(conf *compute.SecurityPolicyA
 
 	data := map[string]interface{}{
 		"layer_7_ddos_defense_config": flattenLayer7DdosDefenseConfig(conf.Layer7DdosDefenseConfig),
+		<% unless version == 'ga' -%>
+		"auto_deploy_config": flattenAutoDeployConfig(conf.AutoDeployConfig),
+		<% end -%>
 	}
 
 	return []map[string]interface{}{data}
@@ -1080,6 +1225,23 @@ func flattenLayer7DdosDefenseConfig(conf *compute.SecurityPolicyAdaptiveProtecti
 	return []map[string]interface{}{data}
 }
 
+<% unless version == 'ga' -%>
+func flattenAutoDeployConfig(conf *compute.SecurityPolicyAdaptiveProtectionConfigAutoDeployConfig) []map[string]interface{} {
+	if conf == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{
+		"load_threshold": conf.LoadThreshold,
+		"confidence_threshold": conf.ConfidenceThreshold,
+		"impacted_baseline_threshold": conf.ImpactedBaselineThreshold,
+		"expiration_sec": conf.ExpirationSec,
+	}
+
+	return []map[string]interface{}{data}
+}
+<% end -%>
+
 func expandSecurityPolicyRuleRateLimitOptions(configured []interface{}) *compute.SecurityPolicyRuleRateLimitOptions {
 	if len(configured) == 0 || configured[0] == nil {
 		return nil
@@ -1093,8 +1255,16 @@ func expandSecurityPolicyRuleRateLimitOptions(configured []interface{}) *compute
 		ConformAction:         data["conform_action"].(string),
 		EnforceOnKey:          data["enforce_on_key"].(string),
 		EnforceOnKeyName:      data["enforce_on_key_name"].(string),
+		<% unless version == 'ga' -%>
+		EnforceOnKeyConfigs:   expandSecurityPolicyEnforceOnKeyConfigs(data["enforce_on_key_configs"].([]interface{})),
+		<% end -%>
 		BanDurationSec:        int64(data["ban_duration_sec"].(int)),
 		ExceedRedirectOptions: expandSecurityPolicyRuleRedirectOptions(data["exceed_redirect_options"].([]interface{})),
+		<% if version == 'ga' -%>
+		ForceSendFields:       []string{"EnforceOnKey", "EnforceOnKeyName"},
+		<% else -%>
+		ForceSendFields:       []string{"EnforceOnKey", "EnforceOnKeyName", "EnforceOnKeyConfigs"},
+		<% end -%>
 	}
 }
 
@@ -1110,6 +1280,27 @@ func expandThreshold(configured []interface{}) *compute.SecurityPolicyRuleRateLi
 	}
 }
 
+<% unless version == 'ga' -%>
+func expandSecurityPolicyEnforceOnKeyConfigs(configured []interface{}) []*compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig {
+	params := make([]*compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig, 0, len(configured))
+
+	for _, raw := range configured {
+		params = append(params, expandSecurityPolicyEnforceOnKeyConfigsFields(raw))
+	}
+
+	return params
+}
+
+func expandSecurityPolicyEnforceOnKeyConfigsFields(raw interface{}) *compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig {
+	data := raw.(map[string]interface{})
+
+	return &compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig{
+		EnforceOnKeyType: data["enforce_on_key_type"].(string),
+		EnforceOnKeyName: data["enforce_on_key_name"].(string),
+	}
+}
+<% end -%>
+
 func flattenSecurityPolicyRuleRateLimitOptions(conf *compute.SecurityPolicyRuleRateLimitOptions) []map[string]interface{} {
 	if conf == nil {
 		return nil
@@ -1122,6 +1313,9 @@ func flattenSecurityPolicyRuleRateLimitOptions(conf *compute.SecurityPolicyRuleR
 		"conform_action":          conf.ConformAction,
 		"enforce_on_key":          conf.EnforceOnKey,
 		"enforce_on_key_name":     conf.EnforceOnKeyName,
+		<% unless version == 'ga' -%>
+		"enforce_on_key_configs": flattenSecurityPolicyEnforceOnKeyConfigs(conf.EnforceOnKeyConfigs),
+		<% end -%>
 		"ban_duration_sec":        conf.BanDurationSec,
 		"exceed_redirect_options": flattenSecurityPolicyRedirectOptions(conf.ExceedRedirectOptions),
 	}
@@ -1154,6 +1348,31 @@ func expandSecurityPolicyRuleRedirectOptions(configured []interface{}) *compute.
 	}
 }
 
+<% unless version == 'ga' -%>
+func flattenSecurityPolicyEnforceOnKeyConfigs(conf []*compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig) []map[string]interface{} {
+	if conf == nil || len(conf) == 0 {
+		return nil
+	}
+
+	transformed := make([]map[string]interface{}, 0, len(conf))
+	for _, raw := range conf {
+		transformed = append(transformed, flattenSecurityPolicyEnforceOnKeyConfigsFields(raw))
+	}
+	return transformed
+}
+
+func flattenSecurityPolicyEnforceOnKeyConfigsFields(conf *compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig) map[string]interface{} {
+	if conf == nil {
+		return nil
+	}
+
+	return map[string]interface{}{
+		"enforce_on_key_name":  conf.EnforceOnKeyName,
+		"enforce_on_key_type": conf.EnforceOnKeyType,
+	}
+}
+<% end -%>
+
 func flattenSecurityPolicyRedirectOptions(conf *compute.SecurityPolicyRuleRedirectOptions) []map[string]interface{} {
 	if conf == nil {
 		return nil
@@ -1167,14 +1386,107 @@ func flattenSecurityPolicyRedirectOptions(conf *compute.SecurityPolicyRuleRedire
 	return []map[string]interface{}{data}
 }
 
+func expandSecurityPolicyRecaptchaOptionsConfig(configured []interface{}, d *schema.ResourceData) *compute.SecurityPolicyRecaptchaOptionsConfig {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+
+	data := configured[0].(map[string]interface{})
+
+	return &compute.SecurityPolicyRecaptchaOptionsConfig{
+		RedirectSiteKey: data["redirect_site_key"].(string),
+		ForceSendFields: []string{"RedirectSiteKey"},
+	}
+}
+
+func flattenSecurityPolicyRecaptchaOptionConfig(conf *compute.SecurityPolicyRecaptchaOptionsConfig) []map[string]interface{} {
+	if conf == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{
+		"redirect_site_key": conf.RedirectSiteKey,
+	}
+
+	return []map[string]interface{}{data}
+}
+
+func expandSecurityPolicyRuleHeaderAction(configured []interface{}) *compute.SecurityPolicyRuleHttpHeaderAction {
+	if len(configured) == 0 || configured[0] == nil {
+		// If header action is unset, return an empty object; this ensures the header action can be cleared
+		return &compute.SecurityPolicyRuleHttpHeaderAction{}
+	}
+
+	data := configured[0].(map[string]interface{})
+
+	return &compute.SecurityPolicyRuleHttpHeaderAction{
+		RequestHeadersToAdds: expandSecurityPolicyRequestHeadersToAdds(data["request_headers_to_adds"].([]interface{})),
+	}
+}
+
+func expandSecurityPolicyRequestHeadersToAdds(configured []interface{}) []*compute.SecurityPolicyRuleHttpHeaderActionHttpHeaderOption {
+	transformed := make([]*compute.SecurityPolicyRuleHttpHeaderActionHttpHeaderOption, 0, len(configured))
+
+	for _, raw := range configured {
+		transformed = append(transformed, expandSecurityPolicyRequestHeader(raw))
+	}
+
+	return transformed
+}
+
+func expandSecurityPolicyRequestHeader(configured interface{}) *compute.SecurityPolicyRuleHttpHeaderActionHttpHeaderOption {
+	data := configured.(map[string]interface{})
+
+	return &compute.SecurityPolicyRuleHttpHeaderActionHttpHeaderOption{
+		HeaderName: data["header_name"].(string),
+		HeaderValue: data["header_value"].(string),
+	}
+}
+
+func flattenSecurityPolicyRuleHeaderAction(conf *compute.SecurityPolicyRuleHttpHeaderAction) []map[string]interface{} {
+	if conf == nil || conf.RequestHeadersToAdds == nil {
+		return nil
+	}
+
+	transformed := map[string]interface{}{
+		"request_headers_to_adds": flattenSecurityPolicyRequestHeadersToAdds(conf.RequestHeadersToAdds),
+	}
+
+	return []map[string]interface{}{transformed}
+}
+
+func flattenSecurityPolicyRequestHeadersToAdds(conf []*compute.SecurityPolicyRuleHttpHeaderActionHttpHeaderOption) []map[string]interface{} {
+	if conf == nil || len(conf) == 0 {
+		return nil
+	}
+
+	transformed := make([]map[string]interface{}, 0, len(conf))
+	for _, raw := range conf {
+		transformed = append(transformed, flattenSecurityPolicyRequestHeader(raw))
+	}
+
+	return transformed
+}
+
+func flattenSecurityPolicyRequestHeader(conf *compute.SecurityPolicyRuleHttpHeaderActionHttpHeaderOption) map[string]interface{} {
+	if conf == nil {
+		return nil
+	}
+
+	return map[string]interface{}{
+		"header_name": conf.HeaderName,
+		"header_value": conf.HeaderValue,
+	}
+}
+
 func resourceSecurityPolicyStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
-	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/global/securityPolicies/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
+	config := meta.(*transport_tpg.Config)
+	if err := tpgresource.ParseImportId([]string{"projects/(?P<project>[^/]+)/global/securityPolicies/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/global/securityPolicies/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/global/securityPolicies/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

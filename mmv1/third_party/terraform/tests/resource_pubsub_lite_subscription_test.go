@@ -5,18 +5,19 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccPubsubLiteSubscription_pubsubLiteSubscription_deliveryRequirement_update(t *testing.T) {
 	t.Parallel()
 
-	topic := fmt.Sprintf("tf-test-topic-foo-%s", randString(t, 10))
-	subscription := fmt.Sprintf("tf-test-topic-foo-%s", randString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-foo-%s", RandString(t, 10))
+	subscription := fmt.Sprintf("tf-test-topic-foo-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckPubsubLiteSubscriptionDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubLiteSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPubsubLiteSubscription_pubsubLiteSubscription_deliveryRequirement_update(topic, subscription, "DELIVER_AFTER_STORED"),

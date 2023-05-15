@@ -1,0 +1,161 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Instance'
+base_url: projects/{{project}}/instances
+update_verb: :PATCH
+description: |
+  An isolated set of Cloud Spanner resources on which databases can be
+  hosted.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/spanner/'
+  api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances'
+async: !ruby/object:Api::OpAsync
+  actions: ['create', 'update']
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+autogen_async: true
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+id_format: '{{project}}/{{name}}'
+import_format:
+  - 'projects/{{project}}/instances/{{name}}'
+  - '{{project}}/{{name}}'
+  - '{{name}}'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'spanner_instance_basic'
+    primary_resource_id:
+      'example'
+      # Randomness
+    skip_vcr: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'spanner_instance_processing_units'
+    primary_resource_id:
+      'example'
+      # Randomness
+    skip_vcr: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'spanner_instance_multi_regional'
+    primary_resource_id:
+      'example'
+      # Randomness
+    skip_vcr: true
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: 'force_destroy'
+    default_value: false
+    description: |
+      When deleting a spanner instance, this boolean option will delete all backups of this instance.
+      This must be set to true if you created a backup manually in the console.
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/spanner_instance.go.erb
+  update_encoder: templates/terraform/encoders/spanner_instance_update.go.erb
+  decoder: templates/terraform/decoders/spanner_instance.go.erb
+  post_create: templates/terraform/post_create/sleep.go.erb
+  pre_delete: 'templates/terraform/pre_delete/spanner_instance.go.erb'
+  constants: 'templates/terraform/constants/spanner_instance.go.erb'
+  pre_update: 'templates/terraform/pre_update/spanner_instance.go.erb'
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      A unique identifier for the instance, which cannot be changed after
+      the instance is created. The name must be between 6 and 30 characters
+      in length.
+
+
+      If not provided, a random string starting with `tf-` will be selected.
+    immutable: true
+    required: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      regex:
+        '^[a-z][-a-z0-9]*[a-z0-9]$'
+        # This resource supports a sort of odd autogenerate-if-not-set
+        # system, which is done in the encoder.  Consequently we have
+        # to interpret "not set" as "use the name in state".
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'config'
+    resource: 'InstanceConfig'
+    imports: 'name'
+    description: |
+      The name of the instance's configuration (similar but not
+      quite the same as a region) which defines the geographic placement and
+      replication of your databases in this instance. It determines where your data
+      is stored. Values are typically of the form `regional-europe-west1` , `us-central` etc.
+      In order to obtain a valid list please consult the
+      [Configuration section of the docs](https://cloud.google.com/spanner/docs/instances).
+    immutable: true
+    required: true
+    custom_expand: templates/terraform/custom_expand/spanner_instance_config.go.erb
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
+    description: |
+      The descriptive name for this instance as it appears in UIs. Must be
+      unique per project and between 4 and 30 characters in length.
+    required: true
+  - !ruby/object:Api::Type::Integer
+    name: 'num_nodes'
+    api_name: nodeCount
+    default_from_api: true
+    description: |
+      The number of nodes allocated to this instance. Exactly one of either node_count or processing_units
+      must be present in terraform.
+    exactly_one_of:
+      - num_nodes
+      - processing_units
+  - !ruby/object:Api::Type::Integer
+    name: 'processingUnits'
+    description: |
+      The number of processing units allocated to this instance. Exactly one of processing_units
+      or node_count must be present in terraform.
+    exactly_one_of:
+      - num_nodes
+      - processing_units
+    default_from_api: true
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'labels'
+    description: |
+      An object containing a list of "key": value pairs.
+      Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+  - !ruby/object:Api::Type::Enum
+    name: 'state'
+    description: |
+      Instance status: `CREATING` or `READY`.
+    output: true
+    # This attribute is not useful - we include it in Terraform for historical
+    # reasons, but you should most likely not use it.
+    exclude: false
+    values:
+      - :READY
+      - :CREATING

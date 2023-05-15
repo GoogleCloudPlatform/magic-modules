@@ -8,14 +8,15 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccContainerEngineVersions_basic(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleContainerEngineVersionsConfig,
@@ -30,9 +31,9 @@ func TestAccContainerEngineVersions_basic(t *testing.T) {
 func TestAccContainerEngineVersions_filtered(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleContainerEngineVersions_filtered,
@@ -109,6 +110,16 @@ func testAccCheckGoogleContainerEngineVersionsMeta(n string) resource.TestCheckF
 		_, ok = rs.Primary.Attributes["default_cluster_version"]
 		if !ok {
 			return errors.New("Didn't get a default cluster version.")
+		}
+
+		_, ok = rs.Primary.Attributes["release_channel_default_version.STABLE"]
+		if !ok {
+			return errors.New("failed to read default STABLE version")
+		}
+
+		_, ok = rs.Primary.Attributes["release_channel_latest_version.STABLE"]
+		if !ok {
+			return errors.New("failed to read latest STABLE version")
 		}
 
 		return nil

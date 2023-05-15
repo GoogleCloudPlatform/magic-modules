@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -13,12 +15,12 @@ func TestAccComputeProjectMetadataItem_basic(t *testing.T) {
 	t.Parallel()
 
 	// Key must be unique to avoid concurrent tests interfering with each other
-	key := "myKey" + randString(t, 10)
+	key := "myKey" + RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectMetadataItem_basic("foobar", key, "myValue"),
@@ -34,19 +36,19 @@ func TestAccComputeProjectMetadataItem_basic(t *testing.T) {
 
 func TestAccComputeProjectMetadataItem_basicMultiple(t *testing.T) {
 	// Multiple fine grained items applied in same config
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	// Generate a config of two config keys
-	key1 := "myKey" + randString(t, 10)
-	key2 := "myKey" + randString(t, 10)
+	key1 := "myKey" + RandString(t, 10)
+	key2 := "myKey" + RandString(t, 10)
 	config := testAccProjectMetadataItem_basic("foobar", key1, "myValue") +
 		testAccProjectMetadataItem_basic("foobar2", key2, "myOtherValue")
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: config,
@@ -69,12 +71,12 @@ func TestAccComputeProjectMetadataItem_basicWithEmptyVal(t *testing.T) {
 	t.Parallel()
 
 	// Key must be unique to avoid concurrent tests interfering with each other
-	key := "myKey" + randString(t, 10)
+	key := "myKey" + RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectMetadataItem_basic("foobar", key, ""),
@@ -92,12 +94,12 @@ func TestAccComputeProjectMetadataItem_basicUpdate(t *testing.T) {
 	t.Parallel()
 
 	// Key must be unique to avoid concurrent tests interfering with each other
-	key := "myKey" + randString(t, 10)
+	key := "myKey" + RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectMetadataItem_basic("foobar", key, "myValue"),
@@ -123,13 +125,13 @@ func TestAccComputeProjectMetadataItem_exists(t *testing.T) {
 	t.Parallel()
 
 	// Key must be unique to avoid concurrent tests interfering with each other
-	key := "myKey" + randString(t, 10)
+	key := "myKey" + RandString(t, 10)
 	originalConfig := testAccProjectMetadataItem_basic("foobar", key, "myValue")
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: originalConfig,
@@ -150,9 +152,9 @@ func TestAccComputeProjectMetadataItem_exists(t *testing.T) {
 
 func testAccCheckProjectMetadataItemDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
-		project, err := config.NewComputeClient(config.userAgent).Projects.Get(config.Project).Do()
+		project, err := config.NewComputeClient(config.UserAgent).Projects.Get(config.Project).Do()
 		if err != nil {
 			return err
 		}

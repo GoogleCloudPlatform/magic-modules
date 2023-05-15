@@ -1,5 +1,5 @@
-config := meta.(*Config)
-ig, err := ParseInstanceGroupFieldValue(d.Get("group").(string), d, config)
+config := meta.(*transport_tpg.Config)
+ig, err := tpgresource.ParseInstanceGroupFieldValue(d.Get("group").(string), d, config)
 if err != nil {
   return nil, err
 }

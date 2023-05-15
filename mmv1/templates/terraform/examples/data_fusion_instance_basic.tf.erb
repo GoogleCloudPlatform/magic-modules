@@ -1,9 +1,6 @@
 resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]["instance_name"] %>"
+  name   = "<%= ctx[:vars]["instance_name"] %>"
   region = "us-central1"
-  type = "BASIC"
-  # Mark for testing to avoid service networking connection usage that is not cleaned up
-  options = {
-    prober_test_run = "true"
-  }
+  type   = "BASIC"
+  <%= ctx[:vars]['prober_test_run'] %>
 }

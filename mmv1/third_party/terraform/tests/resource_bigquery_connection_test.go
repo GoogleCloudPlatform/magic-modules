@@ -4,21 +4,22 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccBigqueryConnectionConnection_bigqueryConnectionBasic(t *testing.T) {
 	// Uses random provider
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigqueryConnectionConnectionDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryConnectionConnectionDestroyProducer(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 		},
@@ -135,6 +136,76 @@ resource "google_bigquery_connection" "connection" {
             password = google_sql_user.user.password
         }
     }
+}
+`, context)
+}
+
+func TestAccBigqueryConnectionConnection_bigqueryConnectionAwsUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": RandString(t, 10),
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+			"time":   {},
+		},
+		CheckDestroy: testAccCheckBigqueryConnectionConnectionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigqueryConnectionConnection_bigqueryConnectionAws(context),
+			},
+			{
+				ResourceName:            "google_bigquery_connection.connection",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+			{
+				Config: testAccBigqueryConnectionConnection_bigqueryConnectionAwsUpdate(context),
+			},
+			{
+				ResourceName:            "google_bigquery_connection.connection",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+		},
+	})
+}
+
+func testAccBigqueryConnectionConnection_bigqueryConnectionAws(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_bigquery_connection" "connection" {
+   connection_id = "tf-test-my-connection%{random_suffix}"
+   location      = "aws-us-east-1"
+   friendly_name = "👋"
+   description   = "a riveting description"
+   aws {
+      access_role {
+         iam_role_id =  "arn:aws:iam::999999999999:role/omnirole%{random_suffix}"
+      }
+   }
+}
+`, context)
+}
+
+func testAccBigqueryConnectionConnection_bigqueryConnectionAwsUpdate(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_bigquery_connection" "connection" {
+   connection_id = "tf-test-my-connection%{random_suffix}"
+   location      = "aws-us-east-1"
+   friendly_name = "👋"
+   description   = "a riveting description"
+   aws {
+      access_role {
+         iam_role_id =  "arn:aws:iam::999999999999:role/omnirole%{random_suffix}update"
+      }
+   }
 }
 `, context)
 }

@@ -11,9 +11,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	"github.com/GoogleCloudPlatform/terraform-validator/converters/google"
-	"github.com/GoogleCloudPlatform/terraform-validator/tfgcv"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai"
 	"go.uber.org/zap/zaptest"
 )
 
@@ -66,11 +64,24 @@ func TestReadPlannedAssetsCoverage(t *testing.T) {
 			ancestryCache := map[string]string{
 				data.Provider["project"]: data.Ancestry,
 			}
-			got, err := tfgcv.ReadPlannedAssets(ctx, planfile, data.Provider["project"], "", "", ancestryCache, true, false, zaptest.NewLogger(t), "")
+
+			jsonPlan, err := ioutil.ReadFile(planfile)
+			if err != nil {
+				t.Fatalf("Error parsing %s: %s", f, err)
+			}
+			got, err := tfplan2cai.Convert(ctx, jsonPlan, &tfplan2cai.Options{
+				ConvertUnchanged: false,
+				ErrorLogger:      zaptest.NewLogger(t),
+				Offline:          true,
+				DefaultProject:   data.Provider["project"],
+				DefaultRegion:    "",
+				DefaultZone:      "",
+				UserAgent:        "",
+				AncestryCache:    ancestryCache,
+			})
 			if err != nil {
 				t.Fatalf("ReadPlannedAssets(%s, %s, \"\", \"\", %s, %t): %v", planfile, data.Provider["project"], ancestryCache, true, err)
 			}
-
 			expectedAssets := normalizeAssets(t, want, true)
 			actualAssets := normalizeAssets(t, got, true)
 			require.ElementsMatch(t, actualAssets, expectedAssets)
@@ -115,11 +126,24 @@ func TestReadPlannedAssetsCoverage_WithoutDefaultProject(t *testing.T) {
 			ancestryCache := map[string]string{
 				// data.Provider["project"]: data.Ancestry,
 			}
-			got, err := tfgcv.ReadPlannedAssets(ctx, planfile, "", "", "", ancestryCache, true, false, zaptest.NewLogger(t), "")
+
+			jsonPlan, err := ioutil.ReadFile(planfile)
+			if err != nil {
+				t.Fatalf("Error parsing %s: %s", f, err)
+			}
+			got, err := tfplan2cai.Convert(ctx, jsonPlan, &tfplan2cai.Options{
+				ConvertUnchanged: false,
+				ErrorLogger:      zaptest.NewLogger(t),
+				Offline:          true,
+				DefaultProject:   "",
+				DefaultRegion:    "",
+				DefaultZone:      "",
+				UserAgent:        "",
+				AncestryCache:    ancestryCache,
+			})
 			if err != nil {
 				t.Fatalf("ReadPlannedAssets(%s, %s, \"\", \"\", %s, %t): %v", planfile, data.Provider["project"], ancestryCache, true, err)
 			}
-
 			expectedAssets := normalizeAssets(t, want, true)
 			actualAssets := normalizeAssets(t, got, true)
 			require.ElementsMatch(t, actualAssets, expectedAssets)

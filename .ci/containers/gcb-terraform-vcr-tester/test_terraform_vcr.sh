@@ -80,6 +80,7 @@ export GOOGLE_APPLICATION_CREDENTIALS=$local_path/sa_key.json
 echo "checking terraform version"
 terraform version
 
+
 TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v -run=TestAcc -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > replaying_test.log
 
 test_exit_code=$?
@@ -160,30 +161,26 @@ comment="#### Tests analytics ${NEWLINE}"
 comment+="Total tests: \`$(($FAILED_TESTS_COUNT+$PASSED_TESTS_COUNT+$SKIPPED_TESTS_COUNT))\` ${NEWLINE}"
 comment+="Passed tests \`$PASSED_TESTS_COUNT\` ${NEWLINE}"
 comment+="Skipped tests: \`$SKIPPED_TESTS_COUNT\` ${NEWLINE}"
-comment+="Failed tests: \`$FAILED_TESTS_COUNT\` ${NEWLINE}${NEWLINE}"
+comment+="Affected tests: \`$FAILED_TESTS_COUNT\` ${NEWLINE}${NEWLINE}"
 
 if [[ -n $FAILED_TESTS_PATTERN ]]; then
   comment+="#### Action taken ${NEWLINE}"
-  comment+="<details> <summary>Triggering VCR tests in RECORDING mode for the tests that failed during VCR. Click here to see the failed tests</summary><blockquote>$FAILED_TESTS_PATTERN </blockquote></details>"
+  comment+="<details> <summary>Found $FAILED_TESTS_COUNT affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit. Click here to see the affected tests</summary><blockquote>$FAILED_TESTS_PATTERN </blockquote></details> ${NEWLINE}${NEWLINE}"
+  comment+="[Get to know how VCR tests work](https://googlecloudplatform.github.io/magic-modules/docs/getting-started/contributing/#general-contributing-steps)"
   add_comment "${comment}"
   # Clear fixtures folder
   rm $VCR_PATH/*
+
+  # Clear replaying-log folder
+  rm testlog/replaying/*
   
   # RECORDING mode
   export VCR_MODE=RECORDING
   FAILED_TESTS=$(grep "^--- FAIL: TestAcc" replaying_test$test_suffix.log | awk '{print $3}')
-  test_exit_code=0
-  for failed_test in $FAILED_TESTS
-  do
-      TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run="${failed_test}$" -timeout 90m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > testlog/recording_build/${failed_test}_recording_test.log & pids+=($!)
-  done
+  # test_exit_code=0
+  parallel --jobs 16 TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run="{}$" -timeout 120m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" ">" testlog/recording_build/{}_recording_test.log ::: $FAILED_TESTS
 
-  # Check if any process fails 
-  for pid in ${pids[*]}; do
-    if ! wait $pid; then
-        test_exit_code=1
-    fi
-  done
+  test_exit_code=$?
 
   # Concatenate recording build logs to one file
   # Note: build logs are different from debug logs
@@ -221,15 +218,24 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   RECORDING_PASSED_TESTS=$(grep "^--- PASS: TestAcc" recording_test.log | awk -v pr_number=$pr_number -v build_id=$build_id '{print "`"$3"`[[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/recording/"$3".log)]"}')
 
   comment=""
+  RECORDING_PASSED_TESTS_COUNT=0
+  RECORDING_FAILED_TESTS_COUNT=0
   if [[ -n $RECORDING_PASSED_TESTS ]]; then
     comment+="Tests passed during RECORDING mode:${NEWLINE} $RECORDING_PASSED_TESTS ${NEWLINE}${NEWLINE}"
+    RECORDING_PASSED_TESTS_COUNT=$(echo "$RECORDING_PASSED_TESTS" | wc -l)
   fi
 
   if [[ -n $RECORDING_FAILED_TESTS ]]; then
     comment+="Tests failed during RECORDING mode:${NEWLINE} $RECORDING_FAILED_TESTS ${NEWLINE}${NEWLINE}"
+    RECORDING_FAILED_TESTS_COUNT=$(echo "$RECORDING_FAILED_TESTS" | wc -l)
+    if [[ $RECORDING_PASSED_TESTS_COUNT+$RECORDING_FAILED_TESTS_COUNT -lt $FAILED_TESTS_COUNT ]]; then
+      comment+="Several tests got terminated during RECORDING mode.${NEWLINE}"
+    fi
     comment+="Please fix these to complete your PR${NEWLINE}"
   else
-    if [[ $test_exit_code -ne 0 ]]; then
+    if [[ $RECORDING_PASSED_TESTS_COUNT+$RECORDING_FAILED_TESTS_COUNT -lt $FAILED_TESTS_COUNT ]]; then
+      comment+="Several tests got terminated during RECORDING mode.${NEWLINE}"
+    elif [[ $test_exit_code -ne 0 ]]; then
       # check for any uncaught errors in RECORDING mode
       comment+="Errors occurred during RECORDING mode. Please fix them to complete your PR${NEWLINE}"
     else

@@ -1,5 +1,7 @@
 ---
 title: "Add a handwritten test"
+summary: "For handwritten resources and generated resources that need to test update,
+handwritten tests must be added."
 weight: 21
 ---
 
@@ -58,13 +60,13 @@ For example, the following test case is a good reference:
 func TestAccComputeFirewall_noSource(t *testing.T) {
     t.Parallel()
 
-    networkName := fmt.Sprintf("tf-test-firewall-%s", randString(t, 10))
-    firewallName := fmt.Sprintf("tf-test-firewall-%s", randString(t, 10))
+    networkName := fmt.Sprintf("tf-test-firewall-%s", RandString(t, 10))
+    firewallName := fmt.Sprintf("tf-test-firewall-%s", RandString(t, 10))
 
-    vcrTest(t, resource.TestCase{
-        PreCheck:     func() { testAccPreCheck(t) },
-        Providers:    testAccProviders,
-        CheckDestroy: testAccCheckComputeFirewallDestroyProducer(t),
+    VcrTest(t, resource.TestCase{
+        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+        ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+        CheckDestroy:             testAccCheckComputeFirewallDestroyProducer(t),
         Steps: []resource.TestStep{
             {
                 Config: testAccComputeFirewall_noSource(networkName, firewallName),
@@ -122,13 +124,13 @@ For example:
 func TestAccComputeFirewall_disabled(t *testing.T) {
     t.Parallel()
 
-    networkName := fmt.Sprintf("tf-test-firewall-%s", randString(t, 10))
-    firewallName := fmt.Sprintf("tf-test-firewall-%s", randString(t, 10))
+    networkName := fmt.Sprintf("tf-test-firewall-%s", RandString(t, 10))
+    firewallName := fmt.Sprintf("tf-test-firewall-%s", RandString(t, 10))
 
-    vcrTest(t, resource.TestCase{
-        PreCheck:     func() { testAccPreCheck(t) },
-        Providers:    testAccProviders,
-        CheckDestroy: testAccCheckComputeFirewallDestroyProducer(t),
+    VcrTest(t, resource.TestCase{
+        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+        ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+        CheckDestroy:             testAccCheckComputeFirewallDestroyProducer(t),
         Steps: []resource.TestStep{
             {
                 Config: testAccComputeFirewall_disabled(networkName, firewallName),

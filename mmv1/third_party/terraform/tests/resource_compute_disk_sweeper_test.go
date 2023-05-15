@@ -5,6 +5,8 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // This will sweep GCE Disk resources
@@ -20,7 +22,7 @@ func testSweepDisk(region string) error {
 	resourceName := "ComputeDisk"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
-	config, err := sharedConfigForRegion(region)
+	config, err := acctest.SharedConfigForRegion(region)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
 		return err
@@ -31,50 +33,55 @@ func testSweepDisk(region string) error {
 		log.Printf("[INFO][SWEEPER_LOG] error loading: %s", err)
 		return err
 	}
-	servicesUrl := "https://compute.googleapis.com/compute/v1/projects/" + config.Project + "/zones/" + getTestZoneFromEnv() + "/disks"
-	res, err := sendRequest(config, "GET", config.Project, servicesUrl, config.userAgent, nil)
-	if err != nil {
-		log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", servicesUrl, err)
-		return nil
-	}
 
-	resourceList, ok := res["items"]
-	if !ok {
-		log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
-		return nil
-	}
-
-	rl := resourceList.([]interface{})
-
-	log.Printf("[INFO][SWEEPER_LOG] Found %d items in %s list response.", len(rl), resourceName)
-	// Count items that weren't sweeped.
-	nonPrefixCount := 0
-	for _, ri := range rl {
-		obj := ri.(map[string]interface{})
-		if obj["id"] == nil {
-			log.Printf("[INFO][SWEEPER_LOG] %s resource id was nil", resourceName)
+	zones := []string{"us-central1-a", "us-central1-b", "us-central1-c", "us-central1-f", "us-east1-b", "us-east1-c", "us-east1-d", "us-west1-a", "us-west1-b", "us-west1-c"}
+	for _, zone := range zones {
+		servicesUrl := "https://compute.googleapis.com/compute/v1/projects/" + config.Project + "/zones/" + zone + "/disks"
+		res, err := transport_tpg.SendRequest(config, "GET", config.Project, servicesUrl, config.UserAgent, nil)
+		if err != nil {
+			log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", servicesUrl, err)
 			return nil
 		}
 
-		id := obj["name"].(string)
-		// Increment count and skip if resource is not sweepable.
-		if !isSweepableTestResource(id) {
-			nonPrefixCount++
-			continue
+		resourceList, ok := res["items"]
+		if !ok {
+			log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
+			return nil
 		}
 
-		deleteUrl := servicesUrl + "/" + id
-		// Don't wait on operations as we may have a lot to delete
-		_, err = sendRequest(config, "DELETE", config.Project, deleteUrl, config.userAgent, nil)
-		if err != nil {
-			log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", deleteUrl, err)
-		} else {
-			log.Printf("[INFO][SWEEPER_LOG] Sent delete request for %s resource: %s", resourceName, id)
-		}
-	}
+		rl := resourceList.([]interface{})
 
-	if nonPrefixCount > 0 {
-		log.Printf("[INFO][SWEEPER_LOG] %d items without tf-test prefix remain.", nonPrefixCount)
+		log.Printf("[INFO][SWEEPER_LOG] Found %d items in %s list response.", len(rl), resourceName)
+		// Count items that weren't sweeped.
+		nonPrefixCount := 0
+		for _, ri := range rl {
+			obj := ri.(map[string]interface{})
+			if obj["id"] == nil {
+				log.Printf("[INFO][SWEEPER_LOG] %s resource id was nil", resourceName)
+				return nil
+			}
+
+			id := obj["name"].(string)
+			// Increment count and skip if resource is not sweepable.
+			if !acctest.IsSweepableTestResource(id) {
+				nonPrefixCount++
+				continue
+			}
+
+			deleteUrl := servicesUrl + "/" + id
+			// Don't wait on operations as we may have a lot to delete
+			_, err = transport_tpg.SendRequest(config, "DELETE", config.Project, deleteUrl, config.UserAgent, nil)
+			if err != nil {
+				log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", deleteUrl, err)
+			} else {
+				log.Printf("[INFO][SWEEPER_LOG] Sent delete request for %s resource: %s", resourceName, id)
+			}
+		}
+
+		if nonPrefixCount > 0 {
+			log.Printf("[INFO][SWEEPER_LOG] %d items without tf-test prefix remain for zone %s", nonPrefixCount, zone)
+		}
+
 	}
 
 	return nil

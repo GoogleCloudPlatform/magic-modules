@@ -1,18 +1,16 @@
-// ----------------------------------------------------------------------------
-//
-//     ***     HANDWRITTEN CODE    ***    Type: MMv1     ***
-//
-// ----------------------------------------------------------------------------
-
 package google
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func init() {
@@ -27,7 +25,7 @@ func testSweepFirebaseAndroidApp(region string) error {
 	resourceName := "FirebaseAndroidApp"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
-	config, err := sharedConfigForRegion(region)
+	config, err := acctest.SharedConfigForRegion(region)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
 		return err
@@ -40,10 +38,10 @@ func testSweepFirebaseAndroidApp(region string) error {
 	}
 
 	t := &testing.T{}
-	billingId := getTestBillingAccountFromEnv(t)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
 
 	// Setup variables to replace in list template
-	d := &ResourceDataMock{
+	d := &tpgresource.ResourceDataMock{
 		FieldsInSchema: map[string]interface{}{
 			"project":         config.Project,
 			"region":          region,
@@ -54,19 +52,19 @@ func testSweepFirebaseAndroidApp(region string) error {
 	}
 
 	listTemplate := strings.Split("https://firebase.googleapis.com/v1beta1/projects/{{project}}/androidApps", "?")[0]
-	listUrl, err := replaceVars(d, config, listTemplate)
+	listUrl, err := tpgresource.ReplaceVars(d, config, listTemplate)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error preparing sweeper list url: %s", err)
 		return nil
 	}
 
-	res, err := sendRequest(config, "GET", config.Project, listUrl, config.userAgent, nil)
+	res, err := transport_tpg.SendRequest(config, "GET", config.Project, listUrl, config.UserAgent, nil)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", listUrl, err)
 		return nil
 	}
 
-	resourceList, ok := res["androidApps"]
+	resourceList, ok := res["apps"]
 	if !ok {
 		log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
 		return nil
@@ -79,31 +77,25 @@ func testSweepFirebaseAndroidApp(region string) error {
 	nonPrefixCount := 0
 	for _, ri := range rl {
 		obj := ri.(map[string]interface{})
-		if obj["name"] == nil {
+		if obj["displayName"] == nil {
 			log.Printf("[INFO][SWEEPER_LOG] %s resource name was nil", resourceName)
 			return nil
 		}
 
-		name := GetResourceNameFromSelfLink(obj["name"].(string))
 		// Skip resources that shouldn't be sweeped
-		if !isSweepableTestResource(name) {
+		if !acctest.IsSweepableTestResource(obj["displayName"].(string)) {
 			nonPrefixCount++
 			continue
 		}
 
-		deleteTemplate := "https://firebase.googleapis.com/v1beta1/{{name}}:remove"
-		deleteUrl, err := replaceVars(d, config, deleteTemplate)
-		if err != nil {
-			log.Printf("[INFO][SWEEPER_LOG] error preparing delete url: %s", err)
-			return nil
-		}
-		deleteUrl = deleteUrl + name
+		name := obj["name"].(string)
+		deleteUrl := fmt.Sprintf("https://firebase.googleapis.com/v1beta1/%s:remove", name)
 
 		body := make(map[string]interface{})
 		body["immediate"] = true
 
 		// Don't wait on operations as we may have a lot to delete
-		_, err = sendRequest(config, "DELETE", config.Project, deleteUrl, config.userAgent, body)
+		_, err = transport_tpg.SendRequest(config, "POST", config.Project, deleteUrl, config.UserAgent, body)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", deleteUrl, err)
 		} else {

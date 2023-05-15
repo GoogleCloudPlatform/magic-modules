@@ -5,19 +5,21 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDataSourceGoogleFolder_byFullName(t *testing.T) {
-	org := getTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "tf-test-" + randString(t, 10)
+	displayName := "tf-test-" + RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleFolder_byFullNameConfig(parent, displayName),
@@ -30,14 +32,14 @@ func TestAccDataSourceGoogleFolder_byFullName(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleFolder_byShortName(t *testing.T) {
-	org := getTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "tf-test-" + randString(t, 10)
+	displayName := "tf-test-" + RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleFolder_byShortNameConfig(parent, displayName),
@@ -50,14 +52,14 @@ func TestAccDataSourceGoogleFolder_byShortName(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleFolder_lookupOrganization(t *testing.T) {
-	org := getTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "tf-test-" + randString(t, 10)
+	displayName := "tf-test-" + RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleFolder_lookupOrganizationConfig(parent, displayName),
@@ -71,11 +73,11 @@ func TestAccDataSourceGoogleFolder_lookupOrganization(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleFolder_byFullNameNotFound(t *testing.T) {
-	name := "folders/" + randString(t, 16)
+	name := "folders/" + RandString(t, 16)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccCheckGoogleFolder_byFullNameNotFoundConfig(name),

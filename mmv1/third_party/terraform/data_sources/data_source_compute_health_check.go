@@ -1,16 +1,20 @@
 package google
 
-import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
 
-func dataSourceGoogleComputeHealthCheck() *schema.Resource {
+func DataSourceGoogleComputeHealthCheck() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeHealthCheck().Schema)
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceComputeHealthCheck().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "name")
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name")
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "project")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleComputeHealthCheckRead,
@@ -19,7 +23,7 @@ func dataSourceGoogleComputeHealthCheck() *schema.Resource {
 }
 
 func dataSourceGoogleComputeHealthCheckRead(d *schema.ResourceData, meta interface{}) error {
-	id, err := replaceVars(d, meta.(*Config), "projects/{{project}}/global/healthChecks/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, meta.(*transport_tpg.Config), "projects/{{project}}/global/healthChecks/{{name}}")
 	if err != nil {
 		return err
 	}

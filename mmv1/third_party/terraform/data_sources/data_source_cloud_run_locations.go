@@ -6,9 +6,11 @@ import (
 	"sort"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleCloudRunLocations() *schema.Resource {
+func DataSourceGoogleCloudRunLocations() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleCloudRunLocationsRead,
 		Schema: map[string]*schema.Schema{
@@ -27,23 +29,23 @@ func dataSourceGoogleCloudRunLocations() *schema.Resource {
 }
 
 func dataSourceGoogleCloudRunLocationsRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "https://run.googleapis.com/v1/projects/{{project}}/locations")
+	url, err := tpgresource.ReplaceVars(d, config, "https://run.googleapis.com/v1/projects/{{project}}/locations")
 	if err != nil {
 		return err
 	}
 
-	res, err := sendRequest(config, "GET", project, url, userAgent, nil)
+	res, err := transport_tpg.SendRequest(config, "GET", project, url, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("Error listing Cloud Run Locations : %s", err)
 	}

@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 <% if version == "ga" -%>
@@ -15,7 +18,7 @@ import (
 <% end -%>
 )
 
-func dataSourceGoogleComputeAddresses() *schema.Resource {
+func DataSourceGoogleComputeAddresses() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceGoogleComputeAddressesRead,
 
@@ -115,13 +118,13 @@ AND (scheduling.automaticRestart = true) """`,
 }
 
 func dataSourceGoogleComputeAddressesRead(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return diag.FromErr(err)
 	}

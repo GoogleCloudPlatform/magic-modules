@@ -1,12 +1,12 @@
 
-  config := meta.(*Config)
+  config := meta.(*transport_tpg.Config)
 
-  dicomStoreId, err := parseHealthcareDicomStoreId(d.Id(), config)
+  dicomStoreId, err := ParseHealthcareDicomStoreId(d.Id(), config)
   if err != nil {
     return nil, err
   }
 
-  if err := d.Set("dataset", dicomStoreId.DatasetId.datasetId()); err != nil {
+  if err := d.Set("dataset", dicomStoreId.DatasetId.DatasetId()); err != nil {
   	return nil, fmt.Errorf("Error setting dataset: %s", err)
   }
   if err := d.Set("name", dicomStoreId.Name); err != nil {

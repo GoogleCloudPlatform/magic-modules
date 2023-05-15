@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_security_policy"
 description: |-
   Creates a Security Policy resource for Google Compute Engine.
 ---
@@ -45,6 +44,120 @@ resource "google_compute_security_policy" "policy" {
 }
 ```
 
+## Example Usage - With reCAPTCHA configuration options
+
+```hcl
+resource "google_recaptcha_enterprise_key" "primary" {
+  display_name = "display-name"
+
+  labels = {
+    label-one = "value-one"
+   }
+
+  project = "my-project-name"
+
+  web_settings {
+    integration_type  = "INVISIBLE"
+    allow_all_domains = true
+    allowed_domains   = ["localhost"]
+  }
+}
+
+resource "google_compute_security_policy" "policy" {
+  name        = "my-policy"
+  description = "basic security policy"
+  type        = "CLOUD_ARMOR"
+
+  recaptcha_options_config {
+    redirect_site_key = google_recaptcha_enterprise_key.primary.name
+  }
+}
+```
+
+## Example Usage - With header actions
+
+```hcl
+resource "google_compute_security_policy" "policy" {
+	name = "my-policy"
+
+  rule {
+    action   = "allow"
+    priority = "2147483647"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+    description = "default rule"
+  }
+
+  rule {
+    action   = "allow"
+    priority = "1000"
+    match {
+      expr {
+        expression = "request.path.matches(\"/login.html\") && token.recaptcha_session.score < 0.2"
+      }
+    }
+
+    header_action {
+      request_headers_to_adds {
+        header_name  = "reCAPTCHA-Warning"
+        header_value = "high"
+      }
+
+      request_headers_to_adds {
+        header_name  = "X-Resource"
+        header_value = "test"
+      }
+    }
+  }
+}
+```
+
+## Example Usage - With enforceOnKey value as empty string
+A scenario example that won't cause any conflict between `enforce_on_key` and `enforce_on_key_configs`, because `enforce_on_key` was specified as an empty string:
+
+```hcl
+resource "google_compute_security_policy" "policy" {
+	name        = "%s"
+	description = "throttle rule with enforce_on_key_configs"
+
+	rule {
+		action   = "throttle"
+		priority = "2147483647"
+		match {
+			versioned_expr = "SRC_IPS_V1"
+			config {
+				src_ip_ranges = ["*"]
+			}
+		}
+		description = "default rule"
+
+		rate_limit_options {
+			conform_action = "allow"
+			exceed_action = "redirect"
+
+			enforce_on_key = ""
+
+			enforce_on_key_configs {
+				enforce_on_key_type = "IP"
+			}
+			exceed_redirect_options {
+				type = "EXTERNAL_302"
+				target = "<https://www.example.com>"
+			}
+
+			rate_limit_threshold {
+				count = 10
+				interval_sec = 60
+			}
+		}
+	}
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -66,6 +179,8 @@ The following arguments are supported:
     Structure is [documented below](#nested_advanced_options_config).
 
 * `adaptive_protection_config` - (Optional) Configuration for [Google Cloud Armor Adaptive Protection](https://cloud.google.com/armor/docs/adaptive-protection-overview?hl=en). Structure is [documented below](#nested_adaptive_protection_config).
+
+* `recaptcha_options_config` - (Optional) [reCAPTCHA Configuration Options](https://cloud.google.com/armor/docs/configure-security-policies?hl=en#use_a_manual_challenge_to_distinguish_between_human_or_automated_clients). Structure is [documented below](#nested_recaptcha_options_config).
 
 * `type` - The type indicates the intended use of the security policy. This field can be set only at resource creation time.
   * CLOUD_ARMOR - Cloud Armor backend security policies can be configured to filter incoming HTTP requests targeting backend services.
@@ -123,6 +238,9 @@ The following arguments are supported:
 
 * `redirect_options` - (Optional)
     Can be specified if the `action` is "redirect". Cannot be specified for other actions. Structure is [documented below](#nested_redirect_options).
+
+* `header_action` - (Optional)
+    Additional actions that are performed on headers. Structure is [documented below](#nested_header_action).
 
 <a name="nested_match"></a>The `match` block supports:
 
@@ -182,14 +300,19 @@ The following arguments are supported:
 
 <a name="nested_rate_limit_options"></a>The `rate_limit_options` block supports:
 
+* `conform_action` - (Required) Action to take for requests that are under the configured rate limit threshold. Valid option is "allow" only.
+
+* `exceed_action` - (Required) When a request is denied, returns the HTTP response code specified.
+    Valid options are "deny()" where valid values for status are 403, 404, 429, and 502.
+
+* `rate_limit_threshold` - (Required) Threshold at which to begin ratelimiting. Structure is [documented below](#nested_threshold).
+
 * `ban_duration_sec` - (Optional) Can only be specified if the `action` for the rule is "rate_based_ban".
     If specified, determines the time (in seconds) the traffic will continue to be banned by the rate limit after the rate falls below the threshold.
 
 * `ban_threshold` - (Optional) Can only be specified if the `action` for the rule is "rate_based_ban".
     If specified, the key will be banned for the configured 'ban_duration_sec' when the number of requests that exceed the 'rate_limit_threshold' also
     exceed this 'ban_threshold'. Structure is [documented below](#nested_threshold).
-
-* `conform_action` - (Optional) Action to take for requests that are under the configured rate limit threshold. Valid option is "allow" only.
 
 * `enforce_on_key` - (Optional) Determines the key to enforce the rate_limit_threshold on. If not specified, defaults to "ALL".
 
@@ -198,19 +321,44 @@ The following arguments are supported:
     * HTTP_HEADER: The value of the HTTP header whose name is configured under "enforceOnKeyName". The key value is truncated to the first 128 bytes of the header value. If no such header is present in the request, the key type defaults to ALL.
     * XFF_IP: The first IP address (i.e. the originating client IP address) specified in the list of IPs under X-Forwarded-For HTTP header. If no such header is present or the value is not a valid IP, the key type defaults to ALL.
     * HTTP_COOKIE: The value of the HTTP cookie whose name is configured under "enforceOnKeyName". The key value is truncated to the first 128 bytes of the cookie value. If no such cookie is present in the request, the key type defaults to ALL.
+    * HTTP_PATH: The URL path of the HTTP request. The key value is truncated to the first 128 bytes
+    * SNI: Server name indication in the TLS session of the HTTPS request. The key value is truncated to the first 128 bytes. The key type defaults to ALL on a HTTP session.
+    * REGION_CODE: The country/region from which the request originates.
 
 * `enforce_on_key_name` - (Optional) Rate limit key name applicable only for the following key types: HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.
 
-* `exceed_action` - (Optional) When a request is denied, returns the HTTP response code specified.
-    Valid options are "deny()" where valid values for status are 403, 404, 429, and 502.
+* `enforce_on_key_configs` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) If specified, any combination of values of enforce_on_key_type/enforce_on_key_name is treated as the key on which ratelimit threshold/action is enforced. You can specify up to 3 enforce_on_key_configs. If `enforce_on_key_configs` is specified, enforce_on_key must be set to an empty string. Structure is [documented below](#nested_enforce_on_key_configs).
 
-* `rate_limit_threshold` - (Optional) Threshold at which to begin ratelimiting. Structure is [documented below](#nested_threshold).
+  **Note:** To avoid the conflict between `enforce_on_key` and `enforce_on_key_configs`, the field [`enforce_on_key`](#enforce_on_key) needs to be set to an empty string.
+
+<a name="nested_enforce_on_key_configs"></a>The `enforce_on_key_configs` block supports:
+
+* `enforce_on_key_name` - (Optional) Rate limit key name applicable only for the following key types: HTTP_HEADER: Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE: Name of the HTTP cookie whose value is taken as the key value.
+
+* `enforce_on_key_type` - (Optional) Determines the key to enforce the rate_limit_threshold on. If not specified, defaults to "ALL".
+
+    * ALL: A single rate limit threshold is applied to all the requests matching this rule.
+    * IP: The source IP address of the request is the key. Each IP has this limit enforced separately.
+    * HTTP_HEADER: The value of the HTTP header whose name is configured under "enforceOnKeyName". The key value is truncated to the first 128 bytes of the header value. If no such header is present in the request, the key type defaults to ALL.
+    * XFF_IP: The first IP address (i.e. the originating client IP address) specified in the list of IPs under X-Forwarded-For HTTP header. If no such header is present or the value is not a valid IP, the key type defaults to ALL.
+    * HTTP_COOKIE: The value of the HTTP cookie whose name is configured under "enforceOnKeyName". The key value is truncated to the first 128 bytes of the cookie value. If no such cookie is present in the request, the key type defaults to ALL.
+    * HTTP_PATH: The URL path of the HTTP request. The key value is truncated to the first 128 bytes
+    * SNI: Server name indication in the TLS session of the HTTPS request. The key value is truncated to the first 128 bytes. The key type defaults to ALL on a HTTP session.
+    * REGION_CODE: The country/region from which the request originates.
+
+* `exceed_redirect_options` - (Optional) Parameters defining the redirect action that is used as the exceed action. Cannot be specified if the exceed action is not redirect. Structure is [documented below](#nested_exceed_redirect_options).
 
 <a name="nested_threshold"></a>The `{ban/rate_limit}_threshold` block supports:
 
-* `count` - (Optional) Number of HTTP(S) requests for calculating the threshold.
+* `count` - (Required) Number of HTTP(S) requests for calculating the threshold.
 
-* `interval_sec` - (Optional) Interval over which the threshold is computed.
+* `interval_sec` - (Required) Interval over which the threshold is computed.
+
+* <a  name="nested_exceed_redirect_options"></a>The `exceed_redirect_options` block supports:
+
+* `type` - (Required) Type of the redirect action.
+
+* `target` - (Optional) Target for the redirect action. This is required if the type is EXTERNAL_302 and cannot be specified for GOOGLE_RECAPTCHA.
 
 <a name="nested_redirect_options"></a>The `redirect_options` block supports:
 
@@ -221,15 +369,41 @@ The following arguments are supported:
 
 * `target` - (Optional) External redirection target when "EXTERNAL_302" is set in 'type'.
 
+<a name="nested_header_action"></a> The `header_action` block supports:
+
+* `request_headers_to_adds` - (Required) The list of request headers to add or overwrite if they're already present. Structure is [documented below](#nested_request_headers_to_adds).
+
+<a name="nested_request_headers_to_adds"><a> The `request_headers_to_adds` block supports:
+
+* `header_name` - (Required) The name of the header to set.
+
+* `header_value` - (Optional) The value to set the named header to.
+
 <a name="nested_adaptive_protection_config"></a>The `adaptive_protection_config` block supports:
 
 * `layer_7_ddos_defense_config` - (Optional) Configuration for [Google Cloud Armor Adaptive Protection Layer 7 DDoS Defense](https://cloud.google.com/armor/docs/adaptive-protection-overview?hl=en). Structure is [documented below](#nested_layer_7_ddos_defense_config).
+
+* `auto_deploy_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for [Automatically deploy Adaptive Protection suggested rules](https://cloud.google.com/armor/docs/adaptive-protection-auto-deploy?hl=en). Structure is [documented below](#nested_auto_deploy_config).
 
 <a name="nested_layer_7_ddos_defense_config"></a>The `layer_7_ddos_defense_config` block supports:
 
 * `enable` - (Optional) If set to true, enables CAAP for L7 DDoS detection.
 
 * `rule_visibility` - (Optional) Rule visibility can be one of the following: STANDARD - opaque rules. (default) PREMIUM - transparent rules.
+
+<a name="nested_auto_deploy_config"></a>The `auto_deploy_config` block supports:
+
+* `load_threshold` - (Optional) Identifies new attackers only when the load to the backend service that is under attack exceeds this threshold.
+
+* `confidence_threshold` - (Optional) Rules are only automatically deployed for alerts on potential attacks with confidence scores greater than this threshold.
+
+* `impacted_baseline_threshold` - (Optional) Rules are only automatically deployed when the estimated impact to baseline traffic from the suggested mitigation is below this threshold.
+
+* `expiration_sec` - (Optional) Google Cloud Armor stops applying the action in the automatically deployed rule to an identified attacker after this duration. The rule continues to operate against new requests.
+
+<a name="nested_recaptcha_options_config"></a>The `recaptcha_options_config` block supports:
+
+* `redirect_site_key` - (Required) A field to supply a reCAPTCHA site key to be used for all the rules using the redirect action with the type of GOOGLE_RECAPTCHA under the security policy. The specified site key needs to be created from the reCAPTCHA API. The user is responsible for the validity of the specified site key. If not specified, a Google-managed site key is used.
 
 ## Attributes Reference
 
