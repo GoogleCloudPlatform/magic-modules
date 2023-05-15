@@ -285,6 +285,8 @@ func TestAccCloudFunctionsFunction_basic(t *testing.T) {
 						"min_instances", "3"),
 					resource.TestCheckResourceAttr(funcResourceName,
 						"ingress_settings", "ALLOW_INTERNAL_ONLY"),
+					resource.TestCheckResourceAttr(funcResourceName,
+						"status", "ACTIVE"),
 					testAccCloudFunctionsFunctionSource(fmt.Sprintf("gs://%s/index.zip", bucketName), &function),
 					testAccCloudFunctionsFunctionTrigger(FUNCTION_TRIGGER_HTTP, &function),
 					resource.TestCheckResourceAttr(funcResourceName,
@@ -390,7 +392,6 @@ func TestAccCloudFunctionsFunction_buildworkerpool(t *testing.T) {
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	proj := acctest.GetTestProjectFromEnv()
 
-
 	defer os.Remove(zipFilePath) // clean up
 
 	VcrTest(t, resource.TestCase{
@@ -438,9 +439,9 @@ func TestAccCloudFunctionsFunction_pubsub(t *testing.T) {
 				Config: testAccCloudFunctionsFunction_pubsub(functionName, bucketName,
 					topicName, zipFilePath),
 				Check: resource.ComposeTestCheckFunc(
-          resource.TestCheckResourceAttr(funcResourceName,
-            "max_instances", "3000"),
-        ),
+					resource.TestCheckResourceAttr(funcResourceName,
+						"max_instances", "3000"),
+				),
 			},
 			{
 				ResourceName:            funcResourceName,

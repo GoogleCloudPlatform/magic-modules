@@ -6,12 +6,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func servicePerimeterImport(d *schema.ResourceData, config *transport_tpg.Config) error {
 	// current import_formats can't import fields with forward slashes in their value
-	if err := ParseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
+	if err := tpgresource.ParseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
 		return err
 	}
 	stringParts := strings.Split(d.Get("name").(string), "/")
@@ -26,7 +27,7 @@ func servicePerimeterImport(d *schema.ResourceData, config *transport_tpg.Config
 
 func accessLevelImport(d *schema.ResourceData, config *transport_tpg.Config) error {
 	// current import_formats can't import fields with forward slashes in their value
-	if err := ParseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
+	if err := tpgresource.ParseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
 		return err
 	}
 	stringParts := strings.Split(d.Get("name").(string), "/")

@@ -837,18 +837,18 @@ properties:
           are notified when this alert fires, on a per-channel basis.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
-          - !ruby/object:Api::Type::Array
-            name: notificationChannelNames
-            description: |
-              The notification channels that these settings apply to. Each of these
-              correspond to the name field in one of the NotificationChannel objects
-              referenced in the notification_channels field of this AlertPolicy. The format is
-              `projects/[PROJECT_ID_OR_NUMBER]/notificationChannels/[CHANNEL_ID]`
-            item_type: Api::Type::String
-          - !ruby/object:Api::Type::String
-            name: renotifyInterval
-            description: |
-               The frequency at which to send reminder notifications for open incidents.
+            - !ruby/object:Api::Type::Array
+              name: notificationChannelNames
+              description: |
+                The notification channels that these settings apply to. Each of these
+                correspond to the name field in one of the NotificationChannel objects
+                referenced in the notification_channels field of this AlertPolicy. The format is
+                `projects/[PROJECT_ID_OR_NUMBER]/notificationChannels/[CHANNEL_ID]`
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::String
+              name: renotifyInterval
+              description: |
+                The frequency at which to send reminder notifications for open incidents.
   - !ruby/object:Api::Type::KeyValuePairs
     name: userLabels
     description: |
