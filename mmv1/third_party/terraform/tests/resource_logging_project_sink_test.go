@@ -611,6 +611,7 @@ func testAccLoggingProjectSink_defaultloggingbucket(name, project, filter string
 	return fmt.Sprintf(`
 resource "google_project" "defaultloggingbucket" {
 	name        = "%s"
+	org_id      = "%{org_id}"
 	project_id  = "%s"
 }
 
