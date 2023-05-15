@@ -32,7 +32,7 @@ func gatewaysSameLocation(d *schema.ResourceData, config *transport_tpg.Config, 
 		log.Print("[DEBUG] No gateways under the same location found.")
 		return gateways, nil
 	}
-	
+
 	gateways = data.([]interface{})
 
 	log.Printf("[DEBUG] There are still gateways under the same region: %#v", gateways)
