@@ -63,7 +63,7 @@ examples:
       resource_name: 'my-gateway'
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
-    name: 'network_services_gateway_swg'
+    name: 'network_services_gateway_secure_web_proxy'
     primary_resource_id: 'default'
     vars:
       certificate_name: 'my-certificate'
@@ -78,7 +78,7 @@ examples:
       - "delete_swg_autogen_router_on_destroy"
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
-    name: 'network_services_gateway_multiple_swg_same_network'
+    name: 'network_services_gateway_multiple_swp_same_network'
     primary_resource_id: 'default'
     vars:
       certificate_name: 'my-certificate'
@@ -98,8 +98,8 @@ virtual_fields:
     name: 'delete_swg_autogen_router_on_destroy'
     default_value: false
     description: |
-      When deleting a SWG gateway, this boolean option will also delete auto generated RouterNat by the gateway creation. 
-      If there is no other SWG gateway remaining for that region and network it will be deleted.
+      When deleting a gateway of type 'SECURE_WEB_GATEWAY', this boolean option will also delete auto generated RouterNat by the gateway creation. 
+      If there is no other gateway of type 'SECURE_WEB_GATEWAY' remaining for that region and network it will be deleted.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_delete: 'templates/terraform/post_delete/network_services_gateway.go.erb'
   constants: 'templates/terraform/constants/network_services_gateway.go.erb'
@@ -143,7 +143,8 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: 'type'
     required: true
-    # TODO(gfelipe) this generates 3 things when removing the immutable:
+    # TODO(#14600): Update this resource once the api is enhanced to handle updateMask.
+    # When removing the immutable, this generates 3 things:
     # 1- the forceNew is removed(so the user thinks this field might be updatable);
     # 2- this field is put on the payload request regardless if is being updated or not;
     # 3- the mask is generated when used;
