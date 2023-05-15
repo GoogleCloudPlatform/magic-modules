@@ -418,7 +418,7 @@ properties:
           - all_updates_rule.0.pubsub_topic
           - all_updates_rule.0.monitoring_notification_channels
         description: |
-          The name of the Cloud Pub/Sub topic where budget related
+          The ID of the Cloud Pub/Sub topic where budget related
           messages will be published, in the form
           projects/{project_id}/topics/{topic_id}. Updates are sent
           at regular intervals to the topic.
