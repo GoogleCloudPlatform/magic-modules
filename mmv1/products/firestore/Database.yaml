@@ -1,0 +1,146 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Database'
+base_url: 'projects/{{project}}/databases'
+create_url: 'projects/{{project}}/databases?databaseId={{name}}'
+update_verb: :PATCH
+update_mask: true
+description: |
+  A Cloud Firestore Database. Currently only one database is allowed per
+  Cloud project; this database must have a `database_id` of '(default)'.
+
+  If you wish to use Firestore with App Engine, use the
+  [`google_app_engine_application`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/app_engine_application)
+  resource instead.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/firestore/docs/'
+  api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases'
+async: !ruby/object:Api::OpAsync
+  actions: ['create', 'update']
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+skip_delete: true
+autogen_async: true
+id_format: 'projects/{{project}}/databases/{{name}}'
+import_format:
+  - 'projects/{{project}}/databases/{{name}}'
+  - '{{project}}/{{name}}'
+  - '{{name}}'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firestore_database'
+    primary_resource_id: 'database'
+    pull_external: true
+    test_env_vars:
+      org_id: :ORG_ID
+    ignore_read_extra:
+      - project
+      - etag
+    vars:
+      project_id: 'my-project'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firestore_database_datastore_mode'
+    primary_resource_id: 'datastore_mode_database'
+    pull_external: true
+    test_env_vars:
+      org_id: :ORG_ID
+    ignore_read_extra:
+      - project
+      - etag
+    vars:
+      project_id: 'my-project'
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    required: true
+    description: |
+      The ID to use for the database, which will become the final
+      component of the database's resource name. This value should be 4-63
+      characters. Valid characters are /[a-z][0-9]-/ with first character
+      a letter and the last a letter or a number. Must not be
+      UUID-like /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
+      "(default)" database id is also valid.
+    immutable: true
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+  - !ruby/object:Api::Type::String
+    name: locationId
+    required: true
+    description: |
+      The location of the database. Available databases are listed at
+      https://cloud.google.com/firestore/docs/locations.
+    immutable: true
+  - !ruby/object:Api::Type::Enum
+    name: type
+    required: true
+    description: |
+      The type of the database.
+      See https://cloud.google.com/datastore/docs/firestore-or-datastore
+      for information about how to choose.
+    values:
+      - :FIRESTORE_NATIVE
+      - :DATASTORE_MODE
+  - !ruby/object:Api::Type::Enum
+    name: concurrencyMode
+    description: |
+      The concurrency control mode to use for this database.
+    values:
+      - :OPTIMISTIC
+      - :PESSIMISTIC
+      - :OPTIMISTIC_WITH_ENTITY_GROUPS
+    default_from_api: true
+  - !ruby/object:Api::Type::Enum
+    name: appEngineIntegrationMode
+    description: |
+      The App Engine integration mode to use for this database.
+    values:
+      - :ENABLED
+      - :DISABLED
+    default_from_api: true
+  - !ruby/object:Api::Type::String
+    name: key_prefix
+    description: |
+      Output only. The keyPrefix for this database.
+      This keyPrefix is used, in combination with the project id ("~") to construct the application id
+      that is returned from the Cloud Datastore APIs in Google App Engine first generation runtimes.
+      This value may be empty in which case the appid to use for URL-encoded keys is the project_id (eg: foo instead of v~foo).
+    output: true
+  - !ruby/object:Api::Type::Fingerprint
+    name: etag
+    description: |
+      This checksum is computed by the server based on the value of other fields,
+      and may be sent on update and delete requests to ensure the client has an
+      up-to-date value before proceeding.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: create_time
+    description: |
+      The timestamp at which this database was created.
+    output: true

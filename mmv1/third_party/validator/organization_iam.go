@@ -1,6 +1,11 @@
 package google
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+)
 
 func resourceConverterOrganizationIamPolicy() ResourceConverter {
 	return ResourceConverter{
@@ -30,15 +35,15 @@ func resourceConverterOrganizationIamMember() ResourceConverter {
 	}
 }
 
-func GetOrganizationIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetOrganizationIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newOrganizationIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetOrganizationIamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetOrganizationIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newOrganizationIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetOrganizationIamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetOrganizationIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newOrganizationIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -64,9 +69,9 @@ func MergeOrganizationIamMemberDelete(existing, incoming Asset) Asset {
 }
 
 func newOrganizationIamAsset(
-	d TerraformResourceData,
-	config *Config,
-	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
+	d tpgresource.TerraformResourceData,
+	config *transport_tpg.Config,
+	expandBindings func(d tpgresource.TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
@@ -87,7 +92,7 @@ func newOrganizationIamAsset(
 	}}, nil
 }
 
-func FetchOrganizationIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+func FetchOrganizationIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
 	return fetchIamPolicy(
 		NewOrganizationIamUpdater,
 		d,

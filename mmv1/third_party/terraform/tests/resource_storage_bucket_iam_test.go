@@ -5,18 +5,19 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccStorageBucketIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	serviceAcct := getTestServiceAccountFromEnv(t)
-	bucket := fmt.Sprintf("tf-test-%d", randInt(t))
-	account := fmt.Sprintf("tf-test-%d", randInt(t))
+	serviceAcct := acctest.GetTestServiceAccountFromEnv(t)
+	bucket := fmt.Sprintf("tf-test-%d", RandInt(t))
+	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Policy creation
@@ -37,6 +38,10 @@ func TestAccStorageBucketIamPolicy(t *testing.T) {
 				ImportStateId:     bucket,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				// Test IAM Policy with member 'allUsers'
+				Config: testAccStorageBucketIamPolicy_allUsers(bucket),
 			},
 		},
 	})
@@ -117,4 +122,28 @@ resource "google_storage_bucket_iam_policy" "bucket-binding" {
   policy_data = data.google_iam_policy.foo-policy.policy_data
 }
 `, bucket, account, serviceAcct)
+}
+
+func testAccStorageBucketIamPolicy_allUsers(bucket string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "US"
+}
+
+data "google_iam_policy" "foo-policy" {
+  binding {
+    role = "roles/storage.objectViewer"
+    members = [
+      "allUsers",
+      "allAuthenticatedUsers",
+    ]
+  }
+}
+
+resource "google_storage_bucket_iam_policy" "bucket-binding" {
+  bucket      = google_storage_bucket.bucket.name
+  policy_data = data.google_iam_policy.foo-policy.policy_data
+}
+`, bucket)
 }

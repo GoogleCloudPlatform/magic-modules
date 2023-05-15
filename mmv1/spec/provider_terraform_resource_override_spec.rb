@@ -95,7 +95,7 @@ describe Overrides::Terraform::ResourceOverride do
   context 'good resource' do
     let(:resource) do
       Overrides::Terraform::ResourceOverride.parse(
-        IO.read('spec/data/good-resource.yaml')
+        File.read('spec/data/good-resource.yaml')
       )
     end
 

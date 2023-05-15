@@ -35,7 +35,7 @@ import (
 var dclResources = map[string]*schema.Resource{
 {{- range $res := . }}
 	{{- if not $res.SkipInProvider }}
-	"{{$res.TerraformName}}": resource{{$res.PathType}}(),
+	"{{$res.TerraformName}}": Resource{{$res.PathType}}(),
 	{{- end }}
 {{- end }}
 }

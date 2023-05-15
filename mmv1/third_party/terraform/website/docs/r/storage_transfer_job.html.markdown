@@ -1,6 +1,5 @@
 ---
 subcategory: "Storage Transfer Service"
-page_title: "Google: google_storage_transfer_job"
 description: |-
   Creates a new Transfer Job in Google Cloud Storage Transfer.
 ---
@@ -130,6 +129,10 @@ The following arguments are supported:
 
 <a name="nested_transfer_spec"></a>The `transfer_spec` block supports:
 
+* `source_agent_pool_name` - (Optional) Specifies the agent pool name associated with the posix data source. When unspecified, the default name is used.
+
+* `sink_agent_pool_name` - (Optional) Specifies the agent pool name associated with the posix data sink. When unspecified, the default name is used.
+
 * `gcs_data_sink` - (Optional) A Google Cloud Storage data sink. Structure [documented below](#nested_gcs_data_sink).
 
 * `posix_data_sink` - (Optional) A POSIX data sink. Structure [documented below](#nested_posix_data_sink).
@@ -168,6 +171,10 @@ A duration in seconds with up to nine fractional digits, terminated by 's'. Exam
 * `include_prefixes` - (Optional) If `include_prefixes` is specified, objects that satisfy the object conditions must have names that start with one of the `include_prefixes` and that do not start with any of the `exclude_prefixes`. If `include_prefixes` is not specified, all objects except those that have names starting with one of the `exclude_prefixes` must satisfy the object conditions. See [Requirements](https://cloud.google.com/storage-transfer/docs/reference/rest/v1/TransferSpec#ObjectConditions).
 
 * `exclude_prefixes` - (Optional) `exclude_prefixes` must follow the requirements described for `include_prefixes`. See [Requirements](https://cloud.google.com/storage-transfer/docs/reference/rest/v1/TransferSpec#ObjectConditions).
+
+* `last_modified_since` - (Optional) If specified, only objects with a "last modification time" on or after this timestamp and objects that don't have a "last modification time" are transferred. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+
+* `last_modified_before` - (Optional) If specified, only objects with a "last modification time" before this timestamp and objects that don't have a "last modification time" are transferred. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
 
 <a name="nested_transfer_options"></a>The `transfer_options` block supports:
 

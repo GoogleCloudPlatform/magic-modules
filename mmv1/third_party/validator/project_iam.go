@@ -1,6 +1,11 @@
 package google
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+)
 
 func resourceConverterProjectIamPolicy() ResourceConverter {
 	return ResourceConverter{
@@ -30,15 +35,15 @@ func resourceConverterProjectIamMember() ResourceConverter {
 	}
 }
 
-func GetProjectIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetProjectIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newProjectIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetProjectIamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetProjectIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newProjectIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetProjectIamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetProjectIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newProjectIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -64,9 +69,9 @@ func MergeProjectIamMemberDelete(existing, incoming Asset) Asset {
 }
 
 func newProjectIamAsset(
-	d TerraformResourceData,
-	config *Config,
-	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
+	d tpgresource.TerraformResourceData,
+	config *transport_tpg.Config,
+	expandBindings func(d tpgresource.TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
@@ -89,7 +94,7 @@ func newProjectIamAsset(
 	}}, nil
 }
 
-func FetchProjectIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+func FetchProjectIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
 	if _, ok := d.GetOk("project"); !ok {
 		return Asset{}, ErrEmptyIdentityField
 	}

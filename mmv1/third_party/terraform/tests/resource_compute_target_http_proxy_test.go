@@ -6,21 +6,22 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccComputeTargetHttpProxy_update(t *testing.T) {
 	t.Parallel()
 
-	target := fmt.Sprintf("thttp-test-%s", randString(t, 10))
-	backend := fmt.Sprintf("thttp-test-%s", randString(t, 10))
-	hc := fmt.Sprintf("thttp-test-%s", randString(t, 10))
-	urlmap1 := fmt.Sprintf("thttp-test-%s", randString(t, 10))
-	urlmap2 := fmt.Sprintf("thttp-test-%s", randString(t, 10))
+	target := fmt.Sprintf("thttp-test-%s", RandString(t, 10))
+	backend := fmt.Sprintf("thttp-test-%s", RandString(t, 10))
+	hc := fmt.Sprintf("thttp-test-%s", RandString(t, 10))
+	urlmap1 := fmt.Sprintf("thttp-test-%s", RandString(t, 10))
+	urlmap2 := fmt.Sprintf("thttp-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeTargetHttpProxyDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeTargetHttpProxyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeTargetHttpProxy_basic1(target, backend, hc, urlmap1, urlmap2),
@@ -52,10 +53,10 @@ func testAccCheckComputeTargetHttpProxyExists(t *testing.T, n string) resource.T
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 		name := rs.Primary.Attributes["name"]
 
-		found, err := config.NewComputeClient(config.userAgent).TargetHttpProxies.Get(
+		found, err := config.NewComputeClient(config.UserAgent).TargetHttpProxies.Get(
 			config.Project, name).Do()
 		if err != nil {
 			return err

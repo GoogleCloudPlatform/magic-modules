@@ -12,7 +12,7 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
   if v == nil || v.(string) == "" {
     return "", nil
   }
@@ -21,7 +21,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
     return nil, fmt.Errorf("Invalid value for <%= property.name.underscore -%>: %s", err)
   }
 
-  url, err := replaceVars(d, config, "{{ComputeBasePath}}"+f.RelativeLink())
+  url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}"+f.RelativeLink())
   if err != nil {
     return nil, err
   }

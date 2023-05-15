@@ -5,21 +5,22 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccCloudIoTRegistry_update(t *testing.T) {
 	t.Parallel()
 
-	registryName := fmt.Sprintf("psregistry-test-%s", randString(t, 10))
+	registryName := fmt.Sprintf("psregistry-test-%s", RandString(t, 10))
 	resourceName := fmt.Sprintf("google_cloudiot_registry.%s", registryName)
-	deviceStatus := fmt.Sprintf("psregistry-test-devicestatus-%s", randString(t, 10))
-	defaultTelemetry := fmt.Sprintf("psregistry-test-telemetry-%s", randString(t, 10))
-	additionalTelemetry := fmt.Sprintf("psregistry-additional-test-telemetry-%s", randString(t, 10))
+	deviceStatus := fmt.Sprintf("psregistry-test-devicestatus-%s", RandString(t, 10))
+	defaultTelemetry := fmt.Sprintf("psregistry-test-telemetry-%s", RandString(t, 10))
+	additionalTelemetry := fmt.Sprintf("psregistry-additional-test-telemetry-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCloudIotDeviceRegistryDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudIotDeviceRegistryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudIoTRegistryBasic(registryName),

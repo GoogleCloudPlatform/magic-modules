@@ -14,35 +14,35 @@ configured by editing definition files under the
 [`mmv1/products`](https://github.com/GoogleCloudPlatform/magic-modules/tree/master/mmv1/products)
 path. Go to the service for your resource like
 [`compute`](https://github.com/GoogleCloudPlatform/magic-modules/tree/master/mmv1/products/compute)
-and open the `api.yaml` and `terraform.yaml` files. In each of those, find the
-resource's `properties` field.
+and open the `ResourceName.yaml` and `product.yaml` files.
 
 For example, for `google_spanner_database`:
 
-*   [`api.yaml`](https://github.com/GoogleCloudPlatform/magic-modules/blob/8728bc89c37d5033b530c7d7157bb43865d9df58/mmv1/products/spanner/api.yaml#L123-L158)
+*   [`Database.yaml`](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/spanner/Database.yaml)
 
-*   [`terraform.yaml`](https://github.com/GoogleCloudPlatform/magic-modules/blob/8728bc89c37d5033b530c7d7157bb43865d9df58/mmv1/products/spanner/terraform.yaml#L16-L51)
+*   [`product.yaml`](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/spanner/product.yaml)
 
-In short,`properties` is an array of the resource's fields. `api.yaml` it
-contains the fields of the resource based on how it behaves in the API, and
-`terraform.yaml` contains Terraform-specific amendments to those fields'
-behaviour. Not all fields will need to be added to `terraform.yaml`- only add an
-entry for your field if you need to configure one of the available option(s).
+In short, `properties` is an array of the resource's fields. `Database.yaml` is named after the resource 
+in PascalCase and contains the fields of the resource based on how it behaves in the API.
+`product.yaml` is lower cased and contains the product-level information that applies to all resources
+within that product.
 
 ## Field Configuration
 
-### `api.yaml`
+### `ResourceName.yaml`
 
-To add a field, you'll append an entry to `properties` within `api.yaml`, such
+To add a field, you'll append an entry to `properties` within `ResourceName.yaml`, such
 as the following adding support for a `fooBar` field in the API:
 
 ```yaml
       - !ruby/object:Api::Type::String
         name: 'fooBar'
         min_version: beta
-        input: true
+        immutable: true
         description: |
           The cloud.google.com description of this field.
+        default_from_api: true
+        custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
 ```
 
 The first line of that snippet is the type of the field in the API, including
@@ -59,7 +59,7 @@ setting values to `false`, and omit them instead.
 *   `required: true` indicates that a field is required. New top-level fields
     should not be considered required, as that is a breaking change. Subfields
     of newly-added optional fields can be added as required.
-*   `input: true` indicates that a field can only be set when the API resource is
+*   `immutable: true` indicates that a field can only be set when the API resource is
     created. Changing the field will force the resource to be recreated.
 *   `output: true` indicates that a field is output-only in the API and cannot
     be configured by the user.
@@ -73,20 +73,6 @@ setting values to `false`, and omit them instead.
     field.`update_verb`should be set to a literal symbol for the type (such
     as :POST for `POST`) and the URL to a templated URL such
     as`projects/{{project}}/global/backendServices/{{name}}/setSecurityPolicy`.
-
-### `terraform.yaml`
-
-You can add additional values within `terraform.yaml`:
-
-```yaml
-      foobar: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
-        default_from_api: true
-        custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
-```
-
-Commonly configured values include the following:
-
 *   `default_from_api: true` indicates that Terraform needs to handle a field
     specially. This is common for fields with complex defaults from the API that
     can't be represented with `default_value`. If a `default_from_api: true`
@@ -268,54 +254,56 @@ If you need to define a custom diff specifically for your resource, you can do
 so in a "constants" file, which is a `.go.erb` file in
 [mmv1/templates/terraform/constants](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform/constants)
 named `<product>_<resource>.erb`. You can then declare this custom code in
-`terraform.yaml`:
+`ResourceName.yaml`:
 
 ```yaml
---- !ruby/object:Provider::Terraform::Config
-overrides: !ruby/object:Overrides::ResourceOverrides
-  ResourceName:
-    # various overrides go here
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      constants: templates/terraform/constants/product_resource_name.go.erb
+--- !ruby/object:Api::Resource
+  name: ResourceName
+
+  custom_code: !ruby/object:Provider::Terraform::CustomCode
+    constants: templates/terraform/constants/product_resource_name.go.erb
 ```
 
 Once you have chosen a DiffSuppressFunc, you can declare it as an override on
 your resource:
 
 ```yaml
---- !ruby/object:Provider::Terraform::Config
-overrides: !ruby/object:Overrides::ResourceOverrides
-  ResourceName:
-    # various overrides go here
-    properties:
-      myField: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'caseDiffSuppress'
+--- !ruby/object:Api::Resource
+  name: ResourceName
+
+  properties:
+    - !ruby/object:Api::Type::String
+      name: "myField"
+      diff_suppress_func: 'tpgresource.CaseDiffSuppress'
 ```
 
 The value of diff_suppress_func can be any valid DiffSuppressFunc, including the
 result of a function call. For example:
 
 ```yaml
-diff_suppress_func: 'optionalPrefixSuppress("folders/")'
+diff_suppress_func: 'tpgresource.OptionalPrefixSuppress("folders/")'
 ```
 
 Please make sure to add thorough unit tests (in addition to basic integration
 tests) for your diff suppress func.
 
-Example: DomainMapping (domainMappingLabelDiffSuppress)
+Example: DomainMapping (DomainMappingLabelDiffSuppress)
 
--   [terraform.yaml resource overrides](https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/products/cloudrun/terraform.yaml#L16)
-    -   [`custom_code`](https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/products/cloudrun/terraform.yaml#L31)
-    -   [`diff_suppress_func: 'resourceBigQueryDatasetAccessRoleDiffSuppress'`](https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/products/cloudrun/terraform.yaml#L46)
--   [constants file](https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/templates/terraform/constants/cloud_run_domain_mapping.go.erb)
--   [unit tests](https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/third_party/terraform/tests/resource_cloud_run_domain_mapping_test.go#L9)
+-   [DomainMapping.yaml resource file](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/cloudrun/DomainMapping.yaml)
+    -   [`custom_code`](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/cloudrun/DomainMapping.yaml#L40)
+    -   [`diff_suppress_func: 'resourceBigQueryDatasetAccessRoleDiffSuppress'`](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/bigquery/DatasetAccess.yaml#L112)
+-   [constants file](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/templates/terraform/constants/cloud_run_domain_mapping.go.erb)
+-   [unit tests](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/third_party/terraform/tests/resource_cloud_run_domain_mapping_test.go#L9)
 
+## Documentation
+
+When adding a new MMv1 product or resource there are fields that you need to set within `product.yaml` and resource-level `ResourceName.yaml` that are specific to documentation for that resource. To learn more about MMv1 generated documentation and what YAML fields you need to pay attention to, see [Update MMv1 resource documentation](/magic-modules/docs/how-to/update-mmv1-resource-documentation).
 
 # Beta features
 
 When the underlying API of a feature is not final (i.e. a `vN` version like
 `v1` or `v2`), is in preview, or the API has no SLO we add it to the
-`google-beta` provider rather than the `google `provider, allowing users to
+`google-beta` provider rather than the `google` provider, allowing users to
 self-select for the stability level they are comfortable with.
 
 In MMv1, a "version tag" can be annotated on resources, fields, resource iam
@@ -328,7 +316,7 @@ the target is generally available, or available at `ga`.
 ## Adding a beta resource
 
 To add support for a beta resource in a preexisting product, ensure that a
-`beta` level exists in the `versions` map in the `api.yaml` file for the product.
+`beta` level exists in the `versions` map in the `product.yaml` file for the product.
 If one doesn't already exist, add it, setting the `base_url` to the appropriate
 value. This is generally an API version including `beta`, such as `v1beta`, but
 may be the same `base_url` as the `ga` entry for services that mix fields with
@@ -356,22 +344,22 @@ versions:
     base_url: https://runtimeconfig.googleapis.com/v1beta1/
 ```
 
-Next, annotate the resource (part of `resources` in `api.yaml`) i.e.:
+Next, annotate the resource (`Config.yaml`) i.e.:
 
 ```diff
-  - !ruby/object:Api::Resource
-    name: 'Config'
-    base_url: projects/{{project}}/configs
-    self_link: projects/{{project}}/configs/{{name}}
-+    min_version: beta
-    description: |
-      A RuntimeConfig resource is the primary resource in the Cloud RuntimeConfig service.
-      A RuntimeConfig resource consists of metadata and a hierarchy of variables.
-    iam_policy: !ruby/object:Api::Resource::IamPolicy
-      parent_resource_attribute: 'config'
-      method_name_separator: ':'
-      exclude: false
-    properties:
+---!ruby/object:Api::Resource
+name: 'Config'
+base_url: projects/{{project}}/configs
+self_link: projects/{{project}}/configs/{{name}}
++min_version: beta
+description: |
+  A RuntimeConfig resource is the primary resource in the Cloud RuntimeConfig service.
+  A RuntimeConfig resource consists of metadata and a hierarchy of variables.
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  parent_resource_attribute: 'config'
+  method_name_separator: ':'
+  exclude: false
+properties:
 ...
 ```
 
@@ -420,17 +408,17 @@ documentation.
 
 For a resource, this typically means ensuring their removal:
 
-* At the resource level, `resources` in `api.yaml`
-* On all resource examples, `examples` in `terraform.yaml` (unless some examples
+* At the resource level, `ResourceName.yaml`
+* On all resource examples, `examples` in `ResourceName.yaml` (unless some examples
 use other beta resources or fields)
   * Additionally, for any modified examples, all `provider = google-beta`
 annotations must be cleared
 
 For a field, this typically means ensuring their removal:
 
-* At the field level, `properties` in `api.yaml`
+* At the field level, `properties` in `ResourceName.yaml`
 * On any resource examples where this was the last beta feature, `examples` in
-`terraform.yaml`
+`ResourceName.yaml`
   * Additionally, for any modified examples, all `provider = google-beta`
 annotations must be cleared
 
@@ -442,17 +430,17 @@ When writing a changelog entry for a promotion, write it as if it was a new
 field or resource, and suffix it with `(ga only)`. For example, if the
 `google_container_cluster` resource was promoted to GA in your change:
 
-```
-\`\`\`release-note:new-resource
+~~~
+```release-note:new-resource
 `google_container_cluster` (ga only)
-\`\`\`
 ```
+~~~
 
-Alternatively, for field promotions, you may use "{{service}}: promoted
-{{field}} in {{resource}} to GA", i.e.
+Alternatively, for field promotions, you may use `{{service}}: promoted
+{{field}} in {{resource}} to GA`, i.e.
 
-```
-\`\`\`release-note:enhancement
+~~~
+```release-note:enhancement
 container: promoted `node_locations` field in google_container_cluster` to GA
-\`\`\`
 ```
+~~~

@@ -1,7 +1,7 @@
-config := meta.(*Config)
+config := meta.(*transport_tpg.Config)
 
 // current import_formats cannot import fields with forward slashes in their value
-if err := parseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
+if err := tpgresource.ParseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
 	return nil, err
 }
 
@@ -29,7 +29,7 @@ if len(nameParts) == 8 {
 	d.SetId(id)
 } else if len(nameParts) == 3 {
 	// `{{location}}/{{namespace_id}}/{{service_id}}`
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 			return nil, err
 	}

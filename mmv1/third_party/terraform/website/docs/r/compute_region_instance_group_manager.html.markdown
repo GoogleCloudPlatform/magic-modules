@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_region_instance_group_manager"
 description: |-
   Manages an Regional Instance Group within GCE.
 ---
@@ -43,7 +42,7 @@ resource "google_compute_region_instance_group_manager" "appserver" {
   distribution_policy_zones  = ["us-central1-a", "us-central1-f"]
 
   version {
-    instance_template = google_compute_instance_template.appserver.id
+    instance_template = google_compute_instance_template.appserver.self_link_unique
   }
 
   all_instances_config {
@@ -81,11 +80,11 @@ resource "google_compute_region_instance_group_manager" "appserver" {
   target_size = 5
 
   version {
-    instance_template = google_compute_instance_template.appserver.id
+    instance_template = google_compute_instance_template.appserver.self_link_unique
   }
 
   version {
-    instance_template = google_compute_instance_template.appserver-canary.id
+    instance_template = google_compute_instance_template.appserver-canary.self_link_unique
     target_size {
       fixed = 1
     }
@@ -169,6 +168,10 @@ group. You can specify one or more values. For more information, see the [offici
 
 * `stateful_disk` - (Optional) Disks created on the instances that will be preserved on instance delete, update, etc. Structure is [documented below](#nested_stateful_disk). For more information see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/configuring-stateful-disks-in-migs). Proactive cross zone instance redistribution must be disabled before you can update stateful disks on existing instance group managers. This can be controlled via the `update_policy`.
 
+* `stateful_internal_ip` - (Optional, [Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions.html)) Internal network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_stateful_internal_ip).
+
+* `stateful_external_ip` - (Optional, [Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions.html)) External network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_stateful_external_ip).
+
 - - -
 
 <a name="nested_update_policy"></a>The `update_policy` block supports:
@@ -205,6 +208,17 @@ update_policy {
 * `min_ready_sec` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)), Minimum number of seconds to wait for after a newly created instance becomes available. This value must be from range [0, 3600]
 
 * `replacement_method` - (Optional), The instance replacement method for managed instance groups. Valid values are: "RECREATE", "SUBSTITUTE". If SUBSTITUTE (default), the group replaces VM instances with new instances that have randomly generated names. If RECREATE, instance names are preserved.  You must also set max_unavailable_fixed or max_unavailable_percent to be greater than 0.
+- - -
+
+<a name="nested_instance_lifecycle_policy"></a>The `instance_lifecycle_policy` block supports:
+
+```hcl
+instance_lifecycle_policy {
+  force_update_on_repair = "YES"
+}
+```
+
+* `force_update_on_repair` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)), Specifies whether to apply the group's latest configuration when repairing a VM. Valid options are: YES, NO. If YES and you updated the group's instance template or per-instance configurations after the VM was created, then these changes are applied when VM is repaired. If NO (default), then updates are applied in accordance with the group's update policy type.
 - - -
 
 <a name="nested_all_instances_config"></a>The `all_instances_config` block supports:
@@ -245,7 +259,7 @@ The `auto_healing_policies` block supports:
 ```hcl
 version {
   name              = "appserver-canary"
-  instance_template = google_compute_instance_template.appserver-canary.id
+  instance_template = google_compute_instance_template.appserver-canary.self_link_unique
 
   target_size {
     fixed = 1
@@ -256,7 +270,7 @@ version {
 ```hcl
 version {
   name              = "appserver-canary"
-  instance_template = google_compute_instance_template.appserver-canary.id
+  instance_template = google_compute_instance_template.appserver-canary.self_link_unique
 
   target_size {
     percent = 20
@@ -286,6 +300,18 @@ one of which has a `target_size.percent` of `60` will create 2 instances of that
 * `device_name` - (Required), The device name of the disk to be attached.
 
 * `delete_rule` - (Optional), A value that prescribes what should happen to the stateful disk when the VM instance is deleted. The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`. `NEVER` - detach the disk when the VM is deleted, but do not delete the disk. `ON_PERMANENT_INSTANCE_DELETION` will delete the stateful disk when the VM is permanently deleted from the instance group. The default is `NEVER`.
+
+<a name="nested_stateful_internal_ip"></a>The `stateful_internal_ip` block supports:
+
+* `interface_name` - (Required), The network interface name of the internal Ip. Possible value: `nic0`.
+
+* `delete_rule` - (Optional), A value that prescribes what should happen to the internal ip when the VM instance is deleted. The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`. `NEVER` - detach the ip when the VM is deleted, but do not delete the ip. `ON_PERMANENT_INSTANCE_DELETION` will delete the internal ip when the VM is permanently deleted from the instance group.
+
+<a name="nested_stateful_external_ip"></a>The `stateful_external_ip` block supports:
+
+* `interface_name` - (Required), The network interface name of the external Ip. Possible value: `nic0`.
+
+* `delete_rule` - (Optional), A value that prescribes what should happen to the external ip when the VM instance is deleted. The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`. `NEVER` - detach the ip when the VM is deleted, but do not delete the ip. `ON_PERMANENT_INSTANCE_DELETION` will delete the external ip when the VM is permanently deleted from the instance group.
 
 ## Attributes Reference
 
@@ -325,7 +351,7 @@ The `per_instance_configs` block holds:
 ## Timeouts
 
 This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
 - `create` - Default is 15 minutes.
 - `update` - Default is 15 minutes.

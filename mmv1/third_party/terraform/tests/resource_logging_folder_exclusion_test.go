@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 // Logging exclusions don't always work when making parallel requests, so run tests serially
@@ -32,15 +33,15 @@ func TestAccLoggingFolderExclusion(t *testing.T) {
 }
 
 func testAccLoggingFolderExclusion_basic(t *testing.T) {
-	org := getTestOrgFromEnv(t)
-	exclusionName := "tf-test-exclusion-" + randString(t, 10)
-	folderName := "tf-test-folder-" + randString(t, 10)
-	description := "Description " + randString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	exclusionName := "tf-test-exclusion-" + RandString(t, 10)
+	folderName := "tf-test-folder-" + RandString(t, 10)
+	description := "Description " + RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLoggingFolderExclusionDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckLoggingFolderExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingFolderExclusion_basicCfg(exclusionName, description, folderName, "organizations/"+org),
@@ -55,10 +56,10 @@ func testAccLoggingFolderExclusion_basic(t *testing.T) {
 }
 
 func testAccLoggingFolderExclusion_folderAcceptsFullFolderPath(t *testing.T) {
-	org := getTestOrgFromEnv(t)
-	exclusionName := "tf-test-exclusion-" + randString(t, 10)
-	folderName := "tf-test-folder-" + randString(t, 10)
-	description := "Description " + randString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	exclusionName := "tf-test-exclusion-" + RandString(t, 10)
+	folderName := "tf-test-folder-" + RandString(t, 10)
+	description := "Description " + RandString(t, 10)
 
 	checkFn := func(s []*terraform.InstanceState) error {
 		loggingExclusionId, err := parseLoggingExclusionId(s[0].ID)
@@ -74,10 +75,10 @@ func testAccLoggingFolderExclusion_folderAcceptsFullFolderPath(t *testing.T) {
 		return nil
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLoggingFolderExclusionDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckLoggingFolderExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingFolderExclusion_withFullFolderPath(exclusionName, description, folderName, "organizations/"+org),
@@ -98,17 +99,17 @@ func testAccLoggingFolderExclusion_folderAcceptsFullFolderPath(t *testing.T) {
 }
 
 func testAccLoggingFolderExclusion_update(t *testing.T) {
-	org := getTestOrgFromEnv(t)
-	exclusionName := "tf-test-exclusion-" + randString(t, 10)
-	folderName := "tf-test-folder-" + randString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	exclusionName := "tf-test-exclusion-" + RandString(t, 10)
+	folderName := "tf-test-folder-" + RandString(t, 10)
 	parent := "organizations/" + org
-	descriptionBefore := "Basic Folder Logging Exclusion" + randString(t, 10)
-	descriptionAfter := "Updated Basic Folder Logging Exclusion" + randString(t, 10)
+	descriptionBefore := "Basic Folder Logging Exclusion" + RandString(t, 10)
+	descriptionAfter := "Updated Basic Folder Logging Exclusion" + RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLoggingFolderExclusionDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckLoggingFolderExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingFolderExclusion_basicCfg(exclusionName, descriptionBefore, folderName, parent),
@@ -131,17 +132,17 @@ func testAccLoggingFolderExclusion_update(t *testing.T) {
 }
 
 func testAccLoggingFolderExclusion_multiple(t *testing.T) {
-	org := getTestOrgFromEnv(t)
-	folderName := "tf-test-folder-" + randString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	folderName := "tf-test-folder-" + RandString(t, 10)
 	parent := "organizations/" + org
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLoggingFolderExclusionDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckLoggingFolderExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingFolderExclusion_multipleCfg(folderName, parent, "tf-test-exclusion-"+randString(t, 10)),
+				Config: testAccLoggingFolderExclusion_multipleCfg(folderName, parent, "tf-test-exclusion-"+RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_logging_folder_exclusion.basic0",
@@ -164,7 +165,7 @@ func testAccLoggingFolderExclusion_multiple(t *testing.T) {
 
 func testAccCheckLoggingFolderExclusionDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_logging_folder_exclusion" {
@@ -173,7 +174,7 @@ func testAccCheckLoggingFolderExclusionDestroyProducer(t *testing.T) func(s *ter
 
 			attributes := rs.Primary.Attributes
 
-			_, err := config.NewLoggingClient(config.userAgent).Folders.Exclusions.Get(attributes["id"]).Do()
+			_, err := config.NewLoggingClient(config.UserAgent).Folders.Exclusions.Get(attributes["id"]).Do()
 			if err == nil {
 				return fmt.Errorf("folder exclusion still exists")
 			}
@@ -196,7 +197,7 @@ resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
 }
-`, exclusionName, description, getTestProjectFromEnv(), folderName, folderParent)
+`, exclusionName, description, acctest.GetTestProjectFromEnv(), folderName, folderParent)
 }
 
 func testAccLoggingFolderExclusion_withFullFolderPath(exclusionName, description, folderName, folderParent string) string {
@@ -212,7 +213,7 @@ resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
 }
-`, exclusionName, description, getTestProjectFromEnv(), folderName, folderParent)
+`, exclusionName, description, acctest.GetTestProjectFromEnv(), folderName, folderParent)
 }
 
 func testAccLoggingFolderExclusion_multipleCfg(folderName, folderParent, exclusionName string) string {
@@ -231,7 +232,7 @@ resource "google_logging_folder_exclusion" "basic%d" {
   description = "Basic Folder Logging Exclusion"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 }
-`, i, exclusionName, i, getTestProjectFromEnv())
+`, i, exclusionName, i, acctest.GetTestProjectFromEnv())
 	}
 	return s
 }

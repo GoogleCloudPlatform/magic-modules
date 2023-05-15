@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud (Stackdriver) Logging"
-page_title: "Google: google_logging_project_bucket_config"
 description: |-
   Manages a project-level logging bucket config.
 ---
@@ -38,6 +37,18 @@ resource "google_logging_project_bucket_config" "basic" {
 	location  = "global"
 	retention_days = 30
 	bucket_id = "custom-bucket"
+}
+```
+
+Create logging bucket with Log Analytics enabled
+
+```hcl
+resource "google_logging_project_bucket_config" "analytics-enabled-bucket" {
+	project          = "project_id"
+	location         = "global"
+	retention_days   = 30
+	enable_analytics = true
+	bucket_id        = "custom-bucket"
 }
 ```
 
@@ -95,6 +106,8 @@ The following arguments are supported:
 * `description` - (Optional) Describes this bucket.
 
 * `retention_days` - (Optional) Logs will be retained by default for this amount of time, after which they will automatically be deleted. The minimum retention period is 1 day. If this value is set to zero at bucket creation time, the default time of 30 days will be used.
+
+* `enable_analytics` - (Optional) Whether or not Log Analytics is enabled. Logs for buckets with Log Analytics enabled can be queried in the **Log Analytics** page using SQL queries. Cannot be disabled once enabled.
 
 * `cmek_settings` - (Optional) The CMEK settings of the log bucket. If present, new log entries written to this log bucket are encrypted using the CMEK key provided in this configuration. If a log bucket has CMEK settings, the CMEK settings cannot be disabled later by updating the log bucket. Changing the KMS key is allowed. Structure is [documented below](#nested_cmek_settings).
 

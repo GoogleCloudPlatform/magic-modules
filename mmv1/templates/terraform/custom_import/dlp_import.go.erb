@@ -1,7 +1,7 @@
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	// Custom import to handle parent possibilities
-	if err := parseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
+	if err := tpgresource.ParseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
 		return nil, err
 	}
 	parts := strings.Split(d.Get("name").(string), "/")
@@ -23,7 +23,7 @@
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "{{parent}}/<%= object.name.camelize(:lower) -%>s/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "{{parent}}/<%= object.name.camelize(:lower) -%>s/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

@@ -38,6 +38,47 @@
 -%>
 '<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/utils/<%= fname -%>'
 <% end -%>
+
+<%
+  Dir["third_party/terraform/acctest/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/acctest/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/acctest/<%= fname -%>'
+<% end -%>
+
+<%
+  Dir["third_party/terraform/tpgresource/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/tpgresource/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/tpgresource/<%= fname -%>'
+<% end -%>
+
+<%
+  Dir["third_party/terraform/transport/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/transport/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/transport/<%= fname -%>'
+<% end -%>
+
+<%
+  Dir["third_party/terraform/verify/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/verify/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/verify/<%= fname -%>'
+<% end -%>
+
+<%
+  Dir["third_party/terraform/framework_utils/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/framework_utils/<%= fname -%>'
+<% end -%>
+<%
+  Dir["third_party/terraform/framework_models/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/framework_models/<%= fname -%>'
+<% end -%>
 <%
   Dir["third_party/terraform/scripts/**/*.erb"].each do |file_path|
     fname = file_path.delete_prefix("third_party/terraform/")

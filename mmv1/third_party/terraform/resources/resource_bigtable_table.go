@@ -8,9 +8,13 @@ import (
 
 	"cloud.google.com/go/bigtable"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func resourceBigtableTable() *schema.Resource {
+func ResourceBigtableTable() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceBigtableTableCreate,
 		Read:   resourceBigtableTableRead,
@@ -35,7 +39,7 @@ func resourceBigtableTable() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: `The name of the table.`,
+				Description: `The name of the table. Must be 1-50 characters and must only contain hyphens, underscores, periods, letters and numbers.`,
 			},
 
 			"column_family": {
@@ -57,7 +61,7 @@ func resourceBigtableTable() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: compareResourceNames,
+				DiffSuppressFunc: tpgresource.CompareResourceNames,
 				Description:      `The name of the Bigtable instance.`,
 			},
 
@@ -76,26 +80,35 @@ func resourceBigtableTable() *schema.Resource {
 				ForceNew:    true,
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
+
+			"deletion_protection": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"PROTECTED", "UNPROTECTED"}, false),
+				Elem:         &schema.Schema{Type: schema.TypeString},
+				Description:  `A field to make the table protected against data loss i.e. when set to PROTECTED, deleting the table, the column families in the table, and the instance containing the table would be prohibited. If not provided, currently deletion protection will be set to UNPROTECTED as it is the API default value.`,
+			},
 		},
 		UseJSONNumber: true,
 	}
 }
 
 func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	ctx := context.Background()
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	instanceName := GetResourceNameFromSelfLink(d.Get("instance_name").(string))
+	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
 	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
@@ -108,6 +121,15 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 
 	tableId := d.Get("name").(string)
 	tblConf := bigtable.TableConf{TableID: tableId}
+
+	// Check if deletion protection is given
+	// If not given, currently tblConf.DeletionProtection will be set to false in the API
+	deletionProtection := d.Get("deletion_protection")
+	if deletionProtection == "PROTECTED" {
+		tblConf.DeletionProtection = bigtable.Protected
+	} else if deletionProtection == "UNPROTECTED" {
+		tblConf.DeletionProtection = bigtable.Unprotected
+	}
 
 	// Set the split keys if given.
 	if v, ok := d.GetOk("split_keys"); ok {
@@ -140,7 +162,7 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error creating table. %s", err)
 	}
 
-	id, err := replaceVars(d, config, "projects/{{project}}/instances/{{instance_name}}/tables/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/instances/{{instance_name}}/tables/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -150,19 +172,19 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 	ctx := context.Background()
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	instanceName := GetResourceNameFromSelfLink(d.Get("instance_name").(string))
+	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
 	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
@@ -173,7 +195,7 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
 	table, err := c.TableInfo(ctx, name)
 	if err != nil {
-		if isNotFoundGrpcError(err) {
+		if tpgresource.IsNotFoundGrpcError(err) {
 			log.Printf("[WARN] Removing %s because it's gone", name)
 			d.SetId("")
 			return nil
@@ -188,23 +210,35 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error setting column_family: %s", err)
 	}
 
+	deletionProtection := table.DeletionProtection
+	if deletionProtection == bigtable.Protected {
+		if err := d.Set("deletion_protection", "PROTECTED"); err != nil {
+			return fmt.Errorf("Error setting deletion_protection: %s", err)
+		}
+	} else if deletionProtection == bigtable.Unprotected {
+		if err := d.Set("deletion_protection", "UNPROTECTED"); err != nil {
+			return fmt.Errorf("Error setting deletion_protection: %s", err)
+		}
+	} else {
+		return fmt.Errorf("Error setting deletion_protection, it should be either PROTECTED or UNPROTECTED")
+	}
 	return nil
 }
 
 func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 	ctx := context.Background()
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	instanceName := GetResourceNameFromSelfLink(d.Get("instance_name").(string))
+	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
 	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
@@ -240,24 +274,37 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
+	if d.HasChange("deletion_protection") {
+		deletionProtection := d.Get("deletion_protection")
+		if deletionProtection == "PROTECTED" {
+			if err := c.UpdateTableWithDeletionProtection(ctx, name, bigtable.Protected); err != nil {
+				return fmt.Errorf("Error updating deletion protection in table %v: %s", name, err)
+			}
+		} else if deletionProtection == "UNPROTECTED" {
+			if err := c.UpdateTableWithDeletionProtection(ctx, name, bigtable.Unprotected); err != nil {
+				return fmt.Errorf("Error updating deletion protection in table %v: %s", name, err)
+			}
+		}
+	}
+
 	return resourceBigtableTableRead(d, meta)
 }
 
 func resourceBigtableTableDestroy(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	ctx := context.Background()
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	instanceName := GetResourceNameFromSelfLink(d.Get("instance_name").(string))
+	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
 	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
@@ -290,8 +337,8 @@ func flattenColumnFamily(families []string) []map[string]interface{} {
 
 // TODO(rileykarson): Fix the stored import format after rebasing 3.0.0
 func resourceBigtableTableImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
-	if err := parseImportId([]string{
+	config := meta.(*transport_tpg.Config)
+	if err := tpgresource.ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/instances/(?P<instance_name>[^/]+)/tables/(?P<name>[^/]+)",
 		"(?P<project>[^/]+)/(?P<instance_name>[^/]+)/(?P<name>[^/]+)",
 		"(?P<instance_name>[^/]+)/(?P<name>[^/]+)",
@@ -300,7 +347,7 @@ func resourceBigtableTableImport(d *schema.ResourceData, meta interface{}) ([]*s
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/instances/{{instance_name}}/tables/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/instances/{{instance_name}}/tables/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

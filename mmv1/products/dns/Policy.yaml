@@ -1,0 +1,144 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Policy'
+kind: 'dns#policy'
+base_url: 'projects/{{project}}/policies'
+immutable: true
+description: |
+  A policy is a collection of DNS rules applied to one or more Virtual
+  Private Cloud resources.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Using DNS server policies': 'https://cloud.google.com/dns/zones/#using-dns-server-policies'
+  api: 'https://cloud.google.com/dns/docs/reference/v1beta2/policies'
+id_format: 'projects/{{project}}/policies/{{name}}'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dns_policy_basic'
+    primary_resource_id: 'example-policy'
+    vars:
+      policy_name: 'example-policy'
+      network_1_name: 'network-1'
+      network_2_name: 'network-2'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: templates/terraform/pre_delete/detach_network.erb
+properties:
+  - !ruby/object:Api::Type::NestedObject
+    name: 'alternativeNameServerConfig'
+    description: |
+      Sets an alternative name server for the associated networks.
+      When specified, all DNS queries are forwarded to a name server that you choose.
+      Names such as .internal are not available when an alternative name server is specified.
+    update_verb: :PATCH
+    update_url: 'projects/{{project}}/policies/{{name}}'
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'targetNameServers'
+        required: true
+        description: |
+          Sets an alternative name server for the associated networks. When specified,
+          all DNS queries are forwarded to a name server that you choose. Names such as .internal
+          are not available when an alternative name server is specified.
+        is_set: true
+        set_hash_func: |-
+          func(v interface{}) int {
+            raw := v.(map[string]interface{})
+            if address, ok := raw["ipv4_address"]; ok {
+              tpgresource.Hashcode(address.(string))
+            }
+            var buf bytes.Buffer
+            schema.SerializeResourceForHash(&buf, raw, dnsPolicyAlternativeNameServerConfigTargetNameServersSchema())
+            return tpgresource.Hashcode(buf.String())
+          }
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'ipv4Address'
+              required: true
+              description: 'IPv4 address to forward to.'
+            - !ruby/object:Api::Type::Enum
+              name: 'forwardingPath'
+              description: |
+                Forwarding path for this TargetNameServer. If unset or `default` Cloud DNS will make forwarding
+                decision based on address ranges, i.e. RFC1918 addresses go to the VPC, Non-RFC1918 addresses go
+                to the Internet. When set to `private`, Cloud DNS will always send queries through VPC for this target
+              values:
+                - :default
+                - :private
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      A textual description field. Defaults to 'Managed by Terraform'.
+    update_verb: :PATCH
+    update_url: 'projects/{{project}}/policies/{{name}}'
+    required: false
+    default_value: 'Managed by Terraform'
+  - !ruby/object:Api::Type::Boolean
+    name: 'enableInboundForwarding'
+    description: |
+      Allows networks bound to this policy to receive DNS queries sent
+      by VMs or applications over VPN connections. When enabled, a
+      virtual IP address will be allocated from each of the sub-networks
+      that are bound to this policy.
+    send_empty_value: true
+    update_verb: :PATCH
+    update_url: 'projects/{{project}}/policies/{{name}}'
+  - !ruby/object:Api::Type::Boolean
+    name: 'enableLogging'
+    description: |
+      Controls whether logging is enabled for the networks bound to this policy.
+      Defaults to no logging if not set.
+    send_empty_value: true
+    update_verb: :PATCH
+    update_url: 'projects/{{project}}/policies/{{name}}'
+  - !ruby/object:Api::Type::Integer
+    name: 'id'
+    description: Unique identifier for the resource; defined by the server.
+    output: true
+    exclude: true
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      User assigned name for this policy.
+    required: true
+  - !ruby/object:Api::Type::Array
+    name: 'networks'
+    description:
+      'List of network names specifying networks to which this policy is
+      applied.'
+    update_verb: :PATCH
+    update_url: 'projects/{{project}}/policies/{{name}}'
+    is_set: true
+    set_hash_func: |-
+      func(v interface{}) int {
+        raw := v.(map[string]interface{})
+        if url, ok := raw["network_url"]; ok {
+          return tpgresource.SelfLinkNameHash(url)
+        }
+        var buf bytes.Buffer
+        schema.SerializeResourceForHash(&buf, raw, dnsPolicyNetworksSchema())
+        return tpgresource.Hashcode(buf.String())
+      }
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'networkUrl'
+          required: true
+          description: |
+            The id or fully qualified URL of the VPC network to forward queries to.
+            This should be formatted like `projects/{project}/global/networks/{network}` or
+            `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
+          custom_expand: templates/terraform/custom_expand/network_full_url.erb
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'

@@ -5,21 +5,22 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccComputeTargetGrpcProxy_update(t *testing.T) {
 	t.Parallel()
 
-	proxy := fmt.Sprintf("tf-manual-proxy-%s", randString(t, 10))
-	urlmap1 := fmt.Sprintf("tf-manual-urlmap1-%s", randString(t, 10))
-	urlmap2 := fmt.Sprintf("tf-manual-urlmap2-%s", randString(t, 10))
-	backend := fmt.Sprintf("tf-manual-backend-%s", randString(t, 10))
-	healthcheck := fmt.Sprintf("tf-manual-healthcheck-%s", randString(t, 10))
+	proxy := fmt.Sprintf("tf-manual-proxy-%s", RandString(t, 10))
+	urlmap1 := fmt.Sprintf("tf-manual-urlmap1-%s", RandString(t, 10))
+	urlmap2 := fmt.Sprintf("tf-manual-urlmap2-%s", RandString(t, 10))
+	backend := fmt.Sprintf("tf-manual-backend-%s", RandString(t, 10))
+	healthcheck := fmt.Sprintf("tf-manual-healthcheck-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeTargetGrpcProxyDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeTargetGrpcProxyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeTargetGrpcProxy_basic(proxy, urlmap1, backend, healthcheck),

@@ -1,12 +1,12 @@
-config := googleProviderConfig(t)
+config := GoogleProviderConfig(t)
 
-url, err := replaceVarsForTest(config, rs, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificates/{{name}}")
+url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificates/{{name}}")
 
 if err != nil {
 	return err
 }
 
-res, err := sendRequest(config, "GET", "", url, config.userAgent, nil)
+res, err := transport_tpg.SendRequest(config, "GET", "", url, config.UserAgent, nil)
 if err != nil {
 	return err
 }

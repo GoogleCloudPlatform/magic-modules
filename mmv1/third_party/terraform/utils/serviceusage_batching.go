@@ -5,6 +5,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -16,24 +19,24 @@ const (
 // BatchRequestEnableServices can be used to batch requests to enable services
 // across resource nodes, i.e. to batch creation of several
 // google_project_service(s) resources.
-func BatchRequestEnableService(service string, project string, d *schema.ResourceData, config *Config) error {
+func BatchRequestEnableService(service string, project string, d *schema.ResourceData, config *transport_tpg.Config) error {
 	// Renamed service create calls are relatively likely to fail, so don't try to batch the call.
 	if altName, ok := renamedServicesByOldAndNewServiceNames[service]; ok {
 		return tryEnableRenamedService(service, altName, project, d, config)
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	billingProject := project
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
-	req := &BatchRequest{
+	req := &transport_tpg.BatchRequest{
 		ResourceName: project,
 		Body:         []string{service},
 		CombineF:     combineServiceUsageServicesBatches,
@@ -41,15 +44,15 @@ func BatchRequestEnableService(service string, project string, d *schema.Resourc
 		DebugId:      fmt.Sprintf("Enable Project Service %q for project %q", service, project),
 	}
 
-	_, err = config.requestBatcherServiceUsage.SendRequestWithTimeout(
+	_, err = config.RequestBatcherServiceUsage.SendRequestWithTimeout(
 		fmt.Sprintf(batchKeyTmplServiceUsageEnableServices, project),
 		req,
 		d.Timeout(schema.TimeoutCreate))
 	return err
 }
 
-func tryEnableRenamedService(service, altName string, project string, d *schema.ResourceData, config *Config) error {
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+func tryEnableRenamedService(service, altName string, project string, d *schema.ResourceData, config *transport_tpg.Config) error {
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -59,15 +62,15 @@ func tryEnableRenamedService(service, altName string, project string, d *schema.
 
 	billingProject := project
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
 	log.Printf("[DEBUG] attempting enabling service with user-specified name %s", service)
-	err = enableServiceUsageProjectServices([]string{service}, project, billingProject, userAgent, config, 1*time.Minute)
+	err = EnableServiceUsageProjectServices([]string{service}, project, billingProject, userAgent, config, 1*time.Minute)
 	if err != nil {
 		log.Printf("[DEBUG] saw error %s. attempting alternate name %v", err, altName)
-		err2 := enableServiceUsageProjectServices([]string{altName}, project, billingProject, userAgent, config, 1*time.Minute)
+		err2 := EnableServiceUsageProjectServices([]string{altName}, project, billingProject, userAgent, config, 1*time.Minute)
 		if err2 != nil {
 			return fmt.Errorf("Saw 2 subsequent errors attempting to enable a renamed service: %s / %s", err, err2)
 		}
@@ -75,19 +78,19 @@ func tryEnableRenamedService(service, altName string, project string, d *schema.
 	return nil
 }
 
-func BatchRequestReadServices(project string, d *schema.ResourceData, config *Config) (interface{}, error) {
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+func BatchRequestReadServices(project string, d *schema.ResourceData, config *transport_tpg.Config) (interface{}, error) {
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
 
 	billingProject := project
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
-	req := &BatchRequest{
+	req := &transport_tpg.BatchRequest{
 		ResourceName: project,
 		Body:         nil,
 		// Use empty CombineF since the request is exactly the same no matter how many services we read.
@@ -96,7 +99,7 @@ func BatchRequestReadServices(project string, d *schema.ResourceData, config *Co
 		DebugId:  fmt.Sprintf("List Project Services %s", project),
 	}
 
-	return config.requestBatcherServiceUsage.SendRequestWithTimeout(
+	return config.RequestBatcherServiceUsage.SendRequestWithTimeout(
 		fmt.Sprintf(batchKeyTmplServiceUsageListServices, project),
 		req,
 		d.Timeout(schema.TimeoutRead))
@@ -115,18 +118,18 @@ func combineServiceUsageServicesBatches(srvsRaw interface{}, toAddRaw interface{
 	return append(srvs, toAdd...), nil
 }
 
-func sendBatchFuncEnableServices(config *Config, userAgent, billingProject string, timeout time.Duration) BatcherSendFunc {
+func sendBatchFuncEnableServices(config *transport_tpg.Config, userAgent, billingProject string, timeout time.Duration) transport_tpg.BatcherSendFunc {
 	return func(project string, toEnableRaw interface{}) (interface{}, error) {
 		toEnable, ok := toEnableRaw.([]string)
 		if !ok {
 			return nil, fmt.Errorf("Expected batch body type to be []string, got %v. This is a provider error.", toEnableRaw)
 		}
-		return nil, enableServiceUsageProjectServices(toEnable, project, billingProject, userAgent, config, timeout)
+		return nil, EnableServiceUsageProjectServices(toEnable, project, billingProject, userAgent, config, timeout)
 	}
 }
 
-func sendListServices(config *Config, billingProject, userAgent string, timeout time.Duration) BatcherSendFunc {
+func sendListServices(config *transport_tpg.Config, billingProject, userAgent string, timeout time.Duration) transport_tpg.BatcherSendFunc {
 	return func(project string, _ interface{}) (interface{}, error) {
-		return listCurrentlyEnabledServices(project, billingProject, userAgent, config, timeout)
+		return ListCurrentlyEnabledServices(project, billingProject, userAgent, config, timeout)
 	}
 }

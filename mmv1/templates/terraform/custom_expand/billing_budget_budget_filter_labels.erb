@@ -1,4 +1,4 @@
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (map[string][]string, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string][]string, error) {
 	if v == nil {
 		return map[string][]string{}, nil
 	}
