@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	compute_tpg "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -22,7 +22,7 @@ type DeploymentManagerOperationWaiter struct {
 	UserAgent    string
 	Project      string
 	OperationUrl string
-	compute_tpg.ComputeOperationWaiter
+	tpgcompute.ComputeOperationWaiter
 }
 
 func (w *DeploymentManagerOperationWaiter) IsRetryable(error) bool {
@@ -63,7 +63,7 @@ func DeploymentManagerOperationWaitTime(config *transport_tpg.Config, resp inter
 		Config:       config,
 		UserAgent:    userAgent,
 		OperationUrl: op.SelfLink,
-		ComputeOperationWaiter: compute_tpg.ComputeOperationWaiter{
+		ComputeOperationWaiter: tpgcompute.ComputeOperationWaiter{
 			Project: project,
 		},
 	}

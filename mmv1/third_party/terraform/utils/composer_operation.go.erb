@@ -4,7 +4,7 @@ package google
 import (
 	"time"
 
-	composer_tpg "github.com/hashicorp/terraform-provider-google/google/services/composer"
+	tpgcomposer "github.com/hashicorp/terraform-provider-google/google/services/composer"
     transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 <% if version == "ga" -%>
@@ -15,7 +15,7 @@ import (
 )
 
 // Deprecated: For backward compatibility ComposerOperationWaitTime is still working,
-// but all new code should use ComposerOperationWaitTime in the composer package instead.
+// but all new code should use ComposerOperationWaitTime in the tpgcomposer package instead.
 func ComposerOperationWaitTime(config *transport_tpg.Config, op *composer.Operation, project, activity, userAgent string, timeout time.Duration) error {
-	return composer_tpg.ComposerOperationWaitTime(config, op, project, activity, userAgent, timeout)
+	return tpgcomposer.ComposerOperationWaitTime(config, op, project, activity, userAgent, timeout)
 }
