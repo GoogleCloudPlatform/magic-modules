@@ -64,12 +64,12 @@ type <%= resource_name -%>IamUpdater struct {
 <% resource_params.each do |param| -%>
 	<%= param.camelize(:lower) -%> string
 <% end # resource_params.each -%>
-	d       TerraformResourceData
+	d       tpgresource.TerraformResourceData
 	Config  *transport_tpg.Config
 }
 
 <% provider_default_values = ['project', 'location', 'region', 'zone'] -%>
-func <%= resource_name -%>IamUpdaterProducer(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+func <%= resource_name -%>IamUpdaterProducer(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
 	values := make(map[string]string)
 
 <% resource_params.each do |param| -%>
@@ -92,7 +92,7 @@ func <%= resource_name -%>IamUpdaterProducer(d TerraformResourceData, config *tr
 <% import_format = object.iam_policy.import_format || object.import_format -%>
 
 	// We may have gotten either a long or short name, so attempt to parse long name if possible
-	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(import_format, object.identity, object.base_url).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{parent_resource_name}>")}.join('","') -%>"}, d, config, d.Get("<%= parent_resource_name -%>").(string))
+	m, err := tpgresource.GetImportIdQualifiers([]string{"<%= import_id_formats(import_format, object.identity, object.base_url).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{parent_resource_name}>")}.join('","') -%>"}, d, config, d.Get("<%= parent_resource_name -%>").(string))
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +145,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *transport_
 <% end # if provider_default_values.include? -%>
 <% end # resource_params.each -%>
 
-	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(import_format, object.identity, object.base_url).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{parent_resource_name}>")}.join('","') -%>"}, d, config, d.Id())
+	m, err := tpgresource.GetImportIdQualifiers([]string{"<%= import_id_formats(import_format, object.identity, object.base_url).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{parent_resource_name}>")}.join('","') -%>"}, d, config, d.Id())
 	if err != nil {
 		return err
 	}
@@ -183,7 +183,7 @@ func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresource
 	}
 
 <% if resource_params.include?('project') -%>
-	project, err := getProject(u.d, u.Config)
+	project, err := tpgresource.GetProject(u.d, u.Config)
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +207,7 @@ func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresource
 	}
 <%  end -%>
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -249,13 +249,13 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 		return err
 	}
 <% if resource_params.include?('project') -%>
-	project, err := getProject(u.d, u.Config)
+	project, err := tpgresource.GetProject(u.d, u.Config)
 	if err != nil {
 		return err
 	}
 <% end -%>
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -272,7 +272,7 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 <% string_qualifiers = extract_identifiers(resource_uri.gsub('{{name}}', "{{#{parent_resource_name}}}")).map{|param| "u.#{param.camelize(:lower)}"}.join(', ') -%>
 func (u *<%= resource_name -%>IamUpdater) qualify<%= object.name -%>Url(methodIdentifier string) (string, error) {
 	urlTemplate := fmt.Sprintf("{{<%= object.__product.name -%>BasePath}}%s<%= object.iam_policy.method_name_separator -%>%s", fmt.Sprintf("<%= import_url -%>", <%= string_qualifiers -%>), methodIdentifier)
-  url, err := ReplaceVars(u.d, u.Config, urlTemplate)
+  url, err := tpgresource.ReplaceVars(u.d, u.Config, urlTemplate)
   if err != nil {
       return "", err
   }

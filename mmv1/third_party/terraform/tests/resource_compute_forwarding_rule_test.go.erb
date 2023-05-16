@@ -135,6 +135,7 @@ func TestAccComputeForwardingRule_networkTier(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccComputeForwardingRule_serviceDirectoryRegistrations(t *testing.T) {
 	t.Parallel()
 
@@ -161,7 +162,6 @@ func TestAccComputeForwardingRule_serviceDirectoryRegistrations(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeForwardingRule_forwardingRuleVpcPscExampleUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -509,6 +509,7 @@ resource "google_compute_forwarding_rule" "foobar" {
 `, poolName, ruleName)
 }
 
+<% unless version == 'ga' -%>
 func testAccComputeForwardingRule_serviceDirectoryRegistrations(poolName, ruleName, svcDirNamespace, serviceName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_target_pool" "foo-tp" {
@@ -547,7 +548,6 @@ resource "google_service_directory_service" "examplesvc" {
 `, poolName, ruleName, svcDirNamespace, serviceName)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeForwardingRule_forwardingRuleVpcPscExampleUpdate(context map[string]interface{}) string {
 	return Nprintf(`
 // Forwarding rule for VPC private service connect

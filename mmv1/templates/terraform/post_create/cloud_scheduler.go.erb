@@ -6,7 +6,7 @@ if paused, pausedOk := d.GetOk("paused"); pausedOk && paused.(bool) {
 }
 
 linkTmpl := fmt.Sprintf("{{CloudSchedulerBasePath}}projects/{{project}}/locations/{{region}}/jobs/{{name}}:%s", endpoint)
-url, err = ReplaceVars(d, config, linkTmpl)
+url, err = tpgresource.ReplaceVars(d, config, linkTmpl)
 if err != nil {
 	return err
 }

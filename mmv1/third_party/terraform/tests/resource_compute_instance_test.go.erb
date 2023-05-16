@@ -1298,21 +1298,9 @@ func TestAccComputeInstance_private_image_family(t *testing.T) {
 		},
 	})
 }
+
 <% unless version == 'ga' -%>
 func TestAccComputeInstance_networkPerformanceConfig(t *testing.T) {
-	// This test /should/ be passing but the reason it's failing
-	// is very non-obvious and requires further investigation
-	//
-	// It's been failing in teamcity for > 90d so there is no
-	// starting point or obvious reason to potentially pivot off
-	//
-	// For whoever decides to investigate this. It looks like
-	// at the time the failure is due to a failure to start
-	// the compute instance after a config update. This results
-	// in it /unable to find the resource/ as the start operation
-	// never completes successful. I suspect a bad configuration
-	// but am unsure.
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	var instance compute.Instance
@@ -1337,6 +1325,7 @@ func TestAccComputeInstance_networkPerformanceConfig(t *testing.T) {
 	})
 }
 <% end -%>
+
 func TestAccComputeInstance_forceChangeMachineTypeManually(t *testing.T) {
 	t.Parallel()
 
@@ -2395,7 +2384,7 @@ func TestAccComputeInstance_spotVM_maxRunDuration_update(t *testing.T) {
 func TestComputeInstance_networkIPCustomizedDiff(t *testing.T) {
 	t.Parallel()
 
-	d := &acctest.ResourceDiffMock{
+	d := &tpgresource.ResourceDiffMock{
 		Before: map[string]interface{}{
 			"network_interface.#": 0,
 		},
@@ -2494,7 +2483,7 @@ func TestComputeInstance_networkIPCustomizedDiff(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		d := &acctest.ResourceDiffMock{
+		d := &tpgresource.ResourceDiffMock{
 			Before: map[string]interface{}{
 				"network_interface.#":                    1,
 				"network_interface.0.network":            tc.Before.Network,
