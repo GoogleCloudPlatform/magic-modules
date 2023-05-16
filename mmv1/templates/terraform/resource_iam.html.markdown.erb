@@ -212,18 +212,6 @@ resource "<%= resource_ns_iam -%>_member" "member" {
 ```
 <% end -%>
 
-
-## data <%= markdown_escaped_name -%>\_policy
-
-```hcl
-data "<%= resource_ns_iam -%>_policy" "policy" {
-<% if object.min_version.name == 'beta' -%>
-  provider = google-beta
-<% end -%>
-<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
-}
-```
-
 ## Argument Reference
 
 The following arguments are supported:
