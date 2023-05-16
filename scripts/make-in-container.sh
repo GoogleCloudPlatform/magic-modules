@@ -2,7 +2,7 @@
 # run-in-container runs a make command within a
 # container. The only required dependency is
 # podman or docker: containers required for runtime
-# will be pulled or built during the exectuion of the script.
+# will be pulled or built during the execution of the script.
 set -e
 
 BUILDER_IMAGE="gcr.io/graphite-docker-images/downstream-builder:latest"

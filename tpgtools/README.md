@@ -86,7 +86,7 @@ example,
 [this meta.yaml](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/tpgtools/overrides/assuredworkloads/samples/workload/meta.yaml)
 file exists for the assured workloads resource. This file will merge with any
 tests. You can customize behavior of the tests and examples generated dcl
-samples data (injections, hiding, ect..). See
+samples data (injections, hiding, etc..). See
 [the section of the meta.yaml file](#the-metayaml-file) for a more detailed
 dive.
 

@@ -38,7 +38,7 @@ rm -rf triage-party/
 
 docker push "${IMAGE}" || exit 2
 
-# TODO: add persistance to make it run faster: env vars PERSIST_BACKEND, PERSIST_PATH
+# TODO: add persistence to make it run faster: env vars PERSIST_BACKEND, PERSIST_PATH
 gcloud beta run deploy "${SERVICE_NAME}" \
     --project "${PROJECT}" \
     --image "${IMAGE}" \

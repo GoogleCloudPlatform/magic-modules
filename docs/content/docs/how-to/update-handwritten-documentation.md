@@ -44,4 +44,4 @@ After finding the file you need, make the changes required for the issue you are
 
 Next, you should test your changes to the file. To do this, you can copy and paste the markdown into the [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) on the Registry website. This will help you identify any malformed markdown and check that it is rendered in the way you expect.
 
-Once you are satified, include the markdown changes in your PR in the Magic Modules repo. When the downstream is generated from Magic Modules your handwritten files will be copied into the correct location within the `website/docs` folder in `terraform-provider-google` or `terraform-provider-google-beta`.
+Once you are satisfied, include the markdown changes in your PR in the Magic Modules repo. When the downstream is generated from Magic Modules your handwritten files will be copied into the correct location within the `website/docs` folder in `terraform-provider-google` or `terraform-provider-google-beta`.

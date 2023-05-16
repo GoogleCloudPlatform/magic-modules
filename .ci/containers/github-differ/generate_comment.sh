@@ -11,7 +11,7 @@ if [ -z "$GITHUB_TOKEN" ]; then
     exit 1
 fi
 
-# make utility functions avalible
+# make utility functions available
 source /utils.sh
 
 PR_NUMBER=$1

@@ -34,7 +34,7 @@ function clone_repo() {
         GH_REPO=docs-examples
         LOCAL_PATH=$GOPATH/src/github.com/terraform-google-modules/docs-examples
     elif [ "$REPO" == "tf-cloud-docs" ]; then
-        # backwards-compatability
+        # backwards-compatibility
         echo "$REPO is no longer available."
         exit 0
     else
