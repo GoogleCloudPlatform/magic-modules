@@ -55,7 +55,7 @@ parameters:
     name: region
     description: The region of the index endpoint. eg us-central1
     url_param_only: true
-    input: true
+    immutable: true
 properties:
   # Intentionally deployedIndexes[] is not included because it's an output-only field and another terraform resource will manage a deployed index.
   - !ruby/object:Api::Type::String
