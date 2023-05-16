@@ -1,7 +1,7 @@
 resource "google_certificate_manager_certificate" "default" {
   provider    = google-beta
   name        = "<%= ctx[:vars]['certificate_name'] %>"
-  location    = "us-west1"
+  location    = "us-south1"
   self_managed {
     pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
     pem_private_key = file("test-fixtures/certificatemanager/private-key.pem")
@@ -20,7 +20,7 @@ resource "google_compute_subnetwork" "default" {
   name          = "<%= ctx[:vars]['subnetwork_name'] %>"
   purpose       = "PRIVATE"
   ip_cidr_range = "10.128.0.0/20"
-  region        = "us-west1"
+  region        = "us-south1"
   network       = google_compute_network.default.id
   role          = "ACTIVE"
 }
@@ -30,7 +30,7 @@ resource "google_compute_subnetwork" "proxyonlysubnet" {
   name          = "<%= ctx[:vars]['proxy_only_subnetwork_name'] %>"
   purpose       = "REGIONAL_MANAGED_PROXY"
   ip_cidr_range = "192.168.0.0/23"
-  region        = "us-west1"
+  region        = "us-south1"
   network       = google_compute_network.default.id
   role          = "ACTIVE"
 }
@@ -38,13 +38,13 @@ resource "google_compute_subnetwork" "proxyonlysubnet" {
 resource "google_network_security_gateway_security_policy" "default" {
   provider    = google-beta
   name        = "<%= ctx[:vars]['policy_name'] %>"
-  location    = "us-west1"
+  location    = "us-south1"
 }
 
 resource "google_network_security_gateway_security_policy_rule" "default" {
   provider                = google-beta
   name                    = "<%= ctx[:vars]['policy_rule_name'] %>"
-  location                = "us-west1"
+  location                = "us-south1"
   gateway_security_policy = google_network_security_gateway_security_policy.default.name
   enabled                 = true  
   priority                = 1
@@ -55,7 +55,7 @@ resource "google_network_security_gateway_security_policy_rule" "default" {
 resource "google_network_services_gateway" "<%= ctx[:primary_resource_id] %>" {
   provider                             = google-beta
   name                                 = "<%= ctx[:vars]['gateway_name_1'] %>"
-  location                             = "us-west1"
+  location                             = "us-south1"
   addresses                            = ["10.128.0.99"]
   type                                 = "SECURE_WEB_GATEWAY"
   ports                                = [443]
@@ -71,7 +71,7 @@ resource "google_network_services_gateway" "<%= ctx[:primary_resource_id] %>" {
 resource "google_network_services_gateway" "gateway2" {
   provider                             = google-beta
   name                                 = "<%= ctx[:vars]['gateway_name_2'] %>"
-  location                             = "us-west1"
+  location                             = "us-south1"
   addresses                            = ["10.128.0.98"]
   type                                 = "SECURE_WEB_GATEWAY"
   ports                                = [443]

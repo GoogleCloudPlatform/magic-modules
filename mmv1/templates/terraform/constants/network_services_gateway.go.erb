@@ -35,13 +35,13 @@ func gatewaysSameLocation(d *schema.ResourceData, config *transport_tpg.Config, 
 
 	gateways = data.([]interface{})
 
-	log.Printf("[DEBUG] There are still gateways under the same region: %#v", gateways)
+	log.Printf("[DEBUG] There are still gateways under the same location: %#v", gateways)
 	
 	return gateways, nil
 }
 
 // Checks if the given list of gateways contains a gateway of type SECURE_WEB_GATEWAY.
-func isLastSWGGateway(gateways []interface{}) bool {
+func isLastSWGGateway(gateways []interface{}, network string) bool {
 	log.Print("[DEBUG] Checking if this is the last gateway of type SECURE_WEB_GATEWAY.")
 	for _, itemRaw := range gateways {
 		if itemRaw == nil {
@@ -54,7 +54,12 @@ func isLastSWGGateway(gateways []interface{}) bool {
 			continue
 		}
 
-		if gType.(string) == "SECURE_WEB_GATEWAY" {
+		gNetwork, ok := item["network"]
+		if !ok || gNetwork == nil {
+			continue
+		}
+
+		if gType.(string) == "SECURE_WEB_GATEWAY" && gNetwork.(string) == network {
 			return false
 		}
 	}
@@ -80,11 +85,11 @@ func deleteSWGAutoGenRouter(d *schema.ResourceData, config *transport_tpg.Config
 	}
 
 	// The name of swg auto generated router is in the following format: swg-autogen-router-{NETWORK-ID}
-	routerNatId := fmt.Sprintf("swg-autogen-router-%s", resp["id"])
-	log.Printf("[DEBUG] Deleting the auto generated router %q.", routerNatId)
+	routerId := fmt.Sprintf("swg-autogen-router-%s", resp["id"])
+	log.Printf("[DEBUG] Deleting the auto generated router %q.", routerId)
 
-	routerNatPath := fmt.Sprintf("{{ComputeBasePath}}projects/{{project}}/regions/{{location}}/routers/%s", routerNatId)
-	routerUrl, err := ReplaceVars(d, config, routerNatPath)
+	routerPath := fmt.Sprintf("{{ComputeBasePath}}projects/{{project}}/regions/{{location}}/routers/%s", routerId)
+	routerUrl, err := ReplaceVars(d, config, routerPath)
 	if err != nil {
 		return err
 	}

@@ -5,7 +5,8 @@ if d.Get("delete_swg_autogen_router_on_destroy").(bool) {
 		return err
 	}
 
-	if isLastSWGGateway(gateways) {
+	network := d.Get("network").(string)
+	if isLastSWGGateway(gateways, network) {
 		err := deleteSWGAutoGenRouter(d, config, billingProject, userAgent)
 		if err != nil {
 			return err
