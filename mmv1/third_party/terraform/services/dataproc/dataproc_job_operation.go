@@ -1,5 +1,4 @@
-<% autogen_exception -%>
-package google
+package dataproc
 
 import (
 	"fmt"
@@ -70,7 +69,7 @@ func (w *DataprocJobOperationWaiter) TargetStates() []string {
 	return []string{"CANCELLED", "DONE", "ATTEMPT_FAILURE", "ERROR", "RUNNING"}
 }
 
-func dataprocJobOperationWait(config *transport_tpg.Config, region, projectId, jobId, activity, userAgent string, timeout time.Duration) error {
+func DataprocJobOperationWait(config *transport_tpg.Config, region, projectId, jobId, activity, userAgent string, timeout time.Duration) error {
 	w := &DataprocJobOperationWaiter{
 		Service:   config.NewDataprocClient(userAgent),
 		Region:    region,
@@ -108,7 +107,7 @@ func (w *DataprocDeleteJobOperationWaiter) QueryOp() (interface{}, error) {
 	return job, err
 }
 
-func dataprocDeleteOperationWait(config *transport_tpg.Config, region, projectId, jobId, activity, userAgent string, timeout time.Duration) error {
+func DataprocDeleteOperationWait(config *transport_tpg.Config, region, projectId, jobId, activity, userAgent string, timeout time.Duration) error {
 	w := &DataprocDeleteJobOperationWaiter{
 		DataprocJobOperationWaiter{
 			Service:   config.NewDataprocClient(userAgent),
