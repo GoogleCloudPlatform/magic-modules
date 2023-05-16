@@ -89,6 +89,11 @@ examples:
       trigger: 'trigger'
     test_env_vars:
       project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_job_trigger_publish_to_stackdriver'
+    primary_resource_id: 'publish_to_stackdriver'
+    test_env_vars:
+      project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/wrap_object.go.erb
   custom_import: templates/terraform/custom_import/dlp_import.go.erb
@@ -590,7 +595,7 @@ properties:
                   name: 'surrogateType'
                   description: |
                     Message for detecting output from deidentification transformations that support reversing.
-                  properties: [] # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/InspectConfig#SurrogateType
+                  properties: []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/InspectConfig#SurrogateType
                   # The fields below are necessary to include the "surrogateType" in the payload
                   send_empty_value: true
                   allow_empty_object: true
@@ -892,6 +897,7 @@ properties:
                 - publish_summary_to_cscc
                 - job_notification_emails
                 - deidentify
+                - publish_to_stackdriver
               description: |
                 If set, the detailed findings will be persisted to the specified OutputStorageConfig. Only a single instance of this action can be specified. Compatible with: Inspect, Risk
               properties:
@@ -948,6 +954,7 @@ properties:
                 - publish_summary_to_cscc
                 - job_notification_emails
                 - deidentify
+                - publish_to_stackdriver
               description: |
                 Publish a message into a given Pub/Sub topic when the job completes.
               properties:
@@ -965,6 +972,7 @@ properties:
                 - publish_summary_to_cscc
                 - job_notification_emails
                 - deidentify
+                - publish_to_stackdriver
               allow_empty_object: true
               send_empty_value: true
               properties: []
@@ -979,6 +987,7 @@ properties:
                 - publish_summary_to_cscc
                 - job_notification_emails
                 - deidentify
+                - publish_to_stackdriver
               allow_empty_object: true
               send_empty_value: true
               properties: []
@@ -993,6 +1002,7 @@ properties:
                 - publish_summary_to_cscc
                 - job_notification_emails
                 - deidentify
+                - publish_to_stackdriver
               allow_empty_object: true
               send_empty_value: true
               properties: []
@@ -1007,6 +1017,7 @@ properties:
                 - publish_summary_to_cscc
                 - job_notification_emails
                 - deidentify
+                - publish_to_stackdriver
               description: |
                 Create a de-identified copy of the requested table or files.
               properties:
@@ -1085,3 +1096,18 @@ properties:
                             The ID of the table. The ID must contain only letters (a-z,
                             A-Z), numbers (0-9), or underscores (_). The maximum length
                             is 1,024 characters.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'publishToStackdriver'
+              exactly_one_of:
+                - save_findings
+                - pub_sub
+                - publish_findings_to_cloud_data_catalog
+                - publish_summary_to_cscc
+                - job_notification_emails
+                - deidentify
+                - publish_to_stackdriver
+              allow_empty_object: true
+              send_empty_value: true
+              properties: []
+              description: |
+                Enable Stackdriver metric dlp.googleapis.com/findingCount.

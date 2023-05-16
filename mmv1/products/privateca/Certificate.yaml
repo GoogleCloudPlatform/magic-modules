@@ -106,7 +106,7 @@ properties:
       The desired lifetime of the CA certificate. Used to create the "notBeforeTime" and
       "notAfterTime" fields inside an X.509 certificate. A duration in seconds with up to nine
       fractional digits, terminated by 's'. Example: "3.5s".
-    default_value: 315360000s # 10 years
+    default_value: 315360000s  # 10 years
     immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'revocationDetails'
@@ -764,7 +764,7 @@ properties:
       the caller must have the necessary permission to use this template. If this is
       omitted, no template will be used. This template must be in the same location
       as the Certificate.
-    diff_suppress_func: 'compareResourceNames'
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: |

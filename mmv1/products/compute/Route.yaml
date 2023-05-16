@@ -135,7 +135,7 @@ properties:
     description: 'The network that this route applies to.'
     immutable: true
     required: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Integer
     name: 'priority'
     description: |
@@ -173,7 +173,7 @@ properties:
       * `projects/project/global/gateways/default-internet-gateway`
       * `global/gateways/default-internet-gateway`
       * The string `default-internet-gateway`.
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/route_gateway.erb
   - !ruby/object:Api::Type::ResourceRef
     name: 'nextHopInstance'
@@ -250,4 +250,4 @@ properties:
       - next_hop_ip
       - next_hop_vpn_tunnel
       - next_hop_ilb
-    diff_suppress_func: 'CompareIpAddressOrSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareIpAddressOrSelfLinkOrResourceName'

@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -104,7 +105,7 @@ func (w *SqlAdminOperationWaiter) TargetStates() []string {
 
 func SqlAdminOperationWaitTime(config *transport_tpg.Config, res interface{}, project, activity, userAgent string, timeout time.Duration) error {
 	op := &sqladmin.Operation{}
-	err := Convert(res, op)
+	err := tpgresource.Convert(res, op)
 	if err != nil {
 		return err
 	}
@@ -117,7 +118,7 @@ func SqlAdminOperationWaitTime(config *transport_tpg.Config, res interface{}, pr
 	if err := w.SetOp(op); err != nil {
 		return err
 	}
-	return OperationWait(w, activity, timeout, config.PollInterval)
+	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }
 
 // SqlAdminOperationError wraps sqladmin.OperationError and implements the

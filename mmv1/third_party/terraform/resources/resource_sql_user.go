@@ -225,12 +225,12 @@ func expandPasswordPolicy(cfg interface{}) *sqladmin.UserPasswordValidationPolic
 
 func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -254,8 +254,8 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 		user.PasswordPolicy = pp
 	}
 
-	mutexKV.Lock(instanceMutexKey(project, instance))
-	defer mutexKV.Unlock(instanceMutexKey(project, instance))
+	transport_tpg.MutexStore.Lock(instanceMutexKey(project, instance))
+	defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 
 	if v, ok := d.GetOk("host"); ok {
 		if v.(string) != "" {
@@ -302,12 +302,12 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -427,13 +427,13 @@ func flattenPasswordStatus(status *sqladmin.PasswordStatus) interface{} {
 
 func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	if d.HasChange("password") || d.HasChange("password_policy") {
-		project, err := getProject(d, config)
+		project, err := tpgresource.GetProject(d, config)
 		if err != nil {
 			return err
 		}
@@ -449,8 +449,8 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 			Password: password,
 		}
 
-		mutexKV.Lock(instanceMutexKey(project, instance))
-		defer mutexKV.Unlock(instanceMutexKey(project, instance))
+		transport_tpg.MutexStore.Lock(instanceMutexKey(project, instance))
+		defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 		var op *sqladmin.Operation
 		updateFunc := func() error {
 			op, err = config.NewSqlAdminClient(userAgent).Users.Update(project, instance, user).Host(host).Name(name).Do()
@@ -485,12 +485,12 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -499,8 +499,8 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 	host := d.Get("host").(string)
 	instance := d.Get("instance").(string)
 
-	mutexKV.Lock(instanceMutexKey(project, instance))
-	defer mutexKV.Unlock(instanceMutexKey(project, instance))
+	transport_tpg.MutexStore.Lock(instanceMutexKey(project, instance))
+	defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 
 	var op *sqladmin.Operation
 	err = transport_tpg.RetryTimeDuration(func() error {

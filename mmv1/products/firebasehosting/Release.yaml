@@ -17,7 +17,7 @@ min_version: beta
 base_url: 'sites/{{site_id}}/channels/{{channel_id}}/releases'
 self_link: 'sites/{{site_id}}/channels/{{channel_id}}/releases/{{release_id}}'
 create_url: 'sites/{{site_id}}/channels/{{channel_id}}/releases?versionName={{version_name}}'
-immutable: true # not updatable
+immutable: true  # not updatable
 description: |
   A Release is a particular collection of configurations that is set to be public at a particular time.
 references: !ruby/object:Api::Resource::ReferenceLinks

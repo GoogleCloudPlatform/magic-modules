@@ -87,32 +87,32 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      The ID of the workstation cluster config.
+      The ID of the parent workstation cluster config.
   - !ruby/object:Api::Type::String
     name: 'workstationClusterId'
     required: true
     immutable: true
     url_param_only: true
     description: |
-      The name of the workstation cluster.
+      The ID of the parent workstation cluster.
   - !ruby/object:Api::Type::String
     name: 'location'
     immutable: true
     required: true
     url_param_only: true
     description: |
-      The location where the workstation cluster config should reside.
+      The location where the workstation parent resources reside.
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     output: true
     description: |
-      The name of the cluster resource.
+      Full name of this resource.
   - !ruby/object:Api::Type::String
     name: 'uid'
     output: true
     description: |
-      The system-generated UID of the resource.
+      A system-assigned unique identified for this resource.
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
@@ -128,7 +128,7 @@ properties:
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: |
-      Time the Instance was created in UTC.
+      Time when this resource was created.
     output: true
   - !ruby/object:Api::Type::String
     name: 'host'

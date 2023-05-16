@@ -29,7 +29,7 @@ examples:
     skip_test: true
     vars:
       intent_name: 'basic-entity-type'
-    # Skip sweeper gen since this is a child resource.
+# Skip sweeper gen since this is a child resource.
 skip_sweeper: true
 id_format: '{{name}}'
 import_format: ['{{name}}']

@@ -93,7 +93,7 @@ parameters:
     immutable: true
     required: true
     # ignore_read in providers - this is only used in Create
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
     resource: 'Zone'

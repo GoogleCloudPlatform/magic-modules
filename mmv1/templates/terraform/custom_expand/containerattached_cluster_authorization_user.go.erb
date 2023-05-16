@@ -31,7 +31,7 @@ type attachedClusterUser struct {
 //      "user2"
 //    ]
 // }
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
   	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil

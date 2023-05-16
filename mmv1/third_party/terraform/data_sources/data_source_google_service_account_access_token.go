@@ -6,6 +6,7 @@ import (
 
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
@@ -34,7 +35,7 @@ func DataSourceGoogleServiceAccountAccessToken() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 					StateFunc: func(v interface{}) string {
-						return canonicalizeServiceScope(v.(string))
+						return tpgresource.CanonicalizeServiceScope(v.(string))
 					},
 				},
 				// ValidateFunc is not yet supported on lists or sets.
@@ -59,7 +60,7 @@ func DataSourceGoogleServiceAccountAccessToken() *schema.Resource {
 
 func dataSourceGoogleServiceAccountAccessTokenRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -72,7 +73,7 @@ func dataSourceGoogleServiceAccountAccessTokenRead(d *schema.ResourceData, meta 
 	tokenRequest := &iamcredentials.GenerateAccessTokenRequest{
 		Lifetime:  d.Get("lifetime").(string),
 		Delegates: convertStringSet(d.Get("delegates").(*schema.Set)),
-		Scope:     canonicalizeServiceScopes(convertStringSet(d.Get("scopes").(*schema.Set))),
+		Scope:     tpgresource.CanonicalizeServiceScopes(convertStringSet(d.Get("scopes").(*schema.Set))),
 	}
 	at, err := service.Projects.ServiceAccounts.GenerateAccessToken(name, tokenRequest).Do()
 	if err != nil {

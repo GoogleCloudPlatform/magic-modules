@@ -111,7 +111,7 @@ properties:
       provider-level project.
     required: true
     immutable: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
   - !ruby/object:Api::Type::Enum
     name: 'natPolicy'

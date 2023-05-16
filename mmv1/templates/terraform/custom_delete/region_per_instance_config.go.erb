@@ -1,16 +1,16 @@
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	lockName, err := ReplaceVars(d, config, "instanceGroupManager/{{project}}/{{region}}/{{region_instance_group_manager}}")
+	lockName, err := tpgresource.ReplaceVars(d, config, "instanceGroupManager/{{project}}/{{region}}/{{region_instance_group_manager}}")
 	if err != nil {
 		return err
 	}
-	mutexKV.Lock(lockName)
-	defer mutexKV.Unlock(lockName)
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 
-	url, err := ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}/deletePerInstanceConfigs")
+	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}/deletePerInstanceConfigs")
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@
 		obj["instances"] = []string{instanceName}
 
 		// Updates must be applied to the instance after deleting the PerInstanceConfig
-		url, err = ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}/applyUpdatesToInstances")
+		url, err = tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}/applyUpdatesToInstances")
 		if err != nil {
 			return err
 		}

@@ -11,6 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/version"
 
+	<% unless version == 'ga' -%>
+	"github.com/hashicorp/terraform-provider-google/google/services/runtimeconfig"
+	<% end -%>
+
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
@@ -18,7 +22,10 @@ import (
 )
 
 // Global MutexKV
-var mutexKV = NewMutexKV()
+//
+// Deprecated: For backward compatibility mutexKV is still working,
+// but all new code should use MutexStore in the transport_tpg package instead.
+var mutexKV = transport_tpg.MutexStore
 
 // Provider returns a *schema.Provider.
 func Provider() *schema.Provider {
@@ -230,6 +237,7 @@ func Provider() *schema.Provider {
 			"google_container_registry_image":                  DataSourceGoogleContainerImage(),
 			"google_container_registry_repository":             DataSourceGoogleContainerRepo(),
 			"google_dataproc_metastore_service":                DataSourceDataprocMetastoreService(),
+			"google_datastream_static_ips":                     DataSourceGoogleDatastreamStaticIps(),
 			"google_game_services_game_server_deployment_rollout":  DataSourceGameServicesGameServerDeploymentRollout(),
 			"google_iam_policy":                                DataSourceGoogleIamPolicy(),
 			"google_iam_role":                                  DataSourceGoogleIamRole(),
@@ -272,8 +280,8 @@ func Provider() *schema.Provider {
 			"google_pubsub_subscription":                       DataSourceGooglePubsubSubscription(),
 			"google_pubsub_topic":                              DataSourceGooglePubsubTopic(),
 			<% unless version == 'ga' -%>
-			"google_runtimeconfig_config":                      DataSourceGoogleRuntimeconfigConfig(),
-			"google_runtimeconfig_variable":                    DataSourceGoogleRuntimeconfigVariable(),
+			"google_runtimeconfig_config":                      runtimeconfig.DataSourceGoogleRuntimeconfigConfig(),
+			"google_runtimeconfig_variable":                    runtimeconfig.DataSourceGoogleRuntimeconfigVariable(),
 			<% end -%>
 			"google_secret_manager_secret":                     DataSourceSecretManagerSecret(),
 			"google_secret_manager_secret_version":             DataSourceSecretManagerSecretVersion(),
@@ -389,6 +397,7 @@ end     # products.each do
 				"google_compute_attached_disk":                 ResourceComputeAttachedDisk(),
 				"google_compute_instance":                      ResourceComputeInstance(),
 				<% unless version == 'ga' -%>
+				"google_compute_disk_async_replication":        ResourceComputeDiskAsyncReplication(),
 				"google_compute_instance_from_machine_image":   ResourceComputeInstanceFromMachineImage(),
 				<% end -%>
 				"google_compute_instance_from_template":        ResourceComputeInstanceFromTemplate(),
@@ -452,8 +461,8 @@ end     # products.each do
 				"google_project_organization_policy":           ResourceGoogleProjectOrganizationPolicy(),
 				"google_project_usage_export_bucket":           ResourceProjectUsageBucket(),
 				<% unless version == 'ga' -%>
-				"google_runtimeconfig_config":                  ResourceRuntimeconfigConfig(),
-				"google_runtimeconfig_variable":                ResourceRuntimeconfigVariable(),
+				"google_runtimeconfig_config":                  runtimeconfig.ResourceRuntimeconfigConfig(),
+				"google_runtimeconfig_variable":                runtimeconfig.ResourceRuntimeconfigVariable(),
 				<% end -%>
 				"google_service_account":                       ResourceGoogleServiceAccount(),
 				"google_service_account_key":                   ResourceGoogleServiceAccountKey(),

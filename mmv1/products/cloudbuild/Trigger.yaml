@@ -29,7 +29,7 @@ docs: !ruby/object:Provider::Terraform::Docs
 import_format:
   - 'projects/{{project}}/triggers/{{trigger_id}}'
   - 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
-    # For global triggers, the id format is changed to projects/{{project}}/triggers/{{trigger_id}} via code overrides.
+# For global triggers, the id format is changed to projects/{{project}}/triggers/{{trigger_id}} via code overrides.
 id_format: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
 schema_version: 2
 examples:
@@ -42,6 +42,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_service_account'
     primary_resource_id: 'service-account-trigger'
+    vars:
+      sa_name: 'cloud-sa'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_include_build_logs'
     primary_resource_id: 'include-build-logs-trigger'
@@ -61,6 +63,8 @@ examples:
     skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_repo'
+    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14390
+    skip_test: true
     min_version: beta
     primary_resource_id: 'repo-trigger'
     vars:
@@ -81,6 +85,24 @@ examples:
     name: 'cloudbuild_trigger_github_enterprise'
     primary_resource_id: 'ghe-trigger'
     skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuild_trigger_allow_failure'
+    primary_resource_id: 'allow-failure-trigger'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuild_trigger_allow_exit_codes'
+    primary_resource_id: 'allow-exit-codes-trigger'
+  - !ruby/object:Provider::Terraform::Examples
+    name: "cloudbuild_trigger_pubsub_with_repo"
+    min_version: beta
+    primary_resource_id: "pubsub-with-repo-trigger"
+    vars:
+      installation_id: "123123"
+      pat_secret: "projects/my-project/secrets/github-pat-secret/versions/latest"
+      repo_uri: "https://github.com/myuser/my-repo.git"
+    test_vars_overrides:
+      installation_id: 31300675
+      pat_secret: '"projects/gcb-terraform-creds/secrets/github-pat/versions/latest"'
+      repo_uri: '"https://github.com/gcb-repos-robot/tf-demo.git"'
 
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_read: templates/terraform/pre_read/cloudbuild_trigger.go.erb
@@ -184,6 +206,12 @@ properties:
         description: |
           The URI of the repo (optional). If unspecified, the repo from which the trigger
           invocation originated is assumed to be the repo from which to read the specified path.
+      - !ruby/object:Api::Type::String
+        name: 'repository'
+        min_version: beta
+        description: |
+          The fully qualified resource name of the Repo API repository. The fully qualified resource name of the Repo API repository.
+          If unspecified, the repo from which the trigger invocation originated is assumed to be the repo from which to read the specified path.
       - !ruby/object:Api::Type::Enum
         name: 'repoType'
         required: true
@@ -305,9 +333,14 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'uri'
-        required: true
         description: |
-          The URI of the repo (required).
+          The URI of the repo.
+      - !ruby/object:Api::Type::String
+        name: 'repository'
+        min_version: beta
+        description: |
+          The qualified resource name of the Repo API repository.
+          Either uri or repository can be specified and is required.
       - !ruby/object:Api::Type::String
         name: 'ref'
         required: true
@@ -978,6 +1011,23 @@ properties:
               description: |
                 A shell script to be executed in the step.
                 When script is provided, the user cannot specify the entrypoint or args.
+            - !ruby/object:Api::Type::Boolean
+              name: 'allowFailure'
+              description: |
+                Allow this build step to fail without failing the entire build.
+                If false, the entire build will fail if this step fails. Otherwise, the
+                build will succeed, but this step will still have a failure status.
+                Error information will be reported in the `failureDetail` field.
+
+                `allowExitCodes` takes precedence over this field.
+            - !ruby/object:Api::Type::Array
+              name: 'allowExitCodes'
+              item_type: Api::Type::Integer
+              description: |
+                Allow this build step to fail without failing the entire build if and
+                only if the exit code is one of the specified codes.
+
+                If `allowFailure` is also specified, this field will take precedence.
       - !ruby/object:Api::Type::NestedObject
         name: 'artifacts'
         description: |

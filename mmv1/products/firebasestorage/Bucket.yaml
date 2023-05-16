@@ -22,7 +22,7 @@ delete_verb: :POST
 description: |
   An association between a Firebase project and a Google Cloud Storage bucket.
   This association enables integration of Cloud Storage buckets with Firebase such as Firebase SDKS, Authentication, and Security Rules.
-immutable: true # Does not support update operation. There is nothing to update.
+immutable: true  # Does not support update operation. There is nothing to update.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://firebase.google.com/docs/storage/'

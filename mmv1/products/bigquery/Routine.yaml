@@ -130,9 +130,9 @@ properties:
             - :IN
             - :OUT
             - :INOUT
-          # This is a string instead of a NestedObject because schemas contain ColumnSchemas,
-          # which can contain nested StandardSqlDataType.
-          # We'll have people provide the json blob for the schema instead.
+        # This is a string instead of a NestedObject because schemas contain ColumnSchemas,
+        # which can contain nested StandardSqlDataType.
+        # We'll have people provide the json blob for the schema instead.
         - !ruby/object:Api::Type::String
           name: 'dataType'
           description: |
