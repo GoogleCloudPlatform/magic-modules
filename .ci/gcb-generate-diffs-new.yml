@@ -242,7 +242,7 @@ steps:
           - GoogleCloudPlatform/magic-modules  # remove after 07/2023
           - "21"                               # remove after 07/2023
       env:
-        - VERSION=beta
+        - VERSION=ga
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
 
