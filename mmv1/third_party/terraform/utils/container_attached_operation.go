@@ -3,7 +3,7 @@ package google
 import (
 	"time"
 
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/services/containerattached"
+	"github.com/hashicorp/terraform-provider-google/google/services/containerattached"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
