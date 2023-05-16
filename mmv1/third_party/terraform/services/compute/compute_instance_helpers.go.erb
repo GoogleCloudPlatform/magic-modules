@@ -387,6 +387,8 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 
 		<% end -%>
 
+		<% end -%>
+
 		nf, err := ParseNetworkFieldValue(network, d, config)
 		if err != nil {
 			return nil, fmt.Errorf("cannot determine self_link for network %q: %s", network, err)
