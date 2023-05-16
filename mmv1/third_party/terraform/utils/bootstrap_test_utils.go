@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 
 	"google.golang.org/api/cloudbilling/v1"
 	cloudkms "google.golang.org/api/cloudkms/v1"
@@ -691,6 +691,116 @@ func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
 		}
 	}
 	return poolName
+}
+
+func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string {
+	projectID := acctest.GetTestProjectFromEnv()
+	region := acctest.GetTestRegionFromEnv()
+	// ctx := context.Background()
+
+	config := BootstrapConfig(t)
+	if config == nil {
+		t.Fatal("Could not bootstrap config.")
+	}
+
+	computeService := config.NewComputeClient(config.UserAgent)
+	if computeService == nil {
+		t.Fatal("Could not create compute client.")
+	}
+
+	// In order to create a networkAttachment we need to bootstrap a subnet.
+	_, err := computeService.Subnetworks.Get(projectID, region, subnetName).Do()
+	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		log.Printf("[DEBUG] Subnet %q not found, bootstrapping", subnetName)
+
+		networkUrl := fmt.Sprintf("%sprojects/%s/global/networks/%s", config.ComputeBasePath, projectID, networkName)
+		url := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks", config.ComputeBasePath, projectID, region)
+
+		subnetObj := map[string]interface{}{
+			"name":        subnetName,
+			"region ":     region,
+			"network":     networkUrl,
+			"ipCidrRange": "10.77.1.0/28",
+		}
+
+		res, err := transport_tpg.SendRequestWithTimeout(config, "POST", projectID, url, config.UserAgent, subnetObj, 4*time.Minute)
+
+		log.Printf("Response is, %s", res)
+		if err != nil {
+			t.Fatalf("Error bootstrapping test subnet %s: %s", subnetName, err)
+		}
+
+		log.Printf("[DEBUG] Waiting for network creation to finish")
+		err = ComputeOperationWaitTime(config, res, projectID, "Error bootstrapping test subnet", config.UserAgent, 4*time.Minute)
+		if err != nil {
+			t.Fatalf("Error bootstrapping test subnet %s: %s", subnetName, err)
+		}
+	}
+
+	subnet, err := computeService.Subnetworks.Get(projectID, region, subnetName).Do()
+
+	if subnet == nil {
+		t.Fatalf("Error getting test subnet %s: is nil", subnetName)
+	}
+
+	if err != nil {
+		t.Fatalf("Error getting test subnet %s: %s", subnetName, err)
+	}
+	return subnet.Name
+}
+
+func BootstrapNetworkAttachment(t *testing.T, networkAttachmentName string, subnetName string) string {
+	projectID := acctest.GetTestProjectFromEnv()
+	region := acctest.GetTestRegionFromEnv()
+	// ctx := context.Background()
+
+	config := BootstrapConfig(t)
+	if config == nil {
+		return ""
+	}
+
+	computeService := config.NewComputeClient(config.UserAgent)
+	if computeService == nil {
+		return ""
+	}
+
+	networkAttachment, err := computeService.NetworkAttachments.Get(projectID, region, networkAttachmentName).Do()
+	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		// Create Network Attachment Here.
+		log.Printf("[DEBUG] Network Attachment %s not found, bootstrapping", networkAttachmentName)
+		url := fmt.Sprintf("%sprojects/%s/regions/%s/networkAttachments", config.ComputeBasePath, projectID, region)
+
+		subnetURL := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks/%s", config.ComputeBasePath, projectID, region, subnetName)
+		networkAttachmentObj := map[string]interface{}{
+			"name":                 networkAttachmentName,
+			"region":               region,
+			"subnetworks":          []string{subnetURL},
+			"connectionPreference": "ACCEPT_AUTOMATIC",
+		}
+
+		res, err := transport_tpg.SendRequestWithTimeout(config, "POST", projectID, url, config.UserAgent, networkAttachmentObj, 4*time.Minute)
+		if err != nil {
+			t.Fatalf("Error bootstrapping test Network Attachment %s: %s", networkAttachmentName, err)
+		}
+
+		log.Printf("[DEBUG] Waiting for network creation to finish")
+		err = ComputeOperationWaitTime(config, res, projectID, "Error bootstrapping shared test subnet", config.UserAgent, 4*time.Minute)
+		if err != nil {
+			t.Fatalf("Error bootstrapping test Network Attachment %s: %s", networkAttachmentName, err)
+		}
+	}
+
+	networkAttachment, err = computeService.NetworkAttachments.Get(projectID, region, networkAttachmentName).Do()
+
+	if networkAttachment == nil {
+		t.Fatalf("Error getting test network attachment %s: is nil", networkAttachmentName)
+	}
+
+	if err != nil {
+		t.Fatalf("Error getting test Network Attachment %s: %s", networkAttachmentName, err)
+	}
+
+	return networkAttachment.Name
 }
 
 func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *transport_tpg.Config) (string, error) {
