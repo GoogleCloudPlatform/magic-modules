@@ -60,7 +60,7 @@ jobs:
         html_url=$(echo "$response" | jq -r --arg job_name "${{ github.job }}" '.jobs | map(select(.name == $job_name)) | .[0].html_url')
         echo "url=${html_url}" >> $GITHUB_OUTPUT
     - name: Post Pending Status to Pull Request
-      if: ${{ !cancelled()() }}
+      if: ${{ !cancelled() }}
       run: |
         curl -X POST -H "Authorization: token ${{secrets.GITHUB_TOKEN}}" \
         -H "Accept: application/vnd.github.v3+json" \
