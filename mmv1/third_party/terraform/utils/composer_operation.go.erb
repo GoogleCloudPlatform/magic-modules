@@ -2,10 +2,9 @@
 package google
 
 import (
-	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	composer_tpg "github.com/hashicorp/terraform-provider-google/google/services/composer"
     transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 <% if version == "ga" -%>
@@ -15,24 +14,8 @@ import (
 <% end -%>
 )
 
-type ComposerOperationWaiter struct {
-	Service *composer.ProjectsLocationsService
-	tpgresource.CommonOperationWaiter
-}
-
-func (w *ComposerOperationWaiter) QueryOp() (interface{}, error) {
-	if w == nil {
-		return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
-	}
-	return w.Service.Operations.Get(w.Op.Name).Do()
-}
-
+// Deprecated: For backward compatibility ComposerOperationWaitTime is still working,
+// but all new code should use ComposerOperationWaitTime in the composer package instead.
 func ComposerOperationWaitTime(config *transport_tpg.Config, op *composer.Operation, project, activity, userAgent string, timeout time.Duration) error {
-	w := &ComposerOperationWaiter{
-		Service: config.NewComposerClient(userAgent).Projects.Locations,
-	}
-	if err := w.SetOp(op); err != nil {
-		return err
-	}
-	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
+	return composer_tpg.ComposerOperationWaitTime(config, op, project, activity, userAgent, timeout)
 }
