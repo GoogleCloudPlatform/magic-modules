@@ -278,19 +278,20 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 		if err != nil {
 			return nil, "", "", "", err
 		}
+
 		region = subnet.Region
 
 		flattened[i] = map[string]interface{}{
-			"network_ip":          iface.NetworkIP,
-			"network":             tpgresource.ConvertSelfLinkToV1(iface.Network),
-			"subnetwork":          tpgresource.ConvertSelfLinkToV1(iface.Subnetwork),
-			"subnetwork_project":  subnet.Project,
-			"access_config":       ac,
-			"alias_ip_range":      flattenAliasIpRange(iface.AliasIpRanges),
-			"nic_type":            iface.NicType,
-			"stack_type":          iface.StackType,
+			"network_ip":         iface.NetworkIP,
+			"network":            tpgresource.ConvertSelfLinkToV1(iface.Network),
+			"subnetwork":         tpgresource.ConvertSelfLinkToV1(iface.Subnetwork),
+			"subnetwork_project": subnet.Project,
+			"access_config":      ac,
+			"alias_ip_range":     flattenAliasIpRange(iface.AliasIpRanges),
+			"nic_type":           iface.NicType,
+			"stack_type":         iface.StackType,
 			"ipv6_access_config": flattenIpv6AccessConfigs(iface.Ipv6AccessConfigs),
-			"queue_count":         iface.QueueCount,
+			"queue_count":        iface.QueueCount,
 		}
 		// Instance template interfaces never have names, so they're absent
 		// in the instance template network_interface schema. We want to use the
@@ -302,6 +303,15 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 		if internalIP == "" {
 			internalIP = iface.NetworkIP
 		}
+		<% if version == "beta" -%>
+		if iface.NetworkAttachment != "" {
+			networkAttachment, err := tpgresource.GetRelativePath(iface.NetworkAttachment)
+			if err != nil {
+				return nil, "", "", "", err
+			}
+			flattened[i]["network_attachment"] = networkAttachment
+		}
+		<% end -%>
 	}
 	return flattened, region, internalIP, externalIP, nil
 }
@@ -348,9 +358,29 @@ func expandNetworkInterfaces(d TerraformResourceData, config *transport_tpg.Conf
 
 		network := data["network"].(string)
 		subnetwork := data["subnetwork"].(string)
+
+		<% if version == "beta" -%>
+		networkAttachment := data["network_attachment"].(string)
+		// Checks if networkAttachment is not specified in resource, network or subnetwork have to be specifed.
+		if networkAttachment == "" && network == "" && subnetwork == "" {
+			return nil, fmt.Errorf("exactly one of network or subnetwork must be provided")
+		}
+
+		if networkAttachment != "" {
+			if network != "" {
+				return nil, fmt.Errorf("Cannot have a network provided with networkAttachment given that networkAttachment is associated with a network already")
+			}
+			if subnetwork != "" {
+				return nil, fmt.Errorf("Cannot have a subnetwork provided with networkAttachment given that networkAttachment is associated with a subnetwork already")
+			}
+		}
+
+		<% else -%>
 		if network == "" && subnetwork == "" {
 			return nil, fmt.Errorf("exactly one of network or subnetwork must be provided")
 		}
+
+		<% end -%>
 
 		nf, err := ParseNetworkFieldValue(network, d, config)
 		if err != nil {
@@ -366,6 +396,9 @@ func expandNetworkInterfaces(d TerraformResourceData, config *transport_tpg.Conf
 		ifaces[i] = &compute.NetworkInterface{
 			NetworkIP:         data["network_ip"].(string),
 			Network:           nf.RelativeLink(),
+			<% if version == "beta" -%>
+			NetworkAttachment: networkAttachment,
+			<% end -%>
 			Subnetwork:        sf.RelativeLink(),
 			AccessConfigs:     expandAccessConfigs(data["access_config"].([]interface{})),
 			AliasIpRanges:     expandAliasIpRanges(data["alias_ip_range"].([]interface{})),

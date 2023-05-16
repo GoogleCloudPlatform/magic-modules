@@ -401,7 +401,16 @@ Google Cloud KMS.`,
 							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 							Description:      `The name or self_link of the network to attach this interface to. Use network attribute for Legacy or Auto subnetted networks and subnetwork for custom subnetted networks.`,
 						},
-
+						<% unless version == 'beta' -%>
+						"network_attachment": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ForceNew:         true,
+							Computed:         true,
+							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+							Description:      `The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.`,
+						},
+						<% end -%>
 						"subnetwork": {
 							Type:             schema.TypeString,
 							Optional:         true,
