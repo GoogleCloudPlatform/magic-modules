@@ -696,7 +696,6 @@ func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
 func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string {
 	projectID := acctest.GetTestProjectFromEnv()
 	region := acctest.GetTestRegionFromEnv()
-	// ctx := context.Background()
 
 	config := BootstrapConfig(t)
 	if config == nil {
@@ -752,7 +751,6 @@ func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string
 func BootstrapNetworkAttachment(t *testing.T, networkAttachmentName string, subnetName string) string {
 	projectID := acctest.GetTestProjectFromEnv()
 	region := acctest.GetTestRegionFromEnv()
-	// ctx := context.Background()
 
 	config := BootstrapConfig(t)
 	if config == nil {
