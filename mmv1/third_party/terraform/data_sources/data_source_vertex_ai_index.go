@@ -4,11 +4,13 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func dataSourceVertexAIIndex() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceVertexAIIndex().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceVertexAIIndex().Schema)
 
 	addRequiredFieldsToSchema(dsSchema, "name", "region")
 	addOptionalFieldsToSchema(dsSchema, "project")
@@ -20,9 +22,9 @@ func dataSourceVertexAIIndex() *schema.Resource {
 }
 
 func dataSourceVertexAIIndexRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
-	id, err := replaceVars(d, config, "projects/{{project}}/locations/{{region}}/indexes/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{region}}/indexes/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
