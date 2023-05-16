@@ -379,12 +379,10 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 		<% else -%>
 		network := data["network"].(string)
 		subnetwork := data["subnetwork"].(string)
+
 		if network == "" && subnetwork == "" {
 			return nil, fmt.Errorf("exactly one of network or subnetwork must be provided")
 		}
-		<% end -%>
-
-		<% end -%>
 
 		<% end -%>
 
@@ -402,6 +400,9 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 		ifaces[i] = &compute.NetworkInterface{
 			NetworkIP:         data["network_ip"].(string),
 			Network:           nf.RelativeLink(),
+			<% if version == "beta" -%>
+			NetworkAttachment: networkAttachment,
+			<% end -%>
 			Subnetwork:        sf.RelativeLink(),
 			AccessConfigs:     expandAccessConfigs(data["access_config"].([]interface{})),
 			AliasIpRanges:     expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
