@@ -6,42 +6,50 @@ billingProject := ""
 
 project, err := getProject(d, config)
 if err != nil {
-    return fmt.Errorf("Error fetching project for App: %s", err)
+	return fmt.Errorf("Error fetching project for App: %s", err)
 }
 billingProject = project
 
 url, err := ReplaceVars(d, config, "{{FirestoreBasePath}}{{name}}")
 if err != nil {
-    return err
+	return err
 }
 
 updateMask := []string{"indexConfig", "ttlConfig"}
 
-url, err = AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 if err != nil {
-    return err
+	return err
 }
 
 
 // err == nil indicates that the billing_project value was found
 if bp, err := getBillingProject(d, config); err == nil {
-    billingProject = bp
+	billingProject = bp
 }
 
 // Clear fields by sending an empty PATCH request with appropriate update mask.
 req := make(map[string]interface{})
-res, err := SendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, req, d.Timeout(schema.TimeoutUpdate))
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "PATCH",
+	Project: billingProject,
+	RawURL: url,
+	UserAgent: userAgent,
+	Body: req,
+	Timeout: d.Timeout(schema.TimeoutUpdate),
+})
 
 if err != nil {
-    return fmt.Errorf("Error deleting Field %q: %s", d.Id(), err)
+	return fmt.Errorf("Error deleting Field %q: %s", d.Id(), err)
 }
 
 err = FirestoreOperationWaitTime(
-    config, res, project, "Deleting Field", userAgent,
-    d.Timeout(schema.TimeoutDelete))
+	config, res, project, "Deleting Field", userAgent,
+	d.Timeout(schema.TimeoutDelete))
 
 if err != nil {
-    return err
+	return err
 }
 
 log.Printf("[DEBUG] Finished deleting Field %q", d.Id())
