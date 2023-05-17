@@ -134,7 +134,16 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 			billingProject = config.BillingProject
 		}
 
-		_, err = transport_tpg.SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, config.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+                _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config: config,
+			Method: "<%= object.read_verb.to_s.upcase -%>",
+			Project: billingProject,
+			RawURL: url,
+			UserAgent: config.UserAgent,
+			<% if object.error_retry_predicates -%>
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+			<% end -%>
+		})
 		if err == nil {
 				return fmt.Errorf("<%= resource_name -%> still exists at %s", url)
 			}
