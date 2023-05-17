@@ -341,6 +341,15 @@ properties:
             default_from_api: true
             validation: !ruby/object:Provider::Terraform::Validation
               function: 'validation.IntAtLeast(0)'
+          - !ruby/object:Api::Type::Integer
+            name: 'maxConcurrentBackfillTasks'
+            send_empty_value: true
+            description: |
+              Maximum number of concurrent backfill tasks. The number should be non negative.
+              If not set (or set to 0), the system's default value will be used.
+            default_from_api: true
+            validation: !ruby/object:Provider::Terraform::Validation
+              function: 'validation.IntAtLeast(0)'
       - !ruby/object:Api::Type::NestedObject
         name: 'oracleSourceConfig'
         allow_empty_object: true
