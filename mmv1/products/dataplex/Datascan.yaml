@@ -17,7 +17,7 @@ base_url: 'projects/{{project}}/locations/{{location}}/dataScans/{{name}}'
 self_link: 'projects/{{project}}/locations/{{location}}/dataScans/{{name}}'
 exclude_resource: true
 description: |
-  Only used to generate IAM resources
+        Represents a user-visible job which provides the insights for the related data source.
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   exclude: false
   method_name_separator: ':'
@@ -109,8 +109,11 @@ properties:
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'onDemand'
+            allow_empty_object: true
+            send_empty_value: true
             description: |
               The scan runs once via dataScans.run API.
+            properties: []
           - !ruby/object:Api::Type::NestedObject
             name: 'schedule'
             description: |
@@ -133,10 +136,12 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'latestJobEndTime'
+        output: true
         description: |
           The time when the latest DataScanJob started.
       - !ruby/object:Api::Type::String
         name: 'latestJobStartTime'
+        output: true
         description: |
           The time when the latest DataScanJob ended.
   - !ruby/object:Api::Type::Enum
@@ -150,11 +155,15 @@ properties:
       - :DATA_PROFILE
   - !ruby/object:Api::Type::NestedObject
     name: 'dataQualitySpec'
+    exactly_one_of:
+            - data_quality_spec
+            - data_profile_spec
     description: |
       DataQualityScan related setting.
     properties:
       - !ruby/object:Api::Type::Array
         name: 'rules'
+        min_size: 1
         description: |
           The list of rules to evaluate against a data source. At least one rule is required.
         item_type: !ruby/object:Api::Type::NestedObject
@@ -176,7 +185,6 @@ properties:
                name: 'threshold'
                description: |
                 The minimum ratio of passing_rows / total_rows required to pass this rule, with a range of [0.0, 1.0]. 0 indicates default value (i.e. 1.0).
-               default_value: 0
              - !ruby/object:Api::Type::NestedObject
                name: 'rangeExpectation'
                description: |
@@ -187,7 +195,7 @@ properties:
                    description: |
                      The minimum column value allowed for a row to pass this validation. At least one of minValue and maxValue need to be provided.
                  - !ruby/object:Api::Type::String
-                   name: maxValue
+                   name: 'maxValue'
                    description: |
                      The maximum column value allowed for a row to pass this validation. At least one of minValue and maxValue need to be provided.
                  - !ruby/object:Api::Type::Boolean
@@ -204,8 +212,11 @@ properties:
                      Only relevant if a maxValue has been defined. Default = false.
              - !ruby/object:Api::Type::NestedObject
                name: 'nonNullExpectation'
+               allow_empty_object: true
+               send_empty_value: true
                description: |
                  ColumnMap rule which evaluates whether each column value is null.
+               properties: []
              - !ruby/object:Api::Type::NestedObject
                name: 'setExpectation'
                description: |
@@ -215,6 +226,7 @@ properties:
                    name: 'values'
                    description: |
                      Expected values for the column value.
+                   item_type: Api::Type::String
              - !ruby/object:Api::Type::NestedObject
                name: 'regexExpectation'
                description: |
@@ -226,8 +238,11 @@ properties:
                      A regular expression the column value is expected to match.
              - !ruby/object:Api::Type::NestedObject
                name: 'uniquenessExpectation'
+               allow_empty_object: true
+               send_empty_value: true
                description: |
                  ColumnAggregate rule which evaluates whether the column has duplicates.
+               properties: []
              - !ruby/object:Api::Type::NestedObject
                name: 'statisticRangeExpectation'
                description: |
@@ -235,6 +250,8 @@ properties:
                properties:
                  - !ruby/object:Api::Type::Enum
                    name: 'statistic'
+                   description: |
+                           column statistics.
                    values:
                      - :STATISTIC_UNDEFINED
                      - :MEAN
@@ -246,7 +263,7 @@ properties:
                      The minimum column statistic value allowed for a row to pass this validation.
                      At least one of minValue and maxValue need to be provided.
                  - !ruby/object:Api::Type::String
-                   name: maxValue
+                   name: 'maxValue'
                    description: |
                      The maximum column statistic value allowed for a row to pass this validation.
                      At least one of minValue and maxValue need to be provided.
@@ -282,8 +299,14 @@ properties:
                      The SQL expression.
   - !ruby/object:Api::Type::NestedObject
     name: 'dataProfileSpec'
+    allow_empty_object: true
+    send_empty_value: true
+    exactly_one_of:
+            - data_quality_spec
+            - data_profile_spec
     description: |
       DataProfileScan related setting.
+    properties: []
   - !ruby/object:Api::Type::NestedObject
     name: 'dataQualityResult'
     output: true
@@ -292,18 +315,19 @@ properties:
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'passed'
+        output: true
         description: |
           Overall data quality result -- true if all rules passed.
-      - !ruby/object:Api::Type::NestedObject
+      - !ruby/object:Api::Type::Array
         name: 'dimensions'
         description: |
           A list of results at the dimension level.
-        properties:
-          - !ruby/object:Api::Type::Array
-            name: 'passed'
-            description: |
-              Whether the dimension passed or failed.
-              item_type: !ruby/object:Api::Type::NestedObject
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Boolean
+              name: 'passed'
+              description: |
+                Whether the dimension passed or failed.
       - !ruby/object:Api::Type::Array
         name: 'rules'
         description: |
@@ -325,7 +349,6 @@ properties:
                     Rows with null values will automatically fail a rule, unless ignoreNull is true. In that case, such null rows are trivially considered passing. Only applicable to ColumnMap rules.
                 - !ruby/object:Api::Type::String
                   name: 'dimension'
-                  required: true
                   description: |
                     The dimension a rule belongs to. Results are also aggregated at the dimension level. Supported dimensions are ["COMPLETENESS", "ACCURACY", "CONSISTENCY", "VALIDITY", "UNIQUENESS", "INTEGRITY"]
                 - !ruby/object:Api::Type::Integer
@@ -360,8 +383,11 @@ properties:
                         Only relevant if a maxValue has been defined. Default = false.
                 - !ruby/object:Api::Type::NestedObject
                   name: 'nonNullExpectation'
+                  allow_empty_object: true
+                  send_empty_value: true
                   description: |
                     ColumnMap rule which evaluates whether each column value is null.
+                  properties: []
                 - !ruby/object:Api::Type::NestedObject
                   name: 'setExpectation'
                   description: |
@@ -371,7 +397,8 @@ properties:
                       name: 'values'
                       description: |
                         Expected values for the column value.
-                - !ruby/object:Api::Type::NestedObject
+                      item_type: Api::Type::String
+                    - !ruby/object:Api::Type::NestedObject
                   name: 'regexExpectation'
                   description: |
                     ColumnMap rule which evaluates whether each column value matches a specified regex.
@@ -382,8 +409,11 @@ properties:
                         A regular expression the column value is expected to match.
                 - !ruby/object:Api::Type::NestedObject
                   name: 'uniquenessExpectation'
+                  allow_empty_object: true
+                  send_empty_value: true      
                   description: |
                     ColumnAggregate rule which evaluates whether the column has duplicates.
+                  properties: []
                 - !ruby/object:Api::Type::NestedObject
                   name: 'statisticRangeExpectation'
                   description: |
@@ -391,6 +421,8 @@ properties:
                   properties:
                     - !ruby/object:Api::Type::Enum
                       name: 'statistic'
+                      description: |
+                              column statistics.
                       values:
                         - :STATISTIC_UNDEFINED
                         - :MEAN
@@ -402,7 +434,7 @@ properties:
                         The minimum column statistic value allowed for a row to pass this validation.
                         At least one of minValue and maxValue need to be provided.
                     - !ruby/object:Api::Type::String
-                      name: maxValue
+                      name: 'maxValue'
                       description: |
                         The maximum column statistic value allowed for a row to pass this validation.
                         At least one of minValue and maxValue need to be provided.
@@ -442,7 +474,6 @@ properties:
                 Whether the rule passed or failed.
             - !ruby/object:Api::Type::String
               name: 'evaluatedCount'
-              default_values: 0
               description: |
                 The number of rows a rule was evaluated against. This field is only valid for ColumnMap type rules.
                 Evaluated count can be configured to either
@@ -478,15 +509,15 @@ properties:
             description: |
               The range denoted by values of an incremental field
             properties:
-              - !ruby/object:Api::Type::string
+              - !ruby/object:Api::Type::String
                 name: 'field'
                 description: |
                   The field that contains values which monotonically increases over time (e.g. a timestamp column).
-              - !ruby/object:Api::Type::string
+              - !ruby/object:Api::Type::String
                 name: 'start'
                 description: |
                   Value that marks the start of the range.
-              - !ruby/object:Api::Type::string
+              - !ruby/object:Api::Type::String
                 name: 'end'
                 description: Value that marks the end of the range.
   - !ruby/object:Api::Type::NestedObject
@@ -509,49 +540,49 @@ properties:
             description: |
               List of fields with structural and profile information for each field.
             item_type: !ruby/object:Api::Type::NestedObject
-            properties:
-              - !ruby/object:Api::Type::String
-                name: 'name'
-                description: |
-                  The name of the field.
-              - !ruby/object:Api::Type::String
-                name: 'type'
-                description: |
-                  The field data type.
-              - !ruby/object:Api::Type::String
-                name: 'mode'
-                description: |
-                  The mode of the field. Possible values include:
-                  1. REQUIRED, if it is a required field.
-                  2. NULLABLE, if it is an optional field.
-                  3. REPEATED, if it is a repeated field.
-              - !ruby/object:Api::Type::NestedObject
-                name: 'profile'
-                description: |
-                  Profile information for the corresponding field.
-                properties:
-                   - !ruby/object:Api::Type::Integer
-                     name: 'nullRatio'
-                     description: |
-                       Ratio of rows with null value against total scanned rows.
-                   - !ruby/object:Api::Type::Integer
-                     name: 'distinctRatio'
-                     description: |  
-                       Ratio of rows with distinct values against total scanned rows. Not available for complex non-groupable field type RECORD and fields with REPEATABLE mode.
-                   - !ruby/object:Api::Type::NestedObject
-                     name: 'topNValues'
-                     description: |
-                      The list of top N non-null values and number of times they occur in the scanned data. N is 10 or equal to the number of distinct values in the field, whichever is smaller. Not available for complex non-groupable field type RECORD and fields with REPEATABLE mode.
-                     properties:
-                       - !ruby/object:Api::Type::String
-                         name: 'value'
-                         description: |
-                           String value of a top N non-null value.
-                       - !ruby/object:Api::Type::String
-                         name: 'count'
-                         description: |
-                           Count of the corresponding value in the scanned data.
-                   - !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'name'
+                  description: |
+                    The name of the field.
+                - !ruby/object:Api::Type::String
+                  name: 'type'
+                  description: |
+                    The field data type.
+                - !ruby/object:Api::Type::String
+                  name: 'mode'
+                  description: |
+                    The mode of the field. Possible values include:
+                    1. REQUIRED, if it is a required field.
+                    2. NULLABLE, if it is an optional field.
+                    3. REPEATED, if it is a repeated field.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'profile'
+                  description: |
+                    Profile information for the corresponding field.
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: 'nullRatio'
+                      description: |
+                        Ratio of rows with null value against total scanned rows.
+                    - !ruby/object:Api::Type::Integer
+                      name: 'distinctRatio'
+                      description: |  
+                        Ratio of rows with distinct values against total scanned rows. Not available for complex non-groupable field type RECORD and fields with REPEATABLE mode.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'topNValues'
+                      description: |
+                        The list of top N non-null values and number of times they occur in the scanned data. N is 10 or equal to the number of distinct values in the field, whichever is smaller. Not available for complex non-groupable field type RECORD and fields with REPEATABLE mode.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'value'
+                          description: |
+                            String value of a top N non-null value.
+                        - !ruby/object:Api::Type::String
+                          name: 'count'
+                          description: |
+                            Count of the corresponding value in the scanned data.
+                     - !ruby/object:Api::Type::NestedObject
                      name: 'stringProfile'
                      description: |
                        String type field information.
