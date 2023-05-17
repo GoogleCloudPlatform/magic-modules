@@ -13,7 +13,15 @@ if err != nil {
 
 emptyReqBody := make(map[string]interface{})
 
-_, err = transport_tpg.SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, emptyReqBody, d.Timeout(schema.TimeoutUpdate))
+_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "POST",
+	Project: billingProject,
+	RawURL: url,
+	UserAgent: userAgent,
+	Body: emptyReqBody,
+	Timeout: d.Timeout(schema.TimeoutUpdate),
+})
 if err != nil {
 	return fmt.Errorf("Error setting Cloud Scheduler Job status: %s", err)
 }
