@@ -501,7 +501,7 @@ properties:
                         The minimum column statistic value allowed for a row to pass this validation.
                         At least one of minValue and maxValue need to be provided.
                     - !ruby/object:Api::Type::String
-                      name: 'maxValue'
+                      name: maxValue
                       description: |
                         The maximum column statistic value allowed for a row to pass this validation.
                         At least one of minValue and maxValue need to be provided.
@@ -541,6 +541,7 @@ properties:
                 Whether the rule passed or failed.
             - !ruby/object:Api::Type::String
               name: 'evaluatedCount'
+              default_values: 0
               description: |
                 The number of rows a rule was evaluated against. This field is only valid for ColumnMap type rules.
                 Evaluated count can be configured to either
