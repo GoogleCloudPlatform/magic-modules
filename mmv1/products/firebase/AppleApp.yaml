@@ -15,7 +15,7 @@
 name: 'AppleApp'
 min_version: beta
 base_url: projects/{{project}}/iosApps
-self_link: '{{name}}'
+self_link: 'projects/{{project}}/iosApps/{{app_id}}'
 update_verb: :PATCH
 delete_verb: :POST
 delete_url: 'projects/{{project}}/iosApps/{{app_id}}:remove'
@@ -45,9 +45,17 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
 import_format:
-  ['projects/{{project}}/iosApps/{{appId}}', 'iosApps/{{appId}}', '{{appId}}']
+  [
+    '{{project}} projects/{{project}}/iosApps/{{app_id}}',
+    'projects/{{project}}/iosApps/{{app_id}}',
+    'iosApps/{{app_id}}',
+    '{{app_id}}'
+  ]
 autogen_async: true
 skip_sweeper: true
+identity:
+  - appId
+  - name
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'firebase_apple_app_basic'
@@ -90,7 +98,6 @@ virtual_fields:
       serving traffic. Set to `DELETE` to delete the Apple. Defaults to `DELETE`.
     default_value: DELETE
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/self_link_as_name.erb
   custom_delete: templates/terraform/custom_delete/firebase_app_deletion_policy.erb
 properties:
   - !ruby/object:Api::Type::String
