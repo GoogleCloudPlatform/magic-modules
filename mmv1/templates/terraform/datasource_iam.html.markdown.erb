@@ -53,7 +53,7 @@
 <%= lines(autogen_notice(:yaml, pwd)) -%>
 subcategory: "<%= tf_subcategory -%>"
 description: |-
-  A datasource to retrive the IAM policy state for <%= product.display_name -%> <%= object.name %>
+  A datasource to retrieve the IAM policy state for <%= product.display_name -%> <%= object.name %>
 ---
 
 
@@ -72,6 +72,17 @@ url_properties = object.all_user_properties.select do
   |param| params.include?(param.name)
 end
 -%>
+
+## example
+
+```hcl
+data "<%= resource_ns_iam -%>_policy" "policy" {
+<% if object.min_version.name == 'beta' -%>
+  provider = google-beta
+<% end -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
+}
+```
 
 ## Argument Reference
 

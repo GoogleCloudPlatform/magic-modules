@@ -70,6 +70,11 @@ func TestAccBillingAccountIam(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				// Test Iam Member creation (no update for member, no need to test)
+				Config: testAccBigqueryDatasetIamPolicy(account, billing, role),
+				Check:  resource.TestCheckResourceAttrSet("data.google_billing_account_iam_policy.policy", "policy_data"),
+			},
 		},
 	})
 }
@@ -193,4 +198,29 @@ resource "google_billing_account_iam_member" "foo" {
   member             = "serviceAccount:${google_service_account.test-account.email}"
 }
 `, account, billingAccountId, role)
+}
+
+func testAccBigqueryDatasetIamPolicy(dataset, account, role string) string {
+	return fmt.Sprintf(testBigqueryDatasetIam+`
+resource "google_service_account" "test-account" {
+  account_id   = "%s"
+  display_name = "Bigquery Dataset IAM Testing Account"
+}
+
+data "google_iam_policy" "policy" {
+  binding {
+    role    = "%s"
+    members = ["serviceAccount:${google_service_account.test-account.email}"]
+  }
+}
+
+resource "google_billing_account_iam_policy" "policy" {
+  billing_account_id = "%s"
+  policy_data = data.google_iam_policy.policy.policy_data
+}
+
+data "google_billing_account_iam_policy" "policy" {
+  billing_account_id = "%s"
+}
+`, account, role, billingAccountId, billingAccountId)
 }
