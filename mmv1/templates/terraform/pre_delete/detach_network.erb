@@ -8,7 +8,18 @@ if d.Get("networks.#").(int) > 0 {
 		return err
 	}
 
-	_, err = transport_tpg.SendRequestWithTimeout(config, "PATCH", project, url, userAgent, patched, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "PATCH",
+		Project: project,
+		RawURL: url,
+		UserAgent: userAgent,
+		Body: patched,
+		Timeout: d.Timeout(schema.TimeoutUpdate),
+<% if object.error_retry_predicates -%>
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+<% end -%>
+	})
 	if err != nil {
 		return fmt.Errorf("Error updating Policy %q: %s", d.Id(), err)
 	}

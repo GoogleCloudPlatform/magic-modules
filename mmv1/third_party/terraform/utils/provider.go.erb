@@ -183,12 +183,13 @@ func DatasourceMap() map[string]*schema.Resource {
 func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 	return mergeResourceMaps(map[string]*schema.Resource{
 		// ####### START handwritten datasources ###########
+		// ####### START datasources ###########
 		"google_access_approval_folder_service_account":    DataSourceAccessApprovalFolderServiceAccount(),
 		"google_access_approval_organization_service_account": DataSourceAccessApprovalOrganizationServiceAccount(),
 		"google_access_approval_project_service_account":   DataSourceAccessApprovalProjectServiceAccount(),
 		"google_active_folder":                             DataSourceGoogleActiveFolder(),
 		"google_alloydb_locations":                         DataSourceAlloydbLocations(),
-		 "google_alloydb_supported_database_flags":          DataSourceAlloydbSupportedDatabaseFlags(),
+		"google_alloydb_supported_database_flags":          DataSourceAlloydbSupportedDatabaseFlags(),
 		"google_artifact_registry_repository":              DataSourceArtifactRegistryRepository(),
 		"google_app_engine_default_service_account":        DataSourceGoogleAppEngineDefaultServiceAccount(),
 		"google_beyondcorp_app_connection":                 DataSourceGoogleBeyondcorpAppConnection(),
@@ -331,6 +332,8 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_tpu_tensorflow_versions":                   DataSourceTpuTensorflowVersions(),
 		"google_vpc_access_connector":                      DataSourceVPCAccessConnector(),
 		"google_redis_instance":                            DataSourceGoogleRedisInstance(),
+		"google_vertex_ai_index":                           dataSourceVertexAIIndex(),
+		// ####### END datasources ###########
 		// ####### END handwritten datasources ###########
 	},
 	map[string]*schema.Resource{
