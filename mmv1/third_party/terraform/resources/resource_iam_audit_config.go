@@ -64,7 +64,9 @@ func ResourceIamAuditConfig(parentSpecificSchema map[string]*schema.Schema, newU
 // Deprecated: For backward compatibility ResourceIamAuditConfigWithBatching is still working,
 // but all new code should use ResourceIamAuditConfig in the google package instead.
 func ResourceIamAuditConfigWithBatching(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser resourceIdParserFunc, enableBatching bool, options ...func(*IamSettings)) *schema.Resource {
-	options = append(options, IamWithBatching(enableBatching))
+	if enableBatching {
+		options = append(options, IamWithBatching)
+	}
 	return ResourceIamAuditConfig(parentSpecificSchema, newUpdaterFunc, resourceIdParser, options...)
 }
 

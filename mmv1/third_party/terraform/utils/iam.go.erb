@@ -484,10 +484,8 @@ func IamWithGAResourceDeprecation() func (s *IamSettings) {
 	<% end -%>
 }
 
-func IamWithBatching(enableBatching bool) func(s *IamSettings) {
-	return func(s *IamSettings) {
-		s.EnableBatching = enableBatching
-	}
+func IamWithBatching (s *IamSettings) {
+	s.EnableBatching = true
 }
 
 // Util to deref and print auditConfigs

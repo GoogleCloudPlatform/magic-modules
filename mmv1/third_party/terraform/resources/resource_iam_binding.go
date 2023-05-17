@@ -89,7 +89,9 @@ func ResourceIamBinding(parentSpecificSchema map[string]*schema.Schema, newUpdat
 // Deprecated: For backward compatibility ResourceIamBindingWithBatching is still working,
 // but all new code should use ResourceIamBinding in the google package instead.
 func ResourceIamBindingWithBatching(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser resourceIdParserFunc, enableBatching bool, options ...func(*IamSettings)) *schema.Resource {
-	options = append(options, IamWithBatching(enableBatching))
+	if enableBatching {
+		options = append(options, IamWithBatching)
+	}
 	return ResourceIamBinding(parentSpecificSchema, newUpdaterFunc, resourceIdParser, options...)
 }
 

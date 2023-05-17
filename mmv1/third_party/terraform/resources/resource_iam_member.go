@@ -192,7 +192,9 @@ func ResourceIamMember(parentSpecificSchema map[string]*schema.Schema, newUpdate
 // Deprecated: For backward compatibility ResourceIamMemberWithBatching is still working,
 // but all new code should use ResourceIamMember in the google package instead.
 func ResourceIamMemberWithBatching(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser resourceIdParserFunc, enableBatching bool, options ...func(*IamSettings)) *schema.Resource {
-	options = append(options, IamWithBatching(enableBatching))
+	if enableBatching {
+		options = append(options, IamWithBatching)
+	}
 	return ResourceIamMember(parentSpecificSchema, newUpdaterFunc, resourceIdParser, options...)
 }
 
