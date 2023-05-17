@@ -149,12 +149,6 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/bigquery_job.go.erb
 properties:
   - !ruby/object:Api::Type::String
-    name: 'id'
-    output: true
-    description: |
-      Opaque ID field of the job.
-    exclude: true
-  - !ruby/object:Api::Type::String
     name: 'user_email'
     output: true
     description: |
@@ -820,12 +814,6 @@ properties:
       Reference describing the unique-per-user name of the job.
     flatten_object: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'projectId'
-        description: |
-          The project ID of the project containing this job.
-        required: true
-        exclude: true
       - !ruby/object:Api::Type::String
         name: 'jobId'
         description: |

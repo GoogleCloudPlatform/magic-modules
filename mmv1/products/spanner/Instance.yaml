@@ -153,9 +153,6 @@ properties:
     description: |
       Instance status: `CREATING` or `READY`.
     output: true
-    # This attribute is not useful - we include it in Terraform for historical
-    # reasons, but you should most likely not use it.
-    exclude: false
     values:
       - :READY
       - :CREATING

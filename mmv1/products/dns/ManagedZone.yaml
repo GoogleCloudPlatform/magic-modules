@@ -21,7 +21,6 @@ description: |
   responsibility. A ManagedZone is a resource that represents a DNS zone
   hosted by the Cloud DNS service.
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
   parent_resource_attribute: 'managed_zone'
@@ -229,14 +228,6 @@ properties:
       defined by the server
     item_type: Api::Type::String
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'nameServerSet'
-    description: |
-      Optionally specifies the NameServerSet for this ManagedZone. A
-      NameServerSet is a set of DNS name servers that all host the same
-      ManagedZones. Most users will leave this field unset.
-    immutable: true
-    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'creationTime'
     description: |
