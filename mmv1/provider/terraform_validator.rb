@@ -303,8 +303,6 @@ module Provider
                         'third_party/terraform/transport/retry_transport.go'],
                        ['converters/google/resources/transport/transport.go',
                         'third_party/terraform/transport/transport.go'],
-                       ['converters/google/resources/transport.go',
-                        'third_party/terraform/utils/transport.go'],
                        ['converters/google/resources/transport/error_retry_predicates.go',
                         'third_party/terraform/transport/error_retry_predicates.go'],
                        ['converters/google/resources/error_retry_predicates.go',
