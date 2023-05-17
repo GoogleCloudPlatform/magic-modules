@@ -379,9 +379,6 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 		if network == "" && subnetwork == "" {
 			return nil, fmt.Errorf("exactly one of network or subnetwork must be provided")
 		}
-		<% end -%>
-
-		<% end -%>
 
 		<% end -%>
 
