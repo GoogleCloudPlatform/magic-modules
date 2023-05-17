@@ -88,6 +88,13 @@ examples:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'workstation_config_source_snapshot'
+    min_version: beta
+    primary_resource_id: 'default'
+    vars:
+      workstation_cluster_name: 'workstation-cluster'
+      workstation_config_name: 'workstation-config'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'workstation_config_shielded_instance_config'
     min_version: beta
     primary_resource_id: 'default'
@@ -291,6 +298,12 @@ properties:
               values:
                 - :DELETE
                 - :RETAIN
+            - !ruby/object:Api::Type::String
+              name: 'sourceSnapshot'
+              description: |
+                The snapshot to use as the source for the disk. This can be the snapshot's `self_link`, `id`, or a string in the format of `projects/{project}/global/snapshots/{snapshot}`. If set, sizeGb and fsType must be empty.
+              immutable: true
+              # TODO(esu): Add conflicting fields once complex lists are supported.
   - !ruby/object:Api::Type::NestedObject
     name: 'container'
     description: |
