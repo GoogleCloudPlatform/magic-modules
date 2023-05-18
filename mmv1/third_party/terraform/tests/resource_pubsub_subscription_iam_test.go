@@ -90,7 +90,7 @@ func TestAccPubsubSubscriptionIamPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPubsubSubscriptionIamPolicy_basic(subscription, topic, account, "roles/pubsub.subscriber"),
-				Check: ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPubsubSubscriptionIam(t, subscription, "roles/pubsub.subscriber", []string{
 						fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, acctest.GetTestProjectFromEnv()),
 					}),
