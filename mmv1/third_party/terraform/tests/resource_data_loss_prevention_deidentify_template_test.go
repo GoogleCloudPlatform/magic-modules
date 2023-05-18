@@ -1719,7 +1719,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 	})
 }
 
-func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_fixedSizeBbucketingConfig_integerValue(context map[string]interface{}) string {
+func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_fixedSizeBucketingConfig_integerValue(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "config" {
   parent = "organizations/%{organization}"
