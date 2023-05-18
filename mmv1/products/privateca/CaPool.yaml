@@ -478,7 +478,6 @@ properties:
           certificate and CRLs. If this is omitted, CA certificates and CRLs
           will be published in PEM.
         values:
-          - :ENCODING_FORMAT_UNSPECIFIED
           - :PEM
           - :DER
   - !ruby/object:Api::Type::KeyValuePairs
