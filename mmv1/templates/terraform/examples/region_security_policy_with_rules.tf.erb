@@ -1,0 +1,30 @@
+resource "google_compute_region_security_policy" "<%= ctx[:primary_resource_id] %>" {
+  name        = "<%= ctx[:vars]['sec_policy_name'] %>"
+  description = "region security policy with rules"
+  type        = "CLOUD_ARMOR"
+
+  rules {
+    action   = "allow"
+    priority = "2147483647"
+    description = "default rule"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+  }
+
+  # TODO(felipegc): why having multiple rules the terraform thinks is a change? Maybe is changing the order and terraform is not accounting this? Maybe is related to hash?
+  # rules {
+  #   action   = "allow"
+  #   priority = "2000"
+  #   match {
+  #     versioned_expr = "SRC_IPS_V1"
+  #     config {
+  #       src_ip_ranges = ["10.0.0.0/24"]
+  #     }
+  #   }
+  #   preview = true
+  # }
+}
