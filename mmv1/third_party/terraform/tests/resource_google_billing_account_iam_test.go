@@ -71,7 +71,7 @@ func TestAccBillingAccountIam(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				// Test Iam Member creation (no update for member, no need to test)
+				// Test Iam Policy creation
 				Config: testAccBillingAccountDatasetIamPolicy(account, billing, role),
 				Check:  resource.TestCheckResourceAttrSet("data.google_billing_account_iam_policy.policy", "policy_data"),
 			},
