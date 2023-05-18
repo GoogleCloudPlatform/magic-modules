@@ -13,17 +13,20 @@
 
 --- !ruby/object:Api::Resource
 name: 'RegionSecurityPolicy'
+min_version: beta
 # TODO(felipegc): what is this
 # kind: 'compute#securityPolicy'
 base_url: projects/{{project}}/regions/{{region}}/securityPolicies
-collection_url_key: 'items'
-has_self_link: true
+self_link: projects/{{project}}/regions/{{region}}/securityPolicies/{{name}}
+update_verb: :PATCH
 description: |
   Represents a Region Cloud Armor Security Policy resource.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/armor/docs/security-policy-concepts'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionSecurityPolicies'
+id_format: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{name}}'
+import_format: ['projects/{{project}}/regions/{{region}}/securityPolicies/{{name}}']
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
@@ -48,16 +51,17 @@ examples:
     primary_resource_id: 'region-sec-policy-basic'
     vars:
       sec_policy_name: 'my-sec-policy-basic'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'region_security_policy_with_rules'
-    primary_resource_id: 'region-sec-policy-with-rules'
-    vars:
-      sec_policy_name: 'my-sec-policy-rules'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'region_security_policy_with_rules_expr'
-    primary_resource_id: 'region-sec-policy-rules-expr'
-    vars:
-      sec_policy_name: 'my-sec-policy-rules-expr'
+  # TODO(felipegc): rules will be a different resource    
+  # - !ruby/object:Provider::Terraform::Examples
+  #   name: 'region_security_policy_with_rules'
+  #   primary_resource_id: 'region-sec-policy-with-rules'
+  #   vars:
+  #     sec_policy_name: 'my-sec-policy-rules'
+  # - !ruby/object:Provider::Terraform::Examples
+  #   name: 'region_security_policy_with_rules_expr'
+  #   primary_resource_id: 'region-sec-policy-rules-expr'
+  #   vars:
+  #     sec_policy_name: 'my-sec-policy-rules-expr'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -88,86 +92,93 @@ properties:
     description: | 
       An optional description of this resource. Provide this property when you create the resource.
     required: true
-  - !ruby/object:Api::Type::Array
-    name: 'rules'
-    is_set: true
+  - !ruby/object:Api::Type::Fingerprint
+    name: 'fingerprint'
     description: |
-      A list of rules that belong to this policy.
-      There must always be a default rule which is a rule with priority 2147483647 and match all condition (for the match condition this means match "*" for srcIpRanges and for the networkMatch condition every field must be either match "*" or not set).
-      If no rules are provided when creating a security policy, a default rule with action "allow" will be added.
-    item_type: !ruby/object:Api::Type::NestedObject
-      properties:
-        - !ruby/object:Api::Type::String
-          name: 'description'
-          description: |
-            An optional description of this resource. Provide this property when you create the resource.
-        - !ruby/object:Api::Type::Integer
-          name: 'priority'
-          description: |
-            An integer indicating the priority of a rule in the list. The priority must be a positive value between 0 and 2147483647.
-            Rules are evaluated from highest to lowest priority where 0 is the highest priority and 2147483647 is the lowest priority.
-        - !ruby/object:Api::Type::NestedObject
-          name: 'match'
-          description: |
-            A match condition that incoming traffic is evaluated against.
-            If it evaluates to true, the corresponding 'action' is enforced.
-          properties:
-            - !ruby/object:Api::Type::NestedObject
-              name: 'expr'
-              description: |
-                User defined CEVAL expression. A CEVAL expression is used to specify match criteria such as origin.ip, source.region_code and contents in the request header. 
-                Expressions containing evaluateThreatIntelligence require Cloud Armor Managed Protection Plus tier and are not supported in Edge Policies nor in Regional Policies. 
-                Expressions containing evaluatePreconfiguredExpr('sourceiplist-*') require Cloud Armor Managed Protection Plus tier and are only supported in Global Security Policies.
-              properties:
-                - !ruby/object:Api::Type::String
-                  name: 'expression'
-                  description: |
-                    Textual representation of an expression in Common Expression Language syntax.
-                - !ruby/object:Api::Type::String
-                  name: 'title'
-                  description: |
-                    Optional. Title for the expression, i.e. a short string describing its purpose. 
-                    This can be used e.g. in UIs which allow to enter the expression.
-                - !ruby/object:Api::Type::String
-                  name: 'description'
-                  description: |
-                    Optional. Description of the expression.
-                    This is a longer text which describes the expression, e.g. when hovered over it in a UI.
-                - !ruby/object:Api::Type::String
-                  name: 'location'
-                  description: |
-                    Optional. String indicating the location of the expression for error reporting, e.g. a file name and a position in the file.
-            - !ruby/object:Api::Type::Enum
-              name: 'versionedExpr'
-              description: |
-                Preconfigured versioned expression. If this field is specified, config must also be specified.
-                Available preconfigured expressions along with their requirements are: SRC_IPS_V1 - must specify the corresponding srcIpRange field in config.
-              values:
-                - :SRC_IPS_V1
-            - !ruby/object:Api::Type::NestedObject
-              name: 'config'
-              description:
-                The configuration options available when specifying versionedExpr.
-                This field must be specified if versionedExpr is specified and cannot be specified if versionedExpr is not specified.
-              properties:
-                - !ruby/object:Api::Type::Array
-                  name: 'srcIpRanges'
-                  description: |
-                    CIDR IP address range. Maximum number of srcIpRanges allowed is 10.
-                  item_type: Api::Type::String
-        - !ruby/object:Api::Type::String
-          name: 'action'
-          description: |
-            The Action to perform when the rule is matched. The following are the valid actions: 
-            - allow: allow access to target.
-            - deny(STATUS): deny access to target, returns the HTTP response code specified. Valid values for `STATUS` are 403, 404, and 502. 
-            - rate_based_ban: limit client traffic to the configured threshold and ban the client if the traffic exceeds the threshold. Configure parameters for this action in RateLimitOptions. Requires rate_limit_options to be set. 
-            - redirect: redirect to a different target. This can either be an internal reCAPTCHA redirect, or an external URL-based redirect via a 302 response. Parameters for this action can be configured via redirectOptions. This action is only supported in Global Security Policies of type CLOUD_ARMOR.
-            - throttle: limit client traffic to the configured threshold. Configure parameters for this action in rateLimitOptions. Requires rate_limit_options to be set for this.
-        - !ruby/object:Api::Type::Boolean
-          name: 'preview'
-          description: |
-            If set to true, the specified action is not enforced.
+      Fingerprint of this resource. This field is used internally during
+      updates of this resource.
+    output: true
+  # TODO(felipegc): rules will be a different resource
+  # - !ruby/object:Api::Type::Array
+  #   name: 'rules'
+  #   is_set: true
+  #   description: |
+  #     A list of rules that belong to this policy.
+  #     There must always be a default rule which is a rule with priority 2147483647 and match all condition (for the match condition this means match "*" for srcIpRanges and for the networkMatch condition every field must be either match "*" or not set).
+  #     If no rules are provided when creating a security policy, a default rule with action "allow" will be added.
+  #   item_type: !ruby/object:Api::Type::NestedObject
+  #     properties:
+  #       - !ruby/object:Api::Type::String
+  #         name: 'description'
+  #         description: |
+  #           An optional description of this resource. Provide this property when you create the resource.
+  #       - !ruby/object:Api::Type::Integer
+  #         name: 'priority'
+  #         description: |
+  #           An integer indicating the priority of a rule in the list. The priority must be a positive value between 0 and 2147483647.
+  #           Rules are evaluated from highest to lowest priority where 0 is the highest priority and 2147483647 is the lowest priority.
+  #       - !ruby/object:Api::Type::NestedObject
+  #         name: 'match'
+  #         description: |
+  #           A match condition that incoming traffic is evaluated against.
+  #           If it evaluates to true, the corresponding 'action' is enforced.
+  #         properties:
+  #           - !ruby/object:Api::Type::NestedObject
+  #             name: 'expr'
+  #             description: |
+  #               User defined CEVAL expression. A CEVAL expression is used to specify match criteria such as origin.ip, source.region_code and contents in the request header. 
+  #               Expressions containing evaluateThreatIntelligence require Cloud Armor Managed Protection Plus tier and are not supported in Edge Policies nor in Regional Policies. 
+  #               Expressions containing evaluatePreconfiguredExpr('sourceiplist-*') require Cloud Armor Managed Protection Plus tier and are only supported in Global Security Policies.
+  #             properties:
+  #               - !ruby/object:Api::Type::String
+  #                 name: 'expression'
+  #                 description: |
+  #                   Textual representation of an expression in Common Expression Language syntax.
+  #               - !ruby/object:Api::Type::String
+  #                 name: 'title'
+  #                 description: |
+  #                   Optional. Title for the expression, i.e. a short string describing its purpose. 
+  #                   This can be used e.g. in UIs which allow to enter the expression.
+  #               - !ruby/object:Api::Type::String
+  #                 name: 'description'
+  #                 description: |
+  #                   Optional. Description of the expression.
+  #                   This is a longer text which describes the expression, e.g. when hovered over it in a UI.
+  #               - !ruby/object:Api::Type::String
+  #                 name: 'location'
+  #                 description: |
+  #                   Optional. String indicating the location of the expression for error reporting, e.g. a file name and a position in the file.
+  #           - !ruby/object:Api::Type::Enum
+  #             name: 'versionedExpr'
+  #             description: |
+  #               Preconfigured versioned expression. If this field is specified, config must also be specified.
+  #               Available preconfigured expressions along with their requirements are: SRC_IPS_V1 - must specify the corresponding srcIpRange field in config.
+  #             values:
+  #               - :SRC_IPS_V1
+  #           - !ruby/object:Api::Type::NestedObject
+  #             name: 'config'
+  #             description:
+  #               The configuration options available when specifying versionedExpr.
+  #               This field must be specified if versionedExpr is specified and cannot be specified if versionedExpr is not specified.
+  #             properties:
+  #               - !ruby/object:Api::Type::Array
+  #                 name: 'srcIpRanges'
+  #                 description: |
+  #                   CIDR IP address range. Maximum number of srcIpRanges allowed is 10.
+  #                 item_type: Api::Type::String
+  #       - !ruby/object:Api::Type::String
+  #         name: 'action'
+  #         description: |
+  #           The Action to perform when the rule is matched. The following are the valid actions: 
+  #           - allow: allow access to target.
+  #           - deny(STATUS): deny access to target, returns the HTTP response code specified. Valid values for `STATUS` are 403, 404, and 502. 
+  #           - rate_based_ban: limit client traffic to the configured threshold and ban the client if the traffic exceeds the threshold. Configure parameters for this action in RateLimitOptions. Requires rate_limit_options to be set. 
+  #           - redirect: redirect to a different target. This can either be an internal reCAPTCHA redirect, or an external URL-based redirect via a 302 response. Parameters for this action can be configured via redirectOptions. This action is only supported in Global Security Policies of type CLOUD_ARMOR.
+  #           - throttle: limit client traffic to the configured threshold. Configure parameters for this action in rateLimitOptions. Requires rate_limit_options to be set for this.
+  #       - !ruby/object:Api::Type::Boolean
+  #         name: 'preview'
+  #         description: |
+  #           If set to true, the specified action is not enforced.
   - !ruby/object:Api::Type::Enum
     name: 'type'
     immutable: true
