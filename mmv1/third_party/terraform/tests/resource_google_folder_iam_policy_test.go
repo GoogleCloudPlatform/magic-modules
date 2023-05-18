@@ -24,7 +24,7 @@ func TestAccFolderIamPolicy_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFolderIamPolicy_basic(folderDisplayName, parent, "roles/viewer", "user:admin@hashicorptest.com"),
-				Check:  resource.TestCheckResourceAttrSet("data.google_folder_iam_policy.policy", "test"),
+				Check:  resource.TestCheckResourceAttrSet("data.google_folder_iam_policy.test", "policy_data"),
 			},
 			{
 				ResourceName:      "google_folder_iam_policy.test",
