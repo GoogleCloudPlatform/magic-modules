@@ -1,0 +1,328 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: Schedule
+min_version: beta
+base_url: projects/{{project}}/locations/{{region}}/schedules
+self_link: 'projects/{{project}}/locations/{{region}}/schedules/{{name}}'
+update_verb: :PATCH
+description: |
+  An instance of a Schedule periodically schedules runs to make
+  API calls based on user specified time specification and API
+  request type.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.schedules'
+id_format: 'projects/{{project}}/locations/{{region}}/schedules/{{name}}'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/vertex_ai_schedule.go.erb
+  update_encoder: templates/terraform/update_encoder/vertex_ai_schedule.go.erb
+  post_create: templates/terraform/post_create/vertex_ai_schedule.go.erb
+  post_update: templates/terraform/post_update/vertex_ai_schedule.go.erb
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'region'
+    description: |
+      Region where the scheduler job resides
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: |
+      The resource name of the Schedule.
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: displayName
+    description:
+      User provided name of the Schedule. The name can be up to 128
+      characters long and can consist of any UTF-8 characters.
+    required: true
+  - !ruby/object:Api::Type::String
+    name: startTime
+    description: |
+      Timestamp after which the first run can be scheduled. Default to
+      Schedule create time if not specified. A timestamp in RFC3339 UTC "Zulu"
+      format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+  - !ruby/object:Api::Type::String
+    name: endTime
+    description: |
+      Timestamp after which no new runs can be scheduled. If specified,
+      The schedule will be completed when either endTime is reached or when
+      scheduled_run_count >= maxRunCount. If not specified, new runs will keep
+      getting scheduled until this Schedule is paused or deleted. Already scheduled
+      runs will be allowed to complete. Unset if not specified. A timestamp in
+      RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
+      fractional digits. Examples: "2014-10-02T15:01:23Z" and
+      "2014-10-02T15:01:23.045123456Z".
+  - !ruby/object:Api::Type::String
+    name: maxRunCount
+    description: |
+      Maximum run count of the schedule. If specified, The schedule will
+      be completed when either startedRunCount >= maxRunCount or when endTime is
+      reached. If not specified, new runs will keep getting scheduled until this
+      Schedule is paused or deleted. Already scheduled runs will be allowed to
+      complete. Unset if not specified.
+  - !ruby/object:Api::Type::String
+    name: state
+    description: |
+      State of the job.
+    output: true
+  - !ruby/object:Api::Type::Boolean
+    name: paused
+    description: |
+      Sets the job to a paused state. Jobs default to being enabled when this property is not set.
+    required: false
+    default_from_api: true
+    custom_flatten: templates/terraform/custom_flatten/vertex_ai_schedule_paused.go.erb
+  - !ruby/object:Api::Type::Boolean
+    name: catchUp
+    description: |
+      Whether to backfill missed runs when the schedule is resumed from PAUSED state.
+      If set to true, all missed runs will be scheduled. New runs will be scheduled after the
+      backfill is complete. This will also update Schedule.catch_up field. Default to false.
+    required: false
+    default_from_api: true
+  - !ruby/object:Api::Type::Integer
+    name: maxConcurrentRunCount
+    description: |
+      Maximum number of runs that can be started concurrently for this
+      Schedule. This is the limit for starting the scheduled requests and not the
+      execution of the operations/jobs created by the requests (if applicable).
+    required: true
+  - !ruby/object:Api::Type::Boolean
+    name: allowQueueing
+    description: |
+      Whether new scheduled runs can be queued when max_concurrent_runs
+      limit is reached. If set to true, new runs will be queued instead of skipped.
+      Default to false.
+  # - !ruby/object:Api::Type::Boolean
+  #   name: catchUp
+  #   description: |
+  #     Whether to backfill missed runs when the schedule is resumed from
+  #     PAUSED state. If set to true, all missed runs will be scheduled. New runs will
+  #     be scheduled after the backfill is complete. Default to false.
+  - !ruby/object:Api::Type::NestedObject
+    name: timeSpecification
+    description: The time specification to launch scheduled runs.
+    exactly_one_of:
+      - time_specification.0.cron
+    properties:
+      - !ruby/object:Api::Type::String
+        name: cron
+        description: |
+          The scheduled run time based on the user-specified schedule.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits. Examples:
+          "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+  - !ruby/object:Api::Type::NestedObject
+    name: request
+    description: |
+      The API request template to launch the scheduled runs. 
+      User-specified ID is not supported in the request template.
+    exactly_one_of:
+      - request.0.create_pipeline_job_request
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: createPipelineJobRequest
+        description: |
+          Request for PipelineService.CreatePipelineJob.
+          CreatePipelineJobRequest.parent field is required
+          (format: projects/{project}/locations/{location}).
+        properties:
+          - !ruby/object:Api::Type::String
+            name: parent
+            description: |
+              The resource name of the Location to create the PipelineJob in. Format: projects/{project}/locations/{location}
+            required: true
+          - !ruby/object:Api::Type::NestedObject
+            name: pipelineJob
+            description: The PipelineJob to create.
+            required: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: displayName
+                description: |
+                  The display name of the Pipeline. The name can be up to 128 characters long
+                  and can consist of any UTF-8 characters.
+              # TODO how to allow for arbitrary object?
+              # - !ruby/object:Api::Object
+              #   name: pipelineSpec
+              #   description: The spec of the pipeline.
+                # required: true
+              - !ruby/object:Api::Type::KeyValuePairs
+                name: labels
+                description: |
+                  The labels with user-defined metadata to organize PipelineJob.
+                  Label keys and values can be no longer than 64 characters
+                  (Unicode codepoints), can only contain lowercase letters,
+                  numeric characters, underscores and dashes. International
+                  characters are allowed. See https://goo.gl/xmQnxf for more
+                  information and examples of labels.
+              - !ruby/object:Api::Type::NestedObject
+                name: runtimeConfig
+                description: Runtime config of the pipeline.
+                required: true
+                properties:
+                  - !ruby/object:Api::Type::Map
+                    name: parameters
+                    description: |
+                      Deprecated. Use RuntimeConfig.parameter_values instead. The runtime parameters of the PipelineJob.
+                      The parameters will be passed into PipelineJob.pipeline_spec to replace the placeholders at runtime.
+                      This field is used by pipelines built using PipelineJob.pipeline_spec.schema_version 2.0.0 or lower,
+                      such as pipelines built using Kubeflow Pipelines SDK 1.8 or lower.
+                    key_name: key
+                    key_description: |
+                      The name of the pipeline parameter.
+                    value_type: !ruby/object:Api::Type::NestedObject
+                      name: value
+                      exactly_one_of:
+                        - request.0.create_pipeline_job_request.0.pipeline_job.0.runtime_config.0.parameters.intValue
+                        - request.0.create_pipeline_job_request.0.pipeline_job.0.runtime_config.0.parameters.doubleValue
+                        - request.0.create_pipeline_job_request.0.pipeline_job.0.runtime_config.0.parameters.stringValue
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: intValue
+                          required: true
+                          description: Integer value
+                        - !ruby/object:Api::Type::Double
+                          name: doubleValue
+                          required: true
+                          description: Double value
+                        - !ruby/object:Api::Type::String
+                          name: stringValue
+                          required: true
+                          description: String value
+                  - !ruby/object:Api::Type::String
+                    name: gcsOutputDirectory
+                    description: |
+                      A path in a Cloud Storage bucket, which will be treated as the root
+                      output directory of the pipeline. It is used by the system to generate the paths
+                      of output artifacts. The artifact paths are generated with a sub-path pattern
+                      {job_id}/{taskId}/{output_key} under the specified output directory.
+                      The service account specified in this pipeline must have the storage.objects.get
+                      and storage.objects.create permissions for this bucket.
+                    required: true
+                  - !ruby/object:Api::Type::Map
+                    name: parameterValues
+                    description: |
+                      The runtime parameters of the PipelineJob. The parameters will be passed into
+                      PipelineJob.pipeline_spec to replace the placeholders at runtime. This field
+                      is used by pipelines built using PipelineJob.pipeline_spec.schema_version 2.1.0,
+                      such as pipelines built using Kubeflow Pipelines SDK 1.9 or higher and the v2 DSL.
+                    key_name: key
+                    key_description: |
+                      The name of the pipeline parameter.
+                    value_type: !ruby/object:Api::Type::NestedObject
+                      name: value
+                      exactly_one_of:
+                        - request.0.create_pipeline_job_request.0.pipeline_job.0.runtime_config.0.parameterValues.nullValue
+                        - request.0.create_pipeline_job_request.0.pipeline_job.0.runtime_config.0.parameterValues.numberValue
+                        - request.0.create_pipeline_job_request.0.pipeline_job.0.runtime_config.0.parameterValues.stringValue
+                        - request.0.create_pipeline_job_request.0.pipeline_job.0.runtime_config.0.parameterValues.boolValue
+                        # - request.0.create_pipeline_job_request.0.pipeline_job.0.runtime_config.0.parameterValues.structureValue
+                        # - request.0.create_pipeline_job_request.0.pipeline_job.0.runtime_config.0.parameterValues.listValue
+                      properties:
+                        - !ruby/object:Api::Type::String # TODO null type
+                          name: nullValue
+                          required: true
+                          description: Null value
+                        - !ruby/object:Api::Type::Double
+                          name: numberValue
+                          required: true
+                          description: Number value
+                        - !ruby/object:Api::Type::String
+                          name: stringValue
+                          required: true
+                          description: String value
+                        - !ruby/object:Api::Type::Boolean
+                          name: boolValue
+                          required: true
+                          description: Boolean value
+                        # TODO how to allow for arbitrary object?
+                        # - !ruby/object:Api::Object
+                        #   name: structureValue
+                        #   required: true
+                        #   description: Structure value
+                        # TODO how to allow arbitrary type in list?
+                        # - !ruby/object:Api::Type::Array
+                        #   name: listValue
+                        #   required: true
+                        #   description: List value
+                        #   item_type: Api::Type::String
+                  - !ruby/object:Api::Type::Enum
+                    name: failurePolicy
+                    description: |
+                      Represents the failure policy of a pipeline. Currently, the default of a pipeline
+                      is that the pipeline will continue to run until no more tasks can be executed,
+                      also known as PIPELINE_FAILURE_POLICY_FAIL_SLOW. However, if a pipeline is set
+                      to PIPELINE_FAILURE_POLICY_FAIL_FAST, it will stop scheduling any new tasks when
+                      a task has failed. Any scheduled tasks will continue to completion.
+                    values:
+                      - :PIPELINE_FAILURE_POLICY_UNSPECIFIED
+                      - :PIPELINE_FAILURE_POLICY_FAIL_SLOW
+                      - :PIPELINE_FAILURE_POLICY_FAIL_FAST
+                    default_value: :PIPELINE_FAILURE_POLICY_UNSPECIFIED
+                  - !ruby/object:Api::Type::Map
+                    name: inputArtifacts
+                    description: |
+                      The runtime artifacts of the PipelineJob. The key will be the input artifact name and the value would be one of the InputArtifact.
+                    key_name: key
+                    key_description: |
+                      The name of the input artifact.
+                    value_type: !ruby/object:Api::Type::NestedObject
+                      name: value
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: artifactId
+                          required: true
+                          description: |
+                            Artifact resource id from MLMD. Which is the last portion of an artifact resource name:
+                            projects/{project}/locations/{location}/metadataStores/default/artifacts/{artifactId}.
+                            The artifact must stay within the same project, location and default metadatastore as the pipeline.
+              - !ruby/object:Api::Type::String
+                name: serviceAccount
+                description: |
+                  The service account that the pipeline workload runs as.
+                  If not specified, the Compute Engine default service account
+                  in the project will be used.
+                  See https://cloud.google.com/compute/docs/access/service-accounts#default_service_account
+                  Users starting the pipeline must have the iam.serviceAccounts.actAs
+                  permission on this service account.
+              - !ruby/object:Api::Type::String
+                name: network
+                description: |
+                  The full name of the Compute Engine network to which the Pipeline Job's workload
+                  should be peered. For example, projects/12345/global/networks/myVPC. Format is
+                  of the form projects/{project}/global/networks/{network}. Where {project} is a
+                  project number, as in 12345, and {network} is a network name.
+                  Private services access must already be configured for the network.
+                  Pipeline job will apply the network configuration to the Google Cloud resources
+                  being launched, if applied, such as Vertex AI Training or Dataflow job.
+                  If left unspecified, the workload is not peered with any network.
+              - !ruby/object:Api::Type::String
+                name: templateUri
+                description:
+                  A template uri from where the PipelineJob.pipeline_spec, if empty, will be downloaded.
+          - !ruby/object:Api::Type::String
+            name: pipelineJobId
+            description: |
+              The ID to use for the PipelineJob, which will become the final component
+              of the PipelineJob name. If not provided, an ID will be automatically
+              generated. This value should be less than 128 characters, and valid
+              characters are /[a-z][0-9]-/.
