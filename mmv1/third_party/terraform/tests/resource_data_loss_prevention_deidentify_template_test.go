@@ -1667,13 +1667,13 @@ resource "google_data_loss_prevention_deidentify_template" "config" {
           bucketing_config {
             buckets {
               min {
-                day_of_the_week_value = "FRIDAY"
+                day_of_week_value = "FRIDAY"
               }
               max {
-                day_of_the_week_value = "SUNDAY"
+                day_of_week_value = "SUNDAY"
               }
               replacement_value {
-                day_of_the_week_value = "MONDAY"
+                day_of_week_value = "MONDAY"
               }
             }
           }
@@ -1930,4 +1930,3 @@ resource "google_data_loss_prevention_deidentify_template" "config" {
 }
 `, context)
 }
-
