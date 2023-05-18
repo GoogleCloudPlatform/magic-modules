@@ -50,6 +50,17 @@ examples:
     test_env_vars:
       org_domain: :ORG_DOMAIN
       cust_id: :CUST_ID
+  - !ruby/object:Provider::Terraform::Examples
+    name:
+      'cloud_identity_groups_dynamic'
+    skip_test: true
+    primary_resource_id: 'cloud_identity_group_dynamic'
+    vars:
+      id_group: 'my-engineering-group'
+    test_env_vars:
+      org_domain: :ORG_DOMAIN
+      cust_id: :CUST_ID
+      query: 'user.organizations.exists(org, org.department=='engineering')'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/set_computed_name.erb
   custom_import: templates/terraform/custom_import/cloud_identity_group_import.go.erb
@@ -128,6 +139,30 @@ properties:
     description: |
       An extended description to help users determine the purpose of a Group.
       Must not be longer than 4,096 characters.
+  - !ruby/object:Api::Type::String
+    name: 'dynamicGroupQuery'
+    # Custom expand to save having to define an entire dynamicGroupMetadata object
+    # which is an object containing an array of objects, but currently there is only
+    # one valid format, and only one variable.
+    # In the future, we can add a `dynamicGroupMetadata` property to this resource
+    # to allow full configurability if other options become supported.
+    custom_expand: 'templates/terraform/custom_expand/cloudidentity_group.go.erb'
+    description: |
+      Query that determines the memberships of the dynamic group.
+
+      It's not possible to create google_cloud_identity_group_membership resources that reference groups that set this query, as membership becomes managed automatically.
+      For a list of all valid attribues referr to the [API reference](https://cloud.google.com/identity/docs/how-to/dynamic-groups-attributes)
+
+      Examples:
+      
+      All users with at least one organizations.department of engineering.
+      user.organizations.exists(org, org.department=='engineering')
+
+      All users with at least one location that has area of foo and building_id of bar.
+      user.locations.exists(loc, loc.area=='foo' && loc.building_id=='bar')
+
+      All users with any variation of the name John Doe (case-insensitive queries add equalsIgnoreCase() to the value being queried).
+      user.name.value.equalsIgnoreCase('jOhn DoE')
   - !ruby/object:Api::Type::String
     name: 'createTime'
     output: true
