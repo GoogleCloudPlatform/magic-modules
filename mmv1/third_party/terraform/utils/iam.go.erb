@@ -459,6 +459,15 @@ func compareAuditConfigs(a, b []*cloudresourcemanager.AuditConfig) bool {
 
 type IamSettings struct {
 	DeprecationMessage string
+	EnableBatching     bool
+}
+
+func NewIamSettings(options ...func(*IamSettings)) *IamSettings {
+	settings := &IamSettings{}
+	for _, o := range options {
+		o(settings)
+	}
+	return settings
 }
 
 func IamWithDeprecationMessage(message string) func(s *IamSettings) {
@@ -473,6 +482,10 @@ func IamWithGAResourceDeprecation() func (s *IamSettings) {
 	<% else -%>
 	return IamWithDeprecationMessage("")
 	<% end -%>
+}
+
+func IamWithBatching (s *IamSettings) {
+	s.EnableBatching = true
 }
 
 // Util to deref and print auditConfigs
