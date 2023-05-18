@@ -720,22 +720,11 @@ func TestAccBigQueryTable_WithViewAndSchema(t *testing.T) {
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigQueryTableWithViewAndSchema(datasetID, tableID, "table description1"),
-			},
-			{
-				ResourceName:            "google_bigquery_table.test",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-			},
-			{
-				Config: testAccBigQueryTableWithViewAndSchema(datasetID, tableID, "table description2"),
-			},
-			{
-				ResourceName:            "google_bigquery_table.test",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				Config:             testAccBigQueryTableWithViewAndSchema(datasetID, tableID, "table description1"),
+				ExpectNonEmptyPlan: true, // Column configs in the schema shouldn't be applied.
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestMatchResourceAttr("google_bigquery_table.test", "schema", regexp.MustCompile("[^XY]")),
+				),
 			},
 		},
 	})
@@ -835,6 +824,30 @@ func TestAccBigQueryTable_MaterializedView_DailyTimePartioning_Update(t *testing
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccBigQueryTable_MaterializedView_WithSchema(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	materialized_viewID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	query := fmt.Sprintf("SELECT some_int FROM `%s.%s`", datasetID, tableID)
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:             testAccBigQueryTableWithMatViewSchema(datasetID, tableID, materialized_viewID, query),
+				ExpectNonEmptyPlan: true, // Column configs in the materialized view schema shouldn't be applied.
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestMatchResourceAttr("google_bigquery_table.mv_test", "schema", regexp.MustCompile("[^Z]")),
+				),
 			},
 		},
 	})
@@ -1767,13 +1780,13 @@ resource "google_bigquery_table" "test" {
   [
 
 	{
-	"description":"desc1",
+	"description":"desc1 with special capital letter X",
 	"mode":"NULLABLE",
 	"name":"col1",
 	"type":"STRING"
 	},
 	{
-	"description":"desc2",
+	"description":"desc2 with special capital letter Y",
 	"mode":"NULLABLE",
 	"name":"col2",
 	"type":"STRING"
@@ -1968,6 +1981,56 @@ resource "google_bigquery_table" "mv_test" {
   ]
 }
 `, datasetID, tableID, mViewID, enable_refresh, refresh_interval, query)
+}
+
+func testAccBigQueryTableWithMatViewSchema(datasetID, tableID, mViewID, query string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+
+  schema     = <<EOH
+[
+  {
+    "name": "some_int",
+    "type": "INTEGER"
+  }
+]
+EOH
+
+}
+
+resource "google_bigquery_table" "mv_test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+
+  materialized_view {
+    enable_refresh = true
+    refresh_interval_ms = 360000
+    query          = "%s"
+  }
+
+  schema     = <<EOH
+[
+  {
+    "description": "special new description with capital letter Z",
+    "name": "some_int",
+    "type": "INTEGER"
+  }
+]
+EOH
+
+  depends_on = [
+    google_bigquery_table.test,
+  ]
+}
+`, datasetID, tableID, mViewID, query)
 }
 
 func testAccBigQueryTableUpdated(datasetID, tableID string) string {
