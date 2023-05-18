@@ -23,7 +23,18 @@ if d.Get("delete_service_on_destroy") == true {
 	}
 	var obj map[string]interface{}
 	log.Printf("[DEBUG] Deleting Service %q", d.Id())
-	res, err := transport_tpg.SendRequestWithTimeout(config, "DELETE", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "DELETE",
+		Project: project,
+		RawURL: url,
+		UserAgent: userAgent,
+		Body: obj,
+		Timeout: d.Timeout(schema.TimeoutDelete),
+<% if object.error_retry_predicates -%>
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+<% end -%>
+	})
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, "Service")
 	}
@@ -43,7 +54,18 @@ if d.Get("delete_service_on_destroy") == true {
 	}
 	var obj map[string]interface{}
 	log.Printf("[DEBUG] Deleting AppVersion %q", d.Id())
-	res, err := transport_tpg.SendRequestWithTimeout(config, "DELETE", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "DELETE",
+		Project: project,
+		RawURL: url,
+		UserAgent: userAgent,
+		Body: obj,
+		Timeout: d.Timeout(schema.TimeoutDelete),
+<% if object.error_retry_predicates -%>
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+<% end -%>
+	})
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, "AppVersion")
 	}

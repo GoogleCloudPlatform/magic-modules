@@ -22,7 +22,14 @@ if err != nil {
 	return err
 }
 
-res, err := transport_tpg.SendRequestWithTimeout(config, "PATCH", "", url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "PATCH",
+	RawURL: url,
+	UserAgent: userAgent,
+	Body: obj,
+	Timeout: d.Timeout(schema.TimeoutUpdate),
+})
 
 if err != nil {
 	return fmt.Errorf("Error emptying OrganizationSettings %q: %s", d.Id(), err)

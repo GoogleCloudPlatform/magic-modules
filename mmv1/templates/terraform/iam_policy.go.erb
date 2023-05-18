@@ -212,7 +212,19 @@ func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresource
 		return nil, err
 	}
 
-	policy, err := transport_tpg.SendRequest(u.Config, "<%= object.iam_policy.fetch_iam_policy_verb.to_s.upcase -%>", <% if resource_params.include?('project')  %>project<% else %>""<% end %>, url, userAgent, obj<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+	policy, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: u.Config,
+		Method: "<%= object.iam_policy.fetch_iam_policy_verb.to_s.upcase -%>",
+<% if resource_params.include?('project') -%>
+		Project: project,
+<% end -%>
+		RawURL: url,
+		UserAgent: userAgent,
+		Body: obj,
+<% if object.error_retry_predicates -%>
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+<% end -%>
+	})
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
@@ -260,7 +272,20 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 		return err
 	}
 
-	_, err = transport_tpg.SendRequestWithTimeout(u.Config, "<%= object.iam_policy.set_iam_policy_verb.to_s.upcase -%>", <% if resource_params.include?('project')  %>project<% else %>""<% end %>, url, userAgent, obj, u.d.Timeout(schema.TimeoutCreate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: u.Config,
+		Method: "<%= object.iam_policy.set_iam_policy_verb.to_s.upcase -%>",
+<% if resource_params.include?('project') -%>
+		Project: project,
+<% end -%>
+		RawURL: url,
+		UserAgent: userAgent,
+		Body: obj,
+		Timeout: u.d.Timeout(schema.TimeoutCreate),
+<% if object.error_retry_predicates -%>
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+<% end -%>
+	})
 	if err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
