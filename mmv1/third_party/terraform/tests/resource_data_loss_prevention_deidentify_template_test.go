@@ -1649,7 +1649,7 @@ resource "google_data_loss_prevention_deidentify_template" "config" {
 `, context)
 }
 
-func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_bucketingConfig_dayOfTheWeekValue(context map[string]interface{}) string {
+func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_bucketingConfig_dayOfWeekValue(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "config" {
   parent = "organizations/%{organization}"
