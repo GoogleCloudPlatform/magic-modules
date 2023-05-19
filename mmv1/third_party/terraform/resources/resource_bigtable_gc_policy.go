@@ -414,7 +414,14 @@ func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) e
 	// The default delete timeout is 20 minutes.
 	timeout := d.Timeout(schema.TimeoutDelete)
 	pollInterval := time.Duration(30) * time.Second
-	_, err = transport_tpg.RetryWithPolling(retryFunc, timeout, pollInterval, transport_tpg.IsBigTableRetryableError)
+	_, err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: transport_tpg.RetryOptions{
+			RetryFunc:            retryFunc,
+			Timeout:              timeout,
+			PollInterval:         pollInterval,
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsBigTableRetryableError},
+		},
+	})
 	if err != nil {
 		return err
 	}

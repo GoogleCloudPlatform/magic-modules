@@ -549,9 +549,11 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 
 	var res *storage.Bucket
 
-	err = transport_tpg.Retry(func() error {
-		res, err = config.NewStorageClient(userAgent).Buckets.Insert(project, sb).Do()
-		return err
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			res, err = config.NewStorageClient(userAgent).Buckets.Insert(project, sb).Do()
+			return err
+		},
 	})
 
 	if err != nil {
