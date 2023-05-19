@@ -49,7 +49,7 @@ examples:
       address_name: "address-name"
       network_name: "network-name"
     test_vars_overrides:
-      network_name: 'BootstrapSharedTestNetwork(t, "vertex")'
+      network_name: 'BootstrapSharedTestNetwork(t, "vertex-ai-index-endpoint")'
 parameters:
   - !ruby/object:Api::Type::String
     name: region
