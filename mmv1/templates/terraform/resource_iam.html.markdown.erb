@@ -65,7 +65,7 @@ Three different resources help you manage your IAM policy for <%= product.displa
 
 A data source can be used to retrieve policy data in advent you do not need creation
 
-* `<%= resource_ns_iam -%>_policy`: Retrieves the IAM policy for the <%= object.name.downcase -%>
+* `<%= resource_ns_iam -%>_policy`: Retrieves the IAM policy for the <%= object.name.downcase %>
 
 ~> **Note:** `<%= resource_ns_iam -%>_policy` **cannot** be used in conjunction with `<%= resource_ns_iam -%>_binding` and `<%= resource_ns_iam -%>_member` or they will fight over what your policy should be.
 
