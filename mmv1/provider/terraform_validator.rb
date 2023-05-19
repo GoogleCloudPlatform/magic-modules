@@ -154,6 +154,8 @@ module Provider
                            'third_party/terraform/utils/config_test_utils.go.erb'],
                           ['converters/google/resources/iam.go',
                            'third_party/terraform/utils/iam.go.erb'],
+                          ['converters/google/resources/tpgiamresource/iam.go',
+                           'third_party/terraform/tpgiamresource/iam.go.erb'],
                           ['converters/google/resources/compute_instance_helpers.go',
                            'third_party/terraform/utils/compute_instance_helpers.go.erb'],
                           ['converters/google/resources/transport/provider_handwritten_endpoint.go',

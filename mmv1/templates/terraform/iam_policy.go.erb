@@ -23,6 +23,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 
+	"<%= import_path() -%>/tpgiamresource"
 	"<%= import_path() -%>/tpgresource"
 	transport_tpg "<%= import_path() -%>/transport"
 )
@@ -69,7 +70,7 @@ type <%= resource_name -%>IamUpdater struct {
 }
 
 <% provider_default_values = ['project', 'location', 'region', 'zone'] -%>
-func <%= resource_name -%>IamUpdaterProducer(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+func <%= resource_name -%>IamUpdaterProducer(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgiamresource.ResourceIamUpdater, error) {
 	values := make(map[string]string)
 
 <% resource_params.each do |param| -%>
@@ -190,19 +191,19 @@ func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresource
 <% end -%>
 	var obj map[string]interface{}
 <% if object.iam_policy.iam_conditions_request_type == :QUERY_PARAM -%>
-	url, err = transport_tpg.AddQueryParams(url, map[string]string{"optionsRequestedPolicyVersion": fmt.Sprintf("%d", <% if object.iam_policy.iam_policy_version -%> <%= object.iam_policy.iam_policy_version -%> <% else -%> IamPolicyVersion <% end -%>)})
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"optionsRequestedPolicyVersion": fmt.Sprintf("%d", <% if object.iam_policy.iam_policy_version -%> <%= object.iam_policy.iam_policy_version -%> <% else -%> tpgiamresource.IamPolicyVersion <% end -%>)})
 	if err != nil {
 		return nil, err
 	}
 <% elsif object.iam_policy.iam_conditions_request_type == :QUERY_PARAM_NESTED -%>
-	url, err = transport_tpg.AddQueryParams(url, map[string]string{"options.requestedPolicyVersion": fmt.Sprintf("%d", <% if object.iam_policy.iam_policy_version -%> <%= object.iam_policy.iam_policy_version -%> <% else -%> IamPolicyVersion <% end -%>)})
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"options.requestedPolicyVersion": fmt.Sprintf("%d", <% if object.iam_policy.iam_policy_version -%> <%= object.iam_policy.iam_policy_version -%> <% else -%> tpgiamresource.IamPolicyVersion <% end -%>)})
 	if err != nil {
 		return nil, err
 	}
 <% elsif object.iam_policy.iam_conditions_request_type == :REQUEST_BODY -%>
 	obj = map[string]interface{}{
 		"options": map[string]interface{}{
-			"requestedPolicyVersion": <% if object.iam_policy.iam_policy_version -%> <%= object.iam_policy.iam_policy_version -%> <% else -%> IamPolicyVersion <% end -%>,
+			"requestedPolicyVersion": <% if object.iam_policy.iam_policy_version -%> <%= object.iam_policy.iam_policy_version -%> <% else -%> tpgiamresource.IamPolicyVersion <% end -%>,
 		},
 	}
 <%  end -%>

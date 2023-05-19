@@ -2,5 +2,5 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	if v == nil {
 		return v
 	}
-	return schema.NewSet(computeRouterNatIPsHash, convertStringArrToInterface(convertAndMapStringArr(v.([]interface{}), tpgresource.ConvertSelfLinkToV1)))
+	return schema.NewSet(computeRouterNatIPsHash, tpgresource.ConvertStringArrToInterface(convertAndMapStringArr(v.([]interface{}), tpgresource.ConvertSelfLinkToV1)))
 }
