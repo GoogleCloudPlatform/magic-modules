@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -199,7 +200,15 @@ func resourcePubsubSchemaCreate(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	d.Partial(true)
-	res, err := transport_tpg.SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutCreate),
+	})
 	if err != nil {
 		return fmt.Errorf("Error creating Schema: %s", err)
 	}
@@ -229,7 +238,7 @@ func resourcePubsubSchemaCreate(d *schema.ResourceData, meta interface{}) error 
 	return resourcePubsubSchemaRead(d, meta)
 }
 
-func resourcePubsubSchemaPollRead(d *schema.ResourceData, meta interface{}) PollReadFunc {
+func resourcePubsubSchemaPollRead(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
 	return func() (map[string]interface{}, error) {
 		config := meta.(*transport_tpg.Config)
 
@@ -256,7 +265,13 @@ func resourcePubsubSchemaPollRead(d *schema.ResourceData, meta interface{}) Poll
 			return nil, err
 		}
 
-		res, err := transport_tpg.SendRequest(config, "GET", billingProject, url, userAgent, nil)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    url,
+			UserAgent: userAgent,
+		})
 		if err != nil {
 			return res, err
 		}
@@ -289,7 +304,13 @@ func resourcePubsubSchemaRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	res, err := transport_tpg.SendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("PubsubSchema %q", d.Id()))
 	}
@@ -385,7 +406,7 @@ func resourcePubsubSchemaUpdate(d *schema.ResourceData, meta interface{}) error 
 			deletePubsubSchemaRevision(dels[dCount], dObj, d, config, userAgent, billingProject)
 			dCount++
 			revC--
-	  }
+		}
 		if aCount < len(adds) {
 			obj["definition"] = adds[aCount]
 			rObj["schema"] = obj
@@ -430,15 +451,23 @@ func resourcePubsubSchemaCustomizeDiff(_ context.Context, d *schema.ResourceDiff
 	return nil
 }
 
-func commitPubsubSchemaRevision(s map[string]interface{}, d *schema.ResourceData, c *transport_tpg.Config, ua string, bp string) error {
-	url, err := ReplaceVars(d, c, "{{PubsubBasePath}}projects/{{project}}/schemas/{{name}}:commit")
+func commitPubsubSchemaRevision(s map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config, userAgent string, billingProject string) error {
+	url, err := ReplaceVars(d, config, "{{PubsubBasePath}}projects/{{project}}/schemas/{{name}}:commit")
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Committing Schema revision %q: %#v", d.Id(), s)
 
-	res, err := transport_tpg.SendRequestWithTimeout(c, "POST", bp, url, ua, s, d.Timeout(schema.TimeoutUpdate))
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      s,
+		Timeout:   d.Timeout(schema.TimeoutUpdate),
+	})
 
 	if err != nil {
 		return fmt.Errorf("Error committing Schema revision %q: %s", d.Id(), err)
@@ -449,15 +478,23 @@ func commitPubsubSchemaRevision(s map[string]interface{}, d *schema.ResourceData
 	return nil
 }
 
-func deletePubsubSchemaRevision(rid string, s map[string]interface{}, d *schema.ResourceData, c *transport_tpg.Config, ua string, bp string) error {
-	url, err := ReplaceVars(d, c, fmt.Sprintf("{{PubsubBasePath}}projects/{{project}}/schemas/{{name}}@%s:deleteRevision", rid))
+func deletePubsubSchemaRevision(rid string, s map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config, userAgent string, billingProject string) error {
+	url, err := ReplaceVars(d, config, fmt.Sprintf("{{PubsubBasePath}}projects/{{project}}/schemas/{{name}}@%s:deleteRevision", rid))
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Deleting Schema revision %q: %#v", d.Id(), rid)
 
-	res, err := transport_tpg.SendRequestWithTimeout(c, "DELETE", bp, url, ua, s, d.Timeout(schema.TimeoutDelete))
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      s,
+		Timeout:   d.Timeout(schema.TimeoutDelete),
+	})
 
 	if err != nil {
 		return fmt.Errorf("Error deleting Schema revision %q: %s", d.Id(), err)
@@ -516,7 +553,6 @@ func resourcePubsubSchemaDelete(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
-	var obj map[string]interface{}
 	log.Printf("[DEBUG] Deleting Schema %q", d.Id())
 
 	// err == nil indicates that the billing_project value was found
@@ -524,7 +560,14 @@ func resourcePubsubSchemaDelete(d *schema.ResourceData, meta interface{}) error 
 		billingProject = bp
 	}
 
-	res, err := transport_tpg.SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Timeout:   d.Timeout(schema.TimeoutDelete),
+	})
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, "Schema")
 	}
@@ -574,7 +617,7 @@ func flattenPubsubSchemaName(v interface{}, d *schema.ResourceData, config *tran
 	return NameFromSelfLinkStateFunc(v)
 }
 
-func expandPubsubSchemaName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandPubsubSchemaName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return GetResourceNameFromSelfLink(v.(string)), nil
 }
 

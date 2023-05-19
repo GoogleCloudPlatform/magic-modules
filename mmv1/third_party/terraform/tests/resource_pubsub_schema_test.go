@@ -111,7 +111,7 @@ func TestAccPubsubSchema_tooManyRevisions(t *testing.T) {
 			},
 			// Exceed the allowed number of revisions
 			{
-				Config: testAccPubsubSchema_tooManyRevisions(schema),
+				Config:      testAccPubsubSchema_tooManyRevisions(schema),
 				ExpectError: regexp.MustCompile("Cannot have more than 20 Schema revisions."),
 			},
 		},
@@ -134,7 +134,7 @@ func TestAccPubsubSchema_tooFewRevisions(t *testing.T) {
 			},
 			// Getting to zero revisions
 			{
-				Config: testAccPubsubSchema_zeroRevisions(schema),
+				Config:      testAccPubsubSchema_zeroRevisions(schema),
 				ExpectError: regexp.MustCompile("Must have at least one Schema revision."),
 			},
 		},
@@ -155,10 +155,10 @@ func TestAccPubsubSchema_withDefinition(t *testing.T) {
 				Config: testAccPubsubSchema_withDefinition(schema),
 			},
 			{
-				ResourceName:            "google_pubsub_schema.foo",
-				ImportStateId:           schema,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_pubsub_schema.foo",
+				ImportStateId:     schema,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -178,10 +178,10 @@ func TestAccPubsubSchema_withDefinitionAndRevision(t *testing.T) {
 				Config: testAccPubsubSchema_withDefinitionAndRevision(schema),
 			},
 			{
-				ResourceName:            "google_pubsub_schema.foo",
-				ImportStateId:           schema,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_pubsub_schema.foo",
+				ImportStateId:     schema,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
