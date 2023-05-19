@@ -166,7 +166,7 @@ module Provider
     def format2regex(format)
       format
         .gsub(/\{\{%([[:word:]]+)\}\}/, '(?P<\1>.+)')
-        .gsub(/\{\{([[:word:]]+)\}\}/, '(?P<\1>[^/]+)')
+        .gsub(/\{\{([[:word:]]+)\}\}/, '(?P<\1>.+)')
     end
 
     # Capitalize the first letter of a property name.

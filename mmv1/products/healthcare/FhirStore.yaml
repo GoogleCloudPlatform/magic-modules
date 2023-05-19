@@ -65,7 +65,6 @@ examples:
       pubsub_topic: 'fhir-notifications'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
-  custom_import: templates/terraform/custom_import/healthcare_fhir_store.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'dataset'
