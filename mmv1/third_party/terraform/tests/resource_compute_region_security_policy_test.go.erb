@@ -46,7 +46,11 @@ func testAccComputeRegionSecurityPolicy_basic(context map[string]interface{}) st
 resource "google_compute_region_security_policy" "regionSecPolicy" {
   name        = "tf-test%{random_suffix}"
   description = "basic region security policy"
-  type        = "CLOUD_ARMOR"
+  type        = "CLOUD_ARMOR_NETWORK"
+
+  ddos_protection_config {
+    ddos_protection = "STANDARD"
+  }
 }
 `, context)
 }
@@ -56,7 +60,11 @@ func testAccComputeRegionSecurityPolicy_update(context map[string]interface{}) s
 resource "google_compute_region_security_policy" "regionSecPolicy" {
   name        = "tf-test%{random_suffix}"
   description = "basic update region security policy"
-  type        = "CLOUD_ARMOR"
+  type        = "CLOUD_ARMOR_NETWORK"
+
+  ddos_protection_config {
+    ddos_protection = "ADVANCED"
+  }
 }
 `, context)
 }

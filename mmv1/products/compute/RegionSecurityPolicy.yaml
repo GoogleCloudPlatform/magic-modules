@@ -23,7 +23,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/armor/docs/security-policy-concepts'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionSecurityPolicies'
-id_format: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{name}}'
 import_format: ['projects/{{project}}/regions/{{region}}/securityPolicies/{{name}}']
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -103,14 +102,18 @@ properties:
   - !ruby/object:Api::Type::NestedObject
       name: 'ddosProtectionConfig'
       description: |
-        TODO(felipegc) we should add a useful description here since the current api does not have it.
+        Configuration for Google Cloud Armor DDOS Proctection Config.
       properties:
         - !ruby/object:Api::Type::Enum
           name: 'ddosProtection'
           description: | 
-            TODO(felipegc) we should add a useful description here since the current api does not have it.
+            Google Cloud Armor offers the following options to help protect systems against DDoS attacks:
+            - STANDARD: basic always-on protection for network load balancers, protocol forwarding, or VMs with public IP addresses.
+            - ADVANCED: additional protections for Managed Protection Plus subscribers who use network load balancers, protocol forwarding, or VMs with public IP addresses.
+            - ADVANCED_PREVIEW: flag to enable the security policy in preview mode.
           values:
             - :ADVANCED
+            - :ADVANCED_PREVIEW
             - :STANDARD
   - !ruby/object:Api::Type::String
     name: 'selfLink'

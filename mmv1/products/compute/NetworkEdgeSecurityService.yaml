@@ -13,7 +13,7 @@
 
 ---
 !ruby/object:Api::Resource
-name: 'networkEdgeSecurityService'
+name: 'NetworkEdgeSecurityService'
 kind: 'compute#networkEdgeSecurityService'
 base_url: projects/{{project}}/regions/{{region}}/networkEdgeSecurityServices
 create_url: 'projects/{{project}}/regions/{{region}}/networkEdgeSecurityServices?networkEdgeSecurityService={{name}}'
