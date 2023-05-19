@@ -4,18 +4,52 @@ package google
 import (
 	"fmt"
 	"testing"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
+func TestCloudrunAnnotationDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		K, Old, New        string
+		ExpectDiffSuppress bool
+	}{
+		"missing run.googleapis.com/operation-id": {
+			K:                  "metadata.0.annotations.run.googleapis.com/operation-id",
+			Old:                "12345abc",
+			New:                "",
+			ExpectDiffSuppress: true,
+		},
+		"missing run.googleapis.com/ingress": {
+			K:                  "metadata.0.annotations.run.googleapis.com/ingress",
+			Old:                "all",
+			New:                "",
+			ExpectDiffSuppress: true,
+		},
+		"explicit run.googleapis.com/ingress": {
+			K:                  "metadata.0.annotations.run.googleapis.com/ingress",
+			Old:                "all",
+			New:                "internal",
+			ExpectDiffSuppress: false,
+		},
+	}
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			if got := cloudrunAnnotationDiffSuppress(tc.K, tc.Old, tc.New, nil); got != tc.ExpectDiffSuppress {
+				t.Errorf("got %t; want %t", got, tc.ExpectDiffSuppress)
+			}
+		})
+	}
+}
+
 func TestAccCloudRunService_cloudRunServiceUpdate(t *testing.T) {
 	t.Parallel()
 
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	name := "tftest-cloudrun-" + RandString(t, 6)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -44,11 +78,11 @@ func TestAccCloudRunService_cloudRunServiceUpdate(t *testing.T) {
 func TestAccCloudRunService_foregroundDeletion(t *testing.T) {
 	t.Parallel()
 
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	name := "tftest-cloudrun-" + RandString(t, 6)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -120,11 +154,11 @@ resource "google_cloud_run_service" "default" {
 func TestAccCloudRunService_secretVolume(t *testing.T) {
 	t.Parallel()
 
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	name := "tftest-cloudrun-" + RandString(t, 6)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -244,11 +278,11 @@ resource "google_cloud_run_service" "default" {
 func TestAccCloudRunService_secretEnvironmentVariable(t *testing.T) {
 	t.Parallel()
 
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	name := "tftest-cloudrun-" + RandString(t, 6)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -365,11 +399,11 @@ resource "google_cloud_run_service" "default" {
 func TestAccCloudRunService_probes(t *testing.T) {
 	t.Parallel()
 
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	name := "tftest-cloudrun-" + RandString(t, 6)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -440,7 +474,6 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -480,7 +513,6 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -507,6 +539,7 @@ resource "google_cloud_run_service" "default" {
           failure_threshold = %s
           http_get {
             path = "/some-path"
+            port = 8080
             http_headers {
               name = "User-Agent"
               value = "magic-modules"
@@ -539,7 +572,6 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -573,7 +605,6 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -584,6 +615,7 @@ resource "google_cloud_run_service" "default" {
         startup_probe {
           http_get {
             path = "/some-path"
+            port = 8080
             http_headers {
               name = "User-Agent"
               value = "magic-modules"
@@ -616,7 +648,6 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -650,7 +681,6 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 

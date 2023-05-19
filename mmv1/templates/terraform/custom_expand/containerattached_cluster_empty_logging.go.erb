@@ -13,7 +13,7 @@
     # limitations under the License.
 -%>
 
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
     l := v.([]interface{})
     if len(l) == 0 || l[0] == nil {
         transformed := make(map[string]interface{})
@@ -33,7 +33,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
     return transformed, nil
 }
 
-func expandContainerAttachedClusterLoggingConfigComponentConfig(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandContainerAttachedClusterLoggingConfigComponentConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
     l := v.([]interface{})
     if len(l) == 0 {
         return nil, nil
@@ -57,6 +57,6 @@ func expandContainerAttachedClusterLoggingConfigComponentConfig(v interface{}, d
     return transformed, nil
 }
 
-func expandContainerAttachedClusterLoggingConfigComponentConfigEnableComponents(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandContainerAttachedClusterLoggingConfigComponentConfigEnableComponents(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
     return v, nil
 }

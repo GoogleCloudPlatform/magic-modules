@@ -6,6 +6,9 @@ import (
 	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -22,7 +25,7 @@ var iamBindingSchema = map[string]*schema.Schema{
 		Required: true,
 		Elem: &schema.Schema{
 			Type:             schema.TypeString,
-			DiffSuppressFunc: CaseDiffSuppress,
+			DiffSuppressFunc: tpgresource.CaseDiffSuppress,
 			ValidateFunc:     validateIAMMember,
 		},
 		Set: func(v interface{}) int {
@@ -61,21 +64,13 @@ var iamBindingSchema = map[string]*schema.Schema{
 }
 
 func ResourceIamBinding(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser resourceIdParserFunc, options ...func(*IamSettings)) *schema.Resource {
-	return ResourceIamBindingWithBatching(parentSpecificSchema, newUpdaterFunc, resourceIdParser, IamBatchingDisabled, options...)
-}
-
-// Resource that batches requests to the same IAM policy across multiple IAM fine-grained resources
-func ResourceIamBindingWithBatching(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser resourceIdParserFunc, enableBatching bool, options ...func(*IamSettings)) *schema.Resource {
-	settings := &IamSettings{}
-	for _, o := range options {
-		o(settings)
-	}
+	settings := NewIamSettings(options...)
 
 	return &schema.Resource{
-		Create: resourceIamBindingCreateUpdate(newUpdaterFunc, enableBatching),
+		Create: resourceIamBindingCreateUpdate(newUpdaterFunc, settings.EnableBatching),
 		Read:   resourceIamBindingRead(newUpdaterFunc),
-		Update: resourceIamBindingCreateUpdate(newUpdaterFunc, enableBatching),
-		Delete: resourceIamBindingDelete(newUpdaterFunc, enableBatching),
+		Update: resourceIamBindingCreateUpdate(newUpdaterFunc, settings.EnableBatching),
+		Delete: resourceIamBindingDelete(newUpdaterFunc, settings.EnableBatching),
 
 		// if non-empty, this will be used to send a deprecation message when the
 		// resource is used.
@@ -89,9 +84,20 @@ func ResourceIamBindingWithBatching(parentSpecificSchema map[string]*schema.Sche
 	}
 }
 
+// Resource that batches requests to the same IAM policy across multiple IAM fine-grained resources
+//
+// Deprecated: For backward compatibility ResourceIamBindingWithBatching is still working,
+// but all new code should use ResourceIamBinding in the google package instead.
+func ResourceIamBindingWithBatching(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser resourceIdParserFunc, enableBatching bool, options ...func(*IamSettings)) *schema.Resource {
+	if enableBatching {
+		options = append(options, IamWithBatching)
+	}
+	return ResourceIamBinding(parentSpecificSchema, newUpdaterFunc, resourceIdParser, options...)
+}
+
 func resourceIamBindingCreateUpdate(newUpdaterFunc newResourceIamUpdaterFunc, enableBatching bool) func(*schema.ResourceData, interface{}) error {
 	return func(d *schema.ResourceData, meta interface{}) error {
-		config := meta.(*Config)
+		config := meta.(*transport_tpg.Config)
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
 			return err
@@ -125,7 +131,7 @@ func resourceIamBindingCreateUpdate(newUpdaterFunc newResourceIamUpdaterFunc, en
 
 func resourceIamBindingRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.ReadFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
-		config := meta.(*Config)
+		config := meta.(*transport_tpg.Config)
 
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
@@ -136,7 +142,7 @@ func resourceIamBindingRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.Rea
 		eCondition := conditionKeyFromCondition(eBinding.Condition)
 		p, err := iamPolicyReadWithRetry(updater)
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Resource %q with IAM Binding (Role %q)", updater.DescribeResource(), eBinding.Role))
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %q with IAM Binding (Role %q)", updater.DescribeResource(), eBinding.Role))
 		}
 		log.Print(spew.Sprintf("[DEBUG] Retrieved policy for %s: %#v", updater.DescribeResource(), p))
 		log.Printf("[DEBUG] Looking for binding with role %q and condition %#v", eBinding.Role, eCondition)
@@ -182,7 +188,7 @@ func iamBindingImport(newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser
 		if resourceIdParser == nil {
 			return nil, errors.New("Import not supported for this IAM resource.")
 		}
-		config := m.(*Config)
+		config := m.(*transport_tpg.Config)
 		s := strings.Fields(d.Id())
 		var id, role string
 		if len(s) < 2 {
@@ -259,7 +265,7 @@ func iamBindingImport(newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser
 
 func resourceIamBindingDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBatching bool) schema.DeleteFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
-		config := meta.(*Config)
+		config := meta.(*transport_tpg.Config)
 
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
@@ -279,7 +285,7 @@ func resourceIamBindingDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBa
 			err = iamPolicyReadModifyWrite(updater, modifyF)
 		}
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Resource %q for IAM binding with role %q", updater.DescribeResource(), binding.Role))
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %q for IAM binding with role %q", updater.DescribeResource(), binding.Role))
 		}
 
 		return resourceIamBindingRead(newUpdaterFunc)(d, meta)

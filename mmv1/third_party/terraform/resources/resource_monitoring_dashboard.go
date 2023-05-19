@@ -5,6 +5,9 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -73,8 +76,8 @@ func ResourceMonitoringDashboard() *schema.Resource {
 }
 
 func resourceMonitoringDashboardCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -84,16 +87,25 @@ func resourceMonitoringDashboardCreate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	url, err := ReplaceVars(d, config, "{{MonitoringBasePath}}v1/projects/{{project}}/dashboards")
+	url, err := tpgresource.ReplaceVars(d, config, "{{MonitoringBasePath}}v1/projects/{{project}}/dashboards")
 	if err != nil {
 		return err
 	}
-	res, err := SendRequestWithTimeout(config, "POST", project, url, userAgent, obj, d.Timeout(schema.TimeoutCreate), IsMonitoringConcurrentEditError)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:               config,
+		Method:               "POST",
+		Project:              project,
+		RawURL:               url,
+		UserAgent:            userAgent,
+		Body:                 obj,
+		Timeout:              d.Timeout(schema.TimeoutCreate),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsMonitoringConcurrentEditError},
+	})
 	if err != nil {
 		return fmt.Errorf("Error creating Dashboard: %s", err)
 	}
@@ -108,22 +120,29 @@ func resourceMonitoringDashboardCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	url := config.MonitoringBasePath + "v1/" + d.Id()
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	res, err := SendRequest(config, "GET", project, url, userAgent, nil, IsMonitoringConcurrentEditError)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:               config,
+		Method:               "GET",
+		Project:              project,
+		RawURL:               url,
+		UserAgent:            userAgent,
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsMonitoringConcurrentEditError},
+	})
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("MonitoringDashboard %q", d.Id()))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("MonitoringDashboard %q", d.Id()))
 	}
 
 	if err := d.Set("project", project); err != nil {
@@ -142,8 +161,8 @@ func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -160,13 +179,22 @@ func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{})
 
 	nObj["etag"] = oObj["etag"]
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
 	url := config.MonitoringBasePath + "v1/" + d.Id()
-	_, err = SendRequestWithTimeout(config, "PATCH", project, url, userAgent, nObj, d.Timeout(schema.TimeoutUpdate), IsMonitoringConcurrentEditError)
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:               config,
+		Method:               "PATCH",
+		Project:              project,
+		RawURL:               url,
+		UserAgent:            userAgent,
+		Body:                 nObj,
+		Timeout:              d.Timeout(schema.TimeoutUpdate),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsMonitoringConcurrentEditError},
+	})
 	if err != nil {
 		return fmt.Errorf("Error updating Dashboard %q: %s", d.Id(), err)
 	}
@@ -175,32 +203,40 @@ func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceMonitoringDashboardDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	url := config.MonitoringBasePath + "v1/" + d.Id()
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	_, err = SendRequestWithTimeout(config, "DELETE", project, url, userAgent, nil, d.Timeout(schema.TimeoutDelete), IsMonitoringConcurrentEditError)
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:               config,
+		Method:               "DELETE",
+		Project:              project,
+		RawURL:               url,
+		UserAgent:            userAgent,
+		Timeout:              d.Timeout(schema.TimeoutDelete),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsMonitoringConcurrentEditError},
+	})
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("MonitoringDashboard %q", d.Id()))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("MonitoringDashboard %q", d.Id()))
 	}
 
 	return nil
 }
 
 func resourceMonitoringDashboardImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	// current import_formats can't import fields with forward slashes in their value
-	parts, err := getImportIdQualifiers([]string{"projects/(?P<project>[^/]+)/dashboards/(?P<id>[^/]+)", "(?P<id>[^/]+)"}, d, config, d.Id())
+	parts, err := tpgresource.GetImportIdQualifiers([]string{"projects/(?P<project>[^/]+)/dashboards/(?P<id>[^/]+)", "(?P<id>[^/]+)"}, d, config, d.Id())
 	if err != nil {
 		return nil, err
 	}

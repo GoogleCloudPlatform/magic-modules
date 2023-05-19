@@ -1,13 +1,14 @@
 package google
 
 import (
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	"testing"
 )
 
 func TestParseServiceForExistingProject(t *testing.T) {
 	cases := []struct {
 		name                  string
-		data                  TerraformResourceData
+		data                  tpgresource.TerraformResourceData
 		expectedType          string
 		expectedAssetName     string
 		expectedParentProject string
@@ -71,7 +72,7 @@ func TestParseServiceForExistingProject(t *testing.T) {
 
 type mockTerraformResourceData struct {
 	m map[string]interface{}
-	TerraformResourceData
+	tpgresource.TerraformResourceData
 }
 
 func (d *mockTerraformResourceData) GetOkExists(k string) (interface{}, bool) {

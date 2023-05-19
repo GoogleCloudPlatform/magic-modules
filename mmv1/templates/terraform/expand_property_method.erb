@@ -22,7 +22,7 @@
 
 <%# Generate expanders for Maps %>
 <%   if property.is_a?(Api::Type::Map) -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (map[string]interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
   if v == nil {
     return map[string]interface{}{}, nil
   }
@@ -40,7 +40,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
     } else {
       transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
     <%       else -%>
-    } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !isEmptyValue(val) {
+    } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !tpgresource.IsEmptyValue(val) {
       transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
     <%       end -%>
     }
@@ -59,7 +59,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 
 <%# Generate expanders for KeyValuePairs %>
 <%   elsif property.is_a?(Api::Type::KeyValuePairs) -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (map[string]string, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
   if v == nil {
     return map[string]string{}, nil
   }
@@ -72,7 +72,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 
 <%# Generate expanders for flattened objects %>
 <%   elsif property.flatten_object -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
   transformed := make(map[string]interface{})
 <%     property.nested_properties.each do |prop| -%>
   <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
@@ -83,7 +83,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
   } else {
     transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
 <%       else -%>
-  } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !isEmptyValue(val) {
+  } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !tpgresource.IsEmptyValue(val) {
     transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
 <%       end -%>
   }
@@ -94,7 +94,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 
 <%# Generate expanders for everything else %>
 <%   elsif tf_types.include?(property.class) -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 <%     if property.is_set -%>
   v = v.(*schema.Set).List()
 <%     end -%>
@@ -134,7 +134,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
       if err != nil {
         return nil, err
 <%         unless prop.send_empty_value -%>
-      } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !isEmptyValue(val) {
+      } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !tpgresource.IsEmptyValue(val) {
         transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
 <%         else -%>
       } else {

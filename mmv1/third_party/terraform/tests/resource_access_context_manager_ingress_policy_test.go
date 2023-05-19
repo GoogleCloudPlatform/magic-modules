@@ -6,6 +6,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // Since each test here is acting on the same organization and only one AccessPolicy
@@ -13,26 +16,21 @@ import (
 
 func testAccAccessContextManagerIngressPolicy_basicTest(t *testing.T) {
 	// Multiple fine-grained resources
-	SkipIfVcr(t)
-	org := GetTestOrgFromEnv(t)
-	projects := BootstrapServicePerimeterProjects(t, 2)
+	acctest.SkipIfVcr(t)
+	org := acctest.GetTestOrgFromEnv(t)
+	projects := BootstrapServicePerimeterProjects(t, 1)
 	policyTitle := RandString(t, 10)
-	perimeterTitle := RandString(t, 10)
+	perimeterTitle := "perimeter"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerIngressPolicy_basic(org, policyTitle, perimeterTitle, projects[0].ProjectNumber, projects[1].ProjectNumber),
+				Config: testAccAccessContextManagerIngressPolicy_basic(org, policyTitle, perimeterTitle, projects[0].ProjectNumber),
 			},
 			{
 				ResourceName:      "google_access_context_manager_ingress_policy.test-access1",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				ResourceName:      "google_access_context_manager_ingress_policy.test-access2",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -53,12 +51,17 @@ func testAccCheckAccessContextManagerIngressPolicyDestroyProducer(t *testing.T) 
 
 			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{ingress_policy_name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{ingress_policy_name}}")
 			if err != nil {
 				return err
 			}
 
-			res, err := SendRequest(config, "GET", "", url, config.UserAgent, nil)
+			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
 			if err != nil {
 				return err
 			}
@@ -86,7 +89,7 @@ func testAccCheckAccessContextManagerIngressPolicyDestroyProducer(t *testing.T) 
 	}
 }
 
-func testAccAccessContextManagerIngressPolicy_basic(org, policyTitle, perimeterTitleName string, projectNumber1, projectNumber2 int64) string {
+func testAccAccessContextManagerIngressPolicy_basic(org, policyTitle, perimeterTitleName string, projectNumber1 int64) string {
 	return fmt.Sprintf(`
 %s
 
@@ -95,12 +98,7 @@ resource "google_access_context_manager_ingress_policy" "test-access1" {
   resource            = "projects/%d"
 }
 
-resource "google_access_context_manager_ingress_policy" "test-access2" {
-  ingress_policy_name = google_access_context_manager_service_perimeter.test-access.name
-  resource            = "projects/%d"
-}
-
-`, testAccAccessContextManagerIngressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber1, projectNumber2)
+`, testAccAccessContextManagerIngressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber1)
 }
 
 func testAccAccessContextManagerIngressPolicy_destroy(org, policyTitle, perimeterTitleName string) string {

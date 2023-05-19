@@ -7,6 +7,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -218,7 +222,7 @@ func ResourceStorageTransferJob() *schema.Resource {
 						},
 						"repeat_interval": {
 							Type:         schema.TypeString,
-							ValidateFunc: validateDuration(),
+							ValidateFunc: verify.ValidateDuration(),
 							Optional:     true,
 							Description:  `Interval between the start of each scheduled transfer. If unspecified, the default value is 24 hours. This value may not be less than 1 hour. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".`,
 							Default:      "86400s",
@@ -263,14 +267,14 @@ func objectConditionsSchema() *schema.Schema {
 			Schema: map[string]*schema.Schema{
 				"min_time_elapsed_since_last_modification": {
 					Type:         schema.TypeString,
-					ValidateFunc: validateDuration(),
+					ValidateFunc: verify.ValidateDuration(),
 					Optional:     true,
 					AtLeastOneOf: objectConditionsKeys,
 					Description:  `A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".`,
 				},
 				"max_time_elapsed_since_last_modification": {
 					Type:         schema.TypeString,
-					ValidateFunc: validateDuration(),
+					ValidateFunc: verify.ValidateDuration(),
 					Optional:     true,
 					AtLeastOneOf: objectConditionsKeys,
 					Description:  `A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".`,
@@ -297,14 +301,14 @@ func objectConditionsSchema() *schema.Schema {
 				},
 				"last_modified_since": {
 					Type:         schema.TypeString,
-					ValidateFunc: validateRFC3339Date,
+					ValidateFunc: verify.ValidateRFC3339Date,
 					Optional:     true,
 					AtLeastOneOf: objectConditionsKeys,
 					Description:  `If specified, only objects with a "last modification time" on or after this timestamp and objects that don't have a "last modification time" are transferred. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".`,
 				},
 				"last_modified_before": {
 					Type:         schema.TypeString,
-					ValidateFunc: validateRFC3339Date,
+					ValidateFunc: verify.ValidateRFC3339Date,
 					Optional:     true,
 					AtLeastOneOf: objectConditionsKeys,
 					Description:  `If specified, only objects with a "last modification time" before this timestamp and objects that don't have a "last modification time" are transferred. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".`,
@@ -439,6 +443,11 @@ func awsS3DataSchema() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: `S3 Bucket name.`,
 			},
+			"path": {
+				Optional:    true,
+				Type:        schema.TypeString,
+				Description: `S3 Bucket path in bucket to transfer.`,
+			},
 			"aws_access_key": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -540,13 +549,13 @@ func diffSuppressEmptyStartTimeOfDay(k, old, new string, d *schema.ResourceData)
 }
 
 func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -562,7 +571,7 @@ func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) 
 
 	var res *storagetransfer.TransferJob
 
-	err = retry(func() error {
+	err = transport_tpg.Retry(func() error {
 		res, err = config.NewStorageTransferClient(userAgent).TransferJobs.Create(transferJob).Do()
 		return err
 	})
@@ -576,20 +585,20 @@ func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error setting name: %s", err)
 	}
 
-	name := GetResourceNameFromSelfLink(res.Name)
+	name := tpgresource.GetResourceNameFromSelfLink(res.Name)
 	d.SetId(fmt.Sprintf("%s/%s", project, name))
 
 	return resourceStorageTransferJobRead(d, meta)
 }
 
 func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -597,7 +606,7 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 	name := d.Get("name").(string)
 	res, err := config.NewStorageTransferClient(userAgent).TransferJobs.Get(name, project).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Transfer Job %q", name))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Transfer Job %q", name))
 	}
 
 	if res.Status == "DELETED" {
@@ -643,13 +652,13 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -715,13 +724,13 @@ func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceStorageTransferJobDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -940,12 +949,14 @@ func expandAwsS3Data(awsS3Datas []interface{}) *storagetransfer.AwsS3Data {
 		BucketName:   awsS3Data["bucket_name"].(string),
 		AwsAccessKey: expandAwsAccessKeys(awsS3Data["aws_access_key"].([]interface{})),
 		RoleArn:      awsS3Data["role_arn"].(string),
+		Path:         awsS3Data["path"].(string),
 	}
 }
 
 func flattenAwsS3Data(awsS3Data *storagetransfer.AwsS3Data, d *schema.ResourceData) []map[string]interface{} {
 	data := map[string]interface{}{
 		"bucket_name": awsS3Data.BucketName,
+		"path":        awsS3Data.Path,
 		"role_arn":    awsS3Data.RoleArn,
 	}
 	if awsS3Data.AwsAccessKey != nil {

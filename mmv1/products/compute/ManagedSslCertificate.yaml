@@ -55,9 +55,10 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 30
-  update_minutes: 30
-      # Deletes can take 20-30 minutes to complete, since they depend
-      # on the provisioning process either succeeding or failing completely.
+  update_minutes:
+    30
+    # Deletes can take 20-30 minutes to complete, since they depend
+    # on the provisioning process either succeeding or failing completely.
   delete_minutes: 30
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
@@ -75,21 +76,22 @@ docs: !ruby/object:Provider::Terraform::Docs
     In conclusion: Be extremely cautious.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "managed_ssl_certificate_basic"
-    primary_resource_id: "default"
+    name: 'managed_ssl_certificate_basic'
+    primary_resource_id: 'default'
     vars:
-      cert_name: "test-cert"
-      proxy_name: "test-proxy"
-      url_map_name: "url-map"
-      backend_service_name: "backend-service"
-      dns_zone_name: "dnszone"
-      forwarding_rule_name: "forwarding-rule"
-      http_health_check_name: "http-health-check"
+      cert_name: 'test-cert'
+      proxy_name: 'test-proxy'
+      url_map_name: 'url-map'
+      backend_service_name: 'backend-service'
+      dns_zone_name: 'dnszone'
+      forwarding_rule_name: 'forwarding-rule'
+      http_health_check_name: 'http-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "managed_ssl_certificate_recreation"
-    primary_resource_id: "cert"
-    pull_external: true
-        # Random provider
+    name: 'managed_ssl_certificate_recreation'
+    primary_resource_id: 'cert'
+    pull_external:
+      true
+      # Random provider
     skip_vcr: true
 properties:
   - !ruby/object:Api::Type::Time
@@ -131,7 +133,7 @@ properties:
           there can be up to 100 domains in this list.
         max_size: 100
         required: true
-        diff_suppress_func: 'AbsoluteDomainSuppress'
+        diff_suppress_func: 'tpgresource.AbsoluteDomainSuppress'
         item_type: Api::Type::String
   - !ruby/object:Api::Type::Enum
     name: 'type'

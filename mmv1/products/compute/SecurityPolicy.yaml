@@ -62,8 +62,9 @@ properties:
             If set to true, the specified action is not enforced.
         - !ruby/object:Api::Type::NestedObject
           name: 'match'
-          description: A match condition that incoming traffic is evaluated against.
-            If it evaluates to true, the corresponding 'action' is enforced.
+          description:
+            A match condition that incoming traffic is evaluated against. If it
+            evaluates to true, the corresponding 'action' is enforced.
           properties:
             - !ruby/object:Api::Type::String
               name: 'description'
@@ -71,8 +72,9 @@ properties:
                 A description of the rule.
             - !ruby/object:Api::Type::NestedObject
               name: 'expr'
-              description: User defined CEVAL expression. A CEVAL expression is used
-                to specify match criteria such as origin.ip, source.region_code and
+              description:
+                User defined CEVAL expression. A CEVAL expression is used to
+                specify match criteria such as origin.ip, source.region_code and
                 contents in the request header.
               properties:
                 - !ruby/object:Api::Type::String
@@ -102,9 +104,11 @@ properties:
                 the corresponding srcIpRange field in config.
             - !ruby/object:Api::Type::NestedObject
               name: 'config'
-              description: The configuration options available when specifying versionedExpr.
-                This field must be specified if versionedExpr is specified and cannot
-                be specified if versionedExpr is not specified.
+              description:
+                The configuration options available when specifying
+                versionedExpr. This field must be specified if versionedExpr is
+                specified and cannot be specified if versionedExpr is not
+                specified.
               properties:
                 - !ruby/object:Api::Type::Array
                   name: 'srcIpRanges'

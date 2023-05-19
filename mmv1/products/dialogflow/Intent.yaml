@@ -13,8 +13,8 @@
 
 --- !ruby/object:Api::Resource
 name: 'Intent'
-base_url: "projects/{{project}}/agent/intents/"
-self_link: "{{name}}"
+base_url: 'projects/{{project}}/agent/intents/'
+self_link: '{{name}}'
 update_verb: :PATCH
 description: |
   Represents a Dialogflow intent. Intents convert a number of user expressions or patterns into an action. An action
@@ -25,22 +25,24 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/dialogflow/docs/reference/rest/v2/projects.agent.intents'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dialogflow_intent_basic"
-    primary_resource_id: "basic_intent"
+    name: 'dialogflow_intent_basic'
+    primary_resource_id: 'basic_intent'
     skip_test: true
     vars:
-      intent_name: "basic-intent"
+      intent_name: 'basic-intent'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dialogflow_intent_full"
-    primary_resource_id: "full_intent"
+    name: 'dialogflow_intent_full'
+    primary_resource_id: 'full_intent'
     vars:
-      intent_name: "full-intent"
+      project_id: 'my-project'
+      account_id: 'my-account'
+      intent_name: 'full-intent'
     test_env_vars:
       org_id: :ORG_ID
-    # Skip sweeper gen since this is a child resource.
+# Skip sweeper gen since this is a child resource.
 skip_sweeper: true
-id_format: "{{name}}"
-import_format: ["{{name}}"]
+id_format: '{{name}}'
+import_format: ['{{name}}']
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/self_link_as_name_set_project.go.erb
   post_create: 'templates/terraform/post_create/set_computed_name.erb'
@@ -49,7 +51,7 @@ properties:
     name: 'name'
     output: true
     description: |
-      The unique identifier of this intent. 
+      The unique identifier of this intent.
       Format: projects/<Project ID>/agent/intents/<Intent ID>.
   - !ruby/object:Api::Type::String
     name: 'displayName'
@@ -98,7 +100,7 @@ properties:
     item_type: Api::Type::String
     description: |
       The collection of event names that trigger the intent. If the collection of input contexts is not empty, all of
-      the contexts must be present in the active user session for an event to trigger this intent. See the 
+      the contexts must be present in the active user session for an event to trigger this intent. See the
       [events reference](https://cloud.google.com/dialogflow/docs/events-overview) for more details.
   - !ruby/object:Api::Type::String
     name: 'action'

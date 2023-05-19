@@ -50,30 +50,33 @@ docs: !ruby/object:Provider::Terraform::Docs
      specified prefix. Conflicts with `name`.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_ssl_certificate_basic"
-    primary_resource_id: "default"
-        # Uses resource.UniqueId
+    name: 'region_ssl_certificate_basic'
+    primary_resource_id:
+      'default'
+      # Uses resource.UniqueId
     skip_vcr: true
     ignore_read_extra:
-      - "name_prefix"
+      - 'name_prefix'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_ssl_certificate_random_provider"
+    name: 'region_ssl_certificate_random_provider'
     pull_external: true
-    primary_resource_id: "default"
-        # Uses resource.UniqueId
+    primary_resource_id:
+      'default'
+      # Uses resource.UniqueId
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_ssl_certificate_target_https_proxies"
-    primary_resource_id: "default"
-        # Uses resource.UniqueId
+    name: 'region_ssl_certificate_target_https_proxies'
+    primary_resource_id:
+      'default'
+      # Uses resource.UniqueId
     skip_vcr: true
     vars:
-      region_target_https_proxy_name: "test-proxy"
-      region_url_map_name: "url-map"
-      region_backend_service_name: "backend-service"
-      region_health_check_name: "http-health-check"
+      region_target_https_proxy_name: 'test-proxy'
+      region_url_map_name: 'url-map'
+      region_backend_service_name: 'backend-service'
+      region_health_check_name: 'http-health-check'
     ignore_read_extra:
-      - "name_prefix"
+      - 'name_prefix'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   extra_schema_entry: templates/terraform/extra_schema_entry/ssl_certificate.erb
 parameters:
@@ -129,7 +132,7 @@ properties:
     default_from_api: true
     custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.erb'
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: 'privateKey'
     description: 'The write-only private key in PEM format.'
@@ -138,4 +141,4 @@ properties:
     sensitive: true
     ignore_read: true
     custom_flatten: 'templates/terraform/custom_flatten/sha256.erb'
-    diff_suppress_func: 'Sha256DiffSuppress'
+    diff_suppress_func: 'tpgresource.Sha256DiffSuppress'
