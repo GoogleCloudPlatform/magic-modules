@@ -94,7 +94,7 @@ properties:
     required: true
     immutable: true
     pattern: 'projects/{{project}}/topics/{{topic}}'
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/computed_subscription_topic.erb
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
@@ -193,7 +193,7 @@ properties:
 
           - v1beta1: uses the push format defined in the v1beta1 Pub/Sub API.
           - v1 or v1beta2: uses the push format defined in the v1 Pub/Sub API.
-        diff_suppress_func: 'IgnoreMissingKeyInMap("x-goog-version")'
+        diff_suppress_func: 'tpgresource.IgnoreMissingKeyInMap("x-goog-version")'
   - !ruby/object:Api::Type::Integer
     name: 'ackDeadlineSeconds'
     description: |
@@ -325,14 +325,14 @@ properties:
           The minimum delay between consecutive deliveries of a given message. Value should be between 0 and 600 seconds. Defaults to 10 seconds.
           A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
         default_from_api: true
-        diff_suppress_func: 'DurationDiffSuppress'
+        diff_suppress_func: 'tpgresource.DurationDiffSuppress'
       - !ruby/object:Api::Type::String
         name: 'maximumBackoff'
         description: |
           The maximum delay between consecutive deliveries of a given message. Value should be between 0 and 600 seconds. Defaults to 600 seconds.
           A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
         default_from_api: true
-        diff_suppress_func: 'DurationDiffSuppress'
+        diff_suppress_func: 'tpgresource.DurationDiffSuppress'
   - !ruby/object:Api::Type::Boolean
     name: 'enableMessageOrdering'
     immutable: true

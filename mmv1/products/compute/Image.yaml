@@ -67,14 +67,21 @@ examples:
     primary_resource_id: 'example'
     vars:
       image_name: 'example-image'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-example-image%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-example-image%s\",
+      context[\"random_suffix\"\
       ])"
   - !ruby/object:Provider::Terraform::Examples
     name: 'image_guest_os'
     primary_resource_id: 'example'
     vars:
       image_name: 'example-image'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'image_basic_storage_location'
+    primary_resource_id: 'example'
+    vars:
+      image_name: 'example-sl-image'
+      primary_resource_name:
+        'fmt.Sprintf("tf-test-sl-example-image%s", context["random_suffix"])'
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'archiveSizeBytes'
@@ -137,6 +144,14 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
+  - !ruby/object:Api::Type::Array
+    name: 'storageLocations'
+    description: |
+      Cloud Storage bucket storage location of the image
+      (regional or multi-regional).
+      Reference link: https://cloud.google.com/compute/docs/reference/rest/v1/images
+    item_type: Api::Type::String
+    default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: 'diskSizeGb'
     description: |
@@ -175,6 +190,10 @@ properties:
             - :WINDOWS
             - :GVNIC
             - :SEV_LIVE_MIGRATABLE
+            - :SEV_SNP_CAPABLE
+            - :SUSPEND_RESUME_COMPATIBLE
+            - :TDX_CAPABLE
+
   - !ruby/object:Api::Type::Integer
     name: 'id'
     description: |
@@ -212,7 +231,7 @@ properties:
           The self link of the encryption key that is stored in Google Cloud
           KMS.
         custom_flatten: 'templates/terraform/custom_flatten/image_kms_key_name.go.erb'
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
       - !ruby/object:Api::Type::String
         name: 'kmsKeyServiceAccount'
         description: |
@@ -368,4 +387,4 @@ properties:
       - :READY
       - :PENDING
       - :FAILED
-  # State is not applicable for state convergence.
+# State is not applicable for state convergence.

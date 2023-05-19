@@ -9,7 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 	appengine "google.golang.org/api/appengine/v1"
 )
 
@@ -39,7 +41,7 @@ func ResourceAppEngineApplication() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				ForceNew:     true,
-				ValidateFunc: validateProjectID(),
+				ValidateFunc: verify.ValidateProjectID(),
 				Description:  `The project ID to create the application under.`,
 			},
 			"auth_domain": {
@@ -201,12 +203,12 @@ func appEngineApplicationLocationIDCustomizeDiff(_ context.Context, d *schema.Re
 
 func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -215,12 +217,12 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	lockName, err := ReplaceVars(d, config, "apps/{{project}}")
+	lockName, err := tpgresource.ReplaceVars(d, config, "apps/{{project}}")
 	if err != nil {
 		return err
 	}
-	mutexKV.Lock(lockName)
-	defer mutexKV.Unlock(lockName)
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 
 	log.Printf("[DEBUG] Creating App Engine App")
 	op, err := config.NewAppEngineClient(userAgent).Apps.Create(app).Do()
@@ -243,7 +245,7 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 
 func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -315,7 +317,7 @@ func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) 
 
 func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -325,12 +327,12 @@ func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	lockName, err := ReplaceVars(d, config, "apps/{{project}}")
+	lockName, err := tpgresource.ReplaceVars(d, config, "apps/{{project}}")
 	if err != nil {
 		return err
 	}
-	mutexKV.Lock(lockName)
-	defer mutexKV.Unlock(lockName)
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 
 	log.Printf("[DEBUG] Updating App Engine App")
 	op, err := config.NewAppEngineClient(userAgent).Apps.Patch(pid, app).UpdateMask("authDomain,databaseType,servingStatus,featureSettings.splitHealthChecks,iap").Do()

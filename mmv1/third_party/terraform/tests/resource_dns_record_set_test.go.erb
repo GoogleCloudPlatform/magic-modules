@@ -9,12 +9,15 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 )
 
 func TestValidateRecordNameTrailingDot(t *testing.T) {
-	cases := []StringValidationTestCase{
+	cases := []verify.StringValidationTestCase{
 		// No errors
 		{TestName: "trailing dot", Value: "test-record.hashicorptest.com."},
 
@@ -23,7 +26,7 @@ func TestValidateRecordNameTrailingDot(t *testing.T) {
 		{TestName: "no trailing dot", Value: "test-record.hashicorptest.com", ExpectError: true},
 	}
 
-	es := testStringValidationCases(cases, validateRecordNameTrailingDot)
+	es := verify.TestStringValidationCases(cases, validateRecordNameTrailingDot)
 	if len(es) > 0 {
 		t.Errorf("Failed to validate DNS Record name with value: %v", es)
 	}
@@ -374,7 +377,7 @@ func testAccCheckDnsRecordSetDestroyProducer(t *testing.T) func(s *terraform.Sta
 
 			config := GoogleProviderConfig(t)
 
-			url, err := acctest.ReplaceVarsForTest(config, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{managed_zone}}/rrsets/{{name}}/{{type}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{managed_zone}}/rrsets/{{name}}/{{type}}")
 			if err != nil {
 				return err
 			}
@@ -385,7 +388,13 @@ func testAccCheckDnsRecordSetDestroyProducer(t *testing.T) func(s *terraform.Sta
 				billingProject = config.BillingProject
 			}
 
-			_, err = transport_tpg.SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config: config,
+				Method: "GET",
+				Project: billingProject,
+				RawURL: url,
+				UserAgent: config.UserAgent,
+			})
 			if err == nil {
 				return fmt.Errorf("DNSResourceDnsRecordSet still exists at %s", url)
 			}

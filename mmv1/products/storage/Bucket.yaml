@@ -48,8 +48,8 @@ examples:
     primary_resource_id: 'default'
     vars:
       name: 'my-bucket'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-my-bucket%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-bucket%s\",
+      context[\"random_suffix\"\
       ])"
 parameters:
   - !ruby/object:Api::Type::String
@@ -228,7 +228,8 @@ properties:
         # | 'etag' is not applicable for state convergence.
         - !ruby/object:Api::Type::Integer
           name: 'generation'
-          description: 'The content generation of the object, if applied to an object.'
+          description:
+            'The content generation of the object, if applied to an object.'
           output: true
         - !ruby/object:Api::Type::String
           name: 'id'

@@ -65,8 +65,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'snapshot_basic'
     primary_resource_id: 'snapshot'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-my-snapshot%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-snapshot%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       snapshot_name: 'my-snapshot'
@@ -74,8 +74,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'snapshot_chainname'
     primary_resource_id: 'snapshot'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-snapshot-chainname%s\", context[\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-snapshot-chainname%s\",
+      context[\"\
       random_suffix\"])"
     vars:
       snapshot_name: 'my-snapshot'
@@ -93,7 +93,7 @@ parameters:
     immutable: true
     required: true
     # ignore_read in providers - this is only used in Create
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
     resource: 'Zone'

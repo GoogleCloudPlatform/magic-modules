@@ -280,7 +280,7 @@ properties:
       When reading an `IPAddress`, the API always returns the IP
       address number.
     default_from_api: true
-    diff_suppress_func: 'InternalIpDiffSuppress'
+    diff_suppress_func: 'tpgresource.InternalIpDiffSuppress'
   - !ruby/object:Api::Type::Enum
     name: 'IPProtocol'
     description: |
@@ -302,7 +302,7 @@ properties:
       - :SCTP
       - :ICMP
       - :L3_DEFAULT
-    diff_suppress_func: 'CaseDiffSuppress'
+    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
     default_from_api: true
   # This is a multi-resource resource reference (BackendService (global), RegionBackendService)
   # We have custom expands that manage this.
@@ -392,7 +392,7 @@ properties:
       For internal forwarding rules within the same VPC network, two or more
       forwarding rules cannot use the same `[IPAddress, IPProtocol]`
       pair, and cannot have overlapping `portRange`s.
-    diff_suppress_func: 'PortRangeDiffSuppress'
+    diff_suppress_func: 'tpgresource.PortRangeDiffSuppress'
     default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'ports'
@@ -456,7 +456,7 @@ properties:
       For Private Service Connect forwarding rules that forward traffic to managed services, the target must be a service attachment.
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setTarget'
-    diff_suppress_func: 'compareSelfLinkRelativePaths'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
     custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
   - !ruby/object:Api::Type::Boolean
     name: 'allowGlobalAccess'
@@ -563,7 +563,7 @@ properties:
 
       This field is only used for INTERNAL load balancing.
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: 'serviceName'
     description: |

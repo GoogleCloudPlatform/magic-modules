@@ -12,7 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 )
 
 const (
@@ -20,7 +23,7 @@ const (
 	GCPolicyModeUnion        = "UNION"
 )
 
-func resourceBigtableGCPolicyCustomizeDiffFunc(diff TerraformResourceDiff) error {
+func resourceBigtableGCPolicyCustomizeDiffFunc(diff tpgresource.TerraformResourceDiff) error {
 	count := diff.Get("max_age.#").(int)
 	if count < 1 {
 		return nil
@@ -71,7 +74,7 @@ func ResourceBigtableGCPolicy() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: compareResourceNames,
+				DiffSuppressFunc: tpgresource.CompareResourceNames,
 				Description:      `The name of the Bigtable instance.`,
 			},
 
@@ -132,7 +135,7 @@ func ResourceBigtableGCPolicy() *schema.Resource {
 							Computed:     true,
 							ForceNew:     true,
 							Description:  `Duration before applying GC policy`,
-							ValidateFunc: validateDuration(),
+							ValidateFunc: verify.ValidateDuration(),
 							ExactlyOneOf: []string{"max_age.0.days", "max_age.0.duration"},
 						},
 					},
@@ -181,19 +184,19 @@ func ResourceBigtableGCPolicy() *schema.Resource {
 
 func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	ctx := context.Background()
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	instanceName := GetResourceNameFromSelfLink(d.Get("instance_name").(string))
+	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
 	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
@@ -243,18 +246,18 @@ func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) er
 
 func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 	ctx := context.Background()
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	instanceName := GetResourceNameFromSelfLink(d.Get("instance_name").(string))
+	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
 	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
@@ -266,7 +269,7 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	columnFamily := d.Get("column_family").(string)
 	ti, err := c.TableInfo(ctx, name)
 	if err != nil {
-		if isNotFoundGrpcError(err) {
+		if tpgresource.IsNotFoundGrpcError(err) {
 			log.Printf("[WARN] Removing the GC policy because the parent table %s is gone", name)
 			d.SetId("")
 			return nil
@@ -385,18 +388,18 @@ func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) e
 		return nil
 	}
 
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 	ctx := context.Background()
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	instanceName := GetResourceNameFromSelfLink(d.Get("instance_name").(string))
+	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
 	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)

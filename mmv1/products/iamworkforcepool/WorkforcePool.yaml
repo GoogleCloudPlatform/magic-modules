@@ -83,11 +83,12 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description:
-      A user-specified display name of the pool in Google Cloud Console.
-      Cannot exceed 32 characters.
+      A user-specified display name of the pool in Google Cloud Console. Cannot
+      exceed 32 characters.
   - !ruby/object:Api::Type::String
     name: 'description'
-    description: A user-specified description of the pool. Cannot exceed 256 characters.
+    description:
+      A user-specified description of the pool. Cannot exceed 256 characters.
   - !ruby/object:Api::Type::Enum
     name: 'state'
     description: |

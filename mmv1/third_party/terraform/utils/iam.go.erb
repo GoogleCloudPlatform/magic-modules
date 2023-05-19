@@ -4,13 +4,15 @@ package google
 
 import (
 	"encoding/json"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"fmt"
 	"log"
 	"reflect"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/errwrap"
@@ -48,7 +50,7 @@ type (
 	}
 
 	// Factory for generating ResourceIamUpdater for given ResourceData resource
-	newResourceIamUpdaterFunc func(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error)
+	newResourceIamUpdaterFunc func(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error)
 
 	// Describes how to modify a policy for a given Terraform IAM (_policy/_member/_binding/_audit_config) resource
 	iamPolicyModifyFunc func(p *cloudresourcemanager.Policy) error
@@ -60,8 +62,8 @@ type (
 // Locking wrapper around read-only operation with retries.
 func iamPolicyReadWithRetry(updater ResourceIamUpdater) (*cloudresourcemanager.Policy, error) {
 	mutexKey := updater.GetMutexKey()
-	mutexKV.Lock(mutexKey)
-	defer mutexKV.Unlock(mutexKey)
+	transport_tpg.MutexStore.Lock(mutexKey)
+	defer transport_tpg.MutexStore.Unlock(mutexKey)
 
 	log.Printf("[DEBUG] Retrieving policy for %s\n", updater.DescribeResource())
 	var policy *cloudresourcemanager.Policy
@@ -79,8 +81,8 @@ func iamPolicyReadWithRetry(updater ResourceIamUpdater) (*cloudresourcemanager.P
 // Locking wrapper around read-modify-write cycle for IAM policy.
 func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModifyFunc) error {
 	mutexKey := updater.GetMutexKey()
-	mutexKV.Lock(mutexKey)
-	defer mutexKV.Unlock(mutexKey)
+	transport_tpg.MutexStore.Lock(mutexKey)
+	defer transport_tpg.MutexStore.Unlock(mutexKey)
 
 	backoff := time.Second
 	for {
@@ -142,7 +144,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 			}
 			break
 		}
-		if isConflictError(err) {
+		if tpgresource.IsConflictError(err) {
 			log.Printf("[DEBUG]: Concurrent policy changes, restarting read-modify-write after %s\n", backoff)
 			time.Sleep(backoff)
 			backoff = backoff * 2
@@ -457,6 +459,15 @@ func compareAuditConfigs(a, b []*cloudresourcemanager.AuditConfig) bool {
 
 type IamSettings struct {
 	DeprecationMessage string
+	EnableBatching     bool
+}
+
+func NewIamSettings(options ...func(*IamSettings)) *IamSettings {
+	settings := &IamSettings{}
+	for _, o := range options {
+		o(settings)
+	}
+	return settings
 }
 
 func IamWithDeprecationMessage(message string) func(s *IamSettings) {
@@ -471,6 +482,10 @@ func IamWithGAResourceDeprecation() func (s *IamSettings) {
 	<% else -%>
 	return IamWithDeprecationMessage("")
 	<% end -%>
+}
+
+func IamWithBatching (s *IamSettings) {
+	s.EnableBatching = true
 }
 
 // Util to deref and print auditConfigs

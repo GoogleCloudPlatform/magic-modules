@@ -85,8 +85,8 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description:
-      The display name of the Index. The name can be up to 128 characters
-      long and can consist of any UTF-8 characters.
+      The display name of the Index. The name can be up to 128 characters long
+      and can consist of any UTF-8 characters.
     required: true
   - !ruby/object:Api::Type::String
     name: 'description'
@@ -150,8 +150,8 @@ properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'algorithmConfig'
             description:
-              The configuration with regard to the algorithms used for
-              efficient search.
+              The configuration with regard to the algorithms used for efficient
+              search.
             properties:
               - !ruby/object:Api::Type::NestedObject
                 name: 'treeAhConfig'
@@ -165,8 +165,8 @@ properties:
                   - !ruby/object:Api::Type::Integer
                     name: 'leafNodeEmbeddingCount'
                     description:
-                      Number of embeddings on each leaf node. The default
-                      value is 1000 if not set.
+                      Number of embeddings on each leaf node. The default value
+                      is 1000 if not set.
                     default_value: 1000
                   - !ruby/object:Api::Type::Integer
                     name: 'leafNodesToSearchPercent'
@@ -194,8 +194,8 @@ properties:
     name: 'deployedIndexes'
     output: true
     description:
-      The pointers to DeployedIndexes created from this Index. An Index
-      can be only deleted if all its DeployedIndexes had been undeployed first.
+      The pointers to DeployedIndexes created from this Index. An Index can be
+      only deleted if all its DeployedIndexes had been undeployed first.
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
@@ -218,8 +218,8 @@ properties:
     name: 'createTime'
     output: true
     description:
-      The timestamp of when the Index was created in RFC3339 UTC "Zulu"
-      format, with nanosecond resolution and up to nine fractional digits.
+      The timestamp of when the Index was created in RFC3339 UTC "Zulu" format,
+      with nanosecond resolution and up to nine fractional digits.
   - !ruby/object:Api::Type::String
     name: 'updateTime'
     output: true

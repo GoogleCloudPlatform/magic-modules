@@ -2,12 +2,14 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -89,12 +91,17 @@ func testAccCheckActiveDirectoryDomainTrustDestroyProducer(t *testing.T) func(s 
 
 			config := GoogleProviderConfig(t)
 
-			url, err := acctest.ReplaceVarsForTest(config, rs, "{{ActiveDirectoryBasePath}}projects/{{project}}/locations/global/domains/{{domain}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ActiveDirectoryBasePath}}projects/{{project}}/locations/global/domains/{{domain}}")
 			if err != nil {
 				return err
 			}
 
-			res, _ := transport_tpg.SendRequest(config, "GET", "", url, config.UserAgent, nil)
+			res, _ := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
 
 			var v interface{}
 			var ok bool

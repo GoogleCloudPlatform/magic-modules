@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"google.golang.org/api/cloudbilling/v1"
@@ -231,7 +232,14 @@ func BootstrapSharedTestADDomain(t *testing.T, testId string, networkName string
 
 	log.Printf("[DEBUG] Getting shared test active directory domain %q", adDomainName)
 	getURL := fmt.Sprintf("%s%s", config.ActiveDirectoryBasePath, adDomainName)
-	_, err := transport_tpg.SendRequestWithTimeout(config, "GET", project, getURL, config.UserAgent, nil, 4*time.Minute)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    getURL,
+		UserAgent: config.UserAgent,
+		Timeout:   4 * time.Minute,
+	})
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[DEBUG] AD domain %q not found, bootstrapping", sharedADDomain)
 		postURL := fmt.Sprintf("%sprojects/%s/locations/global/domains?domainName=%s", config.ActiveDirectoryBasePath, project, sharedADDomain)
@@ -241,7 +249,15 @@ func BootstrapSharedTestADDomain(t *testing.T, testId string, networkName string
 			"authorizedNetworks": []string{fmt.Sprintf("projects/%s/global/networks/%s", project, networkName)},
 		}
 
-		_, err := transport_tpg.SendRequestWithTimeout(config, "POST", project, postURL, config.UserAgent, domainObj, 60*time.Minute)
+		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    postURL,
+			UserAgent: config.UserAgent,
+			Body:      domainObj,
+			Timeout:   60 * time.Minute,
+		})
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared active directory domain %q: %s", adDomainName, err)
 		}
@@ -249,7 +265,14 @@ func BootstrapSharedTestADDomain(t *testing.T, testId string, networkName string
 		log.Printf("[DEBUG] Waiting for active directory domain creation to finish")
 	}
 
-	_, err = transport_tpg.SendRequestWithTimeout(config, "GET", project, getURL, config.UserAgent, nil, 4*time.Minute)
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    getURL,
+		UserAgent: config.UserAgent,
+		Timeout:   4 * time.Minute,
+	})
 
 	if err != nil {
 		t.Fatalf("Error getting shared active directory domain %q: %s", adDomainName, err)
@@ -296,7 +319,15 @@ func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
 			"autoCreateSubnetworks": false,
 		}
 
-		res, err := transport_tpg.SendRequestWithTimeout(config, "POST", project, url, config.UserAgent, netObj, 4*time.Minute)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+			Body:      netObj,
+			Timeout:   4 * time.Minute,
+		})
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared test network %q: %s", networkName, err)
 		}
@@ -353,7 +384,7 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 			t.Fatalf("Error bootstrapping shared test project: %s", err)
 		}
 
-		opAsMap, err := ConvertToMap(op)
+		opAsMap, err := tpgresource.ConvertToMap(op)
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared test project: %s", err)
 		}
@@ -468,7 +499,7 @@ func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, serv
 			t.Fatalf("Error creating bootstrapped test project: %s", err)
 		}
 
-		opAsMap, err := ConvertToMap(op)
+		opAsMap, err := tpgresource.ConvertToMap(op)
 		if err != nil {
 			t.Fatalf("Error converting create project operation to map: %s", err)
 		}
@@ -664,14 +695,28 @@ func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
 
 	log.Printf("[DEBUG] Getting shared CA pool %q", poolName)
 	url := fmt.Sprintf("%sprojects/%s/locations/%s/caPools/%s", config.PrivatecaBasePath, project, location, poolName)
-	_, err := transport_tpg.SendRequest(config, "GET", project, url, config.UserAgent, nil)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+	})
 	if err != nil {
 		log.Printf("[DEBUG] CA pool %q not found, bootstrapping", poolName)
 		poolObj := map[string]interface{}{
 			"tier": "ENTERPRISE",
 		}
 		createUrl := fmt.Sprintf("%sprojects/%s/locations/%s/caPools?caPoolId=%s", config.PrivatecaBasePath, project, location, poolName)
-		res, err := transport_tpg.SendRequestWithTimeout(config, "POST", project, createUrl, config.UserAgent, poolObj, 4*time.Minute)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    createUrl,
+			UserAgent: config.UserAgent,
+			Body:      poolObj,
+			Timeout:   4 * time.Minute,
+		})
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared CA pool %q: %s", poolName, err)
 		}
@@ -684,7 +729,13 @@ func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
 		if err != nil {
 			t.Errorf("Error getting shared CA pool %q: %s", poolName, err)
 		}
-		_, err = transport_tpg.SendRequest(config, "GET", project, url, config.UserAgent, nil)
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			t.Errorf("Error getting shared CA pool %q: %s", poolName, err)
 		}
@@ -715,7 +766,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	}
 
 	// Wait for the operation to complete
-	opAsMap, err := ConvertToMap(op)
+	opAsMap, err := tpgresource.ConvertToMap(op)
 	if err != nil {
 		return "", err
 	}
@@ -746,7 +797,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	}
 
 	// Wait for the operation to complete
-	opAsMap, err = ConvertToMap(op)
+	opAsMap, err = tpgresource.ConvertToMap(op)
 	if err != nil {
 		return "", err
 	}

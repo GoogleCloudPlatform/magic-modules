@@ -2,10 +2,11 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"reflect"
 	"sort"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -68,6 +69,11 @@ func TestAccBillingAccountIam(t *testing.T) {
 				ImportStateId:     fmt.Sprintf("%s roles/billing.viewer serviceAccount:%s@%s.iam.gserviceaccount.com", billing, account, acctest.GetTestProjectFromEnv()),
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				// Test Iam Policy creation
+				Config: testAccBillingAccountDatasetIamPolicy(account, billing, role),
+				Check:  resource.TestCheckResourceAttrSet("data.google_billing_account_iam_policy.policy", "policy_data"),
 			},
 		},
 	})
@@ -192,4 +198,29 @@ resource "google_billing_account_iam_member" "foo" {
   member             = "serviceAccount:${google_service_account.test-account.email}"
 }
 `, account, billingAccountId, role)
+}
+
+func testAccBillingAccountDatasetIamPolicy(account, billing, role string) string {
+	return fmt.Sprintf(testBigqueryDatasetIam+`
+resource "google_service_account" "test-account" {
+  account_id   = "%s"
+  display_name = "Bigquery Dataset IAM Testing Account"
+}
+
+data "google_iam_policy" "policy" {
+  binding {
+    role    = "%s"
+    members = ["serviceAccount:${google_service_account.test-account.email}"]
+  }
+}
+
+resource "google_billing_account_iam_policy" "policy" {
+  billing_account_id = "%s"
+  policy_data = data.google_iam_policy.policy.policy_data
+}
+
+data "google_billing_account_iam_policy" "policy" {
+  billing_account_id = "%s"
+}
+`, account, role, billing, billing)
 }

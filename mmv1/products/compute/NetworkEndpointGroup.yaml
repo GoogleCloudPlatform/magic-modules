@@ -96,7 +96,7 @@ properties:
       character, which cannot be a dash.
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -137,7 +137,7 @@ properties:
     imports: 'selfLink'
     description: |
       Optional subnetwork to which all network endpoints in the NEG belong.
-    diff_suppress_func: 'CompareOptionalSubnet'
+    diff_suppress_func: 'tpgresource.CompareOptionalSubnet'
   - !ruby/object:Api::Type::Integer
     name: 'defaultPort'
     description: |

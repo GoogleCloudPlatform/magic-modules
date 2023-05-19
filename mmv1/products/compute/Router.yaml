@@ -94,7 +94,7 @@ properties:
     immutable: true
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: description
     description: |
@@ -130,7 +130,7 @@ properties:
           will have the same local ASN.
         required: true
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateRFC6996Asn'
+          function: 'verify.ValidateRFC6996Asn'
       - !ruby/object:Api::Type::Enum
         name: advertiseMode
         description: |
@@ -149,7 +149,7 @@ properties:
           blank to advertise no custom groups.
 
           This enum field has the one valid value: ALL_SUBNETS
-        item_type: Api::Type::String # TODO(#324): enum?
+        item_type: Api::Type::String  # TODO(#324): enum?
         send_empty_value: true
       - !ruby/object:Api::Type::Array
         name: advertisedIpRanges

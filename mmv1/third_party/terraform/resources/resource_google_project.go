@@ -12,7 +12,9 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 	"google.golang.org/api/cloudbilling/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/googleapi"
@@ -53,7 +55,7 @@ func ResourceGoogleProject() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validateProjectID(),
+				ValidateFunc: verify.ValidateProjectID(),
 				Description:  `The project ID. Changing this forces a new project to be created.`,
 			},
 			"skip_delete": {
@@ -71,7 +73,7 @@ func ResourceGoogleProject() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validateProjectName(),
+				ValidateFunc: verify.ValidateProjectName(),
 				Description:  `The display name of the project.`,
 			},
 			"org_id": {
@@ -110,7 +112,7 @@ func ResourceGoogleProject() *schema.Resource {
 
 func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -133,7 +135,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if _, ok := d.GetOk("labels"); ok {
-		project.Labels = expandLabels(d)
+		project.Labels = tpgresource.ExpandLabels(d)
 	}
 
 	var op *cloudresourcemanager.Operation
@@ -151,7 +153,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	d.SetId(fmt.Sprintf("projects/%s", pid))
 
 	// Wait for the operation to complete
-	opAsMap, err := ConvertToMap(op)
+	opAsMap, err := tpgresource.ConvertToMap(op)
 	if err != nil {
 		return err
 	}
@@ -189,7 +191,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 
 		billingProject := project.ProjectId
 		// err == nil indicates that the billing_project value was found
-		if bp, err := getBillingProject(d, config); err == nil {
+		if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 			billingProject = bp
 		}
 
@@ -228,7 +230,7 @@ func resourceGoogleProjectCheckPreRequisites(config *transport_tpg.Config, d *sc
 	if !d.Get("auto_create_network").(bool) {
 		call := config.NewServiceUsageClient(userAgent).Services.Get("projects/00000000000/services/serviceusage.googleapis.com")
 		if config.UserProjectOverride {
-			if billingProject, err := getBillingProject(d, config); err == nil {
+			if billingProject, err := tpgresource.GetBillingProject(d, config); err == nil {
 				call.Header().Add("X-Goog-User-Project", billingProject)
 			}
 		}
@@ -247,7 +249,7 @@ func resourceGoogleProjectCheckPreRequisites(config *transport_tpg.Config, d *sc
 
 func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -369,7 +371,7 @@ func parseFolderId(v interface{}) string {
 
 func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -421,7 +423,7 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 
 	// Project Labels have changed
 	if ok := d.HasChange("labels"); ok {
-		p.Labels = expandLabels(d)
+		p.Labels = tpgresource.ExpandLabels(d)
 
 		// Do Update on project
 		if p, err = updateProject(config, d, project_name, userAgent, p); err != nil {
@@ -446,7 +448,7 @@ func updateProject(config *transport_tpg.Config, d *schema.ResourceData, project
 
 func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -491,7 +493,7 @@ func resourceProjectImportState(d *schema.ResourceData, meta interface{}) ([]*sc
 
 // Delete a compute network along with the firewall rules inside it.
 func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Config, projectId, networkName string) error {
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -679,7 +681,7 @@ func ListCurrentlyEnabledServices(project, billingProject, userAgent string, con
 			Pages(ctx, func(r *serviceusage.ListServicesResponse) error {
 				for _, v := range r.Services {
 					// services are returned as "projects/{{project}}/services/{{name}}"
-					name := GetResourceNameFromSelfLink(v.Name)
+					name := tpgresource.GetResourceNameFromSelfLink(v.Name)
 
 					// if name not in ignoredProjectServicesSet
 					if _, ok := ignoredProjectServicesSet[name]; !ok {

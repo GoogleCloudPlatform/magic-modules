@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -45,7 +46,7 @@ func ResourceGoogleFolderOrganizationPolicy() *schema.Resource {
 func resourceFolderOrgPolicyImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
 
-	if err := ParseImportId([]string{
+	if err := tpgresource.ParseImportId([]string{
 		"folders/(?P<folder>[^/]+)/constraints/(?P<constraint>[^/]+)",
 		"folders/(?P<folder>[^/]+)/(?P<constraint>[^/]+)",
 		"(?P<folder>[^/]+)/(?P<constraint>[^/]+)"},
@@ -80,7 +81,7 @@ func resourceGoogleFolderOrganizationPolicyCreate(d *schema.ResourceData, meta i
 
 func resourceGoogleFolderOrganizationPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -136,7 +137,7 @@ func resourceGoogleFolderOrganizationPolicyUpdate(d *schema.ResourceData, meta i
 
 func resourceGoogleFolderOrganizationPolicyDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -152,7 +153,7 @@ func resourceGoogleFolderOrganizationPolicyDelete(d *schema.ResourceData, meta i
 
 func setFolderOrganizationPolicy(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

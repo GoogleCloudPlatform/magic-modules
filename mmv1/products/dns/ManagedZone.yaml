@@ -184,8 +184,7 @@ properties:
             - !ruby/object:Api::Type::Enum
               name: 'algorithm'
               description:
-                String mnemonic specifying the DNSSEC algorithm of this
-                key
+                String mnemonic specifying the DNSSEC algorithm of this key
               values:
                 - 'ecdsap256sha256'
                 - 'ecdsap384sha384'
@@ -258,7 +257,7 @@ properties:
       - :private
       - :public
     default_value: :public
-    diff_suppress_func: 'CaseDiffSuppress'
+    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
     custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
   - !ruby/object:Api::Type::NestedObject
     name: 'privateVisibilityConfig'
@@ -271,8 +270,7 @@ properties:
       - !ruby/object:Api::Type::Array
         name: 'gkeClusters'
         description:
-          'The list of Google Kubernetes Engine clusters that can see this
-          zone.'
+          'The list of Google Kubernetes Engine clusters that can see this zone.'
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
@@ -299,11 +297,11 @@ properties:
             }
             raw := v.(map[string]interface{})
             if url, ok := raw["network_url"]; ok {
-              return selfLinkNameHash(url)
+              return tpgresource.SelfLinkNameHash(url)
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsManagedZonePrivateVisibilityConfigNetworksSchema())
-            return hashcode(buf.String())
+            return tpgresource.Hashcode(buf.String())
           }
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
@@ -316,7 +314,7 @@ properties:
                 This should be formatted like `projects/{project}/global/networks/{network}` or
                 `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
               required: true
-              diff_suppress_func: 'compareSelfLinkOrResourceName'
+              diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::NestedObject
     name: 'forwardingConfig'
     description: |
@@ -336,11 +334,11 @@ properties:
           func(v interface{}) int {
             raw := v.(map[string]interface{})
             if address, ok := raw["ipv4_address"]; ok {
-              hashcode(address.(string))
+              tpgresource.Hashcode(address.(string))
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsManagedZoneForwardingConfigTargetNameServersSchema())
-            return hashcode(buf.String())
+            return tpgresource.Hashcode(buf.String())
           }
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
@@ -378,7 +376,7 @@ properties:
               This should be formatted like `projects/{project}/global/networks/{network}` or
               `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
             custom_expand: templates/terraform/custom_expand/network_full_url.erb
-            diff_suppress_func: 'compareSelfLinkOrResourceName'
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Boolean
     name: 'reverseLookup'
     api_name: reverseLookupConfig
@@ -395,8 +393,8 @@ properties:
     immutable: true
     name: 'serviceDirectoryConfig'
     description:
-      The presence of this field indicates that this zone is backed by
-      Service Directory. The value of this field contains information related to the
+      The presence of this field indicates that this zone is backed by Service
+      Directory. The value of this field contains information related to the
       namespace associated with the zone.
     properties:
       - !ruby/object:Api::Type::NestedObject
@@ -424,5 +422,5 @@ properties:
         name: 'enableLogging'
         required: true
         description:
-          'If set, enable query logging for this ManagedZone. False by
-          default, making logging opt-in.'
+          'If set, enable query logging for this ManagedZone. False by default,
+          making logging opt-in.'

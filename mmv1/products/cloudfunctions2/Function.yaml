@@ -54,8 +54,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudfunctions2_basic'
     primary_resource_id: 'function'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-function-v2%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-function-v2%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       function: 'function-v2'
@@ -106,7 +106,8 @@ examples:
       zip_path: '"./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip"'
       primary_resource_id: '"terraform-test"'
       policyChanged:
-        "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\", \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
+        "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
+        \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
         )"
         # ignore these fields during import step
     ignore_read_extra:
@@ -127,7 +128,8 @@ examples:
       zip_path: '"./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip"'
       primary_resource_id: '"terraform-test"'
       policyChanged:
-        "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\", \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
+        "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
+        \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
         )"
         # ignore these fields during import step
     ignore_read_extra:
@@ -147,7 +149,8 @@ examples:
       zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
       location: '"us-central1"'
       policyChanged:
-        "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\", \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
+        "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
+        \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
         )"
         # ignore these fields during import step
     ignore_read_extra:
@@ -167,7 +170,8 @@ examples:
       zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
       location: '"us-central1"'
       policyChanged:
-        "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\", \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
+        "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
+        \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
         )"
         # ignore these fields during import step
     ignore_read_extra:
@@ -270,8 +274,8 @@ properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'storageSource'
             description:
-              'If provided, get the source from this location in Google
-              Cloud Storage.'
+              'If provided, get the source from this location in Google Cloud
+              Storage.'
             exactly_one_of:
               - storage_source
               - repo_source
@@ -282,7 +286,8 @@ properties:
                 custom_flatten: 'templates/terraform/custom_flatten/cloudfunctions2_function_source_bucket.go.erb'
               - !ruby/object:Api::Type::String
                 name: 'object'
-                description: 'Google Cloud Storage object containing the source.'
+                description:
+                  'Google Cloud Storage object containing the source.'
                 custom_flatten: 'templates/terraform/custom_flatten/cloudfunctions2_function_source_object.go.erb'
               - !ruby/object:Api::Type::Integer
                 name: 'generation'
@@ -292,8 +297,8 @@ properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'repoSource'
             description:
-              'If provided, get the source from this location in a Cloud
-              Source Repository.'
+              'If provided, get the source from this location in a Cloud Source
+              Repository.'
             exactly_one_of:
               - storage_source
               - repo_source
@@ -340,8 +345,8 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'workerPool'
         description:
-          'Name of the Cloud Build Custom Worker Pool that should be used
-          to build the function.'
+          'Name of the Cloud Build Custom Worker Pool that should be used to
+          build the function.'
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'environmentVariables'
         description: |
@@ -375,14 +380,14 @@ properties:
       - !ruby/object:Api::Type::Integer
         name: 'maxInstanceRequestConcurrency'
         description:
-          'Sets the maximum number of concurrent requests that each instance
-          can receive. Defaults to 1.'
+          'Sets the maximum number of concurrent requests that each instance can
+          receive. Defaults to 1.'
         default_from_api: true
       - !ruby/object:Api::Type::String
         name: 'availableCpu'
         description:
-          'The number of CPUs used in a single container instance. Default
-          value is calculated from available memory.'
+          'The number of CPUs used in a single container instance. Default value
+          is calculated from available memory.'
         default_from_api: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'environmentVariables'
@@ -402,8 +407,8 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'vpcConnector'
         description:
-          'The Serverless VPC Access connector that this cloud function
-          can connect to.'
+          'The Serverless VPC Access connector that this cloud function can
+          connect to.'
       - !ruby/object:Api::Type::Enum
         name: 'vpcConnectorEgressSettings'
         description: 'Available egress settings.'
@@ -413,7 +418,8 @@ properties:
           - :ALL_TRAFFIC
       - !ruby/object:Api::Type::Enum
         name: 'ingressSettings'
-        description: 'Available ingress settings. Defaults to "ALLOW_ALL" if unspecified.'
+        description:
+          'Available ingress settings. Defaults to "ALLOW_ALL" if unspecified.'
         values:
           - :ALLOW_ALL
           - :ALLOW_INTERNAL_ONLY
@@ -434,8 +440,8 @@ properties:
       - !ruby/object:Api::Type::Boolean
         name: 'allTrafficOnLatestRevision'
         description:
-          'Whether 100% of traffic is routed to the latest revision. Defaults
-          to true.'
+          'Whether 100% of traffic is routed to the latest revision. Defaults to
+          true.'
         default_value: true
       - !ruby/object:Api::Type::Array
         name: 'secretEnvironmentVariables'
@@ -485,8 +491,8 @@ properties:
             - !ruby/object:Api::Type::Array
               name: 'versions'
               description:
-                List of secret versions to mount for this secret. If empty,
-                the latest version of the secret will be made available in a file
+                List of secret versions to mount for this secret. If empty, the
+                latest version of the secret will be made available in a file
                 named after the secret under the mount point.'
               default_from_api: true
               item_type: !ruby/object:Api::Type::NestedObject

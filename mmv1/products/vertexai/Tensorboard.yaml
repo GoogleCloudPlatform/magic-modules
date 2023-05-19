@@ -96,8 +96,8 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'blobStoragePathPrefix'
     description:
-      Consumer project Cloud Storage path prefix used to store blob data,
-      which can either be a bucket or directory. Does not end with a '/'.
+      Consumer project Cloud Storage path prefix used to store blob data, which
+      can either be a bucket or directory. Does not end with a '/'.
     output: true
   - !ruby/object:Api::Type::String
     name: 'runCount'

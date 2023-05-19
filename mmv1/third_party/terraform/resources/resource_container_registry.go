@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -46,12 +47,12 @@ func ResourceContainerRegistry() *schema.Resource {
 
 func resourceContainerRegistryCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -65,12 +66,19 @@ func resourceContainerRegistryCreate(d *schema.ResourceData, meta interface{}) e
 	}
 
 	// Performing a token handshake with the GCR API causes the backing bucket to create if it hasn't already.
-	url, err := ReplaceVars(d, config, fmt.Sprintf("%s?service=gcr.io&scope=repository:{{project}}/my-repo:push,pull", urlBase))
+	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("%s?service=gcr.io&scope=repository:{{project}}/my-repo:push,pull", urlBase))
 	if err != nil {
 		return err
 	}
 
-	_, err = transport_tpg.SendRequestWithTimeout(config, "GET", project, url, userAgent, nil, d.Timeout(schema.TimeoutCreate))
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Timeout:   d.Timeout(schema.TimeoutCreate),
+	})
 
 	if err != nil {
 		return err
@@ -80,13 +88,13 @@ func resourceContainerRegistryCreate(d *schema.ResourceData, meta interface{}) e
 
 func resourceContainerRegistryRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	location := d.Get("location").(string)
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}

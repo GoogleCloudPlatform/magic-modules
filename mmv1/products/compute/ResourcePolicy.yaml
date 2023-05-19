@@ -139,7 +139,7 @@ properties:
                   eg: 21:00
                 required: true
                 validation: !ruby/object:Provider::Terraform::Validation
-                  function: 'validateHourlyOnly'
+                  function: 'verify.ValidateHourlyOnly'
           - !ruby/object:Api::Type::NestedObject
             name: 'dailySchedule'
             description: |
@@ -162,7 +162,7 @@ properties:
                   both 13:00-5 and 08:00 are valid.
                 required: true
                 validation: !ruby/object:Provider::Terraform::Validation
-                  function: 'validateHourlyOnly'
+                  function: 'verify.ValidateHourlyOnly'
           - !ruby/object:Api::Type::NestedObject
             name: 'weeklySchedule'
             description: |

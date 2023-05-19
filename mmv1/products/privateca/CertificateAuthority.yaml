@@ -86,9 +86,9 @@ examples:
       deletion_protection: 'false'
     ignore_read_extra:
       - 'deletion_protection'
-        # Skip test because it depends on a beta resource, but PrivateCA does
-        # not have a beta endpoint
   - !ruby/object:Provider::Terraform::Examples
+    # Skip test because it depends on a beta resource, but PrivateCA does
+    # not have a beta endpoint
     skip_test: true
     name: 'privateca_certificate_authority_byo_key'
     primary_resource_id:
@@ -102,7 +102,9 @@ examples:
       pool_location: 'us-central1'
       deletion_protection: 'true'
     test_vars_overrides:
-      kms_key_name: 'BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN", "us-central1").CryptoKey.Name'
+      kms_key_name:
+        'BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN",
+        "us-central1").CryptoKey.Name'
       pool_name: 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
       pool_location: '"us-central1"'
       deletion_protection: 'false'
@@ -195,7 +197,8 @@ properties:
     default_value: :SELF_SIGNED
   - !ruby/object:Api::Type::NestedObject
     name: 'config'
-    description: The config used to create a self-signed X.509 certificate or CSR.
+    description:
+      The config used to create a self-signed X.509 certificate or CSR.
     required: true
     immutable: true
     properties:
@@ -527,7 +530,8 @@ properties:
                 immutable: true
               - !ruby/object:Api::Type::String
                 name: 'province'
-                description: The province, territory, or regional state of the subject.
+                description:
+                  The province, territory, or regional state of the subject.
                 immutable: true
               - !ruby/object:Api::Type::String
                 name: 'streetAddress'
@@ -580,8 +584,8 @@ properties:
               - !ruby/object:Api::Type::Array
                 name: 'ipAddresses'
                 description:
-                  Contains only valid 32-bit IPv4 addresses or RFC 4291
-                  IPv6 addresses.
+                  Contains only valid 32-bit IPv4 addresses or RFC 4291 IPv6
+                  addresses.
                 immutable: true
                 item_type: Api::Type::String
                 at_least_one_of:
@@ -595,7 +599,7 @@ properties:
       The desired lifetime of the CA certificate. Used to create the "notBeforeTime" and
       "notAfterTime" fields inside an X.509 certificate. A duration in seconds with up to nine
       fractional digits, terminated by 's'. Example: "3.5s".
-    default_value: 315360000s # 10 years
+    default_value: 315360000s  # 10 years
     immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'keySpec'
@@ -650,7 +654,7 @@ properties:
         exactly_one_of:
           - subordinate_config.0.certificate_authority
           - subordinate_config.0.pem_issuer_chain
-        diff_suppress_func: 'compareResourceNames'
+        diff_suppress_func: 'tpgresource.CompareResourceNames'
       - !ruby/object:Api::Type::NestedObject
         name: 'pemIssuerChain'
         description: |

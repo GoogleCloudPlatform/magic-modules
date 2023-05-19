@@ -1,14 +1,14 @@
 	// Store the name as ID
 	d.SetId(res["name"].(string))
 
-	if err = d.Set("version_id", GetResourceNameFromSelfLink(res["name"].(string))); err != nil {
+	if err = d.Set("version_id", tpgresource.GetResourceNameFromSelfLink(res["name"].(string))); err != nil {
 		return fmt.Errorf("Error setting version_id: %s", err)
 	}
 
 	obj = make(map[string]interface{})
 	obj["status"] = "FINALIZED"
 
-	url, err = ReplaceVars(d, config, "{{FirebaseHostingBasePath}}{{name}}")
+	url, err = tpgresource.ReplaceVars(d, config, "{{FirebaseHostingBasePath}}{{name}}")
 	if err != nil {
 		return err
 	}
@@ -22,7 +22,15 @@
 		return err
 	}
 
-	res, err = transport_tpg.SendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+	res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "PATCH",
+		Project: billingProject,
+		RawURL: url,
+		UserAgent: userAgent,
+		Body: obj,
+		Timeout: d.Timeout(schema.TimeoutUpdate),
+	})
 
 	if err != nil {
 		return fmt.Errorf("Error finalizing Version %q: %s", d.Id(), err)

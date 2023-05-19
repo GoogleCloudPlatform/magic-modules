@@ -57,8 +57,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'backend_bucket_basic'
     primary_resource_id: 'image_backend'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-image-backend-bucket%s\", context[\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-image-backend-bucket%s\",
+      context[\"\
       random_suffix\"])"
     vars:
       backend_bucket_name: 'image-backend-bucket'
@@ -251,7 +251,7 @@ properties:
     name: 'edgeSecurityPolicy'
     description: |
       The security policy associated with this backend bucket.
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Array
     name: 'customResponseHeaders'
     description: |

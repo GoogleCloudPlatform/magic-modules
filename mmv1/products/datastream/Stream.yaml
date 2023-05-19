@@ -132,7 +132,8 @@ examples:
       bigquery_destination_table_kms_key_name: 'bigquery-kms-name'
     test_vars_overrides:
       deletion_protection: 'false'
-      bigquery_destination_table_kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      bigquery_destination_table_kms_key_name:
+        'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 
 parameters:
   - !ruby/object:Api::Type::String
@@ -173,7 +174,7 @@ properties:
         required: true
         description: |
           Source connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
-        diff_suppress_func: 'ProjectNumberDiffSuppress'
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
       - !ruby/object:Api::Type::NestedObject
         name: 'mysqlSourceConfig'
         allow_empty_object: true
@@ -336,6 +337,15 @@ properties:
             send_empty_value: true
             description: |
               Maximum number of concurrent CDC tasks. The number should be non negative.
+              If not set (or set to 0), the system's default value will be used.
+            default_from_api: true
+            validation: !ruby/object:Provider::Terraform::Validation
+              function: 'validation.IntAtLeast(0)'
+          - !ruby/object:Api::Type::Integer
+            name: 'maxConcurrentBackfillTasks'
+            send_empty_value: true
+            description: |
+              Maximum number of concurrent backfill tasks. The number should be non negative.
               If not set (or set to 0), the system's default value will be used.
             default_from_api: true
             validation: !ruby/object:Provider::Terraform::Validation
@@ -759,7 +769,7 @@ properties:
         required: true
         description: |
           Destination connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
-        diff_suppress_func: 'ProjectNumberDiffSuppress'
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
       - !ruby/object:Api::Type::NestedObject
         name: 'gcsDestinationConfig'
         exactly_one_of:

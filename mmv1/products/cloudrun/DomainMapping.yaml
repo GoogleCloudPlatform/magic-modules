@@ -132,7 +132,8 @@ properties:
         description: The name of the route that the mapping currently points to.
   - !ruby/object:Api::Type::String
     name: apiVersion
-    description: The API version for this call such as "serving.knative.dev/v1alpha1".
+    description:
+      The API version for this call such as "serving.knative.dev/v1alpha1".
     exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: spec
@@ -154,7 +155,7 @@ properties:
           The name of the Cloud Run Service that this DomainMapping applies to.
           The route must exist.
         custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.erb'
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
       - !ruby/object:Api::Type::Enum
         name: certificateMode
         description: The mode of the certificate.

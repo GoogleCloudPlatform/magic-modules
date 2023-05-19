@@ -80,7 +80,8 @@ properties:
   # | 'etag' is not applicable for state convergence.
   - !ruby/object:Api::Type::Integer
     name: 'generation'
-    description: 'The content generation of the object, if applied to an object.'
+    description:
+      'The content generation of the object, if applied to an object.'
     output: true
   - !ruby/object:Api::Type::String
     name: 'id'

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -19,7 +20,7 @@ var schemaOrganizationPolicy = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Required:         true,
 		ForceNew:         true,
-		DiffSuppressFunc: compareSelfLinkOrResourceName,
+		DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 		Description:      `The name of the Constraint the Policy is configuring, for example, serviceuser.services.`,
 	},
 	"boolean_policy": {
@@ -189,7 +190,7 @@ func resourceGoogleOrganizationPolicyCreate(d *schema.ResourceData, meta interfa
 
 func resourceGoogleOrganizationPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -245,7 +246,7 @@ func resourceGoogleOrganizationPolicyUpdate(d *schema.ResourceData, meta interfa
 
 func resourceGoogleOrganizationPolicyDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -295,7 +296,7 @@ func isOrganizationPolicyUnset(d *schema.ResourceData) bool {
 
 func setOrganizationPolicy(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

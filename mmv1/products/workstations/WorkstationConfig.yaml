@@ -20,8 +20,9 @@ update_verb: :PATCH
 update_mask: true
 min_version: beta
 description:
-  "A set of configuration options describing how a workstation will be\
-  \ run. Workstation configurations are intended to be shared across multiple workstations."
+  'A set of configuration options describing how a workstation will be run.
+  Workstation configurations are intended to be shared across multiple
+  workstations.'
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Workstations': 'https://cloud.google.com/workstations/docs/'
@@ -66,7 +67,9 @@ examples:
     name: 'workstation_config_basic'
     min_version: beta
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workstation-cluster%s", context["random_suffix"]), fmt.Sprintf("tf-test-workstation-config%s", context["random_suffix"])'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-workstation-cluster%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-workstation-config%s", context["random_suffix"])'
     vars:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
@@ -79,6 +82,13 @@ examples:
       workstation_config_name: 'workstation-config'
   - !ruby/object:Provider::Terraform::Examples
     name: 'workstation_config_persistent_directories'
+    min_version: beta
+    primary_resource_id: 'default'
+    vars:
+      workstation_cluster_name: 'workstation-cluster'
+      workstation_config_name: 'workstation-config'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'workstation_config_source_snapshot'
     min_version: beta
     primary_resource_id: 'default'
     vars:
@@ -106,14 +116,14 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      The ID of the workstation cluster config.
+      The ID to be assigned to the workstation cluster config.
   - !ruby/object:Api::Type::String
     name: 'workstationClusterId'
     required: true
     immutable: true
     url_param_only: true
     description: |
-      The name of the workstation cluster.
+      The ID of the parent workstation cluster.
   - !ruby/object:Api::Type::String
     name: 'location'
     immutable: true
@@ -139,8 +149,8 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description:
-      "Client-specified labels that are applied to the resource and that\
-      \ are also propagated to the underlying Compute Engine resources."
+      'Client-specified labels that are applied to the resource and that are
+      also propagated to the underlying Compute Engine resources.'
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'annotations'
     description: 'Client-specified annotations. This is distinct from labels.'
@@ -152,25 +162,31 @@ properties:
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: |
-      Time the Instance was created in UTC.
+      Time when this resource was created.
     output: true
   - !ruby/object:Api::Type::NestedObject
     name: 'host'
     description: |
       Runtime host for a workstation.
-    immutable: true
     default_from_api: true
+    update_mask_fields:
+      - 'host.gceInstance.machineType'
+      - 'host.gceInstance.poolSize'
+      - 'host.gceInstance.tags'
+      - 'host.gceInstance.disablePublicIpAddresses'
+      - 'host.gceInstance.shieldedInstanceConfig.enableSecureBoot'
+      - 'host.gceInstance.shieldedInstanceConfig.enableVtpm'
+      - 'host.gceInstance.shieldedInstanceConfig.enableIntegrityMonitoring'
+      - 'host.gceInstance.confidentialInstanceConfig.enableConfidentialCompute'
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'gceInstance'
         description: |
-          Specifies a Compute Engine instance as the host.
-        immutable: true
+          A runtime using a Compute Engine instance.
         default_from_api: true
         properties:
           - !ruby/object:Api::Type::String
             name: 'machineType'
-            immutable: true
             description: |-
               The name of a Compute Engine machine type.
             default_from_api: true
@@ -182,7 +198,6 @@ properties:
             default_from_api: true
           - !ruby/object:Api::Type::Integer
             name: 'poolSize'
-            immutable: true
             description: |-
               Number of instances to pool for faster workstation startup.
             default_from_api: true
@@ -195,96 +210,118 @@ properties:
           - !ruby/object:Api::Type::Array
             name: 'tags'
             item_type: Api::Type::String
-            immutable: true
             description: |
               Network tags to add to the Compute Engine machines backing the Workstations.
           - !ruby/object:Api::Type::Boolean
             name: 'disablePublicIpAddresses'
-            immutable: true
             description: |
               Whether instances have no public IP address.
           - !ruby/object:Api::Type::NestedObject
             name: 'shieldedInstanceConfig'
             description: |
               A set of Compute Engine Shielded instance options.
-            immutable: true
+            default_from_api: true
+            custom_flatten: 'templates/terraform/custom_flatten/workstations_config_shielded_instance.go.erb'
             properties:
               - !ruby/object:Api::Type::Boolean
                 name: 'enableSecureBoot'
-                immutable: true
                 description: |
                   Whether the instance has Secure Boot enabled.
+                send_empty_value: true
               - !ruby/object:Api::Type::Boolean
                 name: 'enableVtpm'
-                immutable: true
                 description: |
                   Whether the instance has the vTPM enabled.
+                send_empty_value: true
               - !ruby/object:Api::Type::Boolean
                 name: 'enableIntegrityMonitoring'
-                immutable: true
                 description: |
                   Whether the instance has integrity monitoring enabled.
+                send_empty_value: true
           - !ruby/object:Api::Type::NestedObject
             name: 'confidentialInstanceConfig'
             description: |
               A set of Compute Engine Confidential VM instance options.
-            immutable: true
+            default_from_api: true
+            custom_flatten: 'templates/terraform/custom_flatten/workstations_config_confidential_instance.go.erb'
             properties:
               - !ruby/object:Api::Type::Boolean
                 name: 'enableConfidentialCompute'
-                immutable: true
+                # TODO(esu): Change this to required in next breaking release.
                 description: |
                   Whether the instance has confidential compute enabled.
+                send_empty_value: true
   - !ruby/object:Api::Type::Array
     name: 'persistentDirectories'
     description: |
       Directories to persist across workstation sessions.
     default_from_api: true
+    immutable: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
           name: 'mountPath'
           description: |
             Location of this directory in the running workstation.
+          default_from_api: true
+          immutable: true
         - !ruby/object:Api::Type::NestedObject
           name: 'gcePd'
           description: |
             PersistentDirectory backed by a Compute Engine regional persistent disk.
           default_from_api: true
+          immutable: true
           properties:
             - !ruby/object:Api::Type::String
               name: 'fsType'
               description: |
                 Type of file system that the disk should be formatted with. The workstation image must support this file system type. Must be empty if sourceSnapshot is set.
               default_from_api: true
+              immutable: true
             - !ruby/object:Api::Type::String
               name: 'diskType'
               description: |
                 Type of the disk to use.
               default_from_api: true
+              immutable: true
             - !ruby/object:Api::Type::Integer
               name: 'sizeGb'
               description: |-
                 Size of the disk in GB. Must be empty if sourceSnapshot is set.
               default_from_api: true
+              immutable: true
             - !ruby/object:Api::Type::Enum
               name: 'reclaimPolicy'
               description: |
                 What should happen to the disk after the workstation is deleted. Defaults to DELETE.
+              immutable: true
               values:
-                - :RECLAIM_POLICY_UNSPECIFIED
                 - :DELETE
                 - :RETAIN
+            - !ruby/object:Api::Type::String
+              name: 'sourceSnapshot'
+              description: |
+                The snapshot to use as the source for the disk. This can be the snapshot's `self_link`, `id`, or a string in the format of `projects/{project}/global/snapshots/{snapshot}`. If set, sizeGb and fsType must be empty.
+              immutable: true
+              # TODO(esu): Add conflicting fields once complex lists are supported.
   - !ruby/object:Api::Type::NestedObject
     name: 'container'
     description: |
       Container that will be run for each workstation using this configuration when that workstation is started.
     default_from_api: true
+    # Mask fields must be sent as distinct keys, else some fields will upsert rather than be replaced.
+    update_mask_fields:
+      - 'container.image'
+      - 'container.command'
+      - 'container.args'
+      - 'container.workingDir'
+      - 'container.env'
+      - 'container.runAsUser'
     properties:
       - !ruby/object:Api::Type::String
         name: 'image'
         description: |
-          Docker image defining the container. This image must be accessible by the config"s service account.
+          Docker image defining the container. This image must be accessible by the config's service account.
         default_from_api: true
       - !ruby/object:Api::Type::Array
         name: 'command'
@@ -300,6 +337,8 @@ properties:
         name: 'workingDir'
         description: |
           If set, overrides the default DIR specified by the image.
+        # Allow unsetting to revert to container default.
+        send_empty_value: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'env'
         description: |
@@ -311,6 +350,7 @@ properties:
           If set, overrides the USER specified in the image with the given uid.
   - !ruby/object:Api::Type::NestedObject
     name: 'encryptionKey'
+    immutable: true
     description: |
       Encrypts resources of this workstation configuration using a customer-managed encryption key.
 
