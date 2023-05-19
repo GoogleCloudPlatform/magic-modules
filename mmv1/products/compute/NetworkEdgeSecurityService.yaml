@@ -13,8 +13,8 @@
 
 ---
 !ruby/object:Api::Resource
-name: 'networkEdgeSecurityServices'
-kind: 'compute#networkEdgeSecurityServices'
+name: 'networkEdgeSecurityService'
+kind: 'compute#networkEdgeSecurityService'
 base_url: projects/{{project}}/regions/{{region}}/networkEdgeSecurityServices
 create_url: 'projects/{{project}}/regions/{{region}}/networkEdgeSecurityServices?networkEdgeSecurityService={{name}}'
 self_link: 'projects/{{project}}/regions/{{region}}/networkEdgeSecurityServices/{{name}}'
@@ -75,9 +75,29 @@ properties:
     name: 'description'
     description: |
       Free-text description of the resource.
+  - !ruby/object:Api::Type::String
+    name: 'id'
+    output: true
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
+  - !ruby/object:Api::Type::String
+    name: 'creationTimestamp'
+    output: true
+    description: |
+      Creation timestamp in RFC3339 text format.
+  - !ruby/object:Api::Type::String
+    name: 'selfLink'
+    output: true
+    description: |
+      Server-defined URL for the resource.
+  - !ruby/object:Api::Type::String
+    name: 'selfLinkWithId'
+    output: true
+    description: |
+      Server-defined URL for this resource with the resource id.
   - !ruby/object:Api::Type::Fingerprint
     name: 'fingerprint'
-    ignore_read: true
+    output: true
     description: |
       Fingerprint of this resource. A hash of the contents stored in this object. This field is used in optimistic locking. This field will be ignored when inserting a NetworkEdgeSecurityService. 
       An up-to-date fingerprint must be provided in order to update the NetworkEdgeSecurityService, otherwise the request will fail with error 412 conditionNotMet.

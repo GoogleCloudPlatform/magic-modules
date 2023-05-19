@@ -10,15 +10,16 @@ import (
 func TestAccComputeNetworkEdgeSecurityService_update(t *testing.T) {
 	t.Parallel()
 
+	pName := fmt.Sprintf("tf-test-security-policy-%s", RandString(t, 10))
 	nesName := fmt.Sprintf("tf-test-edge-security-services-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputenetworkEdgeSecurityServicesDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputenetworkEdgeSecurityServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkEdgeSecurityService_basic(nesName),
+				Config: testAccNetworkEdgeSecurityService_basic(pName, nesName),
 			},
 			{
 				ResourceName:      "google_compute_network_edge_security_service.foobar",
@@ -29,41 +30,20 @@ func TestAccComputeNetworkEdgeSecurityService_update(t *testing.T) {
 	})
 }
 
-func testAccNetworkEdgeSecurityService_basic(nesName string) string {
+func testAccNetworkEdgeSecurityService_basic(pName, nesName string) string {
 	return fmt.Sprintf(`
-  resource "google_compute_security_policy" "policy" {
-    name = "my-policy"
-  
-    rule {
-      action   = "deny(403)"
-      priority = "1000"
-      match {
-        versioned_expr = "SRC_IPS_V1"
-        config {
-          src_ip_ranges = ["9.9.9.0/24"]
-        }
-      }
-      description = "Deny access to IPs in 9.9.9.0/24"
-    }
+resource "google_compute_region_security_policy" "foobar" {
+  name        = "%s"
+  description = "basic region security policy"
+  type        = "CLOUD_ARMOR_NETWORK"
+  region      = "asia-southeast1"
+}
 
-    rule {
-      action   = "allow"
-      priority = "2147483647"
-      match {
-        versioned_expr = "SRC_IPS_V1"
-        config {
-          src_ip_ranges = ["*"]
-        }
-      }
-      description = "default rule"
-    }
-  }
-  
-  resource "google_compute_network_edge_security_services" "foobar" {
-    name     = "%s"
-    region = "asia-southeast1"
-    description  = "My basic resource using security policy"
-    security_policy = google_compute_security_policy.policy.id
-  }
-`, nesName)
+resource "google_compute_network_edge_security_service" "foobar" {
+  name     = "%s"
+  region = "asia-southeast1"
+  description  = "My basic resource using security policy"
+  security_policy = google_compute_region_security_policy.foobar.self_link
+}
+`, pName, nesName)
 }
