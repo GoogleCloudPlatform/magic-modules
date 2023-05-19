@@ -48,8 +48,7 @@ spec:
 <%
       # idTemplate is an import id fed into the provider, which is (slightly)
       # distinct from a Terraform id.
-      # Select the first format, which will generally be the long form.
-      id_template = import_id_formats_from_resource(object)[0].gsub('%', '')
+      id_template = guess_id_template(object)
       name = guess_metadata_mapping_name(object)
       has_name = !name.nil?
       has_labels = object.all_user_properties.map(&:name).include?("labels")
