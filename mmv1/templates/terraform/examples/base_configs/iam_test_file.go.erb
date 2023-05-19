@@ -163,6 +163,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAcc<%= resource_name -%>IamPolicy_basicGenerated(context),
+				Check:  resource.TestCheckResourceAttrSet("data.<%= resource_ns_iam -%>_policy.foo", "policy_data"),
 			},
 <% unless object.iam_policy.skip_import_test -%>
 			{
@@ -450,6 +451,16 @@ resource "<%= resource_ns_iam -%>_policy" "foo" {
 <% end -%>
 <%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   policy_data = data.google_iam_policy.foo.policy_data
+}
+
+data "<%= resource_ns_iam -%>_policy" "foo" {
+<% unless object.min_version.name == "ga" -%>
+  provider = google-beta
+<% end -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
+  depends_on = [
+    <%= resource_ns_iam -%>_policy.foo
+  ]
 }
 `, context)
 }
