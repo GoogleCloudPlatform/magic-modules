@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package google
+<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -16,7 +18,7 @@ func TestAccComputeNetworkEdgeSecurityService_update(t *testing.T) {
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputenetworkEdgeSecurityServiceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeNetworkEdgeSecurityServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkEdgeSecurityService_basic(pName, nesName),
@@ -73,3 +75,4 @@ resource "google_compute_network_edge_security_service" "foobar" {
 }
 `, pName, nesName)
 }
+<% end -%>
