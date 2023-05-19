@@ -210,7 +210,7 @@ properties:
             - :ADVANCED
             - :STANDARD
   - !ruby/object:Api::Type::String
-    name: 'selfLink'
+    name: 'selfLinkWithId'
     output: true
     description: |
       Server-defined URL for this resource with the resource id.
