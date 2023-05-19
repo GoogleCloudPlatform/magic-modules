@@ -51,6 +51,11 @@ examples:
     primary_resource_id: 'region-sec-policy-basic'
     vars:
       sec_policy_name: 'my-sec-policy-basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_security_policy_with_ddos_protection_config'
+    primary_resource_id: 'region-sec-policy-ddos-protection'
+    vars:
+      sec_policy_name: 'my-sec-policy-ddos-protection'
   # TODO(felipegc): rules will be a different resource    
   # - !ruby/object:Provider::Terraform::Examples
   #   name: 'region_security_policy_with_rules'
@@ -204,11 +209,6 @@ properties:
           values:
             - :ADVANCED
             - :STANDARD
-  - !ruby/object:Api::Type::String
-    name: 'selfLink'
-    output: true
-    description: |
-      Server-defined URL for the resource.
   - !ruby/object:Api::Type::String
     name: 'selfLink'
     output: true
