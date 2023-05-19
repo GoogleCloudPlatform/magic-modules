@@ -1,0 +1,151 @@
+---
+subcategory: "Cloud Pub/Sub"
+description: |-
+  A schema is a format that messages must follow,
+  creating a contract between publisher and subscriber that Pub/Sub will enforce.
+---
+
+# google\_pubsub\_schema
+
+A schema is a format that messages must follow,
+creating a contract between publisher and subscriber that Pub/Sub will enforce.
+
+
+To get more information about Schema, see:
+
+* [API documentation](https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.schemas)
+* How-to Guides
+    * [Creating and managing schemas](https://cloud.google.com/pubsub/docs/schemas)
+
+<div class = "oics-button" style="float: right; margin: 0 0 -15px">
+  <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_working_dir=pubsub_schema_basic&cloudshell_image=gcr.io%2Fgraphite-cloud-shell-images%2Fterraform%3Alatest&open_in_editor=main.tf&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md" target="_blank">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+  </a>
+</div>
+## Example Usage - Pubsub Schema Basic
+
+
+```hcl
+resource "google_pubsub_schema" "example" {
+  name = "example"
+  type = "AVRO"
+  revision {
+    definition = "{\n  \"type\" : \"record\",\n  \"name\" : \"Avro\",\n  \"fields\" : [\n    {\n      \"name\" : \"StringField\",\n      \"type\" : \"string\"\n    },\n    {\n      \"name\" : \"IntField\",\n      \"type\" : \"int\"\n    }\n  ]\n}\n"
+  }
+}
+```
+## Example Usage - Pubsub Schema Protobuf
+
+
+```hcl
+resource "google_pubsub_schema" "example" {
+  name = "example"
+  type = "PROTOCOL_BUFFER"
+  revision {
+    definition = "syntax = \"proto3\";\nmessage Results {\nstring message_request = 1;\nstring message_response = 2;\nstring timestamp_request = 3;\nstring timestamp_response = 4;\n}"
+  }
+}
+
+resource "google_pubsub_topic" "example" {
+  name = "example-topic"
+
+  depends_on = [google_pubsub_schema.example]
+  schema_settings {
+    schema = "projects/my-project-name/schemas/example"
+    encoding = "JSON"
+    first_revision_id = google_pubsub_schema.example.revision[0].revision_id
+  }
+}
+```
+## Example Usage - Pubsub Schema Multiple Revisions
+
+
+```hcl
+resource "google_pubsub_schema" "example" {
+  name = "example"
+  type = "AVRO"
+  revision {
+    definition = "{\n  \"type\" : \"record\",\n  \"name\" : \"Avro\",\n  \"fields\" : [\n    {\n      \"name\" : \"StringField\",\n      \"type\" : \"string\"\n    },\n    {\n      \"name\" : \"IntField\",\n      \"type\" : \"int\"\n    }\n  ]\n}\n"
+  }
+  revision {
+    definition = "{\n  \"type\" : \"record\",\n  \"name\" : \"Avro\",\n  \"fields\" : [\n    {\n      \"name\" : \"StringField\",\n      \"type\" : \"string\"\n    },\n    {\n      \"name\" : \"IntField\",\n      \"type\" : \"int\"\n    },\n    {\n      \"name\" : \"LongField\",\n      \"type\" : \"long\"\n    }\n  ]\n}\n"
+  }
+}
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+
+* `name` -
+  (Required)
+  The ID to use for the schema, which will become the final component of the schema's resource name.
+
+
+- - -
+
+
+* `type` -
+  (Required)
+  The type of the schema definition
+  Default value is `TYPE_UNSPECIFIED`.
+  Possible values are: `TYPE_UNSPECIFIED`, `PROTOCOL_BUFFER`, `AVRO`.
+
+* `definition` -
+  (Optional, Deprecated)
+  The definition of the schema.
+  This should contain a string representing the full definition of the schema
+  that is a valid schema definition of the type specified in type.
+
+* `revision` -
+  (Optional)
+  The schema's revisions.
+  Structure is [documented below](#nested_revision).
+
+* `project` - (Optional) The ID of the project in which the resource belongs.
+    If it is not provided, the provider project is used.
+
+
+<a name="nested_revision"></a>The `revision` block supports:
+
+* `definition` -
+  (Required)
+  The definition of the schema. This should contain a string
+  representing the full definition of the schema that is a valid
+  schema definition of the type specified in type.
+
+## Attributes Reference
+
+In addition to the arguments listed above, the following computed attributes are exported:
+
+* `id` - an identifier for the resource with format `projects/{{project}}/schemas/{{name}}`
+
+* `revision.N.revision_id` - The revision ID of the schema.
+
+* `revision.N.revision_create_time` - The timestamp that the revision was created.
+
+
+## Timeouts
+
+This resource provides the following
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
+
+- `create` - Default is 20 minutes.
+- `delete` - Default is 20 minutes.
+- `update` - Default is 20 minutes.
+
+## Import
+
+
+Schema can be imported using any of these accepted formats:
+
+```
+$ terraform import google_pubsub_schema.default projects/{{project}}/schemas/{{name}}
+$ terraform import google_pubsub_schema.default {{project}}/{{name}}
+$ terraform import google_pubsub_schema.default {{name}}
+```
+
+## User Project Overrides
+
+This resource supports [User Project Overrides](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#user_project_override).
