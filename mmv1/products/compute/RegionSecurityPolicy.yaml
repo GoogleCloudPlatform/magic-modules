@@ -113,22 +113,13 @@ properties:
             - :ADVANCED
             - :STANDARD
   - !ruby/object:Api::Type::String
+    name: 'selfLink'
+    output: true
+    description: |
+      Server-defined URL for the resource.
+  - !ruby/object:Api::Type::String
     name: 'selfLinkWithId'
     output: true
     description: |
       Server-defined URL for this resource with the resource id.
-  - !ruby/object:Api::Type::Integer
-    name: "ruleTupleCount"
-    description: |
-      Total count of all security policy rule tuples. A security policy can not exceed a set number of tuples.
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
-    description: |
-      User-provided name of the Organization security plicy. 
-      The name should be unique in the organization in which the security policy is created. 
-      This should only be used when SecurityPolicyType is FIREWALL.
-  - !ruby/object:Api::Type::String
-    name: 'parent'
-    output: true
-    description: |
-      The parent of the security policy.
+
