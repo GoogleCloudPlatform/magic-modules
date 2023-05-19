@@ -315,6 +315,8 @@ module Provider
                         'third_party/terraform/utils/pubsub_utils.go'],
                        ['converters/google/resources/sqladmin_operation.go',
                         'third_party/terraform/utils/sqladmin_operation.go'],
+                       ['converters/google/resources/services/sql/sqladmin_operation.go',
+                        'third_party/terraform/services/sql/sqladmin_operation.go'],
                        ['converters/google/resources/verify/path_or_contents.go',
                         'third_party/terraform/verify/path_or_contents.go'],
                        ['converters/google/resources/path_or_contents.go',
