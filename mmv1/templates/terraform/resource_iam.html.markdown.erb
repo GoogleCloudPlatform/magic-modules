@@ -63,6 +63,10 @@ Three different resources help you manage your IAM policy for <%= product.displa
 * `<%= resource_ns_iam -%>_binding`: Authoritative for a given role. Updates the IAM policy to grant a role to a list of members. Other roles within the IAM policy for the <%= object.name.downcase -%> are preserved.
 * `<%= resource_ns_iam -%>_member`: Non-authoritative. Updates the IAM policy to grant a role to a new member. Other members for the role for the <%= object.name.downcase -%> are preserved.
 
+A data source can be used to retrieve policy data in advent you do not need creation
+
+* `<%= resource_ns_iam -%>_policy`: Retrieves the IAM policy for the <%= object.name.downcase %>
+
 ~> **Note:** `<%= resource_ns_iam -%>_policy` **cannot** be used in conjunction with `<%= resource_ns_iam -%>_binding` and `<%= resource_ns_iam -%>_member` or they will fight over what your policy should be.
 
 ~> **Note:** `<%= resource_ns_iam -%>_binding` resources **can be** used in conjunction with `<%= resource_ns_iam -%>_member` resources **only if** they do not grant privilege to the same role.
@@ -208,6 +212,7 @@ resource "<%= resource_ns_iam -%>_member" "member" {
 }
 ```
 <% end -%>
+
 ## Argument Reference
 
 The following arguments are supported:
