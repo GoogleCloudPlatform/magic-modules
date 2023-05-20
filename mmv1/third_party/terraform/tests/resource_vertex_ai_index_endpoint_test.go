@@ -84,7 +84,7 @@ resource "google_vertex_ai_index_endpoint" "index_endpoint" {
   region       = "us-central1"
   labels       = {
     label-one = "value-one"
-	label-two = "value-two
+    label-two = "value-two"
   }
   network      = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.vertex_network.name}"
   depends_on   = [
