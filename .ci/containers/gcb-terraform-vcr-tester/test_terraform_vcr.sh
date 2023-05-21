@@ -252,8 +252,6 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
     # Clear replaying-log folder
     rm testlog/replaying_after_recording/*
     rm testlog/replaying_build_after_recording/*
-  fi
-
   if [[ -n $RECORDING_FAILED_TESTS ]]; then
     comment+="Tests failed during RECORDING mode:${NEWLINE} $RECORDING_FAILED_TESTS ${NEWLINE}${NEWLINE}"
     RECORDING_FAILED_TESTS_COUNT=$(echo "$RECORDING_FAILED_TESTS" | wc -l)
