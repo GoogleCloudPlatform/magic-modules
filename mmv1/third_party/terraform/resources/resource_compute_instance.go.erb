@@ -417,7 +417,6 @@ func ResourceComputeInstance() *schema.Resource {
 					},
 				},
 			},
-<% unless version == 'ga' -%>
 			"network_performance_config": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -436,7 +435,6 @@ func ResourceComputeInstance() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 			"allow_stopping_for_update": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -1260,11 +1258,9 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("machine_type", tpgresource.GetResourceNameFromSelfLink(instance.MachineType)); err != nil {
 		return fmt.Errorf("Error setting machine_type: %s", err)
 	}
-<% unless version == 'ga' -%>
 	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(instance.NetworkPerformanceConfig)); err != nil {
 		return err
 	}
-<% end -%>
 	// Set the networks
 	// Use the first external IP found for the default connection info.
 	networkInterfaces, _, internalIP, externalIP, err := flattenNetworkInterfaces(d, config, instance.NetworkInterfaces)
