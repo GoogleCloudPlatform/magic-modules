@@ -60,11 +60,11 @@ module Provider
     def retrieve_list_of_manually_defined_tests
       m1 =
         retrieve_list_of_manually_defined_tests_from_file(
-          'third_party/validator/tests/source/cli_test.go.erb'
+          'third_party/validator/tests/tgc-source/cli_test.go.erb'
         )
       m2 =
         retrieve_list_of_manually_defined_tests_from_file(
-          'third_party/validator/tests/source/read_test.go.erb'
+          'third_party/validator/tests/tgc-source/read_test.go.erb'
         )
       m1 | m2 # union of manually defined tests
     end
@@ -114,7 +114,7 @@ module Provider
     end
 
     def retrieve_test_source_code_with_location(suffix)
-      path = 'third_party/validator/tests/source/'
+      path = 'third_party/validator/tests/tgc-source/'
       files = retrieve_test_source_files(path, suffix)
       files.map do |file|
         ["test/#{file}", path + file]

@@ -30,6 +30,7 @@ require 'provider/terraform'
 require 'provider/terraform_kcc'
 require 'provider/terraform_oics'
 require 'provider/terraform_validator'
+require 'provider/terraform_cai2hcl_provider'
 
 products_to_generate = nil
 all_products = false
@@ -99,10 +100,10 @@ raise 'Option -o/--output is a required parameter' if output_path.nil?
 raise 'Option -e/--engine is a required parameter' if provider_name.nil?
 
 all_product_files = []
-Dir['products/**/api.yaml'].each do |file_path|
+Dir['products/compute/api.yaml'].each do |file_path|
   all_product_files.push(File.dirname(file_path))
 end
-Dir['products/**/product.yaml'].each do |file_path|
+Dir['products/compute/product.yaml'].each do |file_path|
   all_product_files.push(File.dirname(file_path))
 end
 
@@ -260,7 +261,8 @@ all_product_files.each do |product_name|
     override_providers = {
       'oics' => Provider::TerraformOiCS,
       'validator' => Provider::TerraformValidator,
-      'kcc' => Provider::TerraformKCC
+      'kcc' => Provider::TerraformKCC,
+      'cai2hcl' => Provider::TerraformCai2hclProvider
     }
 
     provider_class = override_providers[force_provider]
