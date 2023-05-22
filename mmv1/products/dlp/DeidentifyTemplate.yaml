@@ -42,8 +42,19 @@ examples:
     primary_resource_id: 'basic'
     test_env_vars:
       project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_deidentify_template_with_template_id'
+    primary_resource_id: 'with_template_id'
+    vars:
+      name: 'tf-test'
+    test_env_vars:
+      project: :PROJECT_NAME
+    test_vars_overrides:
+      name: '"tf-test-" + RandString(t, 10)'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/wrap_object.go.erb
+  decoder: templates/terraform/decoders/dlp_deidentify_template.go.erb
+  encoder: templates/terraform/encoders/wrap_object_with_template_id.go.erb
+  update_encoder: templates/terraform/update_encoder/wrap_object.go.erb
   custom_import: templates/terraform/custom_import/dlp_import.go.erb
 parameters:
   - !ruby/object:Api::Type::String
@@ -83,6 +94,15 @@ properties:
     description: |
       The last update timestamp of an deidentifyTemplate. Set by the server.
     output: true
+  - !ruby/object:Api::Type::String
+    name: 'templateId'
+    description: |
+      The template id can contain uppercase and lowercase letters, numbers, and hyphens;
+      that is, it must match the regular expression: [a-zA-Z\d-_]+. The maximum length is
+      100 characters. Can be empty to allow the system to generate one.
+    immutable: true
+    default_from_api: true
+    url_param_only: true
   - !ruby/object:Api::Type::NestedObject
     name: 'deidentifyConfig'
     required: true
