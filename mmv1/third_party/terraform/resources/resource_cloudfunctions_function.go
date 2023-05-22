@@ -617,7 +617,7 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 			return cloudFunctionsOperationWait(config, op, "Creating CloudFunctions Function", userAgent,
 				d.Timeout(schema.TimeoutCreate))
 		},
-		Timeout: d.Timeout(schema.TimeoutCreate),
+		Timeout:              d.Timeout(schema.TimeoutCreate),
 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{IsCloudFunctionsSourceCodeError},
 	})
 	if rerr != nil {

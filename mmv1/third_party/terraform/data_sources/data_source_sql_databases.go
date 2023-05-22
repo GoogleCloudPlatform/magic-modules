@@ -55,7 +55,7 @@ func dataSourceSqlDatabasesRead(d *schema.ResourceData, meta interface{}) error 
 			databases, rerr = config.NewSqlAdminClient(userAgent).Databases.List(project, d.Get("instance").(string)).Do()
 			return rerr
 		},
-		Timeout: d.Timeout(schema.TimeoutRead),
+		Timeout:              d.Timeout(schema.TimeoutRead),
 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
 	})
 

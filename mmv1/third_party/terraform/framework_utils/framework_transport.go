@@ -72,7 +72,7 @@ func sendFrameworkRequestWithTimeout(p *frameworkProvider, method, project, rawu
 
 			return nil
 		},
-		Timeout: timeout,
+		Timeout:              timeout,
 		ErrorRetryPredicates: errorRetryPredicates,
 	})
 	if err != nil {

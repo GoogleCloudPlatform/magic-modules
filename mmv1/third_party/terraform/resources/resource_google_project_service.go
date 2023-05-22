@@ -295,7 +295,7 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 			}
 			return nil
 		},
-		Timeout: d.Timeout(schema.TimeoutDelete),
+		Timeout:              d.Timeout(schema.TimeoutDelete),
 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.ServiceUsageServiceBeingActivated},
 	})
 	if err != nil {

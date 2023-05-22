@@ -105,7 +105,7 @@ func dataSourceSqlDatabaseInstancesRead(d *schema.ResourceData, meta interface{}
 				instances, rerr = config.NewSqlAdminClient(userAgent).Instances.List(project).Filter(filter).PageToken(pageToken).Do()
 				return rerr
 			},
-			Timeout: d.Timeout(schema.TimeoutRead),
+			Timeout:              d.Timeout(schema.TimeoutRead),
 			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
 		})
 		if err != nil {

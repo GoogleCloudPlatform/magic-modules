@@ -432,7 +432,7 @@ func sendRequestRawBodyWithTimeout(config *transport_tpg.Config, method, project
 
 			return nil
 		},
-		Timeout: timeout,
+		Timeout:              timeout,
 		ErrorRetryPredicates: errorRetryPredicates,
 	})
 	if err != nil {

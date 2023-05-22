@@ -265,7 +265,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 					fetchedInstance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
 					return rerr
 				},
-				Timeout: d.Timeout(schema.TimeoutRead),
+				Timeout:              d.Timeout(schema.TimeoutRead),
 				ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
 			})
 			if err != nil {
@@ -285,7 +285,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: insertFunc,
-		Timeout: d.Timeout(schema.TimeoutCreate),
+		Timeout:   d.Timeout(schema.TimeoutCreate),
 	})
 
 	if err != nil {
@@ -465,7 +465,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: updateFunc,
-			Timeout: d.Timeout(schema.TimeoutUpdate),
+			Timeout:   d.Timeout(schema.TimeoutUpdate),
 		})
 
 		if err != nil {
@@ -525,7 +525,7 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 			}
 			return nil
 		},
-		Timeout: d.Timeout(schema.TimeoutDelete),
+		Timeout:              d.Timeout(schema.TimeoutDelete),
 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError, IsSqlInternalError},
 	})
 

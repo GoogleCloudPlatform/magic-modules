@@ -22,8 +22,8 @@ func retryTime(retryFunc func() error, minutes int) error {
 // but all new code should use RetryTimeDuration in the transport_tpg package instead.
 func RetryTimeDuration(retryFunc func() error, duration time.Duration, errorRetryPredicates ...transport_tpg.RetryErrorPredicateFunc) error {
 	return transport_tpg.Retry(transport_tpg.RetryOptions{
-		RetryFunc: retryFunc,
-		Timeout: duration,
+		RetryFunc:            retryFunc,
+		Timeout:              duration,
 		ErrorRetryPredicates: errorRetryPredicates,
 	})
 }
