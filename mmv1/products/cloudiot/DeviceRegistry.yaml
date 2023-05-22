@@ -34,7 +34,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
       '{{name}}',
     ]
 legacy_name: 'google_cloudiot_registry'
-import_format: ['projects/{{project}}/locations/{{region}}/registries/{{name}}']
+import_format: ['projects/{{project}}/locations/{{region}}/registries/{{name}}', '{{project}}/locations/{{region}}/registries/{{name}}']
 id_format: 'projects/{{project}}/locations/{{region}}/registries/{{name}}'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/cloudiot.go.erb
