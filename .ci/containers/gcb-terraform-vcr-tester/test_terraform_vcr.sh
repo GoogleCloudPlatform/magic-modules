@@ -235,6 +235,12 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
 
     test_exit_code=$?
 
+    # Concatenate recording build logs to one file
+    for test in $RECORDING_PASSED_TESTS
+    do
+      cat testlog/replaying_build_after_recording/${test}_replaying_test.log >> replaying_build_after_recording.log
+    done
+
     # store replaying individual build logs
     gsutil -h "Content-Type:text/plain" -m -q cp testlog/replaying_build_after_recording/* gs://ci-vcr-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/replaying_build_after_recording/
 
