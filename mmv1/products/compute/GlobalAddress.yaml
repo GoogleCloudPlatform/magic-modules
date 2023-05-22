@@ -75,13 +75,6 @@ properties:
     name: 'description'
     description: |
       An optional description of this resource.
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: |
-      The unique identifier for the resource. This identifier is defined by
-      the server.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -108,7 +101,6 @@ properties:
     update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'
     update_verb: :POST
     min_version: beta
-    exclude: false
   - !ruby/object:Api::Type::Enum
     name: 'ipVersion'
     description: |
@@ -117,14 +109,6 @@ properties:
       - :IPV4
       - :IPV6
     diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("IPV4")'
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'region'
-    resource: 'Region'
-    imports: 'selfLink'
-    description: |
-      A reference to the region where the regional address resides.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::Integer
     name: 'prefixLength'
     description: |

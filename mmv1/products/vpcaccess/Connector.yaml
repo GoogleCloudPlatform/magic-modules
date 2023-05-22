@@ -92,7 +92,6 @@ properties:
     description: |
       State of the VPC access connector.
     output: true
-    exclude: false
     values:
       - :READY
       - :CREATING

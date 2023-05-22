@@ -124,11 +124,6 @@ properties:
       The gateway address for default routes to reach destination addresses
       outside this subnetwork.
     output: true
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'ipCidrRange'
     description: |
@@ -272,10 +267,6 @@ properties:
     custom_expand: 'templates/terraform/custom_expand/subnetwork_log_config.go.erb'
     custom_flatten: 'templates/terraform/custom_flatten/subnetwork_log_config.go.erb'
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'enable'
-        description: If logging is enabled for this subnetwork
-        exclude: true
       - !ruby/object:Api::Type::Enum
         name: 'aggregationInterval'
         at_least_one_of:

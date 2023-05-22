@@ -35,11 +35,6 @@ examples:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/response_policy_detach_network_gke.erb
 properties:
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: Unique identifier for the resource; defined by the server.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'responsePolicyName'
     description:

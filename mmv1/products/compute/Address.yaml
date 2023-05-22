@@ -132,11 +132,6 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'description'
     description: 'An optional description of this resource.'
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -182,8 +177,6 @@ properties:
     values:
       - :PREMIUM
       - :STANDARD
-    # TODO(alexstephen): Add in status with exclude attribute. What does this
-    # mean?
     default_from_api: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'subnetwork'
@@ -215,20 +208,6 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/addresses/{{name}}/setLabels'
     update_verb: :POST
     min_version: beta
-    exclude: false
-  - !ruby/object:Api::Type::Enum
-    name: 'status'
-    output: true
-    description: |
-      The status of the address, which can be one of RESERVING, RESERVED, or IN_USE.
-      An address that is RESERVING is currently in the process of being reserved.
-      A RESERVED address is currently reserved and available to use. An IN_USE address
-      is currently being used by another resource and is not available.
-    values:
-      - :RESERVING
-      - :RESERVED
-      - :IN_USE
-    exclude: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'network'
     resource: 'Network'

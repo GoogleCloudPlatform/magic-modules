@@ -268,7 +268,6 @@ properties:
       internally during updates.
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/setLabels'
     update_verb: :POST
-    exclude: false
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
@@ -278,11 +277,6 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'lastAttachTimestamp'
     description: 'Last attach timestamp in RFC3339 text format.'
@@ -297,11 +291,6 @@ properties:
       Labels to apply to this disk.  A list of key->value pairs.
     update_verb: :POST
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/setLabels'
-  - !ruby/object:Api::Type::Array
-    name: 'licenses'
-    description: 'Any applicable publicly visible licenses.'
-    exclude: true
-    item_type: Api::Type::String
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
