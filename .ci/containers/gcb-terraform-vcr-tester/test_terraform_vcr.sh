@@ -220,7 +220,6 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   RECORDING_FAILED_TESTS=$(grep "^--- FAIL: TestAcc" recording_test.log | awk -v pr_number=$pr_number -v build_id=$build_id '{print "`"$3"`[[Error message](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/build-log/recording_build/"$3"_recording_test.log)] [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/recording/"$3".log)]"}')
   RECORDING_PASSED_TESTS=$(grep "^--- PASS: TestAcc" recording_test.log | awk -v pr_number=$pr_number -v build_id=$build_id '{print "`"$3"`[[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/recording/"$3".log)]"}')
   RECORDING_PASSED_TEST_LIST=$(grep "^--- PASS: TestAcc" recording_test.log | awk '{print $3}')
-  echo "RECORDING_PASSED_TEST_LIST: ${RECORDING_PASSED_TEST_LIST}"
 
   comment=""
   RECORDING_PASSED_TESTS_COUNT=0
@@ -256,7 +255,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
     else
       comment+="All tests passed after rerunning REPLAYING mode.${NEWLINE}"
     fi
-    comment+="---"
+    comment+="---${NEWLINE}"
 
     # Clear replaying-log folder
     rm testlog/replaying_after_recording/*
@@ -283,6 +282,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
 
   comment+="View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/recording_test.log) or the [debug log](https://console.cloud.google.com/storage/browser/ci-vcr-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording) for each test"
   add_comment "${comment}"
+
 else
   if [[ $test_exit_code -ne 0 ]]; then
     # check for any uncaught errors errors in REPLAYING mode
