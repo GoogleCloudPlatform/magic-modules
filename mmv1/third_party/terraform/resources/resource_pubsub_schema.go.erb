@@ -27,10 +27,11 @@ func ResourcePubsubSchemaV0() *schema.Resource {
 			},
 			"type": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validateEnum([]string{"TYPE_UNSPECIFIED", "PROTOCOL_BUFFER", "AVRO"}),
 				Description:  `The type of the schema definition Possible values: ["TYPE_UNSPECIFIED", "PROTOCOL_BUFFER", "AVRO"]`,
+				Default:      "TYPE_UNSPECIFIED",
 			},
 			"definition": {
 				Type:     schema.TypeString,
@@ -90,10 +91,11 @@ func ResourcePubsubSchema() *schema.Resource {
 			},
 			"type": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validateEnum([]string{"TYPE_UNSPECIFIED", "PROTOCOL_BUFFER", "AVRO"}),
 				Description:  `The type of the schema definition Possible values: ["TYPE_UNSPECIFIED", "PROTOCOL_BUFFER", "AVRO"]`,
+				Default:      "TYPE_UNSPECIFIED",
 			},
 			"definition": {
 				Type:       schema.TypeString,
