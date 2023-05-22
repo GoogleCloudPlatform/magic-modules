@@ -651,7 +651,6 @@ func flattenReservationAffinity(affinity *compute.ReservationAffinity) []map[str
 	return []map[string]interface{}{flattened}
 }
 
-<% unless version == "ga" -%>
 func expandNetworkPerformanceConfig(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*compute.NetworkPerformanceConfig, error) {
 	configs, ok := d.GetOk("network_performance_config")
 	if !ok {
@@ -682,4 +681,3 @@ func flattenNetworkPerformanceConfig(c *compute.NetworkPerformanceConfig) []map[
 		},
 	}
 }
-<% end -%>
