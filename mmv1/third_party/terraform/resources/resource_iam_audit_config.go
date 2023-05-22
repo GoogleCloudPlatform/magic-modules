@@ -6,6 +6,8 @@ import (
 	"log"
 	"strings"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -43,16 +45,14 @@ var iamAuditConfigSchema = map[string]*schema.Schema{
 	},
 }
 
-func ResourceIamAuditConfig(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser resourceIdParserFunc) *schema.Resource {
-	return ResourceIamAuditConfigWithBatching(parentSpecificSchema, newUpdaterFunc, resourceIdParser, IamBatchingDisabled)
-}
+func ResourceIamAuditConfig(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser resourceIdParserFunc, options ...func(*IamSettings)) *schema.Resource {
+	settings := NewIamSettings(options...)
 
-func ResourceIamAuditConfigWithBatching(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser resourceIdParserFunc, enableBatching bool) *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIamAuditConfigCreateUpdate(newUpdaterFunc, enableBatching),
+		Create: resourceIamAuditConfigCreateUpdate(newUpdaterFunc, settings.EnableBatching),
 		Read:   resourceIamAuditConfigRead(newUpdaterFunc),
-		Update: resourceIamAuditConfigCreateUpdate(newUpdaterFunc, enableBatching),
-		Delete: resourceIamAuditConfigDelete(newUpdaterFunc, enableBatching),
+		Update: resourceIamAuditConfigCreateUpdate(newUpdaterFunc, settings.EnableBatching),
+		Delete: resourceIamAuditConfigDelete(newUpdaterFunc, settings.EnableBatching),
 		Schema: mergeSchemas(iamAuditConfigSchema, parentSpecificSchema),
 		Importer: &schema.ResourceImporter{
 			State: iamAuditConfigImport(resourceIdParser),
@@ -61,9 +61,18 @@ func ResourceIamAuditConfigWithBatching(parentSpecificSchema map[string]*schema.
 	}
 }
 
+// Deprecated: For backward compatibility ResourceIamAuditConfigWithBatching is still working,
+// but all new code should use ResourceIamAuditConfig in the google package instead.
+func ResourceIamAuditConfigWithBatching(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser resourceIdParserFunc, enableBatching bool, options ...func(*IamSettings)) *schema.Resource {
+	if enableBatching {
+		options = append(options, IamWithBatching)
+	}
+	return ResourceIamAuditConfig(parentSpecificSchema, newUpdaterFunc, resourceIdParser, options...)
+}
+
 func resourceIamAuditConfigRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.ReadFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
-		config := meta.(*Config)
+		config := meta.(*transport_tpg.Config)
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
 			return err
@@ -72,7 +81,7 @@ func resourceIamAuditConfigRead(newUpdaterFunc newResourceIamUpdaterFunc) schema
 		eAuditConfig := getResourceIamAuditConfig(d)
 		p, err := iamPolicyReadWithRetry(updater)
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("AuditConfig for %s on %q", eAuditConfig.Service, updater.DescribeResource()))
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("AuditConfig for %s on %q", eAuditConfig.Service, updater.DescribeResource()))
 		}
 		log.Printf("[DEBUG]: Retrieved policy for %s: %+v", updater.DescribeResource(), p)
 
@@ -109,7 +118,7 @@ func iamAuditConfigImport(resourceIdParser resourceIdParserFunc) schema.StateFun
 		if resourceIdParser == nil {
 			return nil, errors.New("Import not supported for this IAM resource.")
 		}
-		config := m.(*Config)
+		config := m.(*transport_tpg.Config)
 		s := strings.Fields(d.Id())
 		if len(s) != 2 {
 			d.SetId("")
@@ -136,7 +145,7 @@ func iamAuditConfigImport(resourceIdParser resourceIdParserFunc) schema.StateFun
 
 func resourceIamAuditConfigCreateUpdate(newUpdaterFunc newResourceIamUpdaterFunc, enableBatching bool) func(*schema.ResourceData, interface{}) error {
 	return func(d *schema.ResourceData, meta interface{}) error {
-		config := meta.(*Config)
+		config := meta.(*transport_tpg.Config)
 
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
@@ -165,7 +174,7 @@ func resourceIamAuditConfigCreateUpdate(newUpdaterFunc newResourceIamUpdaterFunc
 
 func resourceIamAuditConfigDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBatching bool) schema.DeleteFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
-		config := meta.(*Config)
+		config := meta.(*transport_tpg.Config)
 
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
@@ -184,7 +193,7 @@ func resourceIamAuditConfigDelete(newUpdaterFunc newResourceIamUpdaterFunc, enab
 			err = iamPolicyReadModifyWrite(updater, modifyF)
 		}
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Resource %s with IAM audit config %q", updater.DescribeResource(), d.Id()))
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %s with IAM audit config %q", updater.DescribeResource(), d.Id()))
 		}
 
 		return resourceIamAuditConfigRead(newUpdaterFunc)(d, meta)

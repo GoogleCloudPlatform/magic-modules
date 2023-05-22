@@ -5,8 +5,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // Since each test here is acting on the same organization and only one AccessPolicy
@@ -31,15 +35,15 @@ func TestAccIAM2AccessBoundaryPolicy(t *testing.T) {
 
 func testAccIAM2AccessBoundaryPolicy_iamAccessBoundaryPolicyBasic(t *testing.T) {
 	context := map[string]interface{}{
-		"org_id":          getTestOrgFromEnv(t),
-		"billing_account": getTestBillingAccountFromEnv(t),
-		"random_suffix":   randString(t, 10),
+		"org_id":          acctest.GetTestOrgFromEnv(t),
+		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
+		"random_suffix":   RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIAM2AccessBoundaryPolicyDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckIAM2AccessBoundaryPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIAM2AccessBoundaryPolicy_iamAccessBoundaryPolicyBasicExample(context),
@@ -180,9 +184,9 @@ func testAccCheckIAM2AccessBoundaryPolicyDestroyProducer(t *testing.T) func(s *t
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{IAM2BasePath}}policies/{{parent}}/accessboundarypolicies/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{IAM2BasePath}}policies/{{parent}}/accessboundarypolicies/{{name}}")
 			if err != nil {
 				return err
 			}
@@ -193,7 +197,13 @@ func testAccCheckIAM2AccessBoundaryPolicyDestroyProducer(t *testing.T) func(s *t
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
 			if err == nil {
 				return fmt.Errorf("IAM2AccessBoundaryPolicy still exists at %s", url)
 			}

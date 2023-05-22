@@ -12,8 +12,8 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-config := meta.(*Config)
-region, err := getRegionFromSchema("region", "location_id", d, config)
+config := meta.(*transport_tpg.Config)
+region, err := tpgresource.GetRegionFromSchema("region", "location_id", d, config)
 if err != nil {
 	return nil, err
 }

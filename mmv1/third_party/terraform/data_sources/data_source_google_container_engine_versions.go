@@ -6,9 +6,11 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleContainerEngineVersions() *schema.Resource {
+func DataSourceGoogleContainerEngineVersions() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleContainerEngineVersionsRead,
 		Schema: map[string]*schema.Schema{
@@ -61,18 +63,18 @@ func dataSourceGoogleContainerEngineVersions() *schema.Resource {
 }
 
 func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := tpgresource.GetLocation(d, config)
 	if err != nil {
 		return err
 	}

@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/storage/v1"
@@ -18,17 +20,17 @@ var (
 func TestAccStorageNotification_basic(t *testing.T) {
 	t.Parallel()
 
-	skipIfEnvNotSet(t, "GOOGLE_PROJECT")
+	acctest.SkipIfEnvNotSet(t, "GOOGLE_PROJECT")
 
 	var notification storage.Notification
 	bucketName := testBucketName(t)
-	topicName := fmt.Sprintf("tf-pstopic-test-%d", randInt(t))
+	topicName := fmt.Sprintf("tf-pstopic-test-%d", RandInt(t))
 	topic := fmt.Sprintf("//pubsub.googleapis.com/projects/%s/topics/%s", os.Getenv("GOOGLE_PROJECT"), topicName)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccStorageNotificationDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageNotificationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleStorageNotificationBasic(bucketName, topicName, topic),
@@ -62,19 +64,19 @@ func TestAccStorageNotification_basic(t *testing.T) {
 func TestAccStorageNotification_withEventsAndAttributes(t *testing.T) {
 	t.Parallel()
 
-	skipIfEnvNotSet(t, "GOOGLE_PROJECT")
+	acctest.SkipIfEnvNotSet(t, "GOOGLE_PROJECT")
 
 	var notification storage.Notification
 	bucketName := testBucketName(t)
-	topicName := fmt.Sprintf("tf-pstopic-test-%d", randInt(t))
+	topicName := fmt.Sprintf("tf-pstopic-test-%d", RandInt(t))
 	topic := fmt.Sprintf("//pubsub.googleapis.com/projects/%s/topics/%s", os.Getenv("GOOGLE_PROJECT"), topicName)
 	eventType1 := "OBJECT_FINALIZE"
 	eventType2 := "OBJECT_ARCHIVE"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccStorageNotificationDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageNotificationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleStorageNotificationOptionalEventsAttributes(bucketName, topicName, topic, eventType1, eventType2),
@@ -104,7 +106,7 @@ func TestAccStorageNotification_withEventsAndAttributes(t *testing.T) {
 
 func testAccStorageNotificationDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_storage_notification" {
@@ -113,7 +115,7 @@ func testAccStorageNotificationDestroyProducer(t *testing.T) func(s *terraform.S
 
 			bucket, notificationID := resourceStorageNotificationParseID(rs.Primary.ID)
 
-			_, err := config.NewStorageClient(config.userAgent).Notifications.Get(bucket, notificationID).Do()
+			_, err := config.NewStorageClient(config.UserAgent).Notifications.Get(bucket, notificationID).Do()
 			if err == nil {
 				return fmt.Errorf("Notification configuration still exists")
 			}
@@ -134,11 +136,11 @@ func testAccCheckStorageNotificationExists(t *testing.T, resource string, notifi
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		bucket, notificationID := resourceStorageNotificationParseID(rs.Primary.ID)
 
-		found, err := config.NewStorageClient(config.userAgent).Notifications.Get(bucket, notificationID).Do()
+		found, err := config.NewStorageClient(config.UserAgent).Notifications.Get(bucket, notificationID).Do()
 		if err != nil {
 			return err
 		}

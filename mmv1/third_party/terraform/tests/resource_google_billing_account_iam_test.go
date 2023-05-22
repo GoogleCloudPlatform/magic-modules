@@ -6,27 +6,29 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccBillingAccountIam(t *testing.T) {
 	// Deletes two fine-grained resources in same step
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	billing := getTestBillingAccountFromEnv(t)
-	account := fmt.Sprintf("tf-test-%d", randInt(t))
+	billing := acctest.GetTestMasterBillingAccountFromEnv(t)
+	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	role := "roles/billing.viewer"
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Binding creation
 				Config: testAccBillingAccountIamBinding_basic(account, billing, role),
 				Check: testAccCheckGoogleBillingAccountIamBindingExists(t, "foo", role, []string{
-					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, getTestProjectFromEnv()),
+					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, acctest.GetTestProjectFromEnv()),
 				}),
 			},
 			{
@@ -39,8 +41,8 @@ func TestAccBillingAccountIam(t *testing.T) {
 				// Test Iam Binding update
 				Config: testAccBillingAccountIamBinding_update(account, billing, role),
 				Check: testAccCheckGoogleBillingAccountIamBindingExists(t, "foo", role, []string{
-					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, getTestProjectFromEnv()),
-					fmt.Sprintf("serviceAccount:%s-2@%s.iam.gserviceaccount.com", account, getTestProjectFromEnv()),
+					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, acctest.GetTestProjectFromEnv()),
+					fmt.Sprintf("serviceAccount:%s-2@%s.iam.gserviceaccount.com", account, acctest.GetTestProjectFromEnv()),
 				}),
 			},
 			{
@@ -59,14 +61,19 @@ func TestAccBillingAccountIam(t *testing.T) {
 				// Test Iam Member creation (no update for member, no need to test)
 				Config: testAccBillingAccountIamMember_basic(account, billing, role),
 				Check: testAccCheckGoogleBillingAccountIamMemberExists(t, "foo", "roles/billing.viewer",
-					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, getTestProjectFromEnv()),
+					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, acctest.GetTestProjectFromEnv()),
 				),
 			},
 			{
 				ResourceName:      "google_billing_account_iam_member.foo",
-				ImportStateId:     fmt.Sprintf("%s roles/billing.viewer serviceAccount:%s@%s.iam.gserviceaccount.com", billing, account, getTestProjectFromEnv()),
+				ImportStateId:     fmt.Sprintf("%s roles/billing.viewer serviceAccount:%s@%s.iam.gserviceaccount.com", billing, account, acctest.GetTestProjectFromEnv()),
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				// Test Iam Policy creation
+				Config: testAccBillingAccountDatasetIamPolicy(account, billing, role),
+				Check:  resource.TestCheckResourceAttrSet("data.google_billing_account_iam_policy.policy", "policy_data"),
 			},
 		},
 	})
@@ -79,8 +86,8 @@ func testAccCheckGoogleBillingAccountIamBindingExists(t *testing.T, bindingResou
 			return fmt.Errorf("Not found: %s", bindingResourceName)
 		}
 
-		config := googleProviderConfig(t)
-		p, err := config.NewBillingClient(config.userAgent).BillingAccounts.GetIamPolicy("billingAccounts/" + bindingRs.Primary.Attributes["billing_account_id"]).Do()
+		config := GoogleProviderConfig(t)
+		p, err := config.NewBillingClient(config.UserAgent).BillingAccounts.GetIamPolicy("billingAccounts/" + bindingRs.Primary.Attributes["billing_account_id"]).Do()
 		if err != nil {
 			return err
 		}
@@ -109,8 +116,8 @@ func testAccCheckGoogleBillingAccountIamMemberExists(t *testing.T, n, role, memb
 			return fmt.Errorf("Not found: %s", n)
 		}
 
-		config := googleProviderConfig(t)
-		p, err := config.NewBillingClient(config.userAgent).BillingAccounts.GetIamPolicy("billingAccounts/" + rs.Primary.Attributes["billing_account_id"]).Do()
+		config := GoogleProviderConfig(t)
+		p, err := config.NewBillingClient(config.UserAgent).BillingAccounts.GetIamPolicy("billingAccounts/" + rs.Primary.Attributes["billing_account_id"]).Do()
 		if err != nil {
 			return err
 		}
@@ -191,4 +198,29 @@ resource "google_billing_account_iam_member" "foo" {
   member             = "serviceAccount:${google_service_account.test-account.email}"
 }
 `, account, billingAccountId, role)
+}
+
+func testAccBillingAccountDatasetIamPolicy(account, billing, role string) string {
+	return fmt.Sprintf(testBigqueryDatasetIam+`
+resource "google_service_account" "test-account" {
+  account_id   = "%s"
+  display_name = "Bigquery Dataset IAM Testing Account"
+}
+
+data "google_iam_policy" "policy" {
+  binding {
+    role    = "%s"
+    members = ["serviceAccount:${google_service_account.test-account.email}"]
+  }
+}
+
+resource "google_billing_account_iam_policy" "policy" {
+  billing_account_id = "%s"
+  policy_data = data.google_iam_policy.policy.policy_data
+}
+
+data "google_billing_account_iam_policy" "policy" {
+  billing_account_id = "%s"
+}
+`, account, role, billing, billing)
 }

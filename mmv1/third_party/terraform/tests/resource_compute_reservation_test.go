@@ -5,17 +5,18 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccComputeReservation_update(t *testing.T) {
 	t.Parallel()
 
-	reservationName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	reservationName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeReservationDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeReservationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeReservation_basic(reservationName, "2"),

@@ -7,6 +7,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -17,7 +20,7 @@ func iamMemberCaseDiffSuppress(k, old, new string, d *schema.ResourceData) bool 
 	if isCaseSensitive {
 		return old == new
 	}
-	return caseDiffSuppress(k, old, new, d)
+	return tpgresource.CaseDiffSuppress(k, old, new, d)
 }
 
 func validateIAMMember(i interface{}, k string) ([]string, []error) {
@@ -89,7 +92,7 @@ func iamMemberImport(newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser 
 		if resourceIdParser == nil {
 			return nil, errors.New("Import not supported for this IAM resource.")
 		}
-		config := m.(*Config)
+		config := m.(*transport_tpg.Config)
 		s := strings.Fields(d.Id())
 		var id, role, member string
 		if len(s) < 3 {
@@ -167,19 +170,12 @@ func iamMemberImport(newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser 
 }
 
 func ResourceIamMember(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser resourceIdParserFunc, options ...func(*IamSettings)) *schema.Resource {
-	return ResourceIamMemberWithBatching(parentSpecificSchema, newUpdaterFunc, resourceIdParser, IamBatchingDisabled, options...)
-}
-
-func ResourceIamMemberWithBatching(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser resourceIdParserFunc, enableBatching bool, options ...func(*IamSettings)) *schema.Resource {
-	settings := &IamSettings{}
-	for _, o := range options {
-		o(settings)
-	}
+	settings := NewIamSettings(options...)
 
 	return &schema.Resource{
-		Create: resourceIamMemberCreate(newUpdaterFunc, enableBatching),
+		Create: resourceIamMemberCreate(newUpdaterFunc, settings.EnableBatching),
 		Read:   resourceIamMemberRead(newUpdaterFunc),
-		Delete: resourceIamMemberDelete(newUpdaterFunc, enableBatching),
+		Delete: resourceIamMemberDelete(newUpdaterFunc, settings.EnableBatching),
 
 		// if non-empty, this will be used to send a deprecation message when the
 		// resource is used.
@@ -191,6 +187,15 @@ func ResourceIamMemberWithBatching(parentSpecificSchema map[string]*schema.Schem
 		},
 		UseJSONNumber: true,
 	}
+}
+
+// Deprecated: For backward compatibility ResourceIamMemberWithBatching is still working,
+// but all new code should use ResourceIamMember in the google package instead.
+func ResourceIamMemberWithBatching(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser resourceIdParserFunc, enableBatching bool, options ...func(*IamSettings)) *schema.Resource {
+	if enableBatching {
+		options = append(options, IamWithBatching)
+	}
+	return ResourceIamMember(parentSpecificSchema, newUpdaterFunc, resourceIdParser, options...)
 }
 
 func getResourceIamMember(d *schema.ResourceData) *cloudresourcemanager.Binding {
@@ -206,7 +211,7 @@ func getResourceIamMember(d *schema.ResourceData) *cloudresourcemanager.Binding 
 
 func resourceIamMemberCreate(newUpdaterFunc newResourceIamUpdaterFunc, enableBatching bool) schema.CreateFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
-		config := meta.(*Config)
+		config := meta.(*transport_tpg.Config)
 
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
@@ -216,8 +221,8 @@ func resourceIamMemberCreate(newUpdaterFunc newResourceIamUpdaterFunc, enableBat
 		memberBind := getResourceIamMember(d)
 		modifyF := func(ep *cloudresourcemanager.Policy) error {
 			// Merge the bindings together
-			ep.Bindings = mergeBindings(append(ep.Bindings, memberBind))
-			ep.Version = iamPolicyVersion
+			ep.Bindings = MergeBindings(append(ep.Bindings, memberBind))
+			ep.Version = IamPolicyVersion
 			return nil
 		}
 		if enableBatching {
@@ -239,7 +244,7 @@ func resourceIamMemberCreate(newUpdaterFunc newResourceIamUpdaterFunc, enableBat
 
 func resourceIamMemberRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.ReadFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
-		config := meta.(*Config)
+		config := meta.(*transport_tpg.Config)
 
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
@@ -250,7 +255,7 @@ func resourceIamMemberRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.Read
 		eCondition := conditionKeyFromCondition(eMember.Condition)
 		p, err := iamPolicyReadWithRetry(updater)
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Resource %q with IAM Member: Role %q Member %q", updater.DescribeResource(), eMember.Role, eMember.Members[0]))
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %q with IAM Member: Role %q Member %q", updater.DescribeResource(), eMember.Role, eMember.Members[0]))
 		}
 		log.Print(spew.Sprintf("[DEBUG]: Retrieved policy for %s: %#v\n", updater.DescribeResource(), p))
 		log.Printf("[DEBUG]: Looking for binding with role %q and condition %#v", eMember.Role, eCondition)
@@ -301,7 +306,7 @@ func resourceIamMemberRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.Read
 
 func resourceIamMemberDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBatching bool) schema.DeleteFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
-		config := meta.(*Config)
+		config := meta.(*transport_tpg.Config)
 
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
@@ -321,7 +326,7 @@ func resourceIamMemberDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBat
 			err = iamPolicyReadModifyWrite(updater, modifyF)
 		}
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Resource %s for IAM Member (role %q, %q)", updater.GetResourceId(), memberBind.Members[0], memberBind.Role))
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %s for IAM Member (role %q, %q)", updater.GetResourceId(), memberBind.Members[0], memberBind.Role))
 		}
 		return resourceIamMemberRead(newUpdaterFunc)(d, meta)
 	}

@@ -4,24 +4,25 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccDataSourceGoogleBeyondcorpAppGateway_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBeyondcorpAppGatewayDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBeyondcorpAppGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppGateway_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_beyondcorp_app_gateway.foo", "google_beyondcorp_app_gateway.foo"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_gateway.foo", "google_beyondcorp_app_gateway.foo"),
 				),
 			},
 		},
@@ -32,18 +33,18 @@ func TestAccDataSourceGoogleBeyondcorpAppGateway_optionalProject(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBeyondcorpAppGatewayDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBeyondcorpAppGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppGateway_optionalProject(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_beyondcorp_app_gateway.foo", "google_beyondcorp_app_gateway.foo"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_gateway.foo", "google_beyondcorp_app_gateway.foo"),
 				),
 			},
 		},
@@ -54,18 +55,18 @@ func TestAccDataSourceGoogleBeyondcorpAppGateway_optionalRegion(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBeyondcorpAppGatewayDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBeyondcorpAppGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppGateway_optionalRegion(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_beyondcorp_app_gateway.foo", "google_beyondcorp_app_gateway.foo"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_gateway.foo", "google_beyondcorp_app_gateway.foo"),
 				),
 			},
 		},
@@ -76,18 +77,18 @@ func TestAccDataSourceGoogleBeyondcorpAppGateway_optionalProjectRegion(t *testin
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBeyondcorpAppGatewayDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBeyondcorpAppGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppGateway_optionalProjectRegion(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_beyondcorp_app_gateway.foo", "google_beyondcorp_app_gateway.foo"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_gateway.foo", "google_beyondcorp_app_gateway.foo"),
 				),
 			},
 		},

@@ -346,8 +346,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 <a name="nested_service_account"></a>The `service_account` block supports:
 
-* `email` - (Optional) The service account e-mail address. If not given, the
-    default Google Compute Engine service account is used.
+* `email` - (Optional) The service account e-mail address.
     **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
 * `scopes` - (Required) A list of service scopes. Both OAuth2 URLs and gcloud
@@ -385,7 +384,6 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `instance_termination_action` - (Optional) Describe the type of termination action for VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot) 
 
 * `max_run_duration` -  (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Only support `DELETE` `instance_termination_action` at this point. Structure is [documented below](#nested_max_run_duration).
-    
 <a name="nested_max_run_duration"></a>The `max_run_duration` block supports:
 
 * `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
@@ -397,6 +395,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
    315,576,000,000 inclusive. Note: these bounds are computed from: 60
    sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
 
+* `maintenance_interval` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`.
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
 * `type` (Required) - The accelerator type resource to expose to this instance. E.g. `nvidia-tesla-k80`.
@@ -469,6 +468,8 @@ exported:
 
 * `ipv6_access_type` - One of EXTERNAL, INTERNAL to indicate whether the IP can be accessed from the Internet.
 This field is always inherited from its subnetwork.
+
+* `current_status` - The current status of the instance. This could be one of the following values: PROVISIONING, STAGING, RUNNING, STOPPING, SUSPENDING, SUSPENDED, REPAIRING, and TERMINATED. For more information about the status of the instance, see [Instance life cycle](https://cloud.google.com/compute/docs/instances/instance-life-cycle).`,
 
 * `network_interface.0.network_ip` - The internal ip address of the instance, either manually or dynamically assigned.
 

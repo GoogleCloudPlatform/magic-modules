@@ -36,8 +36,8 @@
     directly inserted from YAML.
 -%>
 <%
-  tf_product = (@config.legacy_name || product_ns).underscore
-  product_ns_display = (@config.legacy_name || product_ns).camelize
+  tf_product = (object.__product.legacy_name || product_ns).underscore
+  product_ns_display = (object.__product.legacy_name || product_ns).camelize
   tf_subcategory = (object.__product.display_name)
   resource_ns = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   resource_ns_iam = "#{resource_ns}_iam"
@@ -62,6 +62,10 @@ Three different resources help you manage your IAM policy for <%= product.displa
 * `<%= resource_ns_iam -%>_policy`: Authoritative. Sets the IAM policy for the <%= object.name.downcase -%> and replaces any existing policy already attached.
 * `<%= resource_ns_iam -%>_binding`: Authoritative for a given role. Updates the IAM policy to grant a role to a list of members. Other roles within the IAM policy for the <%= object.name.downcase -%> are preserved.
 * `<%= resource_ns_iam -%>_member`: Non-authoritative. Updates the IAM policy to grant a role to a new member. Other members for the role for the <%= object.name.downcase -%> are preserved.
+
+A data source can be used to retrieve policy data in advent you do not need creation
+
+* `<%= resource_ns_iam -%>_policy`: Retrieves the IAM policy for the <%= object.name.downcase %>
 
 ~> **Note:** `<%= resource_ns_iam -%>_policy` **cannot** be used in conjunction with `<%= resource_ns_iam -%>_binding` and `<%= resource_ns_iam -%>_member` or they will fight over what your policy should be.
 
@@ -208,6 +212,7 @@ resource "<%= resource_ns_iam -%>_member" "member" {
 }
 ```
 <% end -%>
+
 ## Argument Reference
 
 The following arguments are supported:

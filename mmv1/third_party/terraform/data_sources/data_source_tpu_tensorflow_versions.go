@@ -6,9 +6,11 @@ import (
 	"sort"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceTpuTensorflowVersions() *schema.Resource {
+func DataSourceTpuTensorflowVersions() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceTpuTensorFlowVersionsRead,
 		Schema: map[string]*schema.Schema{
@@ -32,23 +34,23 @@ func dataSourceTpuTensorflowVersions() *schema.Resource {
 }
 
 func dataSourceTpuTensorFlowVersionsRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := tpgresource.GetZone(d, config)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{TPUBasePath}}projects/{{project}}/locations/{{zone}}/tensorflowVersions")
+	url, err := tpgresource.ReplaceVars(d, config, "{{TPUBasePath}}projects/{{project}}/locations/{{zone}}/tensorflowVersions")
 	if err != nil {
 		return err
 	}

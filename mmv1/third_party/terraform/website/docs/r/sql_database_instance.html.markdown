@@ -144,8 +144,9 @@ resource "google_sql_database_instance" "instance" {
   settings {
     tier = "db-f1-micro"
     ip_configuration {
-      ipv4_enabled    = false
-      private_network = google_compute_network.private_network.id
+      ipv4_enabled                                  = false
+      private_network                               = google_compute_network.private_network.id
+      enable_private_path_for_google_cloud_services = true
     }
   }
 }
@@ -227,6 +228,10 @@ The `settings` block supports:
     for more details and supported versions. Postgres supports only shared-core machine types,
     and custom machine types such as `db-custom-2-13312`. See the [Custom Machine Type Documentation](https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#create) to learn about specifying custom machine types.
 
+The optional `settings.advanced_machine_features` subblock supports:
+
+* `threads_per_core` - (Optional) The number of threads per core. The value of this flag can be 1 or 2. To disable SMT, set this flag to 1. Only available in Cloud SQL for SQL Server instances. See [smt](https://cloud.google.com/sql/docs/sqlserver/create-instance#smt-create-instance) for more details.
+
 * `activation_policy` - (Optional) This specifies when the instance should be
     active. Can be either `ALWAYS`, `NEVER` or `ON_DEMAND`.
 
@@ -241,7 +246,7 @@ The `settings` block supports:
 
 * `connector_enforcement` - (Optional) Specifies if connections must use Cloud SQL connectors.
 
-* `deletion_protection_enabled` - (Optional) Enables deletion protection of an instance at the GCP level. Enabling this protection will guard against accidental deletion across all surfaces (API, gcloud, Cloud Console and Terraform). Defaults to `false`.
+* `deletion_protection_enabled` - (Optional) Enables deletion protection of an instance at the GCP level. Enabling this protection will guard against accidental deletion across all surfaces (API, gcloud, Cloud Console and Terraform) by enabling the [GCP Cloud SQL instance deletion protection](https://cloud.google.com/sql/docs/postgres/deletion-protection). Terraform provider support was introduced in version 4.48.0. Defaults to `false`.
 
 * `disk_autoresize` - (Optional) Enables auto-resizing of the storage size. Defaults to `true`.
 
@@ -252,6 +257,8 @@ The `settings` block supports:
 * `disk_type` - (Optional) The type of data disk: PD_SSD or PD_HDD. Defaults to `PD_SSD`.
 
 * `pricing_plan` - (Optional) Pricing plan for this instance, can only be `PER_USE`.
+
+* `time_zone` - (Optional) The time_zone to be used by the database engine (supported only for SQL Server), in SQL Server timezone format.
 
 * `user_labels` - (Optional) A set of key/value user label pairs to assign to the instance.
 
@@ -281,8 +288,6 @@ The optional `settings.sql_server_audit_config` subblock supports:
 * `upload_interval` - (Optional) How often to upload generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
 
 * `retention_interval` - (Optional) How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
-
-* `time_zone` - (Optional) The time_zone to be used by the database engine (supported only for SQL Server), in SQL Server timezone format.
 
 The optional `settings.backup_configuration` subblock supports:
 
@@ -323,6 +328,8 @@ This setting can be updated, but it cannot be removed after it is set.
 * `require_ssl` - (Optional) Whether SSL connections over IP are enforced or not.
 
 * `allocated_ip_range` - (Optional) The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the instance ip will be created in the allocated range. The range name must comply with [RFC 1035](https://datatracker.ietf.org/doc/html/rfc1035). Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.
+
+* `enable_private_path_for_google_cloud_services` - (Optional) Whether Google Cloud services such as BigQuery are allowed to access data in this Cloud SQL instance over a private IP connection. SQLSERVER database type is not supported.
 
 The optional `settings.ip_configuration.authorized_networks[]` sublist supports:
 
@@ -425,6 +432,8 @@ The optional `clone` block supports:
 
     A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
 
+* `database_names` - (Optional) (SQL Server only, use with `point_in_time`) Clone only the specified databases from the source instance. Clone all databases if empty.
+
 * `allocated_ip_range` -  (Optional) The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the cloned instance ip will be created in the allocated range. The range name must comply with [RFC 1035](https://tools.ietf.org/html/rfc1035). Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.
 
 The optional `restore_backup_context` block supports:
@@ -482,7 +491,7 @@ performing filtering in a Terraform config.
 
 * `instance_type` - The type of the instance. The supported values are `SQL_INSTANCE_TYPE_UNSPECIFIED`, `CLOUD_SQL_INSTANCE`, `ON_PREMISES_INSTANCE` and `READ_REPLICA_INSTANCE`.
 
-  ~> **NOTE:** Users can upgrade a read replica instance to a stand-alone Cloud SQL instance with the help of `instance_type`. To promote, users have to set the `instance_type` property as `CLOUD_SQL_INSTANCE` and remove/unset `master_instance_name` and `replica_configuration` from instance configuration. This operation might cause your instance to restart.
+~> **NOTE:** Users can upgrade a read replica instance to a stand-alone Cloud SQL instance with the help of `instance_type`. To promote, users have to set the `instance_type` property as `CLOUD_SQL_INSTANCE` and remove/unset `master_instance_name` and `replica_configuration` from instance configuration. This operation might cause your instance to restart.
 
 * `settings.version` - Used to make sure changes to the `settings` block are
     atomic.

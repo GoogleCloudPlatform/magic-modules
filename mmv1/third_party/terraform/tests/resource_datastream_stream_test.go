@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
 func TestDatastreamStreamCustomDiff(t *testing.T) {
@@ -113,7 +115,7 @@ func TestDatastreamStreamCustomDiff(t *testing.T) {
 			tn = fmt.Sprintf("(new) %s => %s", tc.old, tc.new)
 		}
 		t.Run(tn, func(t *testing.T) {
-			diff := &ResourceDiffMock{
+			diff := &tpgresource.ResourceDiffMock{
 				Before: map[string]interface{}{
 					"desired_state": tc.old,
 				},
@@ -135,17 +137,17 @@ func TestDatastreamStreamCustomDiff(t *testing.T) {
 
 func TestAccDatastreamStream_update(t *testing.T) {
 	// this test uses the random provider
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":       randString(t, 10),
+		"random_suffix":       RandString(t, 10),
 		"deletion_protection": false,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 		},
@@ -335,7 +337,7 @@ resource "google_datastream_stream" "default" {
         gcs_destination_config {
             path = "mydata"
             file_rotation_mb = 200
-            file_rotation_interval = "900s"
+            file_rotation_interval = "60s"
             json_file_format {
                 schema_file_format = "NO_SCHEMA_FILE"
                 compression = "GZIP"

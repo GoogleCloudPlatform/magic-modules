@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func isShrinkageIpCidr(old, new, _ interface{}) bool {
+func IsShrinkageIpCidr(old, new, _ interface{}) bool {
 	_, oldCidr, oldErr := net.ParseCIDR(old.(string))
 	_, newCidr, newErr := net.ParseCIDR(new.(string))
 
@@ -57,8 +57,8 @@ func resourceComputeSubnetworkSecondaryIpRangeSetStyleDiff(diff *schema.Resource
 		}
 	}
 
-	oldSet := schema.NewSet(schema.HashResource(resourceComputeSubnetwork().Schema["secondary_ip_range"].Elem.(*schema.Resource)), old)
-	newSet := schema.NewSet(schema.HashResource(resourceComputeSubnetwork().Schema["secondary_ip_range"].Elem.(*schema.Resource)), new)
+	oldSet := schema.NewSet(schema.HashResource(ResourceComputeSubnetwork().Schema["secondary_ip_range"].Elem.(*schema.Resource)), old)
+	newSet := schema.NewSet(schema.HashResource(ResourceComputeSubnetwork().Schema["secondary_ip_range"].Elem.(*schema.Resource)), new)
 
 	if oldSet.Equal(newSet) {
 		if err := diff.Clear("secondary_ip_range"); err != nil {

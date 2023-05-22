@@ -42,7 +42,7 @@ resource "google_compute_region_instance_group_manager" "appserver" {
   distribution_policy_zones  = ["us-central1-a", "us-central1-f"]
 
   version {
-    instance_template = google_compute_instance_template.appserver.id
+    instance_template = google_compute_instance_template.appserver.self_link_unique
   }
 
   all_instances_config {
@@ -80,11 +80,11 @@ resource "google_compute_region_instance_group_manager" "appserver" {
   target_size = 5
 
   version {
-    instance_template = google_compute_instance_template.appserver.id
+    instance_template = google_compute_instance_template.appserver.self_link_unique
   }
 
   version {
-    instance_template = google_compute_instance_template.appserver-canary.id
+    instance_template = google_compute_instance_template.appserver-canary.self_link_unique
     target_size {
       fixed = 1
     }
@@ -210,6 +210,17 @@ update_policy {
 * `replacement_method` - (Optional), The instance replacement method for managed instance groups. Valid values are: "RECREATE", "SUBSTITUTE". If SUBSTITUTE (default), the group replaces VM instances with new instances that have randomly generated names. If RECREATE, instance names are preserved.  You must also set max_unavailable_fixed or max_unavailable_percent to be greater than 0.
 - - -
 
+<a name="nested_instance_lifecycle_policy"></a>The `instance_lifecycle_policy` block supports:
+
+```hcl
+instance_lifecycle_policy {
+  force_update_on_repair = "YES"
+}
+```
+
+* `force_update_on_repair` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)), Specifies whether to apply the group's latest configuration when repairing a VM. Valid options are: YES, NO. If YES and you updated the group's instance template or per-instance configurations after the VM was created, then these changes are applied when VM is repaired. If NO (default), then updates are applied in accordance with the group's update policy type.
+- - -
+
 <a name="nested_all_instances_config"></a>The `all_instances_config` block supports:
 
 ```hcl
@@ -248,7 +259,7 @@ The `auto_healing_policies` block supports:
 ```hcl
 version {
   name              = "appserver-canary"
-  instance_template = google_compute_instance_template.appserver-canary.id
+  instance_template = google_compute_instance_template.appserver-canary.self_link_unique
 
   target_size {
     fixed = 1
@@ -259,7 +270,7 @@ version {
 ```hcl
 version {
   name              = "appserver-canary"
-  instance_template = google_compute_instance_template.appserver-canary.id
+  instance_template = google_compute_instance_template.appserver-canary.self_link_unique
 
   target_size {
     percent = 20
@@ -292,13 +303,13 @@ one of which has a `target_size.percent` of `60` will create 2 instances of that
 
 <a name="nested_stateful_internal_ip"></a>The `stateful_internal_ip` block supports:
 
-* `network_interface_name` - (Required), The network interface name of the internal Ip.
+* `interface_name` - (Required), The network interface name of the internal Ip. Possible value: `nic0`.
 
 * `delete_rule` - (Optional), A value that prescribes what should happen to the internal ip when the VM instance is deleted. The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`. `NEVER` - detach the ip when the VM is deleted, but do not delete the ip. `ON_PERMANENT_INSTANCE_DELETION` will delete the internal ip when the VM is permanently deleted from the instance group.
 
 <a name="nested_stateful_external_ip"></a>The `stateful_external_ip` block supports:
 
-* `network_interface_name` - (Required), The network interface name of the external Ip.
+* `interface_name` - (Required), The network interface name of the external Ip. Possible value: `nic0`.
 
 * `delete_rule` - (Optional), A value that prescribes what should happen to the external ip when the VM instance is deleted. The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`. `NEVER` - detach the ip when the VM is deleted, but do not delete the ip. `ON_PERMANENT_INSTANCE_DELETION` will delete the external ip when the VM is permanently deleted from the instance group.
 

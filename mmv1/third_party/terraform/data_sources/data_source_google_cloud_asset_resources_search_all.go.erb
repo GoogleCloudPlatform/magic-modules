@@ -7,9 +7,11 @@ import (
 	"net/url"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleCloudAssetResourcesSearchAll() *schema.Resource {
+func DataSourceGoogleCloudAssetResourcesSearchAll() *schema.Resource {
 	return &schema.Resource{
 		Read: datasourceGoogleCloudAssetResourcesSearchAllRead,
 		Schema: map[string]*schema.Schema{
@@ -84,8 +86,8 @@ func dataSourceGoogleCloudAssetResourcesSearchAll() *schema.Resource {
 }
 
 func datasourceGoogleCloudAssetResourcesSearchAllRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -106,12 +108,17 @@ func datasourceGoogleCloudAssetResourcesSearchAllRead(d *schema.ResourceData, me
 	}
 
 	for {
-		url, err := addQueryParams(url, params)
+		url, err := transport_tpg.AddQueryParams(url, params)
 		if err != nil {
 			return err
 		}
 
-		res, err := sendRequest(config, "GET", "", url, userAgent, nil)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config: config,
+			Method: "GET",
+			RawURL: url,
+			UserAgent: userAgent,
+		})
 		if err != nil {
 			return fmt.Errorf("Error searching resources: %s", err)
 		}

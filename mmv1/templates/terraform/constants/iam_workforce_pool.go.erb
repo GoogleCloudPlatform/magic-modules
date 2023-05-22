@@ -1,6 +1,6 @@
 const workforcePoolIdRegexp = `^[a-z][a-z0-9-]{4,61}[a-z0-9]$`
 
-func validateWorkforcePoolId(v interface{}, k string) (ws []string, errors []error) {
+func ValidateWorkforcePoolId(v interface{}, k string) (ws []string, errors []error) {
     value := v.(string)
 
     if strings.HasPrefix(value, "gcp-") {

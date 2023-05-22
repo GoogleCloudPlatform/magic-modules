@@ -5,11 +5,13 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"google.golang.org/api/cloudbilling/v1"
 )
 
-func dataSourceGoogleBillingAccount() *schema.Resource {
+func DataSourceGoogleBillingAccount() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceBillingAccountRead,
 		Schema: map[string]*schema.Schema{
@@ -45,8 +47,8 @@ func dataSourceGoogleBillingAccount() *schema.Resource {
 }
 
 func dataSourceBillingAccountRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -57,7 +59,7 @@ func dataSourceBillingAccountRead(d *schema.ResourceData, meta interface{}) erro
 	if v, ok := d.GetOk("billing_account"); ok {
 		resp, err := config.NewBillingClient(userAgent).BillingAccounts.Get(canonicalBillingAccountName(v.(string))).Do()
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Billing Account Not Found : %s", v))
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Billing Account Not Found : %s", v))
 		}
 
 		if openOk && resp.Open != open.(bool) {
@@ -102,7 +104,7 @@ func dataSourceBillingAccountRead(d *schema.ResourceData, meta interface{}) erro
 	}
 	projectIds := flattenBillingProjects(resp.ProjectBillingInfo)
 
-	d.SetId(GetResourceNameFromSelfLink(billingAccount.Name))
+	d.SetId(tpgresource.GetResourceNameFromSelfLink(billingAccount.Name))
 	if err := d.Set("name", billingAccount.Name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}

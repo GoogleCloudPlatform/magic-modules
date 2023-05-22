@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -38,12 +40,12 @@ func TestAccProjectOrganizationPolicy(t *testing.T) {
 }
 
 func testAccProjectOrganizationPolicy_boolean(t *testing.T) {
-	projectId := getTestProjectFromEnv()
+	projectId := acctest.GetTestProjectFromEnv()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				// Test creation of an enforced boolean policy
@@ -74,12 +76,12 @@ func testAccProjectOrganizationPolicy_boolean(t *testing.T) {
 }
 
 func testAccProjectOrganizationPolicy_list_allowAll(t *testing.T) {
-	projectId := getTestProjectFromEnv()
+	projectId := acctest.GetTestProjectFromEnv()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectOrganizationPolicyConfig_list_allowAll(projectId),
@@ -95,12 +97,12 @@ func testAccProjectOrganizationPolicy_list_allowAll(t *testing.T) {
 }
 
 func testAccProjectOrganizationPolicy_list_allowSome(t *testing.T) {
-	project := getTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	canonicalProject := canonicalProjectId(project)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectOrganizationPolicyConfig_list_allowSome(project),
@@ -116,11 +118,11 @@ func testAccProjectOrganizationPolicy_list_allowSome(t *testing.T) {
 }
 
 func testAccProjectOrganizationPolicy_list_denySome(t *testing.T) {
-	projectId := getTestProjectFromEnv()
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
+	projectId := acctest.GetTestProjectFromEnv()
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectOrganizationPolicyConfig_list_denySome(projectId),
@@ -136,11 +138,11 @@ func testAccProjectOrganizationPolicy_list_denySome(t *testing.T) {
 }
 
 func testAccProjectOrganizationPolicy_list_update(t *testing.T) {
-	projectId := getTestProjectFromEnv()
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
+	projectId := acctest.GetTestProjectFromEnv()
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectOrganizationPolicyConfig_list_allowAll(projectId),
@@ -160,12 +162,12 @@ func testAccProjectOrganizationPolicy_list_update(t *testing.T) {
 }
 
 func testAccProjectOrganizationPolicy_restore_defaultTrue(t *testing.T) {
-	projectId := getTestProjectFromEnv()
+	projectId := acctest.GetTestProjectFromEnv()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectOrganizationPolicyConfig_restore_defaultTrue(projectId),
@@ -181,12 +183,12 @@ func testAccProjectOrganizationPolicy_restore_defaultTrue(t *testing.T) {
 }
 
 func testAccProjectOrganizationPolicy_none(t *testing.T) {
-	projectId := getTestProjectFromEnv()
+	projectId := acctest.GetTestProjectFromEnv()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectOrganizationPolicyConfig_none(projectId),
@@ -203,7 +205,7 @@ func testAccProjectOrganizationPolicy_none(t *testing.T) {
 
 func testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_project_organization_policy" {
@@ -212,7 +214,7 @@ func testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t *testing.T) fu
 
 			projectId := canonicalProjectId(rs.Primary.Attributes["project"])
 			constraint := canonicalOrgPolicyConstraint(rs.Primary.Attributes["constraint"])
-			policy, err := config.NewResourceManagerClient(config.userAgent).Projects.GetOrgPolicy(projectId, &cloudresourcemanager.GetOrgPolicyRequest{
+			policy, err := config.NewResourceManagerClient(config.UserAgent).Projects.GetOrgPolicy(projectId, &cloudresourcemanager.GetOrgPolicyRequest{
 				Constraint: constraint,
 			}).Do()
 
@@ -327,10 +329,10 @@ func getGoogleProjectOrganizationPolicyTestResource(t *testing.T, s *terraform.S
 		return nil, fmt.Errorf("No ID is set")
 	}
 
-	config := googleProviderConfig(t)
+	config := GoogleProviderConfig(t)
 	projectId := canonicalProjectId(rs.Primary.Attributes["project"])
 
-	return config.NewResourceManagerClient(config.userAgent).Projects.GetOrgPolicy(projectId, &cloudresourcemanager.GetOrgPolicyRequest{
+	return config.NewResourceManagerClient(config.UserAgent).Projects.GetOrgPolicy(projectId, &cloudresourcemanager.GetOrgPolicyRequest{
 		Constraint: rs.Primary.Attributes["constraint"],
 	}).Do()
 }

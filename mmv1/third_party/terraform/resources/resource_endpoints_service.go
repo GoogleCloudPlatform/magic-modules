@@ -13,10 +13,12 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/servicemanagement/v1"
 )
 
-func resourceEndpointsService() *schema.Resource {
+func ResourceEndpointsService() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceEndpointsServiceCreate,
 		Read:   resourceEndpointsServiceRead,
@@ -211,13 +213,13 @@ func getEndpointServiceGRPCConfigSource(serviceConfig, protoConfig string) *serv
 }
 
 func resourceEndpointsServiceCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -246,7 +248,7 @@ func resourceEndpointsServiceCreate(d *schema.ResourceData, meta interface{}) er
 			return err
 		}
 
-		_, err = serviceManagementOperationWaitTime(config, op, "Creating new ManagedService.", userAgent, d.Timeout(schema.TimeoutCreate))
+		_, err = ServiceManagementOperationWaitTime(config, op, "Creating new ManagedService.", userAgent, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
 			return err
 		}
@@ -286,8 +288,8 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 	// be tweaked if the user is using gcloud.  In the interest of simplicity,
 	// we currently only support full rollouts - anyone trying to do incremental
 	// rollouts or A/B testing is going to need a more precise tool than this resource.
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -316,7 +318,7 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return err
 	}
-	s, err := serviceManagementOperationWaitTime(config, op, "Submitting service config.", userAgent, d.Timeout(schema.TimeoutUpdate))
+	s, err := ServiceManagementOperationWaitTime(config, op, "Submitting service config.", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
 	}
@@ -338,7 +340,7 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return err
 	}
-	_, err = serviceManagementOperationWaitTime(config, op, "Performing service rollout.", userAgent, d.Timeout(schema.TimeoutUpdate))
+	_, err = ServiceManagementOperationWaitTime(config, op, "Performing service rollout.", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
 	}
@@ -347,8 +349,8 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceEndpointsServiceDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -359,14 +361,14 @@ func resourceEndpointsServiceDelete(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return err
 	}
-	_, err = serviceManagementOperationWaitTime(config, op, "Deleting service.", userAgent, d.Timeout(schema.TimeoutDelete))
+	_, err = ServiceManagementOperationWaitTime(config, op, "Deleting service.", userAgent, d.Timeout(schema.TimeoutDelete))
 	d.SetId("")
 	return err
 }
 
 func resourceEndpointsServiceRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

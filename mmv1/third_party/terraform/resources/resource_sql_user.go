@@ -6,6 +6,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -23,7 +27,20 @@ func diffSuppressIamUserName(_, old, new string, d *schema.ResourceData) bool {
 	return false
 }
 
-func resourceSqlUser() *schema.Resource {
+func handleUserNotFoundError(err error, d *schema.ResourceData, resource string) error {
+	if transport_tpg.IsGoogleApiErrorWithCode(err, 404) || transport_tpg.IsGoogleApiErrorWithCode(err, 403) {
+		log.Printf("[WARN] Removing %s because it's gone", resource)
+		// The resource doesn't exist anymore
+		d.SetId("")
+
+		return nil
+	}
+
+	return errwrap.Wrapf(
+		fmt.Sprintf("Error when reading or editing %s: {{err}}", resource), err)
+}
+
+func ResourceSqlUser() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceSqlUserCreate,
 		Read:   resourceSqlUserRead,
@@ -78,7 +95,7 @@ func resourceSqlUser() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: emptyOrDefaultStringSuppress("BUILT_IN"),
+				DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("BUILT_IN"),
 				Description: `The user type. It determines the method to authenticate the user during login.
                 The default is the database's built-in user type. Flags include "BUILT_IN", "CLOUD_IAM_USER", or "CLOUD_IAM_SERVICE_ACCOUNT".`,
 				ValidateFunc: validation.StringInSlice([]string{"BUILT_IN", "CLOUD_IAM_USER", "CLOUD_IAM_SERVICE_ACCOUNT", ""}, false),
@@ -106,6 +123,7 @@ func resourceSqlUser() *schema.Resource {
 			"password_policy": {
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -189,7 +207,6 @@ func expandPasswordPolicy(cfg interface{}) *sqladmin.UserPasswordValidationPolic
 	raw := cfg.([]interface{})[0].(map[string]interface{})
 
 	upvp := &sqladmin.UserPasswordValidationPolicy{}
-
 	if v, ok := raw["allowed_failed_attempts"]; ok {
 		upvp.AllowedFailedAttempts = int64(v.(int))
 	}
@@ -207,13 +224,13 @@ func expandPasswordPolicy(cfg interface{}) *sqladmin.UserPasswordValidationPolic
 }
 
 func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -237,18 +254,18 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 		user.PasswordPolicy = pp
 	}
 
-	mutexKV.Lock(instanceMutexKey(project, instance))
-	defer mutexKV.Unlock(instanceMutexKey(project, instance))
+	transport_tpg.MutexStore.Lock(instanceMutexKey(project, instance))
+	defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 
 	if v, ok := d.GetOk("host"); ok {
 		if v.(string) != "" {
 			var fetchedInstance *sqladmin.DatabaseInstance
-			err = retryTimeDuration(func() (rerr error) {
+			err = transport_tpg.RetryTimeDuration(func() (rerr error) {
 				fetchedInstance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
 				return rerr
-			}, d.Timeout(schema.TimeoutRead), isSqlOperationInProgressError)
+			}, d.Timeout(schema.TimeoutRead), transport_tpg.IsSqlOperationInProgressError)
 			if err != nil {
-				return handleNotFoundError(err, d, fmt.Sprintf("SQL Database Instance %q", d.Get("instance").(string)))
+				return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("SQL Database Instance %q", d.Get("instance").(string)))
 			}
 			if !strings.Contains(fetchedInstance.DatabaseVersion, "MYSQL") {
 				return fmt.Errorf("Error: Host field is only supported for MySQL instances: %s", fetchedInstance.DatabaseVersion)
@@ -262,7 +279,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 			user).Do()
 		return err
 	}
-	err = retryTimeDuration(insertFunc, d.Timeout(schema.TimeoutCreate))
+	err = transport_tpg.RetryTimeDuration(insertFunc, d.Timeout(schema.TimeoutCreate))
 
 	if err != nil {
 		return fmt.Errorf("Error, failed to insert "+
@@ -273,7 +290,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	// for which user.Host is an empty string.  That's okay.
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
 
-	err = sqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutCreate))
+	err = SqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutCreate))
 
 	if err != nil {
 		return fmt.Errorf("Error, failure waiting for insertion of %s "+
@@ -284,13 +301,13 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -299,35 +316,15 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
 	host := d.Get("host").(string)
 
-	var users *sqladmin.UsersListResponse
+	var user *sqladmin.User
 	err = nil
-	err = retryTime(func() error {
-		users, err = config.NewSqlAdminClient(userAgent).Users.List(project, instance).Do()
+	err = transport_tpg.RetryTime(func() error {
+		user, err = config.NewSqlAdminClient(userAgent).Users.Get(project, instance, name).Host(host).Do()
 		return err
 	}, 5)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("SQL User %q in instance %q", name, instance))
-	}
-
-	var user *sqladmin.User
-	databaseInstance, err := config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
-	if err != nil {
-		return err
-	}
-
-	for _, currentUser := range users.Items {
-		if !strings.Contains(databaseInstance.DatabaseVersion, "POSTGRES") {
-			name = strings.Split(name, "@")[0]
-		}
-
-		if currentUser.Name == name {
-			// Host can only be empty for postgres instances,
-			// so don't compare the host if the API host is empty.
-			if host == "" || currentUser.Host == host {
-				user = currentUser
-				break
-			}
-		}
+		// move away from transport_tpg.HandleNotFoundError() as we need to handle both 404 and 403
+		return handleUserNotFoundError(err, d, fmt.Sprintf("SQL User %q in instance %q", name, instance))
 	}
 
 	if user == nil {
@@ -408,14 +405,14 @@ func flattenPasswordStatus(status *sqladmin.PasswordStatus) interface{} {
 }
 
 func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	if d.HasChange("password") || d.HasChange("password_policy") {
-		project, err := getProject(d, config)
+		project, err := tpgresource.GetProject(d, config)
 		if err != nil {
 			return err
 		}
@@ -431,21 +428,21 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 			Password: password,
 		}
 
-		mutexKV.Lock(instanceMutexKey(project, instance))
-		defer mutexKV.Unlock(instanceMutexKey(project, instance))
+		transport_tpg.MutexStore.Lock(instanceMutexKey(project, instance))
+		defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 		var op *sqladmin.Operation
 		updateFunc := func() error {
 			op, err = config.NewSqlAdminClient(userAgent).Users.Update(project, instance, user).Host(host).Name(name).Do()
 			return err
 		}
-		err = retryTimeDuration(updateFunc, d.Timeout(schema.TimeoutUpdate))
+		err = transport_tpg.RetryTimeDuration(updateFunc, d.Timeout(schema.TimeoutUpdate))
 
 		if err != nil {
 			return fmt.Errorf("Error, failed to update"+
 				"user %s into user %s: %s", name, instance, err)
 		}
 
-		err = sqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = SqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutUpdate))
 
 		if err != nil {
 			return fmt.Errorf("Error, failure waiting for update of %s "+
@@ -459,7 +456,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "ABANDON" {
 		// Allows for user to be abandoned without deletion to avoid deletion failing
@@ -467,12 +464,12 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -481,21 +478,21 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 	host := d.Get("host").(string)
 	instance := d.Get("instance").(string)
 
-	mutexKV.Lock(instanceMutexKey(project, instance))
-	defer mutexKV.Unlock(instanceMutexKey(project, instance))
+	transport_tpg.MutexStore.Lock(instanceMutexKey(project, instance))
+	defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 
 	var op *sqladmin.Operation
-	err = retryTimeDuration(func() error {
+	err = transport_tpg.RetryTimeDuration(func() error {
 		op, err = config.NewSqlAdminClient(userAgent).Users.Delete(project, instance).Host(host).Name(name).Do()
 		if err != nil {
 			return err
 		}
 
-		if err := sqlAdminOperationWaitTime(config, op, project, "Delete User", userAgent, d.Timeout(schema.TimeoutDelete)); err != nil {
+		if err := SqlAdminOperationWaitTime(config, op, project, "Delete User", userAgent, d.Timeout(schema.TimeoutDelete)); err != nil {
 			return err
 		}
 		return nil
-	}, d.Timeout(schema.TimeoutDelete), isSqlOperationInProgressError, isSqlInternalError)
+	}, d.Timeout(schema.TimeoutDelete), transport_tpg.IsSqlOperationInProgressError, IsSqlInternalError)
 
 	if err != nil {
 		return fmt.Errorf("Error, failed to delete"+

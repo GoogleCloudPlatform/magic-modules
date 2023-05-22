@@ -6,20 +6,21 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccDataSourceGoogleProjectService_basic(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", randInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
 	services := []string{"iam.googleapis.com", "cloudresourcemanager.googleapis.com"}
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceGoogleProjectService_basic(services, pid, pname, org),
+				Config: testAccDataSourceGoogleProjectService_basic(services, pid, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceGoogleProjectServiceCheck("data.google_project_service.foo"),
 				),
@@ -28,7 +29,7 @@ func TestAccDataSourceGoogleProjectService_basic(t *testing.T) {
 	})
 }
 
-func testAccDataSourceGoogleProjectService_basic(services []string, pid, name, org string) string {
+func testAccDataSourceGoogleProjectService_basic(services []string, pid, org string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id = "%s"
@@ -45,7 +46,7 @@ data "google_project_service" "foo" {
   project = google_project.acceptance.project_id
   service = google_project_service.foo.service
 }
-`, pid, name, org, services[0])
+`, pid, pid, org, services[0])
 }
 
 func testAccDataSourceGoogleProjectServiceCheck(datasourceName string) resource.TestCheckFunc {

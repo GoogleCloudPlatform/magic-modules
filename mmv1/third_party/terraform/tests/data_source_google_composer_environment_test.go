@@ -8,18 +8,19 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccDataSourceComposerEnvironment_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComposerEnvironment_basic(context),
@@ -85,6 +86,9 @@ resource "google_composer_environment" "test" {
 			network    = google_compute_network.test.self_link
 			subnetwork = google_compute_subnetwork.test.self_link
 			zone       = "us-central1-a"
+		}
+		software_config {
+			image_version = "composer-1-airflow-2"
 		}
 	}
 }

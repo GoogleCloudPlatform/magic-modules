@@ -7,25 +7,29 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc<%= dcl_version(version) -%>"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccEventarcGoogleChannelConfig_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":  getTestProjectFromEnv(),
-		"region":        getTestRegionFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project_name":  acctest.GetTestProjectFromEnv(),
+		"region":        acctest.GetTestRegionFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckEventarcGoogleChannelConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckEventarcGoogleChannelConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEventarcGoogleChannelConfig_basic(context),
@@ -42,23 +46,23 @@ func TestAccEventarcGoogleChannelConfig_basic(t *testing.T) {
 func TestAccEventarcGoogleChannelConfig_cryptoKeyUpdate(t *testing.T) {
 	t.Parallel()
 
-	region := getTestRegionFromEnv()
-	key1 := BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-key1")
-	key2 := BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-key2")
+	region := acctest.GetTestRegionFromEnv()
+	key1 := BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-eventarc-google-channel-config-key1")
+	key2 := BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-eventarc-google-channel-config-key2")
 
 	context := map[string]interface{}{
-		"project_name":  getTestProjectFromEnv(),
-		"region":        getTestRegionFromEnv(),
-		"random_suffix": randString(t, 10),
-		"key_ring":      GetResourceNameFromSelfLink(key1.KeyRing.Name),
-		"key1":          GetResourceNameFromSelfLink(key1.CryptoKey.Name),
-		"key2":          GetResourceNameFromSelfLink(key2.CryptoKey.Name),
+		"project_name":  acctest.GetTestProjectFromEnv(),
+		"region":        acctest.GetTestRegionFromEnv(),
+		"random_suffix": RandString(t, 10),
+		"key_ring":      tpgresource.GetResourceNameFromSelfLink(key1.KeyRing.Name),
+		"key1":          tpgresource.GetResourceNameFromSelfLink(key1.CryptoKey.Name),
+		"key2":          tpgresource.GetResourceNameFromSelfLink(key2.CryptoKey.Name),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckEventarcGoogleChannelConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckEventarcGoogleChannelConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEventarcGoogleChannelConfig_setCryptoKey(context),
@@ -75,6 +79,9 @@ func TestAccEventarcGoogleChannelConfig_cryptoKeyUpdate(t *testing.T) {
 				ResourceName:      "google_eventarc_google_channel_config.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				Config: testAccEventarcGoogleChannelConfig_deleteCryptoKey(context),
 			},
 		},
 	})
@@ -105,20 +112,18 @@ data "google_kms_crypto_key" "key1" {
 	key_ring = data.google_kms_key_ring.test_key_ring.id
 }
 
-resource "google_kms_crypto_key_iam_binding" "key1_binding" {
+resource "google_kms_crypto_key_iam_member" "key1_member" {
 	crypto_key_id = data.google_kms_crypto_key.key1.id
 	role      = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
-	members = [
-	"serviceAccount:service-${data.google_project.test_project.number}@gcp-sa-eventarc.iam.gserviceaccount.com",
-	]
+	member = "serviceAccount:service-${data.google_project.test_project.number}@gcp-sa-eventarc.iam.gserviceaccount.com"
 }
 
 resource "google_eventarc_google_channel_config" "primary" {
 	location = "%{region}"
 	name     = "projects/%{project_name}/locations/%{region}/googleChannelConfig"
 	crypto_key_name =  data.google_kms_crypto_key.key1.id
-	depends_on =[google_kms_crypto_key_iam_binding.key1_binding]
+	depends_on =[google_kms_crypto_key_iam_member.key1_member]
 }
 	`, context)
 }
@@ -139,20 +144,28 @@ data "google_kms_crypto_key" "key2" {
 	key_ring = data.google_kms_key_ring.test_key_ring.id
 }
 
-resource "google_kms_crypto_key_iam_binding" "key2_binding" {
+resource "google_kms_crypto_key_iam_member" "key2_member" {
 	crypto_key_id = data.google_kms_crypto_key.key2.id
 	role      = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
-	members = [
-	"serviceAccount:service-${data.google_project.test_project.number}@gcp-sa-eventarc.iam.gserviceaccount.com",
-	]
+	member = "serviceAccount:service-${data.google_project.test_project.number}@gcp-sa-eventarc.iam.gserviceaccount.com"
 }
 
 resource "google_eventarc_google_channel_config" "primary" {
 	location = "%{region}"
 	name     = "projects/%{project_name}/locations/%{region}/googleChannelConfig"
 	crypto_key_name =  data.google_kms_crypto_key.key2.id
-	depends_on =[google_kms_crypto_key_iam_binding.key2_binding]
+	depends_on =[google_kms_crypto_key_iam_member.key2_member]
+}
+	`, context)
+}
+
+func testAccEventarcGoogleChannelConfig_deleteCryptoKey(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_eventarc_google_channel_config" "primary" {
+	location = "%{region}"
+	name     = "projects/%{project_name}/locations/%{region}/googleChannelConfig"
+	crypto_key_name = ""
 }
 	`, context)
 }
@@ -167,7 +180,7 @@ func testAccCheckEventarcGoogleChannelConfigDestroyProducer(t *testing.T) func(s
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			billingProject := ""
 			if config.BillingProject != "" {
@@ -182,7 +195,7 @@ func testAccCheckEventarcGoogleChannelConfigDestroyProducer(t *testing.T) func(s
 				UpdateTime:    dcl.StringOrNil(rs.Primary.Attributes["update_time"]),
 			}
 
-			client := NewDCLEventarcClient(config, config.userAgent, billingProject, 0)
+			client := transport_tpg.NewDCLEventarcClient(config, config.UserAgent, billingProject, 0)
 			_, err := client.GetGoogleChannelConfig(context.Background(), obj)
 			if err == nil {
 				return fmt.Errorf("google_eventarc_google_channel_config still exists %v", obj)

@@ -4,19 +4,53 @@ package google
 import (
 	"fmt"
 	"testing"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
+func TestCloudrunAnnotationDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		K, Old, New        string
+		ExpectDiffSuppress bool
+	}{
+		"missing run.googleapis.com/operation-id": {
+			K:                  "metadata.0.annotations.run.googleapis.com/operation-id",
+			Old:                "12345abc",
+			New:                "",
+			ExpectDiffSuppress: true,
+		},
+		"missing run.googleapis.com/ingress": {
+			K:                  "metadata.0.annotations.run.googleapis.com/ingress",
+			Old:                "all",
+			New:                "",
+			ExpectDiffSuppress: true,
+		},
+		"explicit run.googleapis.com/ingress": {
+			K:                  "metadata.0.annotations.run.googleapis.com/ingress",
+			Old:                "all",
+			New:                "internal",
+			ExpectDiffSuppress: false,
+		},
+	}
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			if got := cloudrunAnnotationDiffSuppress(tc.K, tc.Old, tc.New, nil); got != tc.ExpectDiffSuppress {
+				t.Errorf("got %t; want %t", got, tc.ExpectDiffSuppress)
+			}
+		})
+	}
+}
+
 func TestAccCloudRunService_cloudRunServiceUpdate(t *testing.T) {
 	t.Parallel()
 
-	project := getTestProjectFromEnv()
-	name := "tftest-cloudrun-" + randString(t, 6)
+	project := acctest.GetTestProjectFromEnv()
+	name := "tftest-cloudrun-" + RandString(t, 6)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRunService_cloudRunServiceUpdate(name, project, "10", "600"),
@@ -44,12 +78,12 @@ func TestAccCloudRunService_cloudRunServiceUpdate(t *testing.T) {
 func TestAccCloudRunService_foregroundDeletion(t *testing.T) {
 	t.Parallel()
 
-	project := getTestProjectFromEnv()
-	name := "tftest-cloudrun-" + randString(t, 6)
+	project := acctest.GetTestProjectFromEnv()
+	name := "tftest-cloudrun-" + RandString(t, 6)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRunService_cloudRunServiceUpdate(name, project, "10", "600"),
@@ -120,15 +154,15 @@ resource "google_cloud_run_service" "default" {
 func TestAccCloudRunService_secretVolume(t *testing.T) {
 	t.Parallel()
 
-	project := getTestProjectFromEnv()
-	name := "tftest-cloudrun-" + randString(t, 6)
+	project := acctest.GetTestProjectFromEnv()
+	name := "tftest-cloudrun-" + RandString(t, 6)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretVolume(name, project, "secret-"+randString(t, 5), "secret-"+randString(t, 6), "google_secret_manager_secret.secret1.secret_id"),
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretVolume(name, project, "secret-"+RandString(t, 5), "secret-"+RandString(t, 6), "google_secret_manager_secret.secret1.secret_id"),
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
@@ -137,7 +171,7 @@ func TestAccCloudRunService_secretVolume(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "status.0.conditions"},
 			},
 			{
-				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretVolume(name, project, "secret-"+randString(t, 10), "secret-"+randString(t, 11), "google_secret_manager_secret.secret2.secret_id"),
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretVolume(name, project, "secret-"+RandString(t, 10), "secret-"+RandString(t, 11), "google_secret_manager_secret.secret2.secret_id"),
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
@@ -244,15 +278,15 @@ resource "google_cloud_run_service" "default" {
 func TestAccCloudRunService_secretEnvironmentVariable(t *testing.T) {
 	t.Parallel()
 
-	project := getTestProjectFromEnv()
-	name := "tftest-cloudrun-" + randString(t, 6)
+	project := acctest.GetTestProjectFromEnv()
+	name := "tftest-cloudrun-" + RandString(t, 6)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretEnvVar(name, project, "secret-"+randString(t, 5), "secret-"+randString(t, 6), "google_secret_manager_secret.secret1.secret_id"),
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretEnvVar(name, project, "secret-"+RandString(t, 5), "secret-"+RandString(t, 6), "google_secret_manager_secret.secret1.secret_id"),
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
@@ -261,7 +295,7 @@ func TestAccCloudRunService_secretEnvironmentVariable(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "status.0.conditions"},
 			},
 			{
-				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretEnvVar(name, project, "secret-"+randString(t, 10), "secret-"+randString(t, 11), "google_secret_manager_secret.secret2.secret_id"),
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretEnvVar(name, project, "secret-"+RandString(t, 10), "secret-"+RandString(t, 11), "google_secret_manager_secret.secret2.secret_id"),
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
@@ -365,12 +399,12 @@ resource "google_cloud_run_service" "default" {
 func TestAccCloudRunService_probes(t *testing.T) {
 	t.Parallel()
 
-	project := getTestProjectFromEnv()
-	name := "tftest-cloudrun-" + randString(t, 6)
+	project := acctest.GetTestProjectFromEnv()
+	name := "tftest-cloudrun-" + RandString(t, 6)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRunService_cloudRunServiceWithEmptyTCPStartupProbeAndHTTPLivenessProbe(name, project),
@@ -440,7 +474,6 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -480,7 +513,6 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -507,6 +539,7 @@ resource "google_cloud_run_service" "default" {
           failure_threshold = %s
           http_get {
             path = "/some-path"
+            port = 8080
             http_headers {
               name = "User-Agent"
               value = "magic-modules"
@@ -539,7 +572,6 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -573,7 +605,6 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -584,6 +615,7 @@ resource "google_cloud_run_service" "default" {
         startup_probe {
           http_get {
             path = "/some-path"
+            port = 8080
             http_headers {
               name = "User-Agent"
               value = "magic-modules"
@@ -616,7 +648,6 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -650,7 +681,6 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 

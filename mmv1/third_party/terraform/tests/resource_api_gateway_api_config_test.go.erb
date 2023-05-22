@@ -4,6 +4,7 @@ package google
 
 import (
 	"testing"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -12,13 +13,13 @@ func TestAccApiGatewayApiConfig_apigatewayApiConfigBasicExampleUpdated(t *testin
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
-		CheckDestroy: testAccCheckApiGatewayApiConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckApiGatewayApiConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApiGatewayApiConfig_apigatewayApiConfigBasicExample(context),
@@ -32,17 +33,17 @@ func TestAccApiGatewayApiConfig_apigatewayApiConfigBasicExampleUpdated(t *testin
 
 func TestAccApiGatewayApiConfig_generatedPrefix(t *testing.T) {
 	// Random generated id within resource
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
-		CheckDestroy: testAccCheckApiGatewayApiConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckApiGatewayApiConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApiGatewayApiConfig_generatedPrefix(context),

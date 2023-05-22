@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 const targetAudience = "https://foo.bar/"
@@ -43,8 +44,8 @@ func TestAccDataSourceGoogleServiceAccountIdToken_basic(t *testing.T) {
 	resourceName := "data.google_service_account_id_token.default"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleServiceAccountIdToken_basic(targetAudience),
@@ -70,12 +71,12 @@ func TestAccDataSourceGoogleServiceAccountIdToken_impersonation(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "data.google_service_account_id_token.default"
-	serviceAccount := getTestServiceAccountFromEnv(t)
-	targetServiceAccountEmail := BootstrapServiceAccount(t, getTestProjectFromEnv(), serviceAccount)
+	serviceAccount := acctest.GetTestServiceAccountFromEnv(t)
+	targetServiceAccountEmail := BootstrapServiceAccount(t, acctest.GetTestProjectFromEnv(), serviceAccount)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleServiceAccountIdToken_impersonation_datasource(targetAudience, targetServiceAccountEmail),

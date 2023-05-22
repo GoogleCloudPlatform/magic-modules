@@ -5,14 +5,16 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleCloudBuildTrigger() *schema.Resource {
+func DataSourceGoogleCloudBuildTrigger() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceCloudBuildTrigger().Schema)
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceCloudBuildTrigger().Schema)
 
-	addRequiredFieldsToSchema(dsSchema, "trigger_id", "location")
-	addOptionalFieldsToSchema(dsSchema, "project")
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "trigger_id", "location")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleCloudBuildTriggerRead,
@@ -22,9 +24,9 @@ func dataSourceGoogleCloudBuildTrigger() *schema.Resource {
 }
 
 func dataSourceGoogleCloudBuildTriggerRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
-	id, err := replaceVars(d, config, "projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

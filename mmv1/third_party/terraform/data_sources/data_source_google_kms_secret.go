@@ -5,11 +5,15 @@ import (
 
 	"encoding/base64"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleKmsSecret() *schema.Resource {
+func DataSourceGoogleKmsSecret() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleKmsSecretRead,
 		Schema: map[string]*schema.Schema{
@@ -35,13 +39,13 @@ func dataSourceGoogleKmsSecret() *schema.Resource {
 }
 
 func dataSourceGoogleKmsSecretRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	cryptoKeyId, err := parseKmsCryptoKeyId(d.Get("crypto_key").(string), config)
+	cryptoKeyId, err := ParseKmsCryptoKeyId(d.Get("crypto_key").(string), config)
 
 	if err != nil {
 		return err
@@ -57,7 +61,7 @@ func dataSourceGoogleKmsSecretRead(d *schema.ResourceData, meta interface{}) err
 		kmsDecryptRequest.AdditionalAuthenticatedData = aad.(string)
 	}
 
-	decryptResponse, err := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.CryptoKeys.Decrypt(cryptoKeyId.cryptoKeyId(), kmsDecryptRequest).Do()
+	decryptResponse, err := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.CryptoKeys.Decrypt(cryptoKeyId.CryptoKeyId(), kmsDecryptRequest).Do()
 
 	if err != nil {
 		return fmt.Errorf("Error decrypting ciphertext: %s", err)

@@ -1,0 +1,160 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Database'
+base_url: projects/{{project}}/instances/{{instance}}/databases
+immutable: true
+description: |
+  A Cloud Spanner Database which is hosted on a Spanner instance.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/spanner/'
+  api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances.databases'
+async: !ruby/object:Api::OpAsync
+  actions: ['create', 'update', 'delete']
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+autogen_async: true
+skip_sweeper: true
+id_format: '{{instance}}/{{name}}'
+import_format:
+  - 'projects/{{project}}/instances/{{instance}}/databases/{{name}}'
+  - 'instances/{{instance}}/databases/{{name}}'
+  - '{{project}}/{{instance}}/{{name}}'
+  - '{{instance}}/{{name}}'
+docs: !ruby/object:Provider::Terraform::Docs
+  warning: |
+    On newer versions of the provider, you must explicitly set `deletion_protection=false`
+    (and run `terraform apply` to write the field to state) in order to destroy an instance.
+    It is recommended to not set this field (or set it to true) until you're ready to destroy.
+    On older versions, it is strongly recommended to set `lifecycle { prevent_destroy = true }`
+    on databases in order to prevent accidental data loss. See [Terraform docs](https://www.terraform.io/docs/configuration/resources.html#prevent_destroy)
+    for more information on lifecycle parameters.
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'spanner_database_basic'
+    primary_resource_id:
+      'database'
+      # Randomness due to spanner instance
+    skip_vcr: true
+    vars:
+      database_name: 'my-database'
+    ignore_read_extra:
+      - 'deletion_protection'
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: 'deletion_protection'
+    default_value: true
+    description: |
+      Whether or not to allow Terraform to destroy the instance. Unless this field is set to false
+      in Terraform state, a `terraform destroy` or `terraform apply` that would delete the instance will fail.
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: 'templates/terraform/constants/spanner_database.go.erb'
+  encoder: templates/terraform/encoders/spanner_database.go.erb
+  decoder: templates/terraform/decoders/spanner_database.go.erb
+  update_encoder: templates/terraform/update_encoder/spanner_database.go.erb
+  resource_definition: 'templates/terraform/resource_definition/spanner_database.go.erb'
+  post_create: templates/terraform/post_create/spanner_database.go.erb
+  pre_delete: templates/terraform/pre_delete/resource_spanner_database.go
+  pre_update: templates/terraform/pre_update/spanner_database.go.erb
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'instance'
+    resource: 'Instance'
+    imports: 'name'
+    description: 'The instance to create the database on.'
+    required: true
+properties:
+  # This resource returns only one attribute ("name") from which we parse
+  # "instance", "name", and "project".  You will need custom code handling
+  # to deal with this resource.
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      A unique identifier for the database, which cannot be changed after
+      the instance is created. Values are of the form [a-z][-a-z0-9]*[a-z0-9].
+    immutable: true
+    required: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      regex: '^[a-z][a-z0-9_\-]*[a-z0-9]$'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+  - !ruby/object:Api::Type::String
+    name: 'versionRetentionPeriod'
+    update_url: projects/{{project}}/instances/{{instance}}/databases/{{name}}/ddl
+    update_verb: :PATCH
+    description: |
+      The retention period for the database. The retention period must be between 1 hour
+      and 7 days, and can be specified in days, hours, minutes, or seconds. For example,
+      the values 1d, 24h, 1440m, and 86400s are equivalent. Default value is 1h.
+      If this property is used, you must avoid adding new DDL statements to `ddl` that
+      update the database's version_retention_period.
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: ValidateDatabaseRetentionPeriod
+    default_from_api: true
+  - !ruby/object:Api::Type::Array
+    name: 'ddl'
+    api_name: 'extraStatements'
+    update_url: projects/{{project}}/instances/{{instance}}/databases/{{name}}/ddl
+    update_verb: :PATCH
+    ignore_read: true
+    description: |
+      An optional list of DDL statements to run inside the newly created
+      database. Statements can create tables, indexes, etc. These statements
+      execute atomically with the creation of the database: if there is an
+      error in any statement, the database is not created.
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::Enum
+    name: 'state'
+    description: An explanation of the status of the database.
+    output: true
+    # This attribute is not useful - we include it in Terraform for historical
+    # reasons, but you should most likely not use it.
+    exclude: false
+    values:
+      - :READY
+      - :CREATING
+  - !ruby/object:Api::Type::NestedObject
+    name: 'encryptionConfig'
+    description: |
+      Encryption configuration for the database
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeyName'
+        required: true
+        description: |
+          Fully qualified name of the KMS key to use to encrypt this database. This key must exist
+          in the same location as the Spanner Database.
+  - !ruby/object:Api::Type::Enum
+    name: 'databaseDialect'
+    description: |
+      The dialect of the Cloud Spanner Database.
+      If it is not provided, "GOOGLE_STANDARD_SQL" will be used.
+    values:
+      - :GOOGLE_STANDARD_SQL
+      - :POSTGRESQL
+    default_from_api: true

@@ -92,7 +92,6 @@ module Overrides
       def build_resource(old_resource, res_override, override_classes)
         res_override = override_classes[:resource].new if res_override.nil? || res_override.empty?
 
-        explicit_overrides = res_override.instance_variables
         res_override.validate
         res_override.apply old_resource
 
@@ -102,16 +101,10 @@ module Overrides
         variables = (old_resource.instance_variables + res_override.instance_variables).uniq
         variables.reject { |o| %i[@properties @parameters].include?(o) }
                  .each do |var_name|
-          # Check if the variable is defined on the original api but wasn't explicitly specified
-          # on the override. This stops override defaults (such as custom_code) from clobbering
-          # properties that exist on the api already
-          if old_resource.instance_variables.include?(var_name) \
-             && !explicit_overrides.include?(var_name)
+          if res_override[var_name].nil?
             res.instance_variable_set(var_name, old_resource.instance_variable_get(var_name))
-          elsif !res_override[var_name].nil?
-            res.instance_variable_set(var_name, res_override[var_name])
           else
-            res.instance_variable_set(var_name, old_resource.instance_variable_get(var_name))
+            res.instance_variable_set(var_name, res_override[var_name])
           end
         end
 
@@ -160,7 +153,6 @@ module Overrides
         prop_override = override_classes[:property].new \
           if prop_override.nil? || prop_override.empty?
 
-        explicit_overrides = prop_override.instance_variables
         prop_override.validate
         prop_override.apply old_property
 
@@ -178,16 +170,10 @@ module Overrides
 
         variables.reject { |o| o == :@properties }
                  .each do |var_name|
-          # Check if the variable is defined on the original api but wasn't explicitly specified
-          # on the override. This stops override defaults (such as is_set) from clobbering
-          # properties that exist on the api already
-          if old_property.instance_variables.include?(var_name) \
-             && !explicit_overrides.include?(var_name)
+          if prop_override[var_name].nil?
             prop.instance_variable_set(var_name, old_property.instance_variable_get(var_name))
-          elsif !prop_override[var_name].nil? # and not default
+          else # and not default
             prop.instance_variable_set(var_name, prop_override[var_name])
-          else
-            prop.instance_variable_set(var_name, old_property.instance_variable_get(var_name))
           end
         end
         prop

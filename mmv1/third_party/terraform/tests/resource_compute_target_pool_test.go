@@ -4,20 +4,23 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccComputeTargetPool_basic(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeTargetPoolDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeTargetPoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeTargetPool_basic(randString(t, 10)),
+				Config: testAccComputeTargetPool_basic(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeTargetPoolExists(
 						t, "google_compute_target_pool.foo"),
@@ -39,14 +42,14 @@ func TestAccComputeTargetPool_basic(t *testing.T) {
 func TestAccComputeTargetPool_update(t *testing.T) {
 	t.Parallel()
 
-	tpname := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	name1 := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	name2 := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	tpname := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	name1 := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	name2 := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeTargetPoolDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeTargetPoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				// Create target pool with no instances attached
@@ -81,14 +84,14 @@ func TestAccComputeTargetPool_update(t *testing.T) {
 
 func testAccCheckComputeTargetPoolDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_compute_target_pool" {
 				continue
 			}
 
-			_, err := config.NewComputeClient(config.userAgent).TargetPools.Get(
+			_, err := config.NewComputeClient(config.UserAgent).TargetPools.Get(
 				config.Project, config.Region, rs.Primary.Attributes["name"]).Do()
 			if err == nil {
 				return fmt.Errorf("TargetPool still exists")
@@ -110,9 +113,9 @@ func testAccCheckComputeTargetPoolExists(t *testing.T, n string) resource.TestCh
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
-		found, err := config.NewComputeClient(config.userAgent).TargetPools.Get(
+		found, err := config.NewComputeClient(config.UserAgent).TargetPools.Get(
 			config.Project, config.Region, rs.Primary.Attributes["name"]).Do()
 		if err != nil {
 			return err
@@ -139,8 +142,8 @@ func testAccCheckComputeTargetPoolHealthCheck(targetPool, healthCheck string) re
 		}
 
 		hcLink := healthCheckRes.Primary.Attributes["self_link"]
-		if ConvertSelfLinkToV1(targetPoolRes.Primary.Attributes["health_checks.0"]) != hcLink {
-			return fmt.Errorf("Health check not set up. Expected %q to equal %q", ConvertSelfLinkToV1(targetPoolRes.Primary.Attributes["health_checks.0"]), hcLink)
+		if tpgresource.ConvertSelfLinkToV1(targetPoolRes.Primary.Attributes["health_checks.0"]) != hcLink {
+			return fmt.Errorf("Health check not set up. Expected %q to equal %q", tpgresource.ConvertSelfLinkToV1(targetPoolRes.Primary.Attributes["health_checks.0"]), hcLink)
 		}
 
 		return nil

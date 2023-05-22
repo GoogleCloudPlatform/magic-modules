@@ -4,28 +4,43 @@ package google
 import (
 	"fmt"
 	"testing"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDataSourceGoogleFirebaseAppleAppConfig(t *testing.T) {
+	// TODO: https://github.com/hashicorp/terraform-provider-google/issues/14158
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":   getTestProjectFromEnv(),
-		"bundle_id":    "apple.app." + randString(t, 5),
-		"display_name": "Display Name AppleAppConfig DataSource",
+		"project_id":   acctest.GetTestProjectFromEnv(),
+		"bundle_id":    "apple.app." + RandString(t, 5),
+		"display_name": "tf-test Display Name AppleAppConfig DataSource",
 		"app_store_id": 12345,
 		"team_id":      1234567890,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck: func() { acctest.AccTestPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
+				ExternalProviders: map[string]resource.ExternalProvider{
+					"google": {
+						VersionConstraint: "4.58.0",
+						Source:            "hashicorp/google<%= "-" + version unless version == 'ga'  -%>",
+					},
+				},
 				Config: testAccDataSourceGoogleFirebaseAppleAppConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataSourceFirebaseAppleAppConfigCheck("data.google_firebase_apple_app_config.my_app_config"),
+				),
+			},
+			{
+				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+				Config:                   testAccDataSourceGoogleFirebaseAppleAppConfig(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceFirebaseAppleAppConfigCheck("data.google_firebase_apple_app_config.my_app_config"),
 				),

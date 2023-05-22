@@ -1,4 +1,4 @@
-from golang:1.18-stretch as resource
+from golang:1.19-bullseye as resource
 SHELL ["/bin/bash", "-c"]
 # Set up Github SSH cloning.
 RUN ssh-keyscan github.com >> /known_hosts

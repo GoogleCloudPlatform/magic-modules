@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccCloudFunctions2Function_update(t *testing.T) {
@@ -11,13 +12,13 @@ func TestAccCloudFunctions2Function_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"zip_path":      "./test-fixtures/cloudfunctions2/function-source.zip",
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCloudfunctions2functionDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudfunctions2functionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudfunctions2function_basic(context),
@@ -57,18 +58,18 @@ resource "google_storage_bucket" "bucket" {
   location = "US"
   uniform_bucket_level_access = true
 }
- 
+
 resource "google_storage_bucket_object" "object" {
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
   source = "%{zip_path}"
 }
- 
+
 resource "google_cloudfunctions2_function" "terraform-test2" {
   name = "tf-test-test-function%{random_suffix}"
   location = "us-central1"
   description = "a new function"
- 
+
   build_config {
     runtime = "nodejs12"
     entry_point = "helloHttp"
@@ -79,7 +80,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
       }
     }
   }
- 
+
   service_config {
     max_instance_count  = 1
     available_memory    = "1536Mi"
@@ -96,18 +97,18 @@ resource "google_storage_bucket" "bucket" {
   location = "US"
   uniform_bucket_level_access = true
 }
- 
+
 resource "google_storage_bucket_object" "object" {
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
   source = "%{zip_path}"
 }
- 
+
 resource "google_cloudfunctions2_function" "terraform-test2" {
   name = "tf-test-test-function%{random_suffix}"
   location = "us-central1"
   description = "an updated function"
- 
+
   build_config {
     runtime = "nodejs12"
     entry_point = "helloHttp"
@@ -118,7 +119,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
       }
     }
   }
- 
+
   service_config {
     max_instance_count  = 1
     available_memory    = "1536Mi"
@@ -135,18 +136,18 @@ resource "google_storage_bucket" "bucket" {
   location = "US"
   uniform_bucket_level_access = true
 }
- 
+
 resource "google_storage_bucket_object" "object" {
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
   source = "%{zip_path}"
 }
- 
+
 resource "google_cloudfunctions2_function" "terraform-test2" {
   name = "tf-test-test-function%{random_suffix}"
   location = "us-west1"
   description = "function test"
- 
+
   build_config {
     runtime = "nodejs16"
     entry_point = "helloHttp"
@@ -160,7 +161,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
       }
     }
   }
- 
+
   service_config {
     max_instance_count  = 5
     min_instance_count = 1
@@ -178,15 +179,19 @@ func TestAccCloudFunctions2Function_fullUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       getTestProjectFromEnv(),
+		"project":       acctest.GetTestProjectFromEnv(),
 		"zip_path":      "./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip",
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCloudfunctions2functionDestroyProducer(t),
+	if BootstrapPSARole(t, "service-", "gcp-sa-pubsub", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
+		t.Fatal("Stopping the test because a binding was added.")
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudfunctions2functionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				// Re-use config from the generated tests
@@ -212,7 +217,7 @@ resource "google_storage_bucket" "source-bucket" {
   location = "US"
   uniform_bucket_level_access = true
 }
- 
+
 resource "google_storage_bucket_object" "object" {
   name   = "function-source.zip"
   bucket = google_storage_bucket.source-bucket.name
@@ -262,7 +267,7 @@ resource "google_cloudfunctions2_function" "function" {
   name = "tf-test-gcf-function%{random_suffix}"
   location = "us-central1"
   description = "a new function"
- 
+
   build_config {
     runtime     = "nodejs12"
     entry_point = "entryPoint" # Set the entry point in the code
@@ -276,7 +281,7 @@ resource "google_cloudfunctions2_function" "function" {
       }
     }
   }
- 
+
   service_config {
     max_instance_count  = 3
     min_instance_count = 1
