@@ -297,7 +297,7 @@ Example: DomainMapping (DomainMappingLabelDiffSuppress)
 
 ## Documentation
 
-When adding a new MMv1 product or resource there are fields that you need to set within `product.yaml` and resource-level `ResourceName.yaml` that are specific to documentation for that resource. To learn more about MMv1 generated documentation and what YAML fields you need to pay attention to, see [Update MMv1 resource documentation](/magic-modules/docs/how-to/update-mmv1-resource-documentation).
+When adding a new MMv1 product or resource there are fields that you need to set within `product.yaml` and resource-level `ResourceName.yaml` that are specific to documentation for that resource. To learn more about MMv1 generated documentation and what YAML fields you need to pay attention to, see [Add and update MMv1 resource documentation](/magic-modules/docs/how-to/mmv1-resource-documentation).
 
 # Beta features
 
