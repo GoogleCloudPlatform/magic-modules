@@ -41,7 +41,7 @@ examples:
       bucket_name: 'static-content-bucket'
       object_name: 'public-object'
 id_format: '{{bucket}}/{{object}}/{{entity}}'
-import_format: ['{{bucket}}/{{%object}}/{{entity}}']
+import_format: ['{{&bucket}}/{{%object}}/{{&entity}}']
 mutex: 'storage/buckets/{{bucket}}/objects/{{object}}'
 skip_sweeper: true
 properties:

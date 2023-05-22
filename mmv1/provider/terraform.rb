@@ -157,9 +157,13 @@ module Provider
     # For instance,
     #   projects/{{project}}/global/networks/{{name}}
     # is transformed to
-    #   projects/(?P<project>[^/]+)/global/networks/(?P<name>[^/]+)
+    #   projects/(?P<project>.+)/global/networks/(?P<name>.+)
     #
-    # Values marked with % are URL-encoded, and will match any number of /'s.
+    # Values marked with & are encoded to match a token containing no additional /'s, 
+    # primarily for the use case of multiple tokens in a row where any token after the first 
+    # is specifically expected to contain multiple /'s.
+    #
+    # Values marked with % have no difference from the base functionality and is maintained to preserve compatability.
     #
     # Note: ?P indicates a Python-compatible named capture group. Named groups
     # aren't common in JS-based regex flavours, but are in Perl-based ones
@@ -167,6 +171,7 @@ module Provider
       format
         .gsub(/\{\{%([[:word:]]+)\}\}/, '(?P<\1>.+)')
         .gsub(/\{\{([[:word:]]+)\}\}/, '(?P<\1>.+)')
+        .gsub(/\{\{&([[:word:]]+)\}\}/, '(?P<\1>[^/]+)')
     end
 
     # Capitalize the first letter of a property name.
