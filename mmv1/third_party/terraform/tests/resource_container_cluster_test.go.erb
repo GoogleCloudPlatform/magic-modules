@@ -3631,7 +3631,7 @@ func TestAccContainerCluster_withProtectConfig(t *testing.T) {
 func TestAccContainerCluster_autopilot_minimal(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
