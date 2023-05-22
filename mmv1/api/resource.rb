@@ -147,6 +147,10 @@ module Api
       # The Terraform resource id format used when calling #setId(...).
       # For instance, `{{name}}` means the id will be the resource name.
       attr_reader :id_format
+      # Sets the formats used to generate regex strings that match templated 
+      # values into a full self_link format for importing. Leading a token with `%`
+      # i.e. {{%parent}}/resource/{{resource}}
+      # will allow that token to hold multiple /'s.
       attr_reader :import_format
       attr_reader :custom_code
       attr_reader :docs
