@@ -2017,7 +2017,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 
 	clusterName := d.Get("name").(string)
 
-	ipAllocationBlock, err := expandIPAllocationPolicy(d.Get("ip_allocation_policy"), d.Get("networking_mode").(string))
+	ipAllocationBlock, err := expandIPAllocationPolicy(d.Get("ip_allocation_policy"), d.Get("networking_mode").(string), d.Get("enable_autopilot").(bool))
 	if err != nil {
 		return err
 	}
@@ -4030,10 +4030,13 @@ func expandPodCidrOverprovisionConfig(configured interface{}) *container.PodCIDR
 	}
 }
 
-func expandIPAllocationPolicy(configured interface{}, networkingMode string) (*container.IPAllocationPolicy, error) {
+func expandIPAllocationPolicy(configured interface{}, networkingMode string, autopilot bool) (*container.IPAllocationPolicy, error) {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		if networkingMode == "VPC_NATIVE" {
+			if autopilot {
+				return nil, nil
+			}
 			return nil, fmt.Errorf("`ip_allocation_policy` block is required for VPC_NATIVE clusters.")
 		}
 		return &container.IPAllocationPolicy{
@@ -5230,7 +5233,7 @@ func flattenIPAllocationPolicy(c *container.Cluster, d *schema.ResourceData, con
 
 	p := c.IpAllocationPolicy
 
-	// handle older clusters that return JSON null 
+	// handle older clusters that return JSON null
 	// corresponding to "STACK_TYPE_UNSPECIFIED" due to GKE declining to backfill
 	// equivalent to default_if_empty
 	if p.StackType == "" {
