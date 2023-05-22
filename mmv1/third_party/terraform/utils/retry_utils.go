@@ -21,7 +21,11 @@ func retryTime(retryFunc func() error, minutes int) error {
 // Deprecated: For backward compatibility RetryTimeDuration is still working,
 // but all new code should use RetryTimeDuration in the transport_tpg package instead.
 func RetryTimeDuration(retryFunc func() error, duration time.Duration, errorRetryPredicates ...transport_tpg.RetryErrorPredicateFunc) error {
-	return transport_tpg.RetryTimeDuration(retryFunc, duration, errorRetryPredicates...)
+	return transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: retryFunc,
+		Timeout: duration,
+		ErrorRetryPredicates: errorRetryPredicates,
+	})
 }
 
 // Deprecated: For backward compatibility isRetryableError is still working,

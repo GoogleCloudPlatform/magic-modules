@@ -260,10 +260,14 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	if v, ok := d.GetOk("host"); ok {
 		if v.(string) != "" {
 			var fetchedInstance *sqladmin.DatabaseInstance
-			err = transport_tpg.RetryTimeDuration(func() (rerr error) {
-				fetchedInstance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
-				return rerr
-			}, d.Timeout(schema.TimeoutRead), transport_tpg.IsSqlOperationInProgressError)
+			err = transport_tpg.Retry(transport_tpg.RetryOptions{
+				RetryFunc: func() (rerr error) {
+					fetchedInstance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
+					return rerr
+				},
+				Timeout: d.Timeout(schema.TimeoutRead),
+				ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+			})
 			if err != nil {
 				return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("SQL Database Instance %q", d.Get("instance").(string)))
 			}
@@ -279,7 +283,10 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 			user).Do()
 		return err
 	}
-	err = transport_tpg.RetryTimeDuration(insertFunc, d.Timeout(schema.TimeoutCreate))
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: insertFunc,
+		Timeout: d.Timeout(schema.TimeoutCreate),
+	})
 
 	if err != nil {
 		return fmt.Errorf("Error, failed to insert "+
@@ -456,7 +463,10 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 			op, err = config.NewSqlAdminClient(userAgent).Users.Update(project, instance, user).Host(host).Name(name).Do()
 			return err
 		}
-		err = transport_tpg.RetryTimeDuration(updateFunc, d.Timeout(schema.TimeoutUpdate))
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: updateFunc,
+			Timeout: d.Timeout(schema.TimeoutUpdate),
+		})
 
 		if err != nil {
 			return fmt.Errorf("Error, failed to update"+
@@ -503,17 +513,21 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 	defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 
 	var op *sqladmin.Operation
-	err = transport_tpg.RetryTimeDuration(func() error {
-		op, err = config.NewSqlAdminClient(userAgent).Users.Delete(project, instance).Host(host).Name(name).Do()
-		if err != nil {
-			return err
-		}
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			op, err = config.NewSqlAdminClient(userAgent).Users.Delete(project, instance).Host(host).Name(name).Do()
+			if err != nil {
+				return err
+			}
 
-		if err := SqlAdminOperationWaitTime(config, op, project, "Delete User", userAgent, d.Timeout(schema.TimeoutDelete)); err != nil {
-			return err
-		}
-		return nil
-	}, d.Timeout(schema.TimeoutDelete), transport_tpg.IsSqlOperationInProgressError, IsSqlInternalError)
+			if err := SqlAdminOperationWaitTime(config, op, project, "Delete User", userAgent, d.Timeout(schema.TimeoutDelete)); err != nil {
+				return err
+			}
+			return nil
+		},
+		Timeout: d.Timeout(schema.TimeoutDelete),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError, IsSqlInternalError},
+	})
 
 	if err != nil {
 		return fmt.Errorf("Error, failed to delete"+
