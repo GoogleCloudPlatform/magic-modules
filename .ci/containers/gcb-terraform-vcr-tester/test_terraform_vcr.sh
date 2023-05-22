@@ -172,6 +172,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   comment+="[Get to know how VCR tests work](https://googlecloudplatform.github.io/magic-modules/docs/getting-started/contributing/#general-contributing-steps)"
   add_comment "${comment}"
   # Clear fixtures folder
+  ls $VCR_PATH
   rm $VCR_PATH/*
 
   # Clear replaying-log folder
@@ -221,7 +222,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   RECORDING_PASSED_TESTS=$(grep "^--- PASS: TestAcc" recording_test.log | awk -v pr_number=$pr_number -v build_id=$build_id '{print "`"$3"`[[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/recording/"$3".log)]"}')
   RECORDING_PASSED_TEST_LIST=$(grep "^--- PASS: TestAcc" recording_test.log | awk '{print $3}')
   echo "RECORDING_PASSED_TEST_LIST: ${RECORDING_PASSED_TEST_LIST}"
-
+  ls $VCR_PATH
 
   comment=""
   RECORDING_PASSED_TESTS_COUNT=0
