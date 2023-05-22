@@ -1066,12 +1066,10 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network interfaces: %s", err)
 	}
-<% unless version == 'ga' -%>
 	networkPerformanceConfig, err := expandNetworkPerformanceConfig(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network performance config: %s", err)
 	}
-<% end -%>
 	accels, err := expandInstanceGuestAccelerators(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating guest accelerators: %s", err)
@@ -1091,9 +1089,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		Metadata:                   metadata,
 		Name:                       d.Get("name").(string),
 		NetworkInterfaces:          networkInterfaces,
-<% unless version == 'ga' -%>
 		NetworkPerformanceConfig:   networkPerformanceConfig,
-<% end -%>
 		Tags:                       resourceInstanceTags(d),
 		Labels:                     tpgresource.ExpandLabels(d),
 		ServiceAccounts:            expandServiceAccounts(d.Get("service_account").([]interface{})),

@@ -1202,12 +1202,10 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	if err != nil {
 		return err
 	}
-<% unless version == 'ga' -%>
 	networkPerformanceConfig, err := expandNetworkPerformanceConfig(d, config)
 	if err != nil {
 		return nil
 	}
-<% end -%>
 	reservationAffinity, err := expandReservationAffinity(d)
 	if err != nil {
 		return err
@@ -1223,9 +1221,7 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		Disks:                      disks,
 		Metadata:                   metadata,
 		NetworkInterfaces:          networks,
-<% unless version == 'ga' -%>
 		NetworkPerformanceConfig:   networkPerformanceConfig,
-<% end -%>
 		Scheduling:                 scheduling,
 		ServiceAccounts:            expandServiceAccounts(d.Get("service_account").([]interface{})),
 		Tags:                       resourceInstanceTags(d),
