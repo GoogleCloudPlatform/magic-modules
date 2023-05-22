@@ -325,10 +325,13 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 
 	var users *sqladmin.UsersListResponse
 	err = nil
-	err = transport_tpg.RetryTime(func() error {
-		users, err = config.NewSqlAdminClient(userAgent).Users.List(project, instance).Do()
-		return err
-	}, 5)
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			users, err = config.NewSqlAdminClient(userAgent).Users.List(project, instance).Do()
+			return err
+		},
+		Timeout: 5 * time.Minute,
+	})
 	if err != nil {
 		// move away from transport_tpg.HandleNotFoundError() as we need to handle both 404 and 403
 		return handleUserNotFoundError(err, d, fmt.Sprintf("SQL User %q in instance %q", name, instance))
