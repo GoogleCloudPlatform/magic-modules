@@ -23,7 +23,6 @@ description: |
 id_format: 'projects/{{project}}/iap_web'
 import_format: ['projects/{{project}}/iap_web']
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   method_name_separator: ':'
   parent_resource_type: 'google_project_service'
   fetch_iam_policy_verb: :POST
