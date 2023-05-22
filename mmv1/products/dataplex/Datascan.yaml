@@ -15,9 +15,12 @@
 name: 'Datascan'
 base_url: 'projects/{{project}}/locations/{{location}}/dataScans/{{name}}'
 self_link: 'projects/{{project}}/locations/{{location}}/dataScans/{{name}}'
-exclude_resource: true
 description: |
-        to check3: Represents a user-visible job which provides the insights for the related data source.
+      Represents a user-visible job which provides the insights for the related data source.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/dataplex/docs'
+  api: 'https://cloud.google.com/dataplex/docs/reference/rest'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   exclude: false
   method_name_separator: ':'
@@ -35,7 +38,7 @@ examples:
       project_name: :PROJECT_NAME
 parameters:
   - !ruby/object:Api::Type::String
-    name: 'locationId'
+    name: 'location'
     immutable: true
     required: true
     url_param_only: true
@@ -97,6 +100,12 @@ properties:
         immutable: true
         description: |
           The Dataplex entity that represents the data source(e.g. BigQuery table) for Datascan.
+      - !ruby/object:Api::Type::String
+        name: 'resource'
+        immutable: true
+        description: |
+          The service-qualified full resource name of the cloud resource for a DataScan job to scan against. The field could be:
+          (Cloud Storage bucket for DataDiscoveryScan)BigQuery table of type "TABLE" for DataProfileScan/DataQualityScan.
   - !ruby/object:Api::Type::NestedObject
     name: 'executionSpec'
     description: |
