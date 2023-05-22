@@ -79,13 +79,6 @@ properties:
     immutable: true
     url_param_only: true
     ignore_read: true
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
-    description: |
-      The time that this resource was created on the server.
-      This is in RFC3339 text format.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: |
@@ -135,12 +128,6 @@ properties:
           The protection level to use when creating a version based on this template. Possible values include "SOFTWARE", "HSM", "EXTERNAL", "EXTERNAL_VPC". Defaults to "SOFTWARE".
         immutable: true
         default_value: 'SOFTWARE'
-  - !ruby/object:Api::Type::Time
-    name: 'nextRotationTime'
-    description: |
-      The time when KMS will create a new version of this Crypto Key.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'destroyScheduledDuration'
     immutable: true

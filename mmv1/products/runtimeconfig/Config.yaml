@@ -22,7 +22,6 @@ description: |
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'config'
   method_name_separator: ':'
-  exclude: false
 exclude_resource: true
 exclude_validator: true
 import_format: ['projects/{{project}}/configs/{{config}}']

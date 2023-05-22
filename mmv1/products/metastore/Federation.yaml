@@ -24,7 +24,6 @@ description: |
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   skip_import_test: true
   parent_resource_attribute: federation_id
-  exclude: false
   method_name_separator: ':'
   import_format:
     [
