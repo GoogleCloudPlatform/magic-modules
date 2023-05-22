@@ -225,7 +225,12 @@ func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) er
 	// Mutations to gc policies can only happen one-at-a-time and take some amount of time.
 	// Use a fixed polling rate of 30s based on the RetryInfo returned by the server rather than
 	// the standard up-to-10s exponential backoff for those operations.
-	_, err = transport_tpg.RetryWithPolling(retryFunc, timeout, pollInterval, transport_tpg.IsBigTableRetryableError)
+	_, err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc:            retryFunc,
+		Timeout:              timeout,
+		PollInterval:         pollInterval,
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsBigTableRetryableError},
+	})
 	if err != nil {
 		return err
 	}
