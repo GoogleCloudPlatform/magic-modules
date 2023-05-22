@@ -31,7 +31,7 @@ func RetryTimeDuration(retryFunc func() error, duration time.Duration, errorRetr
 // Deprecated: For backward compatibility isRetryableError is still working,
 // but all new code should use IsRetryableError in the transport_tpg package instead.
 func isRetryableError(topErr error, customPredicates ...transport_tpg.RetryErrorPredicateFunc) bool {
-	return transport_tpg.IsRetryableError(topErr, customPredicates...)
+	return transport_tpg.IsRetryableError(topErr, customPredicates, nil)
 }
 
 // The polling overrides the default backoff logic with max backoff of 10s. The poll interval can be greater than 10s.
