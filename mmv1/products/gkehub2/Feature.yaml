@@ -1,0 +1,139 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Feature'
+base_url: projects/{{project}}/locations/{{location}}/features
+create_url: projects/{{project}}/locations/{{location}}/features?featureId={{name}}
+update_url: projects/{{project}}/locations/{{location}}/features/{{name}}
+self_link: projects/{{project}}/locations/{{location}}/features/{{name}}
+update_verb: :PATCH
+#update_mask: true
+description: |
+  Feature represents the settings and status of any Hub Feature.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Registering a Cluster': 'https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster'
+  api: 'https://cloud.google.com/anthos/fleet-management/docs/reference/rest/v1/projects.locations.features'
+#async: !ruby/object:Api::OpAsync
+#  operation: !ruby/object:Api::OpAsync::Operation
+#    kind: 'gkehub#operation'
+#    path: 'name'
+#    base_url: '{{op_id}}'
+#    wait_ms: 1000
+#  result: !ruby/object:Api::OpAsync::Result
+#    path: 'response'
+#    resource_inside_response: true
+#  status: !ruby/object:Api::OpAsync::Status
+#    path: 'done'
+#    complete: 'true'
+#    allowed:
+#      - 'true'
+#      - 'false'
+#  error: !ruby/object:Api::OpAsync::Error
+#    path: 'error/errors'
+#    message: 'message'
+#autogen_async: true
+# Skip sweeper gen since this is a child resource.
+#skip_sweeper: true
+#id_format: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
+#import_format:
+#  ['projects/{{project}}/locations/{{location}}/features/{{name}}']
+parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description: The location for the resource
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: The full, unique name of this Feature resource
+    immutable: true
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: labels
+    description: GCP labels for this Feature.
+  - !ruby/object:Api::Type::NestedObject
+    name: resourceState
+    description: State of the Feature resource itself.
+    output: true
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: state
+        description: The current state of the Feature resource in the Hub API.
+        output: true
+        values:
+          - :STATE_UNSPECIFIED
+          - :ENABLING
+          - :ACTIVE
+          - :DISABLING
+          - :UPDATING
+          - :SERVICE_UPDATING
+      - !ruby/object:Api::Type::Boolean
+        name: hasResources
+        description: Whether this Feature has outstanding resources that need to be cleaned up before it can be disabled.
+        output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: spec
+    description: Optional. Hub-wide Feature configuration. If this Feature does not support any Hub-wide configuration, this field may be unused.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: multiclusteringress
+        description: Multicluster Ingress-specific spec.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: configMembership
+#            resource: 'Membership'
+#            imports: 'name'
+            description: 'Fully-qualified Membership name which hosts the MultiClusterIngress CRD. Example: `projects/foo-proj/locations/global/memberships/bar`'
+            required: true
+  - !ruby/object:Api::Type::NestedObject
+    name: state
+    description: Output only. The Hub-wide Feature state
+    output: true
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: state
+        description: Output only. The "running state" of the Feature in this Hub.
+        output: true
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: code
+            description: The high-level, machine-readable status of this Feature.
+            output: true
+            values:
+              - :CODE_UNSPECIFIED
+              - :OK
+              - :WARNING
+              - :ERROR
+          - !ruby/object:Api::Type::String
+            name: description
+            description: A human-readable description of the current status.
+            output: true
+          - !ruby/object:Api::Type::String
+            name: updateTime
+            description: 'The time this status and any related Feature-specific details were updated. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z"'
+            output: true
+  - !ruby/object:Api::Type::String
+    name: createTime
+    description: Output only. When the Feature resource was created.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    description: Output only. When the Feature resource was last updated.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: deleteTime
+    description: Output only. When the Feature resource was deleted.
+    output: true
