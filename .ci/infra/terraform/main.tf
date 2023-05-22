@@ -246,6 +246,7 @@ module "project-services" {
     "identitytoolkit.googleapis.com",
     "ids.googleapis.com",
     "logging.googleapis.com",
+    "looker.googleapis.com",
     "managedidentities.googleapis.com",
     "memcache.googleapis.com",
     "metastore.googleapis.com",
