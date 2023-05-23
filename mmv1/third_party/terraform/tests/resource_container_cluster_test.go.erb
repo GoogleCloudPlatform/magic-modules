@@ -3642,7 +3642,6 @@ func TestAccContainerCluster_autopilot_minimal(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
-				ImportStateId:     fmt.Sprintf("us-central1-a/%s", clusterName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
