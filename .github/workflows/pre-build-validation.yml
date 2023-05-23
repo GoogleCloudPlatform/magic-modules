@@ -27,7 +27,7 @@ on:
         required: true
 
 jobs:
-  build-and-test:
+  pre-build-validation:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repository
@@ -37,7 +37,7 @@ jobs:
         ref: ${{ github.event.inputs.branch }}
         path: repo
         fetch-depth: 0
-    - name: Check for Product Changes
+    - name: Check for mmv1 product file changes
       id: pull_request
       run: |
         cd repo
