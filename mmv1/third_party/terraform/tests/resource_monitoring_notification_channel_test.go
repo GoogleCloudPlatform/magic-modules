@@ -36,6 +36,87 @@ func TestAccMonitoringNotificationChannel_update(t *testing.T) {
 	})
 }
 
+func TestAccMonitoringNotificationChannel_updateLabels_slack(t *testing.T) {
+	t.Parallel()
+	// being used to skip test if better test skip is located/created feel free to update
+	if os.Getenv(acctest.TestEnvVar) == "" {
+		t.Skipf("Slack auth_token required for test not to fail, skipping test till interal testing slack can be created; use %s=1 to enable", acctest.TestEnvVar)
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringNotificationChannelDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMonitoringNotificationChannel_updateLabels_slack(),
+			},
+			{
+				ResourceName:            "google_monitoring_notification_channel.slack",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.auth_token"},
+			}
+		},
+	})
+}
+
+func TestAccMonitoringNotificationChannel_updateLabels(t *testing.T) {
+	t.Parallel()
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringNotificationChannelDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMonitoringNotificationChannel_updateLabels(),
+			},
+			{
+				ResourceName:            "google_monitoring_notification_channel.pagerduty",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "sensitive_labels"},
+			},
+			{
+				ResourceName:            "google_monitoring_notification_channel.basicauth",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.password", "sensitive_labels"},
+			}
+		},
+	})
+}
+
+
+
+func TestAccMonitoringNotificationChannel_updateSensitiveLabels_slack(t *testing.T) {
+	t.Parallel()
+
+	// being used to skip test if better test skip is located/created feel free to update
+	if os.Getenv(acctest.TestEnvVar) == "" {
+		t.Skipf("Slack auth_token required for test not to fail, skipping test till interal testing slack can be created; use %s=1 to enable", acctest.TestEnvVar)
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringNotificationChannelDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMonitoringNotificationChannel_updateSensitiveLabels_slack(),
+			},
+			// sensitive labels for notification channels are either obfuscated or not returned by the upstream
+			// API. Therefore when re-importing a resource we cannot know what the value is.
+			{
+				ResourceName:            "google_monitoring_notification_channel.slack",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels.%", "sensitive_labels.auth_token"},
+			}
+		},
+	})
+}
 func TestAccMonitoringNotificationChannel_updateSensitiveLabels(t *testing.T) {
 	t.Parallel()
 
@@ -50,12 +131,6 @@ func TestAccMonitoringNotificationChannel_updateSensitiveLabels(t *testing.T) {
 			// sensitive labels for notification channels are either obfuscated or not returned by the upstream
 			// API. Therefore when re-importing a resource we cannot know what the value is.
 			{
-				ResourceName:            "google_monitoring_notification_channel.slack",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.%", "labels.auth_token", "sensitive_labels"},
-			},
-			{
 				ResourceName:            "google_monitoring_notification_channel.pagerduty",
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -66,28 +141,7 @@ func TestAccMonitoringNotificationChannel_updateSensitiveLabels(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels.%", "labels.password", "sensitive_labels"},
-			},
-			{
-				Config: testAccMonitoringNotificationChannel_updateSensitiveLabels2(),
-			},
-			{
-				ResourceName:            "google_monitoring_notification_channel.slack",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.%", "labels.auth_token", "sensitive_labels"},
-			},
-			{
-				ResourceName:            "google_monitoring_notification_channel.pagerduty",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "sensitive_labels"},
-			},
-			{
-				ResourceName:            "google_monitoring_notification_channel.basicauth",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.%", "labels.password", "sensitive_labels"},
-			},
+			}
 		},
 	})
 }
@@ -107,7 +161,7 @@ resource "google_monitoring_notification_channel" "update" {
 	)
 }
 
-func testAccMonitoringNotificationChannel_updateSensitiveLabels() string {
+func testAccMonitoringNotificationChannel_updateLabels_slack() string {
 	return fmt.Sprintf(`
 resource "google_monitoring_notification_channel" "slack" {
 	display_name = "TFTest Slack Channel"
@@ -117,6 +171,12 @@ resource "google_monitoring_notification_channel" "slack" {
 		"channel_name" = "#foobar"
 	}
 }
+`)
+}
+
+func testAccMonitoringNotificationChannel_updateLabels() string {
+	return fmt.Sprintf(`
+
 
 resource "google_monitoring_notification_channel" "basicauth" {
 	display_name = "TFTest Basicauth Channel"
@@ -138,7 +198,7 @@ resource "google_monitoring_notification_channel" "pagerduty" {
 `)
 }
 
-func testAccMonitoringNotificationChannel_updateSensitiveLabels2() string {
+func testAccMonitoringNotificationChannel_updateSensitiveLabels_slack() string {
 	return fmt.Sprintf(`
 resource "google_monitoring_notification_channel" "slack" {
 	display_name = "TFTest Slack Channel"
@@ -151,6 +211,11 @@ resource "google_monitoring_notification_channel" "slack" {
 		auth_token = "one"
 	}
 }
+`)
+}
+
+func testAccMonitoringNotificationChannel_updateSensitiveLabels() string {
+	return fmt.Sprintf(`
 
 resource "google_monitoring_notification_channel" "basicauth" {
 	display_name = "TFTest Basicauth Channel"
