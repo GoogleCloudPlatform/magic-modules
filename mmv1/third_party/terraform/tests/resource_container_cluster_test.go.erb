@@ -7688,7 +7688,7 @@ func testAccContainerCluster_autopilot_minimal(name string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name             = "%s"
-  location         = "us-central1-a"
+  location         = "us-central1"
 	enable_autopilot = true
 }`, name)
 }
