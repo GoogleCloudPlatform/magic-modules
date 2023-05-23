@@ -25,7 +25,6 @@ properties:
     description: |
       Dummy property.
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   substitute_zone_value: false
   method_name_separator: ':'
   parent_resource_attribute: 'dataplex_zone'

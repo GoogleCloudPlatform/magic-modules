@@ -239,9 +239,7 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}/setLabels'
     update_verb: :POST
     min_version: beta
-    exclude: false
   - !ruby/object:Api::Type::String
-    exclude: false
     name: 'detailedStatus'
     output: true
     description: 'Detailed status message for the VPN tunnel.'

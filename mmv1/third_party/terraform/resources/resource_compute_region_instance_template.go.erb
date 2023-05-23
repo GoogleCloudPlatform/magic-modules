@@ -348,7 +348,6 @@ Google Cloud KMS.`,
 				Description: `The unique fingerprint of the metadata.`,
 			},
 
-<% unless version == 'ga' -%>
 			"network_performance_config": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -367,7 +366,6 @@ Google Cloud KMS.`,
 					},
 				},
 			},
-<% end -%>
 
 			"network_interface": {
 				Type:        schema.TypeList,
@@ -924,12 +922,10 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 	if err != nil {
 		return err
 	}
-<% unless version == 'ga' -%>
 	networkPerformanceConfig, err := expandNetworkPerformanceConfig(d, config)
 	if err != nil {
 		return nil
 	}
-<% end -%>
 	reservationAffinity, err := expandReservationAffinity(d)
 	if err != nil {
 		return err
@@ -945,9 +941,7 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 		Disks:                      disks,
 		Metadata:                   metadata,
 		NetworkInterfaces:          networks,
-<% unless version == 'ga' -%>
 		NetworkPerformanceConfig:   networkPerformanceConfig,
-<% end -%>
 		Scheduling:                 scheduling,
 		ServiceAccounts:            expandServiceAccounts(d.Get("service_account").([]interface{})),
 		Tags:                       resourceInstanceTags(d),
@@ -1127,11 +1121,9 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 	if err = d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-<% unless version == 'ga' -%>
 	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(instanceProperties.NetworkPerformanceConfig)); err != nil {
 		return err
 	}
-<% end -%>
 	if instanceProperties.NetworkInterfaces != nil {
 		networkInterfaces, region, _, _, err := flattenNetworkInterfaces(d, config, instanceProperties.NetworkInterfaces)
 		if err != nil {

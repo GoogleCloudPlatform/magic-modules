@@ -18,6 +18,7 @@ description: |
   A possible configuration for a Cloud Spanner instance. Configurations
   define the geographic placement of nodes and their replication.
 readonly: true
+# Used as a resource ref
 exclude: true
 properties:
   - !ruby/object:Api::Type::String
