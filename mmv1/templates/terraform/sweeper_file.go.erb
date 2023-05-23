@@ -1,4 +1,6 @@
+<% if hc_downstream -%>
 <%= lines(hashicorp_copyright_header(:go, pwd)) -%>
+<% end -%>
 
 <%= lines(autogen_notice(:go, pwd)) -%>
 
