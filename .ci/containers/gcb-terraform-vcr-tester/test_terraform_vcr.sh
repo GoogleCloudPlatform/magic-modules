@@ -255,7 +255,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
     else
       comment+="All tests passed after rerunning REPLAYING mode.${NEWLINE}"
     fi
-    comment+="---${NEWLINE}"
+    comment+="${NEWLINE}---${NEWLINE}"
 
     # Clear replaying-log folder
     rm testlog/replaying_after_recording/*
