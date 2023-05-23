@@ -122,9 +122,9 @@ func expandCors(configured []interface{}) []*storage.BucketCors {
 	for _, raw := range configured {
 		data := raw.(map[string]interface{})
 		corsRule := storage.BucketCors{
-			Origin:         convertStringArr(data["origin"].([]interface{})),
-			Method:         convertStringArr(data["method"].([]interface{})),
-			ResponseHeader: convertStringArr(data["response_header"].([]interface{})),
+			Origin:         tpgresource.ConvertStringArr(data["origin"].([]interface{})),
+			Method:         tpgresource.ConvertStringArr(data["method"].([]interface{})),
+			ResponseHeader: tpgresource.ConvertStringArr(data["response_header"].([]interface{})),
 			MaxAgeSeconds:  int64(data["max_age_seconds"].(int)),
 		}
 
