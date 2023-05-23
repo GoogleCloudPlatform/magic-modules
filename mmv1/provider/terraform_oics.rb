@@ -19,6 +19,12 @@ module Provider
   class TerraformOiCS < Provider::Terraform
     # We don't want *any* static generation, so we override generate to only
     # generate objects.
+
+    def is_generating_hashicorp_repo?()
+      # This code is not used when generating TPG/TPGB
+      return false
+    end
+
     def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
       generate_objects(
         output_folder,
