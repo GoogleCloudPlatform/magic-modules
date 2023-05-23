@@ -291,7 +291,6 @@ properties:
               immutable: true
             - !ruby/object:Api::Type::Enum
               name: 'reclaimPolicy'
-              default_value: :DELETE
               description: |
                 Whether the persistent disk should be deleted when the workstation is deleted. Valid values are `DELETE` and `RETAIN`. Defaults to `DELETE`.
               values:
