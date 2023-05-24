@@ -72,7 +72,7 @@ func TestAccBillingAccountIam(t *testing.T) {
 			},
 			{
 				// Test Iam Policy creation
-				Config: testAccBillingAccountDatasetIamPolicy(account, billing, role),
+				Config: testAccBillingAccountIamPolicy(account, billing, role),
 				Check:  resource.TestCheckResourceAttrSet("data.google_billing_account_iam_policy.policy", "policy_data"),
 			},
 		},
@@ -200,8 +200,8 @@ resource "google_billing_account_iam_member" "foo" {
 `, account, billingAccountId, role)
 }
 
-func testAccBillingAccountDatasetIamPolicy(account, billing, role string) string {
-	return fmt.Sprintf(testBigqueryDatasetIam+`
+func testAccBillingAccountIamPolicy(account, billing, role string) string {
+	return fmt.Sprintf(`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
   display_name = "Bigquery Dataset IAM Testing Account"
