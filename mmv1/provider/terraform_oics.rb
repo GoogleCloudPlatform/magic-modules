@@ -20,7 +20,7 @@ module Provider
     # We don't want *any* static generation, so we override generate to only
     # generate objects.
 
-    def is_generating_hashicorp_repo?
+    def generating_hashicorp_repo?
       # This code is not used when generating TPG/TPGB
       false
     end

@@ -43,7 +43,7 @@ module Provider
                         Ssl: 'SSL',
                         Url: 'URL' }.freeze
 
-    def is_generating_hashicorp_repo?
+    def generating_hashicorp_repo?
       # This code is not used when generating TPG/TPGB
       false
     end
