@@ -237,10 +237,13 @@ module Provider
 
       Google::LOGGER.info "[SARAH FRENCH] adding header to file : #{target}"
       data = File.read("#{output_folder}/#{target}")
-      File.write(
-        "#{output_folder}/#{target}",
-        "// Copyright (c) HashiCorp, Inc.\n// SPDX-License-Identifier: MPL-2.0\n"
-      )
+
+      copyright_header = ['Copyright (c) HashiCorp, Inc','SPDX-License-Identifier: MPL-2.0']
+      lang = language_from_filename(target)
+
+      header = comment_block(copyright_header, lang)
+      File.write("#{output_folder}/#{target}", header)
+
       File.write("#{output_folder}/#{target}", data, mode: 'a') # append mode
     end
 
@@ -426,6 +429,34 @@ module Provider
         return matcher[:year] unless matcher.nil?
       end
       Time.now.year
+    end
+
+    # Adapted from the method used in templating
+    # See: mmv1/compile/core.rb
+    def comment_block(text, lang)
+      case lang
+      when :ruby, :python, :yaml, :git, :gemfile
+        header = text.map { |t| t&.empty? ? '#' : "# #{t}" }
+      when :go
+        header = text.map { |t| t&.empty? ? '//' : "// #{t}" }
+      else
+        raise "Unknown language for comment: #{lang}"
+      end
+
+      header_string = header.join("\n")
+      header_string += "\n" # add trailing newline
+    end
+
+    def language_from_filename(filename)
+      extension = filename.split(".")[-1] 
+      case extension
+      when "go"
+        return :go
+      when "rb"
+        return :ruby
+      else
+        raise "Unknown language for file extension: #{extension}"
+      end
     end
   end
 end
