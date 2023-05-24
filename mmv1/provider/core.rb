@@ -216,25 +216,31 @@ module Provider
         '.golangci.yml',
         'terraform-registry-manifest.json'
       ]
-
+      should_add_header = true
       ignored_folders.each do |folder|
         # folder will be path leading to file
         if target.start_with? folder
           Google::LOGGER.info "[SARAH FRENCH] NOT adding header to : #{target}"
-          return
+          should_add_header = false
         end
       end
+      return unless should_add_header
+
       ignored_files.each do |file|
         # file will be the filename and extension, with no preceding path
         if target.end_with? file
           Google::LOGGER.info "[SARAH FRENCH] NOT adding header to : #{target}"
-          return
+          should_add_header = false
         end
       end
+      return unless should_add_header
 
       Google::LOGGER.info "[SARAH FRENCH] adding header to file : #{target}"
       data = File.read("#{output_folder}/#{target}")
-      File.write("#{output_folder}/#{target}", "// Copyright (c) HashiCorp, Inc.\n// SPDX-License-Identifier: MPL-2.0\n")
+      File.write(
+        "#{output_folder}/#{target}",
+        "// Copyright (c) HashiCorp, Inc.\n// SPDX-License-Identifier: MPL-2.0\n"
+      )
       File.write("#{output_folder}/#{target}", data, mode: 'a') # append mode adds file content after previous write(s)
     end
 
