@@ -198,32 +198,44 @@ module Provider
     end
 
     def add_hashicorp_copyright_header(output_folder, target)
-      return unless @target_version_name == 'ga' || @target_version_name == 'beta' # only add copyright headers when generating TPG and TPGB
+      # only add copyright headers when generating TPG and TPGB
+      return unless @target_version_name == 'ga' || @target_version_name == 'beta'
 
       # Prevent adding copyright header to files with paths matching the strings below
       # This will be refactored
-      ignored_folders = ['.github/', '.release/', '.changelog/', 'examples/', 'META.d/']
-      ignored_files = [ 'go.mod', '.goreleaser.yml', '.golangci.yml', 'terraform-registry-manifest.json']
+      ignored_folders = [
+        '.github/',
+        '.release/',
+        '.changelog/',
+        'examples/',
+        'META.d/'
+      ]
+      ignored_files = [
+        'go.mod',
+        '.goreleaser.yml',
+        '.golangci.yml',
+        'terraform-registry-manifest.json'
+      ]
 
       ignored_folders.each do |folder|
-          # folder will be path leading to file
-          if target.start_with? folder
-            Google::LOGGER.info "[SARAH FRENCH] NOT adding copyright header to files in folder #{folder} : #{target}"
-            return
-          end
+        # folder will be path leading to file
+        if target.start_with? folder
+          Google::LOGGER.info "[SARAH FRENCH] NOT adding header to : #{target}"
+          return
+        end
       end
       ignored_files.each do |file|
-          # file will be the filename and extension, with no preceding path
-          if target.end_with? file
-            Google::LOGGER.info "[SARAH FRENCH] NOT adding copyright header to file #{file} : #{target}"
-            return
-          end
+        # file will be the filename and extension, with no preceding path
+        if target.end_with? file
+          Google::LOGGER.info "[SARAH FRENCH] NOT adding header to : #{target}"
+          return
+        end
       end
 
-      Google::LOGGER.info "[SARAH FRENCH] adding copyright header to file : #{target}"
+      Google::LOGGER.info "[SARAH FRENCH] adding header to file : #{target}"
       data = File.read("#{output_folder}/#{target}")
       File.write("#{output_folder}/#{target}", "// Copyright (c) HashiCorp, Inc.\n// SPDX-License-Identifier: MPL-2.0\n")
-      File.write("#{output_folder}/#{target}", data, mode: "a") # append mode adds file content after previous write(s)
+      File.write("#{output_folder}/#{target}", data, mode: 'a') # append mode adds file content after previous write(s)
     end
 
     def replace_import_path(output_folder, target)
