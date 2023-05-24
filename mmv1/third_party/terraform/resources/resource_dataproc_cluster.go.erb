@@ -2088,28 +2088,25 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 	}
 
 	var cfg []map[string]interface{}
-
-	if cluster.Config != nil {
-		cfg, err = flattenClusterConfig(d, cluster.Config)
-
-		if err != nil {
-			return err
-		}
-
-		err = d.Set("cluster_config", cfg)
-	} else {
-		cfg, err = flattenVirtualClusterConfig(d, cluster.VirtualClusterConfig)
-
-		if err != nil {
-			return err
-		}
-
-		err = d.Set("virtual_cluster_config", cfg)
-	}
+	cfg, err = flattenClusterConfig(d, cluster.Config)
 
 	if err != nil {
 		return err
 	}
+
+	err = d.Set("cluster_config", cfg)
+	virtualCfg, err := flattenVirtualClusterConfig(d, cluster.VirtualClusterConfig)
+
+	if err != nil {
+		return err
+	}
+
+	err = d.Set("virtual_cluster_config", virtualCfg)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
