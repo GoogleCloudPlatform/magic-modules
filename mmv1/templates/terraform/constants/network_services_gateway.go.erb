@@ -15,14 +15,20 @@
 // Checks if there is another gateway under the same location.
 func gatewaysSameLocation(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent string) ([]interface{}, error) {
 	log.Print("[DEBUG] Looking for gateways under the same location.")
-    var gateways []interface{}
+	var gateways []interface{}
 
 	gatewaysUrl, err := ReplaceVars(d, config, "{{NetworkServicesBasePath}}projects/{{project}}/locations/{{location}}/gateways")
 	if err != nil {
 		return gateways, err
 	}
 
-	resp, err := transport_tpg.SendRequest(config, "GET", billingProject, gatewaysUrl, userAgent, nil)
+	resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "GET",
+		Project: billingProject,
+		RawURL: gatewaysUrl,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return gateways, err
 	}
@@ -36,7 +42,7 @@ func gatewaysSameLocation(d *schema.ResourceData, config *transport_tpg.Config, 
 	gateways = data.([]interface{})
 
 	log.Printf("[DEBUG] There are still gateways under the same location: %#v", gateways)
-	
+
 	return gateways, nil
 }
 
@@ -79,7 +85,13 @@ func deleteSWGAutoGenRouter(d *schema.ResourceData, config *transport_tpg.Config
 		return err
 	}
 
-	resp, err := transport_tpg.SendRequest(config, "GET", billingProject, networkUrl, userAgent, nil)
+	resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "GET",
+		Project: billingProject,
+		RawURL: networkUrl,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return err
 	}
@@ -94,9 +106,16 @@ func deleteSWGAutoGenRouter(d *schema.ResourceData, config *transport_tpg.Config
 		return err
 	}
 
-	_, err = transport_tpg.SendRequest(config, "DELETE", billingProject, routerUrl, userAgent, nil, IsSwgAutogenRouterRetryable)
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "DELETE",
+		Project: billingProject,
+		RawURL: routerUrl,
+		UserAgent: userAgent,
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSwgAutogenRouterRetryable},
+	})
 	if err != nil {
-		if IsGoogleApiErrorWithCode(err, 404) {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 			// The swg auto gen router may have already been deleted.
 			// No further action needed.
 			return nil

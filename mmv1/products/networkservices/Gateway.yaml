@@ -143,18 +143,7 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: 'type'
     required: true
-    # TODO(#14600): Update this resource once the api is enhanced to handle updateMask.
-    # When removing the immutable, this generates 3 things:
-    # 1- the forceNew is removed(so the user thinks this field might be updatable);
-    # 2- this field is put on the payload request regardless if is being updated or not;
-    # 3- the mask is generated when used;
-    # Currently the api is not sending the UpdateMask even if you set it so the update only works when sending the 
-    # entire payload(step 2 listed above).
-    # Ideally we should set the immutable to true if the Api works properly because only the updatable fields would be sent over.
-    # 1- forceNew would not be removed;
-    # 2- this field would not be necessary to be present in the request payload;
-    # 3- the mask for this field would not be generated.
-    # immutable: true
+    immutable: true
     description: |
       Immutable. The type of the customer-managed gateway. Possible values are: * OPEN_MESH * SECURE_WEB_GATEWAY.
     values:
@@ -164,7 +153,7 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'ports'
     required: true
-    # immutable: true
+    immutable: true
     description: |
       One or more port numbers (1-65535), on which the Gateway will receive traffic.
       The proxy binds to the specified ports. Gateways of type 'SECURE_WEB_GATEWAY' are
@@ -173,6 +162,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'scope'
     required: true
+    immutable: true
     description: |
       Immutable. Scope determines how configuration across multiple Gateway instances are merged.
       The configuration for multiple Gateway instances with the same scope will be merged as presented as
@@ -185,6 +175,7 @@ properties:
       If empty, TLS termination is disabled.
   - !ruby/object:Api::Type::Array
     name: 'addresses'
+    immutable: true
     description: |
       Zero or one IPv4-address on which the Gateway will receive the traffic. When no address is provided,
       an IP from the subnetwork is allocated This field only applies to gateways of type 'SECURE_WEB_GATEWAY'.
@@ -192,24 +183,28 @@ properties:
     item_type: Api::Type::String
   - !ruby/object:Api::Type::String
     name: 'subnetwork'
+    immutable: true
     description: |
       The relative resource name identifying the subnetwork in which this SWG is allocated.
       For example: `projects/*/regions/us-central1/subnetworks/network-1`.
       Currently, this field is specific to gateways of type 'SECURE_WEB_GATEWAY.
   - !ruby/object:Api::Type::String
     name: 'network'
+    immutable: true
     description: |
       The relative resource name identifying the VPC network that is using this configuration. 
       For example: `projects/*/global/networks/network-1`. 
       Currently, this field is specific to gateways of type 'SECURE_WEB_GATEWAY'.
   - !ruby/object:Api::Type::String
     name: 'gatewaySecurityPolicy'
+    immutable: true
     description: |
       A fully-qualified GatewaySecurityPolicy URL reference. Defines how a server should apply security policy to inbound (VM to Proxy) initiated connections. 
       For example: `projects/*/locations/*/gatewaySecurityPolicies/swg-policy`.
       This policy is specific to gateways of type 'SECURE_WEB_GATEWAY'.
   - !ruby/object:Api::Type::Array
     name: 'certificateUrls'
+    immutable: true
     description: |
       A fully-qualified Certificates URL reference. The proxy presents a Certificate (selected based on SNI) when establishing a TLS connection.
       This feature only applies to gateways of type 'SECURE_WEB_GATEWAY'.
