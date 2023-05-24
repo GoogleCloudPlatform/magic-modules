@@ -65,15 +65,7 @@ examples:
     vars:
       topic_name: 'example-topic'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'pubsub_topic_schema_settings_basic'
-    primary_resource_id: 'example'
-    vars:
-      topic_name: 'example-topic'
-      schema_name: 'example'
-    test_env_vars:
-      project_name: :PROJECT_NAME
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'pubsub_topic_schema_settings_with_revisions'
+    name: 'pubsub_topic_schema_settings'
     primary_resource_id: 'example'
     vars:
       topic_name: 'example-topic'
@@ -138,28 +130,16 @@ properties:
           The value of this field will be _deleted-schema_
           if the schema has been deleted.
         required: true
+        immutable: true
       - !ruby/object:Api::Type::Enum
         name: 'encoding'
         description: The encoding of messages validated against schema.
+        immutable: true
         default_value: :ENCODING_UNSPECIFIED
         values:
           - :ENCODING_UNSPECIFIED
           - :JSON
           - :BINARY
-      - !ruby/object:Api::Type::String
-        name: 'firstRevisionId'
-        default_from_api: true
-        description: |
-          The minimum (inclusive) revision allowed for validating messages. If
-          empty or not present, allow any revision to be validated against
-          lastRevisionId or any revision created before.
-      - !ruby/object:Api::Type::String
-        name: 'lastRevisionId'
-        default_from_api: true
-        description: |
-           The maximum (inclusive) revision allowed for validating messages. If
-           empty or not present, allow any revision to be validated against
-           firstRevisionId or any revision created after.
   - !ruby/object:Api::Type::String
     name: 'messageRetentionDuration'
     description: |
