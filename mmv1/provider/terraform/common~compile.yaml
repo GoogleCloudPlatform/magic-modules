@@ -15,6 +15,17 @@
 <%
   dir = @target_version_name == 'ga' ? 'google' : "google-#{@target_version_name}"
 -%>
+
+# Compile all of the terraform resources that are still hand written into the specific service folder
+<% Dir["third_party/terraform/services/**"].each do |product_path|
+  product_name = product_path.split('/')[-1]
+  Dir[product_path + "/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/services/<%= product_name -%>/<%= fname.delete_suffix(".erb") -%>': '<%= product_path -%>/<%= fname -%>'
+<% end -%>
+<% end -%>
+
 <%  Dir["third_party/terraform/tests/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
@@ -44,6 +55,13 @@
     fname = file_path.split('/')[-1]
 -%>
 '<%= dir -%>/acctest/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/acctest/<%= fname -%>'
+<% end -%>
+
+<%
+  Dir["third_party/terraform/tpgiamresource/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/tpgiamresource/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/tpgiamresource/<%= fname -%>'
 <% end -%>
 
 <%

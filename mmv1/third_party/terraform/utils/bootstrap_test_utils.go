@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -232,7 +233,14 @@ func BootstrapSharedTestADDomain(t *testing.T, testId string, networkName string
 
 	log.Printf("[DEBUG] Getting shared test active directory domain %q", adDomainName)
 	getURL := fmt.Sprintf("%s%s", config.ActiveDirectoryBasePath, adDomainName)
-	_, err := transport_tpg.SendRequestWithTimeout(config, "GET", project, getURL, config.UserAgent, nil, 4*time.Minute)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    getURL,
+		UserAgent: config.UserAgent,
+		Timeout:   4 * time.Minute,
+	})
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[DEBUG] AD domain %q not found, bootstrapping", sharedADDomain)
 		postURL := fmt.Sprintf("%sprojects/%s/locations/global/domains?domainName=%s", config.ActiveDirectoryBasePath, project, sharedADDomain)
@@ -242,7 +250,15 @@ func BootstrapSharedTestADDomain(t *testing.T, testId string, networkName string
 			"authorizedNetworks": []string{fmt.Sprintf("projects/%s/global/networks/%s", project, networkName)},
 		}
 
-		_, err := transport_tpg.SendRequestWithTimeout(config, "POST", project, postURL, config.UserAgent, domainObj, 60*time.Minute)
+		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    postURL,
+			UserAgent: config.UserAgent,
+			Body:      domainObj,
+			Timeout:   60 * time.Minute,
+		})
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared active directory domain %q: %s", adDomainName, err)
 		}
@@ -250,7 +266,14 @@ func BootstrapSharedTestADDomain(t *testing.T, testId string, networkName string
 		log.Printf("[DEBUG] Waiting for active directory domain creation to finish")
 	}
 
-	_, err = transport_tpg.SendRequestWithTimeout(config, "GET", project, getURL, config.UserAgent, nil, 4*time.Minute)
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    getURL,
+		UserAgent: config.UserAgent,
+		Timeout:   4 * time.Minute,
+	})
 
 	if err != nil {
 		t.Fatalf("Error getting shared active directory domain %q: %s", adDomainName, err)
@@ -297,7 +320,15 @@ func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
 			"autoCreateSubnetworks": false,
 		}
 
-		res, err := transport_tpg.SendRequestWithTimeout(config, "POST", project, url, config.UserAgent, netObj, 4*time.Minute)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+			Body:      netObj,
+			Timeout:   4 * time.Minute,
+		})
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared test network %q: %s", networkName, err)
 		}
@@ -665,14 +696,28 @@ func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
 
 	log.Printf("[DEBUG] Getting shared CA pool %q", poolName)
 	url := fmt.Sprintf("%sprojects/%s/locations/%s/caPools/%s", config.PrivatecaBasePath, project, location, poolName)
-	_, err := transport_tpg.SendRequest(config, "GET", project, url, config.UserAgent, nil)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+	})
 	if err != nil {
 		log.Printf("[DEBUG] CA pool %q not found, bootstrapping", poolName)
 		poolObj := map[string]interface{}{
 			"tier": "ENTERPRISE",
 		}
 		createUrl := fmt.Sprintf("%sprojects/%s/locations/%s/caPools?caPoolId=%s", config.PrivatecaBasePath, project, location, poolName)
-		res, err := transport_tpg.SendRequestWithTimeout(config, "POST", project, createUrl, config.UserAgent, poolObj, 4*time.Minute)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    createUrl,
+			UserAgent: config.UserAgent,
+			Body:      poolObj,
+			Timeout:   4 * time.Minute,
+		})
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared CA pool %q: %s", poolName, err)
 		}
@@ -685,7 +730,13 @@ func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
 		if err != nil {
 			t.Errorf("Error getting shared CA pool %q: %s", poolName, err)
 		}
-		_, err = transport_tpg.SendRequest(config, "GET", project, url, config.UserAgent, nil)
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			t.Errorf("Error getting shared CA pool %q: %s", poolName, err)
 		}
@@ -791,19 +842,19 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 		Role:    "roles/iam.serviceAccountCreator",
 	}
 
-	bindings := MergeBindings([]*cloudresourcemanager.Binding{proj1SATokenCreator, proj1SACreator})
+	bindings := tpgiamresource.MergeBindings([]*cloudresourcemanager.Binding{proj1SATokenCreator, proj1SACreator})
 
 	p, err := rmService.Projects.GetIamPolicy(pid,
 		&cloudresourcemanager.GetIamPolicyRequest{
 			Options: &cloudresourcemanager.GetPolicyOptions{
-				RequestedPolicyVersion: IamPolicyVersion,
+				RequestedPolicyVersion: tpgiamresource.IamPolicyVersion,
 			},
 		}).Do()
 	if err != nil {
 		return "", err
 	}
 
-	p.Bindings = MergeBindings(append(p.Bindings, bindings...))
+	p.Bindings = tpgiamresource.MergeBindings(append(p.Bindings, bindings...))
 	_, err = config.NewResourceManagerClient(config.UserAgent).Projects.SetIamPolicy(pid,
 		&cloudresourcemanager.SetIamPolicyRequest{
 			Policy:     p,
@@ -833,7 +884,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 		Role:    fmt.Sprintf("roles/%s.admin", service),
 	}
 
-	bindings = MergeBindings([]*cloudresourcemanager.Binding{proj2ServiceUsageBinding, proj2ServiceAdminBinding})
+	bindings = tpgiamresource.MergeBindings([]*cloudresourcemanager.Binding{proj2ServiceUsageBinding, proj2ServiceAdminBinding})
 
 	// For KMS test only
 	if service == "cloudkms" {
@@ -842,20 +893,20 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 			Role:    "roles/cloudkms.cryptoKeyEncrypter",
 		}
 
-		bindings = MergeBindings(append(bindings, proj2CryptoKeyBinding))
+		bindings = tpgiamresource.MergeBindings(append(bindings, proj2CryptoKeyBinding))
 	}
 
 	p, err = rmService.Projects.GetIamPolicy(p2,
 		&cloudresourcemanager.GetIamPolicyRequest{
 			Options: &cloudresourcemanager.GetPolicyOptions{
-				RequestedPolicyVersion: IamPolicyVersion,
+				RequestedPolicyVersion: tpgiamresource.IamPolicyVersion,
 			},
 		}).Do()
 	if err != nil {
 		return "", err
 	}
 
-	p.Bindings = MergeBindings(append(p.Bindings, bindings...))
+	p.Bindings = tpgiamresource.MergeBindings(append(p.Bindings, bindings...))
 	_, err = config.NewResourceManagerClient(config.UserAgent).Projects.SetIamPolicy(p2,
 		&cloudresourcemanager.SetIamPolicyRequest{
 			Policy:     p,

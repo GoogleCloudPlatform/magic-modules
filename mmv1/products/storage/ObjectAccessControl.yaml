@@ -84,11 +84,6 @@ properties:
       'The content generation of the object, if applied to an object.'
     output: true
   - !ruby/object:Api::Type::String
-    name: 'id'
-    description: 'The ID of the access-control entry.'
-    output: true
-    exclude: true
-  - !ruby/object:Api::Type::String
     name: 'object'
     description: 'The name of the object to apply the access control to.'
     required: true

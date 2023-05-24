@@ -230,11 +230,6 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   # This is a multi-resource resource reference (Address, GlobalAddress)
   - !ruby/object:Api::Type::String
     name: 'IPAddress'
@@ -486,9 +481,6 @@ properties:
       internally during updates.
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
     update_verb: :POST
-    # While this field doesn't appear in the resource definition in the docs,
-    # it's present in Get and Insert, and the resource has no Update/Patch call.
-    exclude: false
   - !ruby/object:Api::Type::Boolean
     name: 'allPorts'
     description: |

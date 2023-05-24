@@ -80,12 +80,6 @@ properties:
     output: true
     description: |
       The access ID of the HMAC Key.
-  - !ruby/object:Api::Type::String
-    name: 'id'
-    output: true
-    description: |
-      The ID of the HMAC key, including the Project ID and the Access ID.
-    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'timeCreated'
     output: true

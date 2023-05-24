@@ -21,7 +21,14 @@ if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 	billingProject = bp
 }
 
-res, err := transport_tpg.SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, nil, d.Timeout(schema.TimeoutCreate))
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "POST",
+	Project: billingProject,
+	RawURL: url,
+	UserAgent: userAgent,
+	Timeout: d.Timeout(schema.TimeoutCreate),
+})
 if err != nil {
 	return fmt.Errorf("Error creating Config: %s", err)
 }

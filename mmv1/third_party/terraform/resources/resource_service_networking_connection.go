@@ -83,7 +83,7 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 
 	connection := &servicenetworking.Connection{
 		Network:               serviceNetworkingNetworkName,
-		ReservedPeeringRanges: convertStringArr(d.Get("reserved_peering_ranges").([]interface{})),
+		ReservedPeeringRanges: tpgresource.ConvertStringArr(d.Get("reserved_peering_ranges").([]interface{})),
 	}
 
 	networkFieldValue, err := tpgresource.ParseNetworkFieldValue(network, d, config)
@@ -226,7 +226,7 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 
 		connection := &servicenetworking.Connection{
 			Network:               serviceNetworkingNetworkName,
-			ReservedPeeringRanges: convertStringArr(d.Get("reserved_peering_ranges").([]interface{})),
+			ReservedPeeringRanges: tpgresource.ConvertStringArr(d.Get("reserved_peering_ranges").([]interface{})),
 		}
 
 		networkFieldValue, err := tpgresource.ParseNetworkFieldValue(network, d, config)
@@ -282,7 +282,15 @@ func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta inte
 	}
 
 	project := networkFieldValue.Project
-	res, err := transport_tpg.SendRequestWithTimeout(config, "POST", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutDelete),
+	})
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ServiceNetworkingConnection %q", d.Id()))
 	}

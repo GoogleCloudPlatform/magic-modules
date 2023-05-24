@@ -86,18 +86,6 @@ properties:
     name: 'description'
     description: |
       A description of the instance.
-  - !ruby/object:Api::Type::String
-    name: 'state'
-    description: |
-      The instance state - short description.
-    output: true
-    exclude: true
-  - !ruby/object:Api::Type::String
-    name: 'statusMessage'
-    description: |
-      Additional information about the instance state, if available.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: Creation timestamp in RFC3339 text format.
