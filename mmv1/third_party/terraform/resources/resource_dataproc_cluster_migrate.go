@@ -15,7 +15,6 @@ import (
 )
 
 const resourceDataprocGoogleLabelPrefix = "goog-dataproc"
-
 const resourceDataprocGoogleProvidedLabelPrefix = "labels." + resourceDataprocGoogleLabelPrefix
 
 func resourceDataprocLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
@@ -1012,7 +1011,7 @@ func ResourceDataprocClusterStateUpgradeV0(_ context.Context, rawState map[strin
 	}
 
 	rawState["labels"] = labels
-	// rawState["effective_labels"] = effectiveLabels
+	rawState["effective_labels"] = effectiveLabels
 
 	log.Printf("[DEBUG] Attributes after migration: %#v", rawState)
 

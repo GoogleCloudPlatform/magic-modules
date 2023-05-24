@@ -2081,11 +2081,6 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error setting region: %s", err)
 	}
 
-
-	log.Printf("[DEBUG] cluster.Labels %#v", cluster.Labels)
-
-	log.Printf("[DEBUG] labels in state before %#v", d.Get("labels"))
-
 	clusterLabels := make(map[string]interface{})
 
 	if v, ok := d.GetOk("labels"); ok {
@@ -2099,8 +2094,6 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 			return fmt.Errorf("Error setting labels: %s", err)
 		}
 	}
-
-	log.Printf("[DEBUG] labels in state after %#v", d.Get("labels"))
 
 	if err := d.Set("effective_labels", cluster.Labels); err != nil {
 		return fmt.Errorf("Error setting effective_labels: %s", err)
