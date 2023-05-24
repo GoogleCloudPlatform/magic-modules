@@ -234,6 +234,19 @@ func ServiceUsageServiceBeingActivated(err error) (bool, string) {
 	return false, ""
 }
 
+// See https://github.com/hashicorp/terraform-provider-google/issues/14691 for
+// details on the error message this handles
+func ServiceUsageInternalError160009(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 3 {
+		if strings.Contains(gerr.Body, "encountered internal error") && strings.Contains(gerr.Body, "160009") && strings.Contains(gerr.Body, "with failed services") {
+			return true, "retrying internal error 160009."
+		}
+
+		return false, ""
+	}
+	return false, ""
+}
+
 // Retry if Bigquery operation returns a 403 with a specific message for
 // concurrent operations (which are implemented in terms of 'edit quota').
 func IsBigqueryIAMQuotaError(err error) (bool, string) {
