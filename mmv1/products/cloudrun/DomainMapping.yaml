@@ -215,4 +215,3 @@ properties:
           or apply the lifecycle.ignore_changes rule to the metadata.0.annotations field.
         default_from_api: true
         diff_suppress_func: 'cloudrunAnnotationDiffSuppress'
-
