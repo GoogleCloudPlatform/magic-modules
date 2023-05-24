@@ -241,6 +241,10 @@ module Provider
       copyright_header = ['Copyright (c) HashiCorp, Inc','SPDX-License-Identifier: MPL-2.0']
       lang = language_from_filename(target)
 
+      # Some file types we don't want to add headers to
+      # because the headers are functional
+      return unless lang != :bash
+
       header = comment_block(copyright_header, lang)
       File.write("#{output_folder}/#{target}", header)
 
@@ -454,6 +458,8 @@ module Provider
         return :go
       when "rb"
         return :ruby
+      when "sh"
+        return :bash
       else
         raise "Unknown language for file extension: #{extension}"
       end
