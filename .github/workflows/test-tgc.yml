@@ -27,7 +27,7 @@ on:
         required: true
 
 concurrency:
-  group: test-tpg-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.branch }}
+  group: test-tgc-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.branch }}
   cancel-in-progress: true
 
 jobs:
