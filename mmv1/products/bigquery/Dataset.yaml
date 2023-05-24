@@ -95,10 +95,6 @@ docs: !ruby/object:Provider::Terraform::Docs
     showing permanent diff on each plan and apply operation.
 properties:
   - !ruby/object:Api::Type::String
-    name: 'name'
-    description: 'Dataset name'
-    exclude: true
-  - !ruby/object:Api::Type::String
     name: 'maxTimeTravelHours'
     description:
       'Defines the time travel window in hours. The value can be from 48 to 168
@@ -149,12 +145,6 @@ properties:
           description: |
             An email address of a user to grant access to. For example:
             fred@example.com
-        - !ruby/object:Api::Type::String
-          name: 'iamMember'
-          description: |
-            Some other type of member that appears in the IAM Policy but isn't a user,
-            group, domain, or special group. For example: `allUsers`
-          exclude: true
         - !ruby/object:Api::Type::NestedObject
           name: 'view'
           description: |
@@ -252,11 +242,6 @@ properties:
         immutable: true
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateDatasetId'
-      - !ruby/object:Api::Type::String
-        name: 'projectId'
-        description: The ID of the project containing this dataset.
-        immutable: true
-        exclude: true
   - !ruby/object:Api::Type::Integer
     name: 'defaultTableExpirationMs'
     description: |
@@ -305,14 +290,6 @@ properties:
     name: 'friendlyName'
     description: A descriptive name for the dataset
     send_empty_value: true
-  - !ruby/object:Api::Type::String
-    name: 'id'
-    output: true
-    description: |
-      The fully-qualified unique name of the dataset in the format
-      projectId:datasetId. The dataset name without the project name is
-      given in the datasetId field
-    exclude: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: |

@@ -24,6 +24,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/logging/docs/apis'
   api: 'https://cloud.google.com/logging/docs/reference/v2/rest/v2/projects.locations.buckets.views'
+# Skipping sweeper since this is a child resource.
+skip_sweeper: true
 description: 'Describes a view over log entries in a bucket.'
 examples:
   - !ruby/object:Provider::Terraform::Examples

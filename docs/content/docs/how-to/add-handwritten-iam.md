@@ -22,8 +22,8 @@ the associated IAM resources that target that parent resource- `_member`,
 
 To add support for a new target, create a new file in
 `mmv1/third_party/terraform/utils` called `iam_{{resource}}.go`, and implement
-the `ResourceIamUpdater`, `newResourceIamUpdaterFunc`, `iamPolicyModifyFunc`,
-`resourceIdParserFunc` interfaces from
+the `ResourceIamUpdater`, `NewResourceIamUpdaterFunc`, `iamPolicyModifyFunc`,
+`ResourceIdParserFunc` interfaces from
 https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/utils/iam.go.erb
 in public types, alongside a public `map[string]*schema.Schema` containing all
 fields referenced in the resource.

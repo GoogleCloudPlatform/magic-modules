@@ -24,7 +24,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/bigquery/docs/column-data-masking-intro'
   api: 'https://cloud.google.com/bigquery/docs/reference/bigquerydatapolicy/rest/v1beta1/projects.locations.dataPolicies/create'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
   parent_resource_attribute: 'data_policy_id'

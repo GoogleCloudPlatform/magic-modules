@@ -200,13 +200,6 @@ properties:
     custom_flatten: 'templates/terraform/custom_flatten/firewall_log_config.go.erb'
     diff_suppress_func: 'diffSuppressEnableLogging'
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'enable'
-        description: |
-          This field denotes whether to enable logging for a particular
-          firewall rule. If logging is enabled, logs will be exported to
-          Stackdriver.
-        exclude: true
       - !ruby/object:Api::Type::Enum
         name: 'metadata'
         description: |
@@ -215,11 +208,6 @@ properties:
           - :EXCLUDE_ALL_METADATA
           - :INCLUDE_ALL_METADATA
         required: true
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
