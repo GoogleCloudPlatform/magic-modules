@@ -31,10 +31,10 @@ module Provider
     include Provider::Terraform::SubTemplate
     include Google::GolangUtils
 
-    def is_generating_hashicorp_repo?()
+    def is_generating_hashicorp_repo?
       # The default Provider is used to generate TPG and TPGB in HashiCorp-owned repos
       # The compiler deviates from the default behaviour with a -f flag to produce non-HashiCorp downstreams
-      return true
+      true
     end
 
     # ProductFileTemplate with Terraform specific fields

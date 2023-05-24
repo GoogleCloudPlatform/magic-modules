@@ -18,9 +18,9 @@ module Provider
   # Code generator for a library converting terraform state to gcp objects.
   class TerraformValidator < Provider::Terraform
 
-    def is_generating_hashicorp_repo?()
+    def is_generating_hashicorp_repo?
       # This code is not used when generating TPG/TPGB
-      return false
+      false
     end
 
     def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)

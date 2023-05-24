@@ -43,9 +43,9 @@ module Provider
                         Ssl: 'SSL',
                         Url: 'URL' }.freeze
 
-    def is_generating_hashicorp_repo?()
+    def is_generating_hashicorp_repo?
       # This code is not used when generating TPG/TPGB
-      return false
+      false
     end
 
     def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
