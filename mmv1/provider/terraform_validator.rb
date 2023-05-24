@@ -17,7 +17,6 @@ require 'fileutils'
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
   class TerraformValidator < Provider::Terraform
-
     def generating_hashicorp_repo?
       # This code is not used when generating TPG/TPGB
       false
