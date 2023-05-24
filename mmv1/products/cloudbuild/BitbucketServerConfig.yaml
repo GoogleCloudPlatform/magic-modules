@@ -49,15 +49,20 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_bitbucket_server_config'
     primary_resource_id: 'bbs-config'
+    vars:
+      bbsname: 'my-bbsconfig'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_bitbucket_server_config_repositories'
     primary_resource_id: 'bbs-config-with-repos'
     skip_test: true
+    vars:
+      bbsname: 'my-bbsconfig'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_bitbucket_server_config_peered_network'
     primary_resource_id: 'bbs-config-with-peered-network'
     vars:
       network_name: 'vpc-network'
+      bbsname: 'my-bbsconfig'
     test_vars_overrides:
       network_name: 'BootstrapSharedTestNetwork(t, "peered-network")'
 custom_code: !ruby/object:Provider::Terraform::CustomCode

@@ -4,7 +4,7 @@ resource "google_project_service" "servicenetworking" {
   service = "servicenetworking.googleapis.com"
   disable_on_destroy = false
 }
- 
+
 data "google_compute_network" "vpc_network" {
     name       = "<%= ctx[:vars]['network_name'] %>"
     depends_on = [google_project_service.servicenetworking]
@@ -26,7 +26,7 @@ resource "google_service_networking_connection" "default" {
 }
 
 resource "google_cloudbuild_bitbucket_server_config" "<%= ctx[:primary_resource_id] %>" {
-    config_id = "mybbsconfig"
+    config_id = "<%= ctx[:vars]['bbsname'] %>"
     location = "us-central1"
     host_uri = "https://bbs.com"
     secrets {
