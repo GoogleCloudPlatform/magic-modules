@@ -59,4 +59,4 @@ properties:
     name: 'name'
     description: |
       The resource name for the KeyRing.
-    required: True
+    required: true
