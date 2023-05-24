@@ -14,41 +14,43 @@
 --- !ruby/object:Api::Resource
 name: 'Feature'
 base_url: projects/{{project}}/locations/{{location}}/features
-create_url: projects/{{project}}/locations/{{location}}/features?featureId={{name}}
-update_url: projects/{{project}}/locations/{{location}}/features/{{name}}
-self_link: projects/{{project}}/locations/{{location}}/features/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/features?featureId={{feature_id}}
+update_url: projects/{{project}}/locations/{{location}}/features/{{feature_id}}
+self_link: projects/{{project}}/locations/{{location}}/features/{{feature_id}}
 update_verb: :PATCH
-#update_mask: true
+update_mask: true
 description: |
   Feature represents the settings and status of any Hub Feature.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Registering a Cluster': 'https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster'
   api: 'https://cloud.google.com/anthos/fleet-management/docs/reference/rest/v1/projects.locations.features'
-#async: !ruby/object:Api::OpAsync
-#  operation: !ruby/object:Api::OpAsync::Operation
-#    kind: 'gkehub#operation'
-#    path: 'name'
-#    base_url: '{{op_id}}'
-#    wait_ms: 1000
-#  result: !ruby/object:Api::OpAsync::Result
-#    path: 'response'
-#    resource_inside_response: true
-#  status: !ruby/object:Api::OpAsync::Status
-#    path: 'done'
-#    complete: 'true'
-#    allowed:
-#      - 'true'
-#      - 'false'
-#  error: !ruby/object:Api::OpAsync::Error
-#    path: 'error/errors'
-#    message: 'message'
-#autogen_async: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/gkehub2_feature.go.erb
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'gkehub2#operation'
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: 'true'
+    allowed:
+      - 'true'
+      - 'false'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+autogen_async: true
 # Skip sweeper gen since this is a child resource.
-#skip_sweeper: true
-#id_format: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
-#import_format:
-#  ['projects/{{project}}/locations/{{location}}/features/{{name}}']
+skip_sweeper: true
+id_format: 'projects/{{project}}/locations/{{location}}/features/{{feature_id}}'
+import_format:
+  ['projects/{{project}}/locations/{{location}}/features/{{feature_id}}']
 parameters:
   - !ruby/object:Api::Type::String
     name: location
@@ -58,9 +60,17 @@ parameters:
     immutable: true
 properties:
   - !ruby/object:Api::Type::String
+    name: 'featureId'
+    description: |
+      The client-provided identifier of the feature.
+    required: true
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::String
     name: name
     description: The full, unique name of this Feature resource
     immutable: true
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
   - !ruby/object:Api::Type::KeyValuePairs
     name: labels
     description: GCP labels for this Feature.
