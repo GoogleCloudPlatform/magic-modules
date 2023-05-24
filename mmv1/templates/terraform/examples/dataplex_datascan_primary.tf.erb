@@ -1,15 +1,24 @@
 resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
   location     = "us-central1"
-  description  = "Test Datascan"
+  description  = "Test Datascan v2.0"
   display_name = "Test Datascan"
-  data_scan_id = "test-scan-1"
+  data_scan_id = "<%= ctx[:primary_resource_id] %>"
 
   data {
 	resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/shakespeare"
   }
 
-  data_profile_spec {}
+  data_profile_spec {  
+  }
+
+  execution_spec {
+    trigger {
+              on_demand {}
+            }
+  }
+
 
   project = "<%= ctx[:test_env_vars]['project_name'] %>"
 }
+
 
