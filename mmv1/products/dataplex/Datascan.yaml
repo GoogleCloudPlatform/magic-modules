@@ -13,8 +13,13 @@
 
 --- !ruby/object:Api::Resource
 name: 'Datascan'
-base_url: 'projects/{{project}}/locations/{{location}}/dataScans/{{name}}'
-self_link: 'projects/{{project}}/locations/{{location}}/dataScans/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/dataScans'
+self_link: 'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/dataScans?dataScanId={{data_scan_id}}'
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}'
+  ]
 description: |
       Represents a user-visible job which provides the insights for the related data source.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -48,8 +53,9 @@ parameters:
     name: 'dataScanId'
     immutable: true
     required: true
-    description: 
-      Datascan identifier.
+    url_param_only: true
+    description: |
+      The location where the data scan should reside.
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
