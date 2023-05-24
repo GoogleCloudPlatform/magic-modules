@@ -44,6 +44,12 @@ parameters:
     url_param_only: true
     description: |
       The location where the data scan should reside.
+  - !ruby/object:Api::Type::String
+    name: 'dataScanId'
+    immutable: true
+    required: true
+    description: 
+      Datascan identifier.
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
