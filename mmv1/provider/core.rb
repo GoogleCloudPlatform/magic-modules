@@ -241,7 +241,7 @@ module Provider
         "#{output_folder}/#{target}",
         "// Copyright (c) HashiCorp, Inc.\n// SPDX-License-Identifier: MPL-2.0\n"
       )
-      File.write("#{output_folder}/#{target}", data, mode: 'a') # append mode adds file content after previous write(s)
+      File.write("#{output_folder}/#{target}", data, mode: 'a') # append mode
     end
 
     def replace_import_path(output_folder, target)
