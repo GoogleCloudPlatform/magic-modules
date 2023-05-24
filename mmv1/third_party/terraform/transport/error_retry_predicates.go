@@ -236,14 +236,15 @@ func ServiceUsageServiceBeingActivated(err error) (bool, string) {
 
 // See https://github.com/hashicorp/terraform-provider-google/issues/14691 for
 // details on the error message this handles
+// This is a post-operation error so it uses tpgresource.CommonOpError instead of googleapi.Error
 func ServiceUsageInternalError160009(err error) (bool, string) {
-	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 3 {
-		if strings.Contains(gerr.Body, "encountered internal error") && strings.Contains(gerr.Body, "160009") && strings.Contains(gerr.Body, "with failed services") {
-			return true, "retrying internal error 160009."
-		}
-
-		return false, ""
+	// a cyclical dependency between transport/tpgresource blocks using tpgresource.CommonOpError
+	// so just work off the error string. Ideally, we'd use that type instead.
+	s := err.Error()
+	if strings.Contains(s, "encountered internal error") && strings.Contains(s, "160009") && strings.Contains(s, "with failed services") {
+		return true, "retrying internal error 160009."
 	}
+
 	return false, ""
 }
 
@@ -263,7 +264,7 @@ func IsBigqueryIAMQuotaError(err error) (bool, string) {
 func IsMonitoringConcurrentEditError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 409 && (strings.Contains(strings.ToLower(gerr.Body), "too many concurrent edits") ||
-			strings.Contains(strings.ToLower(gerr.Body), "could not fulfill the request")) {
+				strings.Contains(strings.ToLower(gerr.Body), "could not fulfill the request")) {
 			return true, "Waiting for other Monitoring changes to finish"
 		}
 	}
