@@ -22,7 +22,7 @@ func ResourcePubsubSchemaV0() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 				Description:      `The ID to use for the schema, which will become the final component of the schema's resource name.`,
 			},
 			"type": {
@@ -86,7 +86,7 @@ func ResourcePubsubSchema() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 				Description:      `The ID to use for the schema, which will become the final component of the schema's resource name.`,
 			},
 			"type": {
@@ -150,7 +150,7 @@ type.`,
 
 func resourcePubsubSchemaCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -182,7 +182,7 @@ func resourcePubsubSchemaCreate(d *schema.ResourceData, meta interface{}) error 
 	rObj["name"] = obj["name"]
 	rObj["schema"] = obj
 
-	url, err := ReplaceVars(d, config, "{{PubsubBasePath}}projects/{{project}}/schemas?schemaId={{name}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{PubsubBasePath}}projects/{{project}}/schemas?schemaId={{name}}")
 	if err != nil {
 		return err
 	}
@@ -190,14 +190,14 @@ func resourcePubsubSchemaCreate(d *schema.ResourceData, meta interface{}) error 
 	log.Printf("[DEBUG] Creating new Schema: %#v", obj)
 	billingProject := ""
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return fmt.Errorf("Error fetching project for Schema: %s", err)
 	}
 	billingProject = project
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
@@ -216,7 +216,7 @@ func resourcePubsubSchemaCreate(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	// Store the ID now
-	id, err := ReplaceVars(d, config, "projects/{{project}}/schemas/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/schemas/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -244,25 +244,25 @@ func resourcePubsubSchemaPollRead(d *schema.ResourceData, meta interface{}) tran
 	return func() (map[string]interface{}, error) {
 		config := meta.(*transport_tpg.Config)
 
-		url, err := ReplaceVars(d, config, "{{PubsubBasePath}}projects/{{project}}/schemas/{{name}}")
+		url, err := tpgresource.ReplaceVars(d, config, "{{PubsubBasePath}}projects/{{project}}/schemas/{{name}}")
 		if err != nil {
 			return nil, err
 		}
 
 		billingProject := ""
 
-		project, err := getProject(d, config)
+		project, err := tpgresource.GetProject(d, config)
 		if err != nil {
 			return nil, fmt.Errorf("Error fetching project for Schema: %s", err)
 		}
 		billingProject = project
 
 		// err == nil indicates that the billing_project value was found
-		if bp, err := getBillingProject(d, config); err == nil {
+		if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 			billingProject = bp
 		}
 
-		userAgent, err := generateUserAgentString(d, config.UserAgent)
+		userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return nil, err
 		}
@@ -283,25 +283,25 @@ func resourcePubsubSchemaPollRead(d *schema.ResourceData, meta interface{}) tran
 
 func resourcePubsubSchemaRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	billingProject := ""
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return fmt.Errorf("Error fetching project for Schema: %s", err)
 	}
 	billingProject = project
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
-	url, err := ReplaceVars(d, config, "{{PubsubBasePath}}projects/{{project}}/schemas/{{name}}:listRevisions?view=FULL")
+	url, err := tpgresource.ReplaceVars(d, config, "{{PubsubBasePath}}projects/{{project}}/schemas/{{name}}:listRevisions?view=FULL")
 	if err != nil {
 		return err
 	}
@@ -351,14 +351,14 @@ func resourcePubsubSchemaRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourcePubsubSchemaUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	billingProject := ""
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return fmt.Errorf("Error fetching project for Schema: %s", err)
 	}
@@ -454,7 +454,7 @@ func resourcePubsubSchemaCustomizeDiff(_ context.Context, d *schema.ResourceDiff
 }
 
 func commitPubsubSchemaRevision(s map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config, userAgent string, billingProject string) error {
-	url, err := ReplaceVars(d, config, "{{PubsubBasePath}}projects/{{project}}/schemas/{{name}}:commit")
+	url, err := tpgresource.ReplaceVars(d, config, "{{PubsubBasePath}}projects/{{project}}/schemas/{{name}}:commit")
 	if err != nil {
 		return err
 	}
@@ -481,7 +481,7 @@ func commitPubsubSchemaRevision(s map[string]interface{}, d *schema.ResourceData
 }
 
 func deletePubsubSchemaRevision(rid string, s map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config, userAgent string, billingProject string) error {
-	url, err := ReplaceVars(d, config, fmt.Sprintf("{{PubsubBasePath}}projects/{{project}}/schemas/{{name}}@%s:deleteRevision", rid))
+	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{PubsubBasePath}}projects/{{project}}/schemas/{{name}}@%s:deleteRevision", rid))
 	if err != nil {
 		return err
 	}
@@ -537,20 +537,20 @@ func computeRevisionDiffs(old []interface{}, new []interface{}) ([]string, []str
 
 func resourcePubsubSchemaDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	billingProject := ""
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return fmt.Errorf("Error fetching project for Schema: %s", err)
 	}
 	billingProject = project
 
-	url, err := ReplaceVars(d, config, "{{PubsubBasePath}}projects/{{project}}/schemas/{{name}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{PubsubBasePath}}projects/{{project}}/schemas/{{name}}")
 	if err != nil {
 		return err
 	}
@@ -558,7 +558,7 @@ func resourcePubsubSchemaDelete(d *schema.ResourceData, meta interface{}) error 
 	log.Printf("[DEBUG] Deleting Schema %q", d.Id())
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
@@ -594,7 +594,7 @@ func resourcePubsubSchemaImport(d *schema.ResourceData, meta interface{}) ([]*sc
 	}
 
 	// Replace import id for the resource id
-	id, err := ReplaceVars(d, config, "projects/{{project}}/schemas/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/schemas/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
