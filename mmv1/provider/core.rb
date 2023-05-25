@@ -202,7 +202,6 @@ module Provider
       return unless output_folder.end_with?('terraform-provider-google') || output_folder.end_with?('terraform-provider-google-beta')
 
       # Prevent adding copyright header to files with paths matching the strings below
-      # This will be refactored
       ignored_folders = [
         '.github/',
         '.release/',
@@ -220,7 +219,7 @@ module Provider
       ignored_folders.each do |folder|
         # folder will be path leading to file
         if target.start_with? folder
-          Google::LOGGER.info "[SARAH FRENCH] NOT adding header to : #{target}"
+          Google::LOGGER.debug "Not adding HashiCorp copyright headers in ignored folder #{folder} : #{target}"
           should_add_header = false
         end
       end
@@ -229,13 +228,13 @@ module Provider
       ignored_files.each do |file|
         # file will be the filename and extension, with no preceding path
         if target.end_with? file
-          Google::LOGGER.info "[SARAH FRENCH] NOT adding header to : #{target}"
+          Google::LOGGER.debug "Not adding HashiCorp copyright headers to ignored file #{file} : #{target}"
           should_add_header = false
         end
       end
       return unless should_add_header
 
-      Google::LOGGER.info "[SARAH FRENCH] adding header to file : #{target}"
+      Google::LOGGER.debug "Adding HashiCorp copyright header to : #{target}"
       data = File.read("#{output_folder}/#{target}")
 
       copyright_header = ['Copyright (c) HashiCorp, Inc','SPDX-License-Identifier: MPL-2.0']
@@ -245,6 +244,7 @@ module Provider
       # because the headers are functional
       return unless lang != :bash
 
+      # File is not ignored and is appropriate file type to add header to
       header = comment_block(copyright_header, lang)
       File.write("#{output_folder}/#{target}", header)
 
