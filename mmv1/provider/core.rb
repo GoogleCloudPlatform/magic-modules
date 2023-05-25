@@ -199,7 +199,7 @@ module Provider
 
     def add_hashicorp_copyright_header(output_folder, target)
       # only add copyright headers when generating TPG and TPGB
-      return unless @target_version_name == 'ga' || @target_version_name == 'beta'
+      return unless output_folder.end_with?('terraform-provider-google') || output_folder.end_with?('terraform-provider-google-beta')
 
       # Prevent adding copyright header to files with paths matching the strings below
       # This will be refactored
