@@ -29,6 +29,12 @@ resource "google_edgecontainer_cluster" "<%= ctx[:primary_resource_id] %>" {
       }
     }
   }
+
+  labels = {
+    test = "<%= ctx[:vars]['edgecontainer_cluster_name'] %>"
+  }
+
+  default_max_pods_per_node = 128
 }
 
 data "google_project" "project" {}
