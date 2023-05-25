@@ -38,7 +38,7 @@ jobs:
       id: pull_request
       run: |
         cd repo
-        git checkout -b ${{ github.event.inputs.sha }}
+        git config user.name "modular-magician"
         git merge --no-ff origin/main
         yamlfiles=$(git diff --name-only origin/main -- mmv1/products)
         if [ -z "$yamlfiles" ]; then
