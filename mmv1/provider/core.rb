@@ -200,7 +200,7 @@ module Provider
     def add_hashicorp_copyright_header(output_folder, target)
       # only add copyright headers when generating TPG and TPGB
       return unless output_folder.end_with?('terraform-provider-google') ||
-        output_folder.end_with?('terraform-provider-google-beta')
+                    output_folder.end_with?('terraform-provider-google-beta')
 
       # Prevent adding copyright header to files with paths matching the strings below
       ignored_folders = [
@@ -219,21 +219,21 @@ module Provider
       should_add_header = true
       ignored_folders.each do |folder|
         # folder will be path leading to file
-        if target.start_with? folder
-          Google::LOGGER.debug 'Not adding HashiCorp copyright headers in ' +
-            "ignored folder #{folder} : #{target}"
-          should_add_header = false
-        end
+        next unless target.start_with? folder
+
+        Google::LOGGER.debug 'Not adding HashiCorp copyright headers in ' \
+                             "ignored folder #{folder} : #{target}"
+        should_add_header = false
       end
       return unless should_add_header
 
       ignored_files.each do |file|
         # file will be the filename and extension, with no preceding path
-        if target.end_with? file
-          Google::LOGGER.debug 'Not adding HashiCorp copyright headers to ' +
-            "ignored file #{file} : #{target}"
-          should_add_header = false
-        end
+        next unless target.end_with? file
+
+        Google::LOGGER.debug 'Not adding HashiCorp copyright headers to ' \
+                             "ignored file #{file} : #{target}"
+        should_add_header = false
       end
       return unless should_add_header
 
