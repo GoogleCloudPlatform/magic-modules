@@ -1,11 +1,12 @@
 #!/bin/bash
 
+set -x
 set -e
 
 gh_repo=magic-modules
 new_branch="auto-pr-$PR_NUMBER"
 
-if [ $PR_NUMBER == 7874 ]; then
+if [ $PR_NUMBER == "7874" ]; then
   post_body=$(jq -n \
     --arg owner "GoogleCloudPlatform" \
     --arg repo "$gh_repo" \
