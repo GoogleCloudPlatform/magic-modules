@@ -4,6 +4,7 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
   display_name = "Test Datascan"
   data_scan_id = "<%= ctx[:primary_resource_id] %>"
 
+<<<<<<< HEAD
   data {
     resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/shakespeare"
   }
@@ -15,6 +16,10 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
     trigger {
       on_demand {}
     }
+=======
+  data = {
+	entity = "projects/dataplex-clouddq/locations/us-central1/lakes/amandeep-dev-lake/zones/rawzone/entities/austin_311"
+>>>>>>> 82ffa8637062746e82f5443baf6e94597e3c6c81
   }
 
   project = "<%= ctx[:test_env_vars]['project_name'] %>"
