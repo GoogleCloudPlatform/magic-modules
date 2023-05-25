@@ -2111,6 +2111,10 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 }
 
 func flattenVirtualClusterConfig(d *schema.ResourceData, cfg *dataproc.VirtualClusterConfig) ([]map[string]interface{}, error) {
+	if cfg == nil {
+		return []map[string]interface{}{}, nil
+	}
+
 	data := map[string]interface{}{
 		"staging_bucket":            d.Get("virtual_cluster_config.0.staging_bucket"),
 		"auxiliary_services_config": flattenAuxiliaryServicesConfig(d, cfg.AuxiliaryServicesConfig),
