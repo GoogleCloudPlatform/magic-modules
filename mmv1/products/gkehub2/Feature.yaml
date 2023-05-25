@@ -45,6 +45,22 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  parent_resource_attribute: feature_id
+  method_name_separator: ':'
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/features/{{feature_id}}',
+      '{{feature_id}}',
+    ]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'gkehub_feature_basic'
+    primary_resource_name: 'fmt.Sprint("multiclusterservicediscovery")'
+    primary_resource_id: 'feature'
+    region_override: 'global'
+    test_env_vars:
+      project_name: :PROJECT_NAME
 autogen_async: true
 # Skip sweeper gen since this is a child resource.
 skip_sweeper: true

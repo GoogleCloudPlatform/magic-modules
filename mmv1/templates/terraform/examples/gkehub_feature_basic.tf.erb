@@ -1,0 +1,21 @@
+resource "google_project_service" "mcsd" {
+  project = "<%= ctx[:test_env_vars]["project_name"] %>"
+  service = "multiclusterservicediscovery.googleapis.com"
+}
+
+resource "google_project_service" "gkehub" {
+  project = "<%= ctx[:test_env_vars]["project_name"] %>"
+  service = "gkehub.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_gke_hub_feature" "feature" {
+  feature_id = "multiclusterservicediscovery"
+  name = "multiclusterservicediscovery"
+  location = "global"
+  project = "<%= ctx[:test_env_vars]["project_name"] %>"
+  labels = {
+    foo = "bar"
+  }
+  depends_on = [google_project_service.mcsd, google_project_service.gkehub]
+}
