@@ -23,6 +23,7 @@ func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
     "random_suffix":   RandString(t, 10),
     "org_id":          acctest.GetTestOrgFromEnv(t),
     "billing_account": acctest.GetTestBillingAccountFromEnv(t),
+    "project_name":  acctest.GetTestProjectFromEnv(),
   }
 
   VcrTest(t, resource.TestCase{
@@ -59,7 +60,7 @@ resource "google_container_cluster" "primary" {
   name               = "tf-test%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
-  project = google_project.project.project_id
+  project = "%{project_name}"
   provider = google-beta
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
@@ -68,7 +69,7 @@ resource "google_container_cluster" "secondary" {
   name               = "tf-test2%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
-  project = google_project.project.project_id
+  project = "%{project_name}"
   provider = google-beta
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
@@ -81,7 +82,7 @@ resource "google_gke_hub_membership" "membership" {
     }
   }
   description = "test resource."
-  project = google_project.project.project_id
+  project = "%{project_name}"
   provider = google-beta
 }
 
@@ -93,12 +94,11 @@ resource "google_gke_hub_membership" "membership_second" {
     }
   }
   description = "test resource."
-  project = google_project.project.project_id
+  project = "%{project_name}"
   provider = google-beta
 }
 
 resource "google_gke_hub_feature" "feature" {
-  feature_id = "multiclusteringress"
   name = "multiclusteringress"
   location = "global"
   spec {
@@ -106,7 +106,7 @@ resource "google_gke_hub_feature" "feature" {
       config_membership = google_gke_hub_membership.membership.id
     }
   }
-  project = google_project.project.project_id
+  project = "%{project_name}"
   provider = google-beta
   depends_on = [google_gke_hub_membership.membership]
 }
@@ -119,7 +119,7 @@ resource "google_container_cluster" "primary" {
   name               = "tf-test%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
-  project = google_project.project.project_id
+  project = "%{project_name}"
   provider = google-beta
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
@@ -128,7 +128,7 @@ resource "google_container_cluster" "secondary" {
   name               = "tf-test2%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
-  project = google_project.project.project_id
+  project = "%{project_name}"
   provider = google-beta
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
@@ -141,7 +141,7 @@ resource "google_gke_hub_membership" "membership" {
     }
   }
   description = "test resource."
-  project = google_project.project.project_id
+  project = "%{project_name}"
   provider = google-beta
 }
 
@@ -153,12 +153,11 @@ resource "google_gke_hub_membership" "membership_second" {
     }
   }
   description = "test resource."
-  project = google_project.project.project_id
+  project = "%{project_name}"
   provider = google-beta
 }
 
 resource "google_gke_hub_feature" "feature" {
-  feature_id = "multiclusteringress"
   name = "multiclusteringress"
   location = "global"
   spec {
@@ -169,7 +168,7 @@ resource "google_gke_hub_feature" "feature" {
   labels = {
     foo = "bar"
   }
-  project = google_project.project.project_id
+  project = "%{project_name}"
   provider = google-beta
   depends_on = [google_gke_hub_membership.membership]
 }
@@ -185,6 +184,7 @@ func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
     "random_suffix":   RandString(t, 10),
     "org_id":          acctest.GetTestOrgFromEnv(t),
     "billing_account": acctest.GetTestBillingAccountFromEnv(t),
+    "project_name":  acctest.GetTestProjectFromEnv(),
   }
 
   VcrTest(t, resource.TestCase{
@@ -215,10 +215,9 @@ func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
 func testAccGKEHubFeature_gkehubFeatureMcsd(context map[string]interface{}) string {
   return gkeHubFeatureProjectSetup(context) + Nprintf(`
 resource "google_gke_hub_feature" "feature" {
-  feature_id = "multiclusterservicediscovery"
   name = "multiclusterservicediscovery"
   location = "global"
-  project = google_project.project.project_id
+  project = "%{project_name}"
   labels = {
     foo = "bar"
   }
@@ -231,10 +230,9 @@ resource "google_gke_hub_feature" "feature" {
 func testAccGKEHubFeature_gkehubFeatureMcsdUpdate(context map[string]interface{}) string {
   return gkeHubFeatureProjectSetup(context) + Nprintf(`
 resource "google_gke_hub_feature" "feature" {
-  feature_id = "multiclusterservicediscovery"
   name = "multiclusterservicediscovery"
   location = "global"
-  project = google_project.project.project_id
+  project = "%{project_name}"
   labels = {
     foo = "quux"
     baz = "qux"
@@ -247,54 +245,46 @@ resource "google_gke_hub_feature" "feature" {
 
 func gkeHubFeatureProjectSetup(context map[string]interface{}) string {
   return Nprintf(`
-resource "google_project" "project" {
-  name            = "tf-test-gkehub%{random_suffix}"
-  project_id      = "tf-test-gkehub%{random_suffix}"
-  org_id          = "%{org_id}"
-  billing_account = "%{billing_account}"
-  provider        = google-beta
-}
-
 resource "google_project_service" "mesh" {
-  project = google_project.project.project_id
+  project = "%{project_name}"
   service = "meshconfig.googleapis.com"
   provider = google-beta
 }
 
 resource "google_project_service" "mci" {
-  project = google_project.project.project_id
+  project = "%{project_name}"
   service = "multiclusteringress.googleapis.com"
   provider = google-beta
 }
 
 resource "google_project_service" "acm" {
-  project = google_project.project.project_id
+  project = "%{project_name}"
   service = "anthosconfigmanagement.googleapis.com"
   provider = google-beta
 }
 
 resource "google_project_service" "mcsd" {
-  project = google_project.project.project_id
+  project = "%{project_name}"
   service = "multiclusterservicediscovery.googleapis.com"
   provider = google-beta
 }
 
 resource "google_project_service" "compute" {
-  project = google_project.project.project_id
+  project = "%{project_name}"
   service = "compute.googleapis.com"
   disable_on_destroy = false
   provider = google-beta
 }
 
 resource "google_project_service" "container" {
-  project = google_project.project.project_id
+  project = "%{project_name}"
   service = "container.googleapis.com"
   disable_on_destroy = false
   provider = google-beta
 }
 
 resource "google_project_service" "gkehub" {
-  project = google_project.project.project_id
+  project = "%{project_name}"
   service = "gkehub.googleapis.com"
   disable_on_destroy = false
   provider = google-beta

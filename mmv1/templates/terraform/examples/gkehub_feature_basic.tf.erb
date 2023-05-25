@@ -10,7 +10,6 @@ resource "google_project_service" "gkehub" {
 }
 
 resource "google_gke_hub_feature" "feature" {
-  feature_id = "multiclusterservicediscovery"
   name = "multiclusterservicediscovery"
   location = "global"
   project = "<%= ctx[:test_env_vars]["project_name"] %>"

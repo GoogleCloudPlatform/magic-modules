@@ -14,9 +14,9 @@
 --- !ruby/object:Api::Resource
 name: 'Feature'
 base_url: projects/{{project}}/locations/{{location}}/features
-create_url: projects/{{project}}/locations/{{location}}/features?featureId={{feature_id}}
-update_url: projects/{{project}}/locations/{{location}}/features/{{feature_id}}
-self_link: projects/{{project}}/locations/{{location}}/features/{{feature_id}}
+create_url: projects/{{project}}/locations/{{location}}/features?featureId={{name}}
+update_url: projects/{{project}}/locations/{{location}}/features/{{name}}
+self_link: projects/{{project}}/locations/{{location}}/features/{{name}}
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -46,12 +46,12 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  parent_resource_attribute: feature_id
+  parent_resource_attribute: name
   method_name_separator: ':'
   import_format:
     [
-      'projects/{{project}}/locations/{{location}}/features/{{feature_id}}',
-      '{{feature_id}}',
+      'projects/{{project}}/locations/{{location}}/features/{{name}}',
+      '{{name}}',
     ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -64,9 +64,9 @@ examples:
 autogen_async: true
 # Skip sweeper gen since this is a child resource.
 skip_sweeper: true
-id_format: 'projects/{{project}}/locations/{{location}}/features/{{feature_id}}'
+id_format: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
 import_format:
-  ['projects/{{project}}/locations/{{location}}/features/{{feature_id}}']
+  ['projects/{{project}}/locations/{{location}}/features/{{name}}']
 parameters:
   - !ruby/object:Api::Type::String
     name: location
@@ -76,16 +76,10 @@ parameters:
     immutable: true
 properties:
   - !ruby/object:Api::Type::String
-    name: 'featureId'
-    description: |
-      The client-provided identifier of the feature.
-    required: true
-    immutable: true
-    url_param_only: true
-  - !ruby/object:Api::Type::String
     name: name
     description: The full, unique name of this Feature resource
     immutable: true
+    url_param_only: true
     diff_suppress_func: 'tpgresource.CompareResourceNames'
   - !ruby/object:Api::Type::KeyValuePairs
     name: labels
