@@ -199,7 +199,8 @@ module Provider
 
     def add_hashicorp_copyright_header(output_folder, target)
       # only add copyright headers when generating TPG and TPGB
-      return unless output_folder.end_with?('terraform-provider-google') || output_folder.end_with?('terraform-provider-google-beta')
+      return unless output_folder.end_with?('terraform-provider-google') ||
+        output_folder.end_with?('terraform-provider-google-beta')
 
       # Prevent adding copyright header to files with paths matching the strings below
       ignored_folders = [
@@ -219,7 +220,8 @@ module Provider
       ignored_folders.each do |folder|
         # folder will be path leading to file
         if target.start_with? folder
-          Google::LOGGER.debug "Not adding HashiCorp copyright headers in ignored folder #{folder} : #{target}"
+          Google::LOGGER.debug 'Not adding HashiCorp copyright headers in ' +
+            "ignored folder #{folder} : #{target}"
           should_add_header = false
         end
       end
@@ -228,7 +230,8 @@ module Provider
       ignored_files.each do |file|
         # file will be the filename and extension, with no preceding path
         if target.end_with? file
-          Google::LOGGER.debug "Not adding HashiCorp copyright headers to ignored file #{file} : #{target}"
+          Google::LOGGER.debug 'Not adding HashiCorp copyright headers to ' +
+            "ignored file #{file} : #{target}"
           should_add_header = false
         end
       end
@@ -237,7 +240,7 @@ module Provider
       Google::LOGGER.debug "Adding HashiCorp copyright header to : #{target}"
       data = File.read("#{output_folder}/#{target}")
 
-      copyright_header = ['Copyright (c) HashiCorp, Inc','SPDX-License-Identifier: MPL-2.0']
+      copyright_header = ['Copyright (c) HashiCorp, Inc', 'SPDX-License-Identifier: MPL-2.0']
       lang = language_from_filename(target)
 
       # Some file types we don't want to add headers to
@@ -448,18 +451,20 @@ module Provider
       end
 
       header_string = header.join("\n")
-      header_string += "\n" # add trailing newline
+      "#{header_string}\n" # add trailing newline to returned value
     end
 
     def language_from_filename(filename)
-      extension = filename.split(".")[-1] 
+      extension = filename.split('.')[-1]
       case extension
-      when "go"
-        return :go
-      when "rb"
-        return :ruby
-      when "sh"
-        return :bash
+      when 'go'
+        :go
+      when 'rb'
+        :ruby
+      when 'yaml', 'yml'
+        :yaml
+      when 'sh'
+        :bash
       else
         raise "Unknown language for file extension: #{extension}"
       end
