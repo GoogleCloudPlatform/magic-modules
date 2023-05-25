@@ -20,7 +20,7 @@ on:
         required: false
         default: 'magic-modules'
       sha:
-        description: "The commit SHA in magic-modules repository to execute against where the status result will be posted"
+        description: "The commit SHA in magic-modules repository to execute against and where the status result will be posted"
         required: true
 
 jobs:
