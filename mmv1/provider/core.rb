@@ -143,7 +143,7 @@ module Provider
 
           FileUtils.copy_entry source, target_file
 
-          add_hashicorp_copyright_header(output_folder, target)
+          add_hashicorp_copyright_header(output_folder, target) if File.extname(target) == '.go'
           replace_import_path(output_folder, target) if File.extname(target) == '.go'
         end
       end.map(&:join)
