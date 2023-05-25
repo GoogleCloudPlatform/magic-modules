@@ -108,3 +108,4 @@
 '.goreleaser.yml': 'third_party/terraform/.goreleaser.yml.erb'
 'terraform-registry-manifest.json': 'third_party/terraform/terraform-registry-manifest.json.erb'
 '.release/release-metadata.hcl': 'third_party/terraform/release-metadata.hcl.erb'
+'.copywrite.hcl': 'third_party/terraform/.copywrite.hcl.erb'
