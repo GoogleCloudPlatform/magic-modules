@@ -12,10 +12,13 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'IssuanceConfigs'
+name: 'CertificateIssuanceConfig'
 base_url: 'projects/{{project}}/locations/{{location}}/certificateIssuanceConfigs'
 create_url: 'projects/{{project}}/locations/{{location}}/certificateIssuanceConfigs?certificateIssuanceConfigId={{name}}'
-self_link: 'projects/{{project}}/locations/{{location}}/certificateIssuanceConfigs/{{name}}'
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Manage certificate issuance configs': 'https://cloud.google.com/certificate-manager/docs/issuance-configs'
+  api: 'https://cloud.google.com/certificate-manager/docs/reference/certificate-manager/rest/v1/projects.locations.certificateIssuanceConfigs'
 immutable: true
 description: |
   Certificate represents a HTTP-reachable backend for a Certificate.
@@ -40,7 +43,7 @@ autogen_async: true
 import_format: ["projects/{{project}}/locations/{{location}}/certificateIssuanceConfigs/{{name}}"]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'certificate_manager_issuance_configs'
+    name: 'certificate_manager_certificate_issuance_config'
     primary_resource_id: 'default'
     vars:
       ca_name: 'my-ca'
@@ -52,8 +55,7 @@ parameters:
     required: true
     description: |
       A user-defined name of the certificate issuance config.
-      CertificateIssuanceConfig names must be unique globally
-      and match pattern projects/*/locations/*/certificateIssuanceConfigs/*.
+      CertificateIssuanceConfig names must be unique globally.
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -70,24 +72,24 @@ properties:
     name: 'rotationWindowPercentage'
     description: |
       It specifies the percentage of elapsed time of the certificate lifetime to wait before renewing the certificate. 
-      Must be a number between 1-99, inclusive. Defaults to 66. 
+      Must be a number between 1-99, inclusive.
       You must set the rotation window percentage in relation to the certificate lifetime so that certificate renewal occurs at least 7 days after 
       the certificate has been issued and at least 7 days before it expires.
+    required: true
   - !ruby/object:Api::Type::Enum
     name: keyAlgorithm
     description: |
-      Key algorithm to use when generating the private key. Defaults to
-      rsa-2048. KEY_ALGORITHM must be one of: ECDSA-P256, RSA_2048.
-    default_value: :RSA_2048
+      Key algorithm to use when generating the private key.
     values:
       - :RSA_2048
       - :ECDSA_P256
+    required: true
   - !ruby/object:Api::Type::String
     name: 'lifetime'
     description: |
       Lifetime of issued certificates. A duration in seconds with up to nine fractional digits, ending with 's'. 
-      Example: "1814400s". Defaults to 2592000s (30 days). Valid values are from 21 days (1814400s) to 30 days (2592000s)
-    default_value: 2592000s
+      Example: "1814400s". Valid values are from 21 days (1814400s) to 30 days (2592000s)
+    required: true
   - !ruby/object:Api::Type::String
     name: 'createTime'
     description: |

@@ -1,4 +1,4 @@
-resource "google_certificate_manager_issuance_configs" "<%= ctx[:primary_resource_id] %>" {
+resource "google_certificate_manager_certificate_issuance_config" "<%= ctx[:primary_resource_id] %>" {
   name    = "issuanceconfigtestterraform"
   description = "sample description for the certificate issuanceConfigs"
   certificate_authority_config {
