@@ -202,7 +202,9 @@ module Provider
       return unless output_folder.end_with?('terraform-provider-google') ||
                     output_folder.end_with?('terraform-provider-google-beta')
 
-      # Prevent adding copyright header to files with paths matching the strings below
+      # Prevent adding copyright header to files with paths or names matching the strings below
+      # NOTE: these entries need to match the content of the .copywrite.hcl file originally
+      #       created in https://github.com/GoogleCloudPlatform/magic-modules/pull/7336
       ignored_folders = [
         '.github/',
         '.release/',
