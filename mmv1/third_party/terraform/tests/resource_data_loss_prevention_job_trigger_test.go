@@ -323,8 +323,8 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample3(t *testing.
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       getTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project":       acctest.GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -358,8 +358,8 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample4(t *testing.
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       getTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project":       acctest.GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
