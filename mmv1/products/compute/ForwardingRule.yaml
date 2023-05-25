@@ -162,7 +162,6 @@ examples:
       - 'ip_address'
   - !ruby/object:Provider::Terraform::Examples
     name: 'forwarding_rule_vpc_psc'
-    min_version: 'beta'
     primary_resource_id: 'default'
     vars:
       forwarding_rule_name: 'psc-endpoint'
