@@ -198,6 +198,11 @@ module Provider
     end
 
     def add_hashicorp_copyright_header(output_folder, target)
+      unless expected_output_folder?(output_folder)
+        Google::LOGGER.info "Unexpected output folder (#{output_folder}) detected " \
+                            'when deciding to add HashiCorp copyright headers. ' \
+                            'Watch out for unexpected changes to copied files'
+      end
       # only add copyright headers when generating TPG and TPGB
       return unless output_folder.end_with?('terraform-provider-google') ||
                     output_folder.end_with?('terraform-provider-google-beta')
@@ -255,6 +260,24 @@ module Provider
       File.write("#{output_folder}/#{target}", header)
 
       File.write("#{output_folder}/#{target}", data, mode: 'a') # append mode
+    end
+
+    def expected_output_folder?(output_folder)
+      expected_folders = %w[
+        terraform-provider-google
+        terraform-provider-google-beta
+        terraform-next
+        terraform-google-conversion
+      ]
+      folder_name = output_folder.split('/')[-1]
+      is_expected = false
+      expected_folders.each do |folder|
+        next unless folder_name == folder
+
+        is_expected = true
+        break
+      end
+      is_expected
     end
 
     def replace_import_path(output_folder, target)
