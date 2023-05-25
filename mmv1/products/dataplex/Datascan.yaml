@@ -13,8 +13,35 @@
 
 --- !ruby/object:Api::Resource
 name: 'Datascan'
-base_url: 'projects/{{project}}/locations/{{location}}/dataScans/{{name}}'
-self_link: 'projects/{{project}}/locations/{{location}}/dataScans/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/dataScans'
+self_link: 'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/dataScans?dataScanId={{data_scan_id}}'
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}'
+  ]
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 5
+      update_minutes: 5
+      delete_minutes: 5
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+autogen_async: true
+read_query_params: '?view=FULL'
 description: |
       Represents a user-visible job which provides the insights for the related data source.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -44,6 +71,13 @@ parameters:
     url_param_only: true
     description: |
       The location where the data scan should reside.
+  - !ruby/object:Api::Type::String
+    name: 'dataScanId'
+    immutable: true
+    required: true
+    url_param_only: true
+    description: |
+      The relative resource id of the scan.
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -233,6 +267,7 @@ properties:
                properties:
                  - !ruby/object:Api::Type::Array
                    name: 'values'
+                   required: true
                    description: |
                      Expected values for the column value.
                    item_type: Api::Type::String
@@ -243,6 +278,7 @@ properties:
                properties:
                  - !ruby/object:Api::Type::String
                    name: 'regex'
+                   required: true
                    description: |
                      A regular expression the column value is expected to match.
              - !ruby/object:Api::Type::NestedObject
@@ -295,6 +331,7 @@ properties:
                properties:
                  - !ruby/object:Api::Type::String
                    name: 'sqlExpression'
+                   required: true
                    description: |
                      The SQL expression.
              - !ruby/object:Api::Type::NestedObject
@@ -304,6 +341,7 @@ properties:
                properties:
                  - !ruby/object:Api::Type::String
                    name: 'sqlExpression'
+                   required: true
                    description: |
                      The SQL expression.
   - !ruby/object:Api::Type::NestedObject

@@ -1,11 +1,20 @@
 resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
   location     = "us-central1"
-  name         = "tf-test-datascan%{random_suffix}"
-  description  = "Test Datascan"
+  description  = "Test Datascan v2.0"
   display_name = "Test Datascan"
+  data_scan_id = "<%= ctx[:primary_resource_id] %>"
 
-  data = {
-	entity = "projects/dataplex-clouddq/locations/us-central1/lakes/amandeep-dev-lake/zones/rawzone/entities/austin_311"
+  data {
+    resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/shakespeare"
+  }
+
+  data_profile_spec {
+  }
+
+  execution_spec {
+    trigger {
+      on_demand {}
+    }
   }
 
   project = "<%= ctx[:test_env_vars]['project_name'] %>"
