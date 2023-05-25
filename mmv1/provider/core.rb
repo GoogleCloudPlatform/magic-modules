@@ -246,8 +246,9 @@ module Provider
       lang = language_from_filename(target)
 
       # Some file types we don't want to add headers to
-      # because the headers are functional
-      return unless lang != :bash
+      # e.g. .sh where headers are functional
+      # Also, this guards against new filetypes being added and triggering build errors
+      return unless lang != :unsupported
 
       # File is not ignored and is appropriate file type to add header to
       header = comment_block(copyright_header, lang)
@@ -465,10 +466,8 @@ module Provider
         :ruby
       when 'yaml', 'yml'
         :yaml
-      when 'sh'
-        :bash
       else
-        raise "Unknown language for file extension: #{extension}"
+        :unsupported
       end
     end
   end
