@@ -1,0 +1,87 @@
+resource "google_dataplex_datascan" "<%= ctx[:primary_resource_name] %>" {
+  location     = "us-central1"
+  display_name = "Full Datascan Quality"
+  data_scan_id = "<%= ctx[:primary_resource_id] %>"
+  description  = "Example resource - Full Datascan Quality"
+
+  data {
+        resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/shakespeare"
+  }
+
+  data_profile_spec {
+      sampling_percent = 80
+  }
+
+  execution_spec {
+    trigger {
+              schedule {
+                cron = "TZ=America/New_York 1 1 * * *"
+              }
+            }
+  }
+
+  data_quality_spec {
+        rules {
+          column = "word"
+          dimension = "VALIDITY"
+          non_null_expectation {
+          }
+        }
+
+        rules {
+          column = "word_count"
+          dimension = "VALIDITY"
+          range_expectation {
+            min_value = 0
+            max_value = 10
+            strict_min_enabled = true
+            strict_max_enabled = false
+          }
+        }
+
+        rules {
+          column = "word"
+          dimension = "VALIDITY"
+          regex_expectation {
+            regex = "^apple$"
+          }
+        }
+
+        rules {
+          column = "word"
+          dimension = "UNIQUENESS"
+          uniqueness_expectation {
+          }
+        }
+
+        rules {
+          column = "word_count"
+          dimension = "VALIDITY"
+          statistic_range_expectation {
+            statistic = "MEAN"
+            min_value = 5
+            max_value = 10
+          }
+        }
+
+        rules {
+          column = "word_count"
+          dimension = "VALIDITY"
+          row_condition_expectation {
+            sql_expression = "word_count > 0 AND word_count <= 10"
+          }
+        }
+
+        rules {
+          dimension = "VALIDITY"
+          table_condition_expectation {
+            sql_expression = "COUNT(*) > 0"
+          }
+        }
+      }
+
+
+  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+}
+
+
