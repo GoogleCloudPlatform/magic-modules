@@ -60,30 +60,26 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_datascan_basic_profile'
-    primary_resource_name: 'basic_profile'
-    primary_resource_id:
-      'fmt.Sprintf("tf-test-dataScan%s", context["random_suffix"])'
+    primary_resource_id: 'basic_profile'
+    primary_resource_name: 'fmt.Sprintf("tf-test-dataScan%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_datascan_full_profile'
-    primary_resource_name: 'full_profile'
-    primary_resource_id:
-      'fmt.Sprintf("tf-test-dataScan%s", context["random_suffix"])'
+    primary_resource_id: 'full_profile'
+    primary_resource_name: 'fmt.Sprintf("tf-test-dataScan%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_datascan_basic_quality'
-    primary_resource_name: 'basic_quality'
-    primary_resource_id:
-      'fmt.Sprintf("tf-test-dataScan%s", context["random_suffix"])'
+    primary_resource_id: 'basic_quality'
+    primary_resource_name: 'fmt.Sprintf("tf-test-dataScan%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_datascan_full_quality'
-    primary_resource_name: 'full_quality'
-    primary_resource_id:
-      'fmt.Sprintf("tf-test-dataScan%s", context["random_suffix"])'
+    primary_resource_id: 'full_quality'
+    primary_resource_name: 'fmt.Sprintf("tf-test-dataScan%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
 parameters:
