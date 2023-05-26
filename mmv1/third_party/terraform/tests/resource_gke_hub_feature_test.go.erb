@@ -18,6 +18,7 @@ func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
   // VCR fails to handle batched project services
   acctest.SkipIfVcr(t)
   t.Parallel()
+
   context := map[string]interface{}{
     "random_suffix":   RandString(t, 10),
     "org_id":          acctest.GetTestOrgFromEnv(t),
