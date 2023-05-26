@@ -2,6 +2,8 @@
 title: "Update handwritten provider documentation"
 summary: "Handwritten resources and datasources have handwritten documentation that needs to be updated in PRs."
 weight: 24
+aliases:
+  - /docs/how-to/update-handwritten-documentation
 ---
 
 # Update handwritten provider documentation (for handwritten resource or datasource)

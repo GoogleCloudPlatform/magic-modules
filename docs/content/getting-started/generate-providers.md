@@ -1,6 +1,8 @@
 ---
 title: Generate the providers
 weight: 20
+aliases:
+  - /docs/getting-started/generate-providers
 ---
 
 # Generate the provider

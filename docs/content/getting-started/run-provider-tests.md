@@ -1,6 +1,8 @@
 ---
 title: "Run provider tests"
 weight: 30
+aliases:
+  - /docs/getting-started/run-provider-tests
 ---
 
 # Run provider tests locally
