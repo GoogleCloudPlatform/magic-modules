@@ -1127,17 +1127,17 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateTemplateId
 				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateTemplateIdUpdate(context),
 			},
 			{
-				ResourceName:            "google_data_loss_prevention_deidentify_template.with_template_id",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_data_loss_prevention_deidentify_template.with_template_id",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
-      {
+			{
 				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateTemplateIdUpdateOther(context),
 			},
 			{
-				ResourceName:            "google_data_loss_prevention_deidentify_template.with_template_id",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_data_loss_prevention_deidentify_template.with_template_id",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
