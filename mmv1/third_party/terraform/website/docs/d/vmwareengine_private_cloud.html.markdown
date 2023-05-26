@@ -1,0 +1,34 @@
+---
+subcategory: "Cloud VMware Engine"
+description: |-
+  Get info about a Google VMwareEngine PrivateCloud.
+---
+
+# google\_vmwareengine\_private_cloud
+
+Use this data source to get details about a Google VMwareEngine PrivateCloud resource.
+
+To get more information about VMwareEngine PrivateCloud, see:
+* [API documentation](https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.privateClouds)
+
+## Example Usage
+
+```hcl
+data "google_vmwareengine_private_cloud" "my_pc" {
+  provider = google-beta
+  name     = "my-pc"
+  location = "us-central1-a"
+}
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+* `name` - (Required) Name of the resource.
+* `location` - (Required) Location of the resource.
+
+- - -
+
+* `project` - (Optional) The ID of the project in which the resource belongs. If it
+    is not provided, the provider project is used.

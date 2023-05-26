@@ -1,0 +1,7 @@
+resource "google_vmwareengine_network" "<%= ctx[:primary_resource_id] %>" {
+    provider          = google-beta
+    name              = "<%= ctx[:test_env_vars]['location'] %>-default" #Legacy network IDs are in the format: {region-id}-default
+    location          = "<%= ctx[:test_env_vars]['location'] %>"
+    type              = "LEGACY"
+    description       = "VMwareEngine legacy network sample"
+}

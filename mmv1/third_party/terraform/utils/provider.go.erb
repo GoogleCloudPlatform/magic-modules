@@ -334,6 +334,11 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_vpc_access_connector":                      DataSourceVPCAccessConnector(),
 		"google_redis_instance":                            DataSourceGoogleRedisInstance(),
 		"google_vertex_ai_index":                           dataSourceVertexAIIndex(),
+		<% unless version == 'ga' -%>
+		"google_vmwareengine_private_cloud":              	DataSourceVmwareenginePrivateCloud(),
+		"google_vmwareengine_network":                    	DataSourceVmwareengineNetwork(),
+		"google_vmwareengine_cluster":                    	DataSourceVmwareengineCluster(),
+		<% end -%>
 		// ####### END datasources ###########
 		// ####### END handwritten datasources ###########
 	},
@@ -538,6 +543,9 @@ end     # products.each do
 				"google_storage_notification":                  ResourceStorageNotification(),
 				"google_storage_transfer_job":                  ResourceStorageTransferJob(),
 				"google_tags_location_tag_binding":             ResourceTagsLocationTagBinding(),
+				<% unless version == 'ga' -%>
+				"google_vmwareengine_private_cloud":            ResourceVmwareenginePrivateCloud(),
+				<% end -%>
 				// ####### END handwritten resources ###########
 			},
 			map[string]*schema.Resource{
