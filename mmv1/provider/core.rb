@@ -248,7 +248,7 @@ module Provider
       Google::LOGGER.debug "Adding HashiCorp copyright header to : #{target}"
       data = File.read("#{output_folder}/#{target}")
 
-      copyright_header = ['Copyright (c) HashiCorp, Inc', 'SPDX-License-Identifier: MPL-2.0']
+      copyright_header = ['Copyright (c) HashiCorp, Inc.', 'SPDX-License-Identifier: MPL-2.0']
       lang = language_from_filename(target)
 
       # Some file types we don't want to add headers to
