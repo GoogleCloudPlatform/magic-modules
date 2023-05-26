@@ -2,6 +2,8 @@
 title: "Add and update MMv1 resource documentation"
 summary: "Generated resources have generated documentation. This page describes the generation process and what YAML inputs are used."
 weight: 13
+aliases:
+  - /docs/how-to/mmv1-resource-documentation
 ---
 
 # MMv1 resource documentation

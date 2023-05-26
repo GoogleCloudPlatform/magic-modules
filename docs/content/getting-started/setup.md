@@ -1,6 +1,8 @@
 ---
 title: Set up your environment
 weight: 10
+aliases:
+  - /docs/getting-started/setup
 ---
 
 # Set up your environment

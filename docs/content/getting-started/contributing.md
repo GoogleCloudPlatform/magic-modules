@@ -1,6 +1,8 @@
 ---
 title: "Contributing"
 weight: 50
+aliases:
+  - /docs/getting-started/contributing
 ---
 
 # General contributing steps

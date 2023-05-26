@@ -2,6 +2,8 @@
 title: "Types of resources"
 summary: "Check the header in the Go source to determine what type of resource it is. If there is no header, it is likely handwritten."
 weight: 1
+aliases:
+  - /docs/how-to/mmv1-resource-documentation
 ---
 
 # Types of resources

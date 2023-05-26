@@ -2,6 +2,8 @@
 title: "Add an MMv1 test"
 summary: "An example terraform configuration can be used to generate docs and tests for a resource."
 weight: 12
+aliases:
+  - /docs/how-to/add-mmv1-test
 ---
 
 # Add an MMv1 test
