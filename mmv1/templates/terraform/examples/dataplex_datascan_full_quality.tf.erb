@@ -3,6 +3,9 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
   display_name = "Full Datascan Quality"
   data_scan_id = "tf-test-datascan%{random_suffix}"
   description  = "Example resource - Full Datascan Quality"
+  labels = {
+    author = "billing"
+  }
 
   data {
         resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/shakespeare"
@@ -24,6 +27,7 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
         rules {
           column = "word"
           dimension = "VALIDITY"
+          threshold = 0.99
           non_null_expectation {
           }
         }
@@ -31,6 +35,8 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
         rules {
           column = "word_count"
           dimension = "VALIDITY"
+          ignore_null = true
+          threshold = 0.9
           range_expectation {
             min_value = 0
             max_value = 10
@@ -42,6 +48,7 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
         rules {
           column = "word"
           dimension = "VALIDITY"
+          ignore_null = false
           regex_expectation {
             regex = "^apple$"
           }
@@ -61,6 +68,8 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
             statistic = "MEAN"
             min_value = 5
             max_value = 10
+            strict_min_enabled = true
+            strict_max_enabled = false
           }
         }
 
