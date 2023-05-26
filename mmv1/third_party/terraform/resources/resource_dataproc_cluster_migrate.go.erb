@@ -1,5 +1,6 @@
+<% autogen_exception -%>
 package google
-
+<% if version == "private" -%>
 import (
 	"context"
 	"fmt"
@@ -13,23 +14,6 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
-
-const resourceDataprocGoogleLabelPrefix = "goog-dataproc"
-const resourceDataprocGoogleProvidedLabelPrefix = "labels." + resourceDataprocGoogleLabelPrefix
-
-func resourceDataprocLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	if strings.HasPrefix(k, resourceDataprocGoogleProvidedLabelPrefix) && new == "" {
-		return true
-	}
-
-	// Let diff be determined by labels (above)
-	if strings.HasPrefix(k, "labels.%") {
-		return true
-	}
-
-	// For other keys, don't suppress diff.
-	return false
-}
 
 func resourceDataprocClusterResourceV0() *schema.Resource {
 	return &schema.Resource{
@@ -1023,3 +1007,4 @@ func ResourceDataprocClusterStateUpgradeV0(_ context.Context, rawState map[strin
 
 	return rawState, nil
 }
+<% end -%>
