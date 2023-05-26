@@ -176,7 +176,7 @@ func (e ComputeOperationError) Error() string {
 const errMsgSep = "\n\n"
 
 func writeOperationError(w io.StringWriter, opError *compute.OperationErrorErrors) {
-	w.WriteString(opError.Message + "\n")
+	w.WriteString(opError.Message + "TEST\n")
 
 	var lm *compute.LocalizedMessage
 	var link *compute.HelpLink
