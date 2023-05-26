@@ -64,26 +64,6 @@ properties:
     description: |
       A user-visible name for the instance.
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: 'state'
-    description: |
-      The instance state - short description.
-    output: true
-    exclude: true
-  - !ruby/object:Api::Type::Array
-    name: 'instanceMessages'
-    description: |
-      Additional information about the instance state, if available.
-    output: true
-    exclude: true
-    item_type: !ruby/object:Api::Type::NestedObject
-      properties:
-        - !ruby/object:Api::Type::String
-          name: 'code'
-          description: An error code.
-        - !ruby/object:Api::Type::String
-          name: 'message'
-          description: The message to be displayed to a user.
   - !ruby/object:Api::Type::Array
     name: 'memcacheNodes'
     description: |

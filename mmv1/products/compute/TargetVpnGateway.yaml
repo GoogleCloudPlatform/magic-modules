@@ -102,29 +102,3 @@ properties:
       The network this VPN gateway is accepting traffic for.
     required: true
     immutable: true
-  - !ruby/object:Api::Type::Array
-    name: 'tunnels'
-    description: |
-      A list of references to VpnTunnel resources associated with this VPN gateway.
-    output: true
-    exclude: true
-    item_type: !ruby/object:Api::Type::ResourceRef
-      name: 'tunnel'
-      resource: 'VpnTunnel'
-      imports: 'selfLink'
-      description: |
-        A VpnTunnel resource associated with this VPN gateway.
-  - !ruby/object:Api::Type::Array
-    name: 'forwardingRules'
-    description: |
-      A list of references to the ForwardingRule resources associated with this VPN
-      gateway.
-    output: true
-    # status is not useful for state convergence
-    exclude: true
-    item_type: !ruby/object:Api::Type::ResourceRef
-      name: 'forwardingRule'
-      resource: 'ForwardingRule'
-      imports: 'selfLink'
-      description: |
-        A ForwardingRule resource associated with this VPN gateway.

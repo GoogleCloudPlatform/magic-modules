@@ -56,6 +56,7 @@ module Provider
       end
 
       ctx.local_variable_set('pwd', pwd)
+      ctx.local_variable_set('hc_downstream', provider.generating_hashicorp_repo?)
 
       # check if the parent folder exists, and make it if not
       parent_path = File.dirname(path)

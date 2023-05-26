@@ -25,7 +25,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Cloud SQL federated queries': 'https://cloud.google.com/bigquery/docs/cloud-sql-federated-queries'
   api: 'https://cloud.google.com/bigquery/docs/reference/bigqueryconnection/rest/v1/projects.locations.connections/create'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
   parent_resource_attribute: 'connection_id'
