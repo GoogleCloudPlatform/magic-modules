@@ -270,7 +270,7 @@ module Provider
         terraform-next
         terraform-google-conversion
       ]
-      folder_name = output_folder.split('/')[-1]
+      folder_name = output_folder.split('/')[-1] # Possible issue with Windows OS
       is_expected = false
       expected_folders.each do |folder|
         next unless folder_name == folder
