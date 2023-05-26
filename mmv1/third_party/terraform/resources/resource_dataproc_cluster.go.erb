@@ -2231,6 +2231,9 @@ func flattenKubernetesSoftwareConfig(d *schema.ResourceData, cfg *dataproc.Kuber
 }
 
 func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) ([]map[string]interface{}, error) {
+	if cfg == nil {
+		return []map[string]interface{}{}, nil
+	}
 
 	data := map[string]interface{}{
 		"staging_bucket": d.Get("cluster_config.0.staging_bucket").(string),
