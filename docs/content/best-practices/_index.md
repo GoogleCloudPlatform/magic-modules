@@ -1,6 +1,8 @@
 ---
 title: "Best practices"
 weight: 25
+aliases:
+  - /docs/best-practices
 ---
 
 # Best practices
