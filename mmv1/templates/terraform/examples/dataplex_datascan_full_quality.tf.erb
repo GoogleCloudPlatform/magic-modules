@@ -8,7 +8,7 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
   }
 
   data {
-        resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/austin-bikeshare/tables/bikeshare_stations"
+        resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/austin_bikeshare/tables/bikeshare_stations"
   }
 
   execution_spec {
@@ -30,7 +30,7 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
         }
 
         rules {
-          column = "council district"
+          column = "council_district"
           dimension = "VALIDITY"
           ignore_null = true
           threshold = 0.9
