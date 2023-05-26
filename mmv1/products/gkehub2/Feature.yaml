@@ -25,8 +25,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Registering a Cluster': 'https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster'
   api: 'https://cloud.google.com/anthos/fleet-management/docs/reference/rest/v1/projects.locations.features'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/gkehub2_feature.go.erb
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'gkehub2#operation'
@@ -80,7 +78,9 @@ properties:
     description: The full, unique name of this Feature resource
     immutable: true
     url_param_only: true
-    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::KeyValuePairs
     name: labels
     description: GCP labels for this Feature.

@@ -23,7 +23,6 @@ func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
     "random_suffix":   RandString(t, 10),
     "org_id":          acctest.GetTestOrgFromEnv(t),
     "billing_account": acctest.GetTestBillingAccountFromEnv(t),
-    "project_name":  acctest.GetTestProjectFromEnv(),
   }
 
   VcrTest(t, resource.TestCase{
@@ -60,7 +59,7 @@ resource "google_container_cluster" "primary" {
   name               = "tf-test%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
-  project = "%{project_name}"
+  project = google_project.project.project_id
   provider = google-beta
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
@@ -69,7 +68,7 @@ resource "google_container_cluster" "secondary" {
   name               = "tf-test2%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
-  project = "%{project_name}"
+  project = google_project.project.project_id
   provider = google-beta
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
@@ -82,7 +81,7 @@ resource "google_gke_hub_membership" "membership" {
     }
   }
   description = "test resource."
-  project = "%{project_name}"
+  project = google_project.project.project_id
   provider = google-beta
 }
 
@@ -94,7 +93,7 @@ resource "google_gke_hub_membership" "membership_second" {
     }
   }
   description = "test resource."
-  project = "%{project_name}"
+  project = google_project.project.project_id
   provider = google-beta
 }
 
@@ -106,9 +105,8 @@ resource "google_gke_hub_feature" "feature" {
       config_membership = google_gke_hub_membership.membership.id
     }
   }
-  project = "%{project_name}"
+  project = google_project.project.project_id
   provider = google-beta
-  depends_on = [google_gke_hub_membership.membership]
 }
 `, context)
 }
@@ -119,7 +117,7 @@ resource "google_container_cluster" "primary" {
   name               = "tf-test%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
-  project = "%{project_name}"
+  project = google_project.project.project_id
   provider = google-beta
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
@@ -128,7 +126,7 @@ resource "google_container_cluster" "secondary" {
   name               = "tf-test2%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
-  project = "%{project_name}"
+  project = google_project.project.project_id
   provider = google-beta
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
@@ -141,7 +139,7 @@ resource "google_gke_hub_membership" "membership" {
     }
   }
   description = "test resource."
-  project = "%{project_name}"
+  project = google_project.project.project_id
   provider = google-beta
 }
 
@@ -153,7 +151,7 @@ resource "google_gke_hub_membership" "membership_second" {
     }
   }
   description = "test resource."
-  project = "%{project_name}"
+  project = google_project.project.project_id
   provider = google-beta
 }
 
@@ -168,9 +166,8 @@ resource "google_gke_hub_feature" "feature" {
   labels = {
     foo = "bar"
   }
-  project = "%{project_name}"
+  project = google_project.project.project_id
   provider = google-beta
-  depends_on = [google_gke_hub_membership.membership]
 }
 `, context)
 }
@@ -184,7 +181,6 @@ func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
     "random_suffix":   RandString(t, 10),
     "org_id":          acctest.GetTestOrgFromEnv(t),
     "billing_account": acctest.GetTestBillingAccountFromEnv(t),
-    "project_name":  acctest.GetTestProjectFromEnv(),
   }
 
   VcrTest(t, resource.TestCase{
@@ -217,7 +213,7 @@ func testAccGKEHubFeature_gkehubFeatureMcsd(context map[string]interface{}) stri
 resource "google_gke_hub_feature" "feature" {
   name = "multiclusterservicediscovery"
   location = "global"
-  project = "%{project_name}"
+  project = google_project.project.project_id
   labels = {
     foo = "bar"
   }
@@ -232,7 +228,7 @@ func testAccGKEHubFeature_gkehubFeatureMcsdUpdate(context map[string]interface{}
 resource "google_gke_hub_feature" "feature" {
   name = "multiclusterservicediscovery"
   location = "global"
-  project = "%{project_name}"
+  project = google_project.project.project_id
   labels = {
     foo = "quux"
     baz = "qux"
@@ -245,46 +241,53 @@ resource "google_gke_hub_feature" "feature" {
 
 func gkeHubFeatureProjectSetup(context map[string]interface{}) string {
   return Nprintf(`
+resource "google_project" "project" {
+  name            = "tf-test-gkehub%{random_suffix}"
+  project_id      = "tf-test-gkehub%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  provider        = google-beta
+}
 resource "google_project_service" "mesh" {
-  project = "%{project_name}"
+  project = google_project.project.project_id
   service = "meshconfig.googleapis.com"
   provider = google-beta
 }
 
 resource "google_project_service" "mci" {
-  project = "%{project_name}"
+  project = google_project.project.project_id
   service = "multiclusteringress.googleapis.com"
   provider = google-beta
 }
 
 resource "google_project_service" "acm" {
-  project = "%{project_name}"
+  project = google_project.project.project_id
   service = "anthosconfigmanagement.googleapis.com"
   provider = google-beta
 }
 
 resource "google_project_service" "mcsd" {
-  project = "%{project_name}"
+  project = google_project.project.project_id
   service = "multiclusterservicediscovery.googleapis.com"
   provider = google-beta
 }
 
 resource "google_project_service" "compute" {
-  project = "%{project_name}"
+  project = google_project.project.project_id
   service = "compute.googleapis.com"
   disable_on_destroy = false
   provider = google-beta
 }
 
 resource "google_project_service" "container" {
-  project = "%{project_name}"
+  project = google_project.project.project_id
   service = "container.googleapis.com"
   disable_on_destroy = false
   provider = google-beta
 }
 
 resource "google_project_service" "gkehub" {
-  project = "%{project_name}"
+  project = google_project.project.project_id
   service = "gkehub.googleapis.com"
   disable_on_destroy = false
   provider = google-beta
