@@ -59,6 +59,8 @@ examples:
     region_override: 'global'
     test_env_vars:
       project_name: :PROJECT_NAME
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
 autogen_async: true
 # Skip sweeper gen since this is a child resource.
 skip_sweeper: true
