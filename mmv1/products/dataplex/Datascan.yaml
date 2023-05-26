@@ -244,7 +244,7 @@ properties:
                required: true
                description: |
                  The dimension a rule belongs to. Results are also aggregated at the dimension level. Supported dimensions are ["COMPLETENESS", "ACCURACY", "CONSISTENCY", "VALIDITY", "UNIQUENESS", "INTEGRITY"]
-             - !ruby/object:Api::Type::Integer
+             - !ruby/object:Api::Type::Double
                name: 'threshold'
                description: |
                 The minimum ratio of passing_rows / total_rows required to pass this rule, with a range of [0.0, 1.0]. 0 indicates default value (i.e. 1.0).
