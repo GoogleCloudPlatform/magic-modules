@@ -1,7 +1,5 @@
-resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dataplex_datascan" "<%= ctx[:primary_resource_name] %>" {
   location     = "us-central1"
-  description  = "Test Datascan v2.0"
-  display_name = "Test Datascan"
   data_scan_id = "<%= ctx[:primary_resource_id] %>"
 
   data {
