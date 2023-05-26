@@ -1109,3 +1109,240 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 `, context)
 }
+
+func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateTemplateIdUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       acctest.GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateTemplateIdUpdate(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_deidentify_template.with_template_id",
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
+      {
+				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateTemplateIdUpdateOther(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_deidentify_template.with_template_id",
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
+		},
+	})
+}
+
+func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateTemplateIdUpdate(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_deidentify_template" "with_template_id" {
+  parent = "projects/%{project}"
+  description = "Description"
+  display_name = "Displayname"
+  template_id = "tf-test-%{random_suffix}"
+
+  deidentify_config {
+    info_type_transformations {
+      transformations {
+        info_types {
+          name = "FIRST_NAME"
+        }
+
+        primitive_transformation {
+          replace_with_info_type_config = true
+        }
+      }
+
+      transformations {
+        info_types {
+          name = "PHONE_NUMBER"
+        }
+        info_types {
+          name = "AGE"
+        }
+
+        primitive_transformation {
+          replace_config {
+            new_value {
+              integer_value = 9
+            }
+          }
+        }
+      }
+
+      transformations {
+        info_types {
+          name = "EMAIL_ADDRESS"
+        }
+        info_types {
+          name = "LAST_NAME"
+        }
+
+        primitive_transformation {
+          character_mask_config {
+            masking_character = "X"
+            number_to_mask = 4
+            reverse_order = true
+            characters_to_ignore {
+              common_characters_to_ignore = "PUNCTUATION"
+            }
+          }
+        }
+      }
+
+      transformations {
+        info_types {
+          name = "DATE_OF_BIRTH"
+        }
+
+        primitive_transformation {
+          replace_config {
+            new_value {
+              date_value {
+                year  = 2020
+                month = 1
+                day   = 1
+              }
+            }
+          }
+        }
+      }
+
+      transformations {
+        info_types {
+          name = "CREDIT_CARD_NUMBER"
+        }
+
+        primitive_transformation {
+          crypto_deterministic_config {
+            context {
+              name = "sometweak"
+            }
+            crypto_key {
+              transient {
+                name = "beep"
+              }
+            }
+            surrogate_info_type {
+              name = "abc"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateTemplateIdUpdateOther(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_deidentify_template" "with_template_id" {
+  parent = "projects/%{project}"
+  description = "Description"
+  display_name = "Displayname"
+  template_id = "tf-test-update-%{random_suffix}"
+
+  deidentify_config {
+    info_type_transformations {
+      transformations {
+        info_types {
+          name = "FIRST_NAME"
+        }
+
+        primitive_transformation {
+          replace_with_info_type_config = true
+        }
+      }
+
+      transformations {
+        info_types {
+          name = "PHONE_NUMBER"
+        }
+        info_types {
+          name = "AGE"
+        }
+
+        primitive_transformation {
+          replace_config {
+            new_value {
+              integer_value = 9
+            }
+          }
+        }
+      }
+
+      transformations {
+        info_types {
+          name = "EMAIL_ADDRESS"
+        }
+        info_types {
+          name = "LAST_NAME"
+        }
+
+        primitive_transformation {
+          character_mask_config {
+            masking_character = "X"
+            number_to_mask = 4
+            reverse_order = true
+            characters_to_ignore {
+              common_characters_to_ignore = "PUNCTUATION"
+            }
+          }
+        }
+      }
+
+      transformations {
+        info_types {
+          name = "DATE_OF_BIRTH"
+        }
+
+        primitive_transformation {
+          replace_config {
+            new_value {
+              date_value {
+                year  = 2020
+                month = 1
+                day   = 1
+              }
+            }
+          }
+        }
+      }
+
+      transformations {
+        info_types {
+          name = "CREDIT_CARD_NUMBER"
+        }
+
+        primitive_transformation {
+          crypto_deterministic_config {
+            context {
+              name = "sometweak"
+            }
+            crypto_key {
+              transient {
+                name = "beep"
+              }
+            }
+            surrogate_info_type {
+              name = "abc"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}

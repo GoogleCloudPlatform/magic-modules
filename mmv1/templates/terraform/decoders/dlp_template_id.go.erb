@@ -13,7 +13,7 @@
 	# limitations under the License.
 -%>
 config := meta.(*transport_tpg.Config)
-if err := d.Set("template_id", flattenDataLossPreventionInspectTemplateName(res["name"], d, config)); err != nil {
-    return nil, fmt.Errorf("Error reading InspectTemplate: %s", err)
+if err := d.Set("template_id", flattenDataLossPrevention<%= object.name -%>Name(res["name"], d, config)); err != nil {
+    return nil, fmt.Errorf("Error reading <%= object.name -%>: %s", err)
 }
 return res, nil
