@@ -996,24 +996,20 @@ by Dataproc`,
 }
 
 func ResourceDataprocClusterStateUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
-	log.Printf("[DEBUG] Attributes before migration: %#v", rawState)
+	log.Printf("[DEBUG] Attributes before migration labels: %#v", rawState["labels"])
+	log.Printf("[DEBUG] Attributes before migration effective_labels: %#v", rawState["effective_labels"])
 
 	rawLabels := rawState["labels"].(map[string]interface{})
-	labels := make(map[string]interface{})
 	effectiveLabels := make(map[string]interface{})
 
 	for k, v := range rawLabels {
 		effectiveLabels[k] = v
-
-		if !strings.HasPrefix(k, resourceDataprocGoogleLabelPrefix) {
-			labels[k] = v
-		}
 	}
 
-	rawState["labels"] = labels
 	rawState["effective_labels"] = effectiveLabels
 
-	log.Printf("[DEBUG] Attributes after migration: %#v", rawState)
+	log.Printf("[DEBUG] Attributes after migration labels: %#v", rawState["labels"])
+	log.Printf("[DEBUG] Attributes after migration effective_labels: %#v", rawState["effective_labels"])
 
 	return rawState, nil
 }
