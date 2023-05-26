@@ -1,5 +1,6 @@
+<% autogen_exception -%>
 package google
-
+<% if version == "private" -%>
 import (
 	"fmt"
 	"testing"
@@ -29,11 +30,11 @@ func TestAccDataprocClusterLabelsMigration_withoutLabels_withoutChanges(t *testi
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				Config:            testAccDataprocClusterLabelsMigration_withoutLabels(rnd),
+				Config:            testAccDataprocCluster_withoutLabels(rnd),
 				ExternalProviders: oldVersion,
 			},
 			{
-				Config:                   testAccDataprocClusterLabelsMigration_withoutLabels(rnd),
+				Config:                   testAccDataprocCluster_withoutLabels(rnd),
 				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
@@ -130,7 +131,7 @@ func TestAccDataprocClusterLabelsMigration_withUpdate(t *testing.T) {
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				Config:            testAccDataprocClusterLabelsMigration_withoutLabels(rnd),
+				Config:            testAccDataprocCluster_withoutLabels(rnd),
 				ExternalProviders: oldVersion,
 			},
 			{
@@ -147,7 +148,7 @@ func TestAccDataprocClusterLabelsMigration_withUpdate(t *testing.T) {
 				),
 			},
 			{
-				Config:                   testAccDataprocClusterLabelsMigration_withoutLabels(rnd),
+				Config:                   testAccDataprocCluster_withoutLabels(rnd),
 				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
@@ -183,7 +184,7 @@ func TestAccDataprocClusterLabelsMigration_withRemoval(t *testing.T) {
 				ExternalProviders: oldVersion,
 			},
 			{
-				Config:                   testAccDataprocClusterLabelsMigration_withoutLabels(rnd),
+				Config:                   testAccDataprocCluster_withoutLabels(rnd),
 				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
@@ -209,12 +210,4 @@ func TestAccDataprocClusterLabelsMigration_withRemoval(t *testing.T) {
 		},
 	})
 }
-
-func testAccDataprocClusterLabelsMigration_withoutLabels(rnd string) string {
-	return fmt.Sprintf(`
-resource "google_dataproc_cluster" "with_labels" {
-  name   = "tf-test-dproc-%s"
-  region = "us-central1"
-}
-`, rnd)
-}
+<% end -%>

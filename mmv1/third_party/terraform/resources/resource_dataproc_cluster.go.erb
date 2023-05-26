@@ -116,6 +116,23 @@ var (
 	}
 )
 
+const resourceDataprocGoogleLabelPrefix = "goog-dataproc"
+const resourceDataprocGoogleProvidedLabelPrefix = "labels." + resourceDataprocGoogleLabelPrefix
+
+func resourceDataprocLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if strings.HasPrefix(k, resourceDataprocGoogleProvidedLabelPrefix) && new == "" {
+		return true
+	}
+
+	// Let diff be determined by labels (above)
+	if strings.HasPrefix(k, "labels.%") {
+		return true
+	}
+
+	// For other keys, don't suppress diff.
+	return false
+}
+
 const resourceDataprocGoogleProvidedDPGKEPrefix = "virtual_cluster_config.0.kubernetes_cluster_config.0.kubernetes_software_config.0.properties.dpgke"
 const resourceDataprocGoogleProvidedSparkPrefix = "virtual_cluster_config.0.kubernetes_cluster_config.0.kubernetes_software_config.0.properties.spark"
 
@@ -146,6 +163,7 @@ func ResourceDataprocCluster() *schema.Resource {
 			Delete: schema.DefaultTimeout(45 * time.Minute),
 		},
 
+<% if version == 'private' -%>
 		SchemaVersion: 1,
 		StateUpgraders: []schema.StateUpgrader{
 			{
@@ -154,6 +172,7 @@ func ResourceDataprocCluster() *schema.Resource {
 				Version: 0,
 			},
 		},
+<% end -%>
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -206,7 +225,7 @@ func ResourceDataprocCluster() *schema.Resource {
 				Default:     "0s",
 				Description: `The timeout duration which allows graceful decomissioning when you change the number of worker nodes directly through a terraform apply`,
 			},
-
+<% if version == "private" -%>
 			"labels": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -220,7 +239,17 @@ func ResourceDataprocCluster() *schema.Resource {
 				Computed:    true,
 				Description: `The list of labels (key/value pairs) to be applied to instances in the cluster. GCP generates some itself including goog-dataproc-cluster-name which is the name of the cluster.`,
 			},
-
+<% else -%>
+			"labels": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				// GCP automatically adds labels
+				DiffSuppressFunc: resourceDataprocLabelDiffSuppress,
+				Computed:         true,
+				Description:      `The list of labels (key/value pairs) to be applied to instances in the cluster. GCP generates some itself including goog-dataproc-cluster-name which is the name of the cluster.`,
+			},
+<% end -%>
 			"virtual_cluster_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -2081,6 +2110,7 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error setting region: %s", err)
 	}
 
+<% if version == 'private' -%>
 	clusterLabels := make(map[string]interface{})
 
 	if v, ok := d.GetOk("labels"); ok {
@@ -2098,6 +2128,11 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("effective_labels", cluster.Labels); err != nil {
 		return fmt.Errorf("Error setting effective_labels: %s", err)
 	}
+<% else -%>
+	if err := d.Set("labels", cluster.Labels); err != nil {
+		return fmt.Errorf("Error setting labels: %s", err)
+	}
+<% end -%>
 
 	var cfg []map[string]interface{}
 
