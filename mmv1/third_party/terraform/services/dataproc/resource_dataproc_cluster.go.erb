@@ -225,6 +225,7 @@ func ResourceDataprocCluster() *schema.Resource {
 				Default:     "0s",
 				Description: `The timeout duration which allows graceful decomissioning when you change the number of worker nodes directly through a terraform apply`,
 			},
+
 <% if version == "private" -%>
 			"labels": {
 				Type:     schema.TypeMap,
@@ -250,6 +251,7 @@ func ResourceDataprocCluster() *schema.Resource {
 				Description:      `The list of labels (key/value pairs) to be applied to instances in the cluster. GCP generates some itself including goog-dataproc-cluster-name which is the name of the cluster.`,
 			},
 <% end -%>
+
 			"virtual_cluster_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -2109,7 +2111,6 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("region", region); err != nil {
 		return fmt.Errorf("Error setting region: %s", err)
 	}
-
 <% if version == 'private' -%>
 	clusterLabels := make(map[string]interface{})
 

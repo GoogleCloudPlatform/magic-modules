@@ -2,7 +2,6 @@
 package google
 <% if version == "private" -%>
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -40,7 +39,7 @@ func TestAccDataprocClusterLabelsMigration_withoutLabels_withoutChanges(t *testi
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
 
 					resource.TestCheckNoResourceAttr("google_dataproc_cluster.with_labels", "labels.%"),
-					// We only provide one, but GCP adds three and goog-dataproc-autozone is added internally, so expect 5.
+					// We only provide one, but GCP adds three and goog-dataproc-autozone is added internally, so expect 4.
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.%", "4"),
 				),
 			},
@@ -154,7 +153,7 @@ func TestAccDataprocClusterLabelsMigration_withUpdate(t *testing.T) {
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
 
 					resource.TestCheckNoResourceAttr("google_dataproc_cluster.with_labels", "labels.%"),
-					// We only provide one, but GCP adds three and goog-dataproc-autozone is added internally, so expect 5.
+					// We only provide one, but GCP adds three and goog-dataproc-autozone is added internally, so expect 4.
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.%", "4"),
 				),
 			},
@@ -190,7 +189,7 @@ func TestAccDataprocClusterLabelsMigration_withRemoval(t *testing.T) {
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
 
 					resource.TestCheckNoResourceAttr("google_dataproc_cluster.with_labels", "labels.%"),
-					// We only provide one, but GCP adds three and goog-dataproc-autozone is added internally, so expect 5.
+					// We only provide one, but GCP adds three and goog-dataproc-autozone is added internally, so expect 4.
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.%", "4"),
 				),
 			},
