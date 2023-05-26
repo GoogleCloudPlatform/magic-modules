@@ -5,6 +5,8 @@ configured by editing definition files under the
 [`mmv1/products`](https://github.com/GoogleCloudPlatform/magic-modules/tree/master/mmv1/products)
 path."
 weight: 10
+aliases:
+  - /docs/how-to/add-mmv1-resource
 ---
 
 # Add an MMv1 resource

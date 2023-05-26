@@ -2,6 +2,8 @@
 title: "Add documentation for a handwritten data source"
 summary: "New handwritten datasources require new handwritten documentation to be created."
 weight: 25
+aliases:
+  - /docs/how-to/add-handwritten-datasource-documentation
 ---
 
 # Add documentation for a handwritten data source
