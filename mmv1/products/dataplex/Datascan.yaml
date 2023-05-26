@@ -166,6 +166,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'trigger'
+        default_from_api: true
         description: |
           Spec related to how often and when a scan should be triggered. If not specified, the default is OnDemand, which means the scan will not run until the user calls dataScans.run API.
         properties:

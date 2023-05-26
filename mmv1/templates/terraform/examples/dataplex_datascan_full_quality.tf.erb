@@ -8,11 +8,7 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
   }
 
   data {
-        resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/shakespeare"
-  }
-
-  data_profile_spec {
-      sampling_percent = 80
+        resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/austin-bikeshare/tables/bikeshare_stations"
   }
 
   execution_spec {
@@ -21,11 +17,12 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
                 cron = "TZ=America/New_York 1 1 * * *"
               }
             }
+    field = "modified_date"
   }
 
   data_quality_spec {
         rules {
-          column = "word"
+          column = "address"
           dimension = "VALIDITY"
           threshold = 0.99
           non_null_expectation {
@@ -33,12 +30,12 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
         }
 
         rules {
-          column = "word_count"
+          column = "council district"
           dimension = "VALIDITY"
           ignore_null = true
           threshold = 0.9
           range_expectation {
-            min_value = 0
+            min_value = 1
             max_value = 10
             strict_min_enabled = true
             strict_max_enabled = false
@@ -46,38 +43,48 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
         }
 
         rules {
-          column = "word"
+          column = "power_type"
           dimension = "VALIDITY"
           ignore_null = false
           regex_expectation {
-            regex = "^apple$"
+            regex = ".*solar.*"
           }
         }
 
         rules {
-          column = "word"
+          column = "property_type"
+          dimension = "VALIDITY"
+          ignore_null = false
+          set_expectation {
+            values = ["sidewalk", "parkland"]
+          }
+        }
+
+
+        rules {
+          column = "address"
           dimension = "UNIQUENESS"
           uniqueness_expectation {
           }
         }
 
         rules {
-          column = "word_count"
+          column = "number_of_docks"
           dimension = "VALIDITY"
           statistic_range_expectation {
             statistic = "MEAN"
             min_value = 5
-            max_value = 10
+            max_value = 15
             strict_min_enabled = true
-            strict_max_enabled = false
+            strict_max_enabled = true
           }
         }
 
         rules {
-          column = "word_count"
+          column = "footprint_length"
           dimension = "VALIDITY"
           row_condition_expectation {
-            sql_expression = "word_count > 0 AND word_count <= 10"
+            sql_expression = "footprint_length > 0 AND footprint_length <= 10"
           }
         }
 
