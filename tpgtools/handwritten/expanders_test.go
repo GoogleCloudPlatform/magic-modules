@@ -1,4 +1,4 @@
-package google
+package tpgresource
 
 import (
 	"reflect"
@@ -66,7 +66,7 @@ func TestExpandEnumBool(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			if got, want := expandEnumBool(tc.input), tc.exp; !reflect.DeepEqual(got, want) {
+			if got, want := ExpandEnumBool(tc.input), tc.exp; !reflect.DeepEqual(got, want) {
 				t.Errorf("expected %v to be %v", got, want)
 			}
 		})

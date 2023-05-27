@@ -360,6 +360,16 @@ func loadOverrides(packagePath Filepath, fileName string) Overrides {
 	return overrides
 }
 
+func getParentDir(res *Resource) string {
+	dirPath := path.Join(*oPath, terraformResourceDirectory)
+
+	servicePath := path.Join(dirPath, "services", string(res.Package()))
+	if err := os.MkdirAll(servicePath, os.ModePerm); err != nil {
+		glog.Error(fmt.Errorf("error creating Terraform services directory %v: %v", servicePath, err))
+	}
+	return servicePath
+}
+
 func generateResourceFile(res *Resource) {
 	// Generate resource file
 	tmplInput := ResourceInput{
@@ -391,7 +401,8 @@ func generateResourceFile(res *Resource) {
 		fmt.Printf("%v", string(formatted))
 	} else {
 		outname := fmt.Sprintf("resource_%s_%s.go", res.ProductName(), res.Name())
-		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
+		parentDir := getParentDir(res)
+		err = ioutil.WriteFile(path.Join(parentDir, outname), formatted, 0644)
 		if err != nil {
 			glog.Exit(err)
 		}

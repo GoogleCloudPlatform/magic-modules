@@ -29,7 +29,7 @@
 //
 // ----------------------------------------------------------------------------
 
-package google
+package {{$.Package}}
 
 import(
 	"context"
@@ -258,10 +258,10 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 {{- if $.CustomCreateDirectiveFunction }}
 	directive := {{ $.CustomCreateDirectiveFunction }}(obj)
 {{- else if $.HasCreate }}
-	directive := CreateDirective
+	directive := tpgresource.CreateDirective
 {{- else }}
 	{{/* Resource has no create method, so we skip the BlockModification parameter. */}}
-	directive := UpdateDirective
+	directive := tpgresource.UpdateDirective
 {{- end }}
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -383,7 +383,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 	res, err := client.Get{{$.DCLTitle}}(context.Background(), obj)
 	if err != nil {
 		resourceName := fmt.Sprintf("{{$.PathType}} %q", d.Id())
-		return handleNotFoundDCLError(err, d, resourceName)
+		return tpgresource.HandleNotFoundDCLError(err, d, resourceName)
 	}
 
 {{ range $v := .Properties -}}
@@ -438,7 +438,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	defer transport_tpg.MutexStore.Unlock(lockName)
 
 {{ end }}
-	directive := UpdateDirective
+	directive := tpgresource.UpdateDirective
 	{{- if $.StateHint }}
 	directive = append(directive, dcl.WithStateHint(old))
 	{{- end }}
