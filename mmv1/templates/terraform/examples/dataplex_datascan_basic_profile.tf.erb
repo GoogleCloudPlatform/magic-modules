@@ -6,15 +6,14 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
 	resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/shakespeare"
   }
 
-  data_profile_spec {  
-  }
-
   execution_spec {
     trigger {
               on_demand {}
             }
   }
 
+  data_profile_spec {  
+  }
 
   project = "<%= ctx[:test_env_vars]['project_name'] %>"
 }
