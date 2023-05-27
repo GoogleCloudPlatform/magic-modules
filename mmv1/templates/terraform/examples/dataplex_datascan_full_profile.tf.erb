@@ -11,10 +11,6 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
         resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/shakespeare"
   }
 
-  data_profile_spec {
-      sampling_percent = 80
-  }
-
   execution_spec {
     trigger {
               schedule {
@@ -23,6 +19,9 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
             }
   }
 
+  data_profile_spec {
+      sampling_percent = 80
+  }
 
   project = "<%= ctx[:test_env_vars]['project_name'] %>"
 }
