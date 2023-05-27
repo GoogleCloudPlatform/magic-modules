@@ -114,6 +114,16 @@ examples:
     ignore_read_extra:
       - "metadata"
       - "metadata_startup_script"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "url_map_path_template_match"
+    primary_resource_id: "urlmap"
+    vars:
+      url_map_name: "urlmap"
+      cart_backend_service_name: "cart-service"
+      user_backend_service_name: "user-service"
+      http_health_check_name: "health-check"
+      backend_bucket_name: "static-asset-backend-bucket"
+      storage_bucket_name: "static-asset-bucket"
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
