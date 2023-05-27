@@ -51,12 +51,11 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/dataplex/docs'
   api: 'https://cloud.google.com/dataplex/docs/reference/rest'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   method_name_separator: ':'
-  parent_resource_attribute: 'data_scan'
+  parent_resource_attribute: 'data_scan_id'
   fetch_iam_policy_verb: :GET
   import_format:
-    ['projects/{{project}}/locations/{{location}}/dataScans/{{name}}', '{{name}}']
+    ['projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}', '{{data_scan_id}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_datascan_basic_profile'
@@ -166,14 +165,17 @@ properties:
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'trigger'
-        default_from_api: true
+        required: true
         description: |
-          Spec related to how often and when a scan should be triggered. If not specified, the default is OnDemand, which means the scan will not run until the user calls dataScans.run API.
+          Spec related to how often and when a scan should be triggered.
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'onDemand'
             allow_empty_object: true
             send_empty_value: true
+            exactly_one_of:
+              - onDemand
+              - schedule
             description: |
               The scan runs once via dataScans.run API.
             properties: []
@@ -181,6 +183,9 @@ properties:
             name: 'schedule'
             description: |
              The scan is scheduled to run periodically.
+            exactly_one_of:
+              - onDemand
+              - schedule
             properties:
               - !ruby/object:Api::Type::String
                 name: 'cron'
@@ -219,8 +224,8 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'dataQualitySpec'
     exactly_one_of:
-            - data_quality_spec
-            - data_profile_spec
+      - data_quality_spec
+      - data_profile_spec
     description: |
       DataQualityScan related setting.
     properties:
@@ -365,8 +370,8 @@ properties:
     allow_empty_object: true
     send_empty_value: true
     exactly_one_of:
-            - data_quality_spec
-            - data_profile_spec
+      - data_quality_spec
+      - data_profile_spec
     description: |
       DataProfileScan related setting.
     properties:
