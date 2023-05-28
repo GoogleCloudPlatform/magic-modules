@@ -20,7 +20,8 @@ update_verb: :PATCH
 update_mask: true
 import_format:
   [
-    'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}'
+    'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}',
+    '{{data_scan_id}}'
   ]
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
