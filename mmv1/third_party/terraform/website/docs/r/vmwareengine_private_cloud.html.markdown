@@ -7,7 +7,11 @@ description: |-
 # google\_vmwareengine\_private\_cloud
 
 Represents a private cloud resource. Private clouds are zonal resources.
-To get more information about PrivateCloud, see:
+
+~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
+
+To get more information about private cloud, see:
 * [API documentation](https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.privateClouds)
 
 ## Example Usage - Vmware Engine Private Cloud Basic

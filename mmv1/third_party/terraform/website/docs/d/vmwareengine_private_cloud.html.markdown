@@ -1,14 +1,17 @@
 ---
 subcategory: "Cloud VMware Engine"
 description: |-
-  Get info about a Google VMwareEngine PrivateCloud.
+  Get information about a private cloud.
 ---
 
 # google\_vmwareengine\_private_cloud
 
-Use this data source to get details about a Google VMwareEngine PrivateCloud resource.
+Use this data source to get details about a private cloud resource.
 
-To get more information about VMwareEngine PrivateCloud, see:
+~> **Warning:** This data source is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
+
+To get more information about private cloud, see:
 * [API documentation](https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.privateClouds)
 
 ## Example Usage

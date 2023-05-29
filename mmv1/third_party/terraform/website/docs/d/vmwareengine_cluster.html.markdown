@@ -1,14 +1,17 @@
 ---
 subcategory: "Cloud VMware Engine"
 description: |-
-  Get info about a Google VMwareEngine Cluster.
+  Get info about a private cloud cluster.
 ---
 
 # google\_vmwareengine\_cluster
 
-Use this data source to get details about a Google VMwareEngine Cluster resource.
+Use this data source to get details about a cluster resource.
 
-To get more information about VMwareEngine Cluster, see:
+~> **Warning:** This data source is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
+
+To get more information about private cloud cluster, see:
 * [API documentation](https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.privateClouds.clusters)
 
 ## Example Usage

@@ -1,12 +1,15 @@
 ---
 subcategory: "Cloud VMware Engine"
 description: |-
-  Get info about a Google VMwareEngine Network.
+  Get information about a VMwareEngine network.
 ---
 
 # google\_vmwareengine\_network
 
-Use this data source to get details about a Google VMwareEngine network resource.
+Use this data source to get details about a VMwareEngine network resource.
+
+~> **Warning:** This data source is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 
 To get more information about VMwareEngine Network, see:
 * [API documentation](https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.vmwareEngineNetworks)
