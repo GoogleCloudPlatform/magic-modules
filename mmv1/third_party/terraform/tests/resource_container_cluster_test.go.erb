@@ -3570,6 +3570,44 @@ func TestAccContainerCluster_withGatewayApiConfig(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withFleet(t *testing.T) {
+        t.Parallel() 
+        clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+        pid := getTestProjectFromEnv()
+  
+        vcrTest(t, resource.TestCase{
+                PreCheck:     func() { testAccPreCheck(t) },
+                Providers:    testAccProviders,
+                CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+                Steps: []resource.TestStep{
+                        {
+                                Config: testAccContainerCluster_withFleetEnabled(pid, clusterName),
+                        },
+                        {
+                                ResourceName:            "google_container_cluster.with_fleet",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                        },
+                        {
+                                Config: testAccContainerCluster_updateFleet(pid, clusterName, false),
+                        },
+                        {
+                                ResourceName:            "google_container_cluster.with_fleet",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                        },
+                        {
+                                Config: testAccContainerCluster_updateFleet(pid, clusterName, true),
+                        },
+                        {
+                                ResourceName:            "google_container_cluster.with_fleet",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                        }, 
+                },
+        })
+}
+
 <% unless version == 'ga' -%>
 func TestAccContainerCluster_withTPUConfig(t *testing.T) {
 	t.Parallel()
@@ -6650,6 +6688,51 @@ resource "google_container_cluster" "with_workload_identity_config" {
 `, projectID, clusterName, workloadIdentityConfig)
 }
 
+func testAccContainerCluster_withFleetEnabled(projectID string, clusterName string) string {
+        return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_container_cluster" "with_fleet" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  fleet {
+    project = "${data.google_project.project.project_id}"
+  }
+}
+`, projectID, clusterName)
+}
+
+func testAccContainerCluster_updateFleet(projectID string, clusterName string, enable bool) string {
+        fleet := ""
+        if enable {
+                fleet = `
+			fleet {
+                  		project = "${data.google_project.project.project_id}"
+                	}`
+        } else {
+                fleet = `
+                        fleet {
+                        project = ""
+                	}`
+        }
+        return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_container_cluster" "with_fleet" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  remove_default_node_pool = true
+  %s
+}
+`, projectID, clusterName, fleet)
+}
 
 <% unless version.nil? || version == 'ga' -%>
 func testAccContainerCluster_sharedVpc(org, billingId, projectName, name string, suffix string) string {
