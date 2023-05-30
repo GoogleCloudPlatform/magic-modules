@@ -22,7 +22,6 @@ description: |
   Only used to generate IAM resources
 exclude_validator: true
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   method_name_separator: ':'
   parent_resource_type: 'google_app_engine_application'
   parent_resource_attribute: 'app_id'

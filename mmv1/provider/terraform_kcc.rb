@@ -43,6 +43,11 @@ module Provider
                         Ssl: 'SSL',
                         Url: 'URL' }.freeze
 
+    def generating_hashicorp_repo?
+      # This code is not used when generating TPG/TPGB
+      false
+    end
+
     def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
       @base_url = @version.base_url
       generate_objects(output_folder, types, generate_code, generate_docs)

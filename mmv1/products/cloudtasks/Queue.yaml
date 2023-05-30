@@ -188,11 +188,6 @@ properties:
           then increases linearly, and finally retries retries at intervals of maxBackoff
           up to maxAttempts times.
         default_from_api: true
-      - !ruby/object:Api::Type::Time
-        name: 'purgeTime'
-        output: true
-        description: The last time this queue was purged.
-        exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: 'stackdriverLoggingConfig'
     description: |
