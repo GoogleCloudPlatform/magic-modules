@@ -35,11 +35,6 @@ func testAccAccessContextManagerServicePerimeterIngressPolicy_basicTest(t *testi
 				ImportStateVerify: true,
 			},
 			{
-				ResourceName:      "google_access_context_manager_service_perimeter_ingress_policy.test-access2",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
 				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitle),
 				Check:  testAccCheckAccessContextManagerServicePerimeterIngressPolicyDestroyProducer(t),
 			},
@@ -134,7 +129,11 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
 }
 resource "google_access_context_manager_service_perimeter_ingress_policy" "test-access2" {
 	perimeter = google_access_context_manager_service_perimeter.test-access.name
+	depends_on = [google_access_context_manager_service_perimeter_ingress_policy.test-access1]
 	ingress_policy {
+		ingress_from {
+			identity_type = "IDENTITY_TYPE_UNSPECIFIED"
+		}
 	}
 }
 

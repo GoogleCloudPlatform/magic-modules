@@ -35,7 +35,7 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_basicTest(t *testin
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccAccessContextManagerEgressPolicy_destroy(org, policyTitle, perimeterTitle),
+				Config: testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitle),
 				Check:  testAccCheckAccessContextManagerServicePerimeterEgressPolicyDestroyProducer(t),
 			},
 		},
