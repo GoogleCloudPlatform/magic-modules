@@ -4,6 +4,7 @@ resource "google_bigquery_reservation" "basic" {
   location = "us-central1"
   slot_capacity = 0
   ignore_idle_slots = false
+  edition = "ENTERPRISE"
 }
 
 resource "google_bigquery_reservation_assignment" "primary" {
