@@ -71,7 +71,7 @@ properties:
     description: |
       The Admin Cluster this Bare Metal User Cluster belongs to.
       This is the full resource name of the Admin Cluster's hub membership.
-    diff_suppress_func: ProjectNumberDiffSuppress
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
   - !ruby/object:Api::Type::String
     name: "description"
     description: |
