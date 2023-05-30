@@ -1937,6 +1937,29 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+			"fleet": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `Fleet information of the cluster.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"project": {
+							Type:         schema.TypeString,
+							Optional:         true,
+                                                	Computed:         true,
+							Description:      `The Fleet host project of the cluster.`
+						},
+                                          	"membership": {
+                                                Type:             schema.TypeString,
+                                                Computed:         true,
+                                                Description:      `The Fleet membership of the cluster.`
+
+                                          	},
+					},
+				},
+			},
 		},
 	}
 }
@@ -2201,6 +2224,10 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 	if v, ok := d.GetOk("monitoring_config"); ok {
 		cluster.MonitoringConfig = expandMonitoringConfig(v)
 	}
+	
+	if v, ok := d.GetOk("fleet"); ok {
+                cluster.Fleet = expandFleet(v)
+        }       
 
 <% unless version == 'ga' -%>
 	if err := validateNodePoolAutoConfig(cluster); err != nil {
@@ -2597,6 +2624,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("monitoring_config", flattenMonitoringConfig(cluster.MonitoringConfig)); err != nil {
 		return err
 	}
+	
+	if err := d.Set("fleet", flattenFleet(cluster.Fleet)); err != nil {
+                return err
+        }
 
 <% unless version == 'ga' -%>
 	if err := d.Set("node_pool_auto_config", flattenNodePoolAutoConfig(cluster.NodePoolAutoConfig)); err != nil {
@@ -3531,6 +3562,21 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s monitoring config has been updated", d.Id())
 	}
+
+        if d.HasChange("fleet") {
+                req := &container.UpdateClusterRequest{
+                        Update: &container.ClusterUpdate{
+                                Fleet: expandFleet(d.Get("fleet")),
+                        },
+                }
+                updateF := updateFunc(req, "updating GKE cluster fleet")
+                // Call update serially.
+                if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+                        return err
+                }
+        
+                log.Printf("[INFO] GKE cluster %s fleet has been updated", d.Id())
+        } 
 
 	if d.HasChange("resource_labels") {
 		resourceLabels := d.Get("resource_labels").(map[string]interface{})
@@ -4893,6 +4939,18 @@ func expandNodePoolAutoConfigNetworkTags(configured interface{}) *container.Netw
 }
 <% end -%>
 
+func expandFleet(configured interface{}) *container.Fleet {
+        l := configured.([]interface{})
+        if len(l) == 0 || l[0] == nil {
+                return nil 
+        }       
+                
+        config := l[0].(map[string]interface{})
+        return &container.Fleet{
+                Project: config["project"].(string),
+        }       
+}  
+
 func flattenNotificationConfig(c *container.NotificationConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -5566,6 +5624,18 @@ func flattenGatewayApiConfig(c *container.GatewayAPIConfig) []map[string]interfa
 			"channel":        c.Channel,
 		},
 	}
+}
+
+func flattenFleet(c *container.Fleet) []map[string]interface{} {
+      if c == nil {
+                return nil
+      }         
+      return []map[string]interface{}{
+                {
+                      "project": c.Project,
+                      "membership": c.Membership,
+                },
+        }       
 }
 
 func flattenContainerClusterLoggingConfig(c *container.LoggingConfig) []map[string]interface{} {
