@@ -145,16 +145,23 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'entity'
         immutable: true
+        exactly_one_of:
+          - entity
+          - resource
         description: |
           The Dataplex entity that represents the data source(e.g. BigQuery table) for Datascan.
       - !ruby/object:Api::Type::String
         name: 'resource'
         immutable: true
+        exactly_one_of:
+          - entity
+          - resource
         description: |
           The service-qualified full resource name of the cloud resource for a DataScan job to scan against. The field could be:
           (Cloud Storage bucket for DataDiscoveryScan)BigQuery table of type "TABLE" for DataProfileScan/DataQualityScan.
   - !ruby/object:Api::Type::NestedObject
     name: 'executionSpec'
+    required: true
     description: |
       DataScan execution settings.
     properties:
@@ -287,6 +294,7 @@ properties:
                properties:
                  - !ruby/object:Api::Type::Array
                    name: 'values'
+                   required: true
                    description: |
                      Expected values for the column value.
                    item_type: Api::Type::String
@@ -297,6 +305,7 @@ properties:
                properties:
                  - !ruby/object:Api::Type::String
                    name: 'regex'
+                   required: true
                    description: |
                      A regular expression the column value is expected to match.
              - !ruby/object:Api::Type::NestedObject
@@ -313,6 +322,7 @@ properties:
                properties:
                  - !ruby/object:Api::Type::Enum
                    name: 'statistic'
+                   required: true
                    description: |
                            column statistics.
                    values:
@@ -349,6 +359,7 @@ properties:
                properties:
                  - !ruby/object:Api::Type::String
                    name: 'sqlExpression'
+                   required: true
                    description: |
                      The SQL expression.
              - !ruby/object:Api::Type::NestedObject
@@ -358,6 +369,7 @@ properties:
                properties:
                  - !ruby/object:Api::Type::String
                    name: 'sqlExpression'
+                   required: true
                    description: |
                      The SQL expression.
   - !ruby/object:Api::Type::NestedObject
@@ -422,7 +434,6 @@ properties:
                   name: 'threshold'
                   description: |
                     The minimum ratio of passing_rows / total_rows required to pass this rule, with a range of [0.0, 1.0]. 0 indicates default value (i.e. 1.0).
-                  default_value: 0
                 - !ruby/object:Api::Type::NestedObject
                   name: 'rangeExpectation'
                   description: |
