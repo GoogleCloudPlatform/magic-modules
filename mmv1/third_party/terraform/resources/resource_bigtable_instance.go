@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -12,6 +13,8 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	btapb "google.golang.org/genproto/googleapis/bigtable/admin/v2"
 
 	"cloud.google.com/go/bigtable"
 )
@@ -25,6 +28,11 @@ func ResourceBigtableInstance() *schema.Resource {
 
 		Importer: &schema.ResourceImporter{
 			State: resourceBigtableInstanceImport,
+		},
+		
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(45 * time.Minute),
+			Update: schema.DefaultTimeout(45 * time.Minute),
 		},
 
 		CustomizeDiff: customdiff.All(
@@ -211,8 +219,12 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 
 	defer c.Close()
 
-	err = c.CreateInstanceWithClusters(ctx, conf)
+	op, err := c.CreateInstanceWithClustersAsync(ctx, conf)
 	if err != nil {
+		return fmt.Errorf("Error creating instance. %s", err)
+	}
+	resp := btapb.Instance{}
+	if err := bigtable.AwaitOperation(ctx, op, &resp, d.Timeout(schema.TimeoutCreate)); err != nil {
 		return fmt.Errorf("Error creating instance. %s", err)
 	}
 
@@ -347,6 +359,7 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
+	c.SetDefaultTimeout(d.Timeout(schema.TimeoutUpdate))
 	_, err = bigtable.UpdateInstanceAndSyncClusters(ctx, c, conf)
 	if err != nil {
 		return fmt.Errorf("Error updating instance. %s", err)
