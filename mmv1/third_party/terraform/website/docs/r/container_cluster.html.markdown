@@ -1187,6 +1187,10 @@ and all pods running on the nodes. Specified as a map from the key, such as
 
 * `audit_mode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Sets which mode of auditing should be used for the cluster's workloads. Accepted values are DISABLED, BASIC.
 
+<a name="nested_fleet"></a>The `fleet` block supports:
+  
+* `project` - (Optional) The Fleet host project the cluster will be registered to.
+  
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
