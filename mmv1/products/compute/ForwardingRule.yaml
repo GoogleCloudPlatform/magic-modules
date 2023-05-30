@@ -162,7 +162,6 @@ examples:
       - 'ip_address'
   - !ruby/object:Provider::Terraform::Examples
     name: 'forwarding_rule_vpc_psc'
-    min_version: 'beta'
     primary_resource_id: 'default'
     vars:
       forwarding_rule_name: 'psc-endpoint'
@@ -588,5 +587,4 @@ properties:
     description:
       This is used in PSC consumer ForwardingRule to control whether the PSC
       endpoint can be accessed from another region.
-    min_version: beta
     send_empty_value: true
