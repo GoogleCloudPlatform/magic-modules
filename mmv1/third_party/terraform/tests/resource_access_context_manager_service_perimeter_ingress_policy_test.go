@@ -14,11 +14,11 @@ import (
 // Since each test here is acting on the same organization and only one AccessPolicy
 // can exist, they need to be run serially. See AccessPolicy for the test runner.
 
-func testAccAccessContextManagerIngressPolicy_basicTest(t *testing.T) {
+func testAccAccessContextManagerServicePerimeterIngressPolicy_basicTest(t *testing.T) {
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
 	org := acctest.GetTestOrgFromEnv(t)
-	projects := BootstrapServicePerimeterProjects(t, 1)
+	//projects := BootstrapServicePerimeterProjects(t, 1)
 	policyTitle := RandString(t, 10)
 	perimeterTitle := "perimeter"
 
@@ -27,22 +27,27 @@ func testAccAccessContextManagerIngressPolicy_basicTest(t *testing.T) {
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerIngressPolicy_basic(org, policyTitle, perimeterTitle, projects[0].ProjectNumber),
+				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_basic(org, policyTitle, perimeterTitle),
 			},
 			{
-				ResourceName:      "google_access_context_manager_ingress_policy.test-access1",
+				ResourceName:      "google_access_context_manager_service_perimeter_ingress_policy.test-access1",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccAccessContextManagerIngressPolicy_destroy(org, policyTitle, perimeterTitle),
-				Check:  testAccCheckAccessContextManagerIngressPolicyDestroyProducer(t),
+				ResourceName:      "google_access_context_manager_service_perimeter_ingress_policy.test-access2",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitle),
+				Check:  testAccCheckAccessContextManagerServicePerimeterIngressPolicyDestroyProducer(t),
 			},
 		},
 	})
 }
 
-func testAccCheckAccessContextManagerIngressPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
+func testAccCheckAccessContextManagerServicePerimeterIngressPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_access_context_manager_service_perimeter_ingress_policy" {
@@ -93,7 +98,7 @@ func testAccAccessContextManagerServicePerimeterIngressPolicy_basic(org, policyT
 	return fmt.Sprintf(`
 %s
 
-resource "google_access_context_manager_service_perimeter_ingress_policy" "test-access" {
+resource "google_access_context_manager_service_perimeter_ingress_policy" "test-access1" {
   perimeter = google_access_context_manager_service_perimeter.test-access.name
   ingress_policy {
 	ingress_from {
@@ -126,6 +131,11 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
 		}
   	}
   }
+}
+resource "google_access_context_manager_service_perimeter_ingress_policy" "test-access2" {
+	perimeter = google_access_context_manager_service_perimeter.test-access.name
+	ingress_policy {
+	}
 }
 
 `, testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName))

@@ -14,11 +14,11 @@ import (
 // Since each test here is acting on the same organization and only one AccessPolicy
 // can exist, they need to be run serially. See AccessPolicy for the test runner.
 
-func testAccAccessContextManagerEgressPolicy_basicTest(t *testing.T) {
+func testAccAccessContextManagerServicePerimeterEgressPolicy_basicTest(t *testing.T) {
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
 	org := acctest.GetTestOrgFromEnv(t)
-	projects := BootstrapServicePerimeterProjects(t, 1)
+	//projects := BootstrapServicePerimeterProjects(t, 1)
 	policyTitle := RandString(t, 10)
 	perimeterTitle := "perimeter"
 
@@ -27,7 +27,7 @@ func testAccAccessContextManagerEgressPolicy_basicTest(t *testing.T) {
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerEgressPolicy_basic(org, policyTitle, perimeterTitle, projects[0].ProjectNumber),
+				Config: testAccAccessContextManagerServicePerimeterEgressPolicy_basic(org, policyTitle, perimeterTitle),
 			},
 			{
 				ResourceName:      "google_access_context_manager_egress_policy.test-access1",
@@ -36,13 +36,13 @@ func testAccAccessContextManagerEgressPolicy_basicTest(t *testing.T) {
 			},
 			{
 				Config: testAccAccessContextManagerEgressPolicy_destroy(org, policyTitle, perimeterTitle),
-				Check:  testAccCheckAccessContextManagerEgressPolicyDestroyProducer(t),
+				Check:  testAccCheckAccessContextManagerServicePerimeterEgressPolicyDestroyProducer(t),
 			},
 		},
 	})
 }
 
-func testAccCheckAccessContextManagerEgressPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
+func testAccCheckAccessContextManagerServicePerimeterEgressPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_access_context_manager_service_perimeter_egress_policy" {
