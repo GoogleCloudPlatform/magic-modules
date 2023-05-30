@@ -90,7 +90,7 @@ parameters:
     required: true
     url_param_only: true
     description: |
-      The location where the data scan should reside.
+      DataScan identifier. Must contain only lowercase letters, numbers and hyphens. Must start with a letter. Must end with a number or a letter.
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -146,8 +146,8 @@ properties:
         name: 'entity'
         immutable: true
         exactly_one_of:
-          - entity
-          - resource
+          - data.0.entity
+          - data.0.resource
         description: |
           The Dataplex entity that represents the data source(e.g. BigQuery table) for Datascan.
       - !ruby/object:Api::Type::String
@@ -176,8 +176,8 @@ properties:
             allow_empty_object: true
             send_empty_value: true
             exactly_one_of:
-              - onDemand
-              - schedule
+              - execution_spec.0.trigger.0.on_demand
+              - execution_spec.0.trigger.0.schedule
             description: |
               The scan runs once via dataScans.run API.
             properties: []
@@ -231,6 +231,14 @@ properties:
     description: |
       DataQualityScan related setting.
     properties:
+      - !ruby/object:Api::Type::Double
+        name: 'samplingPercent'
+        description: |
+          The percentage of the records to be selected from the dataset for DataScan.
+      - !ruby/object:Api::Type::String
+        name: 'rowFilter'
+        description: |
+          A filter applied to all rows in a single DataScan job. The filter needs to be a valid SQL expression for a WHERE clause in BigQuery standard SQL syntax. Example: col1 >= 0 AND col2 < 10
       - !ruby/object:Api::Type::Array
         name: 'rules'
         min_size: 1
@@ -386,6 +394,10 @@ properties:
         name: 'samplingPercent'
         description: |
           The percentage of the records to be selected from the dataset for DataScan.
+      - !ruby/object:Api::Type::String
+        name: 'rowFilter'
+        description: |
+          A filter applied to all rows in a single DataScan job. The filter needs to be a valid SQL expression for a WHERE clause in BigQuery standard SQL syntax. Example: col1 >= 0 AND col2 < 10
   - !ruby/object:Api::Type::NestedObject
     name: 'dataQualityResult'
     output: true
@@ -402,19 +414,22 @@ properties:
         description: |
           A list of results at the dimension level.
         item_type: !ruby/object:Api::Type::NestedObject
-          properties:
-            - !ruby/object:Api::Type::Boolean
-              name: 'passed'
-              description: |
-                Whether the dimension passed or failed.
+        output: true
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'passed'
+            description: |
+              Whether the dimension passed or failed.
       - !ruby/object:Api::Type::Array
         name: 'rules'
+        output: true
         description: |
           A list of all the rules in a job, and their results.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'rule'
+              output: true
               description: |
                 The rule specified in the DataQualitySpec, as is.
               properties:
@@ -436,6 +451,7 @@ properties:
                     The minimum ratio of passing_rows / total_rows required to pass this rule, with a range of [0.0, 1.0]. 0 indicates default value (i.e. 1.0).
                 - !ruby/object:Api::Type::NestedObject
                   name: 'rangeExpectation'
+                  output: true
                   description: |
                     ColumnMap rule which evaluates whether each column value lies between a specified range.
                   properties:
@@ -461,13 +477,14 @@ properties:
                         Only relevant if a maxValue has been defined. Default = false.
                 - !ruby/object:Api::Type::NestedObject
                   name: 'nonNullExpectation'
+                  output: true
                   allow_empty_object: true
-                  send_empty_value: true
                   description: |
                     ColumnMap rule which evaluates whether each column value is null.
                   properties: []
                 - !ruby/object:Api::Type::NestedObject
                   name: 'setExpectation'
+                  output: true
                   description: |
                     ColumnMap rule which evaluates whether each column value is contained by a specified set.
                   properties:
@@ -476,8 +493,9 @@ properties:
                       description: |
                         Expected values for the column value.
                       item_type: Api::Type::String
-                    - !ruby/object:Api::Type::NestedObject
+                - !ruby/object:Api::Type::NestedObject
                   name: 'regexExpectation'
+                  output: true
                   description: |
                     ColumnMap rule which evaluates whether each column value matches a specified regex.
                   properties:
@@ -487,13 +505,14 @@ properties:
                         A regular expression the column value is expected to match.
                 - !ruby/object:Api::Type::NestedObject
                   name: 'uniquenessExpectation'
+                  output: true
                   allow_empty_object: true
-                  send_empty_value: true      
                   description: |
                     ColumnAggregate rule which evaluates whether the column has duplicates.
                   properties: []
                 - !ruby/object:Api::Type::NestedObject
                   name: 'statisticRangeExpectation'
+                  output: true
                   description: |
                     ColumnAggregate rule which evaluates whether the column aggregate statistic lies between a specified range.
                   properties:
@@ -518,18 +537,17 @@ properties:
                         At least one of minValue and maxValue need to be provided.
                     - !ruby/object:Api::Type::Boolean
                       name: 'strictMinEnabled'
-                      default_value: false
                       description: |
                         Whether column statistic needs to be strictly greater than ('>') the minimum, or if equality is allowed.
                         Only relevant if a minValue has been defined. Default = false.
                     - !ruby/object:Api::Type::Boolean
                       name: 'strictMaxEnabled'
-                      default_value: false
                       description: |
                         Whether column statistic needs to be strictly lesser than ('<') the maximum, or if equality is allowed.
                         Only relevant if a maxValue has been defined. Default = false.
                 - !ruby/object:Api::Type::NestedObject
                   name: 'rowConditionExpectation'
+                  output: true
                   description: |
                     Table rule which evaluates whether each row passes the specified condition.
                   properties:
@@ -539,6 +557,7 @@ properties:
                         The SQL expression.
                 - !ruby/object:Api::Type::NestedObject
                   name: 'tableConditionExpectation'
+                  output: true
                   description: |
                     Table rule which evaluates whether the provided expression is true.
                   properties:
@@ -548,10 +567,12 @@ properties:
                         The SQL expression.
             - !ruby/object:Api::Type::Boolean
               name: 'passed'
+              output: true
               description: |
                 Whether the rule passed or failed.
             - !ruby/object:Api::Type::String
               name: 'evaluatedCount'
+              output: true
               description: |
                 The number of rows a rule was evaluated against. This field is only valid for ColumnMap type rules.
                 Evaluated count can be configured to either
@@ -559,26 +580,32 @@ properties:
                 2. exclude null rows from the evaluatedCount, by setting ignore_nulls = true.
             - !ruby/object:Api::Type::String
               name: 'passedCount'
+              output: true
               description: |
                 The number of rows which passed a rule evaluation. This field is only valid for ColumnMap type rules.
             - !ruby/object:Api::Type::String
               name: 'nullCount'
+              output: true
               description: |
                 The number of rows with null values in the specified column.
             - !ruby/object:Api::Type::Integer
               name: 'passRatio'
+              output: true
               description: |
                 The ratio of passedCount / evaluatedCount. This field is only valid for ColumnMap type rules.
             - !ruby/object:Api::Type::String
               name: 'failingRowsQuery'
+              output: true
               description: |
                 The query to find rows that did not pass this rule. Only applies to ColumnMap and RowCondition rules.
       - !ruby/object:Api::Type::String
         name: 'rowCount'
+        output: true
         description: |
           The count of rows processed.
       - !ruby/object:Api::Type::NestedObject
         name: 'scannedData'
+        output: true
         description: |
           The data scanned for this result.
         properties:
@@ -610,6 +637,7 @@ properties:
           The count of rows scanned.
       - !ruby/object:Api::Type::NestedObject
         name: 'profile'
+        output: true
         description: |
           The profile information per field.
         properties:
@@ -641,6 +669,7 @@ properties:
                   properties:
                     - !ruby/object:Api::Type::Integer
                       name: 'nullRatio'
+                      output: true
                       description: |
                         Ratio of rows with null value against total scanned rows.
                     - !ruby/object:Api::Type::Integer
@@ -662,6 +691,7 @@ properties:
                             Count of the corresponding value in the scanned data.
                     - !ruby/object:Api::Type::NestedObject
                       name: 'stringProfile'
+                      output: true
                       description: |
                         String type field information.
                       properties:
@@ -679,6 +709,7 @@ properties:
                             Average length of non-null values in the scanned data.
                     - !ruby/object:Api::Type::NestedObject
                       name: 'integerProfile'
+                      output: true
                       description: |
                         Integer type field information.
                       properties:
@@ -704,6 +735,7 @@ properties:
                             Maximum of non-null values in the scanned data. NaN, if the field has a NaN.
                     - !ruby/object:Api::Type::NestedObject
                       name: 'doubleProfile'
+                      output: true
                       description: |
                         Double type field information.
                       properties:
@@ -729,6 +761,7 @@ properties:
                             Maximum of non-null values in the scanned data. NaN, if the field has a NaN.
       - !ruby/object:Api::Type::NestedObject
         name: 'scannedData'
+        output: true
         description: The data scanned for this result.
         properties:
           - !ruby/object:Api::Type::NestedObject

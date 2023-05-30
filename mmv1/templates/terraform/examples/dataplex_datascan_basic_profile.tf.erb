@@ -3,13 +3,13 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
   data_scan_id = "tf-test-datascan%{random_suffix}"
 
   data {
-	resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/shakespeare"
+	  resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/shakespeare"
   }
 
   execution_spec {
     trigger {
-              on_demand {}
-            }
+      on_demand {}
+    }
   }
 
   data_profile_spec {  

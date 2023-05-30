@@ -8,19 +8,20 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
   }
 
   data {
-        resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/shakespeare"
+    resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/shakespeare"
   }
 
   execution_spec {
     trigger {
-              schedule {
-                cron = "TZ=America/New_York 1 1 * * *"
-              }
-            }
+      schedule {
+        cron = "TZ=America/New_York 1 1 * * *"
+      }
+    }
   }
 
   data_profile_spec {
-      sampling_percent = 80
+    sampling_percent = 80
+    row_filter = "word_count > 10"
   }
 
   project = "<%= ctx[:test_env_vars]['project_name'] %>"
