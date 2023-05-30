@@ -414,12 +414,11 @@ properties:
         description: |
           A list of results at the dimension level.
         item_type: !ruby/object:Api::Type::NestedObject
-        output: true
-        properties:
-          - !ruby/object:Api::Type::Boolean
-            name: 'passed'
-            description: |
-              Whether the dimension passed or failed.
+          properties:
+            - !ruby/object:Api::Type::Boolean
+              name: 'passed'
+              description: |
+                Whether the dimension passed or failed.
       - !ruby/object:Api::Type::Array
         name: 'rules'
         output: true
