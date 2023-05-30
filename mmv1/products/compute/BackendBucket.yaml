@@ -49,7 +49,6 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   min_version: beta
-  exclude: false
   parent_resource_attribute: 'name'
   import_format:
     ['projects/{{project}}/global/backendBuckets/{{name}}', '{{name}}']
@@ -269,11 +268,6 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: 'enableCdn'
     description: 'If true, enable Cloud CDN for this BackendBucket.'
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'Unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |

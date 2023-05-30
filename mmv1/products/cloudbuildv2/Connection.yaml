@@ -23,7 +23,6 @@ exclude_validator: true
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   skip_import_test: true
   min_version: beta
-  exclude: false
   method_name_separator: ':'
   fetch_iam_policy_verb: :GET
   allowed_iam_role: 'roles/cloudbuild.connectionViewer'

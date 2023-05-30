@@ -10,66 +10,70 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 --- !ruby/object:Api::Resource
-name: "BareMetalNodePool"
+name: 'BareMetalNodePool'
 min_version: beta
-base_url: "projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools"
-create_url: "projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools?bare_metal_node_pool_id={{name}}"
-update_url: "projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools/{{name}}"
-self_link: "projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools/{{name}}"
+base_url: 'projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools'
+create_url: 'projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools?bare_metal_node_pool_id={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools/{{name}}'
+self_link: 'projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools/{{name}}'
 update_verb: :PATCH
 update_mask: true
-description: "A Google Bare Metal Node Pool."
+description: 'A Google Bare Metal Node Pool.'
 autogen_async: false
-id_format: "projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools/{{name}}"
-import_format: ["projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools/{{name}}"]
+id_format: 'projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools/{{name}}'
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools/{{name}}',
+  ]
 taint_resource_on_failed_create: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "gkeonprem_bare_metal_node_pool_basic"
-    primary_resource_id: "nodepool-basic"
+    name: 'gkeonprem_bare_metal_node_pool_basic'
+    primary_resource_id: 'nodepool-basic'
     min_version: beta
     vars:
-      name: "nodepool"
+      name: 'nodepool'
     test_env_vars:
-      project: "fake-backend-360322"
+      project: 'fake-backend-360322'
   - !ruby/object:Provider::Terraform::Examples
-    name: "gkeonprem_bare_metal_node_pool_full"
-    primary_resource_id: "nodepool-full"
+    name: 'gkeonprem_bare_metal_node_pool_full'
+    primary_resource_id: 'nodepool-full'
     min_version: beta
     vars:
-      name: "nodepool"
+      name: 'nodepool'
     test_env_vars:
-      project: "fake-backend-360322"
+      project: 'fake-backend-360322'
 skip_sweeper: true
 parameters:
   - !ruby/object:Api::Type::String
-    name: "name"
+    name: 'name'
     description: The bare metal node pool name.
     immutable: true
     url_param_only: true
     required: true
   - !ruby/object:Api::Type::ResourceRef
-    name: "bareMetalCluster"
-    resource: "BareMetalCluster"
-    imports: "name"
+    name: 'bareMetalCluster'
+    resource: 'BareMetalCluster'
+    imports: 'name'
     immutable: true
-    description: "The cluster this node pool belongs to."
+    description: 'The cluster this node pool belongs to.'
     url_param_only: true
     required: true
   - !ruby/object:Api::Type::String
-    name: "location"
+    name: 'location'
     description: The location of the resource.
     immutable: true
     url_param_only: true
     required: true
 properties:
   - !ruby/object:Api::Type::String
-    name: "displayName"
+    name: 'displayName'
     description: |
       The display name for the Bare Metal Node Pool.
   - !ruby/object:Api::Type::KeyValuePairs
-    name: "annotations"
+    name: 'annotations'
     description: |
       Annotations on the Bare Metal Node Pool.
       This field has the same restrictions as Kubernetes annotations.
@@ -81,24 +85,24 @@ properties:
       with dashes (-), underscores (_), dots (.), and alphanumerics between.
     default_from_api: true
   - !ruby/object:Api::Type::NestedObject
-    name: "nodePoolConfig"
+    name: 'nodePoolConfig'
     required: true
     description: |
       Node pool configuration.
     properties:
       - !ruby/object:Api::Type::Array
-        name: "nodeConfigs"
+        name: 'nodeConfigs'
         required: true
         description: The list of machine addresses in the Bare Metal Node Pool.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
-              name: "nodeIp"
+              name: 'nodeIp'
               description: |
                 The default IPv4 address for SSH access and Kubernetes node.
                 Example: 192.168.0.1
             - !ruby/object:Api::Type::KeyValuePairs
-              name: "labels"
+              name: 'labels'
               description: |
                 The map of Kubernetes labels (key/value pairs) to be applied to
                 each node. These will added in addition to any default label(s)
@@ -111,27 +115,27 @@ properties:
                 An object containing a list of "key": value pairs.
                 Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
       - !ruby/object:Api::Type::String
-        name: "operatingSystem"
+        name: 'operatingSystem'
         description: |
           Specifies the nodes operating system (default: LINUX).
         default_from_api: true
       - !ruby/object:Api::Type::Array
-        name: "taints"
+        name: 'taints'
         description: |
           The initial taints assigned to nodes of this node pool.
         default_from_api: true
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
-              name: "key"
+              name: 'key'
               description: |
                 Key associated with the effect.
             - !ruby/object:Api::Type::String
-              name: "value"
+              name: 'value'
               description: |
                 Value associated with the effect.
             - !ruby/object:Api::Type::Enum
-              name: "effect"
+              name: 'effect'
               description: |
                 Specifies the nodes operating system (default: LINUX).
               values:
@@ -139,7 +143,7 @@ properties:
                 - PREFER_NO_SCHEDULE
                 - NO_EXECUTE
       - !ruby/object:Api::Type::KeyValuePairs
-        name: "labels"
+        name: 'labels'
         description: |
           The map of Kubernetes labels (key/value pairs) to be applied to
           each node. These will added in addition to any default label(s)
@@ -153,13 +157,13 @@ properties:
           Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
         default_from_api: true
   - !ruby/object:Api::Type::NestedObject
-    name: "status"
+    name: 'status'
     output: true
     description: |
       Specifies detailed node pool status.
     properties:
       - !ruby/object:Api::Type::String
-        name: "errorMessage"
+        name: 'errorMessage'
         description: |
           Human-friendly representation of the error message from the user cluster
           controller. The error message can be temporary as the user cluster
@@ -168,32 +172,32 @@ properties:
           indicate real problems requiring user intervention.
         output: true
       - !ruby/object:Api::Type::Array
-        name: "conditions"
+        name: 'conditions'
         description: |
           ResourceConditions provide a standard mechanism for higher-level status reporting from user cluster controller.
         output: true
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
-              name: "type"
+              name: 'type'
               description: |
                 Type of the condition.
                 (e.g., ClusterRunning, NodePoolRunning or ServerSidePreflightReady)
             - !ruby/object:Api::Type::String
-              name: "reason"
+              name: 'reason'
               description: |
                 Machine-readable message indicating details about last transition.
             - !ruby/object:Api::Type::String
-              name: "message"
+              name: 'message'
               description: |
                 Human-readable message indicating details about last transition.
             - !ruby/object:Api::Type::Time
-              name: "lastTransitionTime"
+              name: 'lastTransitionTime'
               description: |
                 Last time the condition transit from one status to another.
               output: true
             - !ruby/object:Api::Type::Enum
-              name: "state"
+              name: 'state'
               description: The lifecycle state of the condition.
               output: true
               values:
@@ -202,11 +206,11 @@ properties:
                 - STATE_FALSE
                 - STATE_UNKNOWN
   - !ruby/object:Api::Type::String
-    name: "uid"
-    description: "The unique identifier of the Bare Metal Node Pool."
+    name: 'uid'
+    description: 'The unique identifier of the Bare Metal Node Pool.'
     output: true
   - !ruby/object:Api::Type::Enum
-    name: "state"
+    name: 'state'
     description: The current state of this cluster.
     output: true
     values:
@@ -218,27 +222,27 @@ properties:
       - ERROR
       - DEGRADED
   - !ruby/object:Api::Type::Boolean
-    name: "reconciling"
+    name: 'reconciling'
     description: |
       If set, there are currently changes in flight to the Bare Metal User Cluster.
     output: true
   - !ruby/object:Api::Type::Time
-    name: "createTime"
+    name: 'createTime'
     description: |
       The time the cluster was created, in RFC3339 text format.
     output: true
   - !ruby/object:Api::Type::Time
-    name: "updateTime"
+    name: 'updateTime'
     description: |
       The time the cluster was last updated, in RFC3339 text format.
     output: true
   - !ruby/object:Api::Type::Time
-    name: "deleteTime"
+    name: 'deleteTime'
     description: |
       The time the cluster was deleted, in RFC3339 text format.
     output: true
   - !ruby/object:Api::Type::String
-    name: "etag"
+    name: 'etag'
     description: |
       This checksum is computed by the server based on the value of other
       fields, and may be sent on update and delete requests to ensure the

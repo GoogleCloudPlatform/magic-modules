@@ -28,7 +28,7 @@ func ResourceGoogleProjectOrganizationPolicy() *schema.Resource {
 			Delete: schema.DefaultTimeout(4 * time.Minute),
 		},
 
-		Schema: mergeSchemas(
+		Schema: tpgresource.MergeSchemas(
 			schemaOrganizationPolicy,
 			map[string]*schema.Schema{
 				"project": {
@@ -46,7 +46,7 @@ func ResourceGoogleProjectOrganizationPolicy() *schema.Resource {
 func resourceProjectOrgPolicyImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
 
-	if err := ParseImportId([]string{
+	if err := tpgresource.ParseImportId([]string{
 		"projects/(?P<project>[^/]+):constraints/(?P<constraint>[^/]+)",
 		"(?P<project>[^/]+):constraints/(?P<constraint>[^/]+)",
 		"(?P<project>[^/]+):(?P<constraint>[^/]+)"},

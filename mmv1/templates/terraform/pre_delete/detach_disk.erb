@@ -1,4 +1,13 @@
-readRes, err := transport_tpg.SendRequest(config, "GET", project, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+readRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "GET",
+	Project: project,
+	RawURL: url,
+	UserAgent: userAgent,
+<% if object.error_retry_predicates -%>
+	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+<% end -%>
+})
 if err != nil {
 	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeDisk %q", d.Id()))
 }
@@ -8,7 +17,7 @@ if v, ok := readRes["users"].([]interface{}); ok {
 	type detachArgs struct{ project, zone, instance, deviceName string }
 	var detachCalls []detachArgs
 
-	for _, instance := range convertStringArr(v) {
+	for _, instance := range tpgresource.ConvertStringArr(v) {
 		self := d.Get("self_link").(string)
 		instanceProject, instanceZone, instanceName, err := tpgresource.GetLocationalResourcePropertiesFromSelfLinkString(instance)
 		if err != nil {

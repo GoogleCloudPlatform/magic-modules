@@ -17,6 +17,11 @@ require 'fileutils'
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
   class TerraformValidator < Provider::Terraform
+    def generating_hashicorp_repo?
+      # This code is not used when generating TPG/TPGB
+      false
+    end
+
     def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
       # Temporary shim to generate the missing resources directory. Can be removed
       # once the folder exists downstream.
@@ -154,6 +159,8 @@ module Provider
                            'third_party/terraform/utils/config_test_utils.go.erb'],
                           ['converters/google/resources/iam.go',
                            'third_party/terraform/utils/iam.go.erb'],
+                          ['converters/google/resources/tpgiamresource/iam.go',
+                           'third_party/terraform/tpgiamresource/iam.go.erb'],
                           ['converters/google/resources/compute_instance_helpers.go',
                            'third_party/terraform/utils/compute_instance_helpers.go.erb'],
                           ['converters/google/resources/transport/provider_handwritten_endpoint.go',
@@ -251,6 +258,8 @@ module Provider
                         'third_party/terraform/utils/image.go'],
                        ['converters/google/resources/import.go',
                         'third_party/terraform/utils/import.go'],
+                       ['converters/google/resources/tpgresource/import.go',
+                        'third_party/terraform/tpgresource/import.go'],
                        ['converters/google/resources/disk_type.go',
                         'third_party/terraform/utils/disk_type.go'],
                        ['converters/google/resources/verify/validation.go',
@@ -301,8 +310,6 @@ module Provider
                         'third_party/terraform/transport/retry_transport.go'],
                        ['converters/google/resources/transport/transport.go',
                         'third_party/terraform/transport/transport.go'],
-                       ['converters/google/resources/transport.go',
-                        'third_party/terraform/utils/transport.go'],
                        ['converters/google/resources/transport/error_retry_predicates.go',
                         'third_party/terraform/transport/error_retry_predicates.go'],
                        ['converters/google/resources/error_retry_predicates.go',

@@ -24,7 +24,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/compute/docs/disks/create-snapshots'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/snapshots'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   parent_resource_attribute: 'name'
   import_format: ['projects/{{project}}/global/snapshots/{{name}}', '{{name}}']
 description: |
@@ -161,19 +160,6 @@ parameters:
           RFC 4648 base64 to either encrypt or decrypt this resource.
         # The docs list this field but it is never returned.
         sensitive: true
-      - !ruby/object:Api::Type::String
-        name: 'sha256'
-        exclude: true
-        output: true
-        description: |
-          The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
-          encryption key that protects this resource.
-        # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
-      - !ruby/object:Api::Type::String
-        name: 'kmsKeyName'
-        description: |
-          The name of the encryption key that is stored in Google Cloud KMS.
-        exclude: true
       - !ruby/object:Api::Type::String
         name: 'kmsKeyServiceAccount'
         description: |

@@ -88,6 +88,13 @@ examples:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'workstation_config_source_snapshot'
+    min_version: beta
+    primary_resource_id: 'default'
+    vars:
+      workstation_cluster_name: 'workstation-cluster'
+      workstation_config_name: 'workstation-config'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'workstation_config_shielded_instance_config'
     min_version: beta
     primary_resource_id: 'default'
@@ -157,6 +164,18 @@ properties:
     description: |
       Time when this resource was created.
     output: true
+  - !ruby/object:Api::Type::String
+    name: 'idleTimeout'
+    default_value: '1200s'
+    description: |
+      How long to wait before automatically stopping an instance that hasn't recently received any user traffic. A value of 0 indicates that this instance should never time out from idleness. Defaults to 20 minutes.
+      A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+  - !ruby/object:Api::Type::String
+    name: 'runningTimeout'
+    default_value: '43200s'
+    description: |
+      How long to wait before automatically stopping a workstation after it was started. A value of 0 indicates that workstations using this configuration should never time out from running duration. Must be greater than 0 and less than 24 hours if `encryption_key` is set. Defaults to 12 hours.
+      A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
   - !ruby/object:Api::Type::NestedObject
     name: 'host'
     description: |
@@ -291,6 +310,12 @@ properties:
               values:
                 - :DELETE
                 - :RETAIN
+            - !ruby/object:Api::Type::String
+              name: 'sourceSnapshot'
+              description: |
+                The snapshot to use as the source for the disk. This can be the snapshot's `self_link`, `id`, or a string in the format of `projects/{project}/global/snapshots/{snapshot}`. If set, sizeGb and fsType must be empty.
+              immutable: true
+              # TODO(esu): Add conflicting fields once complex lists are supported.
   - !ruby/object:Api::Type::NestedObject
     name: 'container'
     description: |

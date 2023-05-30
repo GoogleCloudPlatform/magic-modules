@@ -17,6 +17,8 @@ kind: 'compute#instanceGroupManager'
 base_url: projects/{{project}}/zones/{{zone}}/instanceGroupManagers
 collection_url_key: 'items'
 has_self_link: true
+# Used as a resource reference
+exclude: true
 description: |
   Creates a managed instance group using the information that you specify in
   the request. After the group is created, it schedules an action to create
@@ -44,7 +46,6 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-exclude: true
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'

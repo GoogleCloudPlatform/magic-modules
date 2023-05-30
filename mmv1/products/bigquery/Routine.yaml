@@ -66,12 +66,6 @@ properties:
         required: true
         immutable: true
       - !ruby/object:Api::Type::String
-        name: 'projectId'
-        description: The ID of the project containing this routine
-        required: true
-        immutable: true
-        exclude: true
-      - !ruby/object:Api::Type::String
         name: 'routineId'
         description:
           The ID of the the routine. The ID must contain only letters (a-z,
@@ -206,12 +200,3 @@ properties:
       - :DETERMINISM_LEVEL_UNSPECIFIED
       - :DETERMINISTIC
       - :NOT_DETERMINISTIC
-  - !ruby/object:Api::Type::String
-    name: 'id'
-    output: true
-    description: |
-      The fully-qualified unique name of the routine in the format
-      projectId:datasetId:routineId. The routine name without the project name is
-      given in the routineId field
-
-    exclude: true
