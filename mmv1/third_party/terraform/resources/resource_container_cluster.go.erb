@@ -1952,10 +1952,9 @@ func ResourceContainerCluster() *schema.Resource {
 							Description:      `The Fleet host project of the cluster.`
 						},
                                           	"membership": {
-                                                Type:             schema.TypeString,
-                                                Computed:         true,
-                                                Description:      `The Fleet membership of the cluster.`
-
+							Type:             schema.TypeString,
+							Computed:         true,
+							Description:      `The Fleet membership of the cluster.`
                                           	},
 					},
 				},
