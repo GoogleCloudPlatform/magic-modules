@@ -28,6 +28,7 @@ func ResourceBigtableTable() *schema.Resource {
 		// Set a longer timeout for table creation as adding column families can be slow.
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(45 * time.Minute),
+			Update: schema.DefaultTimeout(45 * time.Minute),
 		},
 
 		// ----------------------------------------------------------------------
@@ -274,6 +275,7 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
+	c.SetDefaultTimeout(d.Timeout(schema.TimeoutUpdate))
 	if d.HasChange("deletion_protection") {
 		deletionProtection := d.Get("deletion_protection")
 		if deletionProtection == "PROTECTED" {
