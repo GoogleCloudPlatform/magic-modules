@@ -83,18 +83,14 @@ properties:
     name: 'labels'
     description: |
       Labels with user-defined metadata to apply to this resource.
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'purpose'
     description: |
       The immutable purpose of this CryptoKey. See the
       [purpose reference](https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys#CryptoKeyPurpose)
       for possible inputs.
-    values:
-      - 'ENCRYPT_DECRYPT'
-      - 'ASYMMETRIC_SIGN'
-      - 'ASYMMETRIC_DECRYPT'
-      - 'MAC'
-    default_value: :ENCRYPT_DECRYPT
+      Default value is "ENCRYPT_DECRYPT".
+    default_value: 'ENCRYPT_DECRYPT'
     immutable: true
   - !ruby/object:Api::Type::String
     name: 'rotationPeriod'
