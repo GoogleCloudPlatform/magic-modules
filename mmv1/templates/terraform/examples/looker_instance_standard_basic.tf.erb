@@ -6,4 +6,11 @@ resource "google_looker_instance" "<%= ctx[:primary_resource_id] %>" {
     client_id = "<%= ctx[:vars]["client_id"] %>"
     client_secret = "<%= ctx[:vars]["client_secret"] %>"
   }
+
+  user_metadata {
+    additional_standard_user_count = 1
+    additional_viewer_user_count = 1
+    additional_developer_user_count = 1
+  }
+
 }

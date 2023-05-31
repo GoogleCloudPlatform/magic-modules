@@ -26,7 +26,14 @@ timeouts: !ruby/object:Api::Timeouts
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'looker_instance_basic'
+    name: 'looker_instance_standard_basic'
+    primary_resource_id: 'looker-instance'
+    vars:
+      instance_name: 'my-instance'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'looker_instance_enterprise_full'
     primary_resource_id: 'looker-instance'
     vars:
       instance_name: 'my-instance'

@@ -1,0 +1,42 @@
+resource "google_looker_instance" "<%= ctx[:primary_resource_id] %>" {
+  name              = "<%= ctx[:vars]["instance_name"] %>"
+  platform_edition  = "LOOKER_CORE_ENTERPRISE_ANNUAL"
+  region            = "us-central1"
+  oauth_config {
+    client_id = "<%= ctx[:vars]["client_id"] %>"
+    client_secret = "<%= ctx[:vars]["client_secret"] %>"
+  }
+
+  deny_maintenance_period {
+    start_date {
+      month = 12
+      day   = 1
+      year  = 2026
+    }
+    end_date {
+      month = 12
+      day   = 31
+      year  = 2026
+    }
+    time {
+      hours = 10
+      minutes = 0
+      seconds = 0
+      nanos = 0
+    }
+  }
+
+  maintenance_window {
+    day_of_week = "FRIDAY"
+    start_time {
+      hours = 17
+      minutes = 0
+      seconds = 0
+      nanos = 0
+    }
+  }
+
+  admin_settings {
+    allowed_email_domains = ["example.com"]
+  }
+}
