@@ -212,7 +212,6 @@ module Provider
       # NOTE: these entries need to match the content of the .copywrite.hcl file originally
       #       created in https://github.com/GoogleCloudPlatform/magic-modules/pull/7336
       ignored_folders = [
-        '.github/',
         '.release/',
         '.changelog/',
         'examples/',
