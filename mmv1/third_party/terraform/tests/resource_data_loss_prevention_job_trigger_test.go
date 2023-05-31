@@ -394,7 +394,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerInspectOptionalExample(t *
 
 	context := map[string]interface{}{
 		"project":       acctest.GetTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -412,7 +412,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerInspectOptionalExample(t *
 				ImportStateVerifyIgnore: []string{"parent"},
 			},
 			{
-				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerIdentifyingFieldsUpdate(context),
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerBasic(context),
 			},
 			{
 				ResourceName:            "google_data_loss_prevention_job_trigger.basic",
