@@ -1,4 +1,4 @@
-package tpgresource
+package tpgdclresource
 
 // Returns the terraform representation of a three-state boolean value represented by a pointer to bool in DCL.
 func FlattenEnumBool(v interface{}) string {

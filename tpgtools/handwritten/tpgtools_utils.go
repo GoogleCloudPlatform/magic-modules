@@ -1,4 +1,4 @@
-package tpgresource
+package tpgdclresource
 
 import (
 	"fmt"

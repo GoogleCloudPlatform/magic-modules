@@ -1,9 +1,10 @@
-package tpgresource
+package tpgdclresource
 
 import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -11,7 +12,7 @@ import (
 // to represent the type of parent (e.g. projects/{project_id}).
 func ResourceOrgPolicyPolicyCustomImport(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	if err := ParseImportId([]string{
+	if err := tpgresource.ParseImportId([]string{
 		"^(?P<parent>[^/]+/?[^/]*)/policies/(?P<name>[^/]+)",
 		"^(?P<parent>[^/]+/?[^/]*)/(?P<name>[^/]+)",
 	}, d, config); err != nil {
@@ -19,7 +20,7 @@ func ResourceOrgPolicyPolicyCustomImport(d *schema.ResourceData, meta interface{
 	}
 
 	// Replace import id for the resource id
-	id, err := ReplaceVarsRecursive(d, config, "{{parent}}/policies/{{name}}", false, 0)
+	id, err := tpgresource.ReplaceVarsRecursive(d, config, "{{parent}}/policies/{{name}}", false, 0)
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

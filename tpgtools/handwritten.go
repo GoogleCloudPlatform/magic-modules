@@ -74,7 +74,7 @@ func copyHandwrittenFiles(inPath string, outPath string) {
 		}
 
 		// Write copied file.
-		err = ioutil.WriteFile(path.Join(outPath, terraformResourceDirectory, "tpgresource", f.Name()), b, 0644)
+		err = ioutil.WriteFile(path.Join(outPath, terraformResourceDirectory, "tpgdclresource", f.Name()), b, 0644)
 		if err != nil {
 			glog.Exit(err)
 		}

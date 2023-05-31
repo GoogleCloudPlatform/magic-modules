@@ -123,6 +123,12 @@ func main() {
 		return
 	}
 
+	// Copy DCL helper files into the folder tpgdclresource to make it easier to remove these files later.
+	dirPath := path.Join(*oPath, terraformResourceDirectory, "tpgdclresource")
+	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
+		glog.Error(fmt.Errorf("error creating Terraform tpgdclresource directory %v: %v", dirPath, err))
+	}
+
 	copyHandwrittenFiles(*cPath, *oPath)
 }
 
@@ -361,11 +367,9 @@ func loadOverrides(packagePath Filepath, fileName string) Overrides {
 }
 
 func getParentDir(res *Resource) string {
-	dirPath := path.Join(*oPath, terraformResourceDirectory)
-
-	servicePath := path.Join(dirPath, "services", string(res.Package()))
+	servicePath := path.Join(*oPath, terraformResourceDirectory, "services", string(res.Package()))
 	if err := os.MkdirAll(servicePath, os.ModePerm); err != nil {
-		glog.Error(fmt.Errorf("error creating Terraform services directory %v: %v", servicePath, err))
+		glog.Error(fmt.Errorf("error creating Terraform the service directory %v: %v", servicePath, err))
 	}
 	return servicePath
 }

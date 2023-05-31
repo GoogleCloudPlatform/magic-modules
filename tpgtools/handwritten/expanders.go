@@ -1,9 +1,10 @@
-package tpgresource
+package tpgdclresource
 
 import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
 func ExpandStringArray(v interface{}) []string {
@@ -14,10 +15,10 @@ func ExpandStringArray(v interface{}) []string {
 	}
 
 	if arr, ok := v.(*schema.Set); ok {
-		return ConvertStringSet(arr)
+		return tpgresource.ConvertStringSet(arr)
 	}
 
-	arr = ConvertStringArr(v.([]interface{}))
+	arr = tpgresource.ConvertStringArr(v.([]interface{}))
 	if arr == nil {
 		// Send empty array specifically instead of nil
 		return make([]string, 0)
