@@ -1,0 +1,34 @@
+name: Feature branch auto merge
+
+permissions: read-all
+
+on:
+  push:
+    branches:
+      - main  # Set a branch to deploy
+      
+env:
+
+  MY_REPO: https://GoogleCloudPlatform:${{secrets.GITHUB_TOKEN}}@github.com/GoogleCloudPlatform/magic-modules.git
+
+  MY_BRANCH: feature-branch-release-5.0.0
+
+  MAIN_REPO: https://github.com/GoogleCloudPlatform/magic-modules.git
+
+  MAIN_BRANCH: main
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+
+    steps:
+    - name: Merge with main
+      run: |
+        git clone ${{env.MY_REPO}} -b ${{env.MY_BRANCH}} tmp
+        cd tmp
+        git config pull.rebase false
+        git pull ${{env.MAIN_REPO}} ${{env.MAIN_BRANCH}}
+        git push
