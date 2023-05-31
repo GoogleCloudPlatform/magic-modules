@@ -2,13 +2,15 @@ package google
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleKmsKeyRing() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(ResourceKMSKeyRing().Schema)
-	addRequiredFieldsToSchema(dsSchema, "name")
-	addRequiredFieldsToSchema(dsSchema, "location")
-	addOptionalFieldsToSchema(dsSchema, "project")
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceKMSKeyRing().Schema)
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name")
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "location")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleKmsKeyRingRead,
@@ -17,19 +19,19 @@ func DataSourceGoogleKmsKeyRing() *schema.Resource {
 }
 
 func dataSourceGoogleKmsKeyRingRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	keyRingId := kmsKeyRingId{
+	keyRingId := KmsKeyRingId{
 		Name:     d.Get("name").(string),
 		Location: d.Get("location").(string),
 		Project:  project,
 	}
-	d.SetId(keyRingId.keyRingId())
+	d.SetId(keyRingId.KeyRingId())
 
 	return resourceKMSKeyRingRead(d, meta)
 }

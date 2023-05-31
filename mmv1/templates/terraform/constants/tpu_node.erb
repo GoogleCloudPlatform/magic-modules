@@ -14,7 +14,7 @@ func compareTpuNodeSchedulingConfig(k, old, new string, d *schema.ResourceData) 
 
 func tpuNodeCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	old, new := diff.GetChange("network")
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	networkLinkRegex := regexp.MustCompile("projects/(.+)/global/networks/(.+)")
 
@@ -23,6 +23,10 @@ func tpuNodeCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta int
 	if networkLinkRegex.MatchString(new.(string)) {
 		parts := networkLinkRegex.FindStringSubmatch(new.(string))
 		pid = parts[1]
+	}
+
+	if pid == "" {
+		return nil
 	}
 
 	project, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(pid).Do()

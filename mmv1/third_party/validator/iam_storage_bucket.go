@@ -3,6 +3,10 @@ package google
 import (
 	"fmt"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgiamresource"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -18,16 +22,16 @@ var StorageBucketIamSchema = map[string]*schema.Schema{
 }
 
 func StorageBucketDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
-	return compareResourceNames("", old, new, nil)
+	return tpgresource.CompareResourceNames("", old, new, nil)
 }
 
 type StorageBucketIamUpdater struct {
 	bucket string
-	d      TerraformResourceData
-	Config *Config
+	d      tpgresource.TerraformResourceData
+	Config *transport_tpg.Config
 }
 
-func StorageBucketIamUpdaterProducer(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
+func StorageBucketIamUpdaterProducer(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgiamresource.ResourceIamUpdater, error) {
 	values := make(map[string]string)
 
 	if v, ok := d.GetOk("bucket"); ok {
@@ -35,7 +39,7 @@ func StorageBucketIamUpdaterProducer(d TerraformResourceData, config *Config) (R
 	}
 
 	// We may have gotten either a long or short name, so attempt to parse long name if possible
-	m, err := getImportIdQualifiers([]string{"b/(?P<bucket>[^/]+)", "(?P<bucket>[^/]+)"}, d, config, d.Get("bucket").(string))
+	m, err := tpgresource.GetImportIdQualifiers([]string{"b/(?P<bucket>[^/]+)", "(?P<bucket>[^/]+)"}, d, config, d.Get("bucket").(string))
 	if err != nil {
 		return nil, err
 	}
@@ -57,10 +61,10 @@ func StorageBucketIamUpdaterProducer(d TerraformResourceData, config *Config) (R
 	return u, nil
 }
 
-func StorageBucketIdParseFunc(d *schema.ResourceData, config *Config) error {
+func StorageBucketIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
 	values := make(map[string]string)
 
-	m, err := getImportIdQualifiers([]string{"b/(?P<bucket>[^/]+)", "(?P<bucket>[^/]+)"}, d, config, d.Id())
+	m, err := tpgresource.GetImportIdQualifiers([]string{"b/(?P<bucket>[^/]+)", "(?P<bucket>[^/]+)"}, d, config, d.Id())
 	if err != nil {
 		return err
 	}
@@ -88,23 +92,29 @@ func (u *StorageBucketIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.
 	}
 
 	var obj map[string]interface{}
-	url, err = addQueryParams(url, map[string]string{"optionsRequestedPolicyVersion": fmt.Sprintf("%d", IamPolicyVersion)})
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"optionsRequestedPolicyVersion": fmt.Sprintf("%d", tpgiamresource.IamPolicyVersion)})
 	if err != nil {
 		return nil, err
 	}
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
 
-	policy, err := SendRequest(u.Config, "GET", "", url, userAgent, obj)
+	policy, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    u.Config,
+		Method:    "GET",
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+	})
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
 
 	out := &cloudresourcemanager.Policy{}
-	err = Convert(policy, out)
+	err = tpgresource.Convert(policy, out)
 	if err != nil {
 		return nil, errwrap.Wrapf("Cannot convert a policy to a resource manager policy: {{err}}", err)
 	}
@@ -113,7 +123,7 @@ func (u *StorageBucketIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.
 }
 
 func (u *StorageBucketIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
-	json, err := ConvertToMap(policy)
+	json, err := tpgresource.ConvertToMap(policy)
 	if err != nil {
 		return err
 	}
@@ -125,12 +135,19 @@ func (u *StorageBucketIamUpdater) SetResourceIamPolicy(policy *cloudresourcemana
 		return err
 	}
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	_, err = SendRequestWithTimeout(u.Config, "PUT", "", url, userAgent, obj, u.d.Timeout(schema.TimeoutCreate))
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    u.Config,
+		Method:    "PUT",
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   u.d.Timeout(schema.TimeoutCreate),
+	})
 	if err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
@@ -140,7 +157,7 @@ func (u *StorageBucketIamUpdater) SetResourceIamPolicy(policy *cloudresourcemana
 
 func (u *StorageBucketIamUpdater) qualifyBucketUrl(methodIdentifier string) (string, error) {
 	urlTemplate := fmt.Sprintf("{{StorageBasePath}}%s/%s", fmt.Sprintf("b/%s", u.bucket), methodIdentifier)
-	url, err := replaceVars(u.d, u.Config, urlTemplate)
+	url, err := tpgresource.ReplaceVars(u.d, u.Config, urlTemplate)
 	if err != nil {
 		return "", err
 	}

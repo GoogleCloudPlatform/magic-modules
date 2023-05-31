@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'Service'
-base_url: "projects/{{project}}/locations/{{location}}/services"
+base_url: 'projects/{{project}}/locations/{{location}}/services'
 create_url: 'projects/{{project}}/locations/{{location}}/services?serviceId={{service_id}}'
-self_link: "projects/{{project}}/locations/{{location}}/services/{{service_id}}"
+self_link: 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -26,10 +26,12 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/dataproc-metastore/docs/reference/rest/v1/projects.locations.services'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: service_id
-  exclude: false
   method_name_separator: ':'
-  import_format: ["projects/{{project}}/locations/{{location}}/services/{{service_id}}",
-    "{{service_id}}"]
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/services/{{service_id}}',
+      '{{service_id}}',
+    ]
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -51,66 +53,68 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
 autogen_async: true
-import_format: ["projects/{{project}}/locations/{{location}}/services/{{service_id}}"]
+import_format:
+  ['projects/{{project}}/locations/{{location}}/services/{{service_id}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dataproc_metastore_service_basic"
-    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
-    primary_resource_id: "default"
+    name: 'dataproc_metastore_service_basic'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
+    primary_resource_id: 'default'
     vars:
-      metastore_service_name: "metastore-srv"
+      metastore_service_name: 'metastore-srv'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dataproc_metastore_service_cmek_test"
+    name: 'dataproc_metastore_service_cmek_test'
     skip_docs: true
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      metastore_service_name: "example-service"
-      key_name: "example-key"
-      keyring_name: "example-keyring"
+      metastore_service_name: 'example-service'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dataproc_metastore_service_cmek_example"
+    name: 'dataproc_metastore_service_cmek_example'
     skip_test: true
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      metastore_service_name: "example-service"
-      key_name: "example-key"
-      keyring_name: "example-keyring"
+      metastore_service_name: 'example-service'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dataproc_metastore_service_endpoint"
+    name: 'dataproc_metastore_service_endpoint'
     min_version: beta
     skip_docs: true
-    skip_test: true      # https://github.com/hashicorp/terraform-provider-google/issues/13710
-    primary_resource_id: "endpoint"
+    skip_test: true  # https://github.com/hashicorp/terraform-provider-google/issues/13710
+    primary_resource_id: 'endpoint'
     vars:
-      metastore_service_name: "metastore-endpoint"
+      metastore_service_name: 'metastore-endpoint'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dataproc_metastore_service_aux"
+    name: 'dataproc_metastore_service_aux'
     min_version: beta
     skip_docs: true
-    primary_resource_id: "aux"
+    primary_resource_id: 'aux'
     vars:
-      metastore_service_name: "metastore-aux"
+      metastore_service_name: 'metastore-aux'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dataproc_metastore_service_metadata"
+    name: 'dataproc_metastore_service_metadata'
     min_version: beta
     skip_docs: true
-    primary_resource_id: "metadata"
+    primary_resource_id: 'metadata'
     vars:
-      metastore_service_name: "metastore-metadata"
+      metastore_service_name: 'metastore-metadata'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dataproc_metastore_service_private_service_connect"
+    name: 'dataproc_metastore_service_private_service_connect'
     skip_test: true
     primary_resource_id: default
     vars:
-      metastore_service_name: "metastore-srv"
-      network_name: "my-network"
-      subnet_name: "my-subnetwork"
+      metastore_service_name: 'metastore-srv'
+      network_name: 'my-network'
+      subnet_name: 'my-subnetwork'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dataproc_metastore_service_telemetry"
+    name: 'dataproc_metastore_service_telemetry'
     skip_docs: true
-    primary_resource_id: "telemetry"
+    primary_resource_id: 'telemetry'
     vars:
-      metastore_service_name: "telemetry"
+      metastore_service_name: 'telemetry'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'serviceId'
@@ -245,7 +249,7 @@ properties:
           A mapping of Hive metastore configuration key-value pairs to apply to the Hive metastore (configured in hive-site.xml).
           The mappings override system defaults (some keys cannot be overridden)
         default_from_api: true
-        diff_suppress_func: "dataprocMetastoreServiceOverrideSuppress"
+        diff_suppress_func: 'dataprocMetastoreServiceOverrideSuppress'
       - !ruby/object:Api::Type::NestedObject
         name: 'kerberosConfig'
         description: |
@@ -364,15 +368,15 @@ properties:
             name: 'enabled'
             required: true
             description: |
-              Defines whether the metastore metadata should be synced to Data Catalog. The default value is to disable syncing metastore metadata to Data Catalog.      
+              Defines whether the metastore metadata should be synced to Data Catalog. The default value is to disable syncing metastore metadata to Data Catalog.
   - !ruby/object:Api::Type::NestedObject
-    name: "telemetryConfig"
+    name: 'telemetryConfig'
     description: |
       The configuration specifying telemetry settings for the Dataproc Metastore service. If unspecified defaults to JSON.
     default_from_api: true
     properties:
       - !ruby/object:Api::Type::Enum
-        name: "logFormat"
+        name: 'logFormat'
         default_value: :JSON
         description: |
           The output format of the Dataproc Metastore service's logs.

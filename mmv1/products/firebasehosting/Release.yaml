@@ -12,44 +12,49 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: "Release"
+name: 'Release'
 min_version: beta
-base_url: "sites/{{site_id}}/channels/{{channel_id}}/releases"
-self_link: "sites/{{site_id}}/channels/{{channel_id}}/releases/{{release_id}}"
-create_url: "sites/{{site_id}}/channels/{{channel_id}}/releases?versionName={{version_name}}"
-immutable: true # not updatable
+base_url: 'sites/{{site_id}}/channels/{{channel_id}}/releases'
+self_link: 'sites/{{site_id}}/channels/{{channel_id}}/releases/{{release_id}}'
+create_url: 'sites/{{site_id}}/channels/{{channel_id}}/releases?versionName={{version_name}}'
+immutable: true  # not updatable
 description: |
   A Release is a particular collection of configurations that is set to be public at a particular time.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    "Official Documentation": "https://firebase.google.com/docs/hosting"
-  api: "https://firebase.google.com/docs/reference/hosting/rest/v1beta1/sites.releases"
-import_format: ['sites/{{site_id}}/releases/{{release_id}}', 'sites/{{site_id}}/channels/{{channel_id}}/releases/{{release_id}}',
-  '{{site_id}}/{{release_id}}', '{{site_id}}/{{channel_id}}/{{release_id}}']
+    'Official Documentation': 'https://firebase.google.com/docs/hosting'
+  api: 'https://firebase.google.com/docs/reference/hosting/rest/v1beta1/sites.releases'
+import_format:
+  [
+    'sites/{{site_id}}/releases/{{release_id}}',
+    'sites/{{site_id}}/channels/{{channel_id}}/releases/{{release_id}}',
+    '{{site_id}}/{{release_id}}',
+    '{{site_id}}/{{channel_id}}/{{release_id}}',
+  ]
 skip_delete: true
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebasehosting_release_in_site"
-    min_version: "beta"
-    primary_resource_id: "default"
+    name: 'firebasehosting_release_in_site'
+    min_version: 'beta'
+    primary_resource_id: 'default'
     vars:
       site_id: site-id
     test_env_vars:
       project_id: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebasehosting_release_in_channel"
-    min_version: "beta"
-    primary_resource_id: "default"
+    name: 'firebasehosting_release_in_channel'
+    min_version: 'beta'
+    primary_resource_id: 'default'
     vars:
       site_id: site-with-channel
       channel_id: channel-id
     test_env_vars:
       project_id: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebasehosting_release_disable"
-    min_version: "beta"
-    primary_resource_id: "default"
+    name: 'firebasehosting_release_disable'
+    min_version: 'beta'
+    primary_resource_id: 'default'
     vars:
       site_id: site-id
     test_env_vars:

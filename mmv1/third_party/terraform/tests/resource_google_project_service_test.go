@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -52,17 +54,17 @@ func TestProjectServiceServiceValidateFunc(t *testing.T) {
 func TestAccProjectService_basic(t *testing.T) {
 	t.Parallel()
 	// Multiple fine-grained resources
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
 	services := []string{"iam.googleapis.com", "cloudresourcemanager.googleapis.com"}
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectService_basic(services, pid, pname, org),
+				Config: testAccProjectService_basic(services, pid, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectService(t, services, pid, true),
 				),
@@ -81,21 +83,21 @@ func TestAccProjectService_basic(t *testing.T) {
 			},
 			// Use a separate TestStep rather than a CheckDestroy because we need the project to still exist.
 			{
-				Config: testAccProject_create(pid, pname, org),
+				Config: testAccProject_create(pid, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectService(t, services, pid, false),
 				),
 			},
 			// Create services with disabling turned off.
 			{
-				Config: testAccProjectService_noDisable(services, pid, pname, org),
+				Config: testAccProjectService_noDisable(services, pid, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectService(t, services, pid, true),
 				),
 			},
 			// Check that services are still enabled even after the resources are deleted.
 			{
-				Config: testAccProject_create(pid, pname, org),
+				Config: testAccProject_create(pid, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectService(t, services, pid, true),
 				),
@@ -106,20 +108,20 @@ func TestAccProjectService_basic(t *testing.T) {
 
 func TestAccProjectService_disableDependentServices(t *testing.T) {
 	// Multiple fine-grained resources
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	billingId := GetTestBillingAccountFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
 	services := []string{"cloudbuild.googleapis.com", "containerregistry.googleapis.com"}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectService_disableDependentServices(services, pid, pname, org, billingId, "false"),
+				Config: testAccProjectService_disableDependentServices(services, pid, org, billingId, "false"),
 			},
 			{
 				ResourceName:            "google_project_service.test",
@@ -128,11 +130,11 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"disable_on_destroy"},
 			},
 			{
-				Config:      testAccProjectService_dependencyRemoved(services, pid, pname, org, billingId),
+				Config:      testAccProjectService_dependencyRemoved(services, pid, org, billingId),
 				ExpectError: regexp.MustCompile("Please specify disable_dependent_services=true if you want to proceed with disabling all services."),
 			},
 			{
-				Config: testAccProjectService_disableDependentServices(services, pid, pname, org, billingId, "true"),
+				Config: testAccProjectService_disableDependentServices(services, pid, org, billingId, "true"),
 			},
 			{
 				ResourceName:            "google_project_service.test",
@@ -141,7 +143,7 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"disable_on_destroy"},
 			},
 			{
-				Config:             testAccProjectService_dependencyRemoved(services, pid, pname, org, billingId),
+				Config:             testAccProjectService_dependencyRemoved(services, pid, org, billingId),
 				ExpectNonEmptyPlan: true,
 			},
 		},
@@ -151,15 +153,15 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 func TestAccProjectService_handleNotFound(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
 	service := "iam.googleapis.com"
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectService_handleNotFound(service, pid, pname, org),
+				Config: testAccProjectService_handleNotFound(service, pid, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectService(t, []string{service}, pid, true),
 				),
@@ -185,14 +187,14 @@ func TestAccProjectService_renamedService(t *testing.T) {
 		newName = new
 	}
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectService_single(newName, pid, pname, org),
+				Config: testAccProjectService_single(newName, pid, org),
 			},
 			{
 				ResourceName:            "google_project_service.test",
@@ -231,7 +233,7 @@ func testAccCheckProjectService(t *testing.T, services []string, pid string, exp
 	}
 }
 
-func testAccProjectService_basic(services []string, pid, name, org string) string {
+func testAccProjectService_basic(services []string, pid, org string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id = "%s"
@@ -248,10 +250,10 @@ resource "google_project_service" "test2" {
   project = google_project.acceptance.id
   service = "%s"
 }
-`, pid, name, org, services[0], services[1])
+`, pid, pid, org, services[0], services[1])
 }
 
-func testAccProjectService_disableDependentServices(services []string, pid, name, org, billing, disableDependentServices string) string {
+func testAccProjectService_disableDependentServices(services []string, pid, org, billing, disableDependentServices string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id      = "%s"
@@ -270,10 +272,10 @@ resource "google_project_service" "test2" {
   service                    = "%s"
   disable_dependent_services = %s
 }
-`, pid, name, org, billing, services[0], services[1], disableDependentServices)
+`, pid, pid, org, billing, services[0], services[1], disableDependentServices)
 }
 
-func testAccProjectService_dependencyRemoved(services []string, pid, name, org, billing string) string {
+func testAccProjectService_dependencyRemoved(services []string, pid, org, billing string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id      = "%s"
@@ -286,10 +288,10 @@ resource "google_project_service" "test" {
   project = google_project.acceptance.project_id
   service = "%s"
 }
-`, pid, name, org, billing, services[0])
+`, pid, pid, org, billing, services[0])
 }
 
-func testAccProjectService_noDisable(services []string, pid, name, org string) string {
+func testAccProjectService_noDisable(services []string, pid, org string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id = "%s"
@@ -308,10 +310,10 @@ resource "google_project_service" "test2" {
   service            = "%s"
   disable_on_destroy = false
 }
-`, pid, name, org, services[0], services[1])
+`, pid, pid, org, services[0], services[1])
 }
 
-func testAccProjectService_handleNotFound(service, pid, name, org string) string {
+func testAccProjectService_handleNotFound(service, pid, org string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id = "%s"
@@ -329,7 +331,7 @@ resource "google_project_service" "test" {
   project = local.project_id
   service = "%s"
 }
-`, pid, name, org, service)
+`, pid, pid, org, service)
 }
 
 func testAccProjectService_handleNotFoundNoProject(service, pid string) string {
@@ -341,7 +343,7 @@ resource "google_project_service" "test" {
 `, pid, service)
 }
 
-func testAccProjectService_single(service string, pid, name, org string) string {
+func testAccProjectService_single(service string, pid, org string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id = "%s"
@@ -355,5 +357,5 @@ resource "google_project_service" "test" {
 
   disable_dependent_services = true
 }
-`, pid, name, org, service)
+`, pid, pid, org, service)
 }

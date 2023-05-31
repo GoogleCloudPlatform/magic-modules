@@ -12,7 +12,7 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-func deleteSpannerBackups(d *schema.ResourceData, config *Config, res map[string]interface{}, userAgent string, billingProject string) error {
+func deleteSpannerBackups(d *schema.ResourceData, config *transport_tpg.Config, res map[string]interface{}, userAgent string, billingProject string) error {
 	var v interface{}
 	var ok bool
 
@@ -34,12 +34,18 @@ func deleteSpannerBackups(d *schema.ResourceData, config *Config, res map[string
 
 		path := "{{SpannerBasePath}}" + backupName
 
-		url, err := replaceVars(d, config, path)
+		url, err := tpgresource.ReplaceVars(d, config, path)
 		if err != nil {
 			return err
 		}
 
-		_, err = SendRequest(config, "DELETE", billingProject, url, userAgent, nil)
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config: config,
+			Method: "DELETE",
+			Project: billingProject,
+			RawURL: url,
+			UserAgent: userAgent,
+		})
 		if err != nil {
 			return err
 		}

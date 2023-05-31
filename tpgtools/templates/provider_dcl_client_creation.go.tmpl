@@ -11,6 +11,9 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License. */}}
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // ----------------------------------------------------------------------------
 //
 //     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
@@ -26,9 +29,11 @@
 //
 // ----------------------------------------------------------------------------
 
-package google
+package transport
 
 import (
+	"fmt"
+	"log"
 	"time"
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 {{range $index, $pkg := .}}
@@ -61,3 +66,34 @@ func NewDCL{{$pkg.ProductName.ToTitle}}Client(config *Config, userAgent, billing
 }
 {{end}}
 
+type dclLogger struct{}
+
+// Fatal records Fatal errors.
+func (l dclLogger) Fatal(args ...interface{}) {
+	log.Fatal(args...)
+}
+
+// Fatalf records Fatal errors with added arguments.
+func (l dclLogger) Fatalf(format string, args ...interface{}) {
+	log.Fatalf(fmt.Sprintf("[DEBUG][DCL FATAL] %s", format), args...)
+}
+
+// Info records Info errors.
+func (l dclLogger) Info(args ...interface{}) {
+	log.Print(args...)
+}
+
+// Infof records Info errors with added arguments.
+func (l dclLogger) Infof(format string, args ...interface{}) {
+	log.Printf(fmt.Sprintf("[DEBUG][DCL INFO] %s", format), args...)
+}
+
+// Warningf records Warning errors with added arguments.
+func (l dclLogger) Warningf(format string, args ...interface{}) {
+	log.Printf(fmt.Sprintf("[DEBUG][DCL WARNING] %s", format), args...)
+}
+
+// Warning records Warning errors.
+func (l dclLogger) Warning(args ...interface{}) {
+	log.Print(args...)
+}

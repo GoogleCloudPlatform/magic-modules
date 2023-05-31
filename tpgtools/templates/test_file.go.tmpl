@@ -11,6 +11,9 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License. */}}
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // ----------------------------------------------------------------------------
 //
 //     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
@@ -41,6 +44,9 @@ import (
 	{{$.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$.DCLPackage}}"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 {{- range $s := $.TestSamples }}
@@ -55,7 +61,7 @@ func TestAcc{{$.PathType}}_{{$s.TestSlug}}(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 	{{ if $s.HasGAEquivalent -}}
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 	{{- else }}
@@ -130,7 +136,7 @@ func testAccCheck{{$.PathType}}DestroyProducer(t *testing.T) func(s *terraform.S
 				{{- end }}
 			}
 
-			client := NewDCL{{$.TitleCasePackageName}}Client(config, config.UserAgent, billingProject, 0)
+			client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, config.UserAgent, billingProject, 0)
 			_, err := client.Get{{$.DCLTitle}}(context.Background(), obj)
 			if err == nil {
 				return fmt.Errorf("{{$.TerraformName}} still exists %v", obj)

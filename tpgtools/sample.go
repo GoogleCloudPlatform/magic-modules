@@ -382,52 +382,52 @@ var translationMap = map[string]translationIndex{
 	"org_id": {
 		docsValue:    "123456789",
 		contextKey:   "org_id",
-		contextValue: "GetTestOrgFromEnv(t)",
+		contextValue: "acctest.GetTestOrgFromEnv(t)",
 	},
 	"org_name": {
 		docsValue:    "example.com",
 		contextKey:   "org_domain",
-		contextValue: "GetTestOrgDomainFromEnv(t)",
+		contextValue: "acctest.GetTestOrgDomainFromEnv(t)",
 	},
 	"region": {
 		docsValue:    "us-west1",
 		contextKey:   "region",
-		contextValue: "GetTestRegionFromEnv()",
+		contextValue: "acctest.GetTestRegionFromEnv()",
 	},
 	"zone": {
 		docsValue:    "us-west1-a",
 		contextKey:   "zone",
-		contextValue: "GetTestZoneFromEnv()",
+		contextValue: "acctest.GetTestZoneFromEnv()",
 	},
 	"org_target": {
 		docsValue:    "123456789",
 		contextKey:   "org_target",
-		contextValue: "GetTestOrgTargetFromEnv(t)",
+		contextValue: "acctest.GetTestOrgTargetFromEnv(t)",
 	},
 	"billing_account": {
 		docsValue:    "000000-0000000-0000000-000000",
 		contextKey:   "billing_acct",
-		contextValue: "GetTestBillingAccountFromEnv(t)",
+		contextValue: "acctest.GetTestBillingAccountFromEnv(t)",
 	},
 	"test_service_account": {
 		docsValue:    "my@service-account.com",
 		contextKey:   "service_acct",
-		contextValue: "GetTestServiceAccountFromEnv(t)",
+		contextValue: "acctest.GetTestServiceAccountFromEnv(t)",
 	},
 	"project": {
 		docsValue:    "my-project-name",
 		contextKey:   "project_name",
-		contextValue: "GetTestProjectFromEnv()",
+		contextValue: "acctest.GetTestProjectFromEnv()",
 	},
 	"project_number": {
 		docsValue:    "my-project-number",
 		contextKey:   "project_number",
-		contextValue: "getTestProjectNumberFromEnv()",
+		contextValue: "acctest.GetTestProjectNumberFromEnv()",
 	},
 	"customer_id": {
 		docsValue:    "A01b123xz",
 		contextKey:   "cust_id",
-		contextValue: "GetTestCustIdFromEnv(t)",
+		contextValue: "acctest.GetTestCustIdFromEnv(t)",
 	},
 	// Begin a long list of multicloud-only values which are not going to see reuse.
 	// We can hardcode fake values because we are

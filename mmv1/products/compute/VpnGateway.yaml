@@ -47,44 +47,46 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "ha_vpn_gateway_basic"
-    primary_resource_id: "ha_gateway1"
+    name: 'ha_vpn_gateway_basic'
+    primary_resource_id: 'ha_gateway1'
     vars:
-      ha_vpn_gateway1_name: "ha-vpn-1"
-      network1_name: "network1"
+      ha_vpn_gateway1_name: 'ha-vpn-1'
+      network1_name: 'network1'
   - !ruby/object:Provider::Terraform::Examples
-    name: "ha_vpn_gateway_ipv6"
-    primary_resource_id: "ha_gateway1"
+    name: 'ha_vpn_gateway_ipv6'
+    primary_resource_id: 'ha_gateway1'
     vars:
-      ha_vpn_gateway1_name: "ha-vpn-1"
-      network1_name: "network1"
+      ha_vpn_gateway1_name: 'ha-vpn-1'
+      network1_name: 'network1'
   - !ruby/object:Provider::Terraform::Examples
-    name: "ha_vpn_gateway_gcp_to_gcp"
-    primary_resource_id: "ha_gateway1"
-        # Multiple fine-grained resources
+    name: 'ha_vpn_gateway_gcp_to_gcp'
+    primary_resource_id:
+      'ha_gateway1'
+      # Multiple fine-grained resources
     skip_vcr: true
     skip_test: true
     skip_docs: true
     vars:
-      ha_vpn_gateway1_name: "ha-vpn-1"
-      network1_name: "network1"
-      router1_name: "ha-vpn-router1"
-      ha_vpn_gateway2_name: "ha-vpn-2"
-      network2_name: "network2"
-      router2_name: "ha-vpn-router2"
+      ha_vpn_gateway1_name: 'ha-vpn-1'
+      network1_name: 'network1'
+      router1_name: 'ha-vpn-router1'
+      ha_vpn_gateway2_name: 'ha-vpn-2'
+      network2_name: 'network2'
+      router2_name: 'ha-vpn-router2'
   - !ruby/object:Provider::Terraform::Examples
-    name: "compute_ha_vpn_gateway_encrypted_interconnect"
-    primary_resource_id: "vpn-gateway"
-        # TODO: https://github.com/hashicorp/terraform-provider-google/issues/11504
+    name: 'compute_ha_vpn_gateway_encrypted_interconnect'
+    primary_resource_id:
+      'vpn-gateway'
+      # TODO: https://github.com/hashicorp/terraform-provider-google/issues/11504
     skip_test: true
     vars:
-      ha_vpn_gateway_name: "test-ha-vpngw"
-      interconnect_attachment1_name: "test-interconnect-attachment1"
-      interconnect_attachment2_name: "test-interconnect-attachment2"
-      address1_name: "test-address1"
-      address2_name: "test-address2"
-      router_name: "test-router"
-      network_name: "test-network"
+      ha_vpn_gateway_name: 'test-ha-vpngw'
+      interconnect_attachment1_name: 'test-interconnect-attachment1'
+      interconnect_attachment2_name: 'test-interconnect-attachment2'
+      address1_name: 'test-address1'
+      address2_name: 'test-address2'
+      router_name: 'test-router'
+      network_name: 'test-network'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -96,11 +98,6 @@ parameters:
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
-    description: 'Creation timestamp in RFC3339 text format.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: 'An optional description of this resource.'
@@ -118,12 +115,7 @@ properties:
     required: true
     immutable: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::ResourceRef
     name: 'network'
     resource: 'Network'
@@ -135,13 +127,14 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: 'stackType'
     description: |
-      The stack type for this VPN gateway to identify the IP protocols that are enbaled.
+      The stack type for this VPN gateway to identify the IP protocols that are enabled.
       If not specified, IPV4_ONLY will be used.
     default_value: :IPV4_ONLY
     values:
       - :IPV4_ONLY
       - :IPV4_IPV6
-    immutable: true  
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   - !ruby/object:Api::Type::Array
     name: 'vpnInterfaces'
     description: |

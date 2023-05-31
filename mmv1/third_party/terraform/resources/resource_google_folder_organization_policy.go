@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -26,7 +28,7 @@ func ResourceGoogleFolderOrganizationPolicy() *schema.Resource {
 			Delete: schema.DefaultTimeout(4 * time.Minute),
 		},
 
-		Schema: mergeSchemas(
+		Schema: tpgresource.MergeSchemas(
 			schemaOrganizationPolicy,
 			map[string]*schema.Schema{
 				"folder": {
@@ -42,9 +44,9 @@ func ResourceGoogleFolderOrganizationPolicy() *schema.Resource {
 }
 
 func resourceFolderOrgPolicyImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
-	if err := parseImportId([]string{
+	if err := tpgresource.ParseImportId([]string{
 		"folders/(?P<folder>[^/]+)/constraints/(?P<constraint>[^/]+)",
 		"folders/(?P<folder>[^/]+)/(?P<constraint>[^/]+)",
 		"(?P<folder>[^/]+)/(?P<constraint>[^/]+)"},
@@ -78,22 +80,22 @@ func resourceGoogleFolderOrganizationPolicyCreate(d *schema.ResourceData, meta i
 }
 
 func resourceGoogleFolderOrganizationPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 	folder := canonicalFolderId(d.Get("folder").(string))
 
 	var policy *cloudresourcemanager.OrgPolicy
-	err = RetryTimeDuration(func() (getErr error) {
+	err = transport_tpg.RetryTimeDuration(func() (getErr error) {
 		policy, getErr = config.NewResourceManagerClient(userAgent).Folders.GetOrgPolicy(folder, &cloudresourcemanager.GetOrgPolicyRequest{
 			Constraint: canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 		}).Do()
 		return getErr
 	}, d.Timeout(schema.TimeoutRead))
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Organization policy for %s", folder))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Organization policy for %s", folder))
 	}
 
 	if err := d.Set("constraint", policy.Constraint); err != nil {
@@ -134,14 +136,14 @@ func resourceGoogleFolderOrganizationPolicyUpdate(d *schema.ResourceData, meta i
 }
 
 func resourceGoogleFolderOrganizationPolicyDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 	folder := canonicalFolderId(d.Get("folder").(string))
 
-	return RetryTimeDuration(func() (delErr error) {
+	return transport_tpg.RetryTimeDuration(func() (delErr error) {
 		_, delErr = config.NewResourceManagerClient(userAgent).Folders.ClearOrgPolicy(folder, &cloudresourcemanager.ClearOrgPolicyRequest{
 			Constraint: canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 		}).Do()
@@ -150,8 +152,8 @@ func resourceGoogleFolderOrganizationPolicyDelete(d *schema.ResourceData, meta i
 }
 
 func setFolderOrganizationPolicy(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -168,7 +170,7 @@ func setFolderOrganizationPolicy(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	return RetryTimeDuration(func() (setErr error) {
+	return transport_tpg.RetryTimeDuration(func() (setErr error) {
 		_, setErr = config.NewResourceManagerClient(userAgent).Folders.SetOrgPolicy(folder, &cloudresourcemanager.SetOrgPolicyRequest{
 			Policy: &cloudresourcemanager.OrgPolicy{
 				Constraint:     canonicalOrgPolicyConstraint(d.Get("constraint").(string)),

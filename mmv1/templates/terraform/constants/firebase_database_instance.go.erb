@@ -1,10 +1,16 @@
-func enableRTDB(config *Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
-	url, err := replaceVars(d, config, "{{FirebaseDatabaseBasePath}}projects/{{project}}/locations/{{region}}/instances/{{instance_id}}:reenable")
+func enableRTDB(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
+	url, err := tpgresource.ReplaceVars(d, config, "{{FirebaseDatabaseBasePath}}projects/{{project}}/locations/{{region}}/instances/{{instance_id}}:reenable")
 	if err != nil {
 		return err
 	}
 
-	res, err := SendRequest(config, "POST", billingProject, url, userAgent, nil)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "POST",
+		Project: billingProject,
+		RawURL: url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return fmt.Errorf("Error reenabling firebase_database_instance %q: %s", d.Id(), err)
 	} else {
@@ -13,13 +19,19 @@ func enableRTDB(config *Config, d *schema.ResourceData, project string, billingP
 	return nil
 }
 
-func disableRTDB(config *Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
-	url, err := replaceVars(d, config, "{{FirebaseDatabaseBasePath}}projects/{{project}}/locations/{{region}}/instances/{{instance_id}}:disable")
+func disableRTDB(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
+	url, err := tpgresource.ReplaceVars(d, config, "{{FirebaseDatabaseBasePath}}projects/{{project}}/locations/{{region}}/instances/{{instance_id}}:disable")
 	if err != nil {
 		return err
 	}
 
-	res, err := SendRequest(config, "POST", billingProject, url, userAgent, nil)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "POST",
+		Project: billingProject,
+		RawURL: url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return fmt.Errorf("Error disabling firebase_database_instance %q: %s", d.Id(), err)
 	} else {

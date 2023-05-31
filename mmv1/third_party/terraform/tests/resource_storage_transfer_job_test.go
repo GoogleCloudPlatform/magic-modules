@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccStorageTransferJob_basic(t *testing.T) {
@@ -20,12 +21,12 @@ func TestAccStorageTransferJob_basic(t *testing.T) {
 	testPubSubTopicName := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageTransferJob_omitNotificationConfig(GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription),
+				Config: testAccStorageTransferJob_omitNotificationConfig(acctest.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -33,7 +34,7 @@ func TestAccStorageTransferJob_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferJob_omitSchedule(GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription),
+				Config: testAccStorageTransferJob_omitSchedule(acctest.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -41,7 +42,7 @@ func TestAccStorageTransferJob_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferJob_basic(GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
+				Config: testAccStorageTransferJob_basic(acctest.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -49,7 +50,7 @@ func TestAccStorageTransferJob_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferJob_basic(GetTestProjectFromEnv(), testUpdatedDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
+				Config: testAccStorageTransferJob_basic(acctest.GetTestProjectFromEnv(), testUpdatedDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -57,7 +58,7 @@ func TestAccStorageTransferJob_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferJob_basic(GetTestProjectFromEnv(), testUpdatedDataSourceBucketName, testUpdatedDataSinkBucketName, testTransferJobDescription, testPubSubTopicName),
+				Config: testAccStorageTransferJob_basic(acctest.GetTestProjectFromEnv(), testUpdatedDataSourceBucketName, testUpdatedDataSinkBucketName, testTransferJobDescription, testPubSubTopicName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -65,7 +66,7 @@ func TestAccStorageTransferJob_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferJob_basic(GetTestProjectFromEnv(), testUpdatedDataSourceBucketName, testUpdatedDataSinkBucketName, testUpdatedTransferJobDescription, testPubSubTopicName),
+				Config: testAccStorageTransferJob_basic(acctest.GetTestProjectFromEnv(), testUpdatedDataSourceBucketName, testUpdatedDataSinkBucketName, testUpdatedTransferJobDescription, testPubSubTopicName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -84,12 +85,12 @@ func TestAccStorageTransferJob_omitScheduleEndDate(t *testing.T) {
 	testTransferJobDescription := RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageTransferJob_omitScheduleEndDate(GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription),
+				Config: testAccStorageTransferJob_omitScheduleEndDate(acctest.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -108,12 +109,12 @@ func TestAccStorageTransferJob_posixSource(t *testing.T) {
 	testSourceAgentPoolName := fmt.Sprintf("tf-test-source-agent-pool-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageTransferJob_posixSource(GetTestProjectFromEnv(), testDataSinkName, testTransferJobDescription, testSourceAgentPoolName),
+				Config: testAccStorageTransferJob_posixSource(acctest.GetTestProjectFromEnv(), testDataSinkName, testTransferJobDescription, testSourceAgentPoolName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -131,12 +132,12 @@ func TestAccStorageTransferJob_posixSink(t *testing.T) {
 	testSinkAgentPoolName := fmt.Sprintf("tf-test-sink-agent-pool-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageTransferJob_posixSink(GetTestProjectFromEnv(), testDataSourceName, testTransferJobDescription, testSinkAgentPoolName),
+				Config: testAccStorageTransferJob_posixSink(acctest.GetTestProjectFromEnv(), testDataSourceName, testTransferJobDescription, testSinkAgentPoolName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -157,12 +158,12 @@ func TestAccStorageTransferJob_transferOptions(t *testing.T) {
 	testPubSubTopicName := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageTransferJob_basic(GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
+				Config: testAccStorageTransferJob_basic(acctest.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -170,7 +171,7 @@ func TestAccStorageTransferJob_transferOptions(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferJob_transferOptions(GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, false, false, false, testOverwriteWhen[0], testPubSubTopicName),
+				Config: testAccStorageTransferJob_transferOptions(acctest.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, false, false, false, testOverwriteWhen[0], testPubSubTopicName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -178,7 +179,7 @@ func TestAccStorageTransferJob_transferOptions(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferJob_transferOptions(GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, true, true, false, testOverwriteWhen[1], testPubSubTopicName),
+				Config: testAccStorageTransferJob_transferOptions(acctest.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, true, true, false, testOverwriteWhen[1], testPubSubTopicName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -186,7 +187,40 @@ func TestAccStorageTransferJob_transferOptions(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferJob_transferOptions(GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, true, false, true, testOverwriteWhen[2], testPubSubTopicName),
+				Config: testAccStorageTransferJob_transferOptions(acctest.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, true, false, true, testOverwriteWhen[2], testPubSubTopicName),
+			},
+			{
+				ResourceName:      "google_storage_transfer_job.transfer_job",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccStorageTransferJob_objectConditions(t *testing.T) {
+	t.Parallel()
+
+	testDataSourceBucketName := RandString(t, 10)
+	testDataSinkName := RandString(t, 10)
+	testTransferJobDescription := RandString(t, 10)
+	testPubSubTopicName := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageTransferJob_basic(acctest.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
+			},
+			{
+				ResourceName:      "google_storage_transfer_job.transfer_job",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccStorageTransferJob_objectConditions(acctest.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -208,12 +242,12 @@ func TestAccStorageTransferJob_notificationConfig(t *testing.T) {
 	testPubSubTopicNameUpdate := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageTransferJob_basic(GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
+				Config: testAccStorageTransferJob_basic(acctest.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -221,7 +255,7 @@ func TestAccStorageTransferJob_notificationConfig(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferJob_basic(GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicNameUpdate),
+				Config: testAccStorageTransferJob_basic(acctest.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicNameUpdate),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -229,7 +263,7 @@ func TestAccStorageTransferJob_notificationConfig(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferJob_notificationPayloadFormat(GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicNameUpdate, noneNotificationConfigPayloadFormat),
+				Config: testAccStorageTransferJob_notificationPayloadFormat(acctest.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicNameUpdate, noneNotificationConfigPayloadFormat),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -237,7 +271,7 @@ func TestAccStorageTransferJob_notificationConfig(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferJob_notificationEventTypesUpdate(GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicNameUpdate, noneNotificationConfigPayloadFormat),
+				Config: testAccStorageTransferJob_notificationEventTypesUpdate(acctest.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicNameUpdate, noneNotificationConfigPayloadFormat),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -245,7 +279,7 @@ func TestAccStorageTransferJob_notificationConfig(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferJob_omitNotificationEventTypes(GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicNameUpdate),
+				Config: testAccStorageTransferJob_omitNotificationEventTypes(acctest.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicNameUpdate),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -271,7 +305,7 @@ func testAccStorageTransferJobDestroyProducer(t *testing.T) func(s *terraform.St
 				return fmt.Errorf("No name set")
 			}
 
-			project, err := GetTestProject(rs.Primary, config)
+			project, err := acctest.GetTestProject(rs.Primary, config)
 			if err != nil {
 				return err
 			}
@@ -300,6 +334,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -313,6 +348,7 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {
@@ -355,6 +391,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -368,6 +405,7 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {
@@ -430,6 +468,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -443,6 +482,7 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {
@@ -525,6 +565,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -538,6 +579,7 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {
@@ -592,6 +634,7 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {
@@ -654,7 +697,7 @@ resource "google_storage_transfer_job" "transfer_job" {
     google_project_iam_member.pubsub
   ]
 }
-`, project, dataSinkBucketName, project, transferJobDescription, sourceAgentPoolName, project)
+`, project, dataSinkBucketName, project, sourceAgentPoolName, transferJobDescription, project)
 }
 
 func testAccStorageTransferJob_posixSink(project string, dataSourceBucketName string, transferJobDescription string, sinkAgentPoolName string) string {
@@ -668,6 +711,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -743,6 +787,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -756,6 +801,7 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {
@@ -833,7 +879,7 @@ resource "google_storage_transfer_job" "transfer_job" {
 `, project, dataSourceBucketName, project, dataSinkBucketName, project, pubSubTopicName, transferJobDescription, project, overwriteObjectsAlreadyExistingInSink, deleteObjectsUniqueInSink, deleteObjectsFromSourceAfterTransfer, overwriteWhenVal)
 }
 
-func testAccStorageTransferJob_notificationPayloadFormat(project string, dataSourceBucketName string, dataSinkBucketName string, transferJobDescription string, pubsubTopicName string, notificationPayloadFormat string) string {
+func testAccStorageTransferJob_objectConditions(project string, dataSourceBucketName string, dataSinkBucketName string, transferJobDescription string, pubSubTopicName string) string {
 	return fmt.Sprintf(`
 data "google_storage_transfer_project_service_account" "default" {
   project = "%s"
@@ -844,6 +890,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -857,6 +904,108 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "data_sink" {
+  bucket = google_storage_bucket.data_sink.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_pubsub_topic" "topic" {
+  name = "%s"
+}
+
+resource "google_pubsub_topic_iam_member" "notification_config" {
+  topic = google_pubsub_topic.topic.id
+  role = "roles/pubsub.publisher"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_transfer_job" "transfer_job" {
+  description = "%s"
+  project     = "%s"
+
+  transfer_spec {
+    gcs_data_source {
+      bucket_name = google_storage_bucket.data_source.name
+      path  = "foo/bar/"
+    }
+    gcs_data_sink {
+      bucket_name = google_storage_bucket.data_sink.name
+      path  = "foo/bar/"
+    }
+    object_conditions {
+      last_modified_since = "2020-01-01T00:00:00Z"
+      last_modified_before = "2020-01-01T00:00:00Z"
+    }
+  }
+
+  schedule {
+    schedule_start_date {
+      year  = 2018
+      month = 10
+      day   = 1
+    }
+    schedule_end_date {
+      year  = 2019
+      month = 10
+      day   = 1
+    }
+    start_time_of_day {
+      hours   = 0
+      minutes = 30
+      seconds = 0
+      nanos   = 0
+    }
+	  repeat_interval = "604800s"
+  }
+
+  notification_config {
+    pubsub_topic  = google_pubsub_topic.topic.id
+    event_types   = [
+      "TRANSFER_OPERATION_SUCCESS",
+      "TRANSFER_OPERATION_FAILED"
+    ]
+    payload_format = "JSON"
+  }
+
+  depends_on = [
+    google_storage_bucket_iam_member.data_source,
+    google_storage_bucket_iam_member.data_sink,
+    google_pubsub_topic_iam_member.notification_config,
+  ]
+}
+`, project, dataSourceBucketName, project, dataSinkBucketName, project, pubSubTopicName, transferJobDescription, project)
+}
+
+func testAccStorageTransferJob_notificationPayloadFormat(project string, dataSourceBucketName string, dataSinkBucketName string, transferJobDescription string, pubsubTopicName string, notificationPayloadFormat string) string {
+	return fmt.Sprintf(`
+data "google_storage_transfer_project_service_account" "default" {
+  project = "%s"
+}
+
+resource "google_storage_bucket" "data_source" {
+  name          = "%s"
+  project       = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "data_source" {
+  bucket = google_storage_bucket.data_source.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_bucket" "data_sink" {
+  name          = "%s"
+  project       = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {
@@ -939,6 +1088,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -952,6 +1102,7 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {
@@ -1033,6 +1184,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -1046,6 +1198,7 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {

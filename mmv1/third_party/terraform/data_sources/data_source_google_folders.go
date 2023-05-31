@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleFolders() *schema.Resource {
@@ -59,8 +61,8 @@ func DataSourceGoogleFolders() *schema.Resource {
 }
 
 func dataSourceGoogleFoldersRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -72,12 +74,17 @@ func dataSourceGoogleFoldersRead(d *schema.ResourceData, meta interface{}) error
 		params["parent"] = d.Get("parent_id").(string)
 		url := "https://cloudresourcemanager.googleapis.com/v3/folders"
 
-		url, err := addQueryParams(url, params)
+		url, err := transport_tpg.AddQueryParams(url, params)
 		if err != nil {
 			return err
 		}
 
-		res, err := SendRequest(config, "GET", "", url, userAgent, nil)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			RawURL:    url,
+			UserAgent: userAgent,
+		})
 		if err != nil {
 			return fmt.Errorf("Error retrieving folders: %s", err)
 		}

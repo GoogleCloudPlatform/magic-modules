@@ -3,6 +3,9 @@ package google
 import (
 	"fmt"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	healthcare "google.golang.org/api/healthcare/v1"
 
 	"github.com/hashicorp/errwrap"
@@ -20,40 +23,40 @@ var IamHealthcareDatasetSchema = map[string]*schema.Schema{
 
 type HealthcareDatasetIamUpdater struct {
 	resourceId string
-	d          TerraformResourceData
-	Config     *Config
+	d          tpgresource.TerraformResourceData
+	Config     *transport_tpg.Config
 }
 
-func NewHealthcareDatasetIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
+func NewHealthcareDatasetIamUpdater(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgiamresource.ResourceIamUpdater, error) {
 	dataset := d.Get("dataset_id").(string)
-	datasetId, err := parseHealthcareDatasetId(dataset, config)
+	datasetId, err := ParseHealthcareDatasetId(dataset, config)
 
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error parsing resource ID for %s: {{err}}", dataset), err)
 	}
 
 	return &HealthcareDatasetIamUpdater{
-		resourceId: datasetId.datasetId(),
+		resourceId: datasetId.DatasetId(),
 		d:          d,
 		Config:     config,
 	}, nil
 }
 
-func DatasetIdParseFunc(d *schema.ResourceData, config *Config) error {
-	datasetId, err := parseHealthcareDatasetId(d.Id(), config)
+func DatasetIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
+	datasetId, err := ParseHealthcareDatasetId(d.Id(), config)
 	if err != nil {
 		return err
 	}
 
-	if err := d.Set("dataset_id", datasetId.datasetId()); err != nil {
+	if err := d.Set("dataset_id", datasetId.DatasetId()); err != nil {
 		return fmt.Errorf("Error setting dataset_id: %s", err)
 	}
-	d.SetId(datasetId.datasetId())
+	d.SetId(datasetId.DatasetId())
 	return nil
 }
 
 func (u *HealthcareDatasetIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +83,7 @@ func (u *HealthcareDatasetIamUpdater) SetResourceIamPolicy(policy *cloudresource
 		return errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -110,7 +113,7 @@ func (u *HealthcareDatasetIamUpdater) DescribeResource() string {
 
 func resourceManagerToHealthcarePolicy(p *cloudresourcemanager.Policy) (*healthcare.Policy, error) {
 	out := &healthcare.Policy{}
-	err := Convert(p, out)
+	err := tpgresource.Convert(p, out)
 	if err != nil {
 		return nil, errwrap.Wrapf("Cannot convert a v1 policy to a healthcare policy: {{err}}", err)
 	}
@@ -119,7 +122,7 @@ func resourceManagerToHealthcarePolicy(p *cloudresourcemanager.Policy) (*healthc
 
 func healthcareToResourceManagerPolicy(p *healthcare.Policy) (*cloudresourcemanager.Policy, error) {
 	out := &cloudresourcemanager.Policy{}
-	err := Convert(p, out)
+	err := tpgresource.Convert(p, out)
 	if err != nil {
 		return nil, errwrap.Wrapf("Cannot convert a healthcare policy to a v1 policy: {{err}}", err)
 	}

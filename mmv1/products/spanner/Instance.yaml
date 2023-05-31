@@ -45,26 +45,29 @@ timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-id_format: "{{project}}/{{name}}"
+id_format: '{{project}}/{{name}}'
 import_format:
-  - "projects/{{project}}/instances/{{name}}"
-  - "{{project}}/{{name}}"
-  - "{{name}}"
+  - 'projects/{{project}}/instances/{{name}}'
+  - '{{project}}/{{name}}'
+  - '{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "spanner_instance_basic"
-    primary_resource_id: "example"
-        # Randomness
+    name: 'spanner_instance_basic'
+    primary_resource_id:
+      'example'
+      # Randomness
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
-    name: "spanner_instance_processing_units"
-    primary_resource_id: "example"
-        # Randomness
+    name: 'spanner_instance_processing_units'
+    primary_resource_id:
+      'example'
+      # Randomness
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
-    name: "spanner_instance_multi_regional"
-    primary_resource_id: "example"
-        # Randomness
+    name: 'spanner_instance_multi_regional'
+    primary_resource_id:
+      'example'
+      # Randomness
     skip_vcr: true
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
@@ -94,7 +97,8 @@ properties:
     immutable: true
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
-      regex: '^[a-z][-a-z0-9]*[a-z0-9]$'
+      regex:
+        '^[a-z][-a-z0-9]*[a-z0-9]$'
         # This resource supports a sort of odd autogenerate-if-not-set
         # system, which is done in the encoder.  Consequently we have
         # to interpret "not set" as "use the name in state".
@@ -133,7 +137,7 @@ properties:
   - !ruby/object:Api::Type::Integer
     name: 'processingUnits'
     description: |
-      The number of processing units allocated to this instance. Exactly one of processing_units 
+      The number of processing units allocated to this instance. Exactly one of processing_units
       or node_count must be present in terraform.
     exactly_one_of:
       - num_nodes
@@ -149,9 +153,6 @@ properties:
     description: |
       Instance status: `CREATING` or `READY`.
     output: true
-    # This attribute is not useful - we include it in Terraform for historical
-    # reasons, but you should most likely not use it.
-    exclude: false
     values:
       - :READY
       - :CREATING

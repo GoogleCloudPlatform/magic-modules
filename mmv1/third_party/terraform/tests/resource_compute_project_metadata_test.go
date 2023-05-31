@@ -6,23 +6,24 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 // Add two key value pairs
 func TestAccComputeProjectMetadata_basic(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	billingId := GetTestBillingAccountFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
 	projectID := fmt.Sprintf("tf-test-%d", RandInt(t))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeProjectMetadataDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeProject_basic0_metadata(projectID, pname, org, billingId),
+				Config: testAccComputeProject_basic0_metadata(projectID, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
@@ -37,17 +38,17 @@ func TestAccComputeProjectMetadata_basic(t *testing.T) {
 func TestAccComputeProjectMetadata_modify_1(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	billingId := GetTestBillingAccountFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
 	projectID := fmt.Sprintf("tf-test-%d", RandInt(t))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeProjectMetadataDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeProject_modify0_metadata(projectID, pname, org, billingId),
+				Config: testAccComputeProject_modify0_metadata(projectID, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
@@ -56,7 +57,7 @@ func TestAccComputeProjectMetadata_modify_1(t *testing.T) {
 			},
 
 			{
-				Config: testAccComputeProject_modify1_metadata(projectID, pname, org, billingId),
+				Config: testAccComputeProject_modify1_metadata(projectID, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
@@ -71,17 +72,17 @@ func TestAccComputeProjectMetadata_modify_1(t *testing.T) {
 func TestAccComputeProjectMetadata_modify_2(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	billingId := GetTestBillingAccountFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
 	projectID := fmt.Sprintf("tf-test-%d", RandInt(t))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeProjectMetadataDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeProject_basic0_metadata(projectID, pname, org, billingId),
+				Config: testAccComputeProject_basic0_metadata(projectID, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
@@ -90,7 +91,7 @@ func TestAccComputeProjectMetadata_modify_2(t *testing.T) {
 			},
 
 			{
-				Config: testAccComputeProject_basic1_metadata(projectID, pname, org, billingId),
+				Config: testAccComputeProject_basic1_metadata(projectID, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
@@ -120,7 +121,7 @@ func testAccCheckComputeProjectMetadataDestroyProducer(t *testing.T) func(s *ter
 	}
 }
 
-func testAccComputeProject_basic0_metadata(projectID, name, org, billing string) string {
+func testAccComputeProject_basic0_metadata(projectID, org, billing string) string {
 	return fmt.Sprintf(`
 resource "google_project" "project" {
   project_id      = "%s"
@@ -142,10 +143,10 @@ resource "google_compute_project_metadata" "fizzbuzz" {
   }
   depends_on = [google_project_service.compute]
 }
-`, projectID, name, org, billing)
+`, projectID, projectID, org, billing)
 }
 
-func testAccComputeProject_basic1_metadata(projectID, name, org, billing string) string {
+func testAccComputeProject_basic1_metadata(projectID, org, billing string) string {
 	return fmt.Sprintf(`
 resource "google_project" "project" {
   project_id      = "%s"
@@ -167,10 +168,10 @@ resource "google_compute_project_metadata" "fizzbuzz" {
   }
   depends_on = [google_project_service.compute]
 }
-`, projectID, name, org, billing)
+`, projectID, projectID, org, billing)
 }
 
-func testAccComputeProject_modify0_metadata(projectID, name, org, billing string) string {
+func testAccComputeProject_modify0_metadata(projectID, org, billing string) string {
 	return fmt.Sprintf(`
 resource "google_project" "project" {
   project_id      = "%s"
@@ -193,10 +194,10 @@ resource "google_compute_project_metadata" "fizzbuzz" {
   }
   depends_on = [google_project_service.compute]
 }
-`, projectID, name, org, billing)
+`, projectID, projectID, org, billing)
 }
 
-func testAccComputeProject_modify1_metadata(projectID, name, org, billing string) string {
+func testAccComputeProject_modify1_metadata(projectID, org, billing string) string {
 	return fmt.Sprintf(`
 resource "google_project" "project" {
   project_id      = "%s"
@@ -219,5 +220,5 @@ resource "google_compute_project_metadata" "fizzbuzz" {
   }
   depends_on = [google_project_service.compute]
 }
-`, projectID, name, org, billing)
+`, projectID, projectID, org, billing)
 }

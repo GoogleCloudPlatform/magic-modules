@@ -3,14 +3,20 @@ if d.Get("deletion_protection").(bool) {
 }
 
 if d.Get("state").(string) == "ENABLED" {
-	disableUrl, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:disable")
+	disableUrl, err := tpgresource.ReplaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:disable")
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Disabling CertificateAuthority: %#v", obj)
 
-	dRes, err := SendRequest(config, "POST", billingProject, disableUrl, userAgent, nil)
+	dRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "POST",
+		Project: billingProject,
+		RawURL: disableUrl,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return fmt.Errorf("Error disabling CertificateAuthority: %s", err)
 	}

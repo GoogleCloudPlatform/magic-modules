@@ -3,7 +3,7 @@ obj["notificationEmails"] = []string{}
 obj["enrolledServices"] = []string{}
 obj["activeKeyVersion"] = ""
 
-url, err := replaceVars(d, config, "{{AccessApprovalBasePath}}folders/{{folder_id}}/accessApprovalSettings")
+url, err := tpgresource.ReplaceVars(d, config, "{{AccessApprovalBasePath}}folders/{{folder_id}}/accessApprovalSettings")
 if err != nil {
 	return err
 }
@@ -15,14 +15,21 @@ updateMask = append(updateMask, "notificationEmails")
 updateMask = append(updateMask, "enrolledServices")
 updateMask = append(updateMask, "activeKeyVersion")
 
-// updateMask is a URL parameter but not present in the schema, so replaceVars
+// updateMask is a URL parameter but not present in the schema, so ReplaceVars
 // won't set it
-url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 if err != nil {
 	return err
 }
 
-res, err := SendRequestWithTimeout(config, "PATCH", "", url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "PATCH",
+	RawURL: url,
+	UserAgent: userAgent,
+	Body: obj,
+	Timeout: d.Timeout(schema.TimeoutUpdate),
+})
 
 if err != nil {
 	return fmt.Errorf("Error emptying FolderSettings %q: %s", d.Id(), err)

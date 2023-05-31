@@ -12,7 +12,7 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-func compareSignatureAlgorithm(_, old, new string, _ *schema.ResourceData) bool {
+func CompareSignatureAlgorithm(_, old, new string, _ *schema.ResourceData) bool {
 	// See https://cloud.google.com/binary-authorization/docs/reference/rest/v1/projects.attestors#signaturealgorithm
 	normalizedAlgorithms := map[string]string{
 		"ECDSA_P256_SHA256": "ECDSA_P256_SHA256",

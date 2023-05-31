@@ -6,6 +6,8 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -13,11 +15,11 @@ import (
 func TestAccHealthcareHl7V2StoreIamBinding(t *testing.T) {
 	t.Parallel()
 
-	projectId := GetTestProjectFromEnv()
+	projectId := acctest.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.hl7V2StoreAdmin"
 	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	datasetId := &healthcareDatasetId{
+	datasetId := &HealthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
@@ -25,7 +27,7 @@ func TestAccHealthcareHl7V2StoreIamBinding(t *testing.T) {
 	hl7V2StoreName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -37,7 +39,7 @@ func TestAccHealthcareHl7V2StoreIamBinding(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_healthcare_hl7_v2_store_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("%s/%s %s", datasetId.terraformId(), hl7V2StoreName, roleId),
+				ImportStateId:     fmt.Sprintf("%s/%s %s", datasetId.TerraformId(), hl7V2StoreName, roleId),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -51,7 +53,7 @@ func TestAccHealthcareHl7V2StoreIamBinding(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_healthcare_hl7_v2_store_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("%s/%s %s", datasetId.terraformId(), hl7V2StoreName, roleId),
+				ImportStateId:     fmt.Sprintf("%s/%s %s", datasetId.TerraformId(), hl7V2StoreName, roleId),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -62,11 +64,11 @@ func TestAccHealthcareHl7V2StoreIamBinding(t *testing.T) {
 func TestAccHealthcareHl7V2StoreIamMember(t *testing.T) {
 	t.Parallel()
 
-	projectId := GetTestProjectFromEnv()
+	projectId := acctest.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.hl7V2Editor"
 	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	datasetId := &healthcareDatasetId{
+	datasetId := &HealthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
@@ -74,7 +76,7 @@ func TestAccHealthcareHl7V2StoreIamMember(t *testing.T) {
 	hl7V2StoreName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -86,7 +88,7 @@ func TestAccHealthcareHl7V2StoreIamMember(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_healthcare_hl7_v2_store_iam_member.foo",
-				ImportStateId:     fmt.Sprintf("%s/%s %s serviceAccount:%s@%s.iam.gserviceaccount.com", datasetId.terraformId(), hl7V2StoreName, roleId, account, projectId),
+				ImportStateId:     fmt.Sprintf("%s/%s %s serviceAccount:%s@%s.iam.gserviceaccount.com", datasetId.TerraformId(), hl7V2StoreName, roleId, account, projectId),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -97,11 +99,11 @@ func TestAccHealthcareHl7V2StoreIamMember(t *testing.T) {
 func TestAccHealthcareHl7V2StoreIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	projectId := GetTestProjectFromEnv()
+	projectId := acctest.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.hl7V2Consumer"
 	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	datasetId := &healthcareDatasetId{
+	datasetId := &HealthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
@@ -109,19 +111,22 @@ func TestAccHealthcareHl7V2StoreIamPolicy(t *testing.T) {
 	hl7V2StoreName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Policy creation (no update for policy, no need to test)
 				Config: testAccHealthcareHl7V2StoreIamPolicy_basic(account, datasetName, hl7V2StoreName, roleId),
-				Check: testAccCheckGoogleHealthcareHl7V2StoreIamPolicyExists(t, "foo", roleId,
-					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleHealthcareHl7V2StoreIamPolicyExists(t, "foo", roleId,
+						fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
+					),
+					resource.TestCheckResourceAttrSet("data.google_healthcare_hl7_v2_store_iam_policy.foo", "policy_data"),
 				),
 			},
 			{
 				ResourceName:      "google_healthcare_hl7_v2_store_iam_policy.foo",
-				ImportStateId:     fmt.Sprintf("%s/%s", datasetId.terraformId(), hl7V2StoreName),
+				ImportStateId:     fmt.Sprintf("%s/%s", datasetId.TerraformId(), hl7V2StoreName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -137,13 +142,13 @@ func testAccCheckGoogleHealthcareHl7V2StoreIamBindingExists(t *testing.T, bindin
 		}
 
 		config := GoogleProviderConfig(t)
-		hl7V2StoreId, err := parseHealthcareHl7V2StoreId(bindingRs.Primary.Attributes["hl7_v2_store_id"], config)
+		hl7V2StoreId, err := ParseHealthcareHl7V2StoreId(bindingRs.Primary.Attributes["hl7_v2_store_id"], config)
 
 		if err != nil {
 			return err
 		}
 
-		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.Hl7V2Stores.GetIamPolicy(hl7V2StoreId.hl7V2StoreId()).Do()
+		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.Hl7V2Stores.GetIamPolicy(hl7V2StoreId.Hl7V2StoreId()).Do()
 		if err != nil {
 			return err
 		}
@@ -173,13 +178,13 @@ func testAccCheckGoogleHealthcareHl7V2StoreIamMemberExists(t *testing.T, n, role
 		}
 
 		config := GoogleProviderConfig(t)
-		hl7V2StoreId, err := parseHealthcareHl7V2StoreId(rs.Primary.Attributes["hl7_v2_store_id"], config)
+		hl7V2StoreId, err := ParseHealthcareHl7V2StoreId(rs.Primary.Attributes["hl7_v2_store_id"], config)
 
 		if err != nil {
 			return err
 		}
 
-		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.Hl7V2Stores.GetIamPolicy(hl7V2StoreId.hl7V2StoreId()).Do()
+		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.Hl7V2Stores.GetIamPolicy(hl7V2StoreId.Hl7V2StoreId()).Do()
 		if err != nil {
 			return err
 		}
@@ -208,13 +213,13 @@ func testAccCheckGoogleHealthcareHl7V2StoreIamPolicyExists(t *testing.T, n, role
 		}
 
 		config := GoogleProviderConfig(t)
-		hl7V2StoreId, err := parseHealthcareHl7V2StoreId(rs.Primary.Attributes["hl7_v2_store_id"], config)
+		hl7V2StoreId, err := ParseHealthcareHl7V2StoreId(rs.Primary.Attributes["hl7_v2_store_id"], config)
 
 		if err != nil {
 			return err
 		}
 
-		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.Hl7V2Stores.GetIamPolicy(hl7V2StoreId.hl7V2StoreId()).Do()
+		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.Hl7V2Stores.GetIamPolicy(hl7V2StoreId.Hl7V2StoreId()).Do()
 		if err != nil {
 			return err
 		}
@@ -348,6 +353,10 @@ data "google_iam_policy" "foo" {
 resource "google_healthcare_hl7_v2_store_iam_policy" "foo" {
   hl7_v2_store_id = google_healthcare_hl7_v2_store.hl7_v2_store.id
   policy_data     = data.google_iam_policy.foo.policy_data
+}
+
+data "google_healthcare_hl7_v2_store_iam_policy" "foo" {
+  hl7_v2_store_id = google_healthcare_hl7_v2_store.hl7_v2_store.id
 }
 `, account, datasetName, hl7V2StoreName, roleId)
 }

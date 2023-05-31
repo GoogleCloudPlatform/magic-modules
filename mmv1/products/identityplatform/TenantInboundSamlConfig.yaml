@@ -26,8 +26,8 @@ description: |
   the marketplace prior to using this resource.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "identity_platform_tenant_inbound_saml_config_basic"
-    primary_resource_id: "tenant_saml_config"
+    name: 'identity_platform_tenant_inbound_saml_config_basic'
+    primary_resource_id: 'tenant_saml_config'
     vars:
       name: saml.tf-config
       idp_entity_id: tf-idp

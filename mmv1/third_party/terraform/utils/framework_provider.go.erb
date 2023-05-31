@@ -15,8 +15,9 @@ import (
     "github.com/hashicorp/terraform-plugin-framework/resource"
     "github.com/hashicorp/terraform-plugin-framework/schema/validator"
     "github.com/hashicorp/terraform-plugin-framework/types"
-    "golang.org/x/oauth2"
+    transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
+    "golang.org/x/oauth2"
     "google.golang.org/api/option"
 )
 
@@ -47,8 +48,8 @@ type frameworkProvider struct {
     project types.String
     region types.String
     zone types.String
-    requestBatcherIam *RequestBatcher
-    requestBatcherServiceUsage *RequestBatcher
+    RequestBatcherIam *transport_tpg.RequestBatcher
+    requestBatcherServiceUsage *transport_tpg.RequestBatcher
     scopes []string
     tokenSource oauth2.TokenSource
     userAgent string
@@ -137,7 +138,7 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             "<%= product[:definitions].name.underscore -%>_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             <% end -%>
@@ -146,63 +147,63 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             "cloud_billing_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             "composer_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             "container_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             "dataflow_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             "iam_credentials_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             "resource_manager_v3_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             <% unless version == "ga" -%>
             "runtimeconfig_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             <% end -%>
             "iam_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             "service_networking_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             "tags_location_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
 
@@ -210,13 +211,13 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             "container_aws_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             "container_azure_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
         },
@@ -239,7 +240,7 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
         },
     }
 
-    configureDCLCustomEndpointAttributesFramework(&resp.Schema)
+    transport_tpg.ConfigureDCLCustomEndpointAttributesFramework(&resp.Schema)
 }
 
 // Configure prepares an API client for data sources and resources.
@@ -273,7 +274,9 @@ func (p *frameworkProvider) DataSources(_ context.Context) []func() datasource.D
         NewGoogleDnsRecordSetDataSource,
         NewGoogleDnsKeysDataSource,
         <% unless version == 'ga' -%>
+        NewGoogleFirebaseAndroidAppConfigDataSource,
         NewGoogleFirebaseAppleAppConfigDataSource,
+        NewGoogleFirebaseWebAppConfigDataSource,
         <% end -%>
     }
 }

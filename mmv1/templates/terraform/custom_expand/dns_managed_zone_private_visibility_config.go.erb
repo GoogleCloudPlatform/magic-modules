@@ -12,7 +12,7 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		// The API won't remove the the field unless an empty network array is sent.
@@ -28,21 +28,21 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 	transformedGkeClusters, err := expandDNSManagedZonePrivateVisibilityConfigGkeClusters(original["gke_clusters"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGkeClusters); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGkeClusters); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["gkeClusters"] = transformedGkeClusters
 	}
 
 	transformedNetworks, err := expandDNSManagedZonePrivateVisibilityConfigNetworks(original["networks"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedNetworks); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedNetworks); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["networks"] = transformedNetworks
 	}
 
 	return transformed, nil
 }
 
-func expand<%= prefix -%><%= titlelize_property(property) -%>Networks(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>Networks(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	v = v.(*schema.Set).List()
 	l := v.([]interface{})
 	req := make([]interface{}, 0, len(l))
@@ -56,7 +56,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>Networks(v interfac
 		transformedNetworkUrl, err := expandDNSManagedZonePrivateVisibilityConfigNetworksNetworkUrl(original["network_url"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedNetworkUrl); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedNetworkUrl); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["networkUrl"] = transformedNetworkUrl
 		}
 
@@ -65,7 +65,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>Networks(v interfac
 	return req, nil
 }
 
-func expand<%= prefix -%><%= titlelize_property(property) -%>GkeClusters(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>GkeClusters(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	req := make([]interface{}, 0, len(l))
 	for _, raw := range l {
@@ -78,7 +78,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>GkeClusters(v inter
 		transformedGkeClusterName, err := expandDNSManagedZonePrivateVisibilityConfigGkeClustersGkeClusterName(original["gke_cluster_name"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedGkeClusterName); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedGkeClusterName); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["gkeClusterName"] = transformedGkeClusterName
 		}
 
@@ -87,19 +87,19 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>GkeClusters(v inter
 	return req, nil
 }
 
-func expand<%= prefix -%><%= titlelize_property(property) -%>NetworksNetworkUrl(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>NetworksNetworkUrl(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	if v == nil || v.(string) == "" {
 		return "", nil
 	} else if strings.HasPrefix(v.(string), "https://") {
 		return v, nil
 	}
-	url, err := replaceVars(d, config, "{{ComputeBasePath}}"+v.(string))
+	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}"+v.(string))
 	if err != nil {
 		return "", err
 	}
-	return ConvertSelfLinkToV1(url), nil
+	return tpgresource.ConvertSelfLinkToV1(url), nil
 }
 
-func expandDNSManagedZonePrivateVisibilityConfigGkeClustersGkeClusterName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandDNSManagedZonePrivateVisibilityConfigGkeClustersGkeClusterName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }

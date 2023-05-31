@@ -59,16 +59,16 @@ docs: !ruby/object:Provider::Terraform::Docs
     If logging is enabled, logs will be exported to Stackdriver. Deprecated in favor of `log_config`
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firewall_basic"
-    primary_resource_id: "default"
+    name: 'firewall_basic'
+    primary_resource_id: 'default'
     vars:
-      firewall_name: "test-firewall"
-      network_name: "test-network"
+      firewall_name: 'test-firewall'
+      network_name: 'test-network'
   - !ruby/object:Provider::Terraform::Examples
-    name: "firewall_with_target_tags"
-    primary_resource_id: "rules"
+    name: 'firewall_with_target_tags'
+    primary_resource_id: 'rules'
     vars:
-      firewall_name: "my-firewall-rule"
+      firewall_name: 'my-firewall-rule'
     test_env_vars:
       project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -175,9 +175,7 @@ properties:
     name: 'direction'
     description: |
       Direction of traffic to which this firewall applies; default is
-      INGRESS. Note: For INGRESS traffic, it is NOT supported to specify
-      destinationRanges; For EGRESS traffic, it is NOT supported to specify
-      `source_ranges` OR `source_tags`. For INGRESS traffic, one of `source_ranges`,
+      INGRESS. Note: For INGRESS traffic, one of `source_ranges`,
       `source_tags` or `source_service_accounts` is required.
     values:
       - :INGRESS
@@ -202,13 +200,6 @@ properties:
     custom_flatten: 'templates/terraform/custom_flatten/firewall_log_config.go.erb'
     diff_suppress_func: 'diffSuppressEnableLogging'
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'enable'
-        description: |
-          This field denotes whether to enable logging for a particular
-          firewall rule. If logging is enabled, logs will be exported to
-          Stackdriver.
-        exclude: true
       - !ruby/object:Api::Type::Enum
         name: 'metadata'
         description: |
@@ -217,11 +208,6 @@ properties:
           - :EXCLUDE_ALL_METADATA
           - :INCLUDE_ALL_METADATA
         required: true
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
@@ -235,7 +221,7 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::ResourceRef
     name: 'network'
     resource: 'Network'

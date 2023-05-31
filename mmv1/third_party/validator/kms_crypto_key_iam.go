@@ -3,6 +3,9 @@ package google
 import (
 	"fmt"
 	"strings"
+
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
 func resourceConverterKmsCryptoKeyIamPolicy() ResourceConverter {
@@ -33,15 +36,15 @@ func resourceConverterKmsCryptoKeyIamMember() ResourceConverter {
 	}
 }
 
-func GetKmsCryptoKeyIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetKmsCryptoKeyIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newKmsCryptoKeyIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetKmsCryptoKeyIamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetKmsCryptoKeyIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newKmsCryptoKeyIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetKmsCryptoKeyIamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetKmsCryptoKeyIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newKmsCryptoKeyIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -67,9 +70,9 @@ func MergeKmsCryptoKeyIamMemberDelete(existing, incoming Asset) Asset {
 }
 
 func newKmsCryptoKeyIamAsset(
-	d TerraformResourceData,
-	config *Config,
-	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
+	d tpgresource.TerraformResourceData,
+	config *transport_tpg.Config,
+	expandBindings func(d tpgresource.TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
@@ -91,7 +94,7 @@ func newKmsCryptoKeyIamAsset(
 	}}, nil
 }
 
-func FetchKmsCryptoKeyIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+func FetchKmsCryptoKeyIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("crypto_key_id"); !ok {
 		return Asset{}, ErrEmptyIdentityField
@@ -109,7 +112,7 @@ func FetchKmsCryptoKeyIamPolicy(d TerraformResourceData, config *Config) (Asset,
 	)
 }
 
-func constructAssetNameTemplate(d TerraformResourceData) string {
+func constructAssetNameTemplate(d tpgresource.TerraformResourceData) string {
 	assetNameTemplate := "//cloudkms.googleapis.com/{{crypto_key_id}}"
 	if val, ok := d.GetOk("crypto_key_id"); ok {
 		cryptoKeyID := val.(string)

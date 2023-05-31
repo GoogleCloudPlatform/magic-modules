@@ -30,16 +30,16 @@ description: |
 
   ~> **Note:** KeyRingImportJobs cannot be deleted from Google Cloud Platform.
   Destroying a Terraform-managed KeyRingImportJob will remove it from state but
-  *will not delete the resource from the project.* 
-id_format: "{{name}}"
-import_format: ["{{name}}"]
+  *will not delete the resource from the project.*
+id_format: '{{name}}'
+import_format: ['{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "kms_key_ring_import_job"
-    primary_resource_id: "import-job"
+    name: 'kms_key_ring_import_job'
+    primary_resource_id: 'import-job'
     vars:
-      keyring: "keyring-example"
-      cryptokey: "cryptokey-example"
+      keyring: 'keyring-example'
+      cryptokey: 'cryptokey-example'
     skip_test: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/kms_key_ring_import_job.go.erb
@@ -88,31 +88,11 @@ properties:
       - :HSM
       - :EXTERNAL
   - !ruby/object:Api::Type::Time
-    name: 'createTime'
-    description: |
-      The time that this resource was created on the server.
-      This is in RFC3339 text format.
-    output: true
-    exclude: true
-  - !ruby/object:Api::Type::Time
-    name: 'generateTime'
-    description: |
-      The time that this resource was generated.
-      This is in RFC3339 text format.
-    output: true
-    exclude: true
-  - !ruby/object:Api::Type::Time
     name: 'expireTime'
     description: |
       The time at which this resource is scheduled for expiration and can no longer be used.
       This is in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'expireEventTime'
-    description: |
-      The time this resource expired. Only present if state is EXPIRED.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'state'
     description: |

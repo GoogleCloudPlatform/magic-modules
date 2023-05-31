@@ -5,6 +5,10 @@ import (
 	"path"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -17,7 +21,7 @@ func TestAccHealthcareDicomStoreIdParsing(t *testing.T) {
 		ExpectedError        bool
 		ExpectedTerraformId  string
 		ExpectedDicomStoreId string
-		Config               *Config
+		Config               *transport_tpg.Config
 	}{
 		"id is in project/location/datasetName/dicomStoreName format": {
 			ImportId:             "test-project/us-central1/test-dataset/test-store-name",
@@ -36,17 +40,17 @@ func TestAccHealthcareDicomStoreIdParsing(t *testing.T) {
 			ExpectedError:        false,
 			ExpectedTerraformId:  "test-project/us-central1/test-dataset/test-store-name",
 			ExpectedDicomStoreId: "projects/test-project/locations/us-central1/datasets/test-dataset/dicomStores/test-store-name",
-			Config:               &Config{Project: "test-project"},
+			Config:               &transport_tpg.Config{Project: "test-project"},
 		},
 		"id is in location/datasetName/dicomStoreName format without project in config": {
 			ImportId:      "us-central1/test-dataset/test-store-name",
 			ExpectedError: true,
-			Config:        &Config{Project: ""},
+			Config:        &transport_tpg.Config{Project: ""},
 		},
 	}
 
 	for tn, tc := range cases {
-		dicomStoreId, err := parseHealthcareDicomStoreId(tc.ImportId, tc.Config)
+		dicomStoreId, err := ParseHealthcareDicomStoreId(tc.ImportId, tc.Config)
 
 		if tc.ExpectedError && err == nil {
 			t.Fatalf("bad: %s, expected an error", tn)
@@ -59,12 +63,12 @@ func TestAccHealthcareDicomStoreIdParsing(t *testing.T) {
 			t.Fatalf("bad: %s, err: %#v", tn, err)
 		}
 
-		if dicomStoreId.terraformId() != tc.ExpectedTerraformId {
-			t.Fatalf("bad: %s, expected Terraform ID to be `%s` but is `%s`", tn, tc.ExpectedTerraformId, dicomStoreId.terraformId())
+		if dicomStoreId.TerraformId() != tc.ExpectedTerraformId {
+			t.Fatalf("bad: %s, expected Terraform ID to be `%s` but is `%s`", tn, tc.ExpectedTerraformId, dicomStoreId.TerraformId())
 		}
 
-		if dicomStoreId.dicomStoreId() != tc.ExpectedDicomStoreId {
-			t.Fatalf("bad: %s, expected DicomStore ID to be `%s` but is `%s`", tn, tc.ExpectedDicomStoreId, dicomStoreId.dicomStoreId())
+		if dicomStoreId.DicomStoreId() != tc.ExpectedDicomStoreId {
+			t.Fatalf("bad: %s, expected DicomStore ID to be `%s` but is `%s`", tn, tc.ExpectedDicomStoreId, dicomStoreId.DicomStoreId())
 		}
 	}
 }
@@ -78,7 +82,7 @@ func TestAccHealthcareDicomStore_basic(t *testing.T) {
 	resourceName := "google_healthcare_dicom_store.default"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckHealthcareDicomStoreDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -164,7 +168,7 @@ func testAccCheckGoogleHealthcareDicomStoreUpdate(t *testing.T, pubsubTopic stri
 
 			config := GoogleProviderConfig(t)
 
-			gcpResourceUri, err := replaceVarsForTest(config, rs, "{{dataset}}/dicomStores/{{name}}")
+			gcpResourceUri, err := tpgresource.ReplaceVarsForTest(config, rs, "{{dataset}}/dicomStores/{{name}}")
 			if err != nil {
 				return err
 			}

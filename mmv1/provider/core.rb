@@ -25,6 +25,13 @@ module Provider
   class Core
     include Compile::Core
 
+    TERRAFORM_PROVIDER_GA = 'github.com/hashicorp/terraform-provider-google'.freeze
+    TERRAFORM_PROVIDER_BETA = 'github.com/hashicorp/terraform-provider-google-beta'.freeze
+    TERRAFORM_PROVIDER_PRIVATE = 'internal/terraform-next'.freeze
+    RESOURCE_DIRECTORY_GA = 'google'.freeze
+    RESOURCE_DIRECTORY_BETA = 'google-beta'.freeze
+    RESOURCE_DIRECTORY_PRIVATE = 'google-private'.freeze
+
     def initialize(config, api, version_name, start_time)
       @config = config
       @api = api
@@ -135,6 +142,9 @@ module Provider
           end
 
           FileUtils.copy_entry source, target_file
+
+          add_hashicorp_copyright_header(output_folder, target) if File.extname(target) == '.go'
+          replace_import_path(output_folder, target) if File.extname(target) == '.go'
         end
       end.map(&:join)
     end
@@ -180,9 +190,131 @@ module Provider
         Thread.new do
           Google::LOGGER.debug "Compiling #{source} => #{target}"
           file_template.generate(pwd, source, target, self)
+
+          add_hashicorp_copyright_header(output_folder, target)
+          replace_import_path(output_folder, target)
         end
       end.map(&:join)
       Dir.chdir pwd
+    end
+
+    def add_hashicorp_copyright_header(output_folder, target)
+      unless expected_output_folder?(output_folder)
+        Google::LOGGER.info "Unexpected output folder (#{output_folder}) detected " \
+                            'when deciding to add HashiCorp copyright headers. ' \
+                            'Watch out for unexpected changes to copied files'
+      end
+      # only add copyright headers when generating TPG and TPGB
+      return unless output_folder.end_with?('terraform-provider-google') ||
+                    output_folder.end_with?('terraform-provider-google-beta')
+
+      # Prevent adding copyright header to files with paths or names matching the strings below
+      # NOTE: these entries need to match the content of the .copywrite.hcl file originally
+      #       created in https://github.com/GoogleCloudPlatform/magic-modules/pull/7336
+      ignored_folders = [
+        '.github/',
+        '.release/',
+        '.changelog/',
+        'examples/',
+        'META.d/'
+      ]
+      ignored_files = [
+        'go.mod',
+        '.goreleaser.yml',
+        '.golangci.yml',
+        'terraform-registry-manifest.json'
+      ]
+      should_add_header = true
+      ignored_folders.each do |folder|
+        # folder will be path leading to file
+        next unless target.start_with? folder
+
+        Google::LOGGER.debug 'Not adding HashiCorp copyright headers in ' \
+                             "ignored folder #{folder} : #{target}"
+        should_add_header = false
+      end
+      return unless should_add_header
+
+      ignored_files.each do |file|
+        # file will be the filename and extension, with no preceding path
+        next unless target.end_with? file
+
+        Google::LOGGER.debug 'Not adding HashiCorp copyright headers to ' \
+                             "ignored file #{file} : #{target}"
+        should_add_header = false
+      end
+      return unless should_add_header
+
+      Google::LOGGER.debug "Adding HashiCorp copyright header to : #{target}"
+      data = File.read("#{output_folder}/#{target}")
+
+      copyright_header = ['Copyright (c) HashiCorp, Inc.', 'SPDX-License-Identifier: MPL-2.0']
+      lang = language_from_filename(target)
+
+      # Some file types we don't want to add headers to
+      # e.g. .sh where headers are functional
+      # Also, this guards against new filetypes being added and triggering build errors
+      return unless lang != :unsupported
+
+      # File is not ignored and is appropriate file type to add header to
+      header = comment_block(copyright_header, lang)
+      File.write("#{output_folder}/#{target}", header)
+
+      File.write("#{output_folder}/#{target}", data, mode: 'a') # append mode
+    end
+
+    def expected_output_folder?(output_folder)
+      expected_folders = %w[
+        terraform-provider-google
+        terraform-provider-google-beta
+        terraform-next
+        terraform-google-conversion
+      ]
+      folder_name = output_folder.split('/')[-1] # Possible issue with Windows OS
+      is_expected = false
+      expected_folders.each do |folder|
+        next unless folder_name == folder
+
+        is_expected = true
+        break
+      end
+      is_expected
+    end
+
+    def replace_import_path(output_folder, target)
+      return unless @target_version_name != 'ga'
+
+      # Replace the import pathes in utility files
+      case @target_version_name
+      when 'beta'
+        tpg = TERRAFORM_PROVIDER_BETA
+        dir = RESOURCE_DIRECTORY_BETA
+      else
+        tpg = TERRAFORM_PROVIDER_PRIVATE
+        dir = RESOURCE_DIRECTORY_PRIVATE
+      end
+
+      data = File.read("#{output_folder}/#{target}")
+      data = data.gsub(
+        "#{TERRAFORM_PROVIDER_GA}/#{RESOURCE_DIRECTORY_GA}",
+        "#{tpg}/#{dir}"
+      )
+      data = data.gsub(
+        "#{TERRAFORM_PROVIDER_GA}/version",
+        "#{tpg}/version"
+      )
+      File.write("#{output_folder}/#{target}", data)
+    end
+
+    def import_path
+      case @target_version_name
+      when 'ga'
+        "#{TERRAFORM_PROVIDER_GA}/#{RESOURCE_DIRECTORY_GA}"
+      when 'beta'
+        "#{TERRAFORM_PROVIDER_BETA}/#{RESOURCE_DIRECTORY_BETA}"
+      else
+        "#{TERRAFORM_PROVIDER_PRIVATE}/#{RESOURCE_DIRECTORY_PRIVATE}"
+      end
     end
 
     def generate_objects(output_folder, types, generate_code, generate_docs)
@@ -331,6 +463,36 @@ module Provider
         return matcher[:year] unless matcher.nil?
       end
       Time.now.year
+    end
+
+    # Adapted from the method used in templating
+    # See: mmv1/compile/core.rb
+    def comment_block(text, lang)
+      case lang
+      when :ruby, :python, :yaml, :git, :gemfile
+        header = text.map { |t| t&.empty? ? '#' : "# #{t}" }
+      when :go
+        header = text.map { |t| t&.empty? ? '//' : "// #{t}" }
+      else
+        raise "Unknown language for comment: #{lang}"
+      end
+
+      header_string = header.join("\n")
+      "#{header_string}\n" # add trailing newline to returned value
+    end
+
+    def language_from_filename(filename)
+      extension = filename.split('.')[-1]
+      case extension
+      when 'go'
+        :go
+      when 'rb'
+        :ruby
+      when 'yaml', 'yml'
+        :yaml
+      else
+        :unsupported
+      end
     end
   end
 end

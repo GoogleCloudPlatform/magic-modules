@@ -12,29 +12,29 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: "Lake"
-base_url: "projects/{{project}}/locations/{{location}}/lakes/{{name}}"
-self_link: "projects/{{project}}/locations/{{location}}/lakes/{{name}}"
+name: 'Lake'
+base_url: 'projects/{{project}}/locations/{{location}}/lakes/{{name}}'
+self_link: 'projects/{{project}}/locations/{{location}}/lakes/{{name}}'
 exclude_resource: true
 description: |
   Only used to generate IAM resources
 properties:
   - !ruby/object:Api::Type::String
-    name: "name"
+    name: 'name'
     output: true
     description: |
       Dummy property.
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
-  method_name_separator: ":"
-  parent_resource_attribute: "lake"
+  method_name_separator: ':'
+  parent_resource_attribute: 'lake'
   fetch_iam_policy_verb: :GET
-  import_format: ["projects/{{project}}/locations/{{location}}/lakes/{{name}}", "{{name}}"]
+  import_format:
+    ['projects/{{project}}/locations/{{location}}/lakes/{{name}}', '{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dataplex_lake_primary"
-    primary_resource_id: "example"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-lake%s\", context[\"random_suffix\"])"
+    name: 'dataplex_lake_primary'
+    primary_resource_id: 'example'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-lake%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
-

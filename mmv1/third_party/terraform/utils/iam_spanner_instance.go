@@ -5,6 +5,11 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
+
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -29,12 +34,12 @@ var IamSpannerInstanceSchema = map[string]*schema.Schema{
 type SpannerInstanceIamUpdater struct {
 	project  string
 	instance string
-	d        TerraformResourceData
-	Config   *Config
+	d        tpgresource.TerraformResourceData
+	Config   *transport_tpg.Config
 }
 
-func NewSpannerInstanceIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
-	project, err := getProject(d, config)
+func NewSpannerInstanceIamUpdater(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgiamresource.ResourceIamUpdater, error) {
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +52,7 @@ func NewSpannerInstanceIamUpdater(d TerraformResourceData, config *Config) (Reso
 	}, nil
 }
 
-func SpannerInstanceIdParseFunc(d *schema.ResourceData, config *Config) error {
+func SpannerInstanceIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
 	id, err := extractSpannerInstanceId(d.Id())
 	if err != nil {
 		return err
@@ -60,12 +65,12 @@ func SpannerInstanceIdParseFunc(d *schema.ResourceData, config *Config) error {
 	}
 
 	// Explicitly set the id so imported resources have the same ID format as non-imported ones.
-	d.SetId(id.terraformId())
+	d.SetId(id.TerraformId())
 	return nil
 }
 
 func (u *SpannerInstanceIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +79,7 @@ func (u *SpannerInstanceIamUpdater) GetResourceIamPolicy() (*cloudresourcemanage
 		Project:  u.project,
 		Instance: u.instance,
 	}.instanceUri(), &spanner.GetIamPolicyRequest{
-		Options: &spanner.GetPolicyOptions{RequestedPolicyVersion: IamPolicyVersion},
+		Options: &spanner.GetPolicyOptions{RequestedPolicyVersion: tpgiamresource.IamPolicyVersion},
 	}).Do()
 
 	if err != nil {
@@ -87,7 +92,7 @@ func (u *SpannerInstanceIamUpdater) GetResourceIamPolicy() (*cloudresourcemanage
 		return nil, errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
 
-	cloudResourcePolicy.Version = IamPolicyVersion
+	cloudResourcePolicy.Version = tpgiamresource.IamPolicyVersion
 
 	return cloudResourcePolicy, nil
 }
@@ -99,9 +104,9 @@ func (u *SpannerInstanceIamUpdater) SetResourceIamPolicy(policy *cloudresourcema
 		return errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
 
-	spannerPolicy.Version = IamPolicyVersion
+	spannerPolicy.Version = tpgiamresource.IamPolicyVersion
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -124,7 +129,7 @@ func (u *SpannerInstanceIamUpdater) GetResourceId() string {
 	return spannerInstanceId{
 		Project:  u.project,
 		Instance: u.instance,
-	}.terraformId()
+	}.TerraformId()
 }
 
 func (u *SpannerInstanceIamUpdater) GetMutexKey() string {
@@ -140,7 +145,7 @@ type spannerInstanceId struct {
 	Instance string
 }
 
-func (s spannerInstanceId) terraformId() string {
+func (s spannerInstanceId) TerraformId() string {
 	return fmt.Sprintf("%s/%s", s.Project, s.Instance)
 }
 
@@ -157,7 +162,7 @@ func (s spannerInstanceId) instanceConfigUri(c string) string {
 }
 
 func extractSpannerInstanceId(id string) (*spannerInstanceId, error) {
-	if !regexp.MustCompile("^" + ProjectRegex + "/[a-z0-9-]+$").Match([]byte(id)) {
+	if !regexp.MustCompile("^" + verify.ProjectRegex + "/[a-z0-9-]+$").Match([]byte(id)) {
 		return nil, fmt.Errorf("Invalid spanner id format, expecting {projectId}/{instanceId}")
 	}
 	parts := strings.Split(id, "/")

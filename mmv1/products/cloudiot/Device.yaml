@@ -23,23 +23,23 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/iot/docs/'
   api: 'https://cloud.google.com/iot/docs/reference/cloudiot/rest/'
-import_format: ["{{%registry}}/devices/{{name}}"]
+import_format: ['{{%registry}}/devices/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudiot_device_basic"
-    primary_resource_id: "test-device"
+    name: 'cloudiot_device_basic'
+    primary_resource_id: 'test-device'
     vars:
-      cloudiot_device_name: "cloudiot-device"
-      cloudiot_device_registry_name: "cloudiot-device-registry"
+      cloudiot_device_name: 'cloudiot-device'
+      cloudiot_device_registry_name: 'cloudiot-device-registry'
     test_env_vars:
       project: :PROJECT_NAME
       region: :REGION
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudiot_device_full"
-    primary_resource_id: "test-device"
+    name: 'cloudiot_device_full'
+    primary_resource_id: 'test-device'
     vars:
-      cloudiot_device_name: "cloudiot-device"
-      cloudiot_device_registry_name: "cloudiot-device-registry"
+      cloudiot_device_name: 'cloudiot-device'
+      cloudiot_device_registry_name: 'cloudiot-device-registry'
     test_env_vars:
       project: :PROJECT_NAME
       region: :REGION
@@ -210,7 +210,7 @@ properties:
     description: |
       Gateway-related configuration and state.
     update_mask_fields:
-      - "gateway_config.gateway_auth_method"
+      - 'gateway_config.gateway_auth_method'
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'gatewayType'
@@ -239,4 +239,3 @@ properties:
         output: true
         description: |
           The most recent time at which the device accessed the gateway specified in last_accessed_gateway.
-

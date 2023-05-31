@@ -1,12 +1,12 @@
 
-  config := meta.(*Config)
+  config := meta.(*transport_tpg.Config)
 
-  fhirStoreId, err := parseHealthcareFhirStoreId(d.Id(), config)
+  fhirStoreId, err := ParseHealthcareFhirStoreId(d.Id(), config)
   if err != nil {
     return nil, err
   }
 
-  if err := d.Set("dataset", fhirStoreId.DatasetId.datasetId()); err != nil {
+  if err := d.Set("dataset", fhirStoreId.DatasetId.DatasetId()); err != nil {
   	return nil, fmt.Errorf("Error setting dataset: %s", err)
   }
   if err := d.Set("name", fhirStoreId.Name); err != nil {

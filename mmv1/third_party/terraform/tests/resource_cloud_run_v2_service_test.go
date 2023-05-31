@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/cloudrunv2"
 )
 
 func TestAccCloudRunV2Service_cloudrunv2ServiceFullUpdate(t *testing.T) {
@@ -17,7 +19,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceFullUpdate(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -89,12 +91,14 @@ resource "google_cloud_run_v2_service" "default" {
       }
       resources {
         cpu_idle = true
+        startup_cpu_boost = true
         limits = {
           cpu = "4"
           memory = "2Gi"
         }
       }
     }
+    session_affinity = false
   }
 }
 
@@ -156,6 +160,7 @@ resource "google_cloud_run_v2_service" "default" {
       }
       resources {
         cpu_idle = true
+        startup_cpu_boost = false
         limits = {
           cpu = "2"
           memory = "8Gi"
@@ -166,6 +171,7 @@ resource "google_cloud_run_v2_service" "default" {
       connector = google_vpc_access_connector.connector.id
       egress = "ALL_TRAFFIC"
     }
+    session_affinity = true
   }
   traffic {
     type = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
@@ -210,7 +216,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceTCPProbesUpdate(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -244,7 +250,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceHTTPProbesUpdate(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -279,7 +285,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceGRPCProbesUpdate(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -340,7 +346,7 @@ func testAccCheckCloudRunV2ServiceDestroyByNameProducer(t *testing.T, serviceNam
 			t.Errorf("Error while deleting the Cloud Run service: %s", err)
 			return
 		}
-		err = runAdminV2OperationWaitTime(config, op, config.Project, "Waiting for Cloud Run service to be deleted", config.UserAgent, 5*time.Minute)
+		err = cloudrunv2.RunAdminV2OperationWaitTime(config, op, config.Project, "Waiting for Cloud Run service to be deleted", config.UserAgent, 5*time.Minute)
 		if err != nil {
 			t.Errorf("Error while waiting for Cloud Run service delete operation to complete: %s", err.Error())
 		}
@@ -399,6 +405,7 @@ resource "google_cloud_run_v2_service" "default" {
         failure_threshold = 2
         http_get {
           path = "/some-path"
+          port = 8080
           http_headers {
             name = "User-Agent"
             value = "magic-modules"
@@ -448,6 +455,7 @@ resource "google_cloud_run_v2_service" "default" {
         failure_threshold = 3
         http_get {
           path = "/some-path"
+          port = 8080
           http_headers {
             name = "User-Agent"
             value = "magic-modules"

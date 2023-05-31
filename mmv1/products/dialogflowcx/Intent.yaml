@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'Intent'
-base_url: "{{parent}}/intents"
+base_url: '{{parent}}/intents'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -33,13 +33,13 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dialogflowcx_intent_full"
-    primary_resource_id: "basic_intent"
+    name: 'dialogflowcx_intent_full'
+    primary_resource_id: 'basic_intent'
     vars:
-      agent_name: "dialogflowcx-agent"
+      agent_name: 'dialogflowcx-agent'
 skip_sweeper: true
-id_format: "{{parent}}/intents/{{name}}"
-import_format: ["{{parent}}/intents/{{name}}"]
+id_format: '{{parent}}/intents/{{name}}'
+import_format: ['{{parent}}/intents/{{name}}']
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
