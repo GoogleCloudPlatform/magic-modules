@@ -1224,9 +1224,11 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           transformations {   
             info_types {
               name = "PHONE_NUMBER"
+              version = "0.1"
             }
             info_types {
               name = "CREDIT_CARD_NUMBER"
+              version = "1.2"
             } 
             primitive_transformation {
               replace_config {
@@ -1258,6 +1260,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           transformations {    
             info_types {
               name = "EMAIL_ADDRESS"
+              version = "latest"
             }
             info_types {
               name = "LAST_NAME"
@@ -1593,6 +1596,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 
             info_types {
               name = "CREDIT_CARD_NUMBER"
+              version = "1.5"
             } 
             primitive_transformation {
 
@@ -1618,6 +1622,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           transformations {  
             info_types {
               name = "EMAIL_ADDRESS"
+              version = "latest"
             }
 
             # adding the info_types
@@ -1627,6 +1632,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             }
             info_types {
               name = "LAST_NAME"
+              version = "0.5"
             }  
             primitive_transformation {
               character_mask_config {
