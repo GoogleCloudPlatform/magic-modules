@@ -1,5 +1,4 @@
-<% autogen_exception -%>
-package google
+package dataproc
 
 import (
 	"fmt"
@@ -23,7 +22,7 @@ func (w *DataprocClusterOperationWaiter) QueryOp() (interface{}, error) {
 	return w.Service.Projects.Regions.Operations.Get(w.Op.Name).Do()
 }
 
-func dataprocClusterOperationWait(config *transport_tpg.Config, op *dataproc.Operation, activity, userAgent string, timeout time.Duration) error {
+func DataprocClusterOperationWait(config *transport_tpg.Config, op *dataproc.Operation, activity, userAgent string, timeout time.Duration) error {
 	w := &DataprocClusterOperationWaiter{
 		Service: config.NewDataprocClient(userAgent),
 	}
