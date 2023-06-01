@@ -130,25 +130,40 @@ properties:
     description: |
       Configuration related to blocking functions.
     properties:
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: triggers
+      - !ruby/object:Api::Type::Map
+        name: 'triggers'
         description: |
           Map of Trigger to event type. Key should be one of the supported event types: "beforeCreate", "beforeSignIn".
+        value_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'functionUri'
+              description: |
+                HTTP URI trigger for the Cloud Function.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'updateTime'
+              description: |
+                When the trigger was changed.
+              properties:
+                - !ruby/object:Api::Type::Integer
+                  name: 'seconds'
+                - !ruby/object:Api::Type::Integer
+                  name: 'nanos'
       - !ruby/object:Api::Type::NestedObject
-        name: forwardInboundCredentials
+        name: 'forwardInboundCredentials'
         description: |
           The user credentials to include in the JWT payload that is sent to the registered Blocking Functions.
         properties:
           - !ruby/object:Api::Type::Boolean
-            name: idToken
+            name: 'idToken'
             description: |
               Whether to pass the user's OIDC identity provider's ID token.
           - !ruby/object:Api::Type::Boolean
-            name: accessToken
+            name: 'accessToken'
             description: |
               Whether to pass the user's OAuth identity provider's access token.
           - !ruby/object:Api::Type::Boolean
-            name: refreshToken
+            name: 'refreshToken'
             description: |
               Whether to pass the user's OAuth identity provider's refresh token.
  
@@ -158,32 +173,87 @@ properties:
       Configuration related to quotas.
     properties:
       - !ruby/object:Api::Type::NestedObject
-        name: signUpQuotaConfig
+        name: 'signUpQuotaConfig'
         description: |
           Quota for the Signup endpoint, if overwritten. Signup quota is measured in sign ups per project per hour per IP.
         properties:
           - !ruby/object:Api::Type::Integer
-            name: quota
+            name: 'quota'
             description: |
               Corresponds to the 'refill_token_count' field in QuotaServer config.
           - !ruby/object:Api::Type::NestedObject
-            name: startTime
+            name: 'startTime'
             description: |
               When this quota will take affect.
             properties:
               - !ruby/object:Api::Type::Integer
-                name: seconds
+                name: 'seconds'
               - !ruby/object:Api::Type::Integer
-                name: nanos
+                name: 'nanos'
           - !ruby/object:Api::Type::NestedObject
-            name: quotaDuration
+            name: 'quotaDuration'
             description: |
               How long this quota will be active for.
             properties:
               - !ruby/object:Api::Type::Integer
-                name: seconds
+                name: 'seconds'
               - !ruby/object:Api::Type::Integer
-                name: nanos         
+                name: 'nanos'         
            
-           
+  - !ruby/object:Api::Type::NestedObject
+    name: 'recaptchaConfig'
+    description: |
+      The project-level reCAPTCHA config.
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'emailPasswordEnforcementState'
+        description: |
+          The reCAPTCHA config for email/password provider, containing the enforcement status.
+          The email/password provider contains all related user flows protected by reCAPTCHA.
+        values:
+          - :RECAPTCHA_PROVIDER_ENFORCEMENT_STATE_UNSPECIFIED
+          - :OFF
+          - :AUDIT
+          - :ENFORCE
+      - !ruby/object:Api::Type::Array
+        name: 'managedRules'
+        description: |
+          The managed rules for authentication action based on reCAPTCHA scores.
+          The rules are shared across providers for a given tenant project.
+        item_type: Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Float
+              name: 'endScore'
+              description: |
+                The end score (inclusive) of the score range for an action.
+            - !ruby/object:Api::Type::Enum
+              name: 'action'
+              description: |
+                The action taken if the reCAPTCHA score of a request is within the interval [start_score, end_score].
+              values:
+                - :RECAPTCHA_ACTION_UNSPECIFIED
+                - :BLOCK
+      - !ruby/object:Api::Type::Array
+        name: 'recaptchaKeys'
+        description: |
+          The reCAPTCHA keys.
+        item_type: Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'key'
+              description: |
+                The reCAPTCHA Enterprise key resource name, e.g. "projects/{project}/keys/{key}".
+            - !ruby/object:Api::Type::Enum
+              name: 'type'
+              description: |
+                The client's platform type.
+              values:
+                - :CLIENT_TYPE_UNSPECIFIED
+                - :WEB
+                - :IOS
+                - :ANDROID
+      - !ruby/object:Api::Type::Boolean
+        name: 'useAccountDefender'
+        description: |
+          Whether to use the account defender for reCAPTCHA assessment. Defaults to `false`.
      
