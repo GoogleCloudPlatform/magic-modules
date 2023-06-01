@@ -263,7 +263,7 @@ func activateSubCAWithFirstPartyIssuer(config *transport_tpg.Config, d *schema.R
 	return nil
 }
 
-// These setters are added for tests
+// These setters are used for tests
 func (u *PrivatecaCaPoolIamUpdater) SetProject(project string) {
 	u.project = project
 }
