@@ -7,6 +7,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -204,7 +205,9 @@ func readConfigBasicLit(configBasicLit *ast.BasicLit) (Step, error) {
 		return nil, err
 	} else {
 		// Remove template variables because they interfere with hcl parsing.
-		configStr = strings.ReplaceAll(configStr, "%", "")
+		pattern := regexp.MustCompile("%{[^{}]*}")
+		// Replace with a value that can be parsed outside quotation marks.
+		configStr = pattern.ReplaceAllString(configStr, "true")
 		parser := hclparse.NewParser()
 		file, diagnostics := parser.ParseHCL([]byte(configStr), "config.hcl")
 		if diagnostics.HasErrors() {
