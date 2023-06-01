@@ -222,7 +222,7 @@ properties:
           The rules are shared across providers for a given tenant project.
         item_type: Api::Type::NestedObject
           properties:
-            - !ruby/object:Api::Type::Float
+            - !ruby/object:Api::Type::Integer
               name: 'endScore'
               description: |
                 The end score (inclusive) of the score range for an action.
