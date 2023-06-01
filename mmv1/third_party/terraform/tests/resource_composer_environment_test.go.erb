@@ -526,7 +526,7 @@ func TestAccComposerEnvironment_ComposerV2(t *testing.T) {
 	})
 }
 
-func TestAccComposerEnvironment_ComposerV2(t *testing.T) {
+func TestAccComposerEnvironment_ComposerV2HighResilience(t *testing.T) {
 	t.Parallel()
 
 	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
