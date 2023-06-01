@@ -30,7 +30,7 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_basicTest(t *testin
 				Config: testAccAccessContextManagerServicePerimeterEgressPolicy_basic(org, policyTitle, perimeterTitle),
 			},
 			{
-				ResourceName:      "google_access_context_manager_egress_policy.test-access1",
+				ResourceName:      "google_access_context_manager_service_perimeter.test-access",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},

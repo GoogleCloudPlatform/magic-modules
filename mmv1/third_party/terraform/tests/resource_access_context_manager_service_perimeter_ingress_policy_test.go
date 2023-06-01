@@ -14,7 +14,7 @@ import (
 // Since each test here is acting on the same organization and only one AccessPolicy
 // can exist, they need to be run serially. See AccessPolicy for the test runner.
 
-func testAccAccessContextManagerServicePerimeterIngressPolicy_basicTest(t *testing.T) {
+func TestAccAccessContextManagerServicePerimeterIngressPolicy_basicTest(t *testing.T) {
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
 	org := acctest.GetTestOrgFromEnv(t)
@@ -30,7 +30,7 @@ func testAccAccessContextManagerServicePerimeterIngressPolicy_basicTest(t *testi
 				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_basic(org, policyTitle, perimeterTitle),
 			},
 			{
-				ResourceName:      "google_access_context_manager_service_perimeter_ingress_policy.test-access1",
+				ResourceName:      "google_access_context_manager_service_perimeter.test-access",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -98,8 +98,8 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
   ingress_policy {
 	ingress_from {
 		identity_type = "ANY_IDENTITY"
-	  }
-	  ingress_to {
+	}
+	ingress_to {
 		resources = [ "*" ]
 		operations {
 			service_name = "bigquery.googleapis.com"
@@ -126,15 +126,11 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
 		}
   	}
   }
-}
-resource "google_access_context_manager_service_perimeter_ingress_policy" "test-access2" {
-	perimeter = google_access_context_manager_service_perimeter.test-access.name
-	depends_on = [google_access_context_manager_service_perimeter_ingress_policy.test-access1]
-	ingress_policy {
-		ingress_from {
-			identity_type = "IDENTITY_TYPE_UNSPECIFIED"
-		}
+  ingress_policy {
+	ingress_from {
+		identity_type = "IDENTITY_TYPE_UNSPECIFIED"
 	}
+  }
 }
 
 `, testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName))
