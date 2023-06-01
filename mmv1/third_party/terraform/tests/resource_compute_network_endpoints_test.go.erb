@@ -10,7 +10,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func TestAccComputeNetworkEndpoint_networkEndpointsBasic(t *testing.T) {
+func TestAccComputeNetworkEndpoints_networkEndpointsBasic(t *testing.T) {
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
 	t.Parallel()
@@ -31,113 +31,101 @@ func TestAccComputeNetworkEndpoint_networkEndpointsBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create one endpoint
-				Config: testAccComputeNetworkEndpoint_networkEndpointsBasic(context),
+				Config: testAccComputeNetworkEndpoints_networkEndpointsBase(context),
 			},
 			{
-				ResourceName:      "google_compute_network_endpoint.default",
+				ResourceName:      "google_compute_network_endpoints.default",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				// Force-recreate old endpoint
-				Config: testAccComputeNetworkEndpoint_networkEndpointsModified(context),
+				Config: testAccComputeNetworkEndpoints_networkEndpointsModified(context),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeNetworkEndpointWithPortsDestroyed(t, negId, "90"),
+					testAccCheckComputeNetworkEndpointsWithPortsDestroyed(t, negId, "90"),
 				),
 			},
 			{
-				ResourceName:      "google_compute_network_endpoint.default",
+				ResourceName:      "google_compute_network_endpoints.default",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				// Add two new endpoints
-				Config: testAccComputeNetworkEndpoint_networkEndpointsAdditional(context),
+				Config: testAccComputeNetworkEndpoints_networkEndpointsAdditional(context),
 			},
 			{
-				ResourceName:      "google_compute_network_endpoint.default",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				ResourceName:      "google_compute_network_endpoint.add1",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				ResourceName:      "google_compute_network_endpoint.add2",
+				ResourceName:      "google_compute_network_endpoints.default",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				// delete all endpoints
-				Config: testAccComputeNetworkEndpoint_noNetworkEndpoints(context),
+				Config: testAccComputeNetworkEndpoints_noNetworkEndpoints(context),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeNetworkEndpointWithPortsDestroyed(t, negId, "100"),
+					testAccCheckComputeNetworkEndpointsWithPortsDestroyed(t, negId, "100"),
 				),
 			},
 		},
 	})
 }
 
-func testAccComputeNetworkEndpoint_networkEndpointsBasic(context map[string]interface{}) string {
+func testAccComputeNetworkEndpoints_networkEndpointsBase(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_compute_network_endpoint" "default" {
+resource "google_compute_network_endpoints" "default" {
   zone                   = "us-central1-a"
   network_endpoint_group = google_compute_network_endpoint_group.neg.id
 
-  instance   = google_compute_instance.default.name
-  ip_address = google_compute_instance.default.network_interface[0].network_ip
-  port       = google_compute_network_endpoint_group.neg.default_port
+  endpoints {
+    instance   = google_compute_instance.default.name
+    ip_address = google_compute_instance.default.network_interface[0].network_ip
+    port       = google_compute_network_endpoint_group.neg.default_port
+  }
 }
-`, context) + testAccComputeNetworkEndpoint_noNetworkEndpoints(context)
+`, context) + testAccComputeNetworkEndpoints_noNetworkEndpoints(context)
 }
 
-func testAccComputeNetworkEndpoint_networkEndpointsModified(context map[string]interface{}) string {
+func testAccComputeNetworkEndpoints_networkEndpointsModified(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_compute_network_endpoint" "default" {
+resource "google_compute_network_endpoints" "default" {
   zone                   = "us-central1-a"
   network_endpoint_group = google_compute_network_endpoint_group.neg.name
 
-  instance   = google_compute_instance.default.name
-  ip_address = google_compute_instance.default.network_interface[0].network_ip
-  port       = "%{modified_port}"
+  endpoints {
+    instance   = google_compute_instance.default.name
+    ip_address = google_compute_instance.default.network_interface[0].network_ip
+    port       = "%{modified_port}"
+  }
 }
-`, context) + testAccComputeNetworkEndpoint_noNetworkEndpoints(context)
+`, context) + testAccComputeNetworkEndpoints_noNetworkEndpoints(context)
 }
 
-func testAccComputeNetworkEndpoint_networkEndpointsAdditional(context map[string]interface{}) string {
+func testAccComputeNetworkEndpoints_networkEndpointsAdditional(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_compute_network_endpoint" "default" {
+resource "google_compute_network_endpoints" "default" {
   zone                   = "us-central1-a"
   network_endpoint_group = google_compute_network_endpoint_group.neg.id
-
-  instance   = google_compute_instance.default.name
-  ip_address = google_compute_instance.default.network_interface[0].network_ip
-  port       = "%{modified_port}"
+ 
+  endpoints {
+    instance   = google_compute_instance.default.name
+    ip_address = google_compute_instance.default.network_interface[0].network_ip
+    port       = "%{modified_port}"
+  }
+  endpoints {
+    instance   = google_compute_instance.default.name
+    ip_address = google_compute_instance.default.network_interface[0].network_ip
+    port       = "%{add1_port}"
+  }
+  endpoints {
+    instance   = google_compute_instance.default.name
+    ip_address = google_compute_instance.default.network_interface[0].network_ip
+    port       = "%{add2_port}"
+  }
+}
+`, context) + testAccComputeNetworkEndpoints_noNetworkEndpoints(context)
 }
 
-resource "google_compute_network_endpoint" "add1" {
-  zone                   = "us-central1-a"
-  network_endpoint_group = google_compute_network_endpoint_group.neg.id
-
-  instance   = google_compute_instance.default.name
-  ip_address = google_compute_instance.default.network_interface[0].network_ip
-  port       = "%{add1_port}"
-}
-
-resource "google_compute_network_endpoint" "add2" {
-  zone                   = "us-central1-a"
-  network_endpoint_group = google_compute_network_endpoint_group.neg.name
-
-  instance   = google_compute_instance.default.name
-  ip_address = google_compute_instance.default.network_interface[0].network_ip
-  port       = "%{add2_port}"
-}
-`, context) + testAccComputeNetworkEndpoint_noNetworkEndpoints(context)
-}
-
-func testAccComputeNetworkEndpoint_noNetworkEndpoints(context map[string]interface{}) string {
+func testAccComputeNetworkEndpoints_noNetworkEndpoints(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_compute_network_endpoint_group" "neg" {
   name         = "tf-test-neg-%{random_suffix}"
@@ -186,9 +174,9 @@ data "google_compute_image" "my_image" {
 // testAccCheckComputeNetworkEndpointDestroyed makes sure the endpoint with
 // given Terraform resource name and previous information (obtained from Exists)
 // was destroyed properly.
-func testAccCheckComputeNetworkEndpointWithPortsDestroyed(t *testing.T, negId string, ports ...string) resource.TestCheckFunc {
+func testAccCheckComputeNetworkEndpointsWithPortsDestroyed(t *testing.T, negId string, ports ...string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		foundPorts, err := testAccComputeNetworkEndpointListEndpointPorts(t, negId)
+		foundPorts, err := testAccComputeNetworkEndpointsListEndpointPorts(t, negId)
 		if err != nil {
 			return fmt.Errorf("unable to confirm endpoints with ports %+v was destroyed: %v", ports, err)
 		}
@@ -202,7 +190,7 @@ func testAccCheckComputeNetworkEndpointWithPortsDestroyed(t *testing.T, negId st
 	}
 }
 
-func testAccComputeNetworkEndpointListEndpointPorts(t *testing.T, negId string) (map[string]struct{}, error) {
+func testAccComputeNetworkEndpointsListEndpointPorts(t *testing.T, negId string) (map[string]struct{}, error) {
 	config := GoogleProviderConfig(t)
 
 	url := fmt.Sprintf("https://www.googleapis.com/compute/<% if version == 'ga' %>v1<% else %>beta<% end %>/%s/listNetworkEndpoints", negId)

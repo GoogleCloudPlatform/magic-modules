@@ -1,0 +1,18 @@
+config := meta.(*transport_tpg.Config)
+if err := tpgresource.ParseImportId([]string{
+    "projects/(?P<project>[^/]+)/zones/(?P<zone>[^/]+)/networkEndpointGroups/(?P<network_endpoint_group>[^/]+)/endpoints",
+    "(?P<project>[^/]+)/(?P<zone>[^/]+)/(?P<network_endpoint_group>[^/]+)/endpoints",
+    "(?P<zone>[^/]+)/(?P<network_endpoint_group>[^/]+)/endpoints",
+    "(?P<network_endpoint_group>[^/]+)/endpoints",
+}, d, config); err != nil {
+	return nil, err
+}
+
+// Replace import id for the resource id
+id, err := tpgresource.ReplaceVars(d, config, "{{project}}/{{zone}}/{{network_endpoint_group}}/endpoints")
+if err != nil {
+  return nil, fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+return []*schema.ResourceData{d}, nil

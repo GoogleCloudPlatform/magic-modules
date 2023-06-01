@@ -1,0 +1,34 @@
+var endpointsToDelete []map[string]interface{}
+
+endpoints := d.Get("endpoints").(*schema.Set).List()
+
+for _, e := range(endpoints) {
+    endpoint := e.(map[string]interface{})
+    toDelete := make(map[string]interface{})
+    instanceProp, err := expandNestedComputeNetworkEndpointInstance(endpoint["instance"], d, config)
+    if err != nil {
+        return err
+    }
+    if instanceProp != "" {
+        toDelete["instance"] = instanceProp
+    }
+
+    portProp, err := expandNestedComputeNetworkEndpointPort(endpoint["port"], d, config)
+    if err != nil {
+        return err
+    }
+    if portProp != 0 {
+        toDelete["port"] = portProp
+    }
+
+    ipAddressProp, err := expandNestedComputeNetworkEndpointIpAddress(endpoint["ip_address"], d, config)
+    if err != nil {
+        return err
+    }
+    toDelete["ipAddress"] = ipAddressProp
+    endpointsToDelete = append(endpointsToDelete, toDelete)
+}
+
+obj = map[string]interface{}{
+	"networkEndpoints": endpointsToDelete,
+}
