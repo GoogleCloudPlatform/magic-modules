@@ -81,6 +81,14 @@ examples:
     vars:
       disk_name: 'async-test-disk'
       secondary_disk_name: 'async-secondary-test-disk'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'disk_features'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-test-disk%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      disk_name: 'test-disk-features'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: '/'
   fetch_iam_policy_verb: :GET
@@ -260,7 +268,6 @@ properties:
       internally during updates.
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/setLabels'
     update_verb: :POST
-    exclude: false
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
@@ -270,11 +277,6 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'lastAttachTimestamp'
     description: 'Last attach timestamp in RFC3339 text format.'
@@ -289,11 +291,6 @@ properties:
       Labels to apply to this disk.  A list of key->value pairs.
     update_verb: :POST
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/setLabels'
-  - !ruby/object:Api::Type::Array
-    name: 'licenses'
-    description: 'Any applicable publicly visible licenses.'
-    exclude: true
-    item_type: Api::Type::String
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -444,3 +441,39 @@ properties:
           Primary disk for asynchronous disk replication.
         required: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+  - !ruby/object:Api::Type::Array
+    name: 'guestOsFeatures'
+    description: |
+      A list of features to enable on the guest operating system.
+      Applicable only for bootable disks.
+    default_from_api: true
+    is_set: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::Enum
+          name: 'type'
+          required: true
+          description: |
+            The type of supported feature. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
+          values:
+            - :MULTI_IP_SUBNET
+            - :SECURE_BOOT
+            - :SEV_CAPABLE
+            - :UEFI_COMPATIBLE
+            - :VIRTIO_SCSI_MULTIQUEUE
+            - :WINDOWS
+            - :GVNIC
+            - :SEV_LIVE_MIGRATABLE
+            - :SEV_SNP_CAPABLE
+            - :SUSPEND_RESUME_COMPATIBLE
+            - :TDX_CAPABLE
+  - !ruby/object:Api::Type::Array
+    name: 'licenses'
+    description: Any applicable license URI.
+    default_from_api: true
+    immutable: true
+    item_type: !ruby/object:Api::Type::ResourceRef
+      name: 'license'
+      description: 'An applicable license URI'
+      resource: 'License'
+      imports: 'selfLink'

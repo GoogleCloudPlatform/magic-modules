@@ -29,7 +29,7 @@ func flattenNested<%= resource_name -%>(d *schema.ResourceData, meta interface{}
   _, item, err := resource<%=resource_name%>FindNestedObjectInList(d, meta, v.([]interface{}))
   if err != nil {
     return nil, err
-  } 
+  }
   return item, nil
 }
 
@@ -82,7 +82,7 @@ func resource<%=resource_name%>FindNestedObjectInList(d *schema.ResourceData, me
   return -1, nil, nil
 }
 <% if object.nested_query.modify_by_patch -%>
-<% 
+<%
   list_key = object.nested_query.keys[-1]
   has_project = object.base_url.include?('{{project}}')
 %>
@@ -215,14 +215,14 @@ func resource<%= resource_name -%>PatchDeleteEncoder(d *schema.ResourceData, met
   return res, nil
 }
 
-// ListForPatch handles making API request to get parent resource and 
+// ListForPatch handles making API request to get parent resource and
 // extracting list of objects.
 <%# This function is similar to flattenNested...() but
   # 1) does an API request to read the parent resource from API (flatten
-       takes in list from top-level Read() method, whereas this method 
+       takes in list from top-level Read() method, whereas this method
        is called in Create/Update/Delete)
-  # 2) returns the full list of other resources, rather than just the 
-  #    matching resource 
+  # 2) returns the full list of other resources, rather than just the
+  #    matching resource
 -%>
 func resource<%= resource_name -%>ListForPatch(d *schema.ResourceData, meta interface{}) ([]interface{}, error) {
   config := meta.(*transport_tpg.Config)
@@ -242,7 +242,18 @@ func resource<%= resource_name -%>ListForPatch(d *schema.ResourceData, meta inte
     return nil, err
   }
 
-  res, err := transport_tpg.SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project %>project<% else %>""<% end %>, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+  res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config: config,
+    Method: "<%= object.read_verb.to_s.upcase -%>",
+    <% if has_project -%>
+    Project: project,
+    <% end -%>
+    RawURL: url,
+    UserAgent: userAgent,
+    <% if object.error_retry_predicates -%>
+    ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+    <% end -%>
+  })
   if err != nil {
     return nil, err
   }
@@ -251,12 +262,12 @@ func resource<%= resource_name -%>ListForPatch(d *schema.ResourceData, meta inte
   var ok bool
   <% object.nested_query.keys[0...-1].each do |k| -%>
   if v, ok = res["<%=k-%>"]; ok && v != nil {
-    res = v.(map[string]interface{})    
+    res = v.(map[string]interface{})
   } else {
     return nil, nil
   }
   <% end -%>
-  
+
   v, ok = res["<%=object.nested_query.keys[-1]-%>"]
   if ok && v != nil {
     ls, lsOk := v.([]interface{})

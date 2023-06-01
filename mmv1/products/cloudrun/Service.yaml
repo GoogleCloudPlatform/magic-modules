@@ -127,6 +127,14 @@ examples:
       cloud_run_service_name: 'cloudrun-srv'
     test_env_vars:
       project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloud_run_service_multicontainer'
+    min_version: beta
+    primary_resource_id: 'default'
+    vars:
+      cloud_run_service_name: 'cloudrun-srv'
+    test_env_vars:
+      project: :PROJECT_NAME
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'autogenerate_revision_name'
@@ -161,16 +169,6 @@ properties:
       for creation idempotence and configuration definition. Cannot be updated.
       More info: http://kubernetes.io/docs/user-guide/identifiers#names
     required: true
-    exclude: false
-  - !ruby/object:Api::Type::String
-    name: apiVersion
-    description:
-      The API version for this call such as "serving.knative.dev/v1alpha1".
-    exclude: true
-  - !ruby/object:Api::Type::String
-    name: kind
-    description: This is always set to Service
-    exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: spec
     required: true
@@ -342,12 +340,14 @@ properties:
                 update_verb: :PUT
                 required: true
                 description: |-
-                  Container defines the unit of execution for this Revision.
-                  In the context of a Revision, we disallow a number of the fields of
-                  this Container, including: name, ports, and volumeMounts.
+                  Containers defines the unit of execution for this Revision.
                 default_from_api: true
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
+                    - !ruby/object:Api::Type::String
+                      name: name
+                      description: Name of the container
+                      default_from_api: true
                     - !ruby/object:Api::Type::String
                       deprecation_message:
                         'Not supported by Cloud Run fully managed'
@@ -773,7 +773,6 @@ properties:
                         Volume's name.
                     - !ruby/object:Api::Type::NestedObject
                       name: secret
-                      required: true
                       description: |-
                         The secret's value will be presented as the content of a file whose
                         name is defined in the item path. If no items are defined, the name of
@@ -830,6 +829,20 @@ properties:
                                   not specified, the volume defaultMode will be used. This might be in
                                   conflict with other options that affect the file mode, like fsGroup, and
                                   the result can be other mode bits set.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: emptyDir
+                      description: |-
+                        Ephemeral storage which can be backed by real disks (HD, SSD), network storage or memory (i.e. tmpfs). For now only in memory (tmpfs) is supported. It is ephemeral in the sense that when the sandbox is taken down, the data is destroyed with it (it does not persist across sandbox runs).
+                      min_version: beta
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'medium'
+                          description: |-
+                            The medium on which the data is stored. The default is "" which means to use the node's default medium. Must be an empty string (default) or Memory.
+                        - !ruby/object:Api::Type::String
+                          name: 'sizeLimit'
+                          description: |-
+                            Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: http://kubernetes.io/docs/user-guide/volumes#emptydir.
               - !ruby/object:Api::Type::Enum
                 name: servingState
                 deprecation_message: 'Not supported by Cloud Run fully managed'
@@ -981,12 +994,3 @@ properties:
             when a preview feature is used. For example, `"run.googleapis.com/launch-stage": "BETA"`
         default_from_api: true
         diff_suppress_func: 'cloudrunAnnotationDiffSuppress'
-      - !ruby/object:Api::Type::String
-        name: name
-        required: true
-        description: |-
-          Name must be unique within a Google Cloud project and region.
-          Is required when creating resources. Name is primarily intended
-          for creation idempotence and configuration definition. Cannot be updated.
-
-        exclude: true

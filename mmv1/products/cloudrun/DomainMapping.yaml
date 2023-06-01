@@ -53,15 +53,9 @@ properties:
     name: name
     url_param_only: true
     immutable: true
-    # This is a convenience field handled by terraform encoder/decoders
-    exclude: false
     description: |-
       Name should be a [verified](https://support.google.com/webmasters/answer/9008080) domain
     required: true
-  - !ruby/object:Api::Type::String
-    name: kind
-    description: This is always set to DomainMapping
-    exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: status
     description: The current status of the DomainMapping.
@@ -130,11 +124,6 @@ properties:
         name: mappedRouteName
         output: true
         description: The name of the route that the mapping currently points to.
-  - !ruby/object:Api::Type::String
-    name: apiVersion
-    description:
-      The API version for this call such as "serving.knative.dev/v1alpha1".
-    exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: spec
     description: The spec for this DomainMapping.
@@ -226,13 +215,3 @@ properties:
           or apply the lifecycle.ignore_changes rule to the metadata.0.annotations field.
         default_from_api: true
         diff_suppress_func: 'cloudrunAnnotationDiffSuppress'
-      - !ruby/object:Api::Type::String
-        name: name
-        required: true
-        immutable: true
-        description: |-
-          Name must be unique within a namespace, within a Cloud Run region.
-          Is required when creating resources. Name is primarily intended
-          for creation idempotence and configuration definition. Cannot be updated.
-          More info: http://kubernetes.io/docs/user-guide/identifiers#names
-        exclude: true

@@ -19,6 +19,7 @@ collection_url_key: 'items'
 has_self_link: true
 readonly: true
 description: 'Represents a Zone resource.'
+# Used as a resource reference
 exclude: true
 properties:
   - !ruby/object:Api::Type::Time

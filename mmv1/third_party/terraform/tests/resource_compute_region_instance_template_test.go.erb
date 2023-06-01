@@ -1325,7 +1325,13 @@ func testAccCheckComputeRegionInstanceTemplateDestroyProducer(t *testing.T) func
 				billingProject = config.BillingProject
 			}
 
-			instanceTemplate, err := transport_tpg.SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
+			instanceTemplate, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config: config,
+				Method: "GET",
+				Project: billingProject,
+				RawURL: url,
+				UserAgent: config.UserAgent,
+			})
 			_ = instanceTemplate
 			if err == nil {
 				return fmt.Errorf("Instance template still exists")
@@ -1368,7 +1374,13 @@ func testAccCheckComputeRegionInstanceTemplateExistsInProject(t *testing.T, n, p
 			billingProject = config.BillingProject
 		}
 
-		found, err := transport_tpg.SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
+		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config: config,
+			Method: "GET",
+			Project: billingProject,
+			RawURL: url,
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			return err
 		}
