@@ -59,6 +59,7 @@ examples:
       config_id: 'tf-test-config'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_create: 'templates/terraform/custom_create/gameservice_rollout_create.go'
+  custom_update: 'templates/terraform/custom_update/gameservice_rollout_update.go'
 properties:
   - !ruby/object:Api::Type::String
     name: name
