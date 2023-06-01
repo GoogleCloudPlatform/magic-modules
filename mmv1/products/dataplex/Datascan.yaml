@@ -154,8 +154,8 @@ properties:
         name: 'resource'
         immutable: true
         exactly_one_of:
-          - entity
-          - resource
+          - data.0.entity
+          - data.0.resource
         description: |
           The service-qualified full resource name of the cloud resource for a DataScan job to scan against. The field could be:
           (Cloud Storage bucket for DataDiscoveryScan)BigQuery table of type "TABLE" for DataProfileScan/DataQualityScan.
@@ -186,8 +186,8 @@ properties:
             description: |
              The scan is scheduled to run periodically.
             exactly_one_of:
-              - onDemand
-              - schedule
+              - execution_spec.0.trigger.0.on_demand
+              - execution_spec.0.trigger.0.schedule
             properties:
               - !ruby/object:Api::Type::String
                 name: 'cron'
