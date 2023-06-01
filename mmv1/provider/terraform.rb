@@ -194,10 +194,10 @@ module Provider
     # GCP Resource on Terraform.
     def generate_resource(pwd, data, generate_code, generate_docs)
       if generate_code
-        #@api.api_name is the service folder name
+        # @api.api_name is the service folder name
         product_name = @api.api_name
         target_folder = File.join(folder_name(data.version), 'services', product_name)
-        FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
+        FileUtils.mkpath target_folder
         data.generate(pwd,
                       '/templates/terraform/resource.erb',
                       "#{target_folder}/resource_#{full_resource_name(data)}.go",
@@ -262,7 +262,7 @@ module Provider
 
       data.async = data.object.async
       target_folder = File.join(folder_name(data.version), 'services', product_name)
-      FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
+      FileUtils.mkpath target_folder
       data.generate(pwd,
                     'templates/terraform/operation.go.erb',
                     "#{target_folder}/#{product_name_underscore}_operation.go",
@@ -277,7 +277,7 @@ module Provider
         || data.object.iam_policy.min_version >= data.version)
         product_name = @api.api_name
         target_folder = File.join(folder_name(data.version), 'services', product_name)
-        FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
+        FileUtils.mkpath target_folder
         data.generate(pwd,
                       'templates/terraform/iam_policy.go.erb',
                       "#{target_folder}/iam_#{full_resource_name(data)}.go",

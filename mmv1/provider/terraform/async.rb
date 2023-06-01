@@ -44,7 +44,8 @@ module Provider
         super
 
         check :check_response_func_existence, type: String, required: true
-        check :check_response_func_absence, type: String, default: 'transport_tpg.PollCheckForAbsence'
+        check :check_response_func_absence, type: String,
+                                            default: 'transport_tpg.PollCheckForAbsence'
         check :custom_poll_read, type: String
         check :suppress_error, type: :boolean, default: false
         check :target_occurrences, type: Integer, default: 1
