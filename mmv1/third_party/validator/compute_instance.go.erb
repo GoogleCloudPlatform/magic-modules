@@ -7,7 +7,7 @@
 //     third_party/terraform/resources/resource_compute_instance.go
 //
 // ----------------------------------------------------------------------------
-package google
+package compute
 
 import (
 	"errors"
@@ -28,23 +28,23 @@ import (
 
 const ComputeInstanceAssetType string = "compute.googleapis.com/Instance"
 
-func resourceConverterComputeInstance() ResourceConverter {
-	return ResourceConverter{
+func ResourceConverterComputeInstance() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType: ComputeInstanceAssetType,
 		Convert:   GetComputeInstanceCaiObject,
 	}
 }
 
-func GetComputeInstanceCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//compute.googleapis.com/projects/{{project}}/zones/{{zone}}/instances/{{name}}")
+func GetComputeInstanceCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	name, err := tpgresource.AssetName(d, config, "//compute.googleapis.com/projects/{{project}}/zones/{{zone}}/instances/{{name}}")
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 	if obj, err := GetComputeInstanceApiObject(d, config); err == nil {
-		return []Asset{{
+		return []tpgresource.Asset{{
 			Name: name,
 			Type: ComputeInstanceAssetType,
-			Resource: &AssetResource{
+			Resource: &tpgresource.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
 				DiscoveryName:        "Instance",
@@ -52,7 +52,7 @@ func GetComputeInstanceCaiObject(d tpgresource.TerraformResourceData, config *tr
 			},
 		}}, nil
 	} else {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 }
 
@@ -67,7 +67,7 @@ func GetComputeInstanceApiObject(d tpgresource.TerraformResourceData, config *tr
 		return nil, err
 	}
 
-	return jsonMap(instance)
+	return tpgresource.JsonMap(instance)
 }
 
 func expandComputeInstance(project string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*compute.Instance, error) {

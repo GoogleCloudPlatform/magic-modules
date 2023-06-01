@@ -1,21 +1,20 @@
-package google
+package tpgresource
 
 import (
 	"fmt"
 	"math/rand"
 	"regexp"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
-type ConvertFunc func(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error)
-type GetApiObjectFunc func(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error)
+type ConvertFunc func(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error)
+type GetApiObjectFunc func(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error)
 
 // FetchFullResourceFunc allows initial data for a resource to be fetched from the API and merged
 // with the planned changes. This is useful for resources that are only partially managed
 // by Terraform, like IAM policies managed with member/binding resources.
-type FetchFullResourceFunc func(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (Asset, error)
+type FetchFullResourceFunc func(d TerraformResourceData, config *transport_tpg.Config) (Asset, error)
 
 // MergeFunc combines multiple terraform resources into a single CAI asset.
 // The incoming asset will either be an asset that was created/updated or deleted.
@@ -139,11 +138,11 @@ type BooleanPolicy struct {
 type RestoreDefault struct {
 }
 
-// assetName templates an asset.name by looking up and replacing all instances
+// tpgresource.AssetName templates an asset.name by looking up and replacing all instances
 // of {{field}}. In the case where a field would resolve to an empty string, a
 // generated unique string will be used: "placeholder-" + randomString().
 // This is done to preserve uniqueness of asset.name for a given asset.asset_type.
-func assetName(d tpgresource.TerraformResourceData, config *transport_tpg.Config, linkTmpl string) (string, error) {
+func AssetName(d TerraformResourceData, config *transport_tpg.Config, linkTmpl string) (string, error) {
 	re := regexp.MustCompile("{{([%[:word:]]+)}}")
 
 	// workaround for empty project
@@ -153,7 +152,7 @@ func assetName(d tpgresource.TerraformResourceData, config *transport_tpg.Config
 		placeholderSet = true
 	}
 
-	f, err := tpgresource.BuildReplacementFunc(re, d, config, linkTmpl, false)
+	f, err := BuildReplacementFunc(re, d, config, linkTmpl, false)
 	if err != nil {
 		return "", err
 	}

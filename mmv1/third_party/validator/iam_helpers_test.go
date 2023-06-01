@@ -1,8 +1,9 @@
-package google
+package tpgiamresource
 
 import (
 	"testing"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -10,35 +11,35 @@ func TestMergeBindings(t *testing.T) {
 	cases := []struct {
 		name string
 		// Inputs
-		existing []IAMBinding
-		incoming []IAMBinding
+		existing []tpgresource.IAMBinding
+		incoming []tpgresource.IAMBinding
 		// Expected outputs
-		expectedAdditive      []IAMBinding
-		expectedAuthoritative []IAMBinding
+		expectedAdditive      []tpgresource.IAMBinding
+		expectedAuthoritative []tpgresource.IAMBinding
 	}{
 		{
 			name:                  "EmptyAddEmpty",
-			existing:              []IAMBinding{},
-			incoming:              []IAMBinding{},
-			expectedAdditive:      []IAMBinding{},
-			expectedAuthoritative: []IAMBinding{},
+			existing:              []tpgresource.IAMBinding{},
+			incoming:              []tpgresource.IAMBinding{},
+			expectedAdditive:      []tpgresource.IAMBinding{},
+			expectedAuthoritative: []tpgresource.IAMBinding{},
 		},
 		{
 			name:     "EmptyAddOne",
-			existing: []IAMBinding{},
-			incoming: []IAMBinding{
+			existing: []tpgresource.IAMBinding{},
+			incoming: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a"},
 				},
 			},
-			expectedAdditive: []IAMBinding{
+			expectedAdditive: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a"},
 				},
 			},
-			expectedAuthoritative: []IAMBinding{
+			expectedAuthoritative: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a"},
@@ -47,20 +48,20 @@ func TestMergeBindings(t *testing.T) {
 		},
 		{
 			name: "OneAddEmpty",
-			existing: []IAMBinding{
+			existing: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a"},
 				},
 			},
-			incoming: []IAMBinding{},
-			expectedAdditive: []IAMBinding{
+			incoming: []tpgresource.IAMBinding{},
+			expectedAdditive: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a"},
 				},
 			},
-			expectedAuthoritative: []IAMBinding{
+			expectedAuthoritative: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a"},
@@ -69,25 +70,25 @@ func TestMergeBindings(t *testing.T) {
 		},
 		{
 			name: "OneAddOne",
-			existing: []IAMBinding{
+			existing: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a"},
 				},
 			},
-			incoming: []IAMBinding{
+			incoming: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-b"},
 				},
 			},
-			expectedAdditive: []IAMBinding{
+			expectedAdditive: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a", "member-b"},
 				},
 			},
-			expectedAuthoritative: []IAMBinding{
+			expectedAuthoritative: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-b"},
@@ -96,7 +97,7 @@ func TestMergeBindings(t *testing.T) {
 		},
 		{
 			name: "GrandFinale",
-			existing: []IAMBinding{
+			existing: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a", "member-b"},
@@ -110,7 +111,7 @@ func TestMergeBindings(t *testing.T) {
 					Members: []string{"member-c"},
 				},
 			},
-			incoming: []IAMBinding{
+			incoming: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a", "member-b", "member-c"},
@@ -120,7 +121,7 @@ func TestMergeBindings(t *testing.T) {
 					Members: []string{"member-b", "member-c"},
 				},
 			},
-			expectedAdditive: []IAMBinding{
+			expectedAdditive: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a", "member-b", "member-c"},
@@ -134,7 +135,7 @@ func TestMergeBindings(t *testing.T) {
 					Members: []string{"member-c"},
 				},
 			},
-			expectedAuthoritative: []IAMBinding{
+			expectedAuthoritative: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a", "member-b", "member-c"},
@@ -151,16 +152,16 @@ func TestMergeBindings(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		t.Run(c.name+"/mergeAdditiveBindings", func(t *testing.T) {
+		t.Run(c.name+"/MergeAdditiveBindings", func(t *testing.T) {
 			assert.EqualValues(t,
 				c.expectedAdditive,
-				mergeAdditiveBindings(c.existing, c.incoming),
+				MergeAdditiveBindings(c.existing, c.incoming),
 			)
 		})
-		t.Run(c.name+"/mergeAuthoritativeBindings", func(t *testing.T) {
+		t.Run(c.name+"/MergeAuthoritativeBindings", func(t *testing.T) {
 			assert.EqualValues(t,
 				c.expectedAuthoritative,
-				mergeAuthoritativeBindings(c.existing, c.incoming),
+				MergeAuthoritativeBindings(c.existing, c.incoming),
 			)
 		})
 	}
@@ -170,23 +171,23 @@ func TestMergeDeleteBindings(t *testing.T) {
 	cases := []struct {
 		name string
 		// Inputs
-		existing []IAMBinding
-		incoming []IAMBinding
+		existing []tpgresource.IAMBinding
+		incoming []tpgresource.IAMBinding
 		// Expected outputs
-		expectedDeleteAdditive      []IAMBinding
-		expectedDeleteAuthoritative []IAMBinding
+		expectedDeleteAdditive      []tpgresource.IAMBinding
+		expectedDeleteAuthoritative []tpgresource.IAMBinding
 	}{
 		{
 			name:                        "EmptyDeleteEmpty",
-			existing:                    []IAMBinding{},
-			incoming:                    []IAMBinding{},
+			existing:                    []tpgresource.IAMBinding{},
+			incoming:                    []tpgresource.IAMBinding{},
 			expectedDeleteAdditive:      nil,
 			expectedDeleteAuthoritative: nil,
 		},
 		{
 			name:     "EmptyDeleteOne",
-			existing: []IAMBinding{},
-			incoming: []IAMBinding{
+			existing: []tpgresource.IAMBinding{},
+			incoming: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a"},
@@ -197,20 +198,20 @@ func TestMergeDeleteBindings(t *testing.T) {
 		},
 		{
 			name: "OneDeleteEmpty",
-			existing: []IAMBinding{
+			existing: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a"},
 				},
 			},
-			incoming: []IAMBinding{},
-			expectedDeleteAdditive: []IAMBinding{
+			incoming: []tpgresource.IAMBinding{},
+			expectedDeleteAdditive: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a"},
 				},
 			},
-			expectedDeleteAuthoritative: []IAMBinding{
+			expectedDeleteAuthoritative: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a"},
@@ -219,19 +220,19 @@ func TestMergeDeleteBindings(t *testing.T) {
 		},
 		{
 			name: "OneDeleteOne",
-			existing: []IAMBinding{
+			existing: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a", "member-b"},
 				},
 			},
-			incoming: []IAMBinding{
+			incoming: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-b"},
 				},
 			},
-			expectedDeleteAdditive: []IAMBinding{
+			expectedDeleteAdditive: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a"},
@@ -241,7 +242,7 @@ func TestMergeDeleteBindings(t *testing.T) {
 		},
 		{
 			name: "GrandFinale",
-			existing: []IAMBinding{
+			existing: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a", "member-b"},
@@ -255,7 +256,7 @@ func TestMergeDeleteBindings(t *testing.T) {
 					Members: []string{"member-c"},
 				},
 			},
-			incoming: []IAMBinding{
+			incoming: []tpgresource.IAMBinding{
 				{
 					Role:    "role-a",
 					Members: []string{"member-a", "member-b", "member-c"},
@@ -265,7 +266,7 @@ func TestMergeDeleteBindings(t *testing.T) {
 					Members: []string{"member-b", "member-c"},
 				},
 			},
-			expectedDeleteAdditive: []IAMBinding{
+			expectedDeleteAdditive: []tpgresource.IAMBinding{
 				{
 					Role:    "role-b",
 					Members: []string{"member-d"},
@@ -275,7 +276,7 @@ func TestMergeDeleteBindings(t *testing.T) {
 					Members: []string{"member-c"},
 				},
 			},
-			expectedDeleteAuthoritative: []IAMBinding{
+			expectedDeleteAuthoritative: []tpgresource.IAMBinding{
 				{
 					Role:    "role-c",
 					Members: []string{"member-c"},
@@ -284,16 +285,16 @@ func TestMergeDeleteBindings(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		t.Run(c.name+"/mergeDeleteAdditiveBindings", func(t *testing.T) {
+		t.Run(c.name+"/MergeDeleteAdditiveBindings", func(t *testing.T) {
 			assert.EqualValues(t,
 				c.expectedDeleteAdditive,
-				mergeDeleteAdditiveBindings(c.existing, c.incoming),
+				MergeDeleteAdditiveBindings(c.existing, c.incoming),
 			)
 		})
-		t.Run(c.name+"/mergeDeleteAuthoritativeBindings", func(t *testing.T) {
+		t.Run(c.name+"/MergeDeleteAuthoritativeBindings", func(t *testing.T) {
 			assert.EqualValues(t,
 				c.expectedDeleteAuthoritative,
-				mergeDeleteAuthoritativeBindings(c.existing, c.incoming),
+				MergeDeleteAuthoritativeBindings(c.existing, c.incoming),
 			)
 		})
 	}

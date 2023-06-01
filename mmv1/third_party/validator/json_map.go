@@ -1,13 +1,13 @@
-package google
+package tpgresource
 
 import (
 	"encoding/json"
 	"fmt"
 )
 
-// jsonMap converts a given value to a map[string]interface{} that
+// JsonMap converts a given value to a map[string]interface{} that
 // matches its JSON format.
-func jsonMap(x interface{}) (map[string]interface{}, error) {
+func JsonMap(x interface{}) (map[string]interface{}, error) {
 	jsn, err := json.Marshal(x)
 	if err != nil {
 		return nil, fmt.Errorf("marshalling: %v", err)
