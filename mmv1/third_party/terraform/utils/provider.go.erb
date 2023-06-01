@@ -11,13 +11,24 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/version"
 
-<% products.each do |product| -%>
-	"github.com/hashicorp/terraform-provider-google/google/services/<%= product[:definitions].name.downcase -%>"
-<% end -%>
+<% products.each do |product|
+	product_definition = product[:definitions]
+	if version == 'ga'
+		some_resource_in_ga = false
+		product_definition.objects.each do |object|
+			if !object.exclude && !object.not_in_version?(product_definition.version_obj_or_closest(version))
+				some_resource_in_ga = true
+				break
+			end
+		end
 
-	//<% unless version == 'ga' -%>
-	//"github.com/hashicorp/terraform-provider-google/google/services/runtimeconfig"
-	//<% end -%>
+		if some_resource_in_ga -%>
+			"github.com/hashicorp/terraform-provider-google/google/services/<%= product[:definitions].name.downcase -%>"
+	<% end -%>
+<% else -%>
+		"github.com/hashicorp/terraform-provider-google/google/services/<%= product[:definitions].name.downcase -%>"
+	<% end -%>
+<% end -%>
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
