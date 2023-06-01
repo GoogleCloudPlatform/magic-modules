@@ -31,7 +31,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Creating a Consent store': 'https://cloud.google.com/healthcare/docs/how-tos/consent'
   api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.consentStores'
-
+# Skipping the sweeper since this is a fine-grained resource under dataset
+skip_sweeper: true
 id_format: '{{dataset}}/consentStores/{{name}}'
 import_format: ['{{%dataset}}/consentStores/{{name}}']
 examples:

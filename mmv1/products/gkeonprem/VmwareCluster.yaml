@@ -232,7 +232,7 @@ properties:
                         description:
                           Hostname of the machine. VM's name will be used if
                           this field is empty.
-                        required: true
+                        default_from_api: true
       - !ruby/object:Api::Type::NestedObject
         name: 'dhcpIpConfig'
         description: Configuration settings for a DHCP IP configuration.

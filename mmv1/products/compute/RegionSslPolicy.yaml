@@ -66,11 +66,6 @@ properties:
     description: 'An optional description of this resource.'
     immutable: true
   - !ruby/object:Api::Type::String
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
-  - !ruby/object:Api::Type::String
     name: 'name'
     description: |
       Name of the resource. Provided by the client when the resource is
@@ -135,20 +130,3 @@ properties:
       Fingerprint of this resource. A hash of the contents stored in this
       object. This field is used in optimistic locking.
     output: true
-  - !ruby/object:Api::Type::Array
-    name: 'warnings'
-    description: |
-      If potential misconfigurations are detected for this SSL policy, this
-      field will be populated with warning messages.
-    output: true
-    exclude: true
-    item_type: !ruby/object:Api::Type::NestedObject
-      properties:
-        - !ruby/object:Api::Type::String
-          name: 'code'
-          description: 'A warning code, if applicable.'
-          output: true
-        - !ruby/object:Api::Type::String
-          name: 'message'
-          description: 'A human-readable description of the warning code.'
-          output: true
