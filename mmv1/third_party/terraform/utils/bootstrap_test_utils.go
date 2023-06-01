@@ -774,7 +774,15 @@ func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string
 			"ipCidrRange": "10.77.1.0/28",
 		}
 
-		res, err := transport_tpg.SendRequestWithTimeout(config, "POST", projectID, url, config.UserAgent, subnetObj, 4*time.Minute)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   projectID,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+			Body:      subnetObj,
+			Timeout:   4 * time.Minute,
+		})
 
 		log.Printf("Response is, %s", res)
 		if err != nil {
@@ -828,7 +836,15 @@ func BootstrapNetworkAttachment(t *testing.T, networkAttachmentName string, subn
 			"connectionPreference": "ACCEPT_AUTOMATIC",
 		}
 
-		res, err := transport_tpg.SendRequestWithTimeout(config, "POST", projectID, url, config.UserAgent, networkAttachmentObj, 4*time.Minute)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   projectID,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+			Body:      networkAttachmentObj,
+			Timeout:   4 * time.Minute,
+		})
 		if err != nil {
 			t.Fatalf("Error bootstrapping test Network Attachment %s: %s", networkAttachmentName, err)
 		}
