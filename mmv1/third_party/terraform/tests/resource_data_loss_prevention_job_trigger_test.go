@@ -397,7 +397,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerActionsOptionalExample(t *
 		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
@@ -2270,3 +2270,4 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 }
 `, context)
 }
+
