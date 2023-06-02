@@ -42,13 +42,13 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "public_delegated_prefixes_basic"
-    primary_resource_id: "prefixes"
+    name: 'public_delegated_prefixes_basic'
+    primary_resource_id: 'prefixes'
     # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
     # resource_compute_public_advertised_prefix_test.go
     skip_test: true
     vars:
-      prefixes_name: "my-prefix"
+      prefixes_name: 'my-prefix'
     test_env_vars:
       description: :PAP_DESCRIPTION
 properties:
@@ -75,11 +75,14 @@ properties:
     required: true
   - !ruby/object:Api::Type::String
     name: 'parentPrefix'
-    description: The URL of parent prefix. Either PublicAdvertisedPrefix or PublicDelegatedPrefix.
+    description:
+      The URL of parent prefix. Either PublicAdvertisedPrefix or
+      PublicDelegatedPrefix.
     required: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: 'ipCidrRange'
-    description: The IPv4 address range, in CIDR format, represented by this public advertised prefix.
+    description:
+      The IPv4 address range, in CIDR format, represented by this public
+      advertised prefix.
     required: true
-

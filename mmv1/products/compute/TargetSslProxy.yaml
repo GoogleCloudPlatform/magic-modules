@@ -46,13 +46,13 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "target_ssl_proxy_basic"
-    primary_resource_id: "default"
+    name: 'target_ssl_proxy_basic'
+    primary_resource_id: 'default'
     vars:
-      target_ssl_proxy_name: "test-proxy"
-      ssl_certificate_name: "default-cert"
-      backend_service_name: "backend-service"
-      health_check_name: "health-check"
+      target_ssl_proxy_name: 'test-proxy'
+      ssl_certificate_name: 'default-cert'
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'

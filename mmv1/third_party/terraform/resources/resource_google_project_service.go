@@ -7,7 +7,11 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
+
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/serviceusage/v1"
 )
@@ -56,7 +60,7 @@ var renamedServicesByOldAndNewServiceNames = mergeStringMaps(renamedServices, re
 const maxServiceUsageBatchSize = 20
 
 func validateProjectServiceService(val interface{}, key string) (warns []string, errs []error) {
-	bannedServicesFunc := StringNotInSlice(append(ignoredProjectServices, bannedProjectServices...), false)
+	bannedServicesFunc := verify.StringNotInSlice(append(ignoredProjectServices, bannedProjectServices...), false)
 	warns, errs = bannedServicesFunc(val, key)
 	if len(errs) > 0 {
 		return
@@ -100,7 +104,7 @@ func ResourceGoogleProjectService() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: compareResourceNames,
+				DiffSuppressFunc: tpgresource.CompareResourceNames,
 			},
 
 			"disable_dependent_services": {
@@ -135,11 +139,11 @@ func resourceGoogleProjectServiceImport(d *schema.ResourceData, m interface{}) (
 func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
-	project = GetResourceNameFromSelfLink(project)
+	project = tpgresource.GetResourceNameFromSelfLink(project)
 
 	srv := d.Get("service").(string)
 	id := project + "/" + srv
@@ -147,7 +151,7 @@ func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}
 	// Check if the service has already been enabled
 	servicesRaw, err := BatchRequestReadServices(project, d, config)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
 	}
 	servicesList := servicesRaw.(map[string]struct{})
 	if _, ok := servicesList[srv]; ok {
@@ -172,16 +176,16 @@ func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}
 
 func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
-	project = GetResourceNameFromSelfLink(project)
+	project = tpgresource.GetResourceNameFromSelfLink(project)
 
 	// Verify project for services still exists
 	projectGetCall := config.NewResourceManagerClient(userAgent).Projects.Get(project)
@@ -189,7 +193,7 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 		billingProject := project
 
 		// err == nil indicates that the billing_project value was found
-		if bp, err := getBillingProject(d, config); err == nil {
+		if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 			billingProject = bp
 		}
 		projectGetCall.Header().Add("X-Goog-User-Project", billingProject)
@@ -197,19 +201,19 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 	p, err := projectGetCall.Do()
 
 	if err == nil && p.LifecycleState == "DELETE_REQUESTED" {
-		// Construct a 404 error for handleNotFoundError
+		// Construct a 404 error for transport_tpg.HandleNotFoundError
 		err = &googleapi.Error{
 			Code:    404,
 			Message: "Project deletion was requested",
 		}
 	}
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
 	}
 
 	servicesRaw, err := BatchRequestReadServices(project, d, config)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
 	}
 	servicesList := servicesRaw.(map[string]struct{})
 
@@ -238,16 +242,16 @@ func resourceGoogleProjectServiceDelete(d *schema.ResourceData, meta interface{}
 		return nil
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
-	project = GetResourceNameFromSelfLink(project)
+	project = tpgresource.GetResourceNameFromSelfLink(project)
 
 	service := d.Get("service").(string)
 	disableDependencies := d.Get("disable_dependent_services").(bool)
 	if err = disableServiceUsageProjectService(service, project, d, config, disableDependencies); err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
 	}
 
 	d.SetId("")
@@ -262,9 +266,9 @@ func resourceGoogleProjectServiceUpdate(d *schema.ResourceData, meta interface{}
 
 // Disables a project service.
 func disableServiceUsageProjectService(service, project string, d *schema.ResourceData, config *transport_tpg.Config, disableDependentServices bool) error {
-	err := RetryTimeDuration(func() error {
+	err := transport_tpg.RetryTimeDuration(func() error {
 		billingProject := project
-		userAgent, err := generateUserAgentString(d, config.UserAgent)
+		userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return err
 		}
@@ -274,7 +278,7 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 		})
 		if config.UserProjectOverride {
 			// err == nil indicates that the billing_project value was found
-			if bp, err := getBillingProject(d, config); err == nil {
+			if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 				billingProject = bp
 			}
 			servicesDisableCall.Header().Add("X-Goog-User-Project", billingProject)
@@ -289,7 +293,7 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 			return waitErr
 		}
 		return nil
-	}, d.Timeout(schema.TimeoutDelete), ServiceUsageServiceBeingActivated)
+	}, d.Timeout(schema.TimeoutDelete), transport_tpg.ServiceUsageServiceBeingActivated)
 	if err != nil {
 		return fmt.Errorf("Error disabling service %q for project %q: %v", service, project, err)
 	}

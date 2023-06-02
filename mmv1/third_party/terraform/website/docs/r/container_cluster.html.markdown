@@ -394,6 +394,10 @@ subnetwork in which the cluster's instances are launched.
     which allows the usage of filestore instance as volumes.
     It is disabled by default; set `enabled = true` to enable.
 
+* `gcs_fuse_csi_driver_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))) The status of the GCSFuse CSI driver addon,
+    which allows the usage of a gcs bucket as volumes.
+    It is disabled by default; set `enabled = true` to enable.
+
 * `cloudrun_config` - (Optional). Structure is [documented below](#nested_cloudrun_config).
 
 * `istio_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
@@ -1174,7 +1178,7 @@ and all pods running on the nodes. Specified as a map from the key, such as
 
 <a name="nested_gateway_api_config"></a>The `gateway_api_config` block supports:
 
-* `channel` - (Required) Which Gateway Api channel should be used. `CHANNEL_DISABLED` or `CHANNEL_STANDARD`.
+* `channel` - (Required) Which Gateway Api channel should be used. `CHANNEL_DISABLED`, `CHANNEL_EXPERIMENTAL` or `CHANNEL_STANDARD`.
 
 <a name="nested_protect_config"></a>The `protect_config` block supports:
 

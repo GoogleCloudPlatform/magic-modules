@@ -24,7 +24,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/firestore/docs/manage-data/add-data'
   api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.documents'
-import_format: ["{{name}}"]
+import_format: ['{{name}}']
+skip_sweeper: true
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     This resource creates a Firestore Document on a project that already has
@@ -37,19 +38,19 @@ docs: !ruby/object:Provider::Terraform::Docs
     the App Engine location specified.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firestore_document_basic"
-    primary_resource_id: "mydoc"
+    name: 'firestore_document_basic'
+    primary_resource_id: 'mydoc'
     test_env_vars:
       project_id: :FIRESTORE_PROJECT_NAME
     vars:
-      document_id: "my-doc-id"
+      document_id: 'my-doc-id'
   - !ruby/object:Provider::Terraform::Examples
-    name: "firestore_document_nested_document"
-    primary_resource_id: "mydoc"
+    name: 'firestore_document_nested_document'
+    primary_resource_id: 'mydoc'
     test_env_vars:
       project_id: :FIRESTORE_PROJECT_NAME
     vars:
-      document_id: "my-doc-id"
+      document_id: 'my-doc-id'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/firestore_document.go.erb
   decoder: templates/terraform/decoders/firestore_document.go.erb
@@ -92,7 +93,8 @@ properties:
       The document's [fields](https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.documents) formated as a json string.
     custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
     custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
+    state_func:
+      'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
       return s }'
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'validation.StringIsJSON'
@@ -105,4 +107,3 @@ properties:
     name: 'updateTime'
     description: 'Last update timestamp in RFC3339 format.'
     output: true
-

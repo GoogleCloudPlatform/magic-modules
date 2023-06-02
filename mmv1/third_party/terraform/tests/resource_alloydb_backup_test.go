@@ -1,10 +1,10 @@
 package google
 
 import (
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccAlloydbBackup_update(t *testing.T) {
@@ -16,7 +16,7 @@ func TestAccAlloydbBackup_update(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlloydbBackupDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -92,72 +92,6 @@ data "google_compute_network" "default" {
 `, context)
 }
 
-// We expect an error when creating an on-demand backup without location.
-// Location is a `required` field.
-func TestAccAlloydbBackup_missingLocation(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
-	}
-
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAlloydbBackupDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config:      testAccAlloydbBackup_missingLocation(context),
-				ExpectError: regexp.MustCompile("Missing required argument"),
-			},
-		},
-	})
-}
-
-func testAccAlloydbBackup_missingLocation(context map[string]interface{}) string {
-	return Nprintf(`
-resource "google_alloydb_backup" "default" {
-  backup_id    = "tf-test-alloydb-backup%{random_suffix}"
-  cluster_name = google_alloydb_cluster.default.name
-  depends_on = [google_alloydb_instance.default]
-}
-
-resource "google_alloydb_cluster" "default" {
-  location = "us-central1"
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-}
-  
-data "google_project" "project" { }
-
-resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
-}
-
-resource "google_alloydb_instance" "default" {
-  cluster       = google_alloydb_cluster.default.name
-  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
-  instance_type = "PRIMARY"
-
-  depends_on = [google_service_networking_connection.vpc_connection]
-}
-  
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
-}
-`, context)
-}
-
 // Test to create on-demand backup with mandatory fields.
 func TestAccAlloydbBackup_createBackupWithMandatoryFields(t *testing.T) {
 	t.Parallel()
@@ -167,7 +101,7 @@ func TestAccAlloydbBackup_createBackupWithMandatoryFields(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlloydbBackupDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -237,13 +171,13 @@ func TestAccAlloydbBackup_usingCMEK(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  BootstrapSharedTestNetwork(t, "alloydb-update"),
+		"network_name":  BootstrapSharedTestNetwork(t, "alloydb-cmek"),
 		"random_suffix": RandString(t, 10),
 		"key_name":      "tf-test-key-" + RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlloydbBackupDestroyProducer(t),
 		Steps: []resource.TestStep{

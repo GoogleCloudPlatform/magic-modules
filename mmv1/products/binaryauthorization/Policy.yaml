@@ -111,9 +111,9 @@ properties:
             Note: this field must be non-empty when the evaluation_mode field
             specifies REQUIRE_ATTESTATION, otherwise it must be empty.
           is_set: true
-          set_hash_func: selfLinkNameHash
+          set_hash_func: tpgresource.SelfLinkNameHash
           custom_expand: 'templates/terraform/custom_expand/binaryauthorization_attestors.erb'
-          diff_suppress_func: 'compareSelfLinkOrResourceName'
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
           item_type: Api::Type::String
         - !ruby/object:Api::Type::Enum
           name: enforcementMode
@@ -141,12 +141,12 @@ properties:
         }
         at := copy["require_attestations_by"].(*schema.Set)
         if at != nil {
-          t := convertAndMapStringArr(at.List(), GetResourceNameFromSelfLink)
-          copy["require_attestations_by"] = schema.NewSet(selfLinkNameHash, convertStringArrToInterface(t))
+          t := convertAndMapStringArr(at.List(), tpgresource.GetResourceNameFromSelfLink)
+          copy["require_attestations_by"] = schema.NewSet(tpgresource.SelfLinkNameHash, tpgresource.ConvertStringArrToInterface(t))
         }
         var buf bytes.Buffer
         schema.SerializeResourceForHash(&buf, copy, ResourceBinaryAuthorizationPolicy().Schema["cluster_admission_rules"].Elem.(*schema.Resource))
-        return hashcode(buf.String())
+        return tpgresource.Hashcode(buf.String())
       }
   - !ruby/object:Api::Type::NestedObject
     name: defaultAdmissionRule
@@ -176,9 +176,9 @@ properties:
           Note: this field must be non-empty when the evaluation_mode field
           specifies REQUIRE_ATTESTATION, otherwise it must be empty.
         is_set: true
-        set_hash_func: selfLinkNameHash
+        set_hash_func: tpgresource.SelfLinkNameHash
         custom_expand: 'templates/terraform/custom_expand/binaryauthorization_attestors.erb'
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Enum
         name: enforcementMode

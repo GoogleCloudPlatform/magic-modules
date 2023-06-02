@@ -6,6 +6,8 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -15,7 +17,7 @@ const DEFAULT_HEALTHCARE_TEST_LOCATION = "us-central1"
 func TestAccHealthcareDatasetIamBinding(t *testing.T) {
 	t.Parallel()
 
-	projectId := GetTestProjectFromEnv()
+	projectId := acctest.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.datasetAdmin"
 	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -27,7 +29,7 @@ func TestAccHealthcareDatasetIamBinding(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -64,7 +66,7 @@ func TestAccHealthcareDatasetIamBinding(t *testing.T) {
 func TestAccHealthcareDatasetIamMember(t *testing.T) {
 	t.Parallel()
 
-	projectId := GetTestProjectFromEnv()
+	projectId := acctest.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.datasetViewer"
 	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -76,7 +78,7 @@ func TestAccHealthcareDatasetIamMember(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -99,7 +101,7 @@ func TestAccHealthcareDatasetIamMember(t *testing.T) {
 func TestAccHealthcareDatasetIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	projectId := GetTestProjectFromEnv()
+	projectId := acctest.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.datasetAdmin"
 	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -111,14 +113,17 @@ func TestAccHealthcareDatasetIamPolicy(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccHealthcareDatasetIamPolicy_basic(account, datasetName, roleId),
-				Check: testAccCheckGoogleHealthcareDatasetIam(t, datasetId.DatasetId(), roleId, []string{
-					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
-				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleHealthcareDatasetIam(t, datasetId.DatasetId(), roleId, []string{
+						fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
+					}),
+					resource.TestCheckResourceAttrSet("data.google_healthcare_dataset_iam_policy.foo", "policy_data"),
+				),
 			},
 			{
 				ResourceName:      "google_healthcare_dataset_iam_policy.foo",
@@ -248,6 +253,10 @@ data "google_iam_policy" "foo" {
 resource "google_healthcare_dataset_iam_policy" "foo" {
   dataset_id  = google_healthcare_dataset.dataset.id
   policy_data = data.google_iam_policy.foo.policy_data
+}
+
+data "google_healthcare_dataset_iam_policy" "foo" {
+  dataset_id  = google_healthcare_dataset.dataset.id
 }
 `, account, DEFAULT_HEALTHCARE_TEST_LOCATION, datasetName, roleId)
 }

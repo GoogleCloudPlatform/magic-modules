@@ -108,31 +108,31 @@ properties:
     name: hostnames
     item_type: Api::Type::String
     description: |
-          Set of hosts that should match against the HTTP host header to select a HttpRoute to process the request.  
+      Set of hosts that should match against the HTTP host header to select a HttpRoute to process the request.
     required: true
   - !ruby/object:Api::Type::Array
     name: meshes
     item_type: Api::Type::String
     description: |
-          Meshes defines a list of meshes this HttpRoute is attached to, as one of the routing rules to route the requests served by the mesh.
-          Each mesh reference should match the pattern: projects/*/locations/global/meshes/<mesh_name>.
-          The attached Mesh should be of a type SIDECAR.
-    send_empty_value: true 
+      Meshes defines a list of meshes this HttpRoute is attached to, as one of the routing rules to route the requests served by the mesh.
+      Each mesh reference should match the pattern: projects/*/locations/global/meshes/<mesh_name>.
+      The attached Mesh should be of a type SIDECAR.
+    send_empty_value: true
   - !ruby/object:Api::Type::Array
     name: gateways
     item_type: Api::Type::String
     description: |
-          Gateways defines a list of gateways this HttpRoute is attached to, as one of the routing rules to route the requests served by the gateway.
-          Each gateway reference should match the pattern: projects/*/locations/global/gateways/<gateway_name>
+      Gateways defines a list of gateways this HttpRoute is attached to, as one of the routing rules to route the requests served by the gateway.
+      Each gateway reference should match the pattern: projects/*/locations/global/gateways/<gateway_name>
     send_empty_value: true
   - !ruby/object:Api::Type::Array
     name: rules
     description: |
-          Rules that define how traffic is routed and handled.  
+      Rules that define how traffic is routed and handled.
     required: true
     send_empty_value: true
     item_type: !ruby/object:Api::Type::NestedObject
-      properties: 
+      properties:
         - !ruby/object:Api::Type::Array
           name: matches
           description: |
@@ -170,11 +170,11 @@ properties:
                 exactly_one_of:
                   - fullPathMatch
                   - prefixMatch
-                  - regexMatch   
+                  - regexMatch
               - !ruby/object:Api::Type::Array
                 name: queryParameters
                 description: |
-                  Specifies a list of query parameters to match against. 
+                  Specifies a list of query parameters to match against.
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::String
@@ -208,7 +208,7 @@ properties:
               - !ruby/object:Api::Type::Array
                 name: headers
                 description: |
-                  Specifies a list of HTTP request headers to match against. 
+                  Specifies a list of HTTP request headers to match against.
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::String
@@ -290,17 +290,17 @@ properties:
                         - !ruby/object:Api::Type::Integer
                           name: start
                           description: |
-                             Start of the range (inclusive).
+                            Start of the range (inclusive).
                           required: true
                         - !ruby/object:Api::Type::Integer
                           name: end
                           description: |
-                             End of the range (exclusive).
-                          required: true                
+                            End of the range (exclusive).
+                          required: true
         - !ruby/object:Api::Type::NestedObject
           name: action
           description: |
-              The detailed rule defining how to route matched traffic.
+            The detailed rule defining how to route matched traffic.
           send_empty_value: true
           properties:
             - !ruby/object:Api::Type::Array
@@ -348,7 +348,7 @@ properties:
                 - !ruby/object:Api::Type::Boolean
                   name: stripQuery
                   description: |
-                    If set to true, any accompanying query portion of the original URL is removed prior to redirecting the request. 
+                    If set to true, any accompanying query portion of the original URL is removed prior to redirecting the request.
                 - !ruby/object:Api::Type::Integer
                   name: portRedirect
                   description: |
@@ -366,25 +366,25 @@ properties:
                     - !ruby/object:Api::Type::String
                       name: fixedDelay
                       description: |
-                       Specify a fixed delay before forwarding the request.
+                        Specify a fixed delay before forwarding the request.
                     - !ruby/object:Api::Type::Integer
                       name: percentage
                       description: |
-                         The percentage of traffic on which delay will be injected.
+                        The percentage of traffic on which delay will be injected.
                       send_empty_value: true
                 - !ruby/object:Api::Type::NestedObject
                   name: abort
                   description: |
-                     Specification of how client requests are aborted as part of fault injection before being sent to a destination.
+                    Specification of how client requests are aborted as part of fault injection before being sent to a destination.
                   properties:
                     - !ruby/object:Api::Type::Integer
                       name: httpStatus
                       description: |
-                         The HTTP status code used to abort the request.
+                        The HTTP status code used to abort the request.
                     - !ruby/object:Api::Type::Integer
                       name: percentage
                       description: |
-                         The percentage of traffic which will be aborted.
+                        The percentage of traffic which will be aborted.
                       send_empty_value: true
             - !ruby/object:Api::Type::NestedObject
               name: requestHeaderModifier
@@ -426,7 +426,7 @@ properties:
               name: urlRewrite
               description: |
                 The specification for rewrite URL before forwarding requests to the destination.
-              properties: 
+              properties:
                 - !ruby/object:Api::Type::String
                   name: pathPrefixRewrite
                   description: |
@@ -465,7 +465,7 @@ properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: destination
                   description: |
-                    The destination the requests will be mirrored to. 
+                    The destination the requests will be mirrored to.
                   properties:
                     - !ruby/object:Api::Type::String
                       name: serviceName
@@ -482,7 +482,7 @@ properties:
               name: corsPolicy
               description: |
                 The specification for allowing client side cross-origin requests.
-              properties: 
+              properties:
                 - !ruby/object:Api::Type::Array
                   name: allowOrigins
                   item_type: Api::Type::String
@@ -520,6 +520,3 @@ properties:
                   name: disabled
                   description: |
                     If true, the CORS policy is disabled. The default value is false, which indicates that the CORS policy is in effect.
-
-
-  

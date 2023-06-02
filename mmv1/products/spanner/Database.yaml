@@ -41,12 +41,12 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 autogen_async: true
 skip_sweeper: true
-id_format: "{{instance}}/{{name}}"
+id_format: '{{instance}}/{{name}}'
 import_format:
-  - "projects/{{project}}/instances/{{instance}}/databases/{{name}}"
-  - "instances/{{instance}}/databases/{{name}}"
-  - "{{project}}/{{instance}}/{{name}}"
-  - "{{instance}}/{{name}}"
+  - 'projects/{{project}}/instances/{{instance}}/databases/{{name}}'
+  - 'instances/{{instance}}/databases/{{name}}'
+  - '{{project}}/{{instance}}/{{name}}'
+  - '{{instance}}/{{name}}'
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     On newer versions of the provider, you must explicitly set `deletion_protection=false`
@@ -57,14 +57,15 @@ docs: !ruby/object:Provider::Terraform::Docs
     for more information on lifecycle parameters.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "spanner_database_basic"
-    primary_resource_id: "database"
-        # Randomness due to spanner instance
+    name: 'spanner_database_basic'
+    primary_resource_id:
+      'database'
+      # Randomness due to spanner instance
     skip_vcr: true
     vars:
-      database_name: "my-database"
+      database_name: 'my-database'
     ignore_read_extra:
-      - "deletion_protection"
+      - 'deletion_protection'
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'deletion_protection'
@@ -111,7 +112,7 @@ properties:
       and 7 days, and can be specified in days, hours, minutes, or seconds. For example,
       the values 1d, 24h, 1440m, and 86400s are equivalent. Default value is 1h.
       If this property is used, you must avoid adding new DDL statements to `ddl` that
-      update the database's version_retention_period. 
+      update the database's version_retention_period.
     validation: !ruby/object:Provider::Terraform::Validation
       function: ValidateDatabaseRetentionPeriod
     default_from_api: true
@@ -131,9 +132,6 @@ properties:
     name: 'state'
     description: An explanation of the status of the database.
     output: true
-    # This attribute is not useful - we include it in Terraform for historical
-    # reasons, but you should most likely not use it.
-    exclude: false
     values:
       - :READY
       - :CREATING
@@ -152,7 +150,7 @@ properties:
     name: 'databaseDialect'
     description: |
       The dialect of the Cloud Spanner Database.
-      If it is not provided, "GOOGLE_STANDARD_SQL" will be used. 
+      If it is not provided, "GOOGLE_STANDARD_SQL" will be used.
     values:
       - :GOOGLE_STANDARD_SQL
       - :POSTGRESQL

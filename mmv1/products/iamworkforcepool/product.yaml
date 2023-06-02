@@ -37,7 +37,7 @@ async: !ruby/object:Api::OpAsync
     path: 'targetLink'
   status: !ruby/object:Api::OpAsync::Status
     path: 'done'
-    complete: True
+    complete: true
     allowed:
       - true
       - false

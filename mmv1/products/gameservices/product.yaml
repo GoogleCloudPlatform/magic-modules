@@ -15,11 +15,11 @@
 name: GameServices
 display_name: Game Servers
 scopes:
-- https://www.googleapis.com/auth/compute
+  - https://www.googleapis.com/auth/compute
 versions:
-- !ruby/object:Api::Product::Version
-  name: ga
-  base_url: https://gameservices.googleapis.com/v1/
-- !ruby/object:Api::Product::Version
-  name: beta
-  base_url: https://gameservices.googleapis.com/v1beta/
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://gameservices.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://gameservices.googleapis.com/v1beta/

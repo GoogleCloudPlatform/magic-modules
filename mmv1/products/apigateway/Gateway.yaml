@@ -46,7 +46,8 @@ examples:
     min_version: beta
     name: 'apigateway_gateway_basic'
     primary_resource_id: 'api_gw'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-gateway%s", context["random_suffix"])'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-my-gateway%s", context["random_suffix"])'
     vars:
       api_id: 'my-api'
       config_id: 'my-config'
@@ -56,7 +57,8 @@ examples:
     min_version: beta
     name: 'apigateway_gateway_full'
     primary_resource_id: 'api_gw'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-gateway%s", context["random_suffix"])'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-my-gateway%s", context["random_suffix"])'
     vars:
       api_id: 'my-api'
       config_id: 'my-config'
@@ -93,11 +95,13 @@ properties:
     description: |
       Resource name of the API Config for this Gateway. Format: projects/{project}/locations/global/apis/{api}/configs/{apiConfig}.
       When changing api configs please ensure the new config is a new resource and the lifecycle rule `create_before_destroy` is set.
-    diff_suppress_func: compareResourceNames
+    diff_suppress_func: tpgresource.CompareResourceNames
   - !ruby/object:Api::Type::String
     name: 'defaultHostname'
     output: true
-    description: The default API Gateway host name of the form {gatewayId}-{hash}.{region_code}.gateway.dev.
+    description:
+      The default API Gateway host name of the form
+      {gatewayId}-{hash}.{region_code}.gateway.dev.
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: |

@@ -10,7 +10,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
---- !ruby/object:Api::Resource # This is the plural of `ServicePerimeter`, any changes here should be made to `ServicePerimeter` as well
+
+--- !ruby/object:Api::Resource  # This is the plural of `ServicePerimeter`, any changes here should be made to `ServicePerimeter` as well
 name: 'ServicePerimeters'
 base_url: '{{parent}}/servicePerimeters:replaceAll'
 update_url: '{{parent}}/servicePerimeters:replaceAll'
@@ -400,9 +401,9 @@ properties:
               # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
               # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # at_least_one_of:
-              #   - status.0.resources
-              #   - status.0.access_levels
-              #   - status.0.restricted_services
+              #   - spec.0.resources
+              #   - spec.0.access_levels
+              #   - spec.0.restricted_services
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
               name: 'accessLevels'
@@ -420,9 +421,9 @@ properties:
               # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
               # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # at_least_one_of:
-              #   - status.0.resources
-              #   - status.0.access_levels
-              #   - status.0.restricted_services
+              #   - spec.0.resources
+              #   - spec.0.access_levels
+              #   - spec.0.restricted_services
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
               name: 'restrictedServices'
@@ -435,9 +436,9 @@ properties:
               # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
               # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # at_least_one_of:
-              #   - status.0.resources
-              #   - status.0.access_levels
-              #   - status.0.restricted_services
+              #   - spec.0.resources
+              #   - spec.0.access_levels
+              #   - spec.0.restricted_services
               item_type: Api::Type::String
             - !ruby/object:Api::Type::NestedObject
               name: 'vpcAccessibleServices'

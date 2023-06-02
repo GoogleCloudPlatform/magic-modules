@@ -1,3 +1,7 @@
+<% if hc_downstream -%>
+<%= lines(hashicorp_copyright_header(:go, pwd)) -%>
+<% end -%>
+
 <%= lines(autogen_notice(:go, pwd)) -%>
 
 package google
@@ -7,6 +11,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
+	"<%= import_path() -%>/acctest"
 )
 
 <%# Since most resources define a "basic" config as their first example, we can reuse that config to create a resource to test IAM resources with. -%>
@@ -37,16 +43,16 @@ import_url = import_format.gsub(/({{)%?(\w+)(}})/, '%s').gsub(object.__product.b
 		<% if i != params.size - 1 -%>
 			<%# If the last parameter is project then we want to create a new project to use for the test, so don't default from the environment -%>
 			<% if object.iam_policy.test_project_name.nil? -%>
-				<% import_qualifiers.push('GetTestProjectFromEnv()') -%>
+				<% import_qualifiers.push('acctest.GetTestProjectFromEnv()') -%>
 			<% else -%>
 				<% import_qualifiers.push('context["project_id"]') -%>
 			<% end -%>
 		<% end -%>
         <% elsif param == 'zone' and object.iam_policy.substitute_zone_value -%>
-                <% import_qualifiers.push('GetTestZoneFromEnv()') -%>
+                <% import_qualifiers.push('acctest.GetTestZoneFromEnv()') -%>
 	<% elsif param == 'region' || param == 'location' -%>
 		<% if example.region_override.nil? -%>
-				<% import_qualifiers.push('GetTestRegionFromEnv()') -%>
+				<% import_qualifiers.push('acctest.GetTestRegionFromEnv()') -%>
 			<% else -%>
 				<% import_qualifiers.push("\"#{example.region_override}\"") -%>
 			<% end -%>
@@ -58,7 +64,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { AccTestPreCheck(t) },
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
@@ -104,7 +110,7 @@ func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
@@ -138,7 +144,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 
 <% unless object.iam_policy.admin_iam_role.nil? -%>
 	// This may skip test, so do it first
-	sa := GetTestServiceAccountFromEnv(t)
+	sa := acctest.GetTestServiceAccountFromEnv(t)
 <% end -%>
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 <% unless object.iam_policy.admin_iam_role.nil? -%>
@@ -146,7 +152,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 <% end -%>
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
@@ -161,6 +167,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAcc<%= resource_name -%>IamPolicy_basicGenerated(context),
+				Check:  resource.TestCheckResourceAttrSet("data.<%= resource_ns_iam -%>_policy.foo", "policy_data"),
 			},
 <% unless object.iam_policy.skip_import_test -%>
 			{
@@ -192,7 +199,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T)
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
@@ -222,13 +229,13 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T)
 
 func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *testing.T) {
 	// Multiple fine-grained resources
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
@@ -274,7 +281,7 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 	ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
@@ -304,13 +311,13 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) 
 
 func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *testing.T) {
 	// Multiple fine-grained resources
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
@@ -355,7 +362,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 
 <% unless object.iam_policy.admin_iam_role.nil? -%>
 	// This may skip test, so do it first
-	sa := GetTestServiceAccountFromEnv(t)
+	sa := acctest.GetTestServiceAccountFromEnv(t)
 <% end -%>
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 <% unless object.iam_policy.admin_iam_role.nil? -%>
@@ -372,7 +379,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 	expectedPolicyData = strings.Replace(expectedPolicyData, "<", "\\u003c", -1)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
@@ -448,6 +455,16 @@ resource "<%= resource_ns_iam -%>_policy" "foo" {
 <% end -%>
 <%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   policy_data = data.google_iam_policy.foo.policy_data
+}
+
+data "<%= resource_ns_iam -%>_policy" "foo" {
+<% unless object.min_version.name == "ga" -%>
+  provider = google-beta
+<% end -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
+  depends_on = [
+    <%= resource_ns_iam -%>_policy.foo
+  ]
 }
 `, context)
 }

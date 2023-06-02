@@ -64,17 +64,37 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   resource_definition: templates/terraform/resource_definition/disk.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "disk_basic"
-    primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-test-disk%s\", context[\"random_suffix\"\
+    name: 'disk_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-test-disk%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      disk_name: "test-disk"
+      disk_name: 'test-disk'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'disk_async'
+    primary_resource_id: 'primary'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-test-disk%s\",
+      context[\"random_suffix\"\
+      ])"
+    min_version: beta
+    vars:
+      disk_name: 'async-test-disk'
+      secondary_disk_name: 'async-secondary-test-disk'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'disk_features'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-test-disk%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      disk_name: 'test-disk-features'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: '/'
   fetch_iam_policy_verb: :GET
   parent_resource_attribute: 'name'
-  import_format: ["projects/{{project}}/zones/{{zone}}/disks/{{name}}", "{{name}}"]
+  import_format:
+    ['projects/{{project}}/zones/{{zone}}/disks/{{name}}', '{{name}}']
   base_url: projects/{{project}}/zones/{{zone}}/disks/{{name}}
 parameters:
   - !ruby/object:Api::Type::ResourceRef
@@ -104,7 +124,7 @@ parameters:
         output: true
         # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
       - !ruby/object:Api::Type::String
-        name: "kmsKeySelfLink"
+        name: 'kmsKeySelfLink'
         api_name: 'kmsKeyName'
         description: |
           The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
@@ -112,7 +132,7 @@ parameters:
           (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
           `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
           See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
       - !ruby/object:Api::Type::String
         name: 'kmsKeyServiceAccount'
         description: |
@@ -153,8 +173,8 @@ parameters:
       - !ruby/object:Api::Type::String
         name: 'rsaEncryptedKey'
         description: |
-          Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit 
-          customer-supplied encryption key to either encrypt or decrypt 
+          Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
+          customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
         sensitive: true
       - !ruby/object:Api::Type::String
@@ -165,7 +185,7 @@ parameters:
         output: true
         # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
       - !ruby/object:Api::Type::String
-        name: "kmsKeySelfLink"
+        name: 'kmsKeySelfLink'
         api_name: 'kmsKeyName'
         description: |
           The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
@@ -173,7 +193,7 @@ parameters:
           (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
           `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
           See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
       - !ruby/object:Api::Type::String
         name: 'kmsKeyServiceAccount'
         description: |
@@ -209,7 +229,7 @@ parameters:
           RFC 4648 base64 to either encrypt or decrypt this resource.
         # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
       - !ruby/object:Api::Type::String
-        name: "kmsKeySelfLink"
+        name: 'kmsKeySelfLink'
         api_name: 'kmsKeyName'
         description: |
           The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
@@ -217,7 +237,7 @@ parameters:
           (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
           `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
           See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
       - !ruby/object:Api::Type::String
         name: 'sha256'
         description: |
@@ -248,7 +268,6 @@ properties:
       internally during updates.
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/setLabels'
     update_verb: :POST
-    exclude: false
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
@@ -258,11 +277,6 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'lastAttachTimestamp'
     description: 'Last attach timestamp in RFC3339 text format.'
@@ -277,11 +291,6 @@ properties:
       Labels to apply to this disk.  A list of key->value pairs.
     update_verb: :POST
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/setLabels'
-  - !ruby/object:Api::Type::Array
-    name: 'licenses'
-    description: 'Any applicable publicly visible licenses.'
-    exclude: true
-    item_type: Api::Type::String
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -341,12 +350,13 @@ properties:
     # and prevent sending or reading in API requests
     url_param_only: true
     default_value: 'SCSI'
-    deprecation_message: This field is no longer in use, disk interfaces will be automatically
-      determined on attachment. To resolve this issue, remove this field from your
-      config.
+    deprecation_message:
+      This field is no longer in use, disk interfaces will be automatically
+      determined on attachment. To resolve this issue, remove this field from
+      your config.
     description: |
       Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
-    diff_suppress_func: 'AlwaysDiffSuppress'
+    diff_suppress_func: 'tpgresource.AlwaysDiffSuppress'
   - !ruby/object:Api::Type::String
     name: 'sourceDisk'
     description: |
@@ -407,7 +417,8 @@ properties:
       name: 'resourcePolicy'
       resource: 'ResourcePolicy'
       imports: 'selfLink'
-      description: 'A resource policy applied to this disk for automatic snapshot
+      description:
+        'A resource policy applied to this disk for automatic snapshot
         creations.'
   - !ruby/object:Api::Type::Boolean
     name: 'multiWriter'
@@ -420,3 +431,49 @@ properties:
       Indicates how many IOPS must be provisioned for the disk.
     required: false
     default_from_api: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'asyncPrimaryDisk'
+    min_version: 'beta'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'disk'
+        description: |
+          Primary disk for asynchronous disk replication.
+        required: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+  - !ruby/object:Api::Type::Array
+    name: 'guestOsFeatures'
+    description: |
+      A list of features to enable on the guest operating system.
+      Applicable only for bootable disks.
+    default_from_api: true
+    is_set: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::Enum
+          name: 'type'
+          required: true
+          description: |
+            The type of supported feature. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
+          values:
+            - :MULTI_IP_SUBNET
+            - :SECURE_BOOT
+            - :SEV_CAPABLE
+            - :UEFI_COMPATIBLE
+            - :VIRTIO_SCSI_MULTIQUEUE
+            - :WINDOWS
+            - :GVNIC
+            - :SEV_LIVE_MIGRATABLE
+            - :SEV_SNP_CAPABLE
+            - :SUSPEND_RESUME_COMPATIBLE
+            - :TDX_CAPABLE
+  - !ruby/object:Api::Type::Array
+    name: 'licenses'
+    description: Any applicable license URI.
+    default_from_api: true
+    immutable: true
+    item_type: !ruby/object:Api::Type::ResourceRef
+      name: 'license'
+      description: 'An applicable license URI'
+      resource: 'License'
+      imports: 'selfLink'

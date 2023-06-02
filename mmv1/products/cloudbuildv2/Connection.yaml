@@ -23,23 +23,28 @@ exclude_validator: true
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   skip_import_test: true
   min_version: beta
-  exclude: false
   method_name_separator: ':'
   fetch_iam_policy_verb: :GET
   allowed_iam_role: 'roles/cloudbuild.connectionViewer'
   parent_resource_attribute: 'name'
-id_format: "projects/{{project}}/locations/{{location}}/connections/{{name}}"
-import_format: ["projects/{{project}}/locations/{{location}}/connections/{{name}}",
-  "{{name}}"]
+id_format: 'projects/{{project}}/locations/{{location}}/connections/{{name}}'
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/connections/{{name}}',
+    '{{name}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudbuildv2_connection"
+    name: 'cloudbuildv2_connection'
+    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14390
+    skip_test: true
     min_version: beta
-    primary_resource_id: "my-connection"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-connection%s\", context[\"random_suffix\"\
+    primary_resource_id: 'my-connection'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-connection%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      connection_name: "tf-test-connection"
+      connection_name: 'tf-test-connection'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

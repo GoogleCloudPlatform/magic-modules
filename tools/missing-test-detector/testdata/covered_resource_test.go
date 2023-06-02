@@ -28,6 +28,7 @@ resource "covered_resource" "resource" {
       field_six = "value-three"
     }
   }
+  field_seven = %{bool}
 }
 `, context)
 }

@@ -46,11 +46,11 @@ id_format: '{{name}}'
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_metadata_store"
+    name: 'vertex_ai_metadata_store'
     skip_test: true
-    primary_resource_id: "store"
+    primary_resource_id: 'store'
     vars:
-      name: "test-store"
+      name: 'test-store'
 parameters:
   - !ruby/object:Api::Type::String
     name: region
@@ -61,8 +61,9 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
-    description: The name of the MetadataStore. This value may be up to 60 characters,
-      and valid characters are [a-z0-9_]. The first character cannot be a number.
+    description:
+      The name of the MetadataStore. This value may be up to 60 characters, and
+      valid characters are [a-z0-9_]. The first character cannot be a number.
     immutable: true
     url_param_only: true
     pattern: projects/{{project}}/locations/{{region}}/metadataStores/{{name}}

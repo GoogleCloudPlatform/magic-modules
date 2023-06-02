@@ -1,3 +1,7 @@
+<% if hc_downstream -%>
+<%= lines(hashicorp_copyright_header(:go, pwd)) -%>
+<% end -%>
+
 <%= lines(autogen_notice(:go, pwd)) -%>
 
 package google
@@ -8,7 +12,10 @@ import (
   "strings"
   "testing"
 
- "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
+  "<%= import_path() -%>/acctest"
+  "<%= import_path() -%>/tpgresource"
 )
 
 <%
@@ -35,7 +42,7 @@ func testSweep<%= sweeper_name -%>(region string) error {
 	resourceName := "<%= sweeper_name -%>"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s",resourceName)
 
-	config, err := SharedConfigForRegion(region)
+	config, err := acctest.SharedConfigForRegion(region)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
 		return err
@@ -48,10 +55,10 @@ func testSweep<%= sweeper_name -%>(region string) error {
 	}
 
 	t := &testing.T{}
-	billingId := GetTestBillingAccountFromEnv(t)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
 
 	// Setup variables to replace in list template
-	d := &ResourceDataMock{
+	d := &tpgresource.ResourceDataMock{
 		FieldsInSchema: map[string]interface{}{
 			"project":config.Project,
 			"region":region,
@@ -62,13 +69,19 @@ func testSweep<%= sweeper_name -%>(region string) error {
 	}
 
 	listTemplate := strings.Split("<%= listUrlTemplate -%>","?")[0]
-	listUrl, err := ReplaceVars(d, config, listTemplate)
+	listUrl, err := tpgresource.ReplaceVars(d, config, listTemplate)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error preparing sweeper list url: %s", err)
 		return nil
 	}
 
-	res, err := SendRequest(config, "GET", config.Project, listUrl, config.UserAgent, nil)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "GET",
+		Project: config.Project,
+		RawURL: listUrl,
+		UserAgent: config.UserAgent,
+	})
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", listUrl, err)
 		return nil
@@ -107,9 +120,9 @@ func testSweep<%= sweeper_name -%>(region string) error {
 		var name string
 		// Id detected in the delete URL, attempt to use id.
 		if obj["id"] != nil {
-			name = GetResourceNameFromSelfLink(obj["id"].(string))
+			name = tpgresource.GetResourceNameFromSelfLink(obj["id"].(string))
 		} else if obj["name"] != nil {
-			name = GetResourceNameFromSelfLink(obj["name"].(string))
+			name = tpgresource.GetResourceNameFromSelfLink(obj["name"].(string))
 		} else {
 			log.Printf("[INFO][SWEEPER_LOG] %s resource name and id were nil", resourceName)
 			return nil
@@ -120,10 +133,10 @@ func testSweep<%= sweeper_name -%>(region string) error {
 			return nil
 		}
 
-		name := GetResourceNameFromSelfLink(obj["name"].(string))
+		name := tpgresource.GetResourceNameFromSelfLink(obj["name"].(string))
 		<% end -%>
 		// Skip resources that shouldn't be sweeped
-		if !IsSweepableTestResource(name) {
+		if !acctest.IsSweepableTestResource(name) {
 			nonPrefixCount++
 			continue
 		}
@@ -134,11 +147,11 @@ func testSweep<%= sweeper_name -%>(region string) error {
 			log.Printf("[INFO][SWEEPER_LOG] %s resource zone was nil", resourceName)
 			return nil
 		}
-		zone := GetResourceNameFromSelfLink(obj["zone"].(string))
+		zone := tpgresource.GetResourceNameFromSelfLink(obj["zone"].(string))
 		deleteTemplate = strings.Replace(deleteTemplate, "{{zone}}", zone, -1)
 
 		<% end -%>
-		deleteUrl, err := ReplaceVars(d, config, deleteTemplate)
+		deleteUrl, err := tpgresource.ReplaceVars(d, config, deleteTemplate)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] error preparing delete url: %s", err)
 			return nil
@@ -146,7 +159,13 @@ func testSweep<%= sweeper_name -%>(region string) error {
 		deleteUrl = deleteUrl+name
 
 		// Don't wait on operations as we may have a lot to delete
-		_, err = SendRequest(config, "DELETE", config.Project, deleteUrl, config.UserAgent, nil)
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config: config,
+			Method: "DELETE",
+			Project: config.Project,
+			RawURL: deleteUrl,
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", deleteUrl, err)
 		} else {
