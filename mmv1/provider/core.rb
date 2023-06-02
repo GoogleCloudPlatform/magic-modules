@@ -269,6 +269,7 @@ module Provider
         terraform-provider-google-beta
         terraform-next
         terraform-google-conversion
+        tfplan2cai
       ]
       folder_name = output_folder.split('/')[-1] # Possible issue with Windows OS
       is_expected = false
