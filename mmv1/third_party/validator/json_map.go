@@ -1,22 +1,11 @@
-package tpgresource
+package google
 
 import (
-	"encoding/json"
-	"fmt"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 )
 
 // JsonMap converts a given value to a map[string]interface{} that
 // matches its JSON format.
-func JsonMap(x interface{}) (map[string]interface{}, error) {
-	jsn, err := json.Marshal(x)
-	if err != nil {
-		return nil, fmt.Errorf("marshalling: %v", err)
-	}
-
-	m := make(map[string]interface{})
-	if err := json.Unmarshal(jsn, &m); err != nil {
-		return nil, fmt.Errorf("unmarshalling: %v", err)
-	}
-
-	return m, nil
+func jsonMap(x interface{}) (map[string]interface{}, error) {
+	return tpgresource.JsonMap(x)
 }
