@@ -720,11 +720,8 @@ func TestAccBigQueryTable_WithViewAndSchema(t *testing.T) {
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:             testAccBigQueryTableWithViewAndSchema(datasetID, tableID, "table description1"),
-				ExpectNonEmptyPlan: true, // Column configs in the schema shouldn't be applied.
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr("google_bigquery_table.test", "schema", regexp.MustCompile("[^XY]")),
-				),
+				Config:      testAccBigQueryTableWithViewAndSchema(datasetID, tableID, "table description"),
+				ExpectError: regexp.MustCompile("\"view\": conflicts with schema"),
 			},
 		},
 	})
@@ -834,7 +831,7 @@ func TestAccBigQueryTable_MaterializedView_WithSchema(t *testing.T) {
 
 	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
-	materialized_viewID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	materializedViewID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 	query := fmt.Sprintf("SELECT some_int FROM `%s.%s`", datasetID, tableID)
 
 	VcrTest(t, resource.TestCase{
@@ -843,11 +840,29 @@ func TestAccBigQueryTable_MaterializedView_WithSchema(t *testing.T) {
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:             testAccBigQueryTableWithMatViewSchema(datasetID, tableID, materialized_viewID, query),
-				ExpectNonEmptyPlan: true, // Column configs in the materialized view schema shouldn't be applied.
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr("google_bigquery_table.mv_test", "schema", regexp.MustCompile("[^Z]")),
-				),
+				Config:      testAccBigQueryTableWithMatViewAndSchema(datasetID, tableID, materializedViewID, query),
+				ExpectError: regexp.MustCompile("\"materialized_view\": conflicts with schema"),
+			},
+		},
+	})
+}
+
+func TestAccBigQueryTable_MaterializedView_WithView(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	materializedViewID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	query := fmt.Sprintf("SELECT some_int FROM `%s.%s`", datasetID, tableID)
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccBigQueryTableWithMatViewAndView(datasetID, tableID, materializedViewID, query),
+				ExpectError: regexp.MustCompile("\"materialized_view\": conflicts with view"),
 			},
 		},
 	})
@@ -1780,13 +1795,13 @@ resource "google_bigquery_table" "test" {
   [
 
 	{
-	"description":"desc1 with special capital letter X",
+	"description":"desc1",
 	"mode":"NULLABLE",
 	"name":"col1",
 	"type":"STRING"
 	},
 	{
-	"description":"desc2 with special capital letter Y",
+	"description":"desc2",
 	"mode":"NULLABLE",
 	"name":"col2",
 	"type":"STRING"
@@ -1983,7 +1998,7 @@ resource "google_bigquery_table" "mv_test" {
 `, datasetID, tableID, mViewID, enable_refresh, refresh_interval, query)
 }
 
-func testAccBigQueryTableWithMatViewSchema(datasetID, tableID, mViewID, query string) string {
+func testAccBigQueryTableWithMatViewAndSchema(datasetID, tableID, mViewID, query string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "test" {
   dataset_id = "%s"
@@ -2025,6 +2040,53 @@ resource "google_bigquery_table" "mv_test" {
   }
 ]
 EOH
+
+  depends_on = [
+    google_bigquery_table.test,
+  ]
+}
+`, datasetID, tableID, mViewID, query)
+}
+
+func testAccBigQueryTableWithMatViewAndView(datasetID, tableID, mViewID, query string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+
+  schema     = <<EOH
+[
+  {
+    "name": "some_int",
+    "type": "INTEGER"
+  }
+]
+EOH
+
+}
+
+resource "google_bigquery_table" "mv_test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+
+  view {
+    query = <<SQL
+select "val1" as col1, "val2" as col2
+SQL
+    use_legacy_sql = false
+  }
+
+  materialized_view {
+    enable_refresh = true
+    refresh_interval_ms = 360000
+    query          = "%s"
+  }
 
   depends_on = [
     google_bigquery_table.test,

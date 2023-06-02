@@ -466,6 +466,7 @@ func ResourceBigQueryTable() *schema.Resource {
 						// Schema: Optional] The schema for the  data.
 						// Schema is required for CSV and JSON formats if autodetect is not on.
 						// Schema is disallowed for Google Cloud Bigtable, Cloud Datastore backups, Avro, Iceberg, ORC, and Parquet formats.
+						// Schema is mutually exclusive with View and Materialized View.
 						"schema": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -476,7 +477,8 @@ func ResourceBigQueryTable() *schema.Resource {
 								json, _ := structure.NormalizeJsonString(v)
 								return json
 							},
-							Description: `A JSON schema for the external table. Schema is required for CSV and JSON formats and is disallowed for Google Cloud Bigtable, Cloud Datastore backups, and Avro formats when using external tables.`,
+							Description:   `A JSON schema for the external table. Schema is required for CSV and JSON formats and is disallowed for Google Cloud Bigtable, Cloud Datastore backups, and Avro formats when using external tables.`,
+							ConflictsWith: []string{"view", "materialized_view"},
 						},
 						// CsvOptions: [Optional] Additional properties to set if
 						// sourceFormat is set to CSV.
@@ -697,6 +699,7 @@ func ResourceBigQueryTable() *schema.Resource {
 				Description:      `A JSON schema for the table.`,
 			},
 			// View: [Optional] If specified, configures this table as a view.
+			// View is mutually exclusive with Schema and Materialized View.
 			"view": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -723,9 +726,11 @@ func ResourceBigQueryTable() *schema.Resource {
 						},
 					},
 				},
+				ConflictsWith: []string{"schema", "materialized_view"},
 			},
 
 			// Materialized View: [Optional] If specified, configures this table as a materialized view.
+			// Materialized View is mutually exclusive with Schema and View.
 			"materialized_view": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -762,6 +767,7 @@ func ResourceBigQueryTable() *schema.Resource {
 						},
 					},
 				},
+				ConflictsWith: []string{"schema", "view"},
 			},
 
 			// TimePartitioning: [Experimental] If specified, configures time-based
@@ -1093,31 +1099,15 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 
 	datasetID := d.Get("dataset_id").(string)
 
-	if (table.View != nil || table.MaterializedView != nil) && table.Schema != nil {
+	log.Printf("[INFO] Creating BigQuery table: %s", table.TableReference.TableId)
 
-		log.Printf("[INFO] Removing schema from table definition because BigQuery does not support setting schema on view or materialized view creation")
-		table.Schema = nil
-
-		log.Printf("[INFO] Creating BigQuery table: %s without schema", table.TableReference.TableId)
-
-		res, err := config.NewBigQueryClient(userAgent).Tables.Insert(project, datasetID, table).Do()
-		if err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] BigQuery table %s has been created", res.Id)
-		d.SetId(fmt.Sprintf("projects/%s/datasets/%s/tables/%s", res.TableReference.ProjectId, res.TableReference.DatasetId, res.TableReference.TableId))
-	} else {
-		log.Printf("[INFO] Creating BigQuery table: %s", table.TableReference.TableId)
-
-		res, err := config.NewBigQueryClient(userAgent).Tables.Insert(project, datasetID, table).Do()
-		if err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] BigQuery table %s has been created", res.Id)
-		d.SetId(fmt.Sprintf("projects/%s/datasets/%s/tables/%s", res.TableReference.ProjectId, res.TableReference.DatasetId, res.TableReference.TableId))
+	res, err := config.NewBigQueryClient(userAgent).Tables.Insert(project, datasetID, table).Do()
+	if err != nil {
+		return err
 	}
+
+	log.Printf("[INFO] BigQuery table %s has been created", res.Id)
+	d.SetId(fmt.Sprintf("projects/%s/datasets/%s/tables/%s", res.TableReference.ProjectId, res.TableReference.DatasetId, res.TableReference.TableId))
 
 	return resourceBigQueryTableRead(d, meta)
 }
