@@ -1,4 +1,4 @@
-package google
+package firebase
 
 import (
 	"context"
