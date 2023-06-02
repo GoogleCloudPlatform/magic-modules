@@ -228,6 +228,10 @@ The `settings` block supports:
     for more details and supported versions. Postgres supports only shared-core machine types,
     and custom machine types such as `db-custom-2-13312`. See the [Custom Machine Type Documentation](https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#create) to learn about specifying custom machine types.
 
+The optional `settings.advanced_machine_features` subblock supports:
+
+* `threads_per_core` - (Optional) The number of threads per core. The value of this flag can be 1 or 2. To disable SMT, set this flag to 1. Only available in Cloud SQL for SQL Server instances. See [smt](https://cloud.google.com/sql/docs/sqlserver/create-instance#smt-create-instance) for more details.
+
 * `activation_policy` - (Optional) This specifies when the instance should be
     active. Can be either `ALWAYS`, `NEVER` or `ON_DEMAND`.
 
@@ -253,6 +257,8 @@ The `settings` block supports:
 * `disk_type` - (Optional) The type of data disk: PD_SSD or PD_HDD. Defaults to `PD_SSD`.
 
 * `pricing_plan` - (Optional) Pricing plan for this instance, can only be `PER_USE`.
+
+* `time_zone` - (Optional) The time_zone to be used by the database engine (supported only for SQL Server), in SQL Server timezone format.
 
 * `user_labels` - (Optional) A set of key/value user label pairs to assign to the instance.
 
@@ -282,8 +288,6 @@ The optional `settings.sql_server_audit_config` subblock supports:
 * `upload_interval` - (Optional) How often to upload generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
 
 * `retention_interval` - (Optional) How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
-
-* `time_zone` - (Optional) The time_zone to be used by the database engine (supported only for SQL Server), in SQL Server timezone format.
 
 The optional `settings.backup_configuration` subblock supports:
 
@@ -363,7 +367,7 @@ The optional `settings.insights_config` subblock for instances declares Query In
 
 * `query_insights_enabled` - True if Query Insights feature is enabled.
 
-* `query_string_length` - Maximum query length stored in bytes. Between 256 and 4500. Default to 1024.
+* `query_string_length` - Maximum query length stored in bytes. Between 256 and 4500. Default to 1024. Higher query lengths are more useful for analytical queries, but they also require more memory. Changing the query length requires you to restart the instance. You can still add tags to queries that exceed the length limit.
 
 * `record_application_tags` - True if Query Insights will record application tags from query when enabled.
 

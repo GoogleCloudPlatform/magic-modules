@@ -36,21 +36,21 @@ examples:
       instance_name: 'guest-policy-inst'
       guest_policy_id: 'guest-policy'
     ignore_read_extra:
-      - 'project' # project number is returned in rest response
+      - 'project'  # project number is returned in rest response
   - !ruby/object:Provider::Terraform::Examples
     name: 'os_config_guest_policies_packages'
     primary_resource_id: 'guest_policies'
     vars:
       guest_policy_id: 'guest-policy'
     ignore_read_extra:
-      - 'project' # project number is returned in rest response
+      - 'project'  # project number is returned in rest response
   - !ruby/object:Provider::Terraform::Examples
     name: 'os_config_guest_policies_recipes'
     primary_resource_id: 'guest_policies'
     vars:
       guest_policy_id: 'guest-policy'
     ignore_read_extra:
-      - 'project' # project number is returned in rest response
+      - 'project'  # project number is returned in rest response
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/set_computed_name.erb
 

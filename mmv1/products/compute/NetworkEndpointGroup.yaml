@@ -79,11 +79,6 @@ parameters:
     required: false
     default_from_api: true
 properties:
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -96,7 +91,7 @@ properties:
       character, which cannot be a dash.
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -137,7 +132,7 @@ properties:
     imports: 'selfLink'
     description: |
       Optional subnetwork to which all network endpoints in the NEG belong.
-    diff_suppress_func: 'CompareOptionalSubnet'
+    diff_suppress_func: 'tpgresource.CompareOptionalSubnet'
   - !ruby/object:Api::Type::Integer
     name: 'defaultPort'
     description: |

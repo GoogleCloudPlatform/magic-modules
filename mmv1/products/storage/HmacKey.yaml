@@ -10,6 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 --- !ruby/object:Api::Resource
 name: 'HmacKey'
 kind: 'storage#hmacKey'
@@ -79,12 +80,6 @@ properties:
     output: true
     description: |
       The access ID of the HMAC Key.
-  - !ruby/object:Api::Type::String
-    name: 'id'
-    output: true
-    description: |
-      The ID of the HMAC key, including the Project ID and the Access ID.
-    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'timeCreated'
     output: true

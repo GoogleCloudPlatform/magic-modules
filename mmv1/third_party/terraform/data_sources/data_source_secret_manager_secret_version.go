@@ -3,9 +3,11 @@ package google
 import (
 	"encoding/base64"
 	"fmt"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"log"
 	"regexp"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -22,7 +24,7 @@ func DataSourceSecretManagerSecretVersion() *schema.Resource {
 			"secret": {
 				Type:             schema.TypeString,
 				Required:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 			},
 			"version": {
 				Type:     schema.TypeString,
@@ -56,12 +58,12 @@ func DataSourceSecretManagerSecretVersion() *schema.Resource {
 
 func dataSourceSecretManagerSecretVersionRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	fv, err := parseProjectFieldValue("secrets", d.Get("secret").(string), "project", d, config, false)
+	fv, err := tpgresource.ParseProjectFieldValue("secrets", d.Get("secret").(string), "project", d, config, false)
 	if err != nil {
 		return err
 	}
@@ -80,19 +82,25 @@ func dataSourceSecretManagerSecretVersionRead(d *schema.ResourceData, meta inter
 	versionNum := d.Get("version")
 
 	if versionNum != "" {
-		url, err = ReplaceVars(d, config, "{{SecretManagerBasePath}}projects/{{project}}/secrets/{{secret}}/versions/{{version}}")
+		url, err = tpgresource.ReplaceVars(d, config, "{{SecretManagerBasePath}}projects/{{project}}/secrets/{{secret}}/versions/{{version}}")
 		if err != nil {
 			return err
 		}
 	} else {
-		url, err = ReplaceVars(d, config, "{{SecretManagerBasePath}}projects/{{project}}/secrets/{{secret}}/versions/latest")
+		url, err = tpgresource.ReplaceVars(d, config, "{{SecretManagerBasePath}}projects/{{project}}/secrets/{{secret}}/versions/latest")
 		if err != nil {
 			return err
 		}
 	}
 
 	var version map[string]interface{}
-	version, err = transport_tpg.SendRequest(config, "GET", project, url, userAgent, nil)
+	version, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return fmt.Errorf("Error retrieving available secret manager secret versions: %s", err.Error())
 	}
@@ -112,7 +120,13 @@ func dataSourceSecretManagerSecretVersionRead(d *schema.ResourceData, meta inter
 	}
 
 	url = fmt.Sprintf("%s:access", url)
-	resp, err := transport_tpg.SendRequest(config, "GET", project, url, userAgent, nil)
+	resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return fmt.Errorf("Error retrieving available secret manager secret version access: %s", err.Error())
 	}

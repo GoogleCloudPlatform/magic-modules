@@ -67,8 +67,8 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'match'
     description:
-      A match condition that incoming traffic is evaluated against. If
-      it evaluates to true, the corresponding 'action' is enforced.
+      A match condition that incoming traffic is evaluated against. If it
+      evaluates to true, the corresponding 'action' is enforced.
     required: true
     properties:
       - !ruby/object:Api::Type::String

@@ -26,7 +26,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/dataproc-metastore/docs/reference/rest/v1/projects.locations.services'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: service_id
-  exclude: false
   method_name_separator: ':'
   import_format:
     [
@@ -59,7 +58,8 @@ import_format:
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_metastore_service_basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
     primary_resource_id: 'default'
     vars:
       metastore_service_name: 'metastore-srv'
@@ -83,7 +83,7 @@ examples:
     name: 'dataproc_metastore_service_endpoint'
     min_version: beta
     skip_docs: true
-    skip_test: true # https://github.com/hashicorp/terraform-provider-google/issues/13710
+    skip_test: true  # https://github.com/hashicorp/terraform-provider-google/issues/13710
     primary_resource_id: 'endpoint'
     vars:
       metastore_service_name: 'metastore-endpoint'

@@ -3,6 +3,9 @@
   has_project = object.base_url.include?("{{project}}")
   has_project = has_project || (object.async.is_a? Api::OpAsync and object.async.include_project)
 -%>
+<% if hc_downstream -%>
+<%= lines(hashicorp_copyright_header(:go, pwd)) -%>
+<% end -%>
 
 <%= lines(autogen_notice(:go, pwd)) -%>
 
@@ -15,6 +18,7 @@ import (
   "fmt"
   "time"
 
+  "<%= import_path() -%>/tpgresource"
   transport_tpg "<%= import_path() -%>/transport"
 )
 
@@ -25,9 +29,9 @@ type <%= product_name -%>OperationWaiter struct {
   Project string
 <% end -%>
 <%  if object.__product.operation_retry -%>
-	retryCount int
+  retryCount int
 <% end -%>
-  CommonOperationWaiter
+  tpgresource.CommonOperationWaiter
 }
 
 func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
@@ -41,12 +45,23 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
   url := fmt.Sprintf("%s<%= [async.operation.base_url].flatten.join.gsub('{{op_id}}', '%s')-%>", w.Config.<%= product_name -%>BasePath, w.CommonOperationWaiter.Op.Name)
   <% end -%>
 
-  return transport_tpg.SendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, w.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+  return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config: w.Config,
+    Method: "GET",
+    <% if has_project -%>
+    Project: w.Project,
+    <% end -%>
+    RawURL: url,
+    UserAgent: w.UserAgent,
+    <% if object.error_retry_predicates -%>
+    ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+    <% end -%>
+  })
 }
 
 <%  if object.__product.operation_retry -%>
 func (w *<%= product_name -%>OperationWaiter) IsRetryable(err error) bool {
-	<%= lines(compile(pwd + '/' + object.__product.operation_retry)) -%>
+  <%= lines(compile(pwd + '/' + object.__product.operation_retry)) -%>
 }
 <% end -%>
 
@@ -76,7 +91,7 @@ func <%= product_name.camelize() -%>OperationWaitTimeWithResponse(config *transp
   if err != nil {
       return err
   }
-  if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
+  if err := tpgresource.OperationWait(w, activity, timeout, config.PollInterval); err != nil {
       return err
   }
   return json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), response)
@@ -93,5 +108,5 @@ func <%= product_name.camelize() -%>OperationWaitTime(config *transport_tpg.Conf
       // If w is nil, the op was synchronous.
       return err
   }
-  return OperationWait(w, activity, timeout, config.PollInterval)
+  return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }

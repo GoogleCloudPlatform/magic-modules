@@ -49,7 +49,6 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   min_version: beta
-  exclude: false
   parent_resource_attribute: 'name'
   import_format:
     ['projects/{{project}}/global/backendBuckets/{{name}}', '{{name}}']
@@ -57,8 +56,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'backend_bucket_basic'
     primary_resource_id: 'image_backend'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-image-backend-bucket%s\", context[\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-image-backend-bucket%s\",
+      context[\"\
       random_suffix\"])"
     vars:
       backend_bucket_name: 'image-backend-bucket'
@@ -251,7 +250,7 @@ properties:
     name: 'edgeSecurityPolicy'
     description: |
       The security policy associated with this backend bucket.
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Array
     name: 'customResponseHeaders'
     description: |
@@ -269,11 +268,6 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: 'enableCdn'
     description: 'If true, enable Cloud CDN for this BackendBucket.'
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'Unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |

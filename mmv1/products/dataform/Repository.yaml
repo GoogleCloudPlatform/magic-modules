@@ -52,8 +52,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'gitRemoteSettings'
     description:
-      Optional. If set, configures this repository to be linked to a Git
-      remote.
+      Optional. If set, configures this repository to be linked to a Git remote.
     properties:
       - !ruby/object:Api::Type::String
         name: 'url'
@@ -67,8 +66,9 @@ properties:
         name: 'authenticationTokenSecretVersion'
         required: true
         description:
-          The name of the Secret Manager secret version to use as an authentication
-          token for Git operations. Must be in the format projects/*/secrets/*/versions/*.
+          The name of the Secret Manager secret version to use as an
+          authentication token for Git operations. Must be in the format
+          projects/*/secrets/*/versions/*.
       - !ruby/object:Api::Type::String
         name: 'tokenStatus'
         output: true

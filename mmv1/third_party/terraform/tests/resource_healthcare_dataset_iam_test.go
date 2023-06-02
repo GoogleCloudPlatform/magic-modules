@@ -2,10 +2,11 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"reflect"
 	"sort"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -117,9 +118,12 @@ func TestAccHealthcareDatasetIamPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccHealthcareDatasetIamPolicy_basic(account, datasetName, roleId),
-				Check: testAccCheckGoogleHealthcareDatasetIam(t, datasetId.DatasetId(), roleId, []string{
-					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
-				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleHealthcareDatasetIam(t, datasetId.DatasetId(), roleId, []string{
+						fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
+					}),
+					resource.TestCheckResourceAttrSet("data.google_healthcare_dataset_iam_policy.foo", "policy_data"),
+				),
 			},
 			{
 				ResourceName:      "google_healthcare_dataset_iam_policy.foo",
@@ -249,6 +253,10 @@ data "google_iam_policy" "foo" {
 resource "google_healthcare_dataset_iam_policy" "foo" {
   dataset_id  = google_healthcare_dataset.dataset.id
   policy_data = data.google_iam_policy.foo.policy_data
+}
+
+data "google_healthcare_dataset_iam_policy" "foo" {
+  dataset_id  = google_healthcare_dataset.dataset.id
 }
 `, account, DEFAULT_HEALTHCARE_TEST_LOCATION, datasetName, roleId)
 }

@@ -5,7 +5,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -44,7 +46,7 @@ func ResourceGoogleServiceAccount() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validateRFC1035Name(6, 30),
+				ValidateFunc: verify.ValidateRFC1035Name(6, 30),
 				Description:  `The account id that is used to generate the service account email address and a stable unique id. It is unique within a project, must be 6-30 characters long, and match the regular expression [a-z]([-a-z0-9]*[a-z0-9]) to comply with RFC1035. Changing this forces a new service account to be created.`,
 			},
 			"display_name": {
@@ -83,12 +85,12 @@ func ResourceGoogleServiceAccount() *schema.Resource {
 
 func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -133,10 +135,10 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 	return resourceGoogleServiceAccountRead(d, meta)
 }
 
-func resourceServiceAccountPollRead(d *schema.ResourceData, meta interface{}) PollReadFunc {
+func resourceServiceAccountPollRead(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
 	return func() (map[string]interface{}, error) {
 		config := meta.(*transport_tpg.Config)
-		userAgent, err := generateUserAgentString(d, config.UserAgent)
+		userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return nil, err
 		}
@@ -153,7 +155,7 @@ func resourceServiceAccountPollRead(d *schema.ResourceData, meta interface{}) Po
 
 func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -196,7 +198,7 @@ func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) 
 
 func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -211,7 +213,7 @@ func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}
 
 func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -273,7 +275,7 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 
 func resourceGoogleServiceAccountImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
-	if err := ParseImportId([]string{
+	if err := tpgresource.ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/serviceAccounts/(?P<email>[^/]+)",
 		"(?P<project>[^/]+)/(?P<email>[^/]+)",
 		"(?P<email>[^/]+)"}, d, config); err != nil {
@@ -281,7 +283,7 @@ func resourceGoogleServiceAccountImport(d *schema.ResourceData, meta interface{}
 	}
 
 	// Replace import id for the resource id
-	id, err := ReplaceVars(d, config, "projects/{{project}}/serviceAccounts/{{email}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/serviceAccounts/{{email}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

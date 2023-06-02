@@ -50,8 +50,8 @@ import_format: ['projects/{{project}}/locations/{{location}}/caPools/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'privateca_capool_basic'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-my-pool%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-pool%s\",
+      context[\"random_suffix\"\
       ])"
     primary_resource_id: 'default'
     vars:
@@ -454,7 +454,7 @@ properties:
     name: 'publishingOptions'
     description: |
       The PublishingOptions to follow when issuing Certificates from any CertificateAuthority in this CaPool.
-    diff_suppress_func: 'EmptyOrUnsetBlockDiffSuppress'
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'publishCaCert'
@@ -471,6 +471,15 @@ properties:
           in all issued Certificates. If this is false, CRLs will not be published and the corresponding X.509 extension will not
           be written in issued certificates. CRLs will expire 7 days from their creation. However, we will rebuild daily. CRLs are
           also rebuilt shortly after a certificate is revoked.
+      - !ruby/object:Api::Type::Enum
+        name: 'encodingFormat'
+        description: |
+          Specifies the encoding format of each CertificateAuthority's CA
+          certificate and CRLs. If this is omitted, CA certificates and CRLs
+          will be published in PEM.
+        values:
+          - :PEM
+          - :DER
   - !ruby/object:Api::Type::KeyValuePairs
     name: labels
     description: |

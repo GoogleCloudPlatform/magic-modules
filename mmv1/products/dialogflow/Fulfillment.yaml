@@ -35,7 +35,7 @@ examples:
     skip_test: true
     vars:
       fulfillment_name: 'basic-fulfillment'
-    # Skip sweeper gen since this is a child resource.
+# Skip sweeper gen since this is a child resource.
 skip_sweeper: true
 id_format: '{{name}}'
 import_format: ['{{name}}']

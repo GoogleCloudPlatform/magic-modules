@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -31,7 +32,7 @@ func DataSourceSqlDatabases() *schema.Resource {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
-					Schema: datasourceSchemaFromResourceSchema(ResourceSQLDatabase().Schema),
+					Schema: tpgresource.DatasourceSchemaFromResourceSchema(ResourceSQLDatabase().Schema),
 				},
 			},
 		},
@@ -40,11 +41,11 @@ func DataSourceSqlDatabases() *schema.Resource {
 
 func dataSourceSqlDatabasesRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}

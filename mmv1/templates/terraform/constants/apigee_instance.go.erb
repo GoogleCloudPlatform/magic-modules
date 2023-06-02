@@ -5,7 +5,7 @@ func projectListDiffSuppress(_, _, _ string, d *schema.ResourceData) bool {
     return ProjectListDiffSuppressFunc(d)
 }
 
-func ProjectListDiffSuppressFunc(d TerraformResourceDataChange) bool {
+func ProjectListDiffSuppressFunc(d tpgresource.TerraformResourceDataChange) bool {
 	kLength := "consumer_accept_list.#"
 	oldLength, newLength := d.GetChange(kLength)
 

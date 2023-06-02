@@ -90,9 +90,9 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'network'
     description:
-      'The URL of the network this target instance uses to forward traffic.
-      If not specified, the traffic will be forwarded to the network that the default
-      network interface belongs to.'
+      'The URL of the network this target instance uses to forward traffic. If
+      not specified, the traffic will be forwarded to the network that the
+      default network interface belongs to.'
     immutable: true
     min_version: beta
   - !ruby/object:Api::Type::String
@@ -111,7 +111,7 @@ properties:
       provider-level project.
     required: true
     immutable: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
   - !ruby/object:Api::Type::Enum
     name: 'natPolicy'

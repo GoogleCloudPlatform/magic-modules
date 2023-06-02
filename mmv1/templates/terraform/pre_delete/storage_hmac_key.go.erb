@@ -1,9 +1,15 @@
-getUrl, err := ReplaceVars(d, config, "{{StorageBasePath}}projects/{{project}}/hmacKeys/{{access_id}}")
+getUrl, err := tpgresource.ReplaceVars(d, config, "{{StorageBasePath}}projects/{{project}}/hmacKeys/{{access_id}}")
 if err != nil {
 	return err
 }
 
-getRes, err := transport_tpg.SendRequest(config, "GET", project, getUrl, userAgent, nil)
+getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "GET",
+	Project: project,
+	RawURL: getUrl,
+	UserAgent: userAgent,
+})
 if err != nil {
 	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("StorageHmacKey %q", d.Id()))
 }
@@ -12,13 +18,21 @@ if err != nil {
 // updates
 if v := getRes["state"]; v == "ACTIVE" {
 	getRes["state"] = "INACTIVE"
-	updateUrl, err := ReplaceVars(d, config, "{{StorageBasePath}}projects/{{project}}/hmacKeys/{{access_id}}")
+	updateUrl, err := tpgresource.ReplaceVars(d, config, "{{StorageBasePath}}projects/{{project}}/hmacKeys/{{access_id}}")
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Deactivating HmacKey %q: %#v", d.Id(), getRes)
-	_, err = transport_tpg.SendRequestWithTimeout(config, "PUT", project, updateUrl, userAgent, getRes, d.Timeout(schema.TimeoutUpdate))
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "PUT",
+		Project: project,
+		RawURL: updateUrl,
+		UserAgent: userAgent,
+		Body: getRes,
+		Timeout: d.Timeout(schema.TimeoutUpdate),
+	})
 	if err != nil {
 			return fmt.Errorf("Error deactivating HmacKey %q: %s", d.Id(), err)
 	}

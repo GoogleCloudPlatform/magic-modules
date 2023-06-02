@@ -36,8 +36,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'endpoints_iam'
     primary_resource_id: 'endpoints_service'
-    primary_resource_name:
-      "fmt.Sprintf(\"endpoint%s.endpoints.%s.cloud.goog\", context[\"\
+    primary_resource_name: "fmt.Sprintf(\"endpoint%s.endpoints.%s.cloud.goog\",
+      context[\"\
       random_suffix\"], context[\"project_name\"]), context[\"project_name\"]"
     vars:
       name: 'endpoint'
@@ -53,6 +53,5 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'consumerProject'
     description:
-      The service consumer project ID which you are granting permission
-      to
+      The service consumer project ID which you are granting permission to
     required: true

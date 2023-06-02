@@ -2,10 +2,11 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"reflect"
 	"sort"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -116,8 +117,11 @@ func TestAccHealthcareFhirStoreIamPolicy(t *testing.T) {
 			{
 				// Test Iam Policy creation (no update for policy, no need to test)
 				Config: testAccHealthcareFhirStoreIamPolicy_basic(account, datasetName, fhirStoreName, roleId),
-				Check: testAccCheckGoogleHealthcareFhirStoreIamPolicyExists(t, "foo", roleId,
-					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleHealthcareFhirStoreIamPolicyExists(t, "foo", roleId,
+						fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
+					),
+					resource.TestCheckResourceAttrSet("data.google_healthcare_fhir_store_iam_policy.foo", "policy_data"),
 				),
 			},
 			{
@@ -354,5 +358,10 @@ resource "google_healthcare_fhir_store_iam_policy" "foo" {
   fhir_store_id = google_healthcare_fhir_store.fhir_store.id
   policy_data   = data.google_iam_policy.foo.policy_data
 }
+
+data "google_healthcare_fhir_store_iam_policy" "foo" {
+  fhir_store_id = google_healthcare_fhir_store.fhir_store.id
+}
+
 `, account, datasetName, fhirStoreName, roleId)
 }

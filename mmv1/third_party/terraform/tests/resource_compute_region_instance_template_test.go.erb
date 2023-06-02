@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 <% if version == "ga" -%>
@@ -217,7 +218,7 @@ func TestComputeRegionInstanceTemplate_scratchDiskSizeCustomizeDiff(t *testing.T
 	}
 
 	for tn, tc := range cases {
-		d := &ResourceDiffMock{
+		d := &tpgresource.ResourceDiffMock{
 			After: map[string]interface{}{
 				"disk.#":              1,
 				"disk.0.type":         tc.Typee,
@@ -1239,8 +1240,8 @@ func TestAccComputeRegionInstanceTemplate_sourceSnapshotEncryptionKey(t *testing
 	kmsKey := BootstrapKMSKeyInLocation(t, "us-central1")
 
 	context := map[string]interface{}{
-		"kms_ring_name": GetResourceNameFromSelfLink(kmsKey.KeyRing.Name),
-		"kms_key_name":  GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name),
+		"kms_ring_name": tpgresource.GetResourceNameFromSelfLink(kmsKey.KeyRing.Name),
+		"kms_key_name":  tpgresource.GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -1274,8 +1275,8 @@ func TestAccComputeRegionInstanceTemplate_sourceImageEncryptionKey(t *testing.T)
 	kmsKey := BootstrapKMSKeyInLocation(t, "us-central1")
 
 	context := map[string]interface{}{
-		"kms_ring_name": GetResourceNameFromSelfLink(kmsKey.KeyRing.Name),
-		"kms_key_name":  GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name),
+		"kms_ring_name": tpgresource.GetResourceNameFromSelfLink(kmsKey.KeyRing.Name),
+		"kms_key_name":  tpgresource.GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -1313,7 +1314,7 @@ func testAccCheckComputeRegionInstanceTemplateDestroyProducer(t *testing.T) func
 			splits := strings.Split(rs.Primary.ID, "/")
 			name := splits[len(splits)-1]
 		
-			url, err := acctest.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates/"+name)
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates/"+name)
 			if err != nil {
 				return err
 			}
@@ -1324,7 +1325,13 @@ func testAccCheckComputeRegionInstanceTemplateDestroyProducer(t *testing.T) func
 				billingProject = config.BillingProject
 			}
 
-			instanceTemplate, err := transport_tpg.SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
+			instanceTemplate, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config: config,
+				Method: "GET",
+				Project: billingProject,
+				RawURL: url,
+				UserAgent: config.UserAgent,
+			})
 			_ = instanceTemplate
 			if err == nil {
 				return fmt.Errorf("Instance template still exists")
@@ -1359,7 +1366,7 @@ func testAccCheckComputeRegionInstanceTemplateExistsInProject(t *testing.T, n, p
 		splits := strings.Split(rs.Primary.ID, "/")
 		templateName := splits[len(splits)-1]
 	
-		url, err := acctest.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates/"+templateName)
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates/"+templateName)
 
 		billingProject := ""
 
@@ -1367,7 +1374,13 @@ func testAccCheckComputeRegionInstanceTemplateExistsInProject(t *testing.T, n, p
 			billingProject = config.BillingProject
 		}
 
-		found, err := transport_tpg.SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
+		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config: config,
+			Method: "GET",
+			Project: billingProject,
+			RawURL: url,
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			return err
 		}
@@ -1600,7 +1613,7 @@ func testAccCheckComputeRegionInstanceTemplateHasAliasIpRange(instanceTemplate *
 	return func(s *terraform.State) error {
 		for _, networkInterface := range instanceTemplate.Properties.NetworkInterfaces {
 			for _, aliasIpRange := range networkInterface.AliasIpRanges {
-				if aliasIpRange.SubnetworkRangeName == subnetworkRangeName && (aliasIpRange.IpCidrRange == iPCidrRange || IpCidrRangeDiffSuppress("ip_cidr_range", aliasIpRange.IpCidrRange, iPCidrRange, nil)) {
+				if aliasIpRange.SubnetworkRangeName == subnetworkRangeName && (aliasIpRange.IpCidrRange == iPCidrRange || tpgresource.IpCidrRangeDiffSuppress("ip_cidr_range", aliasIpRange.IpCidrRange, iPCidrRange, nil)) {
 					return nil
 				}
 			}

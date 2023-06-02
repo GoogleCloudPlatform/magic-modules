@@ -46,7 +46,7 @@ async: !ruby/object:Api::OpAsync
 id_format: 'projects/{{project}}/deployments/{{name}}'
 import_format: ['projects/{{project}}/deployments/{{name}}']
 timeouts:
-  !ruby/object:Api::Timeouts # Very long to support very long deployments
+  !ruby/object:Api::Timeouts  # Very long to support very long deployments
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
@@ -68,8 +68,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'deployment_manager_deployment_basic'
     primary_resource_id: 'deployment'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-my-deployment-%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-deployment-%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       deployment_name: 'my-deployment'
@@ -77,14 +77,14 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'deployment_manager_deployment_imports'
     primary_resource_id: 'deployment'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-my-deployment-%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-deployment-%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       deployment_name: 'my-deployment'
     skip_test: true
 custom_code:
-  !ruby/object:Provider::Terraform::CustomCode # post-create failure: Delete deployment if an invalid deployment was created
+  !ruby/object:Provider::Terraform::CustomCode  # post-create failure: Delete deployment if an invalid deployment was created
   post_create_failure: 'templates/terraform/post_create_failure/delete_on_failure.go.erb'
   # Custom diff to force new if 'preview' is true
   constants: 'templates/terraform/constants/deployment_manager_deployment.go.erb'

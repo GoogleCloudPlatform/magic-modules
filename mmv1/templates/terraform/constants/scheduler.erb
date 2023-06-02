@@ -32,7 +32,7 @@ func authHeaderDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
         attr := b[4]
 
         if block == "oauth_token" && attr == "scope" {
-            if old == canonicalizeServiceScope("cloud-platform") && new == "" {
+            if old == tpgresource.CanonicalizeServiceScope("cloud-platform") && new == "" {
                 return true
             }
         }

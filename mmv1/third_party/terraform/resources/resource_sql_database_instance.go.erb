@@ -9,21 +9,22 @@ import (
 	"strings"
 	"time"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"github.com/hashicorp/terraform-provider-google/google/verify"
-
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
+
 	"google.golang.org/api/googleapi"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
 // Match fully-qualified or relative URLs
-const privateNetworkLinkRegex = "^(?:http(?:s)?://.+/)?projects/(" + ProjectRegex + ")/global/networks/((?:[a-z](?:[-a-z0-9]*[a-z0-9])?))$"
+const privateNetworkLinkRegex = "^(?:http(?:s)?://.+/)?projects/(" + verify.ProjectRegex + ")/global/networks/((?:[a-z](?:[-a-z0-9]*[a-z0-9])?))$"
 
 var sqlDatabaseAuthorizedNetWorkSchemaElem *schema.Resource = &schema.Resource{
 	Schema: map[string]*schema.Schema{
@@ -152,6 +153,20 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: `The machine type to use. See tiers for more details and supported versions. Postgres supports only shared-core machine types, and custom machine types such as db-custom-2-13312. See the Custom Machine Type Documentation to learn about specifying custom machine types.`,
+						},
+						"advanced_machine_features": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"threads_per_core": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Description: `The number of threads per physical core. Can be 1 or 2.`,
+									},
+								},
+							},
 						},
 						"activation_policy": {
 							Type:     schema.TypeString,
@@ -394,8 +409,8 @@ is set to true. Defaults to ZONAL.`,
 									"private_network": {
 										Type:             schema.TypeString,
 										Optional:         true,
-										ValidateFunc:     orEmpty(verify.ValidateRegexp(privateNetworkLinkRegex)),
-										DiffSuppressFunc: compareSelfLinkRelativePaths,
+										ValidateFunc:     verify.OrEmpty(verify.ValidateRegexp(privateNetworkLinkRegex)),
+										DiffSuppressFunc: tpgresource.CompareSelfLinkRelativePaths,
 										AtLeastOneOf:     ipConfigurationKeys,
 										Description:      `The VPC network from which the Cloud SQL instance is accessible for private IP. For example, projects/myProject/global/networks/default. Specifying a network enables private IP. At least ipv4_enabled must be enabled or a private_network must be configured. This setting can be updated, but it cannot be removed after it is set.`,
 									},
@@ -869,7 +884,7 @@ is set to true. Defaults to ZONAL.`,
 						"point_in_time": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							DiffSuppressFunc: TimestampDiffSuppress(time.RFC3339Nano),
+							DiffSuppressFunc: tpgresource.TimestampDiffSuppress(time.RFC3339Nano),
 							Description:      `The timestamp of the point in time that should be restored.`,
 						},
 						"database_names": {
@@ -933,17 +948,17 @@ func pitrSupportDbCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v 
 
 func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := tpgresource.GetRegion(d, config)
 	if err != nil {
 		return err
 	}
@@ -1001,8 +1016,8 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	// modified at the same time. Lock the master until we're done in order
 	// to prevent that.
 	if !sqlDatabaseIsMaster(d) {
-		mutexKV.Lock(instanceMutexKey(project, instance.MasterInstanceName))
-		defer mutexKV.Unlock(instanceMutexKey(project, instance.MasterInstanceName))
+		transport_tpg.MutexStore.Lock(instanceMutexKey(project, instance.MasterInstanceName))
+		defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance.MasterInstanceName))
 	}
 
         if k, ok := d.GetOk("encryption_key_name"); ok {
@@ -1037,7 +1052,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error, failed to create instance %s: %s", instance.Name, err)
 	}
 
-	id, err := ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -1151,6 +1166,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		// Version is unset in Create but is set during update
 		SettingsVersion:            int64(_settings["version"].(int)),
 		Tier:                       _settings["tier"].(string),
+		AdvancedMachineFeatures:    expandSqlServerAdvancedMachineFeatures(_settings["advanced_machine_features"].([]interface{})),
 		ForceSendFields:            []string{"StorageAutoResize"},
 		ActivationPolicy:           _settings["activation_policy"].(string),
 		ActiveDirectoryConfig:      expandActiveDirectoryConfig(_settings["active_directory_config"].([]interface{})),
@@ -1369,6 +1385,19 @@ func expandDenyMaintenancePeriod(configured []interface{}) []*sqladmin.DenyMaint
 
 }
 
+
+func expandSqlServerAdvancedMachineFeatures(configured interface{}) *sqladmin.AdvancedMachineFeatures {
+	l := configured.([]interface{})
+	if len(l) == 0 {
+		return nil
+	}
+
+	config := l[0].(map[string]interface{})
+	return &sqladmin.AdvancedMachineFeatures{
+		ThreadsPerCore: int64(config["threads_per_core"].(int)),
+	}
+}
+
 func expandSqlServerAuditConfig(configured interface{}) *sqladmin.SqlServerAuditConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 {
@@ -1416,12 +1445,12 @@ func expandPasswordValidationPolicy(configured []interface{}) *sqladmin.Password
 
 func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1522,12 +1551,12 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 
 func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1632,8 +1661,8 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 			Password: password,
 		}
 
-		mutexKV.Lock(instanceMutexKey(project, instance))
-		defer mutexKV.Unlock(instanceMutexKey(project, instance))
+		transport_tpg.MutexStore.Lock(instanceMutexKey(project, instance))
+		defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 		var op *sqladmin.Operation
 		updateFunc := func() error {
 			op, err = config.NewSqlAdminClient(userAgent).Users.Update(project, instance, user).Host(host).Name(name).Do()
@@ -1712,8 +1741,8 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	// Lock on the master_instance_name just in case updating any replica
 	// settings causes operations on the master.
 	if v, ok := d.GetOk("master_instance_name"); ok {
-		mutexKV.Lock(instanceMutexKey(project, v.(string)))
-		defer mutexKV.Unlock(instanceMutexKey(project, v.(string)))
+		transport_tpg.MutexStore.Lock(instanceMutexKey(project, v.(string)))
+		defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, v.(string)))
 	}
 
 	if _, ok := d.GetOk("instance_type"); ok {
@@ -1758,12 +1787,12 @@ func maintenanceVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) 
 
 func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1777,8 +1806,8 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 	// Lock on the master_instance_name just in case deleting a replica causes
 	// operations on the master.
 	if v, ok := d.GetOk("master_instance_name"); ok {
-		mutexKV.Lock(instanceMutexKey(project, v.(string)))
-		defer mutexKV.Unlock(instanceMutexKey(project, v.(string)))
+		transport_tpg.MutexStore.Lock(instanceMutexKey(project, v.(string)))
+		defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, v.(string)))
 	}
 
 	var op *sqladmin.Operation
@@ -1801,7 +1830,7 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 
 func resourceSqlDatabaseInstanceImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
-	if err := ParseImportId([]string{
+	if err := tpgresource.ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/instances/(?P<name>[^/]+)",
 		"(?P<project>[^/]+)/(?P<name>[^/]+)",
 		"(?P<name>[^/]+)"}, d, config); err != nil {
@@ -1813,7 +1842,7 @@ func resourceSqlDatabaseInstanceImport(d *schema.ResourceData, meta interface{})
 	}
 
 	// Replace import id for the resource id
-	id, err := ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -1886,6 +1915,10 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 		data["password_validation_policy"] = flattenPasswordValidationPolicy(settings.PasswordValidationPolicy)
 	}
 
+	if settings.AdvancedMachineFeatures != nil {
+		data["advanced_machine_features"] = flattenSqlServerAdvancedMachineFeatures(settings.AdvancedMachineFeatures)
+	}
+
 	return []map[string]interface{}{data}
 }
 
@@ -1941,6 +1974,17 @@ func flattenDenyMaintenancePeriod(denyMaintenancePeriod []*sqladmin.DenyMaintena
 	}
 
 	return flags
+}
+
+func flattenSqlServerAdvancedMachineFeatures(advancedMachineFeatures *sqladmin.AdvancedMachineFeatures) []map[string]interface{} {
+	if advancedMachineFeatures == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"threads_per_core": advancedMachineFeatures.ThreadsPerCore,
+		},
+	}
 }
 
 func flattenSqlServerAuditConfig(sqlServerAuditConfig *sqladmin.SqlServerAuditConfig) []map[string]interface{} {

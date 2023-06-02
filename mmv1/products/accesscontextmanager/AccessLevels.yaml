@@ -10,6 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 --- !ruby/object:Api::Resource
 # This is the plural of `AccessLevel`, any changes here should be made to `AccessLevel` as well
 name: 'AccessLevels'
@@ -78,20 +79,6 @@ properties:
           name: 'description'
           description: |
             Description of the AccessLevel and its use. Does not affect behavior.
-        # createTime and updateTime are listed in the docs but are not ever present
-        # in actual API responses.
-        - !ruby/object:Api::Type::Time
-          exclude: true
-          name: 'createTime'
-          description: |
-            Time the AccessPolicy was created in UTC.
-          output: true
-        - !ruby/object:Api::Type::Time
-          exclude: true
-          name: 'updateTime'
-          description: |
-            Time the AccessPolicy was updated in UTC.
-          output: true
         - !ruby/object:Api::Type::NestedObject
           name: 'basic'
           description: |
@@ -266,13 +253,19 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: 'expression'
                   required: true
-                  description: Textual representation of an expression in Common Expression Language syntax.
+                  description:
+                    Textual representation of an expression in Common Expression
+                    Language syntax.
                 - !ruby/object:Api::Type::String
                   name: 'title'
-                  description: Title for the expression, i.e. a short string describing its purpose.
+                  description:
+                    Title for the expression, i.e. a short string describing its
+                    purpose.
                 - !ruby/object:Api::Type::String
                   name: 'description'
                   description: Description of the expression
                 - !ruby/object:Api::Type::String
                   name: 'location'
-                  description: String indicating the location of the expression for error reporting, e.g. a file name and a position in the file
+                  description:
+                    String indicating the location of the expression for error
+                    reporting, e.g. a file name and a position in the file

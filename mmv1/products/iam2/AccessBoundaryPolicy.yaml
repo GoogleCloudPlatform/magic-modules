@@ -76,7 +76,8 @@ properties:
           properties:
             - !ruby/object:Api::Type::String
               name: 'availableResource'
-              description: The full resource name of a Google Cloud resource entity.
+              description:
+                The full resource name of a Google Cloud resource entity.
             - !ruby/object:Api::Type::Array
               name: 'availablePermissions'
               description:
@@ -86,8 +87,8 @@ properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'availabilityCondition'
               description:
-                The availability condition further constrains the access
-                allowed by the access boundary rule.
+                The availability condition further constrains the access allowed
+                by the access boundary rule.
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'expression'

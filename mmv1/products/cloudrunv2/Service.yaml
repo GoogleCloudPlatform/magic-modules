@@ -56,16 +56,16 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-service%s\", context[\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service%s\",
+      context[\"\
       random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_sql'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
@@ -79,8 +79,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_vpcaccess'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
@@ -90,20 +90,28 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_probes'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_secret'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
       secret_id: 'secret-1'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_service_multicontainer'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service%s\", context[\"\
+      random_suffix\"])"
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -119,7 +127,7 @@ properties:
     description: |
       Name of the Service.
     pattern: projects/{{project}}/locations/{{location}}/services/{{name}}
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
@@ -253,7 +261,7 @@ properties:
       - !ruby/object:Api::Type::Array
         name: 'containers'
         description: |-
-          Holds the single container that defines the unit of execution for this task.
+          Holds the containers that define the unit of execution for this Service.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
@@ -331,7 +339,7 @@ properties:
                   description: |-
                     Determines whether CPU should be throttled or not outside of requests.
                 - !ruby/object:Api::Type::Boolean
-                  name: "startupCpuBoost"
+                  name: 'startupCpuBoost'
                   description: |-
                     Determines whether CPU should be boosted on startup of a new container instance above the requested CPU threshold, this can help reduce cold-start latency.
             - !ruby/object:Api::Type::Array
@@ -438,9 +446,9 @@ properties:
                   description: |-
                     TCPSocket specifies an action involving a TCP port. This field is not supported in liveness probe currently.
                   deprecation_message:
-                    Cloud Run does not support tcp socket in liveness
-                    probe and `liveness_probe.tcp_socket` field will be removed in
-                    a future major release.
+                    Cloud Run does not support tcp socket in liveness probe and
+                    `liveness_probe.tcp_socket` field will be removed in a
+                    future major release.
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
@@ -574,6 +582,12 @@ properties:
                         The name of the service to place in the gRPC HealthCheckRequest
                         (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
                         If this is not specified, the default behavior is defined by gRPC.
+            - !ruby/object:Api::Type::Array
+              name: 'dependsOn'
+              description: |-
+                Containers which should be started before this container. If specified the container will wait to start until all containers with the listed names are healthy.
+              min_version: beta
+              item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'volumes'
         description: |-
@@ -592,6 +606,7 @@ properties:
               # exactly_one_of:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance
+              #   - template.0.volumes.0.emptyDir
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'secret'
@@ -629,12 +644,34 @@ properties:
               # exactly_one_of:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance
+              #   - template.0.volumes.0.emptyDir
               properties:
                 - !ruby/object:Api::Type::Array
                   name: 'instances'
                   description: |-
                     The Cloud SQL instance connection names, as can be found in https://console.cloud.google.com/sql/instances. Visit https://cloud.google.com/sql/docs/mysql/connect-run for more information on how to connect Cloud SQL and Cloud Run. Format: {project}:{location}:{instance}
                   item_type: Api::Type::String
+            - !ruby/object:Api::Type::NestedObject
+              name: 'emptyDir'
+              description: |-
+                Ephemeral storage used as a shared volume.
+              min_version: beta
+              # exactly_one_of:
+              #   - template.0.volumes.0.secret
+              #   - template.0.volumes.0.cloudSqlInstance
+              #   - template.0.volumes.0.emptyDir
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: 'medium'
+                  description: |-
+                    The different types of medium supported for EmptyDir.
+                  values:
+                    - :MEMORY
+                  default_value: :MEMORY
+                - !ruby/object:Api::Type::String
+                  name: 'sizeLimit'
+                  description: |-
+                      Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: http://kubernetes.io/docs/user-guide/volumes#emptydir.
       - !ruby/object:Api::Type::Enum
         name: 'executionEnvironment'
         description: |-
@@ -652,7 +689,7 @@ properties:
           Sets the maximum number of requests that each serving instance can receive.
         default_from_api: true
       - !ruby/object:Api::Type::Boolean
-        name: "sessionAffinity"
+        name: 'sessionAffinity'
         description: |-
           Enables session affinity. For more information, go to https://cloud.google.com/run/docs/configuring/session-affinity
   - !ruby/object:Api::Type::Array
