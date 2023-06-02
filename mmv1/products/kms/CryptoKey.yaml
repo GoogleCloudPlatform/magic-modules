@@ -89,7 +89,7 @@ properties:
       The immutable purpose of this CryptoKey. See the
       [purpose reference](https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys#CryptoKeyPurpose)
       for possible inputs.
-    default_value: :ENCRYPT_DECRYPT
+    default_value: 'ENCRYPT_DECRYPT'
     immutable: true
   - !ruby/object:Api::Type::String
     name: 'rotationPeriod'
