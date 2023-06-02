@@ -1,4 +1,5 @@
 
+<% unless compiler == "terraformvalidator-codegen" -%>
 // diffsupress for hyperdisk provisioned_iops
 func hyperDiskIopsUpdateDiffSupress(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	if !strings.Contains(d.Get("type").(string), "hyperdisk") {
@@ -14,6 +15,7 @@ func hyperDiskIopsUpdateDiffSupress(_ context.Context, d *schema.ResourceDiff, m
 
 	return nil
 }
+<% end -%>
 
 // diffsupress for beta and to check change in source_disk attribute
 func sourceDiskDiffSupress(_, old, new string, _ *schema.ResourceData) bool {
