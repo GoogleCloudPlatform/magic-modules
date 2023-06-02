@@ -138,18 +138,6 @@ properties:
           - :ENCODING_UNSPECIFIED
           - :JSON
           - :BINARY
-      - !ruby/object:Api::Type::String
-        name: 'firstRevisionId'
-        description: |
-          The minimum (inclusive) revision allowed for validating messages. If
-          empty or not present, allow any revision to be validated against
-          lastRevisionId or any revision created before.
-      - !ruby/object:Api::Type::String
-        name: 'lastRevisionId'
-        description: |
-           The maximum (inclusive) revision allowed for validating messages. If
-           empty or not present, allow any revision to be validated against
-           firstRevisionId or any revision created after.
   - !ruby/object:Api::Type::String
     name: 'messageRetentionDuration'
     description: |
