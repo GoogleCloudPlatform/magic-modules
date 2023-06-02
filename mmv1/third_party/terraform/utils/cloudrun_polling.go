@@ -8,5 +8,5 @@ import (
 // Deprecated: For backward compatibility PollCheckKnativeStatusFunc is still working,
 // but all new code should use PollCheckKnativeStatusFunc in the cloudrun package instead.
 func PollCheckKnativeStatusFunc(knativeRestResponse map[string]interface{}) func(resp map[string]interface{}, respErr error) transport_tpg.PollResult {
-	return cloudrun.PollCheckKnativeStatusFunc(knativeRestResponse, respErr)
+	return cloudrun.PollCheckKnativeStatusFunc(knativeRestResponse)
 }
