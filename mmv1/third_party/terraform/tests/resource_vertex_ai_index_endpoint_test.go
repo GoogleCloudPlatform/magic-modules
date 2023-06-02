@@ -79,7 +79,7 @@ data "google_project" "project" {}
 func testAccVertexAIIndexEndpoint_updated(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_vertex_ai_index_endpoint" "index_endpoint" {
-  display_name = "sample-endpoint"
+  display_name = "sample-endpoint-updated"
   description  = "A sample vertex endpoint (updated)"
   region       = "us-central1"
   labels       = {
