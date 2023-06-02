@@ -72,8 +72,7 @@ func copyHandwrittenFiles(inPath string, outPath string) {
 		}
 
 		// Add HashiCorp copyright header only if generating TPG/TPGB
-		if strings.HasSuffix(outPath, "/terraform-provider-google") ||
-			strings.HasSuffix(outPath, "/terraform-provider-google-beta") {
+		if strings.HasSuffix(outPath, "/terraform-provider-google") || strings.HasSuffix(outPath, "/terraform-provider-google-beta") {
 			if strings.HasSuffix(f.Name(), ".go") {
 				copyrightHeader := []byte("// Copyright (c) HashiCorp, Inc.\n// SPDX-License-Identifier: MPL-2.0\n")
 				b = append(copyrightHeader, b...)
