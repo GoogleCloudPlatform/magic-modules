@@ -2259,6 +2259,7 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 	}
 
 	inspect_job {
+		inspect_template_name = "fake"
 		storage_config {
 			cloud_storage_options {
 				file_set {
@@ -2270,4 +2271,3 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 }
 `, context)
 }
-
