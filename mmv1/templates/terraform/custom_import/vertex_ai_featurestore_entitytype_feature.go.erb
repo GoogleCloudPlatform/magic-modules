@@ -14,7 +14,7 @@ d.SetId(id)
 
 entitytype := d.Get("entitytype").(string)
 
-re := regexp.MustCompile("^projects/(.+)/locations/(.+)/featurestores/(.+)$")
+re := regexp.MustCompile("^projects/(.+)/locations/(.+)/featurestores/(.+)/entityTypes/(.+)$")
 if parts := re.FindStringSubmatch(entitytype); parts != nil {
 	d.Set("region", parts[2])
 }

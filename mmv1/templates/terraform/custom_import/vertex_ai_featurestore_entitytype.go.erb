@@ -14,7 +14,7 @@ d.SetId(id)
 
 featurestore := d.Get("featurestore").(string)
 
-re := regexp.MustCompile("^projects/(.+)/locations/(.+)/featurestores/(.+)$")
+re := regexp.MustCompile("^projects/(.+)/locations/(.+)/featurestores/(.+)/entityTypes/(.+)$")
 if parts := re.FindStringSubmatch(featurestore); parts != nil {
 	d.Set("region", parts[2])
 }
