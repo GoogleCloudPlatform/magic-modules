@@ -52,7 +52,7 @@ func ResourceGoogleProject() *schema.Resource {
 		MigrateState: resourceGoogleProjectMigrateState,
 
 		CustomizeDiff: customdiff.All(
-			defaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderCustomizeDiff,
 		),
 
 		Schema: map[string]*schema.Schema{

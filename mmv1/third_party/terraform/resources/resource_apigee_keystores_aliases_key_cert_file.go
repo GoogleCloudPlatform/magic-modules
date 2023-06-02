@@ -27,7 +27,7 @@ func ResourceApigeeKeystoresAliasesKeyCertFile() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
-			defaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderCustomizeDiff,
 			/*
 				If cert is changed then an update is expected, so we tell Terraform core to expect update on certs_info
 			*/

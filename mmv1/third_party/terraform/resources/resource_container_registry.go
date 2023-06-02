@@ -18,7 +18,7 @@ func ResourceContainerRegistry() *schema.Resource {
 		Delete: resourceContainerRegistryDelete,
 
 		CustomizeDiff: customdiff.All(
-			defaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderCustomizeDiff,
 		),
 
 		Schema: map[string]*schema.Schema{

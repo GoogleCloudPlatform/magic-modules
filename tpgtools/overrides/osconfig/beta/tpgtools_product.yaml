@@ -9,4 +9,4 @@
 - type: CUSTOMIZE_DIFF
   details:
     functions: 
-    - defaultProviderCustomizeDiff
+    - tpgresource.DefaultProviderCustomizeDiff

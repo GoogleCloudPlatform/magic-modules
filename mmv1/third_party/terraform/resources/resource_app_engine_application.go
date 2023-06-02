@@ -32,7 +32,7 @@ func ResourceAppEngineApplication() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
-			defaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderCustomizeDiff,
 			appEngineApplicationLocationIDCustomizeDiff,
 		),
 

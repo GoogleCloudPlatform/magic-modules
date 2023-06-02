@@ -150,7 +150,7 @@ func ResourceEndpointsService() *schema.Resource {
 			},
 		},
 		CustomizeDiff: customdiff.All(
-			defaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderCustomizeDiff,
 			predictServiceId,
 		),
 		UseJSONNumber: true,

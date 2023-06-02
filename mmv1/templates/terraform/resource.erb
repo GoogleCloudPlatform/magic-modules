@@ -66,6 +66,7 @@ import (
     client_name_lower = client_name.downcase
     has_project = object.base_url.include?('{{project}}') || (object.create_url && object.create_url.include?('{{project}}'))
     has_region = object.base_url.include?('{{region}}') && object.parameters.any?{ |p| p.name == 'region' && p.ignore_read }
+    has_zone = object.base_url.include?('{{zone}}') && object.parameters.any?{ |p| p.name == 'zone' && p.ignore_read }
     # In order of preference, use TF override,
     # general defined timeouts, or default Timeouts
     timeouts = object.timeouts
@@ -117,7 +118,21 @@ func Resource<%= resource_name -%>() *schema.Resource {
 <%    end -%>
         },
 <%  end -%>
-
+<%  if !object.custom_code.resource_definition -%>
+<%    if has_project || has_region || has_zone -%>
+        CustomizeDiff: customdiff.All(
+<%      if has_project -%>
+            tpgresource.DefaultProviderProject,
+<%      end -%>
+<%      if has_region -%>
+            tpgresource.DefaultProviderRegion,
+<%      end -%>
+<%      if has_zone -%>
+            tpgresource.DefaultProviderZone,
+<%      end -%>
+        ),
+<%    end -%>
+<%  end -%>
 <%= lines(compile(pwd + '/' + object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>
 
         Schema: map[string]*schema.Schema{

@@ -69,7 +69,7 @@ func ResourceBigtableGCPolicy() *schema.Resource {
 		Delete: resourceBigtableGCPolicyDestroy,
 		Update: resourceBigtableGCPolicyUpsert,
 		CustomizeDiff: customdiff.All(
-			defaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderCustomizeDiff,
 			resourceBigtableGCPolicyCustomizeDiff,
 		),
 

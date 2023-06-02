@@ -22,7 +22,7 @@ func ResourceStorageNotification() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
-			defaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderCustomizeDiff,
 		),
 
 		Schema: map[string]*schema.Schema{

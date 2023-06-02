@@ -84,7 +84,6 @@ examples:
     vars:
       instance_name: 'my-instance'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   pre_update: templates/terraform/pre_update/datafusion_instance_update.go.erb
   constants: templates/terraform/constants/data_fusion_instance_option.go.erb
 parameters:

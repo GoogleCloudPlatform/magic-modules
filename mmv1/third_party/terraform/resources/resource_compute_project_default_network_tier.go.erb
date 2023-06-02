@@ -38,7 +38,7 @@ func ResourceComputeProjectDefaultNetworkTier() *schema.Resource {
 		SchemaVersion: 0,
 
 		CustomizeDiff: customdiff.All(
-			defaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderCustomizeDiff,
 		),
 
 		Schema: map[string]*schema.Schema{
