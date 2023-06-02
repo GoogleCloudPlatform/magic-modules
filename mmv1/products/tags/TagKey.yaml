@@ -52,9 +52,10 @@ properties:
   - !ruby/object:Api::Type::String
     name: parent
     description: |
-      Input only. The resource name of the new TagKey's parent. Must be of the form organizations/{org_id} or projects/{project_number}.
+      Input only. The resource name of the new TagKey's parent. Must be of the form organizations/{org_id} or projects/{project_id_or_number}.
     immutable: true
     required: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - !ruby/object:Api::Type::String
     name: shortName
     description: |
