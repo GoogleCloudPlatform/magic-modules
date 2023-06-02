@@ -95,7 +95,6 @@ func testAccAccessContextManagerServicePerimeterIngressPolicy_basic(org, policyT
 
 resource "google_access_context_manager_service_perimeter_ingress_policy" "test-access1" {
   perimeter = google_access_context_manager_service_perimeter.test-access.name
-  ingress_policy {
 	ingress_from {
 		identity_type = "ANY_IDENTITY"
 	}
@@ -125,12 +124,13 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
 			}
 		}
   	}
-  }
-  ingress_policy {
+}
+
+resource "google_access_context_manager_service_perimeter_ingress_policy" "test-access2" {
+	perimeter = google_access_context_manager_service_perimeter.test-access.name
 	ingress_from {
 		identity_type = "IDENTITY_TYPE_UNSPECIFIED"
 	}
-  }
 }
 
 `, testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName))
