@@ -20,7 +20,7 @@ func ResourceGoogleServiceAccountKey() *schema.Resource {
 		Read:   resourceGoogleServiceAccountKeyRead,
 		Delete: resourceGoogleServiceAccountKeyDelete,
 		CustomizeDiff: customdiff.All(
-			tpgresource.DefaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderProject,
 		),
 
 		Schema: map[string]*schema.Schema{

@@ -61,7 +61,7 @@ func ResourceSqlUser() *schema.Resource {
 		MigrateState:  resourceSqlUserMigrateState,
 
 		CustomizeDiff: customdiff.All(
-			tpgresource.DefaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderProject,
 		),
 
 		Schema: map[string]*schema.Schema{

@@ -28,7 +28,7 @@ func ResourceGoogleServiceAccount() *schema.Resource {
 			Create: schema.DefaultTimeout(5 * time.Minute),
 		},
 		CustomizeDiff: customdiff.All(
-			tpgresource.DefaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderProject,
 		),
 
 		Schema: map[string]*schema.Schema{

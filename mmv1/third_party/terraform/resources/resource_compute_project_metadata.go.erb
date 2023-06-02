@@ -36,7 +36,7 @@ func ResourceComputeProjectMetadata() *schema.Resource {
 		SchemaVersion: 0,
 
 		CustomizeDiff: customdiff.All(
-			tpgresource.DefaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderProject,
 		),
 
 		Schema: map[string]*schema.Schema{

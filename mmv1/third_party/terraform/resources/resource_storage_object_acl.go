@@ -21,7 +21,7 @@ func ResourceStorageObjectAcl() *schema.Resource {
 		Update: resourceStorageObjectAclUpdate,
 		Delete: resourceStorageObjectAclDelete,
 		CustomizeDiff: customdiff.All(
-			tpgresource.DefaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderProject,
 			resourceStorageObjectAclDiff,
 		),
 		Schema: map[string]*schema.Schema{

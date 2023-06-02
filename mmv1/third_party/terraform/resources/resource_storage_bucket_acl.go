@@ -23,7 +23,7 @@ func ResourceStorageBucketAcl() *schema.Resource {
 		Update: resourceStorageBucketAclUpdate,
 		Delete: resourceStorageBucketAclDelete,
 		CustomizeDiff: customdiff.All(
-			tpgresource.DefaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderProject,
 			resourceStorageRoleEntityCustomizeDiff,
 		),
 

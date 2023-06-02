@@ -36,7 +36,7 @@ func ResourceBigtableTable() *schema.Resource {
 		// Destroying/recreating tables can lead to data loss for users.
 		// ----------------------------------------------------------------------
 		CustomizeDiff: customdiff.All(
-			tpgresource.DefaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderProject,
 		),
 
 		Schema: map[string]*schema.Schema{

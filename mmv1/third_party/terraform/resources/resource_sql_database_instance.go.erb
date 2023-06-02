@@ -115,7 +115,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
-			tpgresource.DefaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderProject,
 			customdiff.ForceNewIfChange("settings.0.disk_size", isDiskShrinkage),
 			customdiff.ForceNewIfChange("master_instance_name", isMasterInstanceNameSet),
 			customdiff.IfValueChange("instance_type", isReplicaPromoteRequested, checkPromoteConfigurationsAndUpdateDiff),

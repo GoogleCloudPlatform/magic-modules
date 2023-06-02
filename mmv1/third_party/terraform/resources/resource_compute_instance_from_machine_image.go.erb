@@ -34,7 +34,7 @@ func ResourceComputeInstanceFromMachineImage() *schema.Resource {
 
 		Schema:        computeInstanceFromMachineImageSchema(),
 		CustomizeDiff: customdiff.All(
-			tpgresource.DefaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderProject,
 			ResourceComputeInstance().CustomizeDiff,
 		),
 		UseJSONNumber: true,

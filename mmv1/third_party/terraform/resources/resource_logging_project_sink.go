@@ -22,7 +22,7 @@ func ResourceLoggingProjectSink() *schema.Resource {
 		Update: resourceLoggingProjectSinkUpdate,
 		Schema: resourceLoggingSinkSchema(),
 		CustomizeDiff: customdiff.All(
-			tpgresource.DefaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderProject,
 			resourceLoggingProjectSinkCustomizeDiff,
 		),
 		Importer: &schema.ResourceImporter{

@@ -42,7 +42,8 @@ func ResourceComputeInstanceGroup() *schema.Resource {
 		MigrateState:  resourceComputeInstanceGroupMigrateState,
 
 		CustomizeDiff: customdiff.All(
-			tpgresource.DefaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderProject,
+			tpgresource.DefaultProviderZone,
 		),
 
 		Schema: map[string]*schema.Schema{

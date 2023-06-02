@@ -31,7 +31,7 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 		Update: resourceDataflowFlexTemplateJobUpdate,
 		Delete: resourceDataflowFlexTemplateJobDelete,
 		CustomizeDiff: customdiff.All(
-			tpgresource.DefaultProviderCustomizeDiff,
+			tpgresource.DefaultProviderProject,
 			resourceDataflowFlexJobTypeCustomizeDiff,
 		),
 		Importer: &schema.ResourceImporter{
