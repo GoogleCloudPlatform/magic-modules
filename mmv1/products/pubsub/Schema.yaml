@@ -73,11 +73,3 @@ properties:
       This should contain a string representing the full definition of the schema
       that is a valid schema definition of the type specified in type.
     ignore_read: true
-  - !ruby/object:Api::Type::String
-    name: 'revisionId'
-    description: 'The revision ID of the schema.'
-    output: true
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
-    description: 'The timestamp that the revision was created.'
-    output: true
