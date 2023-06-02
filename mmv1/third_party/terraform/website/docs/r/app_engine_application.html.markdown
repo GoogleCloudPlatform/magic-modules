@@ -1,6 +1,5 @@
 ---
 subcategory: "App Engine"
-page_title: "Google: google_app_engine_application"
 description: |-
  Allows management of an App Engine application.
 ---
@@ -47,8 +46,10 @@ The following arguments are supported:
 
 * `database_type` - (Optional) The type of the Cloud Firestore or Cloud Datastore database associated with this application.
    Can be `CLOUD_FIRESTORE` or `CLOUD_DATASTORE_COMPATIBILITY` for new
-   instances.  To support old instances, the value `CLOUD_DATASTORE` is accepted
-   by the provider, but will be rejected by the API.
+   instances.  To support old instances, the value `CLOUD_DATASTORE` is accepted by the provider, but will be rejected by the API.
+   To create a Cloud Firestore database without creating an App Engine application, use the
+   [`google_firestore_database`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/firestore_database)
+   resource instead.
 
 * `serving_status` - (Optional) The serving status of the app.
 
@@ -95,7 +96,7 @@ exported:
 ## Timeouts
 
 This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
 - `create` - Default is 4 minutes.
 - `update` - Default is 4 minutes.

@@ -6,12 +6,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
+
 	iamcredentials "google.golang.org/api/iamcredentials/v1"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleServiceAccountJwt() *schema.Resource {
+func DataSourceGoogleServiceAccountJwt() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleServiceAccountJwtRead,
 		Schema: map[string]*schema.Schema{
@@ -28,14 +32,14 @@ func dataSourceGoogleServiceAccountJwt() *schema.Resource {
 			"target_service_account": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validateRegexp("(" + strings.Join(PossibleServiceAccountNames, "|") + ")"),
+				ValidateFunc: verify.ValidateRegexp("(" + strings.Join(verify.PossibleServiceAccountNames, "|") + ")"),
 			},
 			"delegates": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
-					ValidateFunc: validateRegexp(ServiceAccountLinkRegex),
+					ValidateFunc: verify.ValidateRegexp(verify.ServiceAccountLinkRegex),
 				},
 			},
 			"jwt": {
@@ -52,9 +56,9 @@ var (
 )
 
 func dataSourceGoogleServiceAccountJwtRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 
 	if err != nil {
 		return err

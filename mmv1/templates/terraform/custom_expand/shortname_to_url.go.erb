@@ -12,6 +12,6 @@
         # See the License for the specific language governing permissions and
         # limitations under the License.
 #%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	return replaceVars(d, config, "<%= id_format(object) -%>")
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return tpgresource.ReplaceVars(d, config, "<%= id_format(object) -%>")
 }

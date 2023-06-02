@@ -11,6 +11,9 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License. */}}
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // ----------------------------------------------------------------------------
 //
 //     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
@@ -35,7 +38,7 @@ import (
 var dclResources = map[string]*schema.Resource{
 {{- range $res := . }}
 	{{- if not $res.SkipInProvider }}
-	"{{$res.TerraformName}}": resource{{$res.PathType}}(),
+	"{{$res.TerraformName}}": Resource{{$res.PathType}}(),
 	{{- end }}
 {{- end }}
 }

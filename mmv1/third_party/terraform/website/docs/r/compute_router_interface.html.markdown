@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_router_interface"
 description: |-
   Manages a Cloud Router interface.
 ---
@@ -76,15 +75,16 @@ In addition to the arguments listed above, the following computed attributes are
 ## Timeouts
 
 This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
 - `create` - Default is 4 minutes.
 - `delete` - Default is 4 minutes.
 
 ## Import
 
-Router interfaces can be imported using the `region`, `router`, and `name`, e.g.
+Router interfaces can be imported using the `project` (optional), `region`, `router`, and `name`, e.g.
 
 ```
+$ terraform import google_compute_router_interface.foobar my-project/us-central1/router-1/interface-1
 $ terraform import google_compute_router_interface.foobar us-central1/router-1/interface-1
 ```

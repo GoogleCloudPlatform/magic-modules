@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccPrivatecaCertificateAuthority_privatecaCertificateAuthorityUpdate(t *testing.T) {
@@ -13,13 +14,13 @@ func TestAccPrivatecaCertificateAuthority_privatecaCertificateAuthorityUpdate(t 
 		"pool_name":           BootstrapSharedCaPoolInLocation(t, "us-central1"),
 		"pool_location":       "us-central1",
 		"deletion_protection": false,
-		"random_suffix":       randString(t, 10),
+		"random_suffix":       RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckPrivatecaCertificateAuthorityDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPrivatecaCertificateAuthorityDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPrivatecaCertificateAuthority_privatecaCertificateAuthorityBasicRoot(context),
@@ -60,7 +61,7 @@ func TestAccPrivatecaCertificateAuthority_privatecaCertificateAuthorityUpdate(t 
 func TestAccPrivatecaCertificateAuthority_rootCaManageDesiredState(t *testing.T) {
 	t.Parallel()
 
-	random_suffix := randString(t, 10)
+	random_suffix := RandString(t, 10)
 	context_staged := map[string]interface{}{
 		"pool_name":           BootstrapSharedCaPoolInLocation(t, "us-central1"),
 		"pool_location":       "us-central1",
@@ -86,10 +87,10 @@ func TestAccPrivatecaCertificateAuthority_rootCaManageDesiredState(t *testing.T)
 	}
 
 	resourceName := "google_privateca_certificate_authority.default"
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckPrivatecaCertificateAuthorityDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPrivatecaCertificateAuthorityDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPrivatecaCertificateAuthority_privatecaCertificateAuthorityWithDesiredState(context_staged),

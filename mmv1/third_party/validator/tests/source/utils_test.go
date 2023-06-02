@@ -2,21 +2,25 @@ package test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/terraform-validator/converters/google"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai"
+	"go.uber.org/zap/zaptest"
+
 	"github.com/stretchr/testify/require"
 )
 
-func defaultCompareConverterOutput(t *testing.T, expected []google.Asset, actual []google.Asset, offline bool) {
+func defaultCompareConverterOutput(t *testing.T, expected []caiasset.Asset, actual []caiasset.Asset, offline bool) {
 	expectedAssets := normalizeAssets(t, expected, offline)
 	actualAssets := normalizeAssets(t, actual, offline)
 	require.ElementsMatch(t, expectedAssets, actualAssets)
@@ -35,39 +39,10 @@ func testConvertCommand(t *testing.T, dir, tfplanName string, jsonName string, o
 	}
 
 	// Get converted assets
-	var actualRaw []byte
 	fileNameToConvert := tfplanName + ".tfplan.json"
-	actualRaw = tfvConvert(t, dir, fileNameToConvert, offline, withProject)
-	var actual []google.Asset
-	err = json.Unmarshal(actualRaw, &actual)
-	if err != nil {
-		t.Fatalf("unmarshaling: %v", err)
-	}
+	actual := tfvConvert(t, dir, fileNameToConvert, offline, withProject)
 
 	compare(t, expected, actual, offline)
-}
-
-func testValidateCommandGeneric(t *testing.T, dir, name string, offline bool, withProject bool) {
-
-	wantViolation := true
-	wantContents := "Constraint GCPAlwaysViolatesConstraintV1.always_violates_all on resource"
-	constraintName := "always_violate"
-
-	testValidateCommand(t, wantViolation, wantContents, dir, name, offline, withProject, constraintName)
-}
-
-func testValidateCommand(t *testing.T, wantViolation bool, wantContents, dir, name string, offline bool, withProject bool, constraintName string) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("cannot get current directory: %v", err)
-	}
-	policyPath := filepath.Join(cwd, samplePolicyPath, constraintName)
-	var got []byte
-	got = tfvValidate(t, wantViolation, dir, name+".tfplan.json", policyPath, offline, withProject)
-	wantRe := regexp.MustCompile(wantContents)
-	if wantContents != "" && !wantRe.Match(got) {
-		t.Fatalf("binary did not return expect output, \ngot=%s \nwant (regex)=%s", string(got), wantContents)
-	}
 }
 
 func terraformWorkflow(t *testing.T, dir, name string) {
@@ -110,44 +85,31 @@ func saveFile(t *testing.T, dir, filename string, payload []byte) {
 	}
 }
 
-func tfvConvert(t *testing.T, dir, tfPlanFile string, offline bool, withProject bool) []byte {
-	executable := tfvBinary
-	wantError := false
-	args := []string{"convert"}
+func tfvConvert(t *testing.T, dir, tfPlanFile string, offline bool, withProject bool) []caiasset.Asset {
+	jsonPlan, err := ioutil.ReadFile(filepath.Join(dir, tfPlanFile))
+	if err != nil {
+		t.Fatalf("Error parsing %s: %s", tfPlanFile, err)
+	}
+	ctx := context.Background()
+	opts := &tfplan2cai.Options{
+		ConvertUnchanged: false,
+		ErrorLogger:      zaptest.NewLogger(t),
+		Offline:          offline,
+		DefaultRegion:    "",
+		DefaultZone:      "",
+		UserAgent:        "",
+	}
 	if withProject {
-		args = append(args, []string{"--project", data.Provider["project"]}...)
+		opts.DefaultProject = data.Provider["project"]
+		opts.AncestryCache = map[string]string{
+			data.Provider["project"]: data.Ancestry,
+		}
 	}
-	if offline {
-		args = append(args, "--offline", "--ancestry", data.Ancestry)
+	got, err := tfplan2cai.Convert(ctx, jsonPlan, opts)
+	if err != nil {
+		t.Fatalf("Error converting %s: %s", tfPlanFile, err)
 	}
-	args = append(args, tfPlanFile)
-	cmd := exec.Command(executable, args...)
-	// Remove environment variables inherited from the test runtime.
-	cmd.Env = []string{}
-	// Add credentials back.
-	if data.Provider["credentials"] != "" {
-		cmd.Env = append(cmd.Env, "GOOGLE_APPLICATION_CREDENTIALS="+data.Provider["credentials"])
-	}
-	cmd.Dir = dir
-	payload, _ := run(t, cmd, wantError)
-	return payload
-}
-
-func tfvValidate(t *testing.T, wantError bool, dir, tfplan, policyPath string, offline bool, withProject bool) []byte {
-	executable := tfvBinary
-	args := []string{"validate", "--policy-path", policyPath}
-	if withProject {
-		args = append(args, []string{"--project", data.Provider["project"]}...)
-	}
-	if offline {
-		args = append(args, "--offline", "--ancestry", data.Ancestry)
-	}
-	args = append(args, tfplan)
-	cmd := exec.Command(executable, args...)
-	cmd.Env = []string{"GOOGLE_APPLICATION_CREDENTIALS=" + data.Provider["credentials"]}
-	cmd.Dir = dir
-	payload, _ := run(t, cmd, wantError)
-	return payload
+	return got
 }
 
 // run a command and call t.Fatal on non-zero exit.
@@ -188,12 +150,16 @@ func cmdToString(c *exec.Cmd) string {
 
 func generateTFVconvertedAsset(t *testing.T, testDir, testSlug string) {
 	// Get converted assets
-	var conversionRaw []byte
 	fileNameToConvert := testSlug + ".tfplan.json"
-	conversionRaw = tfvConvert(t, testDir, fileNameToConvert, true, true)
+	assets := tfvConvert(t, testDir, fileNameToConvert, true, true)
 	dstDir := "../testdata/generatedconvert"
 	if _, err := os.Stat(dstDir); os.IsNotExist(err) {
 		os.MkdirAll(dstDir, 0700)
+	}
+
+	conversionRaw, err := json.Marshal(assets)
+	if err != nil {
+		t.Fatalf("Failed to convert asset: %s", err)
 	}
 
 	conversionPretty := &bytes.Buffer{}
@@ -202,7 +168,7 @@ func generateTFVconvertedAsset(t *testing.T, testDir, testSlug string) {
 	}
 
 	dstFile := path.Join(dstDir, testSlug+".json")
-	err := os.WriteFile(dstFile, conversionPretty.Bytes(), 0666)
+	err = os.WriteFile(dstFile, conversionPretty.Bytes(), 0666)
 	if err != nil {
 		t.Fatalf("error while writing to file %s, error %v", dstFile, err)
 	}

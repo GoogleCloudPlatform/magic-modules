@@ -4,15 +4,18 @@ import (
 	"fmt"
 	"math/rand"
 	"regexp"
+
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
-type ConvertFunc func(d TerraformResourceData, config *Config) ([]Asset, error)
-type GetApiObjectFunc func(d TerraformResourceData, config *Config) (map[string]interface{}, error)
+type ConvertFunc func(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error)
+type GetApiObjectFunc func(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error)
 
 // FetchFullResourceFunc allows initial data for a resource to be fetched from the API and merged
 // with the planned changes. This is useful for resources that are only partially managed
 // by Terraform, like IAM policies managed with member/binding resources.
-type FetchFullResourceFunc func(d TerraformResourceData, config *Config) (Asset, error)
+type FetchFullResourceFunc func(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (Asset, error)
 
 // MergeFunc combines multiple terraform resources into a single CAI asset.
 // The incoming asset will either be an asset that was created/updated or deleted.
@@ -31,10 +34,11 @@ type Asset struct {
 	// The name, in a peculiar format: `\\<api>.googleapis.com/<self_link>`
 	Name string `json:"name"`
 	// The type name in `google.<api>.<resourcename>` format.
-	Type      string         `json:"asset_type"`
-	Resource  *AssetResource `json:"resource,omitempty"`
-	IAMPolicy *IAMPolicy     `json:"iam_policy,omitempty"`
-	OrgPolicy []*OrgPolicy   `json:"org_policy,omitempty"`
+	Type          string           `json:"asset_type"`
+	Resource      *AssetResource   `json:"resource,omitempty"`
+	IAMPolicy     *IAMPolicy       `json:"iam_policy,omitempty"`
+	OrgPolicy     []*OrgPolicy     `json:"org_policy,omitempty"`
+	V2OrgPolicies []*V2OrgPolicies `json:"v2_org_policies,omitempty"`
 }
 
 // AssetResource is the Asset's Resource field.
@@ -53,6 +57,14 @@ type AssetResource struct {
 	Data map[string]interface{} `json:"data,omitempty"`
 }
 
+type Folder struct {
+	Name        string     `json:"name,omitempty"`
+	Parent      string     `json:"parent,omitempty"`
+	DisplayName string     `json:"display_name,omitempty"`
+	State       string     `json:"state,omitempty"`
+	CreateTime  *Timestamp `json:"create_time,omitempty"`
+}
+
 type IAMPolicy struct {
 	Bindings []IAMBinding `json:"bindings"`
 }
@@ -68,6 +80,41 @@ type OrgPolicy struct {
 	BooleanPolicy  *BooleanPolicy  `json:"booleanPolicy"`
 	RestoreDefault *RestoreDefault `json:"restoreDefault"`
 	UpdateTime     *Timestamp      `json:"update_time,omitempty"`
+}
+
+// V2OrgPolicies is the represtation of V2OrgPolicies
+type V2OrgPolicies struct {
+	Name       string      `json:"name"`
+	PolicySpec *PolicySpec `json:"spec,omitempty"`
+}
+
+// Spec is the representation of Spec for V2OrgPolicy
+type PolicySpec struct {
+	Etag              string        `json:"etag,omitempty"`
+	UpdateTime        *Timestamp    `json:"update_time,omitempty"`
+	PolicyRules       []*PolicyRule `json:"rules,omitempty"`
+	InheritFromParent bool          `json:"inherit_from_parent,omitempty"`
+	Reset             bool          `json:"reset,omitempty"`
+}
+
+type PolicyRule struct {
+	Values    *StringValues `json:"values,omitempty"`
+	AllowAll  bool          `json:"allow_all,omitempty"`
+	DenyAll   bool          `json:"deny_all,omitempty"`
+	Enforce   bool          `json:"enforce,omitempty"`
+	Condition *Expr         `json:"condition,omitempty"`
+}
+
+type StringValues struct {
+	AllowedValues []string `json:"allowed_values,omitempty"`
+	DeniedValues  []string `json:"denied_values,omitempty"`
+}
+
+type Expr struct {
+	Expression  string `json:"expression,omitempty"`
+	Title       string `json:"title,omitempty"`
+	Description string `json:"description,omitempty"`
+	Location    string `json:"location,omitempty"`
 }
 
 type Timestamp struct {
@@ -96,17 +143,17 @@ type RestoreDefault struct {
 // of {{field}}. In the case where a field would resolve to an empty string, a
 // generated unique string will be used: "placeholder-" + randomString().
 // This is done to preserve uniqueness of asset.name for a given asset.asset_type.
-func assetName(d TerraformResourceData, config *Config, linkTmpl string) (string, error) {
-	re := regexp.MustCompile("{{([[:word:]]+)}}")
+func assetName(d tpgresource.TerraformResourceData, config *transport_tpg.Config, linkTmpl string) (string, error) {
+	re := regexp.MustCompile("{{([%[:word:]]+)}}")
 
 	// workaround for empty project
 	placeholderSet := false
 	if config.Project == "" {
-		config.Project = fmt.Sprintf("placeholder-%s", randString(8))
+		config.Project = fmt.Sprintf("placeholder-%s", RandString(8))
 		placeholderSet = true
 	}
 
-	f, err := buildReplacementFunc(re, d, config, linkTmpl, false)
+	f, err := tpgresource.BuildReplacementFunc(re, d, config, linkTmpl, false)
 	if err != nil {
 		return "", err
 	}
@@ -117,7 +164,7 @@ func assetName(d TerraformResourceData, config *Config, linkTmpl string) (string
 	fWithPlaceholder := func(key string) string {
 		val := f(key)
 		if val == "" {
-			val = fmt.Sprintf("placeholder-%s", randString(8))
+			val = fmt.Sprintf("placeholder-%s", RandString(8))
 		}
 		return val
 	}
@@ -125,7 +172,7 @@ func assetName(d TerraformResourceData, config *Config, linkTmpl string) (string
 	return re.ReplaceAllStringFunc(linkTmpl, fWithPlaceholder), nil
 }
 
-func randString(n int) string {
+func RandString(n int) string {
 	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	b := make([]byte, n)
 	for i := range b {

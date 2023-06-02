@@ -5,31 +5,32 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccComputeVpnTunnel_regionFromGateway(t *testing.T) {
 	t.Parallel()
 	region := "us-central1"
-	if getTestRegionFromEnv() == region {
+	if acctest.GetTestRegionFromEnv() == region {
 		// Make sure we choose a region that isn't the provider default
 		// in order to test getting the region from the gateway and not the
 		// provider.
 		region = "us-west1"
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeVpnTunnelDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeVpnTunnelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeVpnTunnel_regionFromGateway(randString(t, 10), region),
+				Config: testAccComputeVpnTunnel_regionFromGateway(RandString(t, 10), region),
 			},
 			{
 				ResourceName:            "google_compute_vpn_tunnel.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateIdPrefix:     fmt.Sprintf("%s/%s/", getTestProjectFromEnv(), region),
+				ImportStateIdPrefix:     fmt.Sprintf("%s/%s/", acctest.GetTestProjectFromEnv(), region),
 				ImportStateVerifyIgnore: []string{"shared_secret", "detailed_status"},
 			},
 		},
@@ -39,14 +40,14 @@ func TestAccComputeVpnTunnel_regionFromGateway(t *testing.T) {
 func TestAccComputeVpnTunnel_router(t *testing.T) {
 	t.Parallel()
 
-	router := fmt.Sprintf("tf-test-tunnel-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeVpnTunnelDestroyProducer(t),
+	router := fmt.Sprintf("tf-test-tunnel-%s", RandString(t, 10))
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeVpnTunnelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeVpnTunnelRouter(randString(t, 10), router),
+				Config: testAccComputeVpnTunnelRouter(RandString(t, 10), router),
 			},
 			{
 				ResourceName:            "google_compute_vpn_tunnel.foobar",
@@ -61,13 +62,13 @@ func TestAccComputeVpnTunnel_router(t *testing.T) {
 func TestAccComputeVpnTunnel_defaultTrafficSelectors(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeVpnTunnelDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeVpnTunnelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeVpnTunnelDefaultTrafficSelectors(randString(t, 10)),
+				Config: testAccComputeVpnTunnelDefaultTrafficSelectors(RandString(t, 10)),
 			},
 			{
 				ResourceName:            "google_compute_vpn_tunnel.foobar",

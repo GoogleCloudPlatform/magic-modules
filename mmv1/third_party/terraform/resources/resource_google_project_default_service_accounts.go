@@ -8,15 +8,18 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/iam/v1"
 )
 
-// resourceGoogleProjectDefaultServiceAccounts returns a *schema.Resource that allows a customer
+// ResourceGoogleProjectDefaultServiceAccounts returns a *schema.Resource that allows a customer
 // to manage all the default serviceAccounts.
 // It does mean that terraform tried to perform the action in the SA at some point but does not ensure that
 // all defaults serviceAccounts where managed. Eg.: API was activated after project creation.
-func resourceGoogleProjectDefaultServiceAccounts() *schema.Resource {
+func ResourceGoogleProjectDefaultServiceAccounts() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceGoogleProjectDefaultServiceAccountsCreate,
 		Read:   schema.Noop,
@@ -34,7 +37,7 @@ func resourceGoogleProjectDefaultServiceAccounts() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validateProjectID(),
+				ValidateFunc: verify.ValidateProjectID(),
 				Description:  `The project ID where service accounts are created.`,
 			},
 			"action": {
@@ -64,8 +67,8 @@ func resourceGoogleProjectDefaultServiceAccounts() *schema.Resource {
 }
 
 func resourceGoogleProjectDefaultServiceAccountsDoAction(d *schema.ResourceData, meta interface{}, action, uniqueID, email, project string) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -136,8 +139,8 @@ func resourceGoogleProjectDefaultServiceAccountsDoAction(d *schema.ResourceData,
 }
 
 func resourceGoogleProjectDefaultServiceAccountsCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -164,14 +167,14 @@ func resourceGoogleProjectDefaultServiceAccountsCreate(d *schema.ResourceData, m
 	if err := d.Set("service_accounts", changedServiceAccounts); err != nil {
 		return fmt.Errorf("error setting service_accounts: %s", err)
 	}
-	d.SetId(prefixedProject(pid))
+	d.SetId(PrefixedProject(pid))
 
 	return nil
 }
 
-func listServiceAccounts(config *Config, d *schema.ResourceData, userAgent string) ([]*iam.ServiceAccount, error) {
+func listServiceAccounts(config *transport_tpg.Config, d *schema.ResourceData, userAgent string) ([]*iam.ServiceAccount, error) {
 	pid := d.Get("project").(string)
-	response, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.List(prefixedProject(pid)).Do()
+	response, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.List(PrefixedProject(pid)).Do()
 	if err != nil {
 		return nil, fmt.Errorf("failed to list service accounts on project %q: %v", pid, err)
 	}

@@ -4,6 +4,7 @@ package google
 import (
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -11,23 +12,23 @@ func TestAccDataSourceGoogleFirebaseAppleApp(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":   getTestProjectFromEnv(),
-		"bundle_id":    "apple.app." + randString(t, 5),
-		"display_name": "Display Name AppleApp DataSource",
+		"project_id":   acctest.GetTestProjectFromEnv(),
+		"bundle_id":    "apple.app." + RandString(t, 5),
+		"display_name": "tf-test Display Name AppleApp DataSource",
 		"app_store_id": 12345,
 		"team_id":      1234567890,
 	}
 
 	resourceName := "data.google_firebase_apple_app.my_app"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleFirebaseAppleApp(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						resourceName,
 						"google_firebase_apple_app.my_app",
 						map[string]struct{}{
@@ -51,6 +52,11 @@ resource "google_firebase_apple_app" "my_app" {
 }
 
 data "google_firebase_apple_app" "my_app" {
+  app_id = google_firebase_apple_app.my_app.app_id
+}
+
+data "google_firebase_apple_app" "my_app_project" {
+  project = "%{project_id}"
   app_id = google_firebase_apple_app.my_app.app_id
 }
 `, context)

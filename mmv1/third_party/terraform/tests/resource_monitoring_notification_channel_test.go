@@ -5,15 +5,16 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccMonitoringNotificationChannel_update(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckMonitoringNotificationChannelDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringNotificationChannelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMonitoringNotificationChannel_update("email", `email_address = "fake_email@blahblah.com"`, "true"),
@@ -24,7 +25,7 @@ func TestAccMonitoringNotificationChannel_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccMonitoringNotificationChannel_update("sms", `number = "+15555379009"`, "false"),
+				Config: testAccMonitoringNotificationChannel_update("sms", `number = "+16502530000"`, "false"),
 			},
 			{
 				ResourceName:      "google_monitoring_notification_channel.update",
@@ -38,10 +39,10 @@ func TestAccMonitoringNotificationChannel_update(t *testing.T) {
 func TestAccMonitoringNotificationChannel_updateSensitiveLabels(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckMonitoringNotificationChannelDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringNotificationChannelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMonitoringNotificationChannel_updateSensitiveLabels(),

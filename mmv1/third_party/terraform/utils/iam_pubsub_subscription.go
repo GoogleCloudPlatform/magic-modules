@@ -5,6 +5,9 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/pubsub/v1"
 )
@@ -14,7 +17,7 @@ var IamPubsubSubscriptionSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Required:         true,
 		ForceNew:         true,
-		DiffSuppressFunc: compareSelfLinkOrResourceName,
+		DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 	},
 	"project": {
 		Type:     schema.TypeString,
@@ -26,12 +29,12 @@ var IamPubsubSubscriptionSchema = map[string]*schema.Schema{
 
 type PubsubSubscriptionIamUpdater struct {
 	subscription string
-	d            TerraformResourceData
-	Config       *Config
+	d            tpgresource.TerraformResourceData
+	Config       *transport_tpg.Config
 }
 
-func NewPubsubSubscriptionIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
-	project, err := getProject(d, config)
+func NewPubsubSubscriptionIamUpdater(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgiamresource.ResourceIamUpdater, error) {
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +48,7 @@ func NewPubsubSubscriptionIamUpdater(d TerraformResourceData, config *Config) (R
 	}, nil
 }
 
-func PubsubSubscriptionIdParseFunc(d *schema.ResourceData, _ *Config) error {
+func PubsubSubscriptionIdParseFunc(d *schema.ResourceData, _ *transport_tpg.Config) error {
 	if err := d.Set("subscription", d.Id()); err != nil {
 		return fmt.Errorf("Error setting subscription: %s", err)
 	}
@@ -53,7 +56,7 @@ func PubsubSubscriptionIdParseFunc(d *schema.ResourceData, _ *Config) error {
 }
 
 func (u *PubsubSubscriptionIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +76,7 @@ func (u *PubsubSubscriptionIamUpdater) GetResourceIamPolicy() (*cloudresourceman
 }
 
 func (u *PubsubSubscriptionIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
-	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -109,7 +112,7 @@ func (u *PubsubSubscriptionIamUpdater) DescribeResource() string {
 // v1 and v2 policy are identical
 func resourceManagerToPubsubPolicy(in *cloudresourcemanager.Policy) (*pubsub.Policy, error) {
 	out := &pubsub.Policy{}
-	err := Convert(in, out)
+	err := tpgresource.Convert(in, out)
 	if err != nil {
 		return nil, errwrap.Wrapf("Cannot convert a v1 policy to a pubsub policy: {{err}}", err)
 	}
@@ -118,7 +121,7 @@ func resourceManagerToPubsubPolicy(in *cloudresourcemanager.Policy) (*pubsub.Pol
 
 func pubsubToResourceManagerPolicy(in *pubsub.Policy) (*cloudresourcemanager.Policy, error) {
 	out := &cloudresourcemanager.Policy{}
-	err := Convert(in, out)
+	err := tpgresource.Convert(in, out)
 	if err != nil {
 		return nil, errwrap.Wrapf("Cannot convert a pubsub policy to a v1 policy: {{err}}", err)
 	}

@@ -4,6 +4,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -12,14 +13,14 @@ import (
 func TestAccServiceDirectoryEndpoint_serviceDirectoryEndpointUpdateExample(t *testing.T) {
 	t.Parallel()
 
-	project := getTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	location := "us-central1"
-	testId := fmt.Sprintf("tf-test-example-endpoint%s", randString(t, 10))
+	testId := fmt.Sprintf("tf-test-example-endpoint%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckServiceDirectoryEndpointDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckServiceDirectoryEndpointDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceDirectoryEndpoint_basic(location, testId),

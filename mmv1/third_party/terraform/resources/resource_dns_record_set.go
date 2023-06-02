@@ -10,6 +10,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/dns/v1"
 )
 
@@ -23,8 +25,8 @@ func rrdatasDnsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 		return false
 	}
 
-	oList := convertStringArr(o.([]interface{}))
-	nList := convertStringArr(n.([]interface{}))
+	oList := tpgresource.ConvertStringArr(o.([]interface{}))
+	nList := tpgresource.ConvertStringArr(n.([]interface{}))
 
 	parseFunc := func(record string) string {
 		switch d.Get("type") {
@@ -39,13 +41,13 @@ func rrdatasDnsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 			return record
 		}
 	}
-	return rrdatasListDiffSuppress(oList, nList, parseFunc, d)
+	return RrdatasListDiffSuppress(oList, nList, parseFunc, d)
 }
 
 // suppress on a list when 1) its items have dups that need to be ignored
 // and 2) string comparison on the items may need a special parse function
 // example of usage can be found ../../../third_party/terraform/tests/resource_dns_record_set_test.go.erb
-func rrdatasListDiffSuppress(oldList, newList []string, fun func(x string) string, _ *schema.ResourceData) bool {
+func RrdatasListDiffSuppress(oldList, newList []string, fun func(x string) string, _ *schema.ResourceData) bool {
 	// compare two lists of unordered records
 	diff := make(map[string]bool, len(oldList))
 	for _, oldRecord := range oldList {
@@ -69,7 +71,7 @@ func rrdatasListDiffSuppress(oldList, newList []string, fun func(x string) strin
 	return true
 }
 
-func resourceDnsRecordSet() *schema.Resource {
+func ResourceDnsRecordSet() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDnsRecordSetCreate,
 		Read:   resourceDnsRecordSetRead,
@@ -84,7 +86,7 @@ func resourceDnsRecordSet() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 				Description:      `The name of the zone in which this record set will reside.`,
 			},
 
@@ -256,8 +258,8 @@ var healthCheckedTargetSchema *schema.Resource = &schema.Resource{
 					"load_balancer_type": {
 						Type:         schema.TypeString,
 						Required:     true,
-						Description:  `The type of load balancer. This value is case-sensitive. Possible values: ["regionalL4ilb"]`,
-						ValidateFunc: validation.StringInSlice([]string{"regionalL4ilb"}, false),
+						Description:  `The type of load balancer. This value is case-sensitive. Possible values: ["regionalL4ilb", "regionalL7ilb]`,
+						ValidateFunc: validation.StringInSlice([]string{"regionalL4ilb", "regionalL7ilb"}, false),
 					},
 					"ip_address": {
 						Type:        schema.TypeString,
@@ -278,7 +280,7 @@ var healthCheckedTargetSchema *schema.Resource = &schema.Resource{
 					"network_url": {
 						Type:             schema.TypeString,
 						Required:         true,
-						DiffSuppressFunc: compareSelfLinkOrResourceName,
+						DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 						Description:      "The fully qualified url of the network in which the load balancer belongs. This should be formatted like `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`.",
 					},
 					"project": {
@@ -298,13 +300,13 @@ var healthCheckedTargetSchema *schema.Resource = &schema.Resource{
 }
 
 func resourceDnsRecordSetCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -378,13 +380,13 @@ func resourceDnsRecordSetCreate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -396,14 +398,14 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 	dnsType := d.Get("type").(string)
 
 	var resp *dns.ResourceRecordSetsListResponse
-	err = retry(func() error {
+	err = transport_tpg.Retry(func() error {
 		var reqErr error
 		resp, reqErr = config.NewDnsClient(userAgent).ResourceRecordSets.List(
 			project, zone).Name(name).Type(dnsType).Do()
 		return reqErr
 	})
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("DNS Record Set %q", d.Get("name").(string)))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("DNS Record Set %q", d.Get("name").(string)))
 	}
 	if len(resp.Rrsets) == 0 {
 		// The resource doesn't exist anymore
@@ -439,13 +441,13 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -493,7 +495,7 @@ func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error 
 	log.Printf("[DEBUG] DNS Record delete request: %#v", chg)
 	chg, err = config.NewDnsClient(userAgent).Changes.Create(project, zone, chg).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, "google_dns_record_set")
+		return transport_tpg.HandleNotFoundError(err, d, "google_dns_record_set")
 	}
 
 	w := &DnsChangeWaiter{
@@ -512,13 +514,13 @@ func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceDnsRecordSetUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -593,8 +595,8 @@ func resourceDnsRecordSetUpdate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceDnsRecordSetImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
-	if err := parseImportId([]string{
+	config := meta.(*transport_tpg.Config)
+	if err := tpgresource.ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/managedZones/(?P<managed_zone>[^/]+)/rrsets/(?P<name>[^/]+)/(?P<type>[^/]+)",
 		"(?P<project>[^/]+)/(?P<managed_zone>[^/]+)/(?P<name>[^/]+)/(?P<type>[^/]+)",
 		"(?P<managed_zone>[^/]+)/(?P<name>[^/]+)/(?P<type>[^/]+)",
@@ -603,7 +605,7 @@ func resourceDnsRecordSetImportState(d *schema.ResourceData, meta interface{}) (
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/managedZones/{{managed_zone}}/rrsets/{{name}}/{{type}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/managedZones/{{managed_zone}}/rrsets/{{name}}/{{type}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -613,10 +615,10 @@ func resourceDnsRecordSetImportState(d *schema.ResourceData, meta interface{}) (
 }
 
 func expandDnsRecordSetRrdata(configured []interface{}) []string {
-	return convertStringArr(configured)
+	return tpgresource.ConvertStringArr(configured)
 }
 
-func expandDnsRecordSetRoutingPolicy(configured []interface{}, d TerraformResourceData, config *Config) (*dns.RRSetRoutingPolicy, error) {
+func expandDnsRecordSetRoutingPolicy(configured []interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*dns.RRSetRoutingPolicy, error) {
 	if len(configured) == 0 || configured[0] == nil {
 		return nil, nil
 	}
@@ -664,7 +666,7 @@ func expandDnsRecordSetRoutingPolicy(configured []interface{}, d TerraformResour
 	return nil, nil // unreachable here if ps is valid data
 }
 
-func expandDnsRecordSetRoutingPolicyWrrItems(configured []interface{}, d TerraformResourceData, config *Config) ([]*dns.RRSetRoutingPolicyWrrPolicyWrrPolicyItem, error) {
+func expandDnsRecordSetRoutingPolicyWrrItems(configured []interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*dns.RRSetRoutingPolicyWrrPolicyWrrPolicyItem, error) {
 	items := make([]*dns.RRSetRoutingPolicyWrrPolicyWrrPolicyItem, 0, len(configured))
 	for _, raw := range configured {
 		item, err := expandDnsRecordSetRoutingPolicyWrrItem(raw, d, config)
@@ -676,20 +678,20 @@ func expandDnsRecordSetRoutingPolicyWrrItems(configured []interface{}, d Terrafo
 	return items, nil
 }
 
-func expandDnsRecordSetRoutingPolicyWrrItem(configured interface{}, d TerraformResourceData, config *Config) (*dns.RRSetRoutingPolicyWrrPolicyWrrPolicyItem, error) {
+func expandDnsRecordSetRoutingPolicyWrrItem(configured interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*dns.RRSetRoutingPolicyWrrPolicyWrrPolicyItem, error) {
 	data := configured.(map[string]interface{})
 	healthCheckedTargets, err := expandDnsRecordSetHealthCheckedTargets(data["health_checked_targets"].([]interface{}), d, config)
 	if err != nil {
 		return nil, err
 	}
 	return &dns.RRSetRoutingPolicyWrrPolicyWrrPolicyItem{
-		Rrdatas:              convertStringArr(data["rrdatas"].([]interface{})),
+		Rrdatas:              tpgresource.ConvertStringArr(data["rrdatas"].([]interface{})),
 		Weight:               data["weight"].(float64),
 		HealthCheckedTargets: healthCheckedTargets,
 	}, nil
 }
 
-func expandDnsRecordSetRoutingPolicyGeoItems(configured []interface{}, d TerraformResourceData, config *Config) ([]*dns.RRSetRoutingPolicyGeoPolicyGeoPolicyItem, error) {
+func expandDnsRecordSetRoutingPolicyGeoItems(configured []interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*dns.RRSetRoutingPolicyGeoPolicyGeoPolicyItem, error) {
 	items := make([]*dns.RRSetRoutingPolicyGeoPolicyGeoPolicyItem, 0, len(configured))
 	for _, raw := range configured {
 		item, err := expandDnsRecordSetRoutingPolicyGeoItem(raw, d, config)
@@ -701,20 +703,20 @@ func expandDnsRecordSetRoutingPolicyGeoItems(configured []interface{}, d Terrafo
 	return items, nil
 }
 
-func expandDnsRecordSetRoutingPolicyGeoItem(configured interface{}, d TerraformResourceData, config *Config) (*dns.RRSetRoutingPolicyGeoPolicyGeoPolicyItem, error) {
+func expandDnsRecordSetRoutingPolicyGeoItem(configured interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*dns.RRSetRoutingPolicyGeoPolicyGeoPolicyItem, error) {
 	data := configured.(map[string]interface{})
 	healthCheckedTargets, err := expandDnsRecordSetHealthCheckedTargets(data["health_checked_targets"].([]interface{}), d, config)
 	if err != nil {
 		return nil, err
 	}
 	return &dns.RRSetRoutingPolicyGeoPolicyGeoPolicyItem{
-		Rrdatas:              convertStringArr(data["rrdatas"].([]interface{})),
+		Rrdatas:              tpgresource.ConvertStringArr(data["rrdatas"].([]interface{})),
 		Location:             data["location"].(string),
 		HealthCheckedTargets: healthCheckedTargets,
 	}, nil
 }
 
-func expandDnsRecordSetHealthCheckedTargets(configured []interface{}, d TerraformResourceData, config *Config) (*dns.RRSetRoutingPolicyHealthCheckTargets, error) {
+func expandDnsRecordSetHealthCheckedTargets(configured []interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*dns.RRSetRoutingPolicyHealthCheckTargets, error) {
 	if len(configured) == 0 || configured[0] == nil {
 		return nil, nil
 	}
@@ -729,7 +731,7 @@ func expandDnsRecordSetHealthCheckedTargets(configured []interface{}, d Terrafor
 	}, nil
 }
 
-func expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancers(configured []interface{}, d TerraformResourceData, config *Config) ([]*dns.RRSetRoutingPolicyLoadBalancerTarget, error) {
+func expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancers(configured []interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*dns.RRSetRoutingPolicyLoadBalancerTarget, error) {
 	ilbs := make([]*dns.RRSetRoutingPolicyLoadBalancerTarget, 0, len(configured))
 	for _, raw := range configured {
 		ilb, err := expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancer(raw, d, config)
@@ -741,7 +743,7 @@ func expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancers(configured []in
 	return ilbs, nil
 }
 
-func expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancer(configured interface{}, d TerraformResourceData, config *Config) (*dns.RRSetRoutingPolicyLoadBalancerTarget, error) {
+func expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancer(configured interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*dns.RRSetRoutingPolicyLoadBalancerTarget, error) {
 	data := configured.(map[string]interface{})
 	networkUrl, err := expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancerNetworkUrl(data["network_url"], d, config)
 	if err != nil {
@@ -758,20 +760,20 @@ func expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancer(configured inter
 	}, nil
 }
 
-func expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancerNetworkUrl(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancerNetworkUrl(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	if v == nil || v.(string) == "" {
 		return "", nil
 	} else if strings.HasPrefix(v.(string), "https://") {
 		return v, nil
 	}
-	url, err := replaceVars(d, config, "{{ComputeBasePath}}"+v.(string))
+	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}"+v.(string))
 	if err != nil {
 		return "", err
 	}
-	return ConvertSelfLinkToV1(url), nil
+	return tpgresource.ConvertSelfLinkToV1(url), nil
 }
 
-func expandDnsRecordSetRoutingPolicyPrimaryBackup(configured []interface{}, d TerraformResourceData, config *Config) (*dns.RRSetRoutingPolicyPrimaryBackupPolicy, error) {
+func expandDnsRecordSetRoutingPolicyPrimaryBackup(configured []interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*dns.RRSetRoutingPolicyPrimaryBackupPolicy, error) {
 	if len(configured) == 0 || configured[0] == nil {
 		return nil, nil
 	}

@@ -5,20 +5,21 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccSpannerDatabaseIamBinding(t *testing.T) {
 	t.Parallel()
 
-	account := fmt.Sprintf("tf-test-%d", randInt(t))
+	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	role := "roles/spanner.databaseAdmin"
-	project := getTestProjectFromEnv()
-	database := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	instance := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	project := acctest.GetTestProjectFromEnv()
+	database := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instance := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSpannerDatabaseIamBinding_basic(account, instance, database, role),
@@ -29,7 +30,7 @@ func TestAccSpannerDatabaseIamBinding(t *testing.T) {
 					Project:  project,
 					Instance: instance,
 					Database: database,
-				}.terraformId(), role),
+				}.TerraformId(), role),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -43,7 +44,7 @@ func TestAccSpannerDatabaseIamBinding(t *testing.T) {
 					Project:  project,
 					Instance: instance,
 					Database: database,
-				}.terraformId(), role),
+				}.TerraformId(), role),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -54,15 +55,16 @@ func TestAccSpannerDatabaseIamBinding(t *testing.T) {
 func TestAccSpannerDatabaseIamMember(t *testing.T) {
 	t.Parallel()
 
-	project := getTestProjectFromEnv()
-	account := fmt.Sprintf("tf-test-%d", randInt(t))
+	project := acctest.GetTestProjectFromEnv()
+	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	role := "roles/spanner.databaseAdmin"
-	database := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	instance := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	database := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instance := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	conditionTitle := "Access only database one"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
@@ -70,11 +72,11 @@ func TestAccSpannerDatabaseIamMember(t *testing.T) {
 			},
 			{
 				ResourceName: "google_spanner_database_iam_member.foo",
-				ImportStateId: fmt.Sprintf("%s %s serviceAccount:%s@%s.iam.gserviceaccount.com", spannerDatabaseId{
+				ImportStateId: fmt.Sprintf("%s %s serviceAccount:%s@%s.iam.gserviceaccount.com %s", spannerDatabaseId{
 					Instance: instance,
 					Database: database,
 					Project:  project,
-				}.terraformId(), role, account, project),
+				}.TerraformId(), role, account, project, conditionTitle),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -85,18 +87,19 @@ func TestAccSpannerDatabaseIamMember(t *testing.T) {
 func TestAccSpannerDatabaseIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	project := getTestProjectFromEnv()
-	account := fmt.Sprintf("tf-test-%d", randInt(t))
+	project := acctest.GetTestProjectFromEnv()
+	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	role := "roles/spanner.databaseAdmin"
-	database := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	instance := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	database := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instance := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSpannerDatabaseIamPolicy_basic(account, instance, database, role),
+				Check:  resource.TestCheckResourceAttrSet("data.google_spanner_database_iam_policy.foo", "policy_data"),
 			},
 			// Test a few import formats
 			{
@@ -105,7 +108,7 @@ func TestAccSpannerDatabaseIamPolicy(t *testing.T) {
 					Instance: instance,
 					Database: database,
 					Project:  project,
-				}.terraformId(),
+				}.TerraformId(),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -207,6 +210,10 @@ resource "google_spanner_database_iam_member" "foo" {
   instance = google_spanner_database.database.instance
   role     = "%s"
   member   = "serviceAccount:${google_service_account.test_account.email}"
+  condition {
+    title      = "Access only database one"
+    expression = "resource.type == \"spanner.googleapis.com/DatabaseRole\" && resource.name.endsWith(\"/databaseRoles/parent\")"
+  }
 }
 `, account, instance, instance, database, roleId)
 }
@@ -244,6 +251,12 @@ resource "google_spanner_database_iam_policy" "foo" {
   database    = google_spanner_database.database.name
   instance    = google_spanner_database.database.instance
   policy_data = data.google_iam_policy.foo.policy_data
+}
+
+data "google_spanner_database_iam_policy" "foo" {
+  project     = google_spanner_database.database.project
+  database    = google_spanner_database.database.name
+  instance    = google_spanner_database.database.instance
 }
 `, account, instance, instance, database, roleId)
 }

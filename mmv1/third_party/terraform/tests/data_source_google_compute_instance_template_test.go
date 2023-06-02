@@ -4,19 +4,20 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccInstanceTemplateDatasource_name(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccInstanceTemplate_name(getTestProjectFromEnv(), randString(t, 10)),
+				Config: testAccInstanceTemplate_name(acctest.GetTestProjectFromEnv(), RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_instance_template.default",
 						"google_compute_instance_template.default",
 						map[string]struct{}{},
@@ -30,14 +31,14 @@ func TestAccInstanceTemplateDatasource_name(t *testing.T) {
 func TestAccInstanceTemplateDatasource_filter(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccInstanceTemplate_filter(getTestProjectFromEnv(), randString(t, 10)),
+				Config: testAccInstanceTemplate_filter(acctest.GetTestProjectFromEnv(), RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_instance_template.default",
 						"google_compute_instance_template.c",
 						map[string]struct{}{},
@@ -51,17 +52,42 @@ func TestAccInstanceTemplateDatasource_filter(t *testing.T) {
 func TestAccInstanceTemplateDatasource_filter_mostRecent(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccInstanceTemplate_filter_mostRecent(getTestProjectFromEnv(), randString(t, 10)),
+				Config: testAccInstanceTemplate_filter_mostRecent(acctest.GetTestProjectFromEnv(), RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_instance_template.default",
 						"google_compute_instance_template.c",
 						map[string]struct{}{},
+					),
+				),
+			},
+		},
+	})
+}
+
+func TestAccInstanceTemplateDatasource_self_link_unique(t *testing.T) {
+	t.Parallel()
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccInstanceTemplate_self_link_unique(acctest.GetTestProjectFromEnv(), RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+						"data.google_compute_instance_template.default",
+						"google_compute_instance_template.default",
+						// we don't compare the id here as we start this test from a self_link_unique url
+						// and the resource's ID will have the standard format project/projectname/global/instanceTemplates/tf-test-template-random
+						map[string]struct{}{
+							"id": {},
+						},
 					),
 				),
 			},
@@ -235,6 +261,34 @@ data "google_compute_instance_template" "default" {
   project = "%{project}${replace(google_compute_instance_template.b.id, "/.*/", "")}"
   filter      = "(name != tf-test-template-%{suffix}-b) (description = tf-test-instance-template)"
   most_recent = true
+}
+`, map[string]interface{}{"project": project, "suffix": suffix})
+}
+
+func testAccInstanceTemplate_self_link_unique(project, suffix string) string {
+	return Nprintf(`
+resource "google_compute_instance_template" "default" {
+  name        = "tf-test-template-%{suffix}"
+  description = "Example template."
+
+  machine_type = "e2-small"
+
+  tags = ["foo", "bar"]
+
+  disk {
+    source_image = "cos-cloud/cos-stable"
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+
+data "google_compute_instance_template" "default" {
+  project = "%{project}"
+  self_link_unique = google_compute_instance_template.default.self_link_unique
 }
 `, map[string]interface{}{"project": project, "suffix": suffix})
 }

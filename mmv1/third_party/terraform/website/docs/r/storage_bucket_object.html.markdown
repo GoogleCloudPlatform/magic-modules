@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Storage"
-page_title: "Google: google_storage_bucket_object"
 description: |-
   Creates a new object inside a specified bucket
 ---
@@ -23,6 +22,16 @@ Example creating a public object in an existing `image-store` bucket.
 resource "google_storage_bucket_object" "picture" {
   name   = "butterfly01"
   source = "/images/nature/garden-tiger-moth.jpg"
+  bucket = "image-store"
+}
+```
+
+Example creating an empty folder in an existing `image-store` bucket.
+
+```hcl
+resource "google_storage_bucket_object" "empty_folder" {
+  name   = "empty_folder/" # folder name should end with '/'
+  content = " "            # content is ignored but should be non-empty
   bucket = "image-store"
 }
 ```
@@ -99,7 +108,7 @@ exported:
 ## Timeouts
 
 This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
 - `create` - Default is 4 minutes.
 - `update` - Default is 4 minutes.

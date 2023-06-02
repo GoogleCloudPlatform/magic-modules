@@ -1,0 +1,479 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Disk'
+kind: 'compute#disk'
+immutable: true
+base_url: projects/{{project}}/zones/{{zone}}/disks
+collection_url_key: 'items'
+has_self_link: true
+description: |
+  Persistent disks are durable storage devices that function similarly to
+  the physical disks in a desktop or a server. Compute Engine manages the
+  hardware behind these devices to ensure data redundancy and optimize
+  performance for you. Persistent disks are available as either standard
+  hard disk drives (HDD) or solid-state drives (SSD).
+
+  Persistent disks are located independently from your virtual machine
+  instances, so you can detach or move persistent disks to keep your data
+  even after you delete your instances. Persistent disk performance scales
+  automatically with size, so you can resize your existing persistent disks
+  or add more persistent disks to an instance to meet your performance and
+  storage space requirements.
+
+  Add a persistent disk to your instance when you need reliable and
+  affordable storage with consistent performance characteristics.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Adding a persistent disk': 'https://cloud.google.com/compute/docs/disks/add-persistent-disk'
+  api: 'https://cloud.google.com/compute/docs/reference/v1/disks'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: templates/terraform/pre_delete/detach_disk.erb
+  constants: templates/terraform/constants/disk.erb
+  encoder: templates/terraform/encoders/disk.erb
+  decoder: templates/terraform/decoders/disk.erb
+  resource_definition: templates/terraform/resource_definition/disk.erb
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'disk_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-test-disk%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      disk_name: 'test-disk'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'disk_async'
+    primary_resource_id: 'primary'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-test-disk%s\",
+      context[\"random_suffix\"\
+      ])"
+    min_version: beta
+    vars:
+      disk_name: 'async-test-disk'
+      secondary_disk_name: 'async-secondary-test-disk'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'disk_features'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-test-disk%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      disk_name: 'test-disk-features'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  method_name_separator: '/'
+  fetch_iam_policy_verb: :GET
+  parent_resource_attribute: 'name'
+  import_format:
+    ['projects/{{project}}/zones/{{zone}}/disks/{{name}}', '{{name}}']
+  base_url: projects/{{project}}/zones/{{zone}}/disks/{{name}}
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'zone'
+    resource: 'Zone'
+    imports: 'name'
+    description: 'A reference to the zone where the disk resides.'
+    required: false
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+  - !ruby/object:Api::Type::NestedObject
+    name: 'sourceImageEncryptionKey'
+    description: |
+      The customer-supplied encryption key of the source image. Required if
+      the source image is protected by a customer-supplied encryption key.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'rawKey'
+        description: |
+          Specifies a 256-bit customer-supplied encryption key, encoded in
+          RFC 4648 base64 to either encrypt or decrypt this resource.
+      - !ruby/object:Api::Type::String
+        name: 'sha256'
+        description: |
+          The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
+          encryption key that protects this resource.
+        output: true
+        # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeySelfLink'
+        api_name: 'kmsKeyName'
+        description: |
+          The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
+          in the cloud console. Your project's Compute Engine System service account
+          (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
+          `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
+          See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeyServiceAccount'
+        description: |
+          The service account used for the encryption request for the given KMS key.
+          If absent, the Compute Engine Service Agent service account is used.
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: 'sourceImageId'
+    description: |
+      The ID value of the image used to create this disk. This value
+      identifies the exact image that was used to create this persistent
+      disk. For example, if you created the persistent disk from an image
+      that was later deleted and recreated under the same name, the source
+      image ID would identify the exact version of the image that was used.
+    output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'diskEncryptionKey'
+    description: |
+      Encrypts the disk using a customer-supplied encryption key.
+
+      After you encrypt a disk with a customer-supplied key, you must
+      provide the same key if you use the disk later (e.g. to create a disk
+      snapshot or an image, or to attach the disk to a virtual machine).
+
+      Customer-supplied encryption keys do not protect access to metadata of
+      the disk.
+
+      If you do not provide an encryption key when creating the disk, then
+      the disk will be encrypted using an automatically generated key and
+      you do not need to provide a key to use the disk later.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'rawKey'
+        description: |
+          Specifies a 256-bit customer-supplied encryption key, encoded in
+          RFC 4648 base64 to either encrypt or decrypt this resource.
+        sensitive: true
+      - !ruby/object:Api::Type::String
+        name: 'rsaEncryptedKey'
+        description: |
+          Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
+          customer-supplied encryption key to either encrypt or decrypt
+          this resource. You can provide either the rawKey or the rsaEncryptedKey.
+        sensitive: true
+      - !ruby/object:Api::Type::String
+        name: 'sha256'
+        description: |
+          The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
+          encryption key that protects this resource.
+        output: true
+        # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeySelfLink'
+        api_name: 'kmsKeyName'
+        description: |
+          The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
+          in the cloud console. Your project's Compute Engine System service account
+          (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
+          `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
+          See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeyServiceAccount'
+        description: |
+          The service account used for the encryption request for the given KMS key.
+          If absent, the Compute Engine Service Agent service account is used.
+    immutable: true
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'snapshot'
+    api_name: 'sourceSnapshot'
+    resource: 'Snapshot'
+    imports: 'selfLink'
+    description: |
+      The source snapshot used to create this disk. You can provide this as
+      a partial or full URL to the resource. If the snapshot is in another
+      project than this disk, you must supply a full URL. For example, the
+      following are valid values:
+
+      * `https://www.googleapis.com/compute/v1/projects/project/global/snapshots/snapshot`
+      * `projects/project/global/snapshots/snapshot`
+      * `global/snapshots/snapshot`
+      * `snapshot`
+  - !ruby/object:Api::Type::NestedObject
+    name: 'sourceSnapshotEncryptionKey'
+    description: |
+      The customer-supplied encryption key of the source snapshot. Required
+      if the source snapshot is protected by a customer-supplied encryption
+      key.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'rawKey'
+        description: |
+          Specifies a 256-bit customer-supplied encryption key, encoded in
+          RFC 4648 base64 to either encrypt or decrypt this resource.
+        # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeySelfLink'
+        api_name: 'kmsKeyName'
+        description: |
+          The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
+          in the cloud console. Your project's Compute Engine System service account
+          (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
+          `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
+          See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+      - !ruby/object:Api::Type::String
+        name: 'sha256'
+        description: |
+          The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
+          encryption key that protects this resource.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeyServiceAccount'
+        description: |
+          The service account used for the encryption request for the given KMS key.
+          If absent, the Compute Engine Service Agent service account is used.
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: 'sourceSnapshotId'
+    description: |
+      The unique ID of the snapshot used to create this disk. This value
+      identifies the exact snapshot that was used to create this persistent
+      disk. For example, if you created the persistent disk from a snapshot
+      that was later deleted and recreated under the same name, the source
+      snapshot ID would identify the exact version of the snapshot that was
+      used.
+    output: true
+properties:
+  - !ruby/object:Api::Type::Fingerprint
+    name: 'labelFingerprint'
+    description: |
+      The fingerprint used for optimistic locking of this resource.  Used
+      internally during updates.
+    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/setLabels'
+    update_verb: :POST
+  - !ruby/object:Api::Type::Time
+    name: 'creationTimestamp'
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      An optional description of this resource. Provide this property when
+      you create the resource.
+  - !ruby/object:Api::Type::Time
+    name: 'lastAttachTimestamp'
+    description: 'Last attach timestamp in RFC3339 text format.'
+    output: true
+  - !ruby/object:Api::Type::Time
+    name: 'lastDetachTimestamp'
+    description: 'Last detach timestamp in RFC3339 text format.'
+    output: true
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'labels'
+    description: |
+      Labels to apply to this disk.  A list of key->value pairs.
+    update_verb: :POST
+    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/setLabels'
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      Name of the resource. Provided by the client when the resource is
+      created. The name must be 1-63 characters long, and comply with
+      RFC1035. Specifically, the name must be 1-63 characters long and match
+      the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+      first character must be a lowercase letter, and all following
+      characters must be a dash, lowercase letter, or digit, except the last
+      character, which cannot be a dash.
+    immutable: true
+    required: true
+  - !ruby/object:Api::Type::Integer
+    name: 'size'
+    api_name: sizeGb
+    default_from_api: true
+    description: |
+      Size of the persistent disk, specified in GB. You can specify this
+      field when creating a persistent disk using the `image` or
+      `snapshot` parameter, or specify it alone to create an empty
+      persistent disk.
+
+      If you specify this field along with `image` or `snapshot`,
+      the value must not be less than the size of the image
+      or the size of the snapshot.
+
+      ~>**NOTE** If you change the size, Terraform updates the disk size
+      if upsizing is detected but recreates the disk if downsizing is requested.
+      You can add `lifecycle.prevent_destroy` in the config to prevent destroying
+      and recreating.
+    update_verb: :POST
+    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/resize'
+  - !ruby/object:Api::Type::Array
+    name: 'users'
+    description: |
+      Links to the users of the disk (attached instances) in form:
+      project/zones/zone/instances/instance
+    item_type: !ruby/object:Api::Type::ResourceRef
+      name: 'user'
+      resource: 'Instance'
+      imports: 'selfLink'
+      description: 'A reference to a user of this disk'
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: 'physicalBlockSizeBytes'
+    description: |
+      Physical block size of the persistent disk, in bytes. If not present
+      in a request, a default value is used. Currently supported sizes
+      are 4096 and 16384, other sizes may be added in the future.
+      If an unsupported value is requested, the error message will list
+      the supported values for the caller's project.
+    default_from_api: true
+  - !ruby/object:Api::Type::String
+    name: 'interface'
+    min_version: 'beta'
+    # interface is removed using url_param_only to preserve schema definition
+    # and prevent sending or reading in API requests
+    url_param_only: true
+    default_value: 'SCSI'
+    deprecation_message:
+      This field is no longer in use, disk interfaces will be automatically
+      determined on attachment. To resolve this issue, remove this field from
+      your config.
+    description: |
+      Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
+    diff_suppress_func: 'tpgresource.AlwaysDiffSuppress'
+  - !ruby/object:Api::Type::String
+    name: 'sourceDisk'
+    description: |
+      The source disk used to create this disk. You can provide this as a partial or full URL to the resource.
+      For example, the following are valid values:
+
+      * https://www.googleapis.com/compute/v1/projects/{project}/zones/{zone}/disks/{disk}
+      * https://www.googleapis.com/compute/v1/projects/{project}/regions/{region}/disks/{disk}
+      * projects/{project}/zones/{zone}/disks/{disk}
+      * projects/{project}/regions/{region}/disks/{disk}
+      * zones/{zone}/disks/{disk}
+      * regions/{region}/disks/{disk}
+    diff_suppress_func: 'sourceDiskDiffSupress'
+  - !ruby/object:Api::Type::String
+    name: 'sourceDiskId'
+    description: |
+      The ID value of the disk used to create this image. This value may
+      be used to determine whether the image was taken from the current
+      or a previous instance of a given disk name.
+    output: true
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'type'
+    resource: 'DiskType'
+    imports: 'selfLink'
+    description: |
+      URL of the disk type resource describing which disk type to use to
+      create the disk. Provide this when creating the disk.
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    default_value: 'pd-standard'
+  - !ruby/object:Api::Type::String
+    name: 'image'
+    api_name: 'sourceImage'
+    diff_suppress_func: 'DiskImageDiffSuppress'
+    description: |
+      The image from which to initialize this disk. This can be
+      one of: the image's `self_link`, `projects/{project}/global/images/{image}`,
+      `projects/{project}/global/images/family/{family}`, `global/images/{image}`,
+      `global/images/family/{family}`, `family/{family}`, `{project}/{family}`,
+      `{project}/{image}`, `{family}`, or `{image}`. If referred by family, the
+      images names must include the family name. If they don't, use the
+      [google_compute_image data source](/docs/providers/google/d/compute_image.html).
+      For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
+      These images can be referred by family name here.
+    immutable: true
+  - !ruby/object:Api::Type::Array
+    name: 'resourcePolicies'
+    min_version: beta
+    description: |
+      Resource policies applied to this disk for automatic snapshot creations.
+
+      ~>**NOTE** This value does not support updating the
+      resource policy, as resource policies can not be updated more than
+      one at a time. Use
+      [`google_compute_disk_resource_policy_attachment`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_disk_resource_policy_attachment)
+      to allow for updating the resource policy attached to the disk.
+    default_from_api: true
+    item_type: !ruby/object:Api::Type::ResourceRef
+      name: 'resourcePolicy'
+      resource: 'ResourcePolicy'
+      imports: 'selfLink'
+      description:
+        'A resource policy applied to this disk for automatic snapshot
+        creations.'
+  - !ruby/object:Api::Type::Boolean
+    name: 'multiWriter'
+    description: |
+      Indicates whether or not the disk can be read/write attached to more than one instance.
+    min_version: beta
+  - !ruby/object:Api::Type::Integer
+    name: 'provisionedIops'
+    description: |
+      Indicates how many IOPS must be provisioned for the disk.
+    required: false
+    default_from_api: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'asyncPrimaryDisk'
+    min_version: 'beta'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'disk'
+        description: |
+          Primary disk for asynchronous disk replication.
+        required: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+  - !ruby/object:Api::Type::Array
+    name: 'guestOsFeatures'
+    description: |
+      A list of features to enable on the guest operating system.
+      Applicable only for bootable disks.
+    default_from_api: true
+    is_set: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::Enum
+          name: 'type'
+          required: true
+          description: |
+            The type of supported feature. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
+          values:
+            - :MULTI_IP_SUBNET
+            - :SECURE_BOOT
+            - :SEV_CAPABLE
+            - :UEFI_COMPATIBLE
+            - :VIRTIO_SCSI_MULTIQUEUE
+            - :WINDOWS
+            - :GVNIC
+            - :SEV_LIVE_MIGRATABLE
+            - :SEV_SNP_CAPABLE
+            - :SUSPEND_RESUME_COMPATIBLE
+            - :TDX_CAPABLE
+  - !ruby/object:Api::Type::Array
+    name: 'licenses'
+    description: Any applicable license URI.
+    default_from_api: true
+    immutable: true
+    item_type: !ruby/object:Api::Type::ResourceRef
+      name: 'license'
+      description: 'An applicable license URI'
+      resource: 'License'
+      imports: 'selfLink'

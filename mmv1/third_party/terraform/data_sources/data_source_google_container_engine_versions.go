@@ -6,9 +6,11 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleContainerEngineVersions() *schema.Resource {
+func DataSourceGoogleContainerEngineVersions() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleContainerEngineVersionsRead,
 		Schema: map[string]*schema.Schema{
@@ -51,23 +53,28 @@ func dataSourceGoogleContainerEngineVersions() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"release_channel_latest_version": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
 
 func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := tpgresource.GetLocation(d, config)
 	if err != nil {
 		return err
 	}
@@ -117,12 +124,23 @@ func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta in
 		return fmt.Errorf("Error setting default_cluster_version: %s", err)
 	}
 
-	channels := map[string]string{}
-	for _, v := range resp.Channels {
-		channels[v.Channel] = v.DefaultVersion
+	releaseChannelDefaultVersion := map[string]string{}
+	releaseChannelLatestVersion := map[string]string{}
+	for _, channelResp := range resp.Channels {
+		releaseChannelDefaultVersion[channelResp.Channel] = channelResp.DefaultVersion
+		for _, v := range channelResp.ValidVersions {
+			if strings.HasPrefix(v, d.Get("version_prefix").(string)) {
+				releaseChannelLatestVersion[channelResp.Channel] = v
+				break
+			}
+		}
 	}
-	if err := d.Set("release_channel_default_version", channels); err != nil {
+
+	if err := d.Set("release_channel_default_version", releaseChannelDefaultVersion); err != nil {
 		return fmt.Errorf("Error setting release_channel_default_version: %s", err)
+	}
+	if err := d.Set("release_channel_latest_version", releaseChannelLatestVersion); err != nil {
+		return fmt.Errorf("Error setting release_channel_latest_version: %s", err)
 	}
 
 	d.SetId(time.Now().UTC().String())

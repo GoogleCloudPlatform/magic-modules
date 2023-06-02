@@ -8,6 +8,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForceNew(t *testing.T) {
@@ -128,7 +131,7 @@ func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForce
 	}
 
 	for tn, tc := range cases {
-		d := &ResourceDiffMock{
+		d := &tpgresource.ResourceDiffMock{
 			Before: map[string]interface{}{
 				"params":         tc.before["params"],
 				"data_source_id": tc.before["data_source_id"],
@@ -138,7 +141,7 @@ func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForce
 				"data_source_id": tc.after["data_source_id"],
 			},
 		}
-		err := paramsCustomizeDiffFunc(d)
+		err := ParamsCustomizeDiffFunc(d)
 		if err != nil {
 			t.Errorf("failed, expected no error but received - %s for the condition %s", err, tn)
 		}
@@ -174,16 +177,16 @@ func TestAccBigqueryDataTransferConfig(t *testing.T) {
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
 	// Uses time.Now
-	skipIfVcr(t)
-	random_suffix := randString(t, 10)
+	acctest.SkipIfVcr(t)
+	random_suffix := RandString(t, 10)
 	now := time.Now().UTC()
 	start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
 	end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryDataTransferConfig_scheduledQuery(random_suffix, random_suffix, "third", start_time, end_time, "y"),
@@ -200,19 +203,19 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_update(t *testing.T) {
 	// Uses time.Now
-	skipIfVcr(t)
-	random_suffix := randString(t, 10)
+	acctest.SkipIfVcr(t)
+	random_suffix := RandString(t, 10)
 	now := time.Now().UTC()
 	first_start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
 	first_end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
 	second_start_time := now.Add(2 * time.Hour).Format(time.RFC3339)
 	second_end_time := now.AddDate(0, 2, 0).Format(time.RFC3339)
-	random_suffix2 := randString(t, 10)
+	random_suffix2 := RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryDataTransferConfig_scheduledQuery(random_suffix, random_suffix, "first", first_start_time, first_end_time, "y"),
@@ -241,16 +244,16 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_update(t *testing.T) {
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_no_destination(t *testing.T) {
 	// Uses time.Now
-	skipIfVcr(t)
-	random_suffix := randString(t, 10)
+	acctest.SkipIfVcr(t)
+	random_suffix := RandString(t, 10)
 	now := time.Now().UTC()
 	start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
 	end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryDataTransferConfig_scheduledQueryNoDestination(random_suffix, "third", start_time, end_time, "y"),
@@ -266,12 +269,12 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_no_destination(t *testing.
 }
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_with_service_account(t *testing.T) {
-	random_suffix := randString(t, 10)
+	random_suffix := RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryDataTransferConfig_scheduledQuery_service_account(random_suffix),
@@ -287,12 +290,12 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_with_service_account(t *te
 }
 
 func testAccBigqueryDataTransferConfig_copy_booleanParam(t *testing.T) {
-	random_suffix := randString(t, 10)
+	random_suffix := RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryDataTransferConfig_booleanParam(random_suffix),
@@ -308,12 +311,12 @@ func testAccBigqueryDataTransferConfig_copy_booleanParam(t *testing.T) {
 }
 
 func testAccBigqueryDataTransferConfig_force_new_update_params(t *testing.T) {
-	random_suffix := randString(t, 10)
+	random_suffix := RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryDataTransferConfig_update_params_force_new(random_suffix, "old", "old"),
@@ -356,14 +359,19 @@ func testAccCheckBigqueryDataTransferConfigDestroyProducer(t *testing.T) func(s 
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{BigqueryDataTransferBasePath}}{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{BigqueryDataTransferBasePath}}{{name}}")
 			if err != nil {
 				return err
 			}
 
-			_, err = sendRequest(config, "GET", "", url, config.userAgent, nil)
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
 			if err == nil {
 				return fmt.Errorf("BigqueryDataTransferConfig still exists at %s", url)
 			}
@@ -380,7 +388,7 @@ data "google_project" "project" {}
 resource "google_project_iam_member" "permissions" {
   project = data.google_project.project.project_id
 
-  role   = "roles/iam.serviceAccountShortTermTokenMinter"
+  role   = "roles/iam.serviceAccountTokenCreator"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
 }
 
@@ -470,7 +478,7 @@ data "google_project" "project" {}
 
 resource "google_project_iam_member" "permissions" {
   project = data.google_project.project.project_id
-  role   = "roles/iam.serviceAccountShortTermTokenMinter"
+  role   = "roles/iam.serviceAccountTokenCreator"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
 }
 
@@ -509,7 +517,7 @@ data "google_project" "project" {}
 
 resource "google_project_iam_member" "permissions" {
   project = data.google_project.project.project_id
-  role   = "roles/iam.serviceAccountShortTermTokenMinter"
+  role   = "roles/iam.serviceAccountTokenCreator"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
 }
 

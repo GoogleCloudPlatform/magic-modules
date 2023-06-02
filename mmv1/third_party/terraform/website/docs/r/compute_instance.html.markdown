@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_instance"
 description: |-
   Manages a VM instance resource within GCE.
 ---
@@ -347,8 +346,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 <a name="nested_service_account"></a>The `service_account` block supports:
 
-* `email` - (Optional) The service account e-mail address. If not given, the
-    default Google Compute Engine service account is used.
+* `email` - (Optional) The service account e-mail address.
     **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
 * `scopes` - (Required) A list of service scopes. Both OAuth2 URLs and gcloud
@@ -383,8 +381,21 @@ specified, then this instance will have no external IPv6 Internet access. Struct
     `false`. For more info about
     `SPOT`, read [here](https://cloud.google.com/compute/docs/instances/spot)
     
-* `instance_termination_action` - (Optional) Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot) 
+* `instance_termination_action` - (Optional) Describe the type of termination action for VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot) 
 
+* `max_run_duration` -  (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Only support `DELETE` `instance_termination_action` at this point. Structure is [documented below](#nested_max_run_duration).
+<a name="nested_max_run_duration"></a>The `max_run_duration` block supports:
+
+* `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
+	resolution. Durations less than one second are represented with a 0
+	`seconds` field and a positive `nanos` field. Must be from 0 to
+	 999,999,999 inclusive.
+
+* `seconds` - (Required) Span of time at a resolution of a second. Must be from 0 to
+   315,576,000,000 inclusive. Note: these bounds are computed from: 60
+   sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
+
+* `maintenance_interval` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`.
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
 * `type` (Required) - The accelerator type resource to expose to this instance. E.g. `nvidia-tesla-k80`.
@@ -458,6 +469,8 @@ exported:
 * `ipv6_access_type` - One of EXTERNAL, INTERNAL to indicate whether the IP can be accessed from the Internet.
 This field is always inherited from its subnetwork.
 
+* `current_status` - The current status of the instance. This could be one of the following values: PROVISIONING, STAGING, RUNNING, STOPPING, SUSPENDING, SUSPENDED, REPAIRING, and TERMINATED. For more information about the status of the instance, see [Instance life cycle](https://cloud.google.com/compute/docs/instances/instance-life-cycle).`,
+
 * `network_interface.0.network_ip` - The internal ip address of the instance, either manually or dynamically assigned.
 
 * `network_interface.0.access_config.0.nat_ip` - If the instance has an access config, either the given external ip (in the `nat_ip` field) or the ephemeral (generated) ip (if you didn't provide one).
@@ -483,7 +496,7 @@ The field is output only, an IPv6 address from a subnetwork associated with the 
 ## Timeouts
 
 This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
 - `create` - Default is 20 minutes.
 - `update` - Default is 20 minutes.

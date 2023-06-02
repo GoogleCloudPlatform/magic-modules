@@ -5,6 +5,8 @@ import (
 
 	"fmt"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -30,12 +32,12 @@ func TestAccDataSourceGoogleServiceAccountAccessToken_basic(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "data.google_service_account_access_token.default"
-	serviceAccount := getTestServiceAccountFromEnv(t)
-	targetServiceAccountEmail := BootstrapServiceAccount(t, getTestProjectFromEnv(), serviceAccount)
+	serviceAccount := acctest.GetTestServiceAccountFromEnv(t)
+	targetServiceAccountEmail := BootstrapServiceAccount(t, acctest.GetTestProjectFromEnv(), serviceAccount)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config:  testAccCheckGoogleServiceAccountAccessToken_datasource(targetServiceAccountEmail),

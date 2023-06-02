@@ -30,5 +30,20 @@
       }
     },
     "ancestry_path": "organization/unknown"
+  },
+  {
+    "name": "//cloudresourcemanager.googleapis.com/folders/placeholder-folder",
+    "asset_type": "cloudresourcemanager.googleapis.com/Folder",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+      "discovery_name": "Folder",
+      "parent": "//cloudresourcemanager.googleapis.com/organizations/{{.OrgID}}",
+      "data": {
+        "display_name": "Department 1",
+        "parent": "organizations/{{.OrgID}}"
+      }
+    },
+    "ancestry_path": "organization/{{.OrgID}}"
   }
 ]

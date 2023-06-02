@@ -6,7 +6,12 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"crypto/sha512"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"google.golang.org/api/cloudkms/v1"
 )
@@ -28,12 +33,12 @@ func getTestOccurrenceAttestationPayload(t *testing.T) string {
 }
 
 func getSignedTestOccurrenceAttestationPayload(
-	t *testing.T, config *Config,
-	signingKey bootstrappedKMS, rawPayload string) string {
+	t *testing.T, config *transport_tpg.Config,
+	signingKey BootstrappedKMS, rawPayload string) string {
 	pbytes := []byte(rawPayload)
 	ssum := sha512.Sum512(pbytes)
 	hashed := base64.StdEncoding.EncodeToString(ssum[:])
-	signed, err := config.NewKmsClient(config.userAgent).Projects.Locations.KeyRings.CryptoKeys.
+	signed, err := config.NewKmsClient(config.UserAgent).Projects.Locations.KeyRings.CryptoKeys.
 		CryptoKeyVersions.AsymmetricSign(
 		fmt.Sprintf("%s/cryptoKeyVersions/1", signingKey.CryptoKey.Name),
 		&cloudkms.AsymmetricSignRequest{
@@ -50,7 +55,7 @@ func getSignedTestOccurrenceAttestationPayload(
 
 func TestAccContainerAnalysisOccurrence_basic(t *testing.T) {
 	t.Parallel()
-	randSuffix := randString(t, 10)
+	randSuffix := RandString(t, 10)
 
 	config := BootstrapConfig(t)
 	if config == nil {
@@ -63,16 +68,16 @@ func TestAccContainerAnalysisOccurrence_basic(t *testing.T) {
 	params := map[string]interface{}{
 		"random_suffix": randSuffix,
 		"image_url":     testAttestationOccurrenceFullImagePath,
-		"key_ring":      GetResourceNameFromSelfLink(signKey.KeyRing.Name),
-		"crypto_key":    GetResourceNameFromSelfLink(signKey.CryptoKey.Name),
+		"key_ring":      tpgresource.GetResourceNameFromSelfLink(signKey.KeyRing.Name),
+		"crypto_key":    tpgresource.GetResourceNameFromSelfLink(signKey.CryptoKey.Name),
 		"payload":       base64.StdEncoding.EncodeToString([]byte(payload)),
 		"signature":     base64.StdEncoding.EncodeToString([]byte(signed)),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerAnalysisNoteDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerAnalysisNoteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerAnalysisOccurence_basic(params),
@@ -88,7 +93,7 @@ func TestAccContainerAnalysisOccurrence_basic(t *testing.T) {
 
 func TestAccContainerAnalysisOccurrence_multipleSignatures(t *testing.T) {
 	t.Parallel()
-	randSuffix := randString(t, 10)
+	randSuffix := RandString(t, 10)
 
 	config := BootstrapConfig(t)
 	if config == nil {
@@ -105,26 +110,26 @@ func TestAccContainerAnalysisOccurrence_multipleSignatures(t *testing.T) {
 	paramsMultipleSignatures := map[string]interface{}{
 		"random_suffix": randSuffix,
 		"image_url":     testAttestationOccurrenceFullImagePath,
-		"key_ring":      GetResourceNameFromSelfLink(key1.KeyRing.Name),
+		"key_ring":      tpgresource.GetResourceNameFromSelfLink(key1.KeyRing.Name),
 		"payload":       base64.StdEncoding.EncodeToString([]byte(payload)),
-		"key1":          GetResourceNameFromSelfLink(key1.CryptoKey.Name),
+		"key1":          tpgresource.GetResourceNameFromSelfLink(key1.CryptoKey.Name),
 		"signature1":    base64.StdEncoding.EncodeToString([]byte(signature1)),
-		"key2":          GetResourceNameFromSelfLink(key2.CryptoKey.Name),
+		"key2":          tpgresource.GetResourceNameFromSelfLink(key2.CryptoKey.Name),
 		"signature2":    base64.StdEncoding.EncodeToString([]byte(signature2)),
 	}
 	paramsSingle := map[string]interface{}{
 		"random_suffix": randSuffix,
 		"image_url":     testAttestationOccurrenceFullImagePath,
-		"key_ring":      GetResourceNameFromSelfLink(key1.KeyRing.Name),
-		"crypto_key":    GetResourceNameFromSelfLink(key1.CryptoKey.Name),
+		"key_ring":      tpgresource.GetResourceNameFromSelfLink(key1.KeyRing.Name),
+		"crypto_key":    tpgresource.GetResourceNameFromSelfLink(key1.CryptoKey.Name),
 		"payload":       base64.StdEncoding.EncodeToString([]byte(payload)),
 		"signature":     base64.StdEncoding.EncodeToString([]byte(signature1)),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerAnalysisNoteDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerAnalysisNoteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerAnalysisOccurence_multipleSignatures(paramsMultipleSignatures),

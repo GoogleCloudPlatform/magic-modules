@@ -1,0 +1,14 @@
+resource "google_network_security_server_tls_policy" "<%= ctx[:primary_resource_id] %>" {
+  provider               = google-beta
+  name                   = "<%= ctx[:vars]['resource_name'] %>"
+  labels                 = {
+    foo = "bar"
+  }
+  description            = "my description"
+  location               = "global"
+  allow_open             = "false"
+  mtls_policy {
+    client_validation_mode = "ALLOW_INVALID_OR_MISSING_CLIENT_CERT"
+  }
+}
+

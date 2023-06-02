@@ -5,22 +5,23 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccDataprocJobIamBinding(t *testing.T) {
 	t.Parallel()
 
-	cluster := "tf-dataproc-iam-cluster" + randString(t, 10)
-	job := "tf-dataproc-iam-job-" + randString(t, 10)
-	account := "tf-dataproc-iam-" + randString(t, 10)
+	cluster := "tf-dataproc-iam-cluster" + RandString(t, 10)
+	job := "tf-dataproc-iam-job-" + RandString(t, 10)
+	account := "tf-dataproc-iam-" + RandString(t, 10)
 	role := "roles/editor"
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/jobs/%s %s",
-		getTestProjectFromEnv(), "us-central1", job, role)
+		acctest.GetTestProjectFromEnv(), "us-central1", job, role)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -49,21 +50,21 @@ func TestAccDataprocJobIamBinding(t *testing.T) {
 func TestAccDataprocJobIamMember(t *testing.T) {
 	t.Parallel()
 
-	cluster := "tf-dataproc-iam-cluster" + randString(t, 10)
-	job := "tf-dataproc-iam-jobid-" + randString(t, 10)
-	account := "tf-dataproc-iam-" + randString(t, 10)
+	cluster := "tf-dataproc-iam-cluster" + RandString(t, 10)
+	job := "tf-dataproc-iam-jobid-" + RandString(t, 10)
+	account := "tf-dataproc-iam-" + RandString(t, 10)
 	role := "roles/editor"
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/jobs/%s %s serviceAccount:%s",
-		getTestProjectFromEnv(),
+		acctest.GetTestProjectFromEnv(),
 		"us-central1",
 		job,
 		role,
 		serviceAccountCanonicalEmail(account))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -82,21 +83,22 @@ func TestAccDataprocJobIamMember(t *testing.T) {
 func TestAccDataprocJobIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	cluster := "tf-dataproc-iam-cluster" + randString(t, 10)
-	job := "tf-dataproc-iam-jobid-" + randString(t, 10)
-	account := "tf-dataproc-iam-" + randString(t, 10)
+	cluster := "tf-dataproc-iam-cluster" + RandString(t, 10)
+	job := "tf-dataproc-iam-jobid-" + RandString(t, 10)
+	account := "tf-dataproc-iam-" + RandString(t, 10)
 	role := "roles/editor"
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/jobs/%s",
-		getTestProjectFromEnv(), "us-central1", job)
+		acctest.GetTestProjectFromEnv(), "us-central1", job)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
 				Config: testAccDataprocJobIamPolicy(cluster, job, account, role),
+				Check:  resource.TestCheckResourceAttrSet("data.google_dataproc_job_iam_policy.policy", "policy_data"),
 			},
 			{
 				ResourceName:      "google_dataproc_job_iam_policy.policy",
@@ -217,5 +219,11 @@ resource "google_dataproc_job_iam_policy" "policy" {
   region      = "us-central1"
   policy_data = data.google_iam_policy.policy.policy_data
 }
+
+data "google_dataproc_job_iam_policy" "policy" {
+  job_id      = google_dataproc_job.pyspark.reference[0].job_id
+  region      = "us-central1"
+}
+
 `, cluster, job, account, role)
 }

@@ -1,6 +1,11 @@
 package google
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+)
 
 func resourceConverterBigqueryDatasetIamPolicy() ResourceConverter {
 	return ResourceConverter{
@@ -30,15 +35,15 @@ func resourceConverterBigqueryDatasetIamMember() ResourceConverter {
 	}
 }
 
-func GetBigqueryDatasetIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetBigqueryDatasetIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newBigqueryDatasetIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetBigqueryDatasetIamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetBigqueryDatasetIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newBigqueryDatasetIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetBigqueryDatasetIamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetBigqueryDatasetIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newBigqueryDatasetIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -64,9 +69,9 @@ func MergeBigqueryDatasetIamMemberDelete(existing, incoming Asset) Asset {
 }
 
 func newBigqueryDatasetIamAsset(
-	d TerraformResourceData,
-	config *Config,
-	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
+	d tpgresource.TerraformResourceData,
+	config *transport_tpg.Config,
+	expandBindings func(d tpgresource.TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
@@ -87,7 +92,7 @@ func newBigqueryDatasetIamAsset(
 	}}, nil
 }
 
-func FetchBigqueryDatasetIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+func FetchBigqueryDatasetIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("dataset_id"); !ok {
 		return Asset{}, ErrEmptyIdentityField

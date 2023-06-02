@@ -5,11 +5,14 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
-func resourceSqlSslCert() *schema.Resource {
+func ResourceSqlSslCert() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceSqlSslCertCreate,
 		Read:   resourceSqlSslCertRead,
@@ -93,13 +96,13 @@ func resourceSqlSslCert() *schema.Resource {
 }
 
 func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -111,15 +114,15 @@ func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
 		CommonName: commonName,
 	}
 
-	mutexKV.Lock(instanceMutexKey(project, instance))
-	defer mutexKV.Unlock(instanceMutexKey(project, instance))
+	transport_tpg.MutexStore.Lock(instanceMutexKey(project, instance))
+	defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 	resp, err := config.NewSqlAdminClient(userAgent).SslCerts.Insert(project, instance, sslCertsInsertRequest).Do()
 	if err != nil {
 		return fmt.Errorf("Error, failed to insert "+
 			"ssl cert %s into instance %s: %s", commonName, instance, err)
 	}
 
-	err = sqlAdminOperationWaitTime(config, resp.Operation, project, "Create Ssl Cert", userAgent, d.Timeout(schema.TimeoutCreate))
+	err = SqlAdminOperationWaitTime(config, resp.Operation, project, "Create Ssl Cert", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error, failure waiting for creation of %q "+
 			"in %q: %s", commonName, instance, err)
@@ -143,13 +146,13 @@ func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -160,7 +163,7 @@ func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 
 	sslCerts, err := config.NewSqlAdminClient(userAgent).SslCerts.Get(project, instance, fingerprint).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("SQL Ssl Cert %q in instance %q", commonName, instance))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("SQL Ssl Cert %q in instance %q", commonName, instance))
 	}
 
 	if sslCerts == nil {
@@ -200,13 +203,13 @@ func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSqlSslCertDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -215,8 +218,8 @@ func resourceSqlSslCertDelete(d *schema.ResourceData, meta interface{}) error {
 	commonName := d.Get("common_name").(string)
 	fingerprint := d.Get("sha1_fingerprint").(string)
 
-	mutexKV.Lock(instanceMutexKey(project, instance))
-	defer mutexKV.Unlock(instanceMutexKey(project, instance))
+	transport_tpg.MutexStore.Lock(instanceMutexKey(project, instance))
+	defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 	op, err := config.NewSqlAdminClient(userAgent).SslCerts.Delete(project, instance, fingerprint).Do()
 
 	if err != nil {
@@ -225,7 +228,7 @@ func resourceSqlSslCertDelete(d *schema.ResourceData, meta interface{}) error {
 			instance, err)
 	}
 
-	err = sqlAdminOperationWaitTime(config, op, project, "Delete Ssl Cert", userAgent, d.Timeout(schema.TimeoutDelete))
+	err = SqlAdminOperationWaitTime(config, op, project, "Delete Ssl Cert", userAgent, d.Timeout(schema.TimeoutDelete))
 
 	if err != nil {
 		return fmt.Errorf("Error, failure waiting for deletion of ssl cert %q "+

@@ -1,0 +1,154 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'NodeTemplate'
+kind: 'compute#nodeTemplate'
+base_url: projects/{{project}}/regions/{{region}}/nodeTemplates
+has_self_link: true
+description: |
+  Represents a NodeTemplate resource. Node templates specify properties
+  for creating sole-tenant nodes, such as node type, vCPU and memory
+  requirements, node affinity labels, and region.
+immutable: true
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Sole-Tenant Nodes': 'https://cloud.google.com/compute/docs/nodes/'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/nodeTemplates'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+collection_url_key: 'items'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'node_template_basic'
+    primary_resource_id: 'template'
+    vars:
+      template_name: 'soletenant-tmpl'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'node_template_server_binding'
+    primary_resource_id: 'template'
+    vars:
+      template_name: 'soletenant-with-licenses'
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'region'
+    resource: 'Region'
+    imports: 'selfLink'
+    required: false
+    description: |
+      Region where nodes using the node template will be created.
+      If it is not provided, the provider region is used.
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+properties:
+  - !ruby/object:Api::Type::Time
+    name: 'creationTimestamp'
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: 'An optional textual description of the resource.'
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: 'Name of the resource.'
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'nodeAffinityLabels'
+    description: |
+      Labels to use for node affinity, which will be used in
+      instance scheduling.
+  - !ruby/object:Api::Type::String
+    name: 'nodeType'
+    description: |
+      Node type to use for nodes group that are created from this template.
+      Only one of nodeTypeFlexibility and nodeType can be specified.
+    conflicts:
+      - node_type_flexibility
+  - !ruby/object:Api::Type::NestedObject
+    name: 'nodeTypeFlexibility'
+    description: |
+      Flexible properties for the desired node type. Node groups that
+      use this node template will create nodes of a type that matches
+      these properties. Only one of nodeTypeFlexibility and nodeType can
+      be specified.
+    conflicts:
+      - node_type
+    properties:
+      - !ruby/object:Api::Type::String
+        name: cpus
+        at_least_one_of:
+          - node_type_flexibility.0.cpus
+          - node_type_flexibility.0.memory
+        description: |
+          Number of virtual CPUs to use.
+      - !ruby/object:Api::Type::String
+        name: memory
+        at_least_one_of:
+          - node_type_flexibility.0.cpus
+          - node_type_flexibility.0.memory
+        description: |
+          Physical memory available to the node, defined in MB.
+      - !ruby/object:Api::Type::String
+        name: localSsd
+        description: |
+          Use local SSD
+        output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'serverBinding'
+    description: |
+      The server binding policy for nodes using this template. Determines
+      where the nodes should restart following a maintenance event.
+    default_from_api: true
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'type'
+        required: true
+        description: |
+          Type of server binding policy. If `RESTART_NODE_ON_ANY_SERVER`,
+          nodes using this template will restart on any physical server
+          following a maintenance event.
+
+          If `RESTART_NODE_ON_MINIMAL_SERVER`, nodes using this template
+          will restart on the same physical server following a maintenance
+          event, instead of being live migrated to or restarted on a new
+          physical server. This option may be useful if you are using
+          software licenses tied to the underlying server characteristics
+          such as physical sockets or cores, to avoid the need for
+          additional licenses when maintenance occurs. However, VMs on such
+          nodes will experience outages while maintenance is applied.
+        values:
+          - :RESTART_NODE_ON_ANY_SERVER
+          - :RESTART_NODE_ON_MINIMAL_SERVERS
+  - !ruby/object:Api::Type::Enum
+    name: 'cpuOvercommitType'
+    description: |
+      CPU overcommit.
+    values:
+      - :ENABLED
+      - :NONE
+    default_value: :NONE

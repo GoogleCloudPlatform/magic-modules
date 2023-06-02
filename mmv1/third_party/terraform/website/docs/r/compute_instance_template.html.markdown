@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_instance_template"
 description: |-
   Manages a VM instance template resource within GCE.
 ---
@@ -253,7 +252,7 @@ resource "google_compute_instance_template" "instance_template" {
 
   // boot disk
   disk {
-    source_image = google_compute_image.my_image.self_link
+    source_image = data.google_compute_image.my_image.self_link
   }
 }
 ```
@@ -336,6 +335,8 @@ The following arguments are supported:
     region where that resource resides. For example, a custom `subnetwork`
     resource is tied to a specific region. Defaults to the region of the
     Provider if no value is given.
+
+* `resource_policies` (Optional) -- A list of self_links of resource policies to attach to the instance. Modifying this list will cause the instance to recreate. Currently a max of 1 resource policy is supported.
 
 * `reservation_affinity` - (Optional) Specifies the reservations that this instance can consume from.
     Structure is [documented below](#nested_reservation_affinity).
@@ -562,7 +563,20 @@ specified, then this instance will have no external IPv6 Internet access. Struct
     `SPOT`, read [here](https://cloud.google.com/compute/docs/instances/spot)
     
 * `instance_termination_action` - (Optional) Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot) 
-    
+
+* `max_run_duration` -  (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Only support `DELETE` `instance_termination_action` at this point. Structure is [documented below](#nested_max_run_duration).
+<a name="nested_max_run_duration"></a>The `max_run_duration` block supports:
+
+* `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
+    resolution. Durations less than one second are represented with a 0
+    `seconds` field and a positive `nanos` field. Must be from 0 to
+     999,999,999 inclusive.
+
+* `seconds` - (Required) Span of time at a resolution of a second. Must be from 0 to
+   315,576,000,000 inclusive. Note: these bounds are computed from: 60
+   sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
+
+* `maintenance_interval` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`. 
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
 * `type` (Required) - The accelerator type resource to expose to this instance. E.g. `nvidia-tesla-k80`.
@@ -626,6 +640,9 @@ exported:
 
 * `self_link` - The URI of the created resource.
 
+* `self_link_unique` - A special URI of the created resource that uniquely identifies this instance template with the following format: `projects/{{project}}/global/instanceTemplates/{{name}}?uniqueId={{uniqueId}}`
+Referencing an instance template via this attribute prevents Time of Check to Time of Use attacks when the instance template resides in a shared/untrusted environment.
+
 * `tags_fingerprint` - The unique fingerprint of the tags.
 
 [1]: /docs/providers/google/r/compute_instance_group_manager.html
@@ -634,7 +651,7 @@ exported:
 ## Timeouts
 
 This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
 - `create` - Default is 4 minutes.
 - `delete` - Default is 4 minutes.
