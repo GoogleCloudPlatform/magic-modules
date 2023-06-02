@@ -40,6 +40,13 @@ func copyHandwrittenFiles(inPath string, outPath string) {
 		}
 	}
 
+	// Log warning about unexpected outPath values before adding copyright headers
+	// Matches equivalent in MMv1, see below:
+	// https://github.com/hashicorp/magic-modules/blob/48ce1004bafd4b4ef1be7565eaa6727adabd0670/mmv1/provider/core.rb#L202-L206
+	if !isOutputFolderExpected(outPath) {
+		glog.Infof("Unexpected output folder (%s) detected when deciding to add HashiCorp copyright headers. Watch out for unexpected changes to copied files", outPath)
+	}
+
 	fs, err := ioutil.ReadDir(inPath)
 	if err != nil {
 		glog.Fatal(err)
@@ -64,6 +71,14 @@ func copyHandwrittenFiles(inPath string, outPath string) {
 			continue
 		}
 
+		// Add HashiCorp copyright header only if generating TPG/TPGB
+		if strings.HasSuffix(outPath, "/terraform-provider-google") || strings.HasSuffix(outPath, "/terraform-provider-google-beta") {
+			if strings.HasSuffix(f.Name(), ".go") {
+				copyrightHeader := []byte("// Copyright (c) HashiCorp, Inc.\n// SPDX-License-Identifier: MPL-2.0\n")
+				b = append(copyrightHeader, b...)
+			}
+		}
+
 		// Format file if ending in .go
 		if strings.HasSuffix(f.Name(), ".go") {
 			b, err = formatSource(bytes.NewBuffer(b))
@@ -78,5 +93,26 @@ func copyHandwrittenFiles(inPath string, outPath string) {
 		if err != nil {
 			glog.Exit(err)
 		}
+	}
+}
+
+// isOutputFolderExpected returns a boolean indicating if the output folder is present in an allow list.
+// Intention is to warn users about unexpected diffs if they have renamed their cloned copy of downstream repos,
+// as this affects detecting which downstream they're building and whether to add copyright headers.
+// Written to match `expected_output_folder?` method in MMv1, see below:
+// https://github.com/hashicorp/magic-modules/blob/48ce1004bafd4b4ef1be7565eaa6727adabd0670/mmv1/provider/core.rb#L266-L282
+func isOutputFolderExpected(outPath string) bool {
+	pathComponents := strings.Split(outPath, "/")
+	folderName := pathComponents[len(pathComponents)-1] // last element
+
+	switch folderName {
+	case "terraform-provider-google",
+		"terraform-provider-google-beta",
+		"terraform-next",
+		"terraform-google-conversion",
+		"tfplan2cai":
+		return true
+	default:
+		return false
 	}
 }
