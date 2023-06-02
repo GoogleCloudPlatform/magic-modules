@@ -118,7 +118,6 @@ resource "google_dataform_repository" "dataform_respository" {
   }
 
   workspace_compilation_overrides {
-    default_database = "database_v2"
     schema_suffix = "_suffix_v2"
     table_prefix = "prefix_v2_"
   }
