@@ -11,11 +11,5 @@ resource "google_pubsub_topic" "<%= ctx[:primary_resource_id] %>" {
   schema_settings {
     schema = "projects/<%= ctx[:test_env_vars]['project_name'] %>/schemas/<%= ctx[:vars]['schema_name'] %>"
     encoding = "JSON"
-    // Setting both revision IDs to the revision of the schema would limit
-    // publishers to only publishing with the most recent schema revision.
-    // If messages that match older schemas should be accepted, do not set
-    // first_revision_id.
-    first_revision_id = google_pubsub_schema.<%= ctx[:primary_resource_id] %>.revision_id
-    last_revision_id = google_pubsub_schema.<%= ctx[:primary_resource_id] %>.revision_id
   }
 }
