@@ -52,7 +52,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: parent
     description: |
-      Input only. The resource name of the new TagKey's parent. Must be of the form organizations/{org_id} or projects/{project_id_or_number}.
+      Input only. The resource name of the new TagKey's parent. Must be of the form organizations/{org_id} or projects/{project_number}.
     immutable: true
     required: true
   - !ruby/object:Api::Type::String
