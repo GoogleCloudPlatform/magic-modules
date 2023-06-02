@@ -1,5 +1,6 @@
 #!/bin/bash
 # Performs basic checks for tools required by Magic Modules.
+# This must be in bash because no other tools are guaranteed to be present.
 
 set -e
 exitcode=0
@@ -45,8 +46,14 @@ else
         warn "yel" "   bundler not found. Run 'gem install bundler' to install it."
     else
         if grep -qi "^Bundler" <<< "$(bundle version)"; then
-            warn "grn" "   found!"
+            if cd mmv1 && bundle check &> /dev/null; then
+                warn "grn" "   found!"
+            else
+                exitcode=1
+                warn "yel" "   bundle gems outdated. Run 'bundle install' from the mmv1 directory to correct"
+            fi
         else
+            exitcode=1
             warn "yel" "   wrong bundle found. You may have something incompatible overriding 'bundle'."
         fi
     fi
@@ -57,7 +64,19 @@ if [ $found -eq 0 ]; then
     exitcode=1
     warn "yel" "   go not found. See https://golang.org/doc/install for information on installing it."
 else
-    warn "grn" "   found!"
+    version=($(go version))
+    version=${version[2]}
+    if [[ "$version" < "go1.19.0" ]]; then
+        exitcode=1
+        warn "yel" "   $version is installed, but go 1.19 or later is required. See https://golang.org/doc/install for information on installing it."
+    fi
+    if [[ -z "${GOPATH}" ]]; then
+        exitcode=1
+        warn "yel" "   GOPATH is not set. Add 'export GOPATH=\$HOME/go' to your terminal's startup script and restart your terminal."
+    fi
+    if [ $exitcode -eq 0 ]; then
+        warn "grn" "   found!"
+    fi
 fi
 
 count_in_path "goimports"
@@ -73,6 +92,15 @@ if [ $found -eq 0 ]; then
     exitcode=1
     warn "yel" "   git not found. See https://git-scm.com/book/en/v2/Getting-Started-Installing-Git"
     warn "yel" "   for information on installing it."
+else
+    warn "grn" "   found!"
+fi
+
+count_in_path "terraform"
+if [ $found -eq 0 ]; then
+    exitcode=1
+    warn "yel" "   terraform not found. See https://learn.hashicorp.com/tutorials/terraform/install-cli"
+    warn "yel" "   for information on installing it. Version 1.1.8 or later recommended."
 else
     warn "grn" "   found!"
 fi

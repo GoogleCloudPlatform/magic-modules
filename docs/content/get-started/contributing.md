@@ -3,6 +3,7 @@ title: "Contributing"
 weight: 50
 aliases:
   - /docs/getting-started/contributing
+  - /getting-started/contributing
 ---
 
 # General contributing steps
