@@ -82,7 +82,7 @@ parameters:
     url_param_only: true
     description: |
       The name of the instance group.
-    diff_suppress_func: 'compareResourceNames'
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
     resource: 'Zone'

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -70,7 +71,7 @@ func ResourceApigeeFlowhook() *schema.Resource {
 
 func resourceApigeeFlowhookCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -79,23 +80,23 @@ func resourceApigeeFlowhookCreate(d *schema.ResourceData, meta interface{}) erro
 	descriptionProp, err := expandApigeeFlowhookDescription(d.Get("description"), d, config)
 	if err != nil {
 		return err
-	} else if v, ok := d.GetOkExists("description"); !isEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
+	} else if v, ok := d.GetOkExists("description"); !tpgresource.IsEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
 		obj["description"] = descriptionProp
 	}
 	sharedflowProp, err := expandApigeeFlowhookSharedflow(d.Get("sharedflow"), d, config)
 	if err != nil {
 		return err
-	} else if v, ok := d.GetOkExists("sharedflow"); !isEmptyValue(reflect.ValueOf(sharedflowProp)) && (ok || !reflect.DeepEqual(v, sharedflowProp)) {
+	} else if v, ok := d.GetOkExists("sharedflow"); !tpgresource.IsEmptyValue(reflect.ValueOf(sharedflowProp)) && (ok || !reflect.DeepEqual(v, sharedflowProp)) {
 		obj["sharedFlow"] = sharedflowProp
 	}
 	continue_on_errorProp, err := expandApigeeFlowhookContinueOnError(d.Get("continue_on_error"), d, config)
 	if err != nil {
 		return err
-	} else if v, ok := d.GetOkExists("continue_on_error"); !isEmptyValue(reflect.ValueOf(continue_on_errorProp)) && (ok || !reflect.DeepEqual(v, continue_on_errorProp)) {
+	} else if v, ok := d.GetOkExists("continue_on_error"); !tpgresource.IsEmptyValue(reflect.ValueOf(continue_on_errorProp)) && (ok || !reflect.DeepEqual(v, continue_on_errorProp)) {
 		obj["continueOnError"] = continue_on_errorProp
 	}
 
-	url, err := ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
 	if err != nil {
 		return err
 	}
@@ -104,17 +105,25 @@ func resourceApigeeFlowhookCreate(d *schema.ResourceData, meta interface{}) erro
 	billingProject := ""
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
-	res, err := transport_tpg.SendRequestWithTimeout(config, "PUT", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "PUT",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutCreate),
+	})
 	if err != nil {
 		return fmt.Errorf("Error creating Flowhook: %s", err)
 	}
 
 	// Store the ID now
-	id, err := ReplaceVars(d, config, "organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
+	id, err := tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -127,12 +136,12 @@ func resourceApigeeFlowhookCreate(d *schema.ResourceData, meta interface{}) erro
 
 func resourceApigeeFlowhookRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	url, err := ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
 	if err != nil {
 		return err
 	}
@@ -140,11 +149,17 @@ func resourceApigeeFlowhookRead(d *schema.ResourceData, meta interface{}) error 
 	billingProject := ""
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
-	res, err := transport_tpg.SendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ApigeeFlowhook %q", d.Id()))
 	}
@@ -168,14 +183,14 @@ func resourceApigeeFlowhookRead(d *schema.ResourceData, meta interface{}) error 
 
 func resourceApigeeFlowhookDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	billingProject := ""
 
-	url, err := ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
 	if err != nil {
 		return err
 	}
@@ -184,11 +199,19 @@ func resourceApigeeFlowhookDelete(d *schema.ResourceData, meta interface{}) erro
 	log.Printf("[DEBUG] Deleting Flowhook %q", d.Id())
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
-	res, err := transport_tpg.SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutDelete),
+	})
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, "Flowhook")
 	}
@@ -199,7 +222,7 @@ func resourceApigeeFlowhookDelete(d *schema.ResourceData, meta interface{}) erro
 
 func resourceApigeeFlowhookImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
-	if err := ParseImportId([]string{
+	if err := tpgresource.ParseImportId([]string{
 		"organizations/(?P<org_id>[^/]+)/environments/(?P<environment>[^/]+)/flowhooks/(?P<flow_hook_point>[^/]+)",
 		"(?P<org_id>[^/]+)/(?P<environment>[^/]+)/(?P<flow_hook_point>[^/]+)",
 	}, d, config); err != nil {
@@ -207,7 +230,7 @@ func resourceApigeeFlowhookImport(d *schema.ResourceData, meta interface{}) ([]*
 	}
 
 	// Replace import id for the resource id
-	id, err := ReplaceVars(d, config, "organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
+	id, err := tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -228,14 +251,14 @@ func flattenApigeeFlowhookContinueOnError(v interface{}, d *schema.ResourceData,
 	return v
 }
 
-func expandApigeeFlowhookDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeFlowhookDescription(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeFlowhookSharedflow(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeFlowhookSharedflow(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeFlowhookContinueOnError(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApigeeFlowhookContinueOnError(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }

@@ -1,0 +1,10 @@
+{{ with .Site.GetPage "/" }}
+  {{ $current := eq $ .Page }}
+  <ul>
+    <li>
+      <a href="{{ .Page.RelPermalink }}" class="{{ if $current }}active{{ end }}">
+        {{- partial "docs/title" .Page -}}
+      </a>
+    </li>
+  </ul>
+{{ end }}

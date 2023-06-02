@@ -101,7 +101,7 @@ properties:
 
           A base64-encoded string.
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateBase64String'
+          function: 'verify.ValidateBase64String'
       - !ruby/object:Api::Type::String
         name: schema
         at_least_one_of:
@@ -115,8 +115,8 @@ properties:
         custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
         custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
         state_func:
-          'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-          return s }'
+          'func(v interface{}) string { s, _ :=
+          structure.NormalizeJsonString(v); return s }'
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.StringIsJSON'
       - !ruby/object:Api::Type::Enum
@@ -212,13 +212,6 @@ properties:
           project. service-PROJECT_NUMBER@gcp-sa-healthcare.iam.gserviceaccount.com must have publisher permissions on the given
           Cloud Pub/Sub topic. Not having adequate permissions will cause the calls that send notifications to fail.
         required: true
-  - !ruby/object:Api::Type::Time
-    name: 'creationTime'
-    description: |
-      The time that this resource was created on the server.
-      This is in RFC3339 text format.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'selfLink'
     description: |

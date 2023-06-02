@@ -181,8 +181,6 @@ properties:
     custom_flatten: templates/terraform/custom_flatten/json_to_string_map.go.erb
   - !ruby/object:Api::Type::NestedObject
     name: sensitiveParams
-    # This is a helper object for Terraform only
-    exclude: false
     url_param_only: true
     description: |
       Different parameters are configured primarily using the the `params` field on this

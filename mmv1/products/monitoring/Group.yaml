@@ -53,7 +53,7 @@ properties:
       The name of the group's parent, if it has one. The format is
       "projects/{project_id_or_number}/groups/{group_id}". For
       groups with no parent, parentName is the empty string, "".
-    diff_suppress_func: 'compareSelfLinkRelativePaths'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
   - !ruby/object:Api::Type::String
     name: name
     description: |

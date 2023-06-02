@@ -23,8 +23,8 @@ update_verb: :POST
 update_url: v3/projects/{{project}}/metricDescriptors
 description:
   Defines a metric type and its schema. Once a metric descriptor is created,
-  deleting or altering it stops data collection and makes the metric type's existing
-  data unusable.
+  deleting or altering it stops data collection and makes the metric type's
+  existing data unusable.
 async: !ruby/object:Provider::Terraform::PollAsync
   check_response_func_existence: PollCheckForExistence
   check_response_func_absence: PollCheckForAbsence
@@ -59,18 +59,20 @@ properties:
     immutable: true
     required: true
     description:
-      The metric type, including its DNS name prefix. The type is not URL-encoded.
-      All service defined metrics must be prefixed with the service name, in the format
-      of {service name}/{relative metric name}, such as cloudsql.googleapis.com/database/cpu/utilization.
-      The relative metric name must have only upper and lower-case letters, digits,
-      '/' and underscores '_' are allowed. Additionally, the maximum number of characters
-      allowed for the relative_metric_name is 100. All user-defined metric types have
-      the DNS name custom.googleapis.com, external.googleapis.com, or logging.googleapis.com/user/.
+      The metric type, including its DNS name prefix. The type is not
+      URL-encoded. All service defined metrics must be prefixed with the service
+      name, in the format of {service name}/{relative metric name}, such as
+      cloudsql.googleapis.com/database/cpu/utilization. The relative metric name
+      must have only upper and lower-case letters, digits, '/' and underscores
+      '_' are allowed. Additionally, the maximum number of characters allowed
+      for the relative_metric_name is 100. All user-defined metric types have
+      the DNS name custom.googleapis.com, external.googleapis.com, or
+      logging.googleapis.com/user/.
   - !ruby/object:Api::Type::Array
     name: labels
     description:
-      The set of labels that can be used to describe a specific instance
-      of this metric type. In order to delete a label, the entire resource must be
+      The set of labels that can be used to describe a specific instance of this
+      metric type. In order to delete a label, the entire resource must be
       deleted, then created with the desired labels.
     is_set: true
     item_type: !ruby/object:Api::Type::NestedObject
@@ -79,10 +81,10 @@ properties:
           name: key
           required: true
           description:
-            The key for this label. The key must not exceed 100 characters.
-            The first character of the key must be an upper- or lower-case letter,
-            the remaining characters must be letters, digits or underscores, and the
-            key must match the regular expression [a-zA-Z][a-zA-Z0-9_]*
+            The key for this label. The key must not exceed 100 characters. The
+            first character of the key must be an upper- or lower-case letter,
+            the remaining characters must be letters, digits or underscores, and
+            the key must match the regular expression [a-zA-Z][a-zA-Z0-9_]*
         - !ruby/object:Api::Type::Enum
           name: valueType
           description: The type of data that can be assigned to the label.
@@ -100,8 +102,8 @@ properties:
     immutable: true
     required: true
     description:
-      Whether the metric records instantaneous values, changes to a value,
-      etc. Some combinations of metricKind and valueType might not be supported.
+      Whether the metric records instantaneous values, changes to a value, etc.
+      Some combinations of metricKind and valueType might not be supported.
     values:
       - :METRIC_KIND_UNSPECIFIED
       - :GAUGE
@@ -112,8 +114,8 @@ properties:
     immutable: true
     required: true
     description:
-      Whether the measurement is an integer, a floating-point number, etc.
-      Some combinations of metricKind and valueType might not be supported.
+      Whether the measurement is an integer, a floating-point number, etc. Some
+      combinations of metricKind and valueType might not be supported.
     values:
       - :BOOL
       - :INT64
@@ -148,7 +150,8 @@ properties:
     name: description
     immutable: true
     required: true
-    description: A detailed description of the metric, which can be used in documentation.
+    description:
+      A detailed description of the metric, which can be used in documentation.
   - !ruby/object:Api::Type::String
     name: displayName
     immutable: true
@@ -168,19 +171,21 @@ properties:
           - metadata.0.sample_period
           - metadata.0.ingest_delay
         description:
-          The sampling period of metric data points. For metrics which
-          are written periodically, consecutive data points are stored at this time
-          interval, excluding data loss due to errors. Metrics with a higher granularity
-          have a smaller sampling period. In `[duration format](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf?&_ga=2.264881487.1507873253.1593446723-935052455.1591817775#google.protobuf.Duration)`.
+          The sampling period of metric data points. For metrics which are
+          written periodically, consecutive data points are stored at this time
+          interval, excluding data loss due to errors. Metrics with a higher
+          granularity have a smaller sampling period. In `[duration
+          format](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf?&_ga=2.264881487.1507873253.1593446723-935052455.1591817775#google.protobuf.Duration)`.
       - !ruby/object:Api::Type::String
         name: ingestDelay
         at_least_one_of:
           - metadata.0.sample_period
           - metadata.0.ingest_delay
         description:
-          The delay of data points caused by ingestion. Data points older
-          than this age are guaranteed to be ingested and available to be read, excluding
-          data loss due to errors. In `[duration format](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf?&_ga=2.264881487.1507873253.1593446723-935052455.1591817775#google.protobuf.Duration)`.
+          The delay of data points caused by ingestion. Data points older than
+          this age are guaranteed to be ingested and available to be read,
+          excluding data loss due to errors. In `[duration
+          format](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf?&_ga=2.264881487.1507873253.1593446723-935052455.1591817775#google.protobuf.Duration)`.
   - !ruby/object:Api::Type::Enum
     name: launchStage
     immutable: true
@@ -199,10 +204,11 @@ properties:
     name: monitoredResourceTypes
     output: true
     description:
-      If present, then a time series, which is identified partially by
-      a metric type and a MonitoredResourceDescriptor, that is associated with this
-      metric type can only be associated with one of the monitored resource types
-      listed here. This field allows time series to be associated with the intersection
-      of this metric type and the monitored resource types in this list.
+      If present, then a time series, which is identified partially by a metric
+      type and a MonitoredResourceDescriptor, that is associated with this
+      metric type can only be associated with one of the monitored resource
+      types listed here. This field allows time series to be associated with the
+      intersection of this metric type and the monitored resource types in this
+      list.
     is_set: true
     item_type: Api::Type::String

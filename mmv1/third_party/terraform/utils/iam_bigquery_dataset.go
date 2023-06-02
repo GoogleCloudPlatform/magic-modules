@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/errwrap"
@@ -35,12 +37,12 @@ var bigqueryAccessPrimitiveToRoleMap = map[string]string{
 type BigqueryDatasetIamUpdater struct {
 	project   string
 	datasetId string
-	d         TerraformResourceData
+	d         tpgresource.TerraformResourceData
 	Config    *transport_tpg.Config
 }
 
-func NewBigqueryDatasetIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
-	project, err := getProject(d, config)
+func NewBigqueryDatasetIamUpdater(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgiamresource.ResourceIamUpdater, error) {
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +60,7 @@ func NewBigqueryDatasetIamUpdater(d TerraformResourceData, config *transport_tpg
 }
 
 func BigqueryDatasetIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
-	fv, err := parseProjectFieldValue("datasets", d.Id(), "project", d, config, false)
+	fv, err := tpgresource.ParseProjectFieldValue("datasets", d.Id(), "project", d, config, false)
 	if err != nil {
 		return err
 	}
@@ -78,12 +80,18 @@ func BigqueryDatasetIdParseFunc(d *schema.ResourceData, config *transport_tpg.Co
 func (u *BigqueryDatasetIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
 	url := fmt.Sprintf("%s%s", u.Config.BigQueryBasePath, u.GetResourceId())
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := transport_tpg.SendRequest(u.Config, "GET", u.project, url, userAgent, nil)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    u.Config,
+		Method:    "GET",
+		Project:   u.project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
@@ -106,12 +114,19 @@ func (u *BigqueryDatasetIamUpdater) SetResourceIamPolicy(policy *cloudresourcema
 		"access": access,
 	}
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	_, err = transport_tpg.SendRequest(u.Config, "PATCH", u.project, url, userAgent, obj)
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    u.Config,
+		Method:    "PATCH",
+		Project:   u.project,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+	})
 	if err != nil {
 		return fmt.Errorf("Error creating DatasetAccess: %s", err)
 	}

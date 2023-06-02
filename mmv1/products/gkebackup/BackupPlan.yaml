@@ -38,8 +38,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkebackup_backupplan_basic'
     primary_resource_id: 'basic'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-basic-plan%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-basic-plan%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       name: 'basic-plan'
@@ -104,7 +104,8 @@ properties:
       The source cluster from which Backups will be created via this BackupPlan.
   - !ruby/object:Api::Type::NestedObject
     name: retentionPolicy
-    description: RetentionPolicy governs lifecycle of Backups created under this plan.
+    description:
+      RetentionPolicy governs lifecycle of Backups created under this plan.
     properties:
       - !ruby/object:Api::Type::Integer
         name: backupDeleteLockDays
@@ -145,7 +146,8 @@ properties:
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
   - !ruby/object:Api::Type::NestedObject
     name: backupSchedule
-    description: Defines a schedule for automatic Backup creation via this BackupPlan.
+    description:
+      Defines a schedule for automatic Backup creation via this BackupPlan.
     properties:
       - !ruby/object:Api::Type::String
         name: cronSchedule

@@ -128,7 +128,7 @@ examples:
       l7_xlb_proxy: 'l7-xlb-proxy'
       l7_xlb_forwarding_rule: 'l7-xlb-forwarding-rule'
     skip_docs: true
-    skip_test: true # Similar to other samples
+    skip_test: true  # Similar to other samples
     min_version: beta
 parameters:
   - !ruby/object:Api::Type::ResourceRef
@@ -1473,8 +1473,8 @@ properties:
           resource: 'RegionBackendService'
           imports: 'selfLink'
           description:
-            A reference to expected RegionBackendService resource the given
-            URL should be mapped to.
+            A reference to expected RegionBackendService resource the given URL
+            should be mapped to.
   - !ruby/object:Api::Type::NestedObject
     name: 'defaultUrlRedirect'
     exactly_one_of:

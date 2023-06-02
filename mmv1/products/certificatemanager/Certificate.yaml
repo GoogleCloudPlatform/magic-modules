@@ -116,6 +116,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: certificatePem
+        immutable: true
         exactly_one_of:
           - self_managed.0.certificate_pem
           - self_managed.0.pem_certificate
@@ -127,6 +128,7 @@ properties:
         sensitive: true
       - !ruby/object:Api::Type::String
         name: privateKeyPem
+        immutable: true
         exactly_one_of:
           - self_managed.0.private_key_pem
           - self_managed.0.pem_private_key
@@ -136,6 +138,7 @@ properties:
         sensitive: true
       - !ruby/object:Api::Type::String
         name: pemCertificate
+        immutable: true
         exactly_one_of:
           - self_managed.0.certificate_pem
           - self_managed.0.pem_certificate
@@ -145,6 +148,7 @@ properties:
           Leaf certificate comes first, followed by intermediate ones if any.
       - !ruby/object:Api::Type::String
         name: pemPrivateKey
+        immutable: true
         exactly_one_of:
           - self_managed.0.private_key_pem
           - self_managed.0.pem_private_key
@@ -174,7 +178,7 @@ properties:
         immutable: true
         description: |
           Authorizations that will be used for performing domain authorization
-        diff_suppress_func: 'ProjectNumberDiffSuppress'
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
         item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'state'

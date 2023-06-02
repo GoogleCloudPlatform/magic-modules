@@ -53,21 +53,25 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'machine_image_basic'
     primary_resource_id: 'image'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])'
     vars:
       vm_name: 'my-vm'
       image_name: 'my-image'
   - !ruby/object:Provider::Terraform::Examples
     name: 'compute_machine_image_kms'
     primary_resource_id: 'image'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])'
     vars:
       vm_name: 'my-vm'
       image_name: 'my-image'
       key_name: 'key'
       keyring_name: 'keyring'
     test_vars_overrides:
-      policyChanged: 'BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter")'
+      policyChanged:
+        'BootstrapPSARole(t, "service-", "compute-system",
+        "roles/cloudkms.cryptoKeyEncrypterDecrypter")'
 
 properties:
   - !ruby/object:Api::Type::String

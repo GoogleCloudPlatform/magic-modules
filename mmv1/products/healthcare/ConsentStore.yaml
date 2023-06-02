@@ -31,7 +31,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Creating a Consent store': 'https://cloud.google.com/healthcare/docs/how-tos/consent'
   api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.consentStores'
-
+# Skipping the sweeper since this is a fine-grained resource under dataset
+skip_sweeper: true
 id_format: '{{dataset}}/consentStores/{{name}}'
 import_format: ['{{%dataset}}/consentStores/{{name}}']
 examples:
@@ -40,8 +41,9 @@ examples:
     primary_resource_id: 'my-consent'
     primary_resource_name:
       ' fmt.Sprintf("projects/%s/locations/%s/datasets/tf-test-my-dataset%s",
-      acctest.GetTestProjectFromEnv(), acctest.GetTestRegionFromEnv(), context["random_suffix"]),
-      fmt.Sprintf("tf-test-my-consent-store%s", context["random_suffix"])'
+      acctest.GetTestProjectFromEnv(), acctest.GetTestRegionFromEnv(),
+      context["random_suffix"]), fmt.Sprintf("tf-test-my-consent-store%s",
+      context["random_suffix"])'
     vars:
       dataset_id: 'my-dataset'
       consent_id: 'my-consent-store'

@@ -72,8 +72,7 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: labels
     description:
-      The labels associated with this realm. Each label is a key-value
-      pair.
+      The labels associated with this realm. Each label is a key-value pair.
   - !ruby/object:Api::Type::String
     name: timeZone
     required: true

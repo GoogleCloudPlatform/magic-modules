@@ -17,7 +17,7 @@ min_version: beta
 base_url: sites/{{site_id}}/versions
 self_link: sites/{{site_id}}/versions/{{version_id}}
 create_url: sites/{{site_id}}/versions
-immutable: true # not updatable
+immutable: true  # not updatable
 description: |
   A `Version` is a configuration which determine how a site is displayed. Static files are not supported at the moment.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -84,8 +84,8 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: config
     description:
-      The configuration for the behavior of the site. This configuration
-      exists in the `firebase.json` file.
+      The configuration for the behavior of the site. This configuration exists
+      in the `firebase.json` file.
     properties:
       - !ruby/object:Api::Type::Array
         name: rewrites
@@ -100,16 +100,15 @@ properties:
             - !ruby/object:Api::Type::String
               name: glob
               description:
-                The user-supplied glob to match against the request URL
-                path.
+                The user-supplied glob to match against the request URL path.
               exactly_one_of:
                 - glob
                 - regex
             - !ruby/object:Api::Type::String
               name: regex
               description:
-                The user-supplied RE2 regular expression to match against
-                the request URL path.
+                The user-supplied RE2 regular expression to match against the
+                request URL path.
               exactly_one_of:
                 - glob
                 - regex
@@ -135,8 +134,8 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: region
                   description:
-                    Optional. User-provided region where the Cloud Run
-                    service is hosted. Defaults to `us-central1` if not supplied.
+                    Optional. User-provided region where the Cloud Run service
+                    is hosted. Defaults to `us-central1` if not supplied.
       - !ruby/object:Api::Type::Array
         name: redirects
         description: |
@@ -150,16 +149,15 @@ properties:
             - !ruby/object:Api::Type::String
               name: glob
               description:
-                The user-supplied glob to match against the request URL
-                path.
+                The user-supplied glob to match against the request URL path.
               exactly_one_of:
                 - glob
                 - regex
             - !ruby/object:Api::Type::String
               name: regex
               description:
-                The user-supplied RE2 regular expression to match against
-                the request URL path.
+                The user-supplied RE2 regular expression to match against the
+                request URL path.
               exactly_one_of:
                 - glob
                 - regex
@@ -167,8 +165,8 @@ properties:
               name: statusCode
               required: true
               description:
-                The status HTTP code to return in the response. It must
-                be a valid 3xx status code.
+                The status HTTP code to return in the response. It must be a
+                valid 3xx status code.
             - !ruby/object:Api::Type::String
               name: location
               required: true

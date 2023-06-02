@@ -244,7 +244,7 @@ billingAccounts/{billingAccountId}/budgets/{budgetId}.`,
 func ResourceBillingBudgetUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
 	log.Printf("[DEBUG] Attributes before migration: %#v", rawState)
 
-	rawState["name"] = GetResourceNameFromSelfLink(rawState["name"].(string))
+	rawState["name"] = tpgresource.GetResourceNameFromSelfLink(rawState["name"].(string))
 
 	log.Printf("[DEBUG] Attributes after migration: %#v", rawState)
 	return rawState, nil

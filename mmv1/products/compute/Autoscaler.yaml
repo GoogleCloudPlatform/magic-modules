@@ -86,11 +86,6 @@ parameters:
     immutable: true
     default_from_api: true
 properties:
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'Unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
@@ -106,7 +101,7 @@ properties:
     required: true
     immutable: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |

@@ -23,6 +23,10 @@ async: !ruby/object:Api::OpAsync
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 45
+      update_minutes: 45
+      delete_minutes: 45
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
     resource_inside_response: true

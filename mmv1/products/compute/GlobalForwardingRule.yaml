@@ -171,11 +171,6 @@ examples:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
-    description: 'Creation timestamp in RFC3339 text format.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'pscConnectionId'
     description: 'The PSC connection id of the PSC Forwarding Rule.'
@@ -191,11 +186,6 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   # This is a multi-resource resource reference (Address, GlobalAddress)
   - !ruby/object:Api::Type::String
     name: 'IPAddress'
@@ -241,7 +231,7 @@ properties:
       When reading an `IPAddress`, the API always returns the IP
       address number.
     default_from_api: true
-    diff_suppress_func: 'InternalIpDiffSuppress'
+    diff_suppress_func: 'tpgresource.InternalIpDiffSuppress'
   - !ruby/object:Api::Type::Enum
     name: 'IPProtocol'
     description: |
@@ -262,7 +252,7 @@ properties:
       - :AH
       - :SCTP
       - :ICMP
-    diff_suppress_func: 'CaseDiffSuppress'
+    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
     default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'ipVersion'
@@ -414,7 +404,7 @@ properties:
       * TargetSslProxy: 25, 43, 110, 143, 195, 443, 465, 587, 700, 993, 995,
                         1883, 5222
       * TargetVpnGateway: 500, 4500
-    diff_suppress_func: 'PortRangeDiffSuppress'
+    diff_suppress_func: 'tpgresource.PortRangeDiffSuppress'
     # This is a multi-resource resource reference (TargetHttp(s)Proxy,
     # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
     # TargetInstance)
@@ -437,7 +427,7 @@ properties:
       For Private Service Connect forwarding rules that forward traffic to managed services, the target must be a service attachment.
     update_verb: :POST
     update_url: 'projects/{{project}}/global/forwardingRules/{{name}}/setTarget'
-    diff_suppress_func: 'compareSelfLinkRelativePaths'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
   - !ruby/object:Api::Type::Array
     name: sourceIpRanges
     description: If not empty, this Forwarding Rule will only forward the traffic when the source IP address matches one of the IP addresses or CIDR ranges set here. Note that a Forwarding Rule can only have up to 64 source IP ranges, and this field can only be used with a regional Forwarding Rule whose scheme is EXTERNAL. Each sourceIpRange entry should be either an IP address (for example, 1.2.3.4) or a CIDR range (for example, 1.2.3.0/24).

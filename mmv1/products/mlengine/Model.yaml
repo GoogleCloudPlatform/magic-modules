@@ -78,8 +78,8 @@ properties:
         name: 'name'
         required: true
         description: The name specified for the version when it was created.
-    # Even though only one region is supported, keeping this as an array
-    # to future-proof it.
+  # Even though only one region is supported, keeping this as an array
+  # to future-proof it.
   - !ruby/object:Api::Type::Array
     name: 'regions'
     description: |
@@ -89,7 +89,8 @@ properties:
     item_type: Api::Type::String
   - !ruby/object:Api::Type::Boolean
     name: 'onlinePredictionLogging'
-    description: If true, online prediction access logs are sent to StackDriver Logging.
+    description:
+      If true, online prediction access logs are sent to StackDriver Logging.
   - !ruby/object:Api::Type::Boolean
     name: 'onlinePredictionConsoleLogging'
     description:

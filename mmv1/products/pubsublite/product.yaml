@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: PubsubLite
-display_name: Cloud Pub/Sub # Merges docs under Pub/Sub
+display_name: Cloud Pub/Sub  # Merges docs under Pub/Sub
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

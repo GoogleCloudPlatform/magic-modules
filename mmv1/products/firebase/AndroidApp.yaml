@@ -15,11 +15,11 @@
 name: 'AndroidApp'
 min_version: beta
 base_url: projects/{{project}}/androidApps
-self_link: '{{name}}'
+self_link: 'projects/{{project}}/androidApps/{{app_id}}'
 update_verb: :PATCH
 update_mask: true
 delete_verb: :POST
-delete_url: '{{name}}:remove'
+delete_url: 'projects/{{project}}/androidApps/{{app_id}}:remove'
 description: |
   A Google Cloud Firebase Android application instance
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -46,12 +46,16 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 import_format:
   [
-    'projects/{{project}}/androidApps/{{appId}}',
-    'androidApps/{{appId}}',
-    '{{appId}}',
+    '{{project}} projects/{{project}}/androidApps/{{app_id}}',
+    'projects/{{project}}/androidApps/{{app_id}}',
+    'androidApps/{{app_id}}',
+    '{{app_id}}',
   ]
 autogen_async: true
 skip_sweeper: true
+identity:
+  - appId
+  - name
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'firebase_android_app_basic'
@@ -78,7 +82,6 @@ virtual_fields:
       serving traffic. Set to `DELETE` to delete the AndroidApp. Defaults to `DELETE`.
     default_value: DELETE
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/self_link_as_name.erb
   custom_delete: templates/terraform/custom_delete/firebase_app_deletion_policy.erb
 properties:
   - !ruby/object:Api::Type::String

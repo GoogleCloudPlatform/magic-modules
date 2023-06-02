@@ -81,7 +81,7 @@ properties:
           The externally accessible IPv4 address for the source database server.
         required: true
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateIpAddress'
+          function: 'verify.ValidateIpAddress'
       - !ruby/object:Api::Type::Integer
         name: 'port'
         default_value: 3306

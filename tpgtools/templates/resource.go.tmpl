@@ -11,6 +11,9 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License. */}}
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // ----------------------------------------------------------------------------
 //
 //     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
@@ -48,6 +51,7 @@ import(
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	{{$.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$.DCLPackage}}"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -229,8 +233,8 @@ func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) erro
 	if err != nil {
 		return err
 	}
-	mutexKV.Lock(lockName)
-	defer mutexKV.Unlock(lockName)
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 {{ end }}
 
 {{ if $.PreCreateFunction }}
@@ -259,7 +263,7 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 	{{/* Resource has no create method, so we skip the BlockModification parameter. */}}
 	directive := UpdateDirective
 {{- end }}
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -269,7 +273,7 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 	billingProject := ""
 {{- end}}
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
@@ -279,7 +283,7 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 	{{- if $.ReplaceInBasePath.Present }}
 	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
 	{{- end }}
-	if bp, err := ReplaceVars(d, config, client.Config.BasePath); err != nil {
+	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
 	} else {
@@ -350,7 +354,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 {{ end }}
 	}
 
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -360,7 +364,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 	billingProject := ""
 {{- end}}
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
@@ -370,7 +374,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 	{{- if $.ReplaceInBasePath.Present }}
 	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
 	{{- end }}
-	if bp, err := ReplaceVars(d, config, client.Config.BasePath); err != nil {
+	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
 	} else {
@@ -430,22 +434,22 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	if err != nil {
 		return err
 	}
-	mutexKV.Lock(lockName)
-	defer mutexKV.Unlock(lockName)
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 
 {{ end }}
 	directive := UpdateDirective
 	{{- if $.StateHint }}
 	directive = append(directive, dcl.WithStateHint(old))
 	{{- end }}
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	billingProject := ""
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
@@ -455,7 +459,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	{{- if $.ReplaceInBasePath.Present }}
 	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
 	{{- end }}
-	if bp, err := ReplaceVars(d, config, client.Config.BasePath); err != nil {
+	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
 	} else {
@@ -502,8 +506,8 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 	if err != nil {
 		return err
 	}
-	mutexKV.Lock(lockName)
-	defer mutexKV.Unlock(lockName)
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 
 {{ end }}
 {{ if $.PreDeleteFunction }}
@@ -523,7 +527,7 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 {{- end }}
 
 	log.Printf("[DEBUG] Deleting {{$.DCLTitle}} %q", d.Id())
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -533,7 +537,7 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 	billingProject := ""
 {{- end}}
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
@@ -543,7 +547,7 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 {{- if $.ReplaceInBasePath.Present }}
 	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
 {{- end }}
-	if bp, err := ReplaceVars(d, config, client.Config.BasePath); err != nil {
+	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
 	} else {
@@ -565,7 +569,7 @@ func resource{{$.PathType}}Import(d *schema.ResourceData, meta interface{}) ([]*
 	}
 {{ else -}}
 	{{$allowForwardSlash := shouldAllowForwardSlashInFormat $.ID $.Properties}}
-	if err := ParseImportId([]string{
+	if err := tpgresource.ParseImportId([]string{
 	{{- range $format := $.ImportFormats }}
 	"{{patternToRegex $format $allowForwardSlash}}",
 	{{- end }}

@@ -79,8 +79,8 @@ examples:
     vars:
       subnetwork_name: 'test-subnetwork'
       network_name: 'test-network'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-test-subnetwork%s\", context[\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-test-subnetwork%s\",
+      context[\"\
       random_suffix\"])"
   - !ruby/object:Provider::Terraform::Examples
     name: 'subnetwork_logging_config'
@@ -124,11 +124,6 @@ properties:
       The gateway address for default routes to reach destination addresses
       outside this subnetwork.
     output: true
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'ipCidrRange'
     description: |
@@ -140,7 +135,7 @@ properties:
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/expandIpCidrRange'
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateIpCidrRange'
+      function: 'verify.ValidateIpCidrRange'
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -153,7 +148,7 @@ properties:
       except the last character, which cannot be a dash.
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::ResourceRef
     name: 'network'
     resource: 'Network'
@@ -217,7 +212,7 @@ properties:
           name: 'rangeName'
           required: true
           validation: !ruby/object:Provider::Terraform::Validation
-            function: 'validateGCEName'
+            function: 'verify.ValidateGCEName'
           description: |
             The name associated with this subnetwork secondary range, used
             when adding an alias IP range to a VM instance. The name must
@@ -227,7 +222,7 @@ properties:
           name: 'ipCidrRange'
           required: true
           validation: !ruby/object:Provider::Terraform::Validation
-            function: 'validateIpCidrRange'
+            function: 'verify.ValidateIpCidrRange'
           description: |
             The range of IP addresses belonging to this subnetwork secondary
             range. Provide this property when you create the subnetwork.
@@ -272,10 +267,6 @@ properties:
     custom_expand: 'templates/terraform/custom_expand/subnetwork_log_config.go.erb'
     custom_flatten: 'templates/terraform/custom_flatten/subnetwork_log_config.go.erb'
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'enable'
-        description: If logging is enabled for this subnetwork
-        exclude: true
       - !ruby/object:Api::Type::Enum
         name: 'aggregationInterval'
         at_least_one_of:

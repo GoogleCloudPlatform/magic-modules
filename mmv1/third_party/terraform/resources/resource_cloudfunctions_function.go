@@ -5,8 +5,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
+
 	"google.golang.org/api/cloudfunctions/v1"
 
 	"fmt"
@@ -60,7 +63,7 @@ func (s *cloudFunctionId) locationId() string {
 }
 
 func parseCloudFunctionId(d *schema.ResourceData, config *transport_tpg.Config) (*cloudFunctionId, error) {
-	if err := ParseImportId([]string{
+	if err := tpgresource.ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/locations/(?P<region>[^/]+)/functions/(?P<name>[^/]+)",
 		"(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)",
 		"(?P<name>[^/]+)",
@@ -111,7 +114,7 @@ func partsCompare(a, b, reg string) bool {
 	return true
 }
 
-// based on compareSelfLinkOrResourceName, but less reusable and allows multi-/
+// based on CompareSelfLinkOrResourceName, but less reusable and allows multi-/
 // strings in the new state (config) part
 func compareSelfLinkOrResourceNameWithMultipleParts(_, old, new string, _ *schema.ResourceData) bool {
 	// two formats based on expandEventTrigger()
@@ -274,7 +277,7 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 			"vpc_connector": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 				Description:      `The VPC Network Connector that this cloud function can connect to. It can be either the fully-qualified URI, or the short name of the network connector resource. The format of this field is projects/*/locations/*/connectors/*.`,
 			},
 
@@ -458,6 +461,11 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 					},
 				},
 			},
+			"status": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `Describes the current stage of a deployment.`,
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -465,17 +473,17 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 
 func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := tpgresource.GetRegion(d, config)
 	if err != nil {
 		return err
 	}
@@ -551,15 +559,15 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if _, ok := d.GetOk("labels"); ok {
-		function.Labels = expandLabels(d)
+		function.Labels = tpgresource.ExpandLabels(d)
 	}
 
 	if _, ok := d.GetOk("environment_variables"); ok {
-		function.EnvironmentVariables = expandEnvironmentVariables(d)
+		function.EnvironmentVariables = tpgresource.ExpandEnvironmentVariables(d)
 	}
 
 	if _, ok := d.GetOk("build_environment_variables"); ok {
-		function.BuildEnvironmentVariables = expandBuildEnvironmentVariables(d)
+		function.BuildEnvironmentVariables = tpgresource.ExpandBuildEnvironmentVariables(d)
 	}
 
 	if v, ok := d.GetOk("vpc_connector"); ok {
@@ -617,7 +625,7 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 
 func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -704,6 +712,10 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 		return fmt.Errorf("Error setting secret_volumes: %s", err)
 	}
 
+	if err := d.Set("status", function.Status); err != nil {
+		return fmt.Errorf("Error setting status: %s", err)
+	}
+
 	if function.HttpsTrigger != nil {
 		if err := d.Set("trigger_http", true); err != nil {
 			return fmt.Errorf("Error setting trigger_http: %s", err)
@@ -747,12 +759,12 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG]: Updating google_cloudfunctions_function")
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -824,7 +836,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if d.HasChange("labels") {
-		function.Labels = expandLabels(d)
+		function.Labels = tpgresource.ExpandLabels(d)
 		updateMaskArr = append(updateMaskArr, "labels")
 	}
 
@@ -834,12 +846,12 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if d.HasChange("environment_variables") {
-		function.EnvironmentVariables = expandEnvironmentVariables(d)
+		function.EnvironmentVariables = tpgresource.ExpandEnvironmentVariables(d)
 		updateMaskArr = append(updateMaskArr, "environmentVariables")
 	}
 
 	if d.HasChange("build_environment_variables") {
-		function.BuildEnvironmentVariables = expandBuildEnvironmentVariables(d)
+		function.BuildEnvironmentVariables = tpgresource.ExpandBuildEnvironmentVariables(d)
 		updateMaskArr = append(updateMaskArr, "buildEnvironmentVariables")
 	}
 
@@ -915,7 +927,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 
 func resourceCloudFunctionsDestroy(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

@@ -16,3 +16,4 @@ path = 'github.com/alex-shpak/hugo-book'
 	BookCommitPath = 'commit'
 	BookEditPath = 'edit/main/docs'
 	BookComments = false
+	BookSection = '*'

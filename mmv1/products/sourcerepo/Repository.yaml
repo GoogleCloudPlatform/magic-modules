@@ -27,7 +27,6 @@ description: |
 import_format: ['projects/{{project}}/repos/{{%name}}', '{{%name}}']
 exclude_validator: true
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   method_name_separator: ':'
   parent_resource_attribute: 'repository'
   custom_diff_suppress: 'templates/terraform/iam/sourcerepo_diff_suppress.go.erb'
@@ -35,8 +34,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'sourcerepo_repository_basic'
     primary_resource_id: 'my-repo'
-    primary_resource_name:
-      "fmt.Sprintf(\"my/repository%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"my/repository%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       repository_name: 'my/repository'
@@ -104,6 +103,6 @@ properties:
             If unspecified, it defaults to the compute engine default service account.
 
           default_from_api: true
-    key_diff_suppress_func: 'compareSelfLinkOrResourceName'
+    key_diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     key_expander: 'expandSourceRepoRepositoryPubsubConfigsTopic'
     set_hash_func: 'resourceSourceRepoRepositoryPubSubConfigsHash'

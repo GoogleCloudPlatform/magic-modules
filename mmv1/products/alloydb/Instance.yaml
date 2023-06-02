@@ -28,9 +28,9 @@ async: !ruby/object:Api::OpAsync
     base_url: '{{op_id}}'
     wait_ms: 1000
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 20
-      update_minutes: 20
-      delete_minutes: 20
+      insert_minutes: 40
+      update_minutes: 40
+      delete_minutes: 40
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
   status: !ruby/object:Api::OpAsync::Status
@@ -102,8 +102,8 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'annotations'
     description:
-      "Annotations to allow client tools to store small amount of arbitrary\
-      \ data. This is distinct from labels."
+      'Annotations to allow client tools to store small amount of arbitrary
+      data. This is distinct from labels.'
   - !ruby/object:Api::Type::String
     name: 'state'
     output: true
@@ -126,11 +126,11 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'databaseFlags'
     description:
-      "Database flags. Set at instance level. * They are copied from primary\
-      \ instance on read instance creation. * Read instances can set new or override\
-      \ existing flags that are relevant for reads, e.g. for enabling columnar cache\
-      \ on a read instance. Flags set on read instance may or may not be present on\
-      \ primary."
+      'Database flags. Set at instance level. * They are copied from primary
+      instance on read instance creation. * Read instances can set new or
+      override existing flags that are relevant for reads, e.g. for enabling
+      columnar cache on a read instance. Flags set on read instance may or may
+      not be present on primary.'
   - !ruby/object:Api::Type::Enum
     name: 'availabilityType'
     description: |
@@ -160,12 +160,12 @@ properties:
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'nodeCount'
-        description: 'Read capacity, i.e. number of nodes in a read pool instance.'
+        description:
+          'Read capacity, i.e. number of nodes in a read pool instance.'
   - !ruby/object:Api::Type::NestedObject
     name: 'machineConfig'
     description:
-      "Configurations for the machines that host the underlying database\
-      \ engine."
+      'Configurations for the machines that host the underlying database engine.'
     default_from_api: true
     properties:
       - !ruby/object:Api::Type::Integer

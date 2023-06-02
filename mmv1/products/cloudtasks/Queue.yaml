@@ -37,8 +37,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'queue_basic'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloud-tasks-queue-test%s\", context[\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloud-tasks-queue-test%s\",
+      context[\"\
       random_suffix\"])"
     vars:
       name: 'cloud-tasks-queue-test'
@@ -188,11 +188,6 @@ properties:
           then increases linearly, and finally retries retries at intervals of maxBackoff
           up to maxAttempts times.
         default_from_api: true
-      - !ruby/object:Api::Type::Time
-        name: 'purgeTime'
-        output: true
-        description: The last time this queue was purged.
-        exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: 'stackdriverLoggingConfig'
     description: |

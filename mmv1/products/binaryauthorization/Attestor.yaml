@@ -20,7 +20,6 @@ description: |
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'attestor'
   method_name_separator: ':'
-  exclude: false
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/binary-authorization/'
@@ -32,8 +31,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'binary_authorization_attestor_basic'
     primary_resource_id: 'attestor'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-test-attestor%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-test-attestor%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       attestor_name: 'test-attestor'
@@ -81,7 +80,7 @@ properties:
         required: true
         immutable: true
         custom_expand: 'templates/terraform/custom_expand/container_analysis_note.erb'
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
       - !ruby/object:Api::Type::Array
         name: publicKeys
         description: |

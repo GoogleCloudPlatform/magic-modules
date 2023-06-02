@@ -36,12 +36,18 @@ examples:
     name: 'monitoring_alert_policy_basic'
     primary_resource_id: 'alert_policy'
     vars:
-      alert_policy_display_name:
-        'My Alert Policy'
-        # skipping tests because the API is full of race conditions
+      alert_policy_display_name: 'My Alert Policy'
+  # skipping tests because the API is full of race conditions
   - !ruby/object:Provider::Terraform::Examples
     skip_test: true
     name: 'monitoring_alert_policy_evaluation_missing_data'
+    primary_resource_id: 'alert_policy'
+    vars:
+      alert_policy_display_name: 'My Alert Policy'
+  # skipping tests because the API is full of race conditions
+  - !ruby/object:Provider::Terraform::Examples
+    skip_test: true
+    name: 'monitoring_alert_policy_forecast_options'
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
@@ -560,6 +566,26 @@ properties:
                 generate spurious alerts, but short enough
                 that unhealthy states are detected and
                 alerted on quickly.
+            - !ruby/object:Api::Type::NestedObject
+              name: forecastOptions
+              description: |
+                When this field is present, the `MetricThreshold`
+                condition forecasts whether the time series is
+                predicted to violate the threshold within the
+                `forecastHorizon`. When this field is not set, the
+                `MetricThreshold` tests the current value of the
+                timeseries against the threshold.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: forecastHorizon
+                  description: |
+                    The length of time into the future to forecast
+                    whether a timeseries will violate the threshold.
+                    If the predicted value is found to violate the
+                    threshold, and the violation is observed in all
+                    forecasts made for the Configured `duration`,
+                    then the timeseries is considered to be failing.
+                  required: true
             - !ruby/object:Api::Type::Enum
               name: comparison
               description: |
@@ -830,6 +856,25 @@ properties:
         name: autoClose
         description: |
           If an alert policy that was active has no data for this long, any open incidents will close.
+      - !ruby/object:Api::Type::Array
+        name: notificationChannelStrategy
+        description: |
+          Control over how the notification channels in `notification_channels`
+          are notified when this alert fires, on a per-channel basis.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: notificationChannelNames
+              description: |
+                The notification channels that these settings apply to. Each of these
+                correspond to the name field in one of the NotificationChannel objects
+                referenced in the notification_channels field of this AlertPolicy. The format is
+                `projects/[PROJECT_ID_OR_NUMBER]/notificationChannels/[CHANNEL_ID]`
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::String
+              name: renotifyInterval
+              description: |
+                The frequency at which to send reminder notifications for open incidents.
   - !ruby/object:Api::Type::KeyValuePairs
     name: userLabels
     description: |
