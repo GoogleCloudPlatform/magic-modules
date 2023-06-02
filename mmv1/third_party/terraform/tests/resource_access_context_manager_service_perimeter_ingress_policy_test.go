@@ -14,7 +14,7 @@ import (
 // Since each test here is acting on the same organization and only one AccessPolicy
 // can exist, they need to be run serially. See AccessPolicy for the test runner.
 
-func TestAccAccessContextManagerServicePerimeterIngressPolicy_basicTest(t *testing.T) {
+func testAccAccessContextManagerServicePerimeterIngressPolicy_basicTest(t *testing.T) {
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
 	org := acctest.GetTestOrgFromEnv(t)
@@ -129,7 +129,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
 resource "google_access_context_manager_service_perimeter_ingress_policy" "test-access2" {
 	perimeter = google_access_context_manager_service_perimeter.test-access.name
 	ingress_from {
-		identity_type = "IDENTITY_TYPE_UNSPECIFIED"
+		identity_type = "ANY_IDENTITY"
 	}
 }
 

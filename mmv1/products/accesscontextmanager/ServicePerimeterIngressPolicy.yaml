@@ -44,6 +44,7 @@ exclude_validator: true
 skip_sweeper: true
 id_format: '{{perimeter}}'
 import_format: ['{{perimeter}}']
+mutex: '{{perimeter}}'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.erb
 parameters:

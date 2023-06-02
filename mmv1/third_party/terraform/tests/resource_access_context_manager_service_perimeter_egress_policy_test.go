@@ -95,7 +95,6 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_basic(org, policyTi
 
 resource "google_access_context_manager_service_perimeter_egress_policy" "test-access1" {
   perimeter = google_access_context_manager_service_perimeter.test-access.name
-  egress_policy {
 	egress_from {
 		identity_type = "ANY_USER_ACCOUNT"
 	}
@@ -107,7 +106,14 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
 	    }
 	  }
 	}
-  }
+
+}
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "test-access2" {
+	perimeter = google_access_context_manager_service_perimeter.test-access.name
+	egress_from {
+		identity_type = "ANY_USER_ACCOUNT"
+	}
 }
 
 `, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName))
