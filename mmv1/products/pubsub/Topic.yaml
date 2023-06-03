@@ -73,7 +73,6 @@ examples:
     test_env_vars:
       project_name: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   encoder: templates/terraform/encoders/no_send_name.go.erb
   update_encoder: templates/terraform/update_encoder/pubsub_topic.erb
 properties:

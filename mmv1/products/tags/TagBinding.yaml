@@ -32,7 +32,6 @@ id_format: 'tagBindings/{{name}}'
 import_format: ['tagBindings/{{name}}', '{{name}}']
 mutex: tagBindings/{{parent}}
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   custom_import: templates/terraform/custom_import/tags_tag_binding.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples

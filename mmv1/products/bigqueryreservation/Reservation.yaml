@@ -46,8 +46,6 @@ parameters:
     required: true
     description: |
       The name of the reservation. This field must only contain alphanumeric characters or dash.
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'slotCapacity'

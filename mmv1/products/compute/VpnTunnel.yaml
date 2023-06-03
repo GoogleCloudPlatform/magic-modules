@@ -80,7 +80,6 @@ examples:
       provider_name: 'google-beta'
       provider_alias: ''
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: templates/terraform/constants/vpn_tunnel.erb
   encoder: templates/terraform/encoders/vpn_tunnel.go.erb
   post_create: templates/terraform/post_create/labels.erb

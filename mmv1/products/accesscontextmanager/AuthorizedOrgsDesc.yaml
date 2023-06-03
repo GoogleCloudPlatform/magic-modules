@@ -45,7 +45,6 @@ examples:
 # Skipping the sweeper due to the non-standard base_url
 skip_sweeper: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
   pre_update: templates/terraform/update_mask.erb
   post_create: templates/terraform/post_create/sleep_2_min.go.erb

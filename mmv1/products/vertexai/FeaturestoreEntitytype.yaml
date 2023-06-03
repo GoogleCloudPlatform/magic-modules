@@ -90,7 +90,6 @@ examples:
       kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     min_version: beta
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   pre_create: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
   pre_delete: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
   custom_import: templates/terraform/custom_import/vertex_ai_featurestore_entitytype.go.erb

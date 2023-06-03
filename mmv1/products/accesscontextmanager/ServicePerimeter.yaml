@@ -72,7 +72,6 @@ examples:
     vars:
       service_perimeter_name: 'restrict_bigquery_dryrun_storage'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
   custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
 parameters:

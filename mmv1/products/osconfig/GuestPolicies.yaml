@@ -52,7 +52,6 @@ examples:
     ignore_read_extra:
       - 'project'  # project number is returned in rest response
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   post_create: templates/terraform/post_create/set_computed_name.erb
 
 parameters:

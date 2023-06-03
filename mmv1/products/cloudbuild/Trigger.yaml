@@ -105,7 +105,6 @@ examples:
       repo_uri: '"https://github.com/gcb-repos-robot/tf-demo.git"'
 
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   pre_read: templates/terraform/pre_read/cloudbuild_trigger.go.erb
   post_create: templates/terraform/post_create/cloudbuild_trigger_id.go.erb
   post_import: templates/terraform/post_import/cloudbuild_trigger.go.erb

@@ -38,7 +38,6 @@ virtual_fields:
       - :PAUSED
     default_value: :NOT_STARTED
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: 'templates/terraform/constants/datastream_stream.go.erb'
   post_create: 'templates/terraform/post_create/datastream_stream.go.erb'
   post_import: 'templates/terraform/post_import/datastream_stream.go.erb'

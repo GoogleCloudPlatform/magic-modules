@@ -27,7 +27,6 @@ description: |
   You must [enable multi-tenancy](https://cloud.google.com/identity-platform/docs/multi-tenancy-quickstart) via
   the Cloud Console prior to creating tenants.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   post_create: templates/terraform/post_create/gcip_tenant.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples

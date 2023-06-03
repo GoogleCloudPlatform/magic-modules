@@ -40,7 +40,6 @@ examples:
       project: :PROJECT_NAME
       org_id: :ORG_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   custom_delete: templates/terraform/custom_delete/clear_project_access_approval_settings.go.erb
   pre_create: templates/terraform/update_mask.erb
 parameters:

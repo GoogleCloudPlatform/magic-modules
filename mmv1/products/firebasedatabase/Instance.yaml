@@ -63,7 +63,6 @@ virtual_fields:
       - :DISABLED
     default_value: :ACTIVE
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: 'templates/terraform/constants/firebase_database_instance.go.erb'
   decoder: templates/terraform/decoders/firebase_database_instance.go.erb
   post_create: templates/terraform/post_create/firebase_database_instance.go.erb

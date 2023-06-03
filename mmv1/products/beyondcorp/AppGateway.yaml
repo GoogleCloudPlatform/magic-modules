@@ -64,8 +64,6 @@ examples:
     vars:
       app_gateway_name: 'my-app-gateway'
       display_name: 'some display name'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

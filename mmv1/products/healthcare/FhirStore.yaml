@@ -64,7 +64,6 @@ examples:
       fhir_store_name: 'example-fhir-store'
       pubsub_topic: 'fhir-notifications'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
   custom_import: templates/terraform/custom_import/healthcare_fhir_store.go.erb
 parameters:

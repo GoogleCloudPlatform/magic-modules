@@ -52,7 +52,6 @@ examples:
     oics_vars_overrides:
       force_delete: 'true'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   custom_import: 'templates/terraform/custom_import/data_catalog_tag_template.go.erb'
   pre_update: 'templates/terraform/pre_update/tagtemplate_fields.go.erb'
   post_update: 'templates/terraform/post_update/tagtemplate_fields.go.erb'

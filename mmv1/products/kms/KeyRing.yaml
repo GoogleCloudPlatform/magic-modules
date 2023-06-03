@@ -44,7 +44,6 @@ examples:
       # for the test service account.
     skip_test: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   decoder: templates/terraform/decoders/kms.go.erb
   encoder: templates/terraform/encoders/send_nil_body.go.erb
 parameters:

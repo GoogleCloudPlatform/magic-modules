@@ -41,7 +41,6 @@ examples:
     test_env_vars:
       org_id: :ORG_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: templates/terraform/constants/firebase_project.go.erb
   pre_create: templates/terraform/pre_create/firebase_project.go.erb
 properties:

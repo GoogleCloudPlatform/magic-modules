@@ -40,7 +40,6 @@ examples:
     test_env_vars:
       org_id: :ORG_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   custom_import: templates/terraform/custom_import/scc_source_self_link_as_name_set_organization.go.erb
   post_create: templates/terraform/post_create/set_computed_name.erb
 parameters:

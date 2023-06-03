@@ -53,7 +53,6 @@ examples:
     vars:
       patch_deployment_id: 'patch-deploy'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   post_create: templates/terraform/post_create/set_computed_name.erb
   encoder: templates/terraform/encoders/os_config_patch_deployment.go.erb
   decoder: templates/terraform/decoders/os_config_patch_deployment.go.erb

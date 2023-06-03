@@ -45,7 +45,6 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: 'templates/terraform/constants/region_ssl_policy.erb'
   resource_definition: 'templates/terraform/resource_definition/region_ssl_policy.erb'
 parameters:

@@ -105,7 +105,6 @@ examples:
     ignore_read_extra:
       - 'force_destroy'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   pre_delete: templates/terraform/pre_delete/vertex_ai_force_delete.go.erb
 virtual_fields:
   - !ruby/object:Api::Type::Boolean

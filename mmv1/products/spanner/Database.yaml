@@ -74,7 +74,6 @@ virtual_fields:
       Whether or not to allow Terraform to destroy the instance. Unless this field is set to false
       in Terraform state, a `terraform destroy` or `terraform apply` that would delete the instance will fail.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: 'templates/terraform/constants/spanner_database.go.erb'
   encoder: templates/terraform/encoders/spanner_database.go.erb
   decoder: templates/terraform/decoders/spanner_database.go.erb

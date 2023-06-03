@@ -54,8 +54,6 @@ examples:
       mirroring_name: 'my-mirroring'
       ilb_rule_name: 'my-ilb'
       network_name: 'my-network'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
 properties:
   - !ruby/object:Api::Type::String
     name: name

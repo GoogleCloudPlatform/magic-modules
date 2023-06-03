@@ -109,7 +109,6 @@ virtual_fields:
     description: 'Set this true to delete all records in the zone.'
     default_value: false
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   update_encoder: templates/terraform/update_encoder/managed_dns_zone.go.erb
   pre_delete: templates/terraform/pre_delete/managed_dns_zone.go.erb
 properties:

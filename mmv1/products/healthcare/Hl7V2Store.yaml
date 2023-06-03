@@ -51,7 +51,6 @@ examples:
       dataset_name: 'example-dataset'
       hl7_v2_store_name: 'example-hl7-v2-store'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
   custom_import: templates/terraform/custom_import/healthcare_hl7_v2_store.go.erb
 parameters:

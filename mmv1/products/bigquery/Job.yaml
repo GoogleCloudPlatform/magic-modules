@@ -145,7 +145,6 @@ examples:
       - 'status.0.state'
     skip_docs: true  # there are a lot of examples for this resource, so omitting some that are similar to others
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: templates/terraform/constants/bigquery_job.go
   encoder: templates/terraform/encoders/bigquery_job.go.erb
 properties:

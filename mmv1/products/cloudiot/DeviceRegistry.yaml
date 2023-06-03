@@ -36,7 +36,6 @@ legacy_name: 'google_cloudiot_registry'
 import_format: ['{{project}}/locations/{{region}}/registries/{{name}}']
 id_format: 'projects/{{project}}/locations/{{region}}/registries/{{name}}'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: templates/terraform/constants/cloudiot.go.erb
   decoder: templates/terraform/decoders/cloudiot_device_registry.go.erb
   encoder: templates/terraform/encoders/cloudiot_device_registry.go.erb

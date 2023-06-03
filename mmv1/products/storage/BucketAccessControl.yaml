@@ -51,8 +51,6 @@ id_format: '{{bucket}}/{{entity}}'
 import_format: ['{{bucket}}/{{entity}}']
 mutex: 'storage/buckets/{{bucket}}'
 skip_sweeper: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
 properties:
   - !ruby/object:Api::Type::ResourceRef
     name: 'bucket'

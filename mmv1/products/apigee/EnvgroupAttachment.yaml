@@ -71,7 +71,6 @@ timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 30
   delete_minutes: 30
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   custom_import: templates/terraform/custom_import/apigee_environment_group_attachment.go.erb
 parameters:
   - !ruby/object:Api::Type::String

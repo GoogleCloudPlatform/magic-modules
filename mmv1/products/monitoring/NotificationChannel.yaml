@@ -69,7 +69,6 @@ virtual_fields:
       referenced by an existing alerting policy will fail to be
       deleted in a delete operation.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   resource_definition: templates/terraform/resource_definition/monitoring_notification_channel.erb
   encoder: templates/terraform/encoders/monitoring_notification_channel.go.erb
   decoder: templates/terraform/decoders/monitoring_notification_channel.go.erb

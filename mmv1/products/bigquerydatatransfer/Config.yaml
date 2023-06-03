@@ -30,7 +30,6 @@ import_format: ['{{name}}']
 id_format: '{{name}}'
 error_retry_predicates: ['transport_tpg.IamMemberMissing']
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   resource_definition: templates/terraform/resource_definition/bigquery_data_transfer.go.erb
   constants: templates/terraform/constants/bigquery_data_transfer.go.erb
   decoder: templates/terraform/decoders/bigquery_data_transfer.go.erb

@@ -42,7 +42,6 @@ examples:
     vars:
       workload_identity_pool_id: 'example-pool'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: templates/terraform/constants/iam_workload_identity_pool.go.erb
   decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
   test_check_destroy: templates/terraform/custom_check_destroy/iam_workload_identity_pool.go.erb

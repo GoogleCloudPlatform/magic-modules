@@ -51,8 +51,6 @@ parameters:
     required: true
     description: |
       The name of the device registry where this device should be created.
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

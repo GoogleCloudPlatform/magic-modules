@@ -115,7 +115,6 @@ examples:
       backend_bucket_name: 'image-backend-bucket'
       bucket_name: 'image-store-bucket'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   encoder: 'templates/terraform/encoders/compute_backend_bucket.go.erb'
   post_create: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
   post_update: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'

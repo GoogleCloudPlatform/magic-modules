@@ -40,7 +40,6 @@ examples:
       service_id: 'custom-srv'
       resource_name: '//product.googleapis.com/foo/foo/services/test'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
   encoder: templates/terraform/encoders/monitoring_service.go.erb
 

@@ -40,8 +40,6 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-backend-service%s\",
       context[\"\
       random_suffix\"])"
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

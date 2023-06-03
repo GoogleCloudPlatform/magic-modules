@@ -84,7 +84,6 @@ examples:
       deployment_name: 'my-deployment'
     skip_test: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   post_create_failure: 'templates/terraform/post_create_failure/delete_on_failure.go.erb'
   # Custom diff to force new if 'preview' is true
   constants: 'templates/terraform/constants/deployment_manager_deployment.go.erb'

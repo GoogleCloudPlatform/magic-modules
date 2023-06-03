@@ -33,8 +33,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'identity_platform_tenant_default_supported_idp_config_basic'
     primary_resource_id: 'idp_config'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

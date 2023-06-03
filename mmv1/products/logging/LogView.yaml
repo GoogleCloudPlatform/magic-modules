@@ -42,7 +42,6 @@ examples:
       project: :PROJECT_NAME
     skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   encoder: templates/terraform/encoders/logging_log_view.go.erb
 parameters:
   - !ruby/object:Api::Type::String

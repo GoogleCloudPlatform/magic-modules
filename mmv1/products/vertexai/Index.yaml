@@ -69,7 +69,6 @@ examples:
       - metadata.0.contents_delta_uri
       - metadata.0.is_complete_overwrite
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   pre_update: templates/terraform/pre_update/vertex_ai_index.go.erb
 parameters:
   - !ruby/object:Api::Type::String

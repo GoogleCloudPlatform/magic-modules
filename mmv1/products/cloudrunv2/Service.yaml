@@ -118,8 +118,6 @@ parameters:
     immutable: true
     url_param_only: true
     description: The location of the cloud run service
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

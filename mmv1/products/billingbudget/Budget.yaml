@@ -24,7 +24,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Creating a budget': 'https://cloud.google.com/billing/docs/how-to/budgets'
   api: 'https://cloud.google.com/billing/docs/reference/budget/rest/v1/billingAccounts.budgets'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: templates/terraform/constants/billing_budget.erb
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |

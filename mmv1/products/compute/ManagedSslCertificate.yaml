@@ -93,8 +93,6 @@ examples:
       true
       # Random provider
     skip_vcr: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'

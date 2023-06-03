@@ -57,7 +57,6 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   pre_delete: templates/terraform/pre_delete/detach_disk.erb
   constants: templates/terraform/constants/disk.erb
   encoder: templates/terraform/encoders/disk.erb

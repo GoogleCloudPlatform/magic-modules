@@ -38,7 +38,6 @@ examples:
     test_env_vars:
       org_id: :ORG_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   custom_delete: templates/terraform/custom_delete/clear_organization_access_approval_settings.go.erb
   pre_create: templates/terraform/update_mask.erb
 parameters:

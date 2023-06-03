@@ -81,7 +81,6 @@ examples:
       disk_name: 'debian-disk'
       chain_name: 'snapshot-chain'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   decoder: templates/terraform/decoders/snapshot.go.erb
   pre_create: templates/terraform/pre_create/compute_snapshot_precreate_url.go.erb
 parameters:

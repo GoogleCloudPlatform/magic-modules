@@ -26,7 +26,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/asset-inventory/docs'
   api: 'https://cloud.google.com/asset-inventory/docs/reference/rest/'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   pre_create: templates/terraform/pre_create/cloud_asset_feed.go.erb
   post_create: templates/terraform/post_create/cloud_asset_feed.go.erb
   custom_import: templates/terraform/custom_import/cloud_asset_feed.go.erb

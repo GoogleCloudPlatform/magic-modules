@@ -38,8 +38,6 @@ examples:
 id_format: '{{project}}'
 import_format: ['{{project}}']
 skip_sweeper: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'displayName'

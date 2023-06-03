@@ -40,7 +40,6 @@ examples:
 # Skipping the sweeper due to the non-standard base_url
 skip_sweeper: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   custom_import: templates/terraform/custom_import/set_access_policy_parent_from_access_policy.go.erb
   custom_delete: templates/terraform/custom_delete/replace_all_access_levels_empty_list.go.erb
 parameters:

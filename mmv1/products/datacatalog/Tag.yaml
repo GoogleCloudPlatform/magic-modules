@@ -88,7 +88,6 @@ examples:
       force_delete: 'true'
     skip_docs: true  # omitting doc as it is almost identical to the case of data_catalog_entry_tag_basic
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   custom_import: templates/terraform/custom_import/data_catalog_tag.go.erb
   encoder: templates/terraform/encoders/data_catalog_tag.go.erb
 parameters:

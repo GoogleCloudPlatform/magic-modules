@@ -114,8 +114,6 @@ examples:
     ignore_read_extra:
       - "metadata"
       - "metadata_startup_script"
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'

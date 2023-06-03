@@ -94,7 +94,6 @@ examples:
       address_name: 'test-address'
       network_name: 'test-network'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   post_create: templates/terraform/post_create/labels.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef

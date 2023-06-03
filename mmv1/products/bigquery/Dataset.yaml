@@ -87,7 +87,6 @@ virtual_fields:
       dataset when destroying the resource; otherwise,
       destroying the resource will fail if tables are present.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: templates/terraform/constants/bigquery_dataset.go.erb
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |

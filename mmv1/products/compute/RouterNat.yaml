@@ -92,7 +92,6 @@ examples:
       address_name2: 'nat-address2'
       address_name3: 'nat-address3'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   constants: 'templates/terraform/constants/router_nat.go.erb'
   resource_definition: 'templates/terraform/resource_definition/router_nat.go.erb'
 parameters:

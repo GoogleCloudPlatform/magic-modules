@@ -70,7 +70,6 @@ examples:
       # Resource creation race
     skip_vcr: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/default_provider_values.erb
   update_encoder: templates/terraform/update_encoder/reservation.go.erb
   pre_update: templates/terraform/pre_update/shared_reservation_update.go.erb
 parameters:
