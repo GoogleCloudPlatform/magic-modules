@@ -218,6 +218,7 @@ func flattenCloudIotDeviceRegistryStateNotificationConfigPubsubTopicName(v inter
     return v
 }
 
+<% unless compiler == "terraformvalidator-codegen" -%>
 func ValidateCloudIotDeviceRegistryID(v interface{}, k string) (warnings []string, errors []error) {
     value := v.(string)
     if strings.HasPrefix(value, "goog") {
@@ -230,6 +231,7 @@ func ValidateCloudIotDeviceRegistryID(v interface{}, k string) (warnings []strin
     }
     return
 }
+<% end -%>
 
 func validateCloudIotDeviceRegistrySubfolderMatch(v interface{}, k string) (warnings []string, errors []error) {
     value := v.(string)
