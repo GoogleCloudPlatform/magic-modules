@@ -110,10 +110,10 @@ func TestAccComputeNetworkPeering_stackType(t *testing.T) {
 	primaryNetworkName := fmt.Sprintf("tf-test-network-1-%d", RandInt(t))
 	peeringNetworkName := fmt.Sprintf("tf-test-network-2-%d", RandInt(t))
 	peeringName := fmt.Sprintf("tf-test-peering-%d", RandInt(t))
-	importId := fmt.Sprintf("%s/%s/%s", GetTestProjectFromEnv(), primaryNetworkName, peeringName)
+	importId := fmt.Sprintf("%s/%s/%s", acctest.GetTestProjectFromEnv(), primaryNetworkName, peeringName)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccComputeNetworkPeeringDestroyProducer(t),
 		Steps: []resource.TestStep{

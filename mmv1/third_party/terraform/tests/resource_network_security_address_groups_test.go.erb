@@ -4,17 +4,17 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccNetworkSecurityAddressGroups_update(t *testing.T){
     t.Parallel()
 
     addressGroupsName := fmt.Sprintf("tf-test-address-group-%s", RandString(t, 10))
-	projectName := GetTestProjectFromEnv()
+	projectName := acctest.GetTestProjectFromEnv()
 
     VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },

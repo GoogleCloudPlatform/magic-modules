@@ -9,12 +9,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccComputeDiskAsyncReplication(t *testing.T) {
 	t.Parallel()
 
-	region := GetTestRegionFromEnv()
+	region := acctest.GetTestRegionFromEnv()
 	if !tpgresource.StringInSlice([]string{"europe-west2", "europe-west1", "us-central1", "us-east1", "us-west1", "us-east4", "asia-east1", "australia-southeast1"}, region) {
 		return
 	}
@@ -44,7 +45,7 @@ func TestAccComputeDiskAsyncReplication(t *testing.T) {
 	secondaryRegionalDisk := fmt.Sprintf("tf-test-disk-rsecondary-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{

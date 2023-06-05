@@ -123,7 +123,7 @@ func setupTestResourceDataFromConfigMap(t *testing.T, s map[string]*schema.Schem
 // configure the provider.
 // The testing package will restore the original values after the test
 func unsetTestProviderConfigEnvs(t *testing.T) {
-	envs := providerConfigEnvNames()
+	envs := acctest.ProviderConfigEnvNames()
 	if len(envs) > 0 {
 		for _, k := range envs {
 			t.Setenv(k, "")
