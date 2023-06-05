@@ -16,7 +16,7 @@ name: 'NetworkEndpoints'
 kind: 'compute#networkEndpoints'
 base_url: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}'
 description: |
-  A set of network endpoints belonging to a network endpoint group (NEG). A 
+  A set of network endpoints belonging to a network endpoint group (NEG). A
   single network endpoint represents a IP address and port combination that is
   part of a specific (NEG). NEGs are zonal collections of these endpoints for
   GCP resources within a single subnet. **NOTE**: Network endpoints cannot be
@@ -132,4 +132,3 @@ properties:
             to a VM in GCE (either the primary IP or as part of an aliased IP
             range).
           required: true
-
