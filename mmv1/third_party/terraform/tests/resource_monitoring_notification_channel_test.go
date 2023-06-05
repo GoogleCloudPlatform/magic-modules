@@ -54,7 +54,7 @@ func TestAccMonitoringNotificationChannel_updateLabels_slack(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels.%", "labels.auth_token"},
-			}
+			},
 		},
 	})
 }
@@ -81,12 +81,10 @@ func TestAccMonitoringNotificationChannel_updateLabels(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels.%", "labels.password", "sensitive_labels"},
-			}
+			},
 		},
 	})
 }
-
-
 
 func TestAccMonitoringNotificationChannel_updateSensitiveLabels_slack(t *testing.T) {
 	// Slack auth_token required for test not to fail, skipping test till interal testing slack can be created
@@ -108,7 +106,7 @@ func TestAccMonitoringNotificationChannel_updateSensitiveLabels_slack(t *testing
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels.%", "sensitive_labels.auth_token"},
-			}
+			},
 		},
 	})
 }
@@ -136,7 +134,7 @@ func TestAccMonitoringNotificationChannel_updateSensitiveLabels(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels.%", "labels.password", "sensitive_labels"},
-			}
+			},
 		},
 	})
 }
