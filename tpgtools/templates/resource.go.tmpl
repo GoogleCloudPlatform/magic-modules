@@ -11,6 +11,9 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License. */}}
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // ----------------------------------------------------------------------------
 //
 //     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
@@ -566,7 +569,7 @@ func resource{{$.PathType}}Import(d *schema.ResourceData, meta interface{}) ([]*
 	}
 {{ else -}}
 	{{$allowForwardSlash := shouldAllowForwardSlashInFormat $.ID $.Properties}}
-	if err := ParseImportId([]string{
+	if err := tpgresource.ParseImportId([]string{
 	{{- range $format := $.ImportFormats }}
 	"{{patternToRegex $format $allowForwardSlash}}",
 	{{- end }}

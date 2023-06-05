@@ -39,7 +39,6 @@ async: !ruby/object:Api::OpAsync
 description: |
   An `Environment` in Apigee.
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   method_name_separator: ':'
   parent_resource_attribute: 'env_id'
   import_format: ['{{%org_id}}/environments/{{name}}', '{{name}}']

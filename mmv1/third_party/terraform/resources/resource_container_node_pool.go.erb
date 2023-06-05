@@ -53,7 +53,7 @@ func ResourceContainerNodePool() *schema.Resource {
 
 		UseJSONNumber: true,
 
-		Schema: mergeSchemas(
+		Schema: tpgresource.MergeSchemas(
 			schemaNodePool,
 			map[string]*schema.Schema{
 				"project": {
@@ -787,7 +787,7 @@ func resourceContainerNodePoolStateImporter(d *schema.ResourceData, meta interfa
 		return nil, err
 	}
 
-	if err := ParseImportId([]string{"projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<cluster>[^/]+)/nodePools/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<location>[^/]+)/(?P<cluster>[^/]+)/(?P<name>[^/]+)", "(?P<location>[^/]+)/(?P<cluster>[^/]+)/(?P<name>[^/]+)"}, d, config); err != nil {
+	if err := tpgresource.ParseImportId([]string{"projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<cluster>[^/]+)/nodePools/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<location>[^/]+)/(?P<cluster>[^/]+)/(?P<name>[^/]+)", "(?P<location>[^/]+)/(?P<cluster>[^/]+)/(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}
 
@@ -1039,7 +1039,7 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		"name":                np.Name,
 		"name_prefix":         d.Get(prefix + "name_prefix"),
 		"initial_node_count":  np.InitialNodeCount,
-		"node_locations":      schema.NewSet(schema.HashString, convertStringArrToInterface(np.Locations)),
+		"node_locations":      schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(np.Locations)),
 		"node_count":          nodeCount,
 		"node_config":         flattenNodeConfig(np.Config),
 		"instance_group_urls": igmUrls,
@@ -1665,13 +1665,14 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 
 				if v, ok := blueGreenSettingsConfig["standard_rollout_policy"]; ok && len(v.([]interface{})) > 0 {
 					standardRolloutPolicy := &container.StandardRolloutPolicy{}
-					standardRolloutPolicyConfig := v.([]interface{})[0].(map[string]interface{})
-					standardRolloutPolicy.BatchSoakDuration = standardRolloutPolicyConfig["batch_soak_duration"].(string)
-					if v, ok := standardRolloutPolicyConfig["batch_node_count"]; ok {
-						standardRolloutPolicy.BatchNodeCount = int64(v.(int))
-					}
-					if v, ok := standardRolloutPolicyConfig["batch_percentage"]; ok {
-						standardRolloutPolicy.BatchPercentage = v.(float64)
+					if standardRolloutPolicyConfig, ok := v.([]interface{})[0].(map[string]interface{}); ok	{
+						standardRolloutPolicy.BatchSoakDuration = standardRolloutPolicyConfig["batch_soak_duration"].(string)
+						if v, ok := standardRolloutPolicyConfig["batch_node_count"]; ok {
+							standardRolloutPolicy.BatchNodeCount = int64(v.(int))
+						}
+						if v, ok := standardRolloutPolicyConfig["batch_percentage"]; ok {
+							standardRolloutPolicy.BatchPercentage = v.(float64)
+						}
 					}
 					blueGreenSettings.StandardRolloutPolicy = standardRolloutPolicy
 				}

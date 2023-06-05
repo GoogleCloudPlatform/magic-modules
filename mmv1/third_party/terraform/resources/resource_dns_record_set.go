@@ -25,8 +25,8 @@ func rrdatasDnsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 		return false
 	}
 
-	oList := convertStringArr(o.([]interface{}))
-	nList := convertStringArr(n.([]interface{}))
+	oList := tpgresource.ConvertStringArr(o.([]interface{}))
+	nList := tpgresource.ConvertStringArr(n.([]interface{}))
 
 	parseFunc := func(record string) string {
 		switch d.Get("type") {
@@ -258,8 +258,8 @@ var healthCheckedTargetSchema *schema.Resource = &schema.Resource{
 					"load_balancer_type": {
 						Type:         schema.TypeString,
 						Required:     true,
-						Description:  `The type of load balancer. This value is case-sensitive. Possible values: ["regionalL4ilb"]`,
-						ValidateFunc: validation.StringInSlice([]string{"regionalL4ilb"}, false),
+						Description:  `The type of load balancer. This value is case-sensitive. Possible values: ["regionalL4ilb", "regionalL7ilb]`,
+						ValidateFunc: validation.StringInSlice([]string{"regionalL4ilb", "regionalL7ilb"}, false),
 					},
 					"ip_address": {
 						Type:        schema.TypeString,
@@ -398,11 +398,13 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 	dnsType := d.Get("type").(string)
 
 	var resp *dns.ResourceRecordSetsListResponse
-	err = transport_tpg.Retry(func() error {
-		var reqErr error
-		resp, reqErr = config.NewDnsClient(userAgent).ResourceRecordSets.List(
-			project, zone).Name(name).Type(dnsType).Do()
-		return reqErr
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			var reqErr error
+			resp, reqErr = config.NewDnsClient(userAgent).ResourceRecordSets.List(
+				project, zone).Name(name).Type(dnsType).Do()
+			return reqErr
+		},
 	})
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("DNS Record Set %q", d.Get("name").(string)))
@@ -596,7 +598,7 @@ func resourceDnsRecordSetUpdate(d *schema.ResourceData, meta interface{}) error 
 
 func resourceDnsRecordSetImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
-	if err := ParseImportId([]string{
+	if err := tpgresource.ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/managedZones/(?P<managed_zone>[^/]+)/rrsets/(?P<name>[^/]+)/(?P<type>[^/]+)",
 		"(?P<project>[^/]+)/(?P<managed_zone>[^/]+)/(?P<name>[^/]+)/(?P<type>[^/]+)",
 		"(?P<managed_zone>[^/]+)/(?P<name>[^/]+)/(?P<type>[^/]+)",
@@ -615,7 +617,7 @@ func resourceDnsRecordSetImportState(d *schema.ResourceData, meta interface{}) (
 }
 
 func expandDnsRecordSetRrdata(configured []interface{}) []string {
-	return convertStringArr(configured)
+	return tpgresource.ConvertStringArr(configured)
 }
 
 func expandDnsRecordSetRoutingPolicy(configured []interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*dns.RRSetRoutingPolicy, error) {
@@ -685,7 +687,7 @@ func expandDnsRecordSetRoutingPolicyWrrItem(configured interface{}, d tpgresourc
 		return nil, err
 	}
 	return &dns.RRSetRoutingPolicyWrrPolicyWrrPolicyItem{
-		Rrdatas:              convertStringArr(data["rrdatas"].([]interface{})),
+		Rrdatas:              tpgresource.ConvertStringArr(data["rrdatas"].([]interface{})),
 		Weight:               data["weight"].(float64),
 		HealthCheckedTargets: healthCheckedTargets,
 	}, nil
@@ -710,7 +712,7 @@ func expandDnsRecordSetRoutingPolicyGeoItem(configured interface{}, d tpgresourc
 		return nil, err
 	}
 	return &dns.RRSetRoutingPolicyGeoPolicyGeoPolicyItem{
-		Rrdatas:              convertStringArr(data["rrdatas"].([]interface{})),
+		Rrdatas:              tpgresource.ConvertStringArr(data["rrdatas"].([]interface{})),
 		Location:             data["location"].(string),
 		HealthCheckedTargets: healthCheckedTargets,
 	}, nil

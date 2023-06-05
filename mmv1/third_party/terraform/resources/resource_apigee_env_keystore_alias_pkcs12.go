@@ -231,7 +231,13 @@ func ResourceApigeeKeystoresAliasesPkcs12Read(d *schema.ResourceData, meta inter
 		billingProject = bp
 	}
 
-	res, err := transport_tpg.SendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ApigeeKeystoreAliasesPkcs %q", d.Id()))
 	}
@@ -273,7 +279,15 @@ func ResourceApigeeKeystoresAliasesPkcs12Delete(d *schema.ResourceData, meta int
 		billingProject = bp
 	}
 
-	res, err := transport_tpg.SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutDelete),
+	})
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, "KeystoreAliasesPkcs")
 	}
@@ -284,7 +298,7 @@ func ResourceApigeeKeystoresAliasesPkcs12Delete(d *schema.ResourceData, meta int
 
 func ResourceApigeeKeystoresAliasesPkcs12Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
-	if err := ParseImportId([]string{
+	if err := tpgresource.ParseImportId([]string{
 		"organizations/(?P<org_id>[^/]+)/environments/(?P<environment>[^/]+)/keystores/(?P<keystore>[^/]+)/aliases/(?P<alias>[^/]+)",
 		"(?P<org_id>[^/]+)/(?P<environment>[^/]+)/(?P<keystore>[^/]+)/(?P<alias>[^/]+)",
 	}, d, config); err != nil {

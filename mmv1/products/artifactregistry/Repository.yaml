@@ -24,7 +24,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/artifact-registry/docs/overview'
   api: 'https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   method_name_separator:
     ':'
     # TODO (camthornton): Change to repository_id in 4.0
@@ -83,6 +82,8 @@ examples:
     vars:
       repository_id: 'my-repository'
       description: 'example remote docker repository'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/location_from_region.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: name

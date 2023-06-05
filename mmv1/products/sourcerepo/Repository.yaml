@@ -27,7 +27,6 @@ description: |
 import_format: ['projects/{{project}}/repos/{{%name}}', '{{%name}}']
 exclude_validator: true
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   method_name_separator: ':'
   parent_resource_attribute: 'repository'
   custom_diff_suppress: 'templates/terraform/iam/sourcerepo_diff_suppress.go.erb'
