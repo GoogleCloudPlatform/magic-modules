@@ -407,7 +407,7 @@ func waitForDataflowJobState(d *schema.ResourceData, config *transport_tpg.Confi
 
 		job, err := resourceDataflowJobGetJob(config, project, region, userAgent, jobID)
 		if err != nil {
-			if transport_tpg.IsRetryableError(err) {
+			if transport_tpg.IsRetryableError(err, nil, nil) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
