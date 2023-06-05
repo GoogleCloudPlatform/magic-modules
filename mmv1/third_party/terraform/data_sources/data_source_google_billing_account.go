@@ -42,7 +42,7 @@ func DataSourceGoogleBillingAccount() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"read_projects": {
+			"lookup_projects": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
@@ -103,7 +103,7 @@ func dataSourceBillingAccountRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("one of billing_account or display_name must be set")
 	}
 
-	if d.Get("read_projects").(bool) {
+	if d.Get("lookup_projects").(bool) {
 		resp, err := config.NewBillingClient(userAgent).BillingAccounts.Projects.List(billingAccount.Name).Do()
 		if err != nil {
 			return fmt.Errorf("Error reading billing account projects: %s", err)
