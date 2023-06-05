@@ -6,20 +6,21 @@ on:
   push:
     branches:
       - main  # Set a branch to deploy
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
       
 env:
 
-  MY_REPO: https://GoogleCloudPlatform:${{secrets.GITHUB_TOKEN}}@github.com/GoogleCloudPlatform/magic-modules.git
+  REPO: https://GoogleCloudPlatform:${{secrets.GITHUB_TOKEN}}@github.com/GoogleCloudPlatform/magic-modules.git
 
-  MY_BRANCH: feature-branch-release-5.0.0
-
-  MAIN_REPO: https://github.com/GoogleCloudPlatform/magic-modules.git
-
-  MAIN_BRANCH: main
+  FEATURE_BRANCH: feature-branch-release-5.0.0
 
 jobs:
   merge:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     
     permissions:
       contents: write
@@ -27,8 +28,9 @@ jobs:
     steps:
     - name: Merge with main
       run: |
-        git clone ${{env.MY_REPO}} -b ${{env.MY_BRANCH}} tmp
+        git clone ${{env.REPO}} -b ${{env.FEATURE_BRANCH}} tmp
         cd tmp
-        git config pull.rebase false
-        git pull ${{env.MAIN_REPO}} ${{env.MAIN_BRANCH}}
+        git config user.name "Feature Branch automerge"
+        git config user.email "magic-modules+automerge@google.com"
+        git merge origin/main
         git push
