@@ -102,7 +102,7 @@ properties:
     name: 'endpoints'
     api_name: 'networkEndpoints'
     is_set: true
-    # set_hash_func: 'resourceComputeFirewallRuleHash'
+    max_size: 500
     description: |
       The list of network endpoints to be added to the enclosing network
       endpoint group (NEG). Each endpoint specifies an IP address and port,
