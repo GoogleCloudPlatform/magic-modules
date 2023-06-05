@@ -14,11 +14,11 @@ import (
 // Since each test here is acting on the same organization and only one AccessPolicy
 // can exist, they need to be run serially. See AccessPolicy for the test runner.
 
-func testAccAccessContextManagerIngressPolicy_basicTest(t *testing.T) {
+func testAccAccessContextManagerServicePerimeterIngressPolicy_basicTest(t *testing.T) {
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
 	org := acctest.GetTestOrgFromEnv(t)
-	projects := BootstrapServicePerimeterProjects(t, 1)
+	//projects := BootstrapServicePerimeterProjects(t, 1)
 	policyTitle := RandString(t, 10)
 	perimeterTitle := "perimeter"
 
@@ -27,31 +27,31 @@ func testAccAccessContextManagerIngressPolicy_basicTest(t *testing.T) {
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerIngressPolicy_basic(org, policyTitle, perimeterTitle, projects[0].ProjectNumber),
+				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_basic(org, policyTitle, perimeterTitle),
 			},
 			{
-				ResourceName:      "google_access_context_manager_ingress_policy.test-access1",
+				ResourceName:      "google_access_context_manager_service_perimeter.test-access",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccAccessContextManagerIngressPolicy_destroy(org, policyTitle, perimeterTitle),
-				Check:  testAccCheckAccessContextManagerIngressPolicyDestroyProducer(t),
+				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitle),
+				Check:  testAccCheckAccessContextManagerServicePerimeterIngressPolicyDestroyProducer(t),
 			},
 		},
 	})
 }
 
-func testAccCheckAccessContextManagerIngressPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
+func testAccCheckAccessContextManagerServicePerimeterIngressPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_access_context_manager_ingress_policy" {
+			if rs.Type != "google_access_context_manager_service_perimeter_ingress_policy" {
 				continue
 			}
 
 			config := GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{ingress_policy_name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{perimeter}}")
 			if err != nil {
 				return err
 			}
@@ -72,7 +72,7 @@ func testAccCheckAccessContextManagerIngressPolicyDestroyProducer(t *testing.T) 
 			}
 
 			res = v.(map[string]interface{})
-			v, ok = res["resources"]
+			v, ok = res["perimeter"]
 			if !ok || v == nil {
 				return nil
 			}
@@ -89,19 +89,54 @@ func testAccCheckAccessContextManagerIngressPolicyDestroyProducer(t *testing.T) 
 	}
 }
 
-func testAccAccessContextManagerIngressPolicy_basic(org, policyTitle, perimeterTitleName string, projectNumber1 int64) string {
+func testAccAccessContextManagerServicePerimeterIngressPolicy_basic(org, policyTitle, perimeterTitleName string) string {
 	return fmt.Sprintf(`
 %s
 
-resource "google_access_context_manager_ingress_policy" "test-access1" {
-  ingress_policy_name = google_access_context_manager_service_perimeter.test-access.name
-  resource            = "projects/%d"
+resource "google_access_context_manager_service_perimeter_ingress_policy" "test-access1" {
+  perimeter = google_access_context_manager_service_perimeter.test-access.name
+	ingress_from {
+		identity_type = "ANY_IDENTITY"
+	}
+	ingress_to {
+		resources = [ "*" ]
+		operations {
+			service_name = "bigquery.googleapis.com"
+	
+			method_selectors {
+				method = "BigQueryStorage.ReadRows"
+			}
+	
+			method_selectors {
+				method = "TableService.ListTables"
+			}
+	
+			method_selectors {
+				permission = "bigquery.jobs.get"
+			}
+		}
+	
+		operations {
+			service_name = "storage.googleapis.com"
+	
+			method_selectors {
+				method = "google.storage.objects.create"
+			}
+		}
+  	}
 }
 
-`, testAccAccessContextManagerIngressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber1)
+resource "google_access_context_manager_service_perimeter_ingress_policy" "test-access2" {
+	perimeter = google_access_context_manager_service_perimeter.test-access.name
+	ingress_from {
+		identity_type = "ANY_IDENTITY"
+	}
 }
 
-func testAccAccessContextManagerIngressPolicy_destroy(org, policyTitle, perimeterTitleName string) string {
+`, testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName))
+}
+
+func testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName string) string {
 	return fmt.Sprintf(`
 resource "google_access_context_manager_access_policy" "test-access" {
   parent = "organizations/%s"
@@ -114,42 +149,10 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
   title          = "%s"
   status {
     restricted_services = ["storage.googleapis.com"]
-	ingress_policies {
-		ingress_from {
-			identity_type = "ANY_IDENTITY"
-		}
-
-		ingress_to {
-			resources = [ "*" ]
-			operations {
-				service_name = "bigquery.googleapis.com"
-
-				method_selectors {
-					method = "BigQueryStorage.ReadRows"
-				}
-
-				method_selectors {
-					method = "TableService.ListTables"
-				}
-
-				method_selectors {
-					permission = "bigquery.jobs.get"
-				}
-			}
-
-			operations {
-				service_name = "storage.googleapis.com"
-
-				method_selectors {
-					method = "google.storage.objects.create"
-				}
-			}
-		}
-	}
   }
 
   lifecycle {
-  	ignore_changes = [status[0].resources]
+  	ignore_changes = [status[0].ingress_policies]
   }
 }
 `, org, policyTitle, perimeterTitleName, perimeterTitleName)
