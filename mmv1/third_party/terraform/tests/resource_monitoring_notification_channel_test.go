@@ -37,11 +37,9 @@ func TestAccMonitoringNotificationChannel_update(t *testing.T) {
 }
 
 func TestAccMonitoringNotificationChannel_updateLabels_slack(t *testing.T) {
+	// Slack auth_token required for test not to fail, skipping test till interal testing slack can be created
+	acctest.SkipIfVcr(t)
 	t.Parallel()
-	// being used to skip test if better test skip is located/created feel free to update
-	if os.Getenv(acctest.TestEnvVar) == "" {
-		t.Skipf("Slack auth_token required for test not to fail, skipping test till interal testing slack can be created; use %s=1 to enable", acctest.TestEnvVar)
-	}
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -91,12 +89,9 @@ func TestAccMonitoringNotificationChannel_updateLabels(t *testing.T) {
 
 
 func TestAccMonitoringNotificationChannel_updateSensitiveLabels_slack(t *testing.T) {
+	// Slack auth_token required for test not to fail, skipping test till interal testing slack can be created
+	acctest.SkipIfVcr(t)
 	t.Parallel()
-
-	// being used to skip test if better test skip is located/created feel free to update
-	if os.Getenv(acctest.TestEnvVar) == "" {
-		t.Skipf("Slack auth_token required for test not to fail, skipping test till interal testing slack can be created; use %s=1 to enable", acctest.TestEnvVar)
-	}
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
