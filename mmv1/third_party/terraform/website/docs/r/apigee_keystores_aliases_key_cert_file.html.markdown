@@ -137,5 +137,5 @@ KeystoresAliasesKeyCertFile can be imported using any of these accepted formats:
 
 ```
 $ terraform import google_apigee_keystores_aliases_key_cert_file.default organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}
-$ terraform import google_apigee_keystores_aliases_key_cert_file.default {{org_id}}/{{environment}}/{{keystore}}/{{alias}}
+$ terraform import google_apigee_keystores_aliases_key_cert_file.default {{org_id}}/{{environment}}/{{keystore}}/{{test}}
 ```
