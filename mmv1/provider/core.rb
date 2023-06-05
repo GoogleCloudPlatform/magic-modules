@@ -211,11 +211,13 @@ module Provider
       # Prevent adding copyright header to files with paths or names matching the strings below
       # NOTE: these entries need to match the content of the .copywrite.hcl file originally
       #       created in https://github.com/GoogleCloudPlatform/magic-modules/pull/7336
+      #       The test-fixtures folder is not included here as it's copied as a whole,
+      #       not file by file (see common~copy.yaml)
       ignored_folders = [
-        '.github/',
         '.release/',
         '.changelog/',
         'examples/',
+        'scripts/',
         'META.d/'
       ]
       ignored_files = [
@@ -269,6 +271,7 @@ module Provider
         terraform-provider-google-beta
         terraform-next
         terraform-google-conversion
+        tfplan2cai
       ]
       folder_name = output_folder.split('/')[-1] # Possible issue with Windows OS
       is_expected = false
