@@ -52,10 +52,11 @@ examples:
       name: 'my-template'
     test_env_vars:
       project: :PROJECT_NAME
+    skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/dlp_template_id.go.erb
   encoder: templates/terraform/encoders/wrap_object_with_template_id.go.erb
-  update_encoder: templates/terraform/update_encoder/wrap_object.go.erb
+  update_encoder: templates/terraform/encoders/wrap_object.go.erb
   custom_import: templates/terraform/custom_import/dlp_import.go.erb
 parameters:
   - !ruby/object:Api::Type::String

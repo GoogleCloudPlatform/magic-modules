@@ -1,7 +1,5 @@
 resource "google_data_loss_prevention_inspect_template" "<%= ctx[:primary_resource_id] %>" {
   parent = "projects/<%= ctx[:test_env_vars]['project'] %>"
-  description = "My description"
-  display_name = "display_name"
   template_id = "<%= ctx[:vars]['name'] %>"
 
   inspect_config {
@@ -10,18 +8,6 @@ resource "google_data_loss_prevention_inspect_template" "<%= ctx[:primary_resour
     }
     info_types {
       name = "PERSON_NAME"
-    }
-    info_types {
-      name = "LAST_NAME"
-    }
-    info_types {
-      name = "DOMAIN_NAME"
-    }
-    info_types {
-      name = "PHONE_NUMBER"
-    }
-    info_types {
-      name = "FIRST_NAME"
     }
 
     min_likelihood = "UNLIKELY"
@@ -35,33 +21,6 @@ resource "google_data_loss_prevention_inspect_template" "<%= ctx[:primary_resour
             pattern = ".+@example.com"
           }
           matching_type = "MATCHING_TYPE_FULL_MATCH"
-        }
-      }
-    }
-    rule_set {
-      info_types {
-        name = "EMAIL_ADDRESS"
-      }
-      info_types {
-        name = "DOMAIN_NAME"
-      }
-      info_types {
-        name = "PHONE_NUMBER"
-      }
-      info_types {
-        name = "PERSON_NAME"
-      }
-      info_types {
-        name = "FIRST_NAME"
-      }
-      rules {
-        exclusion_rule {
-          dictionary {
-            word_list {
-              words = ["TEST"]
-            }
-          }
-          matching_type = "MATCHING_TYPE_PARTIAL_MATCH"
         }
       }
     }
@@ -81,23 +40,6 @@ resource "google_data_loss_prevention_inspect_template" "<%= ctx[:primary_resour
           likelihood_adjustment {
             fixed_likelihood = "VERY_LIKELY"
           }
-        }
-      }
-    }
-
-    limits {
-      max_findings_per_item    = 10
-      max_findings_per_request = 50
-      max_findings_per_info_type {
-        max_findings = "75"
-        info_type {
-          name = "PERSON_NAME"
-        }
-      }
-      max_findings_per_info_type {
-        max_findings = "80"
-        info_type {
-          name = "LAST_NAME"
         }
       }
     }
