@@ -39,7 +39,7 @@ description: |
   or query against a BigQuery dataset).
 autogen_async: true
 exclude_validator: true
-# Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter/IngressPolicy
+# Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
 skip_sweeper: true
 id_format: '{{perimeter}}'
 import_format: ['{{perimeter}}']
@@ -69,7 +69,6 @@ properties:
           perimeter. If left unspecified, then members of `identities` field will
           be allowed access.
         values:
-          - :IDENTITY_TYPE_UNSPECIFIED
           - :ANY_IDENTITY
           - :ANY_USER_ACCOUNT
           - :ANY_SERVICE_ACCOUNT

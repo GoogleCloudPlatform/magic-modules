@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# This resource has been deprecated, please refer to ServicePerimeterIngressPolicy.
 --- !ruby/object:Api::Resource
 name: 'IngressPolicy'
 create_url: '{{ingress_policy_name}}'
