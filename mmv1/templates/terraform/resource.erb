@@ -42,6 +42,7 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
 
+    "<%= import_path() -%>/services/compute"
     "<%= import_path() -%>/tpgresource"
     transport_tpg "<%= import_path() -%>/transport"
     "<%= import_path() -%>/verify"
@@ -620,6 +621,9 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     var project string
 <%    end -%>
     config := meta.(*transport_tpg.Config)
+<%  if object.custom_code.custom_update -%>
+    <%= lines(compile(pwd + '/' + object.custom_code.custom_update))  -%>
+<%  else  -%>
     userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
         return err
@@ -907,6 +911,7 @@ if len(updateMask) > 0 {
 
 <%= lines(compile(pwd + '/' + object.custom_code.post_update)) if object.custom_code.post_update -%>
     return resource<%= resource_name -%>Read(d, meta)
+<%  end # if custom_update -%>
 }
 <%  end # if updatable? -%>
 

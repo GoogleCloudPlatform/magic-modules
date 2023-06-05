@@ -153,6 +153,8 @@ module Provider
       compile_file_list(output_folder, [
                           ['converters/google/resources/compute_operation.go',
                            'third_party/terraform/utils/compute_operation.go.erb'],
+                          ['converters/google/resources/services/compute/compute_operation.go',
+                           'third_party/terraform/services/compute/compute_operation.go.erb'],
                           ['converters/google/resources/transport/config.go',
                            'third_party/terraform/transport/config.go.erb'],
                           ['converters/google/resources/config_test_utils.go',
@@ -318,6 +320,8 @@ module Provider
                         'third_party/terraform/utils/pubsub_utils.go'],
                        ['converters/google/resources/sqladmin_operation.go',
                         'third_party/terraform/utils/sqladmin_operation.go'],
+                       ['converters/google/resources/services/sql/sqladmin_operation.go',
+                        'third_party/terraform/services/sql/sqladmin_operation.go'],
                        ['converters/google/resources/verify/path_or_contents.go',
                         'third_party/terraform/verify/path_or_contents.go'],
                        ['converters/google/resources/path_or_contents.go',

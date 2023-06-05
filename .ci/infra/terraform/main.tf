@@ -295,6 +295,7 @@ module "project-services" {
     "testing.googleapis.com",
     "tpu.googleapis.com",
     "trafficdirector.googleapis.com",
+    "vmwareengine.googleapis.com",
     "vpcaccess.googleapis.com",
     "websecurityscanner.googleapis.com",
     "workflowexecutions.googleapis.com",
