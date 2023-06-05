@@ -71,6 +71,66 @@ resource "google_gke_hub_feature" "feature" {
 }
 ```
 
+## Example Usage - Enable Fleet Observability for default logs with COPY
+
+```hcl
+resource "google_gke_hub_feature" "feature" {
+  name = "fleetobservability"
+  location = "global"
+  spec {
+    fleetobservability {
+      logging_config {
+        default_config {
+          mode = "COPY"
+        }
+      }
+    }
+  }
+  provider = google-beta
+}
+```
+
+## Example Usage - Enable Fleet Observability for scope logs with MOVE
+
+```hcl
+resource "google_gke_hub_feature" "feature" {
+  name = "fleetobservability"
+  location = "global"
+  spec {
+    fleetobservability {
+      logging_config {
+        fleet_scope_logs_config {
+          mode = "MOVE"
+        }
+      }
+    }
+  }
+  provider = google-beta
+}
+```
+
+## Example Usage - Enable Fleet Observability for both default and scope logs
+
+```hcl
+resource "google_gke_hub_feature" "feature" {
+  name = "fleetobservability"
+  location = "global"
+  spec {
+    fleetobservability {
+      logging_config {
+        default_config {
+          mode = "COPY"
+        }
+        fleet_scope_logs_config {
+          mode = "MOVE"
+        }
+      }
+    }
+  }
+  provider = google-beta
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -108,6 +168,31 @@ The `spec` block supports:
 * `config_membership` -
   (Optional)
   Fully-qualified Membership name which hosts the MultiClusterIngress CRD. Example: `projects/foo-proj/locations/global/memberships/bar`
+
+* `fleetobservability` -
+  (Optional)
+  Defines the fleet observability configuration for the whole fleet. The `fleetobservability`
+  block supports:
+
+* `logging_config` -
+  (Optional)
+  Specified if the fleet logging feature is enabled for the entire fleet.
+  If unspecified, the fleet logging feature is disabled for the entire fleet.
+  The `logging_config` block supports:
+
+* `default_config` -
+  (Optional)
+  Sets the log routing behavior for default logs in the fleet. The `default_config` has a field `mode`.
+
+* `fleet_scope_logs_config` -
+  (Optional)
+  Sets the log routing behavior for fleet scope logs. The `fleet_scope_logs_config` has a field `mode`.
+
+* `mode` -
+  (Optional)
+  Specified to enable logs routing, and unspecified or MODE_UNSPECIFIED to disable logs routing.
+  If set to COPY, logs will be copied to the destination project.
+  If set to MOVE, logs will be moved to the destination project.
 
 ## Attributes Reference
 
