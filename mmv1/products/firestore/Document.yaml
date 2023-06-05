@@ -25,6 +25,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/firestore/docs/manage-data/add-data'
   api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.documents'
 import_format: ['{{name}}']
+skip_sweeper: true
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     This resource creates a Firestore Document on a project that already has

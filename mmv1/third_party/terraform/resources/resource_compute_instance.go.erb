@@ -417,7 +417,6 @@ func ResourceComputeInstance() *schema.Resource {
 					},
 				},
 			},
-<% unless version == 'ga' -%>
 			"network_performance_config": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -436,7 +435,6 @@ func ResourceComputeInstance() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 			"allow_stopping_for_update": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -629,7 +627,7 @@ func ResourceComputeInstance() *schema.Resource {
 							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress(""),
 							Description:      `Specifies node affinities or anti-affinities to determine which sole-tenant nodes your instances and managed instance groups will use as host systems.`,
 						},
-						
+
 						"min_node_cpus": {
 							Type:         schema.TypeInt,
 							Optional:     true,
@@ -686,7 +684,7 @@ be from 0 to 999,999,999 inclusive.`,
 							Description:   `Specifies the frequency of planned maintenance events. The accepted values are: PERIODIC`,
 						},
 <% end -%>
-						
+
 					},
 				},
 			},
@@ -1068,12 +1066,10 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network interfaces: %s", err)
 	}
-<% unless version == 'ga' -%>
 	networkPerformanceConfig, err := expandNetworkPerformanceConfig(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network performance config: %s", err)
 	}
-<% end -%>
 	accels, err := expandInstanceGuestAccelerators(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating guest accelerators: %s", err)
@@ -1093,9 +1089,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		Metadata:                   metadata,
 		Name:                       d.Get("name").(string),
 		NetworkInterfaces:          networkInterfaces,
-<% unless version == 'ga' -%>
 		NetworkPerformanceConfig:   networkPerformanceConfig,
-<% end -%>
 		Tags:                       resourceInstanceTags(d),
 		Labels:                     tpgresource.ExpandLabels(d),
 		ServiceAccounts:            expandServiceAccounts(d.Get("service_account").([]interface{})),
@@ -1109,7 +1103,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		AdvancedMachineFeatures:    expandAdvancedMachineFeatures(d),
 		ShieldedInstanceConfig:     expandShieldedVmConfigs(d),
 		DisplayDevice:              expandDisplayDevice(d),
-		ResourcePolicies:           convertStringArr(d.Get("resource_policies").([]interface{})),
+		ResourcePolicies:           tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:        reservationAffinity,
 	}, nil
 }
@@ -1260,11 +1254,9 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("machine_type", tpgresource.GetResourceNameFromSelfLink(instance.MachineType)); err != nil {
 		return fmt.Errorf("Error setting machine_type: %s", err)
 	}
-<% unless version == 'ga' -%>
 	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(instance.NetworkPerformanceConfig)); err != nil {
 		return err
 	}
-<% end -%>
 	// Set the networks
 	// Use the first external IP found for the default connection info.
 	networkInterfaces, _, internalIP, externalIP, err := flattenNetworkInterfaces(d, config, instance.NetworkInterfaces)
@@ -1294,7 +1286,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		if err := d.Set("tags_fingerprint", instance.Tags.Fingerprint); err != nil {
 			return fmt.Errorf("Error setting tags_fingerprint: %s", err)
 		}
-		if err := d.Set("tags", convertStringArrToInterface(instance.Tags.Items)); err != nil {
+		if err := d.Set("tags", tpgresource.ConvertStringArrToInterface(instance.Tags.Items)); err != nil {
 			return fmt.Errorf("Error setting tags: %s", err)
 		}
 	}
@@ -1530,8 +1522,8 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 
 		// We're retrying for an error 412 where the metadata fingerprint is out of date
-		err = transport_tpg.Retry(
-			func() error {
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() error {
 				// retrieve up-to-date metadata from the API in case several updates hit simultaneously. instances
 				// sometimes but not always share metadata fingerprints.
 				instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, instance.Name).Do()
@@ -1553,7 +1545,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 				return nil
 			},
-		)
+		})
 
 		if err != nil {
 			return err
@@ -1609,7 +1601,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			}
 		}
 
-		resourcePolicies := convertStringArr(d.Get("resource_policies").([]interface{}))
+		resourcePolicies := tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{}))
 		if len(resourcePolicies) > 0 {
 			req := compute.InstancesAddResourcePoliciesRequest{ResourcePolicies: resourcePolicies}
 
@@ -1913,8 +1905,8 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	if d.HasChange("can_ip_forward") {
-		err = transport_tpg.Retry(
-			func() error {
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() error {
 				instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, instance.Name).Do()
 				if err != nil {
 					return fmt.Errorf("Error retrieving instance: %s", err)
@@ -1934,7 +1926,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 				return nil
 			},
-		)
+		})
 
 		if err != nil {
 			return err
@@ -2102,8 +2094,8 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 
 		if d.HasChange("advanced_machine_features") {
-			err = transport_tpg.Retry(
-				func() error {
+			err = transport_tpg.Retry(transport_tpg.RetryOptions{
+				RetryFunc: func() error {
 					// retrieve up-to-date instance from the API in case several updates hit simultaneously. instances
 					// sometimes but not always share metadata fingerprints.
 					instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, instance.Name).Do()
@@ -2125,7 +2117,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 					return nil
 				},
-			)
+			})
 
 			if err != nil {
 				return err

@@ -123,7 +123,6 @@ func ResourceSqlUser() *schema.Resource {
 			"password_policy": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -207,6 +206,7 @@ func expandPasswordPolicy(cfg interface{}) *sqladmin.UserPasswordValidationPolic
 	raw := cfg.([]interface{})[0].(map[string]interface{})
 
 	upvp := &sqladmin.UserPasswordValidationPolicy{}
+
 	if v, ok := raw["allowed_failed_attempts"]; ok {
 		upvp.AllowedFailedAttempts = int64(v.(int))
 	}
@@ -260,10 +260,14 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	if v, ok := d.GetOk("host"); ok {
 		if v.(string) != "" {
 			var fetchedInstance *sqladmin.DatabaseInstance
-			err = transport_tpg.RetryTimeDuration(func() (rerr error) {
-				fetchedInstance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
-				return rerr
-			}, d.Timeout(schema.TimeoutRead), transport_tpg.IsSqlOperationInProgressError)
+			err = transport_tpg.Retry(transport_tpg.RetryOptions{
+				RetryFunc: func() (rerr error) {
+					fetchedInstance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
+					return rerr
+				},
+				Timeout:              d.Timeout(schema.TimeoutRead),
+				ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+			})
 			if err != nil {
 				return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("SQL Database Instance %q", d.Get("instance").(string)))
 			}
@@ -279,7 +283,10 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 			user).Do()
 		return err
 	}
-	err = transport_tpg.RetryTimeDuration(insertFunc, d.Timeout(schema.TimeoutCreate))
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: insertFunc,
+		Timeout:   d.Timeout(schema.TimeoutCreate),
+	})
 
 	if err != nil {
 		return fmt.Errorf("Error, failed to insert "+
@@ -316,15 +323,39 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
 	host := d.Get("host").(string)
 
-	var user *sqladmin.User
+	var users *sqladmin.UsersListResponse
 	err = nil
-	err = transport_tpg.RetryTime(func() error {
-		user, err = config.NewSqlAdminClient(userAgent).Users.Get(project, instance, name).Host(host).Do()
-		return err
-	}, 5)
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			users, err = config.NewSqlAdminClient(userAgent).Users.List(project, instance).Do()
+			return err
+		},
+		Timeout: 5 * time.Minute,
+	})
 	if err != nil {
 		// move away from transport_tpg.HandleNotFoundError() as we need to handle both 404 and 403
 		return handleUserNotFoundError(err, d, fmt.Sprintf("SQL User %q in instance %q", name, instance))
+	}
+
+	var user *sqladmin.User
+	databaseInstance, err := config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
+	if err != nil {
+		return err
+	}
+
+	for _, currentUser := range users.Items {
+		if !strings.Contains(databaseInstance.DatabaseVersion, "POSTGRES") {
+			name = strings.Split(name, "@")[0]
+		}
+
+		if currentUser.Name == name {
+			// Host can only be empty for postgres instances,
+			// so don't compare the host if the API host is empty.
+			if host == "" || currentUser.Host == host {
+				user = currentUser
+				break
+			}
+		}
 	}
 
 	if user == nil {
@@ -435,7 +466,10 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 			op, err = config.NewSqlAdminClient(userAgent).Users.Update(project, instance, user).Host(host).Name(name).Do()
 			return err
 		}
-		err = transport_tpg.RetryTimeDuration(updateFunc, d.Timeout(schema.TimeoutUpdate))
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: updateFunc,
+			Timeout:   d.Timeout(schema.TimeoutUpdate),
+		})
 
 		if err != nil {
 			return fmt.Errorf("Error, failed to update"+
@@ -482,17 +516,21 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 	defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 
 	var op *sqladmin.Operation
-	err = transport_tpg.RetryTimeDuration(func() error {
-		op, err = config.NewSqlAdminClient(userAgent).Users.Delete(project, instance).Host(host).Name(name).Do()
-		if err != nil {
-			return err
-		}
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			op, err = config.NewSqlAdminClient(userAgent).Users.Delete(project, instance).Host(host).Name(name).Do()
+			if err != nil {
+				return err
+			}
 
-		if err := SqlAdminOperationWaitTime(config, op, project, "Delete User", userAgent, d.Timeout(schema.TimeoutDelete)); err != nil {
-			return err
-		}
-		return nil
-	}, d.Timeout(schema.TimeoutDelete), transport_tpg.IsSqlOperationInProgressError, IsSqlInternalError)
+			if err := SqlAdminOperationWaitTime(config, op, project, "Delete User", userAgent, d.Timeout(schema.TimeoutDelete)); err != nil {
+				return err
+			}
+			return nil
+		},
+		Timeout:              d.Timeout(schema.TimeoutDelete),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError, IsSqlInternalError},
+	})
 
 	if err != nil {
 		return fmt.Errorf("Error, failed to delete"+

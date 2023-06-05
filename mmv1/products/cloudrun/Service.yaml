@@ -169,16 +169,6 @@ properties:
       for creation idempotence and configuration definition. Cannot be updated.
       More info: http://kubernetes.io/docs/user-guide/identifiers#names
     required: true
-    exclude: false
-  - !ruby/object:Api::Type::String
-    name: apiVersion
-    description:
-      The API version for this call such as "serving.knative.dev/v1alpha1".
-    exclude: true
-  - !ruby/object:Api::Type::String
-    name: kind
-    description: This is always set to Service
-    exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: spec
     required: true
@@ -852,7 +842,7 @@ properties:
                         - !ruby/object:Api::Type::String
                           name: 'sizeLimit'
                           description: |-
-                              Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: http://kubernetes.io/docs/user-guide/volumes#emptydir.
+                            Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: http://kubernetes.io/docs/user-guide/volumes#emptydir.
               - !ruby/object:Api::Type::Enum
                 name: servingState
                 deprecation_message: 'Not supported by Cloud Run fully managed'
@@ -1004,12 +994,3 @@ properties:
             when a preview feature is used. For example, `"run.googleapis.com/launch-stage": "BETA"`
         default_from_api: true
         diff_suppress_func: 'cloudrunAnnotationDiffSuppress'
-      - !ruby/object:Api::Type::String
-        name: name
-        required: true
-        description: |-
-          Name must be unique within a Google Cloud project and region.
-          Is required when creating resources. Name is primarily intended
-          for creation idempotence and configuration definition. Cannot be updated.
-
-        exclude: true
