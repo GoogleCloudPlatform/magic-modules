@@ -334,6 +334,9 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_vpc_access_connector":                      DataSourceVPCAccessConnector(),
 		"google_redis_instance":                            DataSourceGoogleRedisInstance(),
 		"google_vertex_ai_index":                           dataSourceVertexAIIndex(),
+		<% unless version == 'ga' -%>
+		"google_vmwareengine_network":                    	DataSourceVmwareengineNetwork(),
+		<% end -%>
 		// ####### END datasources ###########
 		// ####### END handwritten datasources ###########
 	},
