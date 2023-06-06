@@ -649,7 +649,7 @@ properties:
                           required: true
                           description: |
                             Range of shift in days. Actual shift will be selected at random within this range (inclusive ends).
-                            Negative means shift to earlier in time. Must not be more than 365250 days (1000 years) each direction. 
+                            Negative means shift to earlier in time. Must not be more than 365250 days (1000 years) each direction.
                         - !ruby/object:Api::Type::Integer
                           name: lowerBoundDays
                           required: true
