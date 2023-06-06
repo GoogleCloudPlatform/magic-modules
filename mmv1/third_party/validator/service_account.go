@@ -10,23 +10,23 @@ import (
 
 const ServiceAccountAssetType string = "iam.googleapis.com/ServiceAccount"
 
-func resourceConverterServiceAccount() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterServiceAccount() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType: ServiceAccountAssetType,
 		Convert:   GetServiceAccountCaiObject,
 	}
 }
 
-func GetServiceAccountCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//iam.googleapis.com/projects/{{project}}/serviceAccounts/{{unique_id}}")
+func GetServiceAccountCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	name, err := tpgresource.AssetName(d, config, "//iam.googleapis.com/projects/{{project}}/serviceAccounts/{{unique_id}}")
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 	if obj, err := GetServiceAccountApiObject(d, config); err == nil {
-		return []Asset{{
+		return []tpgresource.Asset{{
 			Name: name,
 			Type: ServiceAccountAssetType,
-			Resource: &AssetResource{
+			Resource: &tpgresource.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://iam.googleapis.com/$discovery/rest",
 				DiscoveryName:        "ServiceAccount",
@@ -34,7 +34,7 @@ func GetServiceAccountCaiObject(d tpgresource.TerraformResourceData, config *tra
 			},
 		}}, nil
 	} else {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 }
 

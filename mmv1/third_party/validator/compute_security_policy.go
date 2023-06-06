@@ -10,23 +10,23 @@ import (
 
 const ComputeSecurityPolicyAssetType string = "compute.googleapis.com/SecurityPolicy"
 
-func resourceConverterComputeSecurityPolicy() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterComputeSecurityPolicy() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType: ComputeSecurityPolicyAssetType,
 		Convert:   GetComputeSecurityPolicyCaiObject,
 	}
 }
 
-func GetComputeSecurityPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//compute.googleapis.com/projects/{{project}}/global/securityPolicies/{{name}}")
+func GetComputeSecurityPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	name, err := tpgresource.AssetName(d, config, "//compute.googleapis.com/projects/{{project}}/global/securityPolicies/{{name}}")
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 	if obj, err := GetComputeSecurityPolicyApiObject(d, config); err == nil {
-		return []Asset{{
+		return []tpgresource.Asset{{
 			Name: name,
 			Type: ComputeSecurityPolicyAssetType,
-			Resource: &AssetResource{
+			Resource: &tpgresource.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
 				DiscoveryName:        "SecurityPolicy",
@@ -34,7 +34,7 @@ func GetComputeSecurityPolicyCaiObject(d tpgresource.TerraformResourceData, conf
 			},
 		}}, nil
 	} else {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 }
 
