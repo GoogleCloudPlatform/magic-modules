@@ -433,6 +433,39 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerActionsOptionalExample(t *
 	})
 }
 
+func TestAccDataLossPreventionStoredInfoType_dlpJobTriggerTriggerId(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       acctest.GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerTriggerId(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_job_trigger.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerTriggerIdUpdate(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_job_trigger.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerBasic(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "basic" {
@@ -2260,6 +2293,82 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 
 	inspect_job {
 		inspect_template_name = "fake"
+		storage_config {
+			cloud_storage_options {
+				file_set {
+					url = "gs://mybucket/directory/"
+				}
+			}
+		}
+	}
+}
+`, context)
+}
+
+func testAccDataLossPreventionJobTrigger_dlpJobTriggerTriggerId(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_job_trigger" "basic" {
+	parent = "projects/%{project}"
+	description = "Starting description"
+	display_name = "display"
+	trigger_id = "tf-test-%{random_suffix}"
+
+	triggers {
+		schedule {
+			recurrence_period_duration = "86400s"
+		}
+	}
+
+	inspect_job {
+		inspect_template_name = "fake"
+		actions {
+			save_findings {
+				output_config {
+					table {
+						project_id = "project"
+						dataset_id = "dataset123"
+					}
+				}
+			}
+		}
+		storage_config {
+			cloud_storage_options {
+				file_set {
+					url = "gs://mybucket/directory/"
+				}
+			}
+		}
+	}
+}
+`, context)
+}
+
+func testAccDataLossPreventionJobTrigger_dlpJobTriggerTriggerIdUpdate(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_job_trigger" "basic" {
+	parent = "projects/%{project}"
+	description = "Starting description"
+	display_name = "display"
+	trigger_id = "tf-test-updated-%{random_suffix}"
+
+	triggers {
+		schedule {
+			recurrence_period_duration = "86400s"
+		}
+	}
+
+	inspect_job {
+		inspect_template_name = "fake"
+		actions {
+			save_findings {
+				output_config {
+					table {
+						project_id = "project"
+						dataset_id = "dataset123"
+					}
+				}
+			}
+		}
 		storage_config {
 			cloud_storage_options {
 				file_set {

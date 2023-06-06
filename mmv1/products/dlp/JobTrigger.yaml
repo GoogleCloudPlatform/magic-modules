@@ -94,9 +94,18 @@ examples:
     primary_resource_id: 'publish_to_stackdriver'
     test_env_vars:
       project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_job_trigger_with_id'
+    primary_resource_id: 'with_trigger_id'
+    vars:
+      name: 'id-'
+    test_env_vars:
+      project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/wrap_object.go.erb
+  encoder: templates/terraform/encoders/dlp_job_trigger.go.erb
+  decoder: templates/terraform/decoders/dlp_job_trigger.go.erb
   custom_import: templates/terraform/custom_import/dlp_import.go.erb
+  update_encoder: templates/terraform/encoders/wrap_object.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'parent'
@@ -131,6 +140,15 @@ properties:
     name: 'displayName'
     description: |
       User set display name of the job trigger.
+  - !ruby/object:Api::Type::String
+    name: 'triggerId'
+    description: |
+      The trigger id can contain uppercase and lowercase letters, numbers, and hyphens;
+      that is, it must match the regular expression: [a-zA-Z\d-_]+.
+      The maximum length is 100 characters. Can be empty to allow the system to generate one.
+    immutable: true
+    default_from_api: true
+    url_param_only: true
   - !ruby/object:Api::Type::Time
     name: 'lastRunTime'
     description: The timestamp of the last time this trigger executed.
