@@ -42,7 +42,7 @@ end
 
 if v, ok := d.GetOk("image"); ok {
 	log.Printf("[DEBUG] Resolving image name: %s", v.(string))
-	imageUrl, err := resolveImage(config, project, v.(string), userAgent)
+	imageUrl, err := ResolveImage(config, project, v.(string), userAgent)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"Error resolving image name '%s': %s",

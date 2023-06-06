@@ -21,23 +21,23 @@ import (
 
 const SQLDatabaseInstanceAssetType string = "sqladmin.googleapis.com/Instance"
 
-func resourceConverterSQLDatabaseInstance() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterSQLDatabaseInstance() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType: SQLDatabaseInstanceAssetType,
 		Convert:   GetSQLDatabaseInstanceCaiObject,
 	}
 }
 
-func GetSQLDatabaseInstanceCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}")
+func GetSQLDatabaseInstanceCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	name, err := tpgresource.AssetName(d, config, "//cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}")
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 	if obj, err := GetSQLDatabaseInstanceApiObject(d, config); err == nil {
-		return []Asset{{
+		return []tpgresource.Asset{{
 			Name: name,
 			Type: SQLDatabaseInstanceAssetType,
-			Resource: &AssetResource{
+			Resource: &tpgresource.AssetResource{
 				Version:              "v1beta4",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/sqladmin/v1beta4/rest",
 				DiscoveryName:        "DatabaseInstance",
@@ -45,7 +45,7 @@ func GetSQLDatabaseInstanceCaiObject(d tpgresource.TerraformResourceData, config
 			},
 		}}, nil
 	} else {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 }
 
@@ -77,7 +77,7 @@ func GetSQLDatabaseInstanceApiObject(d tpgresource.TerraformResourceData, config
 		ReplicaConfiguration: expandReplicaConfiguration(d.Get("replica_configuration").([]interface{})),
 	}
 
-	return jsonMap(instance)
+	return tpgresource.JsonMap(instance)
 }
 
 // Detects whether a database is 1st Generation by inspecting the tier name

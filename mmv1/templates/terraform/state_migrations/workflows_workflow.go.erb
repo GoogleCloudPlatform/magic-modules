@@ -31,7 +31,7 @@ func resourceWorkflowsWorkflowResourceV0() *schema.Resource {
 				Computed:         true,
 				Optional:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 				Description: `Name of the service account associated with the latest workflow version. This service
 account represents the identity of the workflow and determines what permissions the workflow has.
 
