@@ -156,7 +156,7 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 	// This method may return before the table's creation is complete - we may need to wait until
 	// it exists in the future.
 	// Set a longer timeout as creating table and adding column families can be pretty slow.
-	ctxWithTimeout, cancel := context.WithTimeout(ctx, 20*time.Minute)
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, d.Timeout(schema.TimeoutCreate)-5*time.Second)
 	defer cancel() // Always call cancel.
 	err = c.CreateTableFromConf(ctxWithTimeout, &tblConf)
 	if err != nil {
@@ -275,15 +275,16 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	c.SetDefaultTimeout(d.Timeout(schema.TimeoutUpdate))
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, d.Timeout(schema.TimeoutCreate)-5*time.Second)
+	defer cancel()
 	if d.HasChange("deletion_protection") {
 		deletionProtection := d.Get("deletion_protection")
 		if deletionProtection == "PROTECTED" {
-			if err := c.UpdateTableWithDeletionProtection(ctx, name, bigtable.Protected); err != nil {
+			if err := c.UpdateTableWithDeletionProtection(ctxWithTimeout, name, bigtable.Protected); err != nil {
 				return fmt.Errorf("Error updating deletion protection in table %v: %s", name, err)
 			}
 		} else if deletionProtection == "UNPROTECTED" {
-			if err := c.UpdateTableWithDeletionProtection(ctx, name, bigtable.Unprotected); err != nil {
+			if err := c.UpdateTableWithDeletionProtection(ctxWithTimeout, name, bigtable.Unprotected); err != nil {
 				return fmt.Errorf("Error updating deletion protection in table %v: %s", name, err)
 			}
 		}
