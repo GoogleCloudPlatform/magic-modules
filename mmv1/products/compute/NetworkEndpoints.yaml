@@ -106,12 +106,12 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'endpoints'
     api_name: 'networkEndpoints'
-    unordered_list: true
+    is_set: true
     max_size: 500
     description: |
-      The list of network endpoints to be added to the enclosing network
-      endpoint group (NEG). Each endpoint specifies an IP address and port,
-      along with additional information depending on the NEG type.
+      The network endpoints to be added to the enclosing network endpoint group
+      (NEG). Each endpoint specifies an IP address and port, along with
+      additional information depending on the NEG type.
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::ResourceRef
