@@ -14,9 +14,9 @@
 -%>
 
     newObj := make(map[string]interface{})
-	newObj["<%= object.name.camelize(:lower) -%>"] = obj
+    newObj["<%= object.name.camelize(:lower) -%>"] = obj
     triggerIdProp, ok := d.GetOk("trigger_id")
-	if ok && triggerIdProp != nil {
-		newObj["triggerId"] = triggerIdProp
+    if ok && triggerIdProp != nil {
+        newObj["triggerId"] = triggerIdProp
 	}
-	return newObj, nil
+    return newObj, nil
