@@ -1205,6 +1205,29 @@ func TestAccContainerNodePool_concurrent(t *testing.T) {
 	})
 }
 
+func TestAccContainerNodePool_withSoleTenantConfig(t *testing.T) {
+       t.Parallel()
+
+       cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+       np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
+
+       VcrTest(t, resource.TestCase{
+               PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+               ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+               CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+               Steps: []resource.TestStep{
+                       {
+                               Config: testAccContainerNodePool_withSoleTenantConfig(cluster, np),
+                       },
+                       {
+                               ResourceName:      "google_container_node_pool.with_sole_tenant_config",
+                               ImportState:       true,
+                               ImportStateVerify: true,
+                       },
+               },
+       })
+}
+
 <% unless version == 'ga' -%>
 func TestAccContainerNodePool_ephemeralStorageConfig(t *testing.T) {
 	t.Parallel()
@@ -3051,36 +3074,4 @@ resource "google_container_node_pool" "with_sole_tenant_config" {
   }
 }
 `, cluster, np)
-}
-
-func TestAccContainerNodePool_withSoleTenantConfig(t *testing.T) {
-       t.Parallel()
-
-       cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-       np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
-
-       VcrTest(t, resource.TestCase{
-               PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-               ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-               CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
-               Steps: []resource.TestStep{
-                       {
-                               Config: testAccContainerNodePool_withSoleTenantConfig(cluster, np),
-                       },
-                       {
-                               ResourceName:      "google_container_node_pool.with_sole_tenant_config",
-                               ImportState:       true,
-                               ImportStateVerify: true,
-                       },
-                       // Perform an update.
-                       {
-                               Config: testAccContainerNodePool_withSoleTenantConfig(cluster, np),
-                       },
-                       {
-                               ResourceName:      "google_container_node_pool.with_sole_tenant_config",
-                               ImportState:       true,
-                               ImportStateVerify: true,
-                       },
-               },
-       })
 }

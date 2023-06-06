@@ -549,7 +549,6 @@ func schemaNodeConfig() *schema.Schema {
 				"sole_tenant_config": {
 					Type:        schema.TypeList,
 					Optional:    true,
-					Computed:    true,
 					Description: `Node affinity options for sole tenant node pools.`,
 					ForceNew:    true,
 					MaxItems:    1,
@@ -946,15 +945,10 @@ func expandSoleTenantConfig(v interface{}) *container.SoleTenantConfig {
 	for _, v := range affinitiesRaw.(*schema.Set).List() {
 		na := v.(map[string]interface{})
 
-		values := make([]string, 0)
-		for _, val := range na["values"].([]interface{}) {
-			values = append(values, val.(string))
-		}
-
 		affinities = append(affinities, &container.NodeAffinity{
 			Key:      na["key"].(string),
 			Operator: na["operator"].(string),
-			Values:   values,
+			Values:   tpgresource.ConvertStringArr(na["values"].([]interface{})),
 		})
 	}
 	return &container.SoleTenantConfig{
