@@ -11,23 +11,23 @@ import (
 
 const OrganizationIAMCustomRoleAssetType string = "iam.googleapis.com/Role"
 
-func resourceConverterOrganizationIAMCustomRole() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterOrganizationIAMCustomRole() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType: OrganizationIAMCustomRoleAssetType,
 		Convert:   GetOrganizationIAMCustomRoleCaiObject,
 	}
 }
 
-func GetOrganizationIAMCustomRoleCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//iam.googleapis.com/organizations/{{org_id}}/roles/{{role_id}}")
+func GetOrganizationIAMCustomRoleCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	name, err := tpgresource.AssetName(d, config, "//iam.googleapis.com/organizations/{{org_id}}/roles/{{role_id}}")
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 	if obj, err := GetOrganizationIAMCustomRoleApiObject(d, config); err == nil {
-		return []Asset{{
+		return []tpgresource.Asset{{
 			Name: name,
 			Type: OrganizationIAMCustomRoleAssetType,
-			Resource: &AssetResource{
+			Resource: &tpgresource.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://iam.googleapis.com/$discovery/rest?version=v1",
 				DiscoveryName:        "Role",
@@ -35,7 +35,7 @@ func GetOrganizationIAMCustomRoleCaiObject(d tpgresource.TerraformResourceData, 
 			},
 		}}, nil
 	} else {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 }
 

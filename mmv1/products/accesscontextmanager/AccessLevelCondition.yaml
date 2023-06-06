@@ -58,7 +58,7 @@ docs: !ruby/object:Provider::Terraform::Docs
     Your account must have the `serviceusage.services.use` permission on the
     `billing_project` you defined.
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
   actions: ['create']
 autogen_async: true
 exclude_validator: true

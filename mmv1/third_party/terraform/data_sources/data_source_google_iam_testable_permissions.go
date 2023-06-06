@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 package google
 
 import (
@@ -136,7 +133,7 @@ func flattenTestablePermissionsList(v interface{}, custom_support_level string, 
 			} else {
 				csl = p["customRolesSupportLevel"] == custom_support_level
 			}
-			if csl && p["stage"] != nil && stringInSlice(stages, p["stage"].(string)) {
+			if csl && p["stage"] != nil && tpgresource.StringInSlice(stages, p["stage"].(string)) {
 				permissions = append(permissions, map[string]interface{}{
 					"name":                 p["name"],
 					"title":                p["title"],

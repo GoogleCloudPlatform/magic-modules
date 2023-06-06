@@ -197,7 +197,7 @@ func resource<%= resource_name -%>PatchDeleteEncoder(d *schema.ResourceData, met
   }
   if item == nil {
     // Spoof 404 error for proper handling by Delete (i.e. no-op)
-    return nil, fake404("nested", "<%= resource_name%>")
+    return nil, tpgresource.Fake404("nested", "<%= resource_name%>")
   }
 
   updatedItems := append(currItems[:idx], currItems[idx+1:]...)

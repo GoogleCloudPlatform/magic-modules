@@ -18,7 +18,7 @@
 
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package google
+package <%= product_ns.downcase -%>
 
 import (
 
@@ -373,7 +373,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 
 <%    if object.async&.allow?('create') -%>
 <%      if object.async.is_a? Provider::Terraform::PollAsync -%>
-    err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Creating <%= object.name -%>", d.Timeout(schema.TimeoutCreate), <%= object.async.target_occurrences -%>)
+    err = transport_tpg.PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Creating <%= object.name -%>", d.Timeout(schema.TimeoutCreate), <%= object.async.target_occurrences -%>)
     if err != nil {
 <%        if object.async.suppress_error -%>
         log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
@@ -453,7 +453,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
         }
 
         if res == nil {
-            return nil, fake404("nested", "<%= resource_name%>")
+            return nil, tpgresource.Fake404("nested", "<%= resource_name%>")
         }
 
 <%      end -%>
@@ -463,7 +463,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
             return nil, err
         }
         if res == nil {
-            return nil, fake404("decoded", "<%= resource_name%>")
+            return nil, tpgresource.Fake404("decoded", "<%= resource_name%>")
         }
 
 <%      end -%>
@@ -620,6 +620,9 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     var project string
 <%    end -%>
     config := meta.(*transport_tpg.Config)
+<%  if object.custom_code.custom_update -%>
+    <%= lines(compile(pwd + '/' + object.custom_code.custom_update))  -%>
+<%  else  -%>
     userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
         return err
@@ -736,7 +739,7 @@ if len(updateMask) > 0 {
         return err
     }
 <%        elsif object.async.is_a? Provider::Terraform::PollAsync -%>
-    err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Updating <%= object.name -%>", d.Timeout(schema.TimeoutUpdate), <%= object.async.target_occurrences -%>)
+    err = transport_tpg.PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Updating <%= object.name -%>", d.Timeout(schema.TimeoutUpdate), <%= object.async.target_occurrences -%>)
     if err != nil {
 <%          if object.async.suppress_error-%>
         log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
@@ -889,7 +892,7 @@ if len(updateMask) > 0 {
             return err
         }
 <%          elsif object.async.is_a? Provider::Terraform::PollAsync -%>
-        err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Updating <%= object.name -%>", d.Timeout(schema.TimeoutUpdate), <%= object.async.target_occurrences -%>)
+        err = transport_tpg.PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Updating <%= object.name -%>", d.Timeout(schema.TimeoutUpdate), <%= object.async.target_occurrences -%>)
         if err != nil {
 <%            if object.async.suppress_error-%>
         log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
@@ -907,6 +910,7 @@ if len(updateMask) > 0 {
 
 <%= lines(compile(pwd + '/' + object.custom_code.post_update)) if object.custom_code.post_update -%>
     return resource<%= resource_name -%>Read(d, meta)
+<%  end # if custom_update -%>
 }
 <%  end # if updatable? -%>
 
@@ -1004,7 +1008,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
 <%      if object.async&.allow?('delete') -%>
 <%        if object.async.is_a? Provider::Terraform::PollAsync -%>
-    err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_absence -%>, "Deleting <%= object.name -%>", d.Timeout(schema.TimeoutCreate), <%= object.async.target_occurrences -%>)
+    err = transport_tpg.PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_absence -%>, "Deleting <%= object.name -%>", d.Timeout(schema.TimeoutCreate), <%= object.async.target_occurrences -%>)
     if err != nil {
 <%          if object.async.suppress_error -%>
         log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
