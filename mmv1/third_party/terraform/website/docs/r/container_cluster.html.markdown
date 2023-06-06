@@ -903,6 +903,9 @@ sole_tenant_config {
 }
 ```
 
+* `advanced_machine_features` - (Optional) Specifies options for controlling
+  advanced machine features. Structure is [documented below](#nested_advanced_machine_features).
+
 <a name="nested_node_affinity"></a>The `node_affinity` block supports:
 
 * `key` (Required) - The default or custom node affinity label key name.
@@ -910,9 +913,6 @@ sole_tenant_config {
 * `operator` (Required) - Specifies affinity or anti-affinity. Accepted values are `"IN"` or `"NOT_IN"`
 
 * `values` (Required) - List of node affinity label values as strings.
-
-* `advanced_machine_features` - (Optional) Specifies options for controlling
-  advanced machine features. Structure is documented below.
 
 <a name="nested_advanced_machine_features"></a>The `advanced_machine_features` block supports:
 
