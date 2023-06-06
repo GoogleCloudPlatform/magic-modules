@@ -141,7 +141,6 @@ properties:
     description: |
       List of projects using the connector.
     output: true
-    unordered_list: true
     item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: 'subnet'
