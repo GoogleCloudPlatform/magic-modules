@@ -907,17 +907,17 @@ properties:
                           name: partToExtract
                           description: The part of the time to keep.
                           values:
-                            - :YEAR # [0-9999]
-                            - :MONTH # [1-12]
-                            - :DAY_OF_MONTH # [1-31]
-                            - :DAY_OF_WEEK # [1-7]
-                            - :WEEK_OF_YEAR # [1-53]
-                            - :HOUR_OF_DAY # [0-23]
+                            - :YEAR           # [0-9999]
+                            - :MONTH          # [1-12]
+                            - :DAY_OF_MONTH   # [1-31]
+                            - :DAY_OF_WEEK    # [1-7]
+                            - :WEEK_OF_YEAR   # [1-53]
+                            - :HOUR_OF_DAY    # [0-23]
                     - !ruby/object:Api::Type::NestedObject
                       name: redactConfig
                       description: |
                         Redact a given value. For example, if used with an InfoTypeTransformation transforming PHONE_NUMBER, and input 'My phone number is 206-555-0123', the output would be 'My phone number is '.
-                      properties: [] # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#redactconfig
+                      properties: []     # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#redactconfig
                       # The fields below are necessary to include the "redactConfig" transformation in the payload
                       # A side-effect is null values when the field is unused, see: https://github.com/hashicorp/terraform-provider-google/issues/13201
                       send_empty_value: true
