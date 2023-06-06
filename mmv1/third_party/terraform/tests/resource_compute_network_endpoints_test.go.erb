@@ -21,6 +21,10 @@ func TestAccComputeNetworkEndpoints_networkEndpointsBasic(t *testing.T) {
 		"modified_port": 100,
 		"add1_port":     101,
 		"add2_port":     102,
+		"add3_port":     103,
+		"add4_port":     104,
+        "add5_port":     105,
+
 	}
 	negId := fmt.Sprintf("projects/%s/zones/%s/networkEndpointGroups/tf-test-neg-%s",
 		acctest.GetTestProjectFromEnv(), acctest.GetTestZoneFromEnv(), context["random_suffix"])
@@ -120,6 +124,21 @@ resource "google_compute_network_endpoints" "default" {
     instance   = google_compute_instance.default.name
     ip_address = google_compute_instance.default.network_interface[0].network_ip
     port       = "%{add2_port}"
+  }
+  endpoints {
+    instance   = google_compute_instance.default.name
+    ip_address = google_compute_instance.default.network_interface[0].network_ip
+    port       = "%{add3_port}"
+  }
+  endpoints {
+    instance   = google_compute_instance.default.name
+    ip_address = google_compute_instance.default.network_interface[0].network_ip
+    port       = "%{add4_port}"
+  }
+  endpoints {
+    instance   = google_compute_instance.default.name
+    ip_address = google_compute_instance.default.network_interface[0].network_ip
+    port       = "%{add5_port}"
   }
 }
 `, context) + testAccComputeNetworkEndpoints_noNetworkEndpoints(context)
