@@ -356,8 +356,7 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, d.Timeout(schema.TimeoutUpdate)-5*time.Second)
 	defer cancel()
-	_, err = bigtable.UpdateInstanceAndSyncClusters(ctxWithTimeout, c, conf)
-	if err != nil {
+	if _, err := bigtable.UpdateInstanceAndSyncClusters(ctxWithTimeout, c, conf); err != nil {
 		return fmt.Errorf("Error updating instance. %s", err)
 	}
 
