@@ -37,6 +37,7 @@ func TestReadCoveredResourceTestFile(t *testing.T) {
 				"field_six": "\"value-three\"",
 			},
 		},
+		"field_seven": "true",
 	}); !reflect.DeepEqual(coveredResource, expectedResource) {
 		t.Errorf("found wrong fields in covered resource config: %#v, expected %#v", coveredResource, expectedResource)
 	}

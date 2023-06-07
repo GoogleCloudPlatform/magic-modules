@@ -18,7 +18,7 @@ func resourceDatastreamStreamCustomDiffFunc(diff tpgresource.TerraformResourceDi
 		oldState := old.(string)
 		newState := new.(string)
 
-		if isNewResource(diff) {
+		if tpgresource.IsNewResource(diff) {
 			if newState != "NOT_STARTED" && newState != "RUNNING" {
 				return fmt.Errorf("`desired_state` can only be set to `NOT_STARTED` or `RUNNING` when creating a new Stream")
 			}

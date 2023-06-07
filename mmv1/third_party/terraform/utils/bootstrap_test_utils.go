@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/privateca"
+	"github.com/hashicorp/terraform-provider-google/google/services/sql"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -527,20 +529,26 @@ func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, serv
 	if billingAccount != "" {
 		billingClient := config.NewBillingClient(config.UserAgent)
 		var pbi *cloudbilling.ProjectBillingInfo
-		err = transport_tpg.RetryTimeDuration(func() error {
-			var reqErr error
-			pbi, reqErr = billingClient.Projects.GetBillingInfo(PrefixedProject(projectID)).Do()
-			return reqErr
-		}, 30*time.Second)
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() error {
+				var reqErr error
+				pbi, reqErr = billingClient.Projects.GetBillingInfo(PrefixedProject(projectID)).Do()
+				return reqErr
+			},
+			Timeout: 30 * time.Second,
+		})
 		if err != nil {
 			t.Fatalf("Error getting billing info for project %q: %v", projectID, err)
 		}
 		if strings.TrimPrefix(pbi.BillingAccountName, "billingAccounts/") != billingAccount {
 			pbi.BillingAccountName = "billingAccounts/" + billingAccount
-			err := transport_tpg.RetryTimeDuration(func() error {
-				_, err := config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(PrefixedProject(projectID), pbi).Do()
-				return err
-			}, 2*time.Minute)
+			err := transport_tpg.Retry(transport_tpg.RetryOptions{
+				RetryFunc: func() error {
+					_, err := config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(PrefixedProject(projectID), pbi).Do()
+					return err
+				},
+				Timeout: 2 * time.Minute,
+			})
 			if err != nil {
 				t.Fatalf("Error setting billing account for project %q to %q: %s", projectID, billingAccount, err)
 			}
@@ -643,14 +651,18 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 		}
 
 		var op *sqladmin.Operation
-		err = transport_tpg.RetryTimeDuration(func() (operr error) {
-			op, operr = config.NewSqlAdminClient(config.UserAgent).Instances.Insert(project, bootstrapInstance).Do()
-			return operr
-		}, time.Duration(20)*time.Minute, transport_tpg.IsSqlOperationInProgressError)
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() (operr error) {
+				op, operr = config.NewSqlAdminClient(config.UserAgent).Instances.Insert(project, bootstrapInstance).Do()
+				return operr
+			},
+			Timeout:              20 * time.Minute,
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+		})
 		if err != nil {
 			t.Fatalf("Error, failed to create instance %s: %s", bootstrapInstance.Name, err)
 		}
-		err = SqlAdminOperationWaitTime(config, op, project, "Create Instance", config.UserAgent, time.Duration(40)*time.Minute)
+		err = sql.SqlAdminOperationWaitTime(config, op, project, "Create Instance", config.UserAgent, 40*time.Minute)
 		if err != nil {
 			t.Fatalf("Error, failed to create instance %s: %s", bootstrapInstance.Name, err)
 		}
@@ -669,14 +681,18 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 		}
 
 		var op *sqladmin.Operation
-		err = transport_tpg.RetryTimeDuration(func() (operr error) {
-			op, operr = config.NewSqlAdminClient(config.UserAgent).BackupRuns.Insert(project, bootstrapInstance.Name, backupRun).Do()
-			return operr
-		}, time.Duration(20)*time.Minute, transport_tpg.IsSqlOperationInProgressError)
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() (operr error) {
+				op, operr = config.NewSqlAdminClient(config.UserAgent).BackupRuns.Insert(project, bootstrapInstance.Name, backupRun).Do()
+				return operr
+			},
+			Timeout:              20 * time.Minute,
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+		})
 		if err != nil {
 			t.Fatalf("Error, failed to create instance backup: %s", err)
 		}
-		err = SqlAdminOperationWaitTime(config, op, project, "Backup Instance", config.UserAgent, time.Duration(20)*time.Minute)
+		err = sql.SqlAdminOperationWaitTime(config, op, project, "Backup Instance", config.UserAgent, 20*time.Minute)
 		if err != nil {
 			t.Fatalf("Error, failed to create instance backup: %s", err)
 		}
@@ -724,7 +740,7 @@ func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
 
 		log.Printf("[DEBUG] Waiting for CA pool creation to finish")
 		var opRes map[string]interface{}
-		err = PrivatecaOperationWaitTimeWithResponse(
+		err = privateca.PrivatecaOperationWaitTimeWithResponse(
 			config, res, &opRes, project, "Creating CA pool", config.UserAgent,
 			4*time.Minute)
 		if err != nil {
@@ -758,10 +774,13 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	}
 
 	var op *cloudresourcemanager.Operation
-	err := transport_tpg.RetryTimeDuration(func() (reqErr error) {
-		op, reqErr = rmService.Projects.Create(project).Do()
-		return reqErr
-	}, 5*time.Minute)
+	err := transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() (reqErr error) {
+			op, reqErr = rmService.Projects.Create(project).Do()
+			return reqErr
+		},
+		Timeout: 5 * time.Minute,
+	})
 	if err != nil {
 		return "", err
 	}
@@ -789,10 +808,13 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	project.ProjectId = p2
 	project.Name = fmt.Sprintf("%s-2", pid)
 
-	err = transport_tpg.RetryTimeDuration(func() (reqErr error) {
-		op, reqErr = rmService.Projects.Create(project).Do()
-		return reqErr
-	}, 5*time.Minute)
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() (reqErr error) {
+			op, reqErr = rmService.Projects.Create(project).Do()
+			return reqErr
+		},
+		Timeout: 5 * time.Minute,
+	})
 	if err != nil {
 		return "", err
 	}

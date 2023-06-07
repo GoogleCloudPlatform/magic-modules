@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 package google
 
 import (
@@ -89,7 +86,7 @@ func dataSourceGoogleServiceAccountIdTokenRead(d *schema.ResourceData, meta inte
 		tokenRequest := &iamcredentials.GenerateIdTokenRequest{
 			Audience:     targetAudience,
 			IncludeEmail: d.Get("include_email").(bool),
-			Delegates:    convertStringSet(d.Get("delegates").(*schema.Set)),
+			Delegates:    tpgresource.ConvertStringSet(d.Get("delegates").(*schema.Set)),
 		}
 		at, err := service.Projects.ServiceAccounts.GenerateIdToken(name, tokenRequest).Do()
 		if err != nil {

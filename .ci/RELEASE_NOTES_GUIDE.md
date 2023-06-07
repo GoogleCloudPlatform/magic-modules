@@ -93,12 +93,11 @@ Notes SHOULD:
   changes, deprecations, or new behavior.
 - Impersonal third person (no “I”, “you”, etc.)
 - Start with {{service}} if changing an existing resource (see below)
+- List specific added or changed resources or fields
 
-Notes, breaking changes, and features are exceptions. These are more free-form and left to
-the discretion of the PR author and reviewer. The overarching goal should be a good user
-experience when reading the changelog.
-
-See examples below for good release notes.
+Notes and breaking changes are exceptions, these are more free-form and left to
+the discretion of the PR author and/or reviewer. The changelog should be clear,
+and easy to understand for end users not familiar with provider internals.
 
 ### Examples:
 

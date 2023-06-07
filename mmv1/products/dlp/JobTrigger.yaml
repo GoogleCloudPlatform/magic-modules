@@ -905,7 +905,6 @@ properties:
                   * `"pipeline" : "etl"`
       - !ruby/object:Api::Type::Array
         name: 'actions'
-        required: true
         description: |
           A task to execute on the completion of a job.
         item_type: !ruby/object:Api::Type::NestedObject

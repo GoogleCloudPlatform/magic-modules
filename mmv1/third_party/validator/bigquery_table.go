@@ -9,24 +9,24 @@ import (
 
 const BigQueryTableAssetType string = "bigquery.googleapis.com/Table"
 
-func resourceConverterBigQueryTable() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterBigQueryTable() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType: BigQueryTableAssetType,
 		Convert:   GetBigQueryTableCaiObject,
 	}
 }
 
-func GetBigQueryTableCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//bigquery.googleapis.com/projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
+func GetBigQueryTableCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	name, err := tpgresource.AssetName(d, config, "//bigquery.googleapis.com/projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
 
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 	if obj, err := GetBigQueryTableApiObject(d, config); err == nil {
-		return []Asset{{
+		return []tpgresource.Asset{{
 			Name: name,
 			Type: BigQueryTableAssetType,
-			Resource: &AssetResource{
+			Resource: &tpgresource.AssetResource{
 				Version:              "v2",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/bigquery/v2/rest",
 				DiscoveryName:        "Table",
@@ -34,7 +34,7 @@ func GetBigQueryTableCaiObject(d tpgresource.TerraformResourceData, config *tran
 			},
 		}}, nil
 	} else {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 }
 

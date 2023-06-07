@@ -4,7 +4,7 @@
 
 config := GoogleProviderConfig(t)
 
-url, err := replaceVarsForTest(config, rs, "{{FirestoreBasePath}}projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/fields/{{field}}")
+url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{FirestoreBasePath}}projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/fields/{{field}}")
 if err != nil {
   return err
 }
