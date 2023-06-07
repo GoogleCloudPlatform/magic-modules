@@ -14,17 +14,12 @@
 --- !ruby/object:Api::Resource
 name: 'RegionSecurityPolicyRule'
 min_version: beta
-# base_url: '{{policy_id}}'
 base_url: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}'
 self_link: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/getRule?priority={{priority}}'
-# has_self_link: true
-# create_url: '{{policy_id}}/addRule?priority={{priority}}'
 create_url: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/addRule?priority={{priority}}'
 update_verb: :POST
-# update_url: '{{policy_id}}/patchRule?priority={{priority}}'
 update_url: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/patchRule?priority={{priority}}'
 delete_verb: :POST
-# delete_url: '{{policy_id}}/removeRule?priority={{priority}}'
 delete_url: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/removeRule?priority={{priority}}'
 description: |
   A rule for the RegionSecurityPolicy.
@@ -35,7 +30,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api:
     # TODO(felipegc): evaluate if there will be something like this:
     'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies/addRule'
-# id_format: '{{policy_id}}/priority/{{priority}}'
 id_format: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/priority/{{priority}}'
 import_format: ['projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/priority/{{priority}}']
 async: !ruby/object:Api::OpAsync
@@ -63,32 +57,7 @@ examples:
     min_version: 'beta'
     vars:
       sec_policy_name: 'policyruletest'
-# TODO(felipegc): evaluate if this will be necessary. I think so because the operation comes from the compute.
-# custom_code: !ruby/object:Provider::Terraform::CustomCode
-#   post_create: templates/terraform/post_create/org_security_policy_rule.go.erb
-#   post_delete: templates/terraform/post_create/org_security_policy_rule.go.erb
-#   post_update:
-#     templates/terraform/post_create/org_security_policy_rule.go.erb
-#     # TODO: Remove once b/154369201 is closed.
-#   test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
 parameters:
-  # - !ruby/object:Api::Type::String
-  #   name: policyId
-  #   description: |
-  #     The ID of the RegionSecurityPolicy this rule applies to.
-  #   required: true
-  #   immutable: true
-  #   url_param_only: true
-  # - !ruby/object:Api::Type::ResourceRef
-  #   name: 'region'
-  #   resource: 'Region'
-  #   imports: 'name'
-  #   required: false
-  #   immutable: false
-  #   description: |
-  #     The Region in which the created Region Security Policy rule should reside.
-  #     If it is not provided, the provider region is used.
-  #   default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'region'
     description: | 
