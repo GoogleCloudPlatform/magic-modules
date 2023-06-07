@@ -1,4 +1,4 @@
-package google
+package spanner
 
 import (
 	"fmt"

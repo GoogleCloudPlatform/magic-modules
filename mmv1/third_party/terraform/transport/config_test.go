@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	google_tpg "github.com/hashicorp/terraform-provider-google/google"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/provider"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"golang.org/x/oauth2/google"
 )
@@ -48,7 +48,7 @@ func TestHandleSDKDefaults_BillingProject(t *testing.T) {
 			// Arrange
 			// Create empty schema.ResourceData using the SDK Provider schema
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, google_tpg.Provider().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, provider.Provider().Schema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.ConfigValue != "" {
@@ -145,7 +145,7 @@ func TestHandleSDKDefaults_Region(t *testing.T) {
 			// Arrange
 			// Create empty schema.ResourceData using the SDK Provider schema
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, google_tpg.Provider().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, provider.Provider().Schema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.ConfigValue != "" {
@@ -242,7 +242,7 @@ func TestHandleSDKDefaults_Zone(t *testing.T) {
 			// Arrange
 			// Create empty schema.ResourceData using the SDK Provider schema
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, google_tpg.Provider().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, provider.Provider().Schema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.ConfigValue != "" {
@@ -342,7 +342,7 @@ func TestHandleSDKDefaults_UserProjectOverride(t *testing.T) {
 			// Arrange
 			// Create empty schema.ResourceData using the SDK Provider schema
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, google_tpg.Provider().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, provider.Provider().Schema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.SetViaConfig {
@@ -414,7 +414,7 @@ func TestHandleSDKDefaults_RequestReason(t *testing.T) {
 			// Arrange
 			// Create empty schema.ResourceData using the SDK Provider schema
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, google_tpg.Provider().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, provider.Provider().Schema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.ConfigValue != "" {
