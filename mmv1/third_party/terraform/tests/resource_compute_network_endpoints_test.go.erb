@@ -55,7 +55,7 @@ func TestAccComputeNetworkEndpoints_networkEndpointsBasic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				// Add two new endpoints
+				// Add four new endpoints
 				Config: testAccComputeNetworkEndpoints_networkEndpointsAdditional(context),
 			},
 			{
