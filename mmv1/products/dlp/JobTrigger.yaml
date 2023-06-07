@@ -180,7 +180,6 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'inspectTemplateName'
         description: The name of the template to run when this job is triggered.
-        required: true
       - !ruby/object:Api::Type::NestedObject
         name: 'inspectConfig'
         description: The core content of the template.
@@ -828,6 +827,29 @@ properties:
                       required: true
                       description: |
                         Name of a BigQuery field to be returned with the findings.
+              - !ruby/object:Api::Type::Array
+                name: 'includedFields'
+                description: |
+                  Limit scanning only to these fields.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'name'
+                      required: true
+                      description: |
+                        Name describing the field to which scanning is limited.
+              - !ruby/object:Api::Type::Array
+                name: 'excludedFields'
+                description: |
+                  References to fields excluded from scanning.
+                  This allows you to skip inspection of entire columns which you know have no findings.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'name'
+                      required: true
+                      description: |
+                        Name describing the field excluded from scanning.
           - !ruby/object:Api::Type::NestedObject
             name: 'hybridOptions'
             allow_empty_object: true
@@ -883,7 +905,6 @@ properties:
                   * `"pipeline" : "etl"`
       - !ruby/object:Api::Type::Array
         name: 'actions'
-        required: true
         description: |
           A task to execute on the completion of a job.
         item_type: !ruby/object:Api::Type::NestedObject

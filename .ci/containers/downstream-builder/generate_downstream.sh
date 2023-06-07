@@ -104,6 +104,7 @@ if [ "$REPO" == "terraform-google-conversion" ]; then
     rm -rf ./tfplan2cai/testdata/templates/
     rm -rf ./tfplan2cai/testdata/generatedconvert/
     rm -rf ./tfplan2cai/converters/google/provider
+    rm -rf ./tfplan2cai/converters/google/resources
     find ./tfplan2cai/test/** -type f -exec git rm {} \;
     popd
 

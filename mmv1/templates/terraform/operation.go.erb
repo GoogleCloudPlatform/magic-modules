@@ -3,10 +3,13 @@
   has_project = object.base_url.include?("{{project}}")
   has_project = has_project || (object.async.is_a? Api::OpAsync and object.async.include_project)
 -%>
+<% if hc_downstream -%>
+<%= lines(hashicorp_copyright_header(:go, pwd)) -%>
+<% end -%>
 
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package google
+package <%= product_ns.downcase -%>
 
 import (
 <% if async.result.resource_inside_response -%>
