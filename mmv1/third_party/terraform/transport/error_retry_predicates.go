@@ -410,7 +410,7 @@ func isCommonRetryableErrorCode(err error) (bool, string) {
 }
 
 // Do not retry if operation returns a 429
-func IsQuotaError(err error) (bool, string) {
+func Is429QuotaError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 429 {
 			return true, "429s are not retryable for this resource"
