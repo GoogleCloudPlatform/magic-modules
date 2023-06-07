@@ -351,6 +351,7 @@ func expandNetworkInterfaces(d TerraformResourceData, config *transport_tpg.Conf
 		if network == "" && subnetwork == "" {
 			return nil, fmt.Errorf("exactly one of network or subnetwork must be provided")
 		}
+		<% end -%>
 
 		nf, err := ParseNetworkFieldValue(network, d, config)
 		if err != nil {
