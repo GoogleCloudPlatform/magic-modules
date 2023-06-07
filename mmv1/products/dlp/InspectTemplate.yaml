@@ -45,8 +45,18 @@ examples:
     primary_resource_id: 'custom_type_surrogate'
     test_env_vars:
       project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_inspect_template_with_template_id'
+    primary_resource_id: 'with_template_id'
+    vars:
+      name: 'my-template'
+    test_env_vars:
+      project: :PROJECT_NAME
+    skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/wrap_object.go.erb
+  decoder: templates/terraform/decoders/dlp_template_id.go.erb
+  encoder: templates/terraform/encoders/wrap_object_with_template_id.go.erb
+  update_encoder: templates/terraform/encoders/wrap_object.go.erb
   custom_import: templates/terraform/custom_import/dlp_import.go.erb
 parameters:
   - !ruby/object:Api::Type::String
@@ -76,6 +86,15 @@ properties:
     name: 'displayName'
     description: |
       User set display name of the inspect template.
+  - !ruby/object:Api::Type::String
+    name: 'templateId'
+    description: |
+      The template id can contain uppercase and lowercase letters, numbers, and hyphens;
+      that is, it must match the regular expression: [a-zA-Z\d-_]+. The maximum length is
+      100 characters. Can be empty to allow the system to generate one.
+    immutable: true
+    default_from_api: true
+    url_param_only: true
   - !ruby/object:Api::Type::NestedObject
     name: 'inspectConfig'
     description: The core content of the template.
