@@ -805,7 +805,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 						"environment_size": {
 							Type:         schema.TypeString,
 							Optional:     true,
-											Computed:			true,
+							Computed:     true,
 							ForceNew:     false,
 							AtLeastOneOf: composerConfigKeys,
 							ValidateFunc: validation.StringInSlice([]string{"ENVIRONMENT_SIZE_SMALL", "ENVIRONMENT_SIZE_MEDIUM", "ENVIRONMENT_SIZE_LARGE"}, false),
@@ -813,9 +813,9 @@ func ResourceComposerEnvironment() *schema.Resource {
 						},
 						"resilience_mode": {
 							Type:         	schema.TypeString,
-							Optional:     	true,
+							Optional:		true,
 							Computed:		true,
-							ForceNew:     	true,
+							ForceNew:		true,
 							AtLeastOneOf: composerConfigKeys,
 							ValidateFunc: validation.StringInSlice([]string{"RESILIENCE_MODE_UNSPECIFIED", "HIGH_RESILIENCE"}, false),
 							Description:  `Whether high resilience is enabled or not. This field is supported for Cloud Composer environments in versions composer-2.1.15-airflow-*.*.* and newer.`,
