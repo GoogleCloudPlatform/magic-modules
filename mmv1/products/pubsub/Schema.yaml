@@ -24,8 +24,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: projects/{{project}}/schemas
 create_url: projects/{{project}}/schemas?schemaId={{name}}
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
-  check_response_func_absence: PollCheckForAbsence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
   target_occurrences: 10
   actions: ['delete']
 examples:

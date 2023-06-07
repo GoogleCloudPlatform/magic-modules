@@ -194,10 +194,13 @@ module Provider
     # GCP Resource on Terraform.
     def generate_resource(pwd, data, generate_code, generate_docs)
       if generate_code
-        FileUtils.mkpath folder_name(data.version)
+        # @api.api_name is the service folder name
+        product_name = @api.api_name
+        target_folder = File.join(folder_name(data.version), 'services', product_name)
+        FileUtils.mkpath target_folder
         data.generate(pwd,
                       '/templates/terraform/resource.erb',
-                      "#{folder_name(data.version)}/resource_#{full_resource_name(data)}.go",
+                      "#{target_folder}/resource_#{full_resource_name(data)}.go",
                       self)
       end
 
@@ -251,16 +254,18 @@ module Provider
     def generate_operation(pwd, output_folder, _types)
       return if @api.objects.select(&:autogen_async).empty?
 
-      product_name = @api.name.underscore
+      product_name = @api.api_name
+      product_name_underscore = @api.name.underscore
       data = build_object_data(pwd, @api.objects.first, output_folder, @target_version_name)
 
       data.object = @api.objects.select(&:autogen_async).first
 
       data.async = data.object.async
-      FileUtils.mkpath folder_name(data.version)
+      target_folder = File.join(folder_name(data.version), 'services', product_name)
+      FileUtils.mkpath target_folder
       data.generate(pwd,
                     'templates/terraform/operation.go.erb',
-                    "#{folder_name(data.version)}/#{product_name}_operation.go",
+                    "#{target_folder}/#{product_name_underscore}_operation.go",
                     self)
     end
 
@@ -270,10 +275,12 @@ module Provider
       if generate_code \
         && (!data.object.iam_policy.min_version \
         || data.object.iam_policy.min_version >= data.version)
-        FileUtils.mkpath folder_name(data.version)
+        product_name = @api.api_name
+        target_folder = File.join(folder_name(data.version), 'services', product_name)
+        FileUtils.mkpath target_folder
         data.generate(pwd,
                       'templates/terraform/iam_policy.go.erb',
-                      "#{folder_name(data.version)}/iam_#{full_resource_name(data)}.go",
+                      "#{target_folder}/iam_#{full_resource_name(data)}.go",
                       self)
 
         # Only generate test if testable examples exist.

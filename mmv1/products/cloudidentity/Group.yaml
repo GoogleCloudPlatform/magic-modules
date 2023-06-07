@@ -25,8 +25,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/identity/docs/how-to/setup'
   api: 'https://cloud.google.com/identity/docs/reference/rest/v1beta1/groups'
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistenceWith403
-  check_response_func_absence: PollCheckForAbsenceWith403
+  check_response_func_existence: transport_tpg.PollCheckForExistenceWith403
+  check_response_func_absence: transport_tpg.PollCheckForAbsenceWith403
   target_occurrences: 10
   actions: ['create', 'update', 'delete']
 docs: !ruby/object:Provider::Terraform::Docs
