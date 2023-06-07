@@ -1123,12 +1123,8 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		NetworkInterfaces:          networkInterfaces,
 		NetworkPerformanceConfig:   networkPerformanceConfig,
 		Tags:                       resourceInstanceTags(d),
-<<<<<<< HEAD:mmv1/third_party/terraform/resources/resource_compute_instance.go.erb
-		Labels:                     expandLabels(d),
 		Params:                     params,
-=======
 		Labels:                     tpgresource.ExpandLabels(d),
->>>>>>> 323a25a57849e941907e15c7849b3909afda4b85:mmv1/third_party/terraform/services/compute/resource_compute_instance.go.erb
 		ServiceAccounts:            expandServiceAccounts(d.Get("service_account").([]interface{})),
 		GuestAccelerators:          accels,
 		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
@@ -1593,27 +1589,6 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
-<<<<<<< HEAD:mmv1/third_party/terraform/resources/resource_compute_instance.go.erb
-=======
-	if d.HasChange("tags") {
-		tags := resourceInstanceTags(d)
-		tagsV1 := &compute.Tags{}
-		if err := tpgresource.Convert(tags, tagsV1); err != nil {
-			return err
-		}
-		op, err := config.NewComputeClient(userAgent).Instances.SetTags(
-			project, zone, d.Get("name").(string), tagsV1).Do()
-		if err != nil {
-			return fmt.Errorf("Error updating tags: %s", err)
-		}
-
-		opErr := ComputeOperationWaitTime(config, op, project, "tags to update", userAgent, d.Timeout(schema.TimeoutUpdate))
-		if opErr != nil {
-			return opErr
-		}
-	}
-
->>>>>>> 323a25a57849e941907e15c7849b3909afda4b85:mmv1/third_party/terraform/services/compute/resource_compute_instance.go.erb
 	if d.HasChange("labels") {
 		labels := tpgresource.ExpandLabels(d)
 		labelFingerprint := d.Get("label_fingerprint").(string)
@@ -2460,24 +2435,19 @@ func resourceComputeInstanceImportState(d *schema.ResourceData, meta interface{}
 	return []*schema.ResourceData{d}, nil
 }
 
-<<<<<<< HEAD:mmv1/third_party/terraform/resources/resource_compute_instance.go.erb
 func expandParams(d *schema.ResourceData) (*compute.InstanceParams, error) {
 	params := &compute.InstanceParams{
 	}
 
 	if _, ok := d.GetOk("params.0.resource_manager_tags"); ok {
-		params.ResourceManagerTags = expandStringMap(d, "params.0.resource_manager_tags")
+		params.ResourceManagerTags = tpgresource.ExpandStringMap(d, "params.0.resource_manager_tags")
 	}
 
 	return params, nil
 }
 
-func expandBootDisk(d *schema.ResourceData, config *Config, project string) (*compute.AttachedDisk, error) {
-	userAgent, err := generateUserAgentString(d, config.userAgent)
-=======
 func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, project string) (*compute.AttachedDisk, error) {
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
->>>>>>> 323a25a57849e941907e15c7849b3909afda4b85:mmv1/third_party/terraform/services/compute/resource_compute_instance.go.erb
 	if err != nil {
 		return nil, err
 	}
@@ -2546,7 +2516,7 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 		}
 
 		if _, ok := d.GetOk("boot_disk.0.initialize_params.0.resource_manager_tags"); ok {
-			disk.InitializeParams.ResourceManagerTags = expandStringMap(d, "boot_disk.0.initialize_params.0.resource_manager_tags")
+			disk.InitializeParams.ResourceManagerTags = tpgresource.ExpandStringMap(d, "boot_disk.0.initialize_params.0.resource_manager_tags")
 		}
 	}
 
