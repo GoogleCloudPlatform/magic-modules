@@ -19,6 +19,8 @@ delete_verb: :PUT
 description: |
   Billing information for a project.
 references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Enable, disable, or change billing for a project': 'https://cloud.google.com/billing/docs/how-to/modify-project'
   api: 'https://cloud.google.com/billing/docs/reference/rest/v1/projects'
 id_format: 'projects/{{project}}/billingInfo'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -38,5 +40,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: billing_account
     description: |
-      TBC
+      The ID of the billing account associated with the project, if
+      any. Set to empty string to disable billing for the project.
+      For example, `"012345-567890-ABCDEF"` or `""`.
     required: true

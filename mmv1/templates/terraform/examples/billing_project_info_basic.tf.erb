@@ -10,4 +10,4 @@ resource "google_project" "project" {
 resource "google_billing_project_info" "<%= ctx[:primary_resource_id] %>" {
   project         = google_project.project.project_id
   billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
- }
+}
