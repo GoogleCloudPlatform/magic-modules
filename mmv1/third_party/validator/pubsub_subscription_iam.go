@@ -3,20 +3,21 @@ package google
 import (
 	"fmt"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgiamresource"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
-func resourceConverterPubsubSubscriptionIamPolicy() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterPubsubSubscriptionIamPolicy() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType:         "pubsub.googleapis.com/Subscription",
 		Convert:           GetPubsubSubscriptionIamPolicyCaiObject,
 		MergeCreateUpdate: MergePubsubSubscriptionIamPolicy,
 	}
 }
 
-func resourceConverterPubsubSubscriptionIamBinding() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterPubsubSubscriptionIamBinding() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType:         "pubsub.googleapis.com/Subscription",
 		Convert:           GetPubsubSubscriptionIamBindingCaiObject,
 		FetchFullResource: FetchPubsubSubscriptionIamPolicy,
@@ -25,8 +26,8 @@ func resourceConverterPubsubSubscriptionIamBinding() ResourceConverter {
 	}
 }
 
-func resourceConverterPubsubSubscriptionIamMember() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterPubsubSubscriptionIamMember() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType:         "pubsub.googleapis.com/Subscription",
 		Convert:           GetPubsubSubscriptionIamMemberCaiObject,
 		FetchFullResource: FetchPubsubSubscriptionIamPolicy,
@@ -35,70 +36,70 @@ func resourceConverterPubsubSubscriptionIamMember() ResourceConverter {
 	}
 }
 
-func GetPubsubSubscriptionIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
-	return newPubsubSubscriptionIamAsset(d, config, expandIamPolicyBindings)
+func GetPubsubSubscriptionIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	return newPubsubSubscriptionIamAsset(d, config, tpgiamresource.ExpandIamPolicyBindings)
 }
 
-func GetPubsubSubscriptionIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
-	return newPubsubSubscriptionIamAsset(d, config, expandIamRoleBindings)
+func GetPubsubSubscriptionIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	return newPubsubSubscriptionIamAsset(d, config, tpgiamresource.ExpandIamRoleBindings)
 }
 
-func GetPubsubSubscriptionIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
-	return newPubsubSubscriptionIamAsset(d, config, expandIamMemberBindings)
+func GetPubsubSubscriptionIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	return newPubsubSubscriptionIamAsset(d, config, tpgiamresource.ExpandIamMemberBindings)
 }
 
-func MergePubsubSubscriptionIamPolicy(existing, incoming Asset) Asset {
+func MergePubsubSubscriptionIamPolicy(existing, incoming tpgresource.Asset) tpgresource.Asset {
 	existing.IAMPolicy = incoming.IAMPolicy
 	return existing
 }
 
-func MergePubsubSubscriptionIamBinding(existing, incoming Asset) Asset {
-	return mergeIamAssets(existing, incoming, mergeAuthoritativeBindings)
+func MergePubsubSubscriptionIamBinding(existing, incoming tpgresource.Asset) tpgresource.Asset {
+	return tpgiamresource.MergeIamAssets(existing, incoming, tpgiamresource.MergeAuthoritativeBindings)
 }
 
-func MergePubsubSubscriptionIamBindingDelete(existing, incoming Asset) Asset {
-	return mergeDeleteIamAssets(existing, incoming, mergeDeleteAuthoritativeBindings)
+func MergePubsubSubscriptionIamBindingDelete(existing, incoming tpgresource.Asset) tpgresource.Asset {
+	return tpgiamresource.MergeDeleteIamAssets(existing, incoming, tpgiamresource.MergeDeleteAuthoritativeBindings)
 }
 
-func MergePubsubSubscriptionIamMember(existing, incoming Asset) Asset {
-	return mergeIamAssets(existing, incoming, mergeAdditiveBindings)
+func MergePubsubSubscriptionIamMember(existing, incoming tpgresource.Asset) tpgresource.Asset {
+	return tpgiamresource.MergeIamAssets(existing, incoming, tpgiamresource.MergeAdditiveBindings)
 }
 
-func MergePubsubSubscriptionIamMemberDelete(existing, incoming Asset) Asset {
-	return mergeDeleteIamAssets(existing, incoming, mergeDeleteAdditiveBindings)
+func MergePubsubSubscriptionIamMemberDelete(existing, incoming tpgresource.Asset) tpgresource.Asset {
+	return tpgiamresource.MergeDeleteIamAssets(existing, incoming, tpgiamresource.MergeDeleteAdditiveBindings)
 }
 
 func newPubsubSubscriptionIamAsset(
 	d tpgresource.TerraformResourceData,
 	config *transport_tpg.Config,
-	expandBindings func(d tpgresource.TerraformResourceData) ([]IAMBinding, error),
-) ([]Asset, error) {
+	expandBindings func(d tpgresource.TerraformResourceData) ([]tpgresource.IAMBinding, error),
+) ([]tpgresource.Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
-		return []Asset{}, fmt.Errorf("expanding bindings: %v", err)
+		return []tpgresource.Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
-	name, err := assetName(d, config, "//pubsub.googleapis.com/projects/{{project}}/subscriptions/{{subscription}}")
+	name, err := tpgresource.AssetName(d, config, "//pubsub.googleapis.com/projects/{{project}}/subscriptions/{{subscription}}")
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 
-	return []Asset{{
+	return []tpgresource.Asset{{
 		Name: name,
 		Type: "pubsub.googleapis.com/Subscription",
-		IAMPolicy: &IAMPolicy{
+		IAMPolicy: &tpgresource.IAMPolicy{
 			Bindings: bindings,
 		},
 	}}, nil
 }
 
-func FetchPubsubSubscriptionIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
+func FetchPubsubSubscriptionIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgresource.Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("subscription"); !ok {
-		return Asset{}, ErrEmptyIdentityField
+		return tpgresource.Asset{}, tpgresource.ErrEmptyIdentityField
 	}
 
-	return fetchIamPolicy(
+	return tpgiamresource.FetchIamPolicy(
 		NewPubsubSubscriptionIamUpdater,
 		d,
 		config,

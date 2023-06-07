@@ -18,15 +18,15 @@ import (
 const ContainerClusterAssetType string = "container.googleapis.com/Cluster"
 const ContainerNodePoolAssetType string = "container.googleapis.com/NodePool"
 
-func resourceConverterContainerCluster() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterContainerCluster() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType: ContainerClusterAssetType,
 		Convert:   GetContainerClusterCaiObject,
 	}
 }
 
-func resourceConverterContainerNodePool() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterContainerNodePool() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType: ContainerNodePoolAssetType,
 		Convert:   GetContainerNodePoolCaiObject,
 	}
@@ -102,16 +102,16 @@ func expandContainerNodePoolNodeConfigOauthScopes(v interface{}, d tpgresource.T
 	return canonicalizeServiceScopesFromSet(scopesSet)
 }
 
-func GetContainerClusterCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{name}}")
+func GetContainerClusterCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	name, err := tpgresource.AssetName(d, config, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{name}}")
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 	if obj, err := GetContainerClusterApiObject(d, config); err == nil {
-		return []Asset{{
+		return []tpgresource.Asset{{
 			Name: name,
 			Type: ContainerClusterAssetType,
-			Resource: &AssetResource{
+			Resource: &tpgresource.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/container/v1/rest",
 				DiscoveryName:        "Cluster",
@@ -119,7 +119,7 @@ func GetContainerClusterCaiObject(d tpgresource.TerraformResourceData, config *t
 			},
 		}}, nil
 	} else {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 }
 
@@ -1178,16 +1178,16 @@ func expandContainerClusterKubectlContext(v interface{}, d tpgresource.Terraform
 	return v, nil
 }
 
-func GetContainerNodePoolCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}")
+func GetContainerNodePoolCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	name, err := tpgresource.AssetName(d, config, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}")
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 	if obj, err := GetContainerNodePoolApiObject(d, config); err == nil {
-		return []Asset{{
+		return []tpgresource.Asset{{
 			Name: name,
 			Type: ContainerNodePoolAssetType,
-			Resource: &AssetResource{
+			Resource: &tpgresource.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/container/v1/rest",
 				DiscoveryName:        "NodePool",
@@ -1195,7 +1195,7 @@ func GetContainerNodePoolCaiObject(d tpgresource.TerraformResourceData, config *
 			},
 		}}, nil
 	} else {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 }
 

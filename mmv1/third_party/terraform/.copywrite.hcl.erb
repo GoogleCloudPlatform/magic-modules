@@ -16,6 +16,11 @@ project {
     ".changelog/**",
     "examples/**",
     "scripts/**",
+<% if version.nil? || version == 'ga' -%>
+    "google/test-fixtures/**",
+<% else -%>
+    "google-<%= version -%>/test-fixtures/**",
+<% end -%>
     "META.d/*.yml",
     ".golangci.yml",
     ".goreleaser.yml",
