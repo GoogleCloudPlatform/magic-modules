@@ -56,6 +56,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
         }
         info_types {
           name = "CREDIT_CARD_NUMBER"
+          sensitivity_score {
+            score = "SENSITIVITY_MODERATE"
+          }
         }
 
         primitive_transformation {
@@ -167,6 +170,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             surrogate_info_type {
               name = "CUSTOM_INFO_TYPE"
               version = "version-1"
+              sensitivity_score {
+                score = "SENSITIVITY_MEDIUM"
+              }
             }
           }
         }
@@ -190,6 +196,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             surrogate_info_type {
               name = "CUSTOM_INFO_TYPE"
               version = "version-1"
+              sensitivity_score {
+                score = "SENSITIVITY_LOW"
+              }
             }
           }
         }
@@ -272,6 +281,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
       transformations {
         info_types {
           name = "CREDIT_CARD_NUMBER"
+          sensitivity_score {
+            score = "SENSITIVITY_HIGH"
+          }
         }
 
         primitive_transformation {
@@ -356,6 +368,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             surrogate_info_type {
               name = "CUSTOM_INFO_TYPEf"
               version = "version-2"
+              sensitivity_score {
+                score="SENSITIVITY_LOW"
+              }
             }
           }
         }
@@ -379,6 +394,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             surrogate_info_type {
               name = "CUSTOM_INFO_TYPEF"
               version = "version-2"
+              sensitivity_score {
+                score = "SENSITIVIY_MODERATE"
+              }
             }
           }
         }
@@ -591,6 +609,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             surrogate_info_type {
               name = "CUSTOM_INFO_TYPE"
               version = "version-1"
+              sensitivity_score {
+                score = "SENSITIVITY_LOW"
+              }
             }
           }
         }
@@ -699,6 +720,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             surrogate_info_type {
               name = "CREDIT_CARD_NUMBER"
               version = "version-1"
+              sensitivity_score {
+                score = "SENSITIVITY_HIGH"
+              }
             }
             context {
               name = "unconditionally-crypto-deterministic-field"
@@ -853,6 +877,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             surrogate_info_type {
               name = "CUSTOM_INFO_TYPE"
               version = "version-2"
+              sensitivity_score {
+                score = "SENSITIVITY_MODERATE"
+              }
             }
           }
         }
@@ -979,6 +1006,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
               # update info type
               name = "CREDIT_CARD_TRACK_NUMBER"
               version = "version-2"
+              sensitivity_score {
+                score = "SENSITIVITY_LOW"
+              }
             }
             context {
               name = "unconditionally-crypto-deterministic-field"
@@ -1064,6 +1094,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           info_types {
             name = "COLOR_INFO"
             version = "latest"
+            sensitivity_score {
+              score = "SENSITIVITY_LOW"
+            }
           }
         }
       }
@@ -1100,6 +1133,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           info_types {
             name = "COLOR_EXAMPLE"
             version = "0.1"
+            sensitivity_score {
+              score = "SENSITIVITY_MODERATE"
+            }
           }
         }
       }
@@ -2050,6 +2086,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             info_types {
               name = "CREDIT_CARD_NUMBER"
               version = "1.2"
+              sensitivity_score {
+                score = "SENSITIVITY_HIGH"
+              }
             } 
             primitive_transformation {
               replace_config {
@@ -2123,6 +2162,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
                 surrogate_info_type {
                   name = "CUSTOM_INFO_TYPE"
                   version = "version-1"
+                  sensitivity_score {
+                    score = "SENSITIVITY_LOW"
+                  }
                 }
               }
             }
@@ -2273,6 +2315,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
                 surrogate_info_type {
                   name = "CREDIT_CARD_NUMBER"
                   version = "version-1"
+                  sensitivity_score {
+                    score = "SENSITIVITY_LOW"
+                  }
                 }
                 context {
                   name = "unconditionally-crypto-deterministic-field"
@@ -2418,6 +2463,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             info_types {
               name = "CREDIT_CARD_NUMBER"
               version = "1.5"
+              sensitivity_score {
+                score = "SENSITIVITY_MODERATE"
+              }
             } 
             primitive_transformation {
 
@@ -2502,6 +2550,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
                 surrogate_info_type {
                   name = "CUSTOM_INFO_TYPE"
                   version = "version-2"
+                  sensitivity_score {
+                    score = "SENSITIVITY_MODERATE"
+                  }
                 }
               }
             }
@@ -2681,6 +2732,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 
                   name = "CREDIT_CARD_TRACK_NUMBER"
                   version = "version-2"
+                  sensitivity_score {
+                    score = "SENSITIVITY_MODERATE"
+                  }
                 }
                 context {
                   name = "unconditionally-crypto-deterministic-field"
