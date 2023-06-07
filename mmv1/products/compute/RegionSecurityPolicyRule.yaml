@@ -1,0 +1,182 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'RegionSecurityPolicyRule'
+min_version: beta
+# base_url: '{{policy_id}}'
+base_url: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}'
+self_link: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/getRule?priority={{priority}}'
+# has_self_link: true
+# create_url: '{{policy_id}}/addRule?priority={{priority}}'
+create_url: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/addRule?priority={{priority}}'
+update_verb: :POST
+# update_url: '{{policy_id}}/patchRule?priority={{priority}}'
+update_url: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/patchRule?priority={{priority}}'
+delete_verb: :POST
+# delete_url: '{{policy_id}}/removeRule?priority={{priority}}'
+delete_url: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/removeRule?priority={{priority}}'
+description: |
+  A rule for the RegionSecurityPolicy.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    # TODO(felipegc): evaluate if there will be something like this: 
+    'Creating region security policy rules': 'https://cloud.google.com/armor/docs/configure-security-policies'
+  api:
+    # TODO(felipegc): evaluate if there will be something like this:
+    'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies/addRule'
+# id_format: '{{policy_id}}/priority/{{priority}}'
+id_format: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/priority/{{priority}}'
+import_format: ['projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/priority/{{priority}}']
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_security_policy_rule_basic'
+    primary_resource_id: 'policy_rule'
+    min_version: 'beta'
+    vars:
+      sec_policy_name: 'policyruletest'
+# TODO(felipegc): evaluate if this will be necessary. I think so because the operation comes from the compute.
+# custom_code: !ruby/object:Provider::Terraform::CustomCode
+#   post_create: templates/terraform/post_create/org_security_policy_rule.go.erb
+#   post_delete: templates/terraform/post_create/org_security_policy_rule.go.erb
+#   post_update:
+#     templates/terraform/post_create/org_security_policy_rule.go.erb
+#     # TODO: Remove once b/154369201 is closed.
+#   test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
+parameters:
+  # - !ruby/object:Api::Type::String
+  #   name: policyId
+  #   description: |
+  #     The ID of the RegionSecurityPolicy this rule applies to.
+  #   required: true
+  #   immutable: true
+  #   url_param_only: true
+  # - !ruby/object:Api::Type::ResourceRef
+  #   name: 'region'
+  #   resource: 'Region'
+  #   imports: 'name'
+  #   required: false
+  #   immutable: false
+  #   description: |
+  #     The Region in which the created Region Security Policy rule should reside.
+  #     If it is not provided, the provider region is used.
+  #   default_from_api: true
+  - !ruby/object:Api::Type::String
+    name: 'region'
+    description: | 
+      The Region in which the created Region Security Policy rule should reside.
+      If it is not provided, the provider region is used.'A region where the prefix will reside.'
+    url_param_only: true
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'security_policy'
+    required: true
+    immutable: true
+    description: |
+      The name of the security policy this rule belongs to.
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      An optional description of this resource. Provide this property when you create the resource.
+  - !ruby/object:Api::Type::Integer
+    name: 'priority'
+    description: |
+      An integer indicating the priority of a rule in the list.
+      The priority must be a positive value between 0 and 2147483647.
+      Rules are evaluated from highest to lowest priority where 0 is the highest priority and 2147483647 is the lowest priority.
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'match'
+    description: |
+      A match condition that incoming traffic is evaluated against.
+      If it evaluates to true, the corresponding 'action' is enforced.
+    required: true
+    properties:
+    # TODO(felipegc): REMOVE this comment: match.expr: only supported in Global Security Policies
+      - !ruby/object:Api::Type::Enum
+          name: 'versionedExpr'
+          description: |
+            Preconfigured versioned expression. If this field is specified, config must also be specified.
+            Available preconfigured expressions along with their requirements are: SRC_IPS_V1 - must specify the corresponding srcIpRange field in config.
+          values:
+            - :SRC_IPS_V1
+          default_value: :SRC_IPS_V1
+      - !ruby/object:Api::Type::NestedObject
+        name: 'config'
+        description: | 
+          The configuration options available when specifying versionedExpr.
+          This field must be specified if versionedExpr is specified and cannot be specified if versionedExpr is not specified.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'srcIpRanges'
+            description: |
+              CIDR IP address range. Maximum number of srcIpRanges allowed is 10.
+            item_type: Api::Type::String
+            #  TODO(felipegc): This field may only be specified when versionedExpr is set to FIREWALL.
+            # exactly_one_of:
+            #   - match.0.config.0.src_ip_ranges
+            #   - match.0.config.0.dest_ip_ranges
+          # - !ruby/object:Api::Type::Array
+          #   name: 'destIpRanges'
+          #   description: |
+          #     CIDR IP address range.
+          #   item_type: Api::Type::String
+          #   exactly_one_of:
+          #     - match.0.config.0.src_ip_ranges
+          #     - match.0.config.0.dest_ip_ranges
+          #  TODO(felipegc): This field may only be specified when versionedExpr is set to FIREWALL.
+          # - !ruby/object:Api::Type::Array
+          #   name: 'layer4Config'
+  - !ruby/object:Api::Type::String
+    name: 'action'
+    description: |
+      The Action to perform when the rule is matched. The following are the valid actions:
+      allow: allow access to target.
+      deny(STATUS): deny access to target, returns the HTTP response code specified. Valid values for STATUS are 403, 404, and 502.
+      rate_based_ban: limit client traffic to the configured threshold and ban the client if the traffic exceeds the threshold. Configure parameters for this action in RateLimitOptions. Requires rateLimitOptions to be set.
+      redirect: redirect to a different target. This can either be an internal reCAPTCHA redirect, or an external URL-based redirect via a 302 response. Parameters for this action can be configured via redirectOptions. This action is only supported in Global Security Policies of type CLOUD_ARMOR.
+      throttle: limit client traffic to the configured threshold. Configure parameters for this action in rateLimitOptions. Requires rateLimitOptions to be set for this.
+    required: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'preview'
+    description: |
+      If set to true, the specified action is not enforced.
+  # TODO(felipegc): REMOVE this comment: 
+  # rules.direction: This field may only be specified when versionedExpr is set to FIREWALL
+  # rules.targetResources: This field may only be specified when versionedExpr is set to FIREWALL.
+  # rules.enableLogging: This field may only be specified when the versionedExpr is set to FIREWALL.
+
+   
+            
