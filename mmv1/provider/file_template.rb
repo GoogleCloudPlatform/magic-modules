@@ -39,8 +39,8 @@ module Provider
       # If we've modified a file since starting an MM run, it's a reasonable
       # assumption that it was this run that modified it.
       if File.exist?(path) && File.mtime(path) > @env[:start_time]
-        raise "#{path} was already modified during this run.. check to see if"\
-              ' there is both a .go and .go.erb version of this file'
+        raise "#{path} was already modified during this run.. check to see if " \
+              'there is both a .go and .go.erb version of this file'
       end
 
       # You're looking at some magic here!
@@ -52,27 +52,25 @@ module Provider
       # all of the variables in this object.
       ctx = provider.provider_binding
       instance_variables.each do |name|
-        ctx.local_variable_set(name[1..-1], instance_variable_get(name))
+        ctx.local_variable_set(name[1..], instance_variable_get(name))
       end
 
-      # This variable is used in ansible/resource.erb
-      ctx.local_variable_set('file_relative',
-                             relative_path(@output_folder + '/' + path, @output_folder).to_s)
       ctx.local_variable_set('pwd', pwd)
+      ctx.local_variable_set('hc_downstream', provider.generating_hashicorp_repo?)
 
       # check if the parent folder exists, and make it if not
       parent_path = File.dirname(path)
       FileUtils.mkdir_p(parent_path) unless File.directory?(parent_path)
 
       Google::LOGGER.debug "Generating #{path}"
-      File.open(path, 'w') { |f| f.puts compile_file(ctx, pwd + '/' + template) }
+      File.open(path, 'w') { |f| f.puts compile_file(ctx, "#{pwd}/#{template}") }
 
       # Files are often generated in parallel.
       # We can use thread-local variables to ensure that autogen checking
       # stays specific to the file each thred represents.
       raise "#{path} missing autogen" unless Thread.current[:autogen]
 
-      old_file_chmod_mode = File.stat(pwd + '/' + template).mode
+      old_file_chmod_mode = File.stat("#{pwd}/#{template}").mode
       FileUtils.chmod(old_file_chmod_mode, path)
 
       format_output_file(path, template)
@@ -110,6 +108,8 @@ module Provider
     attr_accessor :override_path
 
     def initialize(output_folder, version, env, products, override_path = nil)
+      super()
+
       @output_folder = output_folder
       @version = version
       @env = env
@@ -143,6 +143,8 @@ module Provider
     end
 
     def initialize(output_folder, name, product, version, env)
+      super()
+
       @name = name
       @product = product
       @product_ns = product.name

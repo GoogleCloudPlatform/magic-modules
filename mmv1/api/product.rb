@@ -58,16 +58,29 @@ module Api
 
     attr_reader :async
 
+    attr_reader :legacy_name
+
+    attr_reader :client_name
+
     def validate
       super
       set_variables @objects, :__product
+
+      # name comes from Named, and product names must start with a capital
+      caps = ('A'..'Z').to_a
+      unless caps.include? @name[0]
+        raise "product name `#{@name}` must start with a capital letter."
+      end
+
       check :display_name, type: String
-      check :objects, type: Array, item_type: Api::Resource, required: true
+      check :objects, type: Array, item_type: Api::Resource
       check :scopes, type: Array, item_type: String, required: true
       check :apis_required, type: Array, item_type: Api::Product::ApiReference
       check :operation_retry, type: String
 
       check :async, type: Api::Async
+      check :legacy_name, type: String
+      check :client_name, type: String
 
       check :versions, type: Array, item_type: Api::Product::Version, required: true
     end
@@ -84,10 +97,10 @@ module Api
     # The product full name is the "display name" in string form intended for
     # users to read in documentation; "Google Compute Engine", "Cloud Bigtable"
     def display_name
-      if !@display_name.nil?
-        @display_name
+      if @display_name.nil?
+        name.space_separated
       else
-        name.underscore.humanize
+        @display_name
       end
     end
 
@@ -176,7 +189,7 @@ module Api
 
       instance_variables.each do |v|
         if v == :@objects
-          json_out['@resources'] = objects.map { |o| [o.name, o] }.to_h
+          json_out['@resources'] = objects.to_h { |o| [o.name, o] }
         elsif instance_variable_get(v) == false || instance_variable_get(v).nil?
           # ignore false or missing because omitting them cleans up result
           # and both are the effective defaults of their types

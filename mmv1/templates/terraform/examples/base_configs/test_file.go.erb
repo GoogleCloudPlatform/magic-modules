@@ -1,3 +1,7 @@
+<% if hc_downstream -%>
+<%= lines(hashicorp_copyright_header(:go, pwd)) -%>
+<% end -%>
+
 <%= lines(autogen_notice(:go, pwd)) -%>
 
 package google
@@ -15,11 +19,15 @@ import (
 <% unless object.skip_delete -%>
   "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 <% end -%>
+
+  "<%= import_path() -%>/acctest"
+  "<%= import_path() -%>/tpgresource"
+  transport_tpg "<%= import_path() -%>/transport"
 )
 <%
 
 resource_name = product_ns + object.name
-tf_product = (@config.legacy_name || product_ns).underscore
+tf_product = (object.__product.legacy_name || product_ns).underscore
 tf_resource = object.name.underscore
 terraform_name = object.legacy_name || "google_#{tf_product}_#{tf_resource}"
 -%>
@@ -49,7 +57,7 @@ object.examples
 
 func TestAcc<%= test_slug -%>(t *testing.T) {
 <% if example.skip_vcr -%>
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 <% end -%>
   t.Parallel()
 
@@ -60,16 +68,16 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 			"<%= var_name %>": <%= override %>,
 	<% end -%>
 	<% end -%>
-			"random_suffix": randString(t, 10),
+			"random_suffix": RandString(t, 10),
 	}
 
 <% versioned_provider = !example_version.nil? && example_version != 'ga' -%>
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		<% unless versioned_provider -%>
-		Providers: testAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		<% else -%>
-		Providers: testAccProvidersOiCS,
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		<% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -117,9 +125,9 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 		<% if object.custom_code.test_check_destroy -%>
 	<%= lines(compile(pwd + '/' + object.custom_code.test_check_destroy)) -%>
 		<% else -%>
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
-		url, err := replaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
 		if err != nil {
 			return err
 		}
@@ -130,7 +138,16 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 			billingProject = config.BillingProject
 		}
 
-		_, err = sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, config.userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+                _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config: config,
+			Method: "<%= object.read_verb.to_s.upcase -%>",
+			Project: billingProject,
+			RawURL: url,
+			UserAgent: config.UserAgent,
+			<% if object.error_retry_predicates -%>
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+			<% end -%>
+		})
 		if err == nil {
 				return fmt.Errorf("<%= resource_name -%> still exists at %s", url)
 			}

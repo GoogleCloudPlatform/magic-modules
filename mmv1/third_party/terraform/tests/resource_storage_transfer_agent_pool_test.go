@@ -5,24 +5,28 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccStorageTransferAgentPool_agentPoolUpdate(t *testing.T) {
 	t.Parallel()
 
-	agentPoolName := fmt.Sprintf("tf-test-agent-pool-%s", randString(t, 10))
-	displayName := fmt.Sprintf("tf-test-display-name-%s", randString(t, 10))
-	displayNameUpdate := fmt.Sprintf("tf-test-display-name-%s", randString(t, 10))
+	agentPoolName := fmt.Sprintf("tf-test-agent-pool-%s", RandString(t, 10))
+	displayName := fmt.Sprintf("tf-test-display-name-%s", RandString(t, 10))
+	displayNameUpdate := fmt.Sprintf("tf-test-display-name-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckStorageTransferAgentPoolDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckStorageTransferAgentPoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageTransferAgentPool_agentPoolBasic(getTestProjectFromEnv(), agentPoolName, displayName),
+				Config: testAccStorageTransferAgentPool_agentPoolBasic(acctest.GetTestProjectFromEnv(), agentPoolName, displayName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_agent_pool.foo",
@@ -30,7 +34,7 @@ func TestAccStorageTransferAgentPool_agentPoolUpdate(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferAgentPool_agentPoolBasic(getTestProjectFromEnv(), agentPoolName, displayNameUpdate),
+				Config: testAccStorageTransferAgentPool_agentPoolBasic(acctest.GetTestProjectFromEnv(), agentPoolName, displayNameUpdate),
 			},
 			{
 				ResourceName:      "google_storage_transfer_agent_pool.foo",
@@ -38,7 +42,7 @@ func TestAccStorageTransferAgentPool_agentPoolUpdate(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferAgentPool_updateLimitMbps(getTestProjectFromEnv(), agentPoolName, displayNameUpdate),
+				Config: testAccStorageTransferAgentPool_updateLimitMbps(acctest.GetTestProjectFromEnv(), agentPoolName, displayNameUpdate),
 			},
 			{
 				ResourceName:      "google_storage_transfer_agent_pool.foo",
@@ -46,7 +50,7 @@ func TestAccStorageTransferAgentPool_agentPoolUpdate(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferAgentPool_omitDisplayName(getTestProjectFromEnv(), agentPoolName),
+				Config: testAccStorageTransferAgentPool_omitDisplayName(acctest.GetTestProjectFromEnv(), agentPoolName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_agent_pool.foo",
@@ -54,7 +58,7 @@ func TestAccStorageTransferAgentPool_agentPoolUpdate(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferAgentPool_omitBandwidthLimit(getTestProjectFromEnv(), agentPoolName, displayNameUpdate),
+				Config: testAccStorageTransferAgentPool_omitBandwidthLimit(acctest.GetTestProjectFromEnv(), agentPoolName, displayNameUpdate),
 			},
 			{
 				ResourceName:      "google_storage_transfer_agent_pool.foo",
@@ -167,9 +171,9 @@ func testAccCheckStorageTransferAgentPoolDestroyProducer(t *testing.T) func(s *t
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{StorageTransferBasePath}}projects/{{project}}/agentPools/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{StorageTransferBasePath}}projects/{{project}}/agentPools/{{name}}")
 			if err != nil {
 				return err
 			}
@@ -180,7 +184,13 @@ func testAccCheckStorageTransferAgentPoolDestroyProducer(t *testing.T) func(s *t
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
 			if err == nil {
 				return fmt.Errorf("StorageTransferAgentPool still exists at %s", url)
 			}

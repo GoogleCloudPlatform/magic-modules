@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	resourceManager "google.golang.org/api/cloudresourcemanager/v1"
@@ -13,14 +15,14 @@ import (
 func TestAccResourceManagerLien_basic(t *testing.T) {
 	t.Parallel()
 
-	projectName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	org := getTestOrgFromEnv(t)
+	projectName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	org := acctest.GetTestOrgFromEnv(t)
 	var lien resourceManager.Lien
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckResourceManagerLienDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckResourceManagerLienDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceManagerLien_basic(projectName, org),
@@ -56,9 +58,9 @@ func testAccCheckResourceManagerLienExists(t *testing.T, n, projectName string, 
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
-		found, err := config.NewResourceManagerClient(config.userAgent).Liens.List().Parent(fmt.Sprintf("projects/%s", projectName)).Do()
+		found, err := config.NewResourceManagerClient(config.UserAgent).Liens.List().Parent(fmt.Sprintf("projects/%s", projectName)).Do()
 		if err != nil {
 			return err
 		}
@@ -74,14 +76,14 @@ func testAccCheckResourceManagerLienExists(t *testing.T, n, projectName string, 
 
 func testAccCheckResourceManagerLienDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_resource_manager_lien" {
 				continue
 			}
 
-			_, err := config.NewResourceManagerClient(config.userAgent).Liens.List().Parent(fmt.Sprintf("projects/%s", rs.Primary.Attributes["parent"])).Do()
+			_, err := config.NewResourceManagerClient(config.UserAgent).Liens.List().Parent(fmt.Sprintf("projects/%s", rs.Primary.Attributes["parent"])).Do()
 			if err == nil {
 				return fmt.Errorf("Lien %s still exists", rs.Primary.ID)
 			}

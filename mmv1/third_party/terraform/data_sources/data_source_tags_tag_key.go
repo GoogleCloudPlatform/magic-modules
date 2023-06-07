@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
 )
 
-func dataSourceGoogleTagsTagKey() *schema.Resource {
+func DataSourceGoogleTagsTagKey() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleTagsTagKeyRead,
 
@@ -51,8 +54,8 @@ func dataSourceGoogleTagsTagKey() *schema.Resource {
 }
 
 func dataSourceGoogleTagsTagKeyRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

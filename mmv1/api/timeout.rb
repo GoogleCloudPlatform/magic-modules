@@ -27,6 +27,8 @@ module  Api
     attr_reader :delete_minutes
 
     def initialize
+      super
+
       validate
     end
 

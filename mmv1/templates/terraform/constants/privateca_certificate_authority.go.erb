@@ -2,7 +2,7 @@ func resourcePrivateCaCACustomDiff(_ context.Context, diff *schema.ResourceDiff,
 	if diff.HasChange("desired_state") {
 		_, new := diff.GetChange("desired_state")
 
-		if isNewResource(diff) {
+		if tpgresource.IsNewResource(diff) {
 			if diff.Get("type").(string) == "SUBORDINATE" {
 				return fmt.Errorf("`desired_state` can not be specified when creating a SUBORDINATE CA")
 			}
@@ -16,9 +16,4 @@ func resourcePrivateCaCACustomDiff(_ context.Context, diff *schema.ResourceDiff,
 		}
 	}
 	return nil
-}
-
-func isNewResource(diff *schema.ResourceDiff) bool {
-	name := diff.Get("name")
-	return name.(string) == ""
 }

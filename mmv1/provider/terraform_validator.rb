@@ -13,11 +13,15 @@
 
 require 'provider/terraform_oics'
 require 'fileutils'
-require 'set'
 
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
   class TerraformValidator < Provider::Terraform
+    def generating_hashicorp_repo?
+      # This code is not used when generating TPG/TPGB
+      false
+    end
+
     def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
       # Temporary shim to generate the missing resources directory. Can be removed
       # once the folder exists downstream.
@@ -43,20 +47,24 @@ module Provider
     end
 
     def generate_resource(pwd, data, _generate_code, _generate_docs)
-      target_folder = data.output_folder
       product_name = data.object.__product.name.downcase
+      output_folder = File.join(
+        data.output_folder,
+        'converters/google/resources/services',
+        product_name
+      )
       object_name = data.object.name.underscore
+      target = "#{product_name}_#{object_name}.go"
       data.generate(pwd,
                     'templates/validator/resource_converter.go.erb',
-                    File.join(target_folder,
-                              "converters/google/resources/#{product_name}_#{object_name}.go"),
+                    File.join(output_folder, target),
                     self)
+      replace_import_path(output_folder, target)
     end
 
     def retrieve_list_of_manually_defined_tests_from_file(file)
       content = File.read(file)
-      matches = content.scan(/\s*name\s*:\s*\"([^,]+)\"/).flatten(1)
-      matches
+      content.scan(/\s*name\s*:\s*"([^,]+)"/).flatten(1)
     end
 
     def retrieve_list_of_manually_defined_tests
@@ -72,17 +80,17 @@ module Provider
     end
 
     def validate_non_defined_tests(file_set, non_defined_tests)
-      if non_defined_tests.any? { |test| !file_set.member?(test + '.json') }
-        raise 'test file named ' + test + '.json expected but found none'
+      if non_defined_tests.any? { |test| !file_set.member?("#{test}.json") }
+        raise "test file named #{test}.json expected but found none"
       end
 
-      if non_defined_tests.any? { |test| !file_set.member?(test + '.tfplan.json') }
-        raise 'test file named ' + test + '.tfplan.json expected but found none'
+      if non_defined_tests.any? { |test| !file_set.member?("#{test}.tfplan.json") }
+        raise "test file named #{test}.tfplan.json expected but found none"
       end
 
-      return unless non_defined_tests.any? { |test| !file_set.member?(test + '.tf') }
+      return unless non_defined_tests.any? { |test| !file_set.member?("#{test}.tf") }
 
-      raise 'test file named ' + test + '.tf expected but found none'
+      raise "test file named #{test}.tf expected but found none"
     end
 
     def retrieve_full_list_of_test_files
@@ -94,7 +102,7 @@ module Provider
     def retrieve_full_list_of_test_files_with_location
       files = retrieve_full_list_of_test_files
       files.map do |file|
-        ['testdata/templates/' + file, 'third_party/validator/tests/data/' + file]
+        ["testdata/templates/#{file}", "third_party/validator/tests/data/#{file}"]
       end
     end
 
@@ -110,7 +118,7 @@ module Provider
     end
 
     def retrieve_test_source_files(path, suffix)
-      files = Dir[path + '**' + suffix]
+      files = Dir["#{path}**#{suffix}"]
       files = files.map { |file| file.split(path)[-1] }
       files.sort
     end
@@ -119,7 +127,7 @@ module Provider
       path = 'third_party/validator/tests/source/'
       files = retrieve_test_source_files(path, suffix)
       files.map do |file|
-        ['test/' + file, path + file]
+        ["test/#{file}", path + file]
       end
     end
 
@@ -146,35 +154,42 @@ module Provider
         file_template
       )
 
-      compile_file_list(output_folder, [
-                          ['converters/google/resources/compute_operation.go',
-                           'third_party/terraform/utils/compute_operation.go.erb'],
-                          ['converters/google/resources/config.go',
-                           'third_party/terraform/utils/config.go.erb'],
-                          ['converters/google/resources/config_test_utils.go',
-                           'third_party/terraform/utils/config_test_utils.go.erb'],
-                          ['converters/google/resources/iam.go',
-                           'third_party/terraform/utils/iam.go.erb'],
-                          ['converters/google/resources/compute_instance_helpers.go',
-                           'third_party/terraform/utils/compute_instance_helpers.go.erb'],
-                          ['converters/google/resources/provider_handwritten_endpoint.go',
-                           'third_party/terraform/utils/provider_handwritten_endpoint.go.erb'],
-                          ['converters/google/resources/transport.go',
-                           'third_party/terraform/utils/transport.go.erb'],
-                          ['converters/google/resources/resource_converters.go',
-                           'templates/validator/resource_converters.go.erb'],
-                          ['converters/google/resources/mappers.go',
-                           'templates/validator/mappers/mappers.go.erb'],
-                          ['converters/google/resources/iam_kms_key_ring.go',
-                           'third_party/terraform/utils/iam_kms_key_ring.go.erb'],
-                          ['converters/google/resources/iam_kms_crypto_key.go',
-                           'third_party/terraform/utils/iam_kms_crypto_key.go.erb'],
-                          ['converters/google/resources/metadata.go',
-                           'third_party/terraform/utils/metadata.go.erb'],
-                          ['converters/google/resources/compute_instance.go',
-                           'third_party/validator/compute_instance.go.erb']
-                        ],
-                        file_template)
+      compile_file_list(
+        output_folder,
+        [
+          ['converters/google/resources/compute_operation.go',
+           'third_party/terraform/utils/compute_operation.go.erb'],
+          ['converters/google/resources/services/compute/compute_operation.go',
+           'third_party/terraform/services/compute/compute_operation.go.erb'],
+          ['converters/google/resources/transport/config.go',
+           'third_party/terraform/transport/config.go.erb'],
+          ['converters/google/resources/config_test_utils.go',
+           'third_party/terraform/utils/config_test_utils.go.erb'],
+          ['converters/google/resources/iam.go',
+           'third_party/terraform/utils/iam.go.erb'],
+          ['converters/google/resources/tpgiamresource/iam.go',
+           'third_party/terraform/tpgiamresource/iam.go.erb'],
+          ['converters/google/resources/tpgresource/common_diff_suppress.go',
+           'third_party/terraform/tpgresource/common_diff_suppress.go.erb'],
+          ['converters/google/resources/services/compute/compute_instance_helpers.go',
+           'third_party/terraform/services/compute/compute_instance_helpers.go.erb'],
+          ['converters/google/resources/transport/provider_handwritten_endpoint.go',
+           'third_party/terraform/transport/provider_handwritten_endpoint.go.erb'],
+          ['converters/google/resources/resource_converters.go',
+           'templates/validator/resource_converters.go.erb'],
+          ['converters/google/resources/mappers.go',
+           'templates/validator/mappers/mappers.go.erb'],
+          ['converters/google/resources/services/kms/iam_kms_key_ring.go',
+           'third_party/terraform/services/kms/iam_kms_key_ring.go.erb'],
+          ['converters/google/resources/services/kms/iam_kms_crypto_key.go',
+           'third_party/terraform/services/kms/iam_kms_crypto_key.go.erb'],
+          ['converters/google/resources/services/compute/metadata.go',
+           'third_party/terraform/services/compute/metadata.go.erb'],
+          ['converters/google/resources/services/compute/compute_instance.go',
+           'third_party/validator/compute_instance.go.erb']
+        ],
+        file_template
+      )
     end
 
     def copy_common_files(output_folder, generate_code, _generate_docs)
@@ -192,16 +207,28 @@ module Provider
       )
 
       copy_file_list(output_folder, [
+                       ['converters/google/resources/tpgresource/constants.go',
+                        'third_party/validator/tpgresource/constants.go'],
                        ['converters/google/resources/constants.go',
                         'third_party/validator/constants.go'],
                        ['converters/google/resources/cai.go',
                         'third_party/validator/cai.go'],
-                       ['converters/google/resources/cai_test.go',
-                        'third_party/validator/cai_test.go'],
+                       ['converters/google/resources/tpgresource/cai.go',
+                        'third_party/validator/tpgresource/cai.go'],
+                       ['converters/google/resources/tpgresource/cai_test.go',
+                        'third_party/validator/tpgresource/cai_test.go'],
+                       ['converters/google/resources/org_policy_policy.go',
+                        'third_party/validator/org_policy_policy.go'],
                        ['converters/google/resources/getconfig.go',
                         'third_party/validator/getconfig.go'],
+                       ['converters/google/resources/folder.go',
+                        'third_party/validator/folder.go'],
                        ['converters/google/resources/getconfig_test.go',
                         'third_party/validator/getconfig_test.go'],
+                       ['converters/google/resources/transport/config_test_utils.go',
+                        'third_party/terraform/transport/config_test_utils.go'],
+                       ['converters/google/resources/tpgresource/json_map.go',
+                        'third_party/validator/tpgresource/json_map.go'],
                        ['converters/google/resources/json_map.go',
                         'third_party/validator/json_map.go'],
                        ['converters/google/resources/project.go',
@@ -212,7 +239,7 @@ module Provider
                         'third_party/validator/storage_bucket.go'],
                        ['converters/google/resources/cloudfunctions_function.go',
                         'third_party/validator/cloudfunctions_function.go'],
-                       ['converters/google/resources/dcl.go',
+                       ['converters/google/resources/transport/dcl.go',
                         'third_party/validator/dcl.go'],
                        ['converters/google/resources/cloudfunctions_cloud_function.go',
                         'third_party/validator/cloudfunctions_cloud_function.go'],
@@ -222,10 +249,12 @@ module Provider
                         'third_party/validator/bigtable_cluster.go'],
                        ['converters/google/resources/bigtable_instance.go',
                         'third_party/validator/bigtable_instance.go'],
+                       ['converters/google/resources/tpgiamresource/iam_helpers.go',
+                        'third_party/validator/tpgiamresource/iam_helpers.go'],
                        ['converters/google/resources/iam_helpers.go',
                         'third_party/validator/iam_helpers.go'],
-                       ['converters/google/resources/iam_helpers_test.go',
-                        'third_party/validator/iam_helpers_test.go'],
+                       ['converters/google/resources/tpgiamresource/iam_helpers_test.go',
+                        'third_party/validator/tpgiamresource/iam_helpers_test.go'],
                        ['converters/google/resources/organization_iam.go',
                         'third_party/validator/organization_iam.go'],
                        ['converters/google/resources/project_iam.go',
@@ -240,68 +269,100 @@ module Provider
                         'third_party/validator/container.go'],
                        ['converters/google/resources/project_service.go',
                         'third_party/validator/project_service.go'],
-                       ['converters/google/resources/monitoring_slo_helper.go',
+                       ['converters/google/resources/services/monitoring/monitoring_slo_helper.go',
                         'third_party/validator/monitoring_slo_helper.go'],
-                       ['converters/google/resources/image.go',
-                        'third_party/terraform/utils/image.go'],
+                       ['converters/google/resources/service_account.go',
+                        'third_party/validator/service_account.go'],
+                       ['converters/google/resources/services/compute/image.go',
+                        'third_party/terraform/services/compute/image.go'],
                        ['converters/google/resources/import.go',
                         'third_party/terraform/utils/import.go'],
-                       ['converters/google/resources/disk_type.go',
-                        'third_party/terraform/utils/disk_type.go'],
+                       ['converters/google/resources/tpgresource/import.go',
+                        'third_party/terraform/tpgresource/import.go'],
+                       ['converters/google/resources/services/compute/disk_type.go',
+                        'third_party/terraform/services/compute/disk_type.go'],
+                       ['converters/google/resources/verify/validation.go',
+                        'third_party/terraform/verify/validation.go'],
                        ['converters/google/resources/validation.go',
                         'third_party/terraform/utils/validation.go'],
+                       ['converters/google/resources/tpgresource/regional_utils.go',
+                        'third_party/terraform/tpgresource/regional_utils.go'],
                        ['converters/google/resources/regional_utils.go',
                         'third_party/terraform/utils/regional_utils.go'],
+                       ['converters/google/resources/tpgresource/field_helpers.go',
+                        'third_party/terraform/tpgresource/field_helpers.go'],
                        ['converters/google/resources/field_helpers.go',
                         'third_party/terraform/utils/field_helpers.go'],
                        ['converters/google/resources/self_link_helpers.go',
                         'third_party/terraform/utils/self_link_helpers.go'],
-                       ['converters/google/resources/header_transport.go',
-                        'third_party/terraform/utils/header_transport.go'],
-                       ['converters/google/resources/bigtable_client_factory.go',
-                        'third_party/terraform/utils/bigtable_client_factory.go'],
+                       ['converters/google/resources/tpgresource/self_link_helpers.go',
+                        'third_party/terraform/tpgresource/self_link_helpers.go'],
+                       ['converters/google/resources/transport/header_transport.go',
+                        'third_party/terraform/transport/header_transport.go'],
+                       ['converters/google/resources/transport/bigtable_client_factory.go',
+                        'third_party/terraform/transport/bigtable_client_factory.go'],
+                       ['converters/google/resources/tpgresource/common_operation.go',
+                        'third_party/terraform/tpgresource/common_operation.go'],
                        ['converters/google/resources/common_operation.go',
                         'third_party/terraform/utils/common_operation.go'],
                        ['converters/google/resources/convert.go',
                         'third_party/terraform/utils/convert.go'],
+                       ['converters/google/resources/tpgresource/convert.go',
+                        'third_party/terraform/tpgresource/convert.go'],
+                       ['converters/google/resources/services/logging/extract.go',
+                        'third_party/terraform/services/logging/extract.go'],
                        ['converters/google/resources/service_scope.go',
                         'third_party/terraform/utils/service_scope.go'],
-                       ['converters/google/resources/kms_utils.go',
-                        'third_party/terraform/utils/kms_utils.go'],
-                       ['converters/google/resources/batcher.go',
-                        'third_party/terraform/utils/batcher.go'],
+                       ['converters/google/resources/tpgresource/service_scope.go',
+                        'third_party/terraform/tpgresource/service_scope.go'],
+                       ['converters/google/resources/services/kms/kms_utils.go',
+                        'third_party/terraform/services/kms/kms_utils.go'],
+                       ['converters/google/resources/transport/batcher.go',
+                        'third_party/terraform/transport/batcher.go'],
+                       ['converters/google/resources/transport/retry_utils.go',
+                        'third_party/terraform/transport/retry_utils.go'],
                        ['converters/google/resources/retry_utils.go',
                         'third_party/terraform/utils/retry_utils.go'],
-                       ['converters/google/resources/source_repo_utils.go',
-                        'third_party/terraform/utils/source_repo_utils.go'],
-                       ['converters/google/resources/retry_transport.go',
-                        'third_party/terraform/utils/retry_transport.go'],
+                       ['converters/google/resources/services/sourcerepo/source_repo_utils.go',
+                        'third_party/terraform/services/sourcerepo/source_repo_utils.go'],
+                       ['converters/google/resources/transport/retry_transport.go',
+                        'third_party/terraform/transport/retry_transport.go'],
+                       ['converters/google/resources/transport/transport.go',
+                        'third_party/terraform/transport/transport.go'],
+                       ['converters/google/resources/transport/error_retry_predicates.go',
+                        'third_party/terraform/transport/error_retry_predicates.go'],
                        ['converters/google/resources/error_retry_predicates.go',
                         'third_party/terraform/utils/error_retry_predicates.go'],
-                       ['converters/google/resources/pubsub_utils.go',
-                        'third_party/terraform/utils/pubsub_utils.go'],
+                       ['converters/google/resources/services/pubsub/pubsub_utils.go',
+                        'third_party/terraform/services/pubsub/pubsub_utils.go'],
                        ['converters/google/resources/sqladmin_operation.go',
                         'third_party/terraform/utils/sqladmin_operation.go'],
+                       ['converters/google/resources/services/sql/sqladmin_operation.go',
+                        'third_party/terraform/services/sql/sqladmin_operation.go'],
+                       ['converters/google/resources/verify/path_or_contents.go',
+                        'third_party/terraform/verify/path_or_contents.go'],
                        ['converters/google/resources/path_or_contents.go',
                         'third_party/terraform/utils/path_or_contents.go'],
-                       ['converters/google/resources/mutexkv.go',
-                        'third_party/terraform/utils/mutexkv.go'],
+                       ['converters/google/resources/transport/mutexkv.go',
+                        'third_party/terraform/transport/mutexkv.go'],
                        ['converters/google/resources/hashcode.go',
                         'third_party/terraform/utils/hashcode.go'],
+                       ['converters/google/resources/tpgresource/hashcode.go',
+                        'third_party/terraform/tpgresource/hashcode.go'],
                        ['converters/google/resources/iam_organization.go',
                         'third_party/terraform/utils/iam_organization.go'],
                        ['converters/google/resources/iam_folder.go',
                         'third_party/terraform/utils/iam_folder.go'],
                        ['converters/google/resources/iam_project.go',
                         'third_party/terraform/utils/iam_project.go'],
-                       ['converters/google/resources/privateca_utils.go',
-                        'third_party/terraform/utils/privateca_utils.go'],
+                       ['converters/google/resources/services/privateca/privateca_utils.go',
+                        'third_party/terraform/services/privateca/privateca_utils.go'],
                        ['converters/google/resources/utils.go',
                         'third_party/terraform/utils/utils.go'],
+                       ['converters/google/resources/tpgresource/utils.go',
+                        'third_party/terraform/tpgresource/utils.go'],
                        ['converters/google/resources/iam_bigquery_dataset.go',
                         'third_party/terraform/utils/iam_bigquery_dataset.go'],
-                       ['converters/google/resources/dcl_logger.go',
-                        '../tpgtools/handwritten/dcl_logger.go'],
                        ['converters/google/resources/bigquery_dataset_iam.go',
                         'third_party/validator/bigquery_dataset_iam.go'],
                        ['converters/google/resources/compute_security_policy.go',
@@ -329,14 +390,14 @@ module Provider
                        ['converters/google/resources/storage_bucket_iam.go',
                         'third_party/validator/storage_bucket_iam.go'],
                        ['converters/google/resources/organization_policy.go',
-                        'third_party/validator/organization_policy.go']
+                        'third_party/validator/organization_policy.go'],
+                       ['converters/google/resources/iam_storage_bucket.go',
+                        'third_party/validator/iam_storage_bucket.go']
                      ])
     end
 
     def generate_resource_tests(pwd, data)
-      product_whitelist = [
-        'cloudrun'
-      ]
+      product_whitelist = []
 
       return unless product_whitelist.include?(data.product.name.downcase)
       return if data.object.examples
@@ -347,7 +408,7 @@ module Provider
                 end
                     .empty?
 
-      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+      FileUtils.mkpath folder_name(data.version)
       data.generate(
         pwd,
         'templates/validator/examples/base_configs/test_file.go.erb',
@@ -363,25 +424,46 @@ module Provider
       return unless generate_code
       return if data.object.iam_policy.exclude_validator
 
-      target_folder = File.join(data.output_folder, 'converters/google/resources')
       name = data.object.filename_override || data.object.name.underscore
-      product_name = data.product.name.underscore
+      product_name = data.product.name.downcase
+      product_name_underscore = product_name.underscore
+      output_folder = File.join(
+        data.output_folder,
+        'converters/google/resources/services',
+        product_name
+      )
 
-      FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
+      FileUtils.mkpath output_folder
+      target = "#{product_name_underscore}_#{name}_iam.go"
       data.generate(pwd,
                     'templates/validator/resource_converter_iam.go.erb',
-                    "#{target_folder}/#{product_name}_#{name}_iam.go",
+                    File.join(output_folder, target),
                     self)
+      replace_import_path(output_folder, target)
 
+      target = "iam_#{product_name_underscore}_#{name}.go"
       data.generate(pwd,
                     'templates/terraform/iam_policy.go.erb',
-                    "#{target_folder}/iam_#{product_name}_#{name}.go",
+                    File.join(output_folder, target),
                     self)
+      replace_import_path(output_folder, target)
 
       # Don't generate tests - we can rely on the terraform provider
       # to test these.
     end
 
     def generate_resource_sweepers(pwd, data) end
+
+    def replace_import_path(output_folder, target)
+      # Replace import paths to reference the resources dir instead of the google provider
+      data = File.read("#{output_folder}/#{target}")
+      # rubocop:disable Layout/LineLength
+      data = data.gsub(
+        %r{(?<!provider ")github.com/hashicorp/terraform-provider-google/google},
+        'github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources'
+      )
+      # rubocop:enable Layout/LineLength
+      File.write("#{output_folder}/#{target}", data)
+    end
   end
 end

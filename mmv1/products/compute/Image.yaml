@@ -1,0 +1,268 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Image'
+kind: 'compute#image'
+base_url: projects/{{project}}/global/images
+immutable: true
+has_self_link: true
+collection_url_key: 'items'
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/compute/docs/images'
+  api: 'https://cloud.google.com/compute/docs/reference/v1/images'
+description: |
+  Represents an Image resource.
+
+  Google Compute Engine uses operating system images to create the root
+  persistent disks for your instances. You specify an image when you create
+  an instance. Images contain a boot loader, an operating system, and a
+  root file system. Linux operating system images are also capable of
+  running containers on Compute Engine.
+
+  Images can be either public or custom.
+
+  Public images are provided and maintained by Google, open-source
+  communities, and third-party vendors. By default, all projects have
+  access to these images and can use them to create instances.  Custom
+  images are available only to your project. You can create a custom image
+  from root persistent disks and other images. Then, use the custom image
+  to create an instance.
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  allowed_iam_role: 'roles/compute.imageUser'
+  parent_resource_attribute: 'image'
+  iam_conditions_request_type: :QUERY_PARAM
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'image_basic'
+    primary_resource_id: 'example'
+    vars:
+      image_name: 'example-image'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-example-image%s\",
+      context[\"random_suffix\"\
+      ])"
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'image_guest_os'
+    primary_resource_id: 'example'
+    vars:
+      image_name: 'example-image'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'image_basic_storage_location'
+    primary_resource_id: 'example'
+    vars:
+      image_name: 'example-sl-image'
+      primary_resource_name:
+        'fmt.Sprintf("tf-test-sl-example-image%s", context["random_suffix"])'
+properties:
+  - !ruby/object:Api::Type::Integer
+    name: 'archiveSizeBytes'
+    description: |
+      Size of the image tar.gz archive stored in Google Cloud Storage (in
+      bytes).
+    output: true
+  - !ruby/object:Api::Type::Time
+    name: 'creationTimestamp'
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      An optional description of this resource. Provide this property when
+      you create the resource.
+  - !ruby/object:Api::Type::Array
+    name: 'storageLocations'
+    description: |
+      Cloud Storage bucket storage location of the image
+      (regional or multi-regional).
+      Reference link: https://cloud.google.com/compute/docs/reference/rest/v1/images
+    item_type: Api::Type::String
+    default_from_api: true
+  - !ruby/object:Api::Type::Integer
+    name: 'diskSizeGb'
+    description: |
+      Size of the image when restored onto a persistent disk (in GB).
+    # TODO(alexstephen): Build family support.
+    # Families use a different API
+    default_from_api: true
+  - !ruby/object:Api::Type::String
+    name: 'family'
+    description: |
+      The name of the image family to which this image belongs. You can
+      create disks by specifying an image family instead of a specific
+      image name. The image family always returns its latest image that is
+      not deprecated. The name of the image family must comply with
+      RFC1035.
+  - !ruby/object:Api::Type::Array
+    name: 'guestOsFeatures'
+    description: |
+      A list of features to enable on the guest operating system.
+      Applicable only for bootable images.
+    default_from_api: true
+    is_set: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::Enum
+          name: 'type'
+          required: true
+          description: |
+            The type of supported feature. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
+          values:
+            - :MULTI_IP_SUBNET
+            - :SECURE_BOOT
+            - :SEV_CAPABLE
+            - :UEFI_COMPATIBLE
+            - :VIRTIO_SCSI_MULTIQUEUE
+            - :WINDOWS
+            - :GVNIC
+            - :SEV_LIVE_MIGRATABLE
+            - :SEV_SNP_CAPABLE
+            - :SUSPEND_RESUME_COMPATIBLE
+            - :TDX_CAPABLE
+  - !ruby/object:Api::Type::NestedObject
+    name: 'imageEncryptionKey'
+    description: |
+      Encrypts the image using a customer-supplied encryption key.
+
+      After you encrypt an image with a customer-supplied key, you must
+      provide the same key if you use the image later (e.g. to create a
+      disk from the image)
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeySelfLink'
+        api_name: 'kmsKeyName'
+        description: |
+          The self link of the encryption key that is stored in Google Cloud
+          KMS.
+        custom_flatten: 'templates/terraform/custom_flatten/image_kms_key_name.go.erb'
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeyServiceAccount'
+        description: |
+          The service account being used for the encryption request for the
+          given KMS key. If absent, the Compute Engine default service
+          account is used.
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'labels'
+    description: Labels to apply to this Image.
+    update_verb: :POST
+    update_url: 'projects/{{project}}/global/images/{{name}}/setLabels'
+  - !ruby/object:Api::Type::Fingerprint
+    name: 'labelFingerprint'
+    description: |
+      The fingerprint used for optimistic locking of this resource. Used
+      internally during updates.
+    update_url: 'projects/{{project}}/global/images/{{name}}/setLabels'
+    update_verb: :POST
+  - !ruby/object:Api::Type::Array
+    name: 'licenses'
+    description: Any applicable license URI.
+    default_from_api: true
+    item_type: !ruby/object:Api::Type::ResourceRef
+      name: 'license'
+      description: 'An applicable license URI'
+      resource: 'License'
+      imports: 'selfLink'
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      Name of the resource; provided by the client when the resource is
+      created. The name must be 1-63 characters long, and comply with
+      RFC1035. Specifically, the name must be 1-63 characters long and
+      match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means
+      the first character must be a lowercase letter, and all following
+      characters must be a dash, lowercase letter, or digit, except the
+      last character, which cannot be a dash.
+    required: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'rawDisk'
+    description: The parameters of the raw disk image.
+    ignore_read: true
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'containerType'
+        description: |
+          The format used to encode and transmit the block device, which
+          should be TAR. This is just a container and transmission format
+          and not a runtime format. Provided by the client when the disk
+          image is created.
+        values:
+          - :TAR
+        default_value: :TAR
+      - !ruby/object:Api::Type::String
+        name: 'sha1'
+        api_name: 'sha1Checksum'
+        description: |
+          An optional SHA1 checksum of the disk image before unpackaging.
+          This is provided by the client when the disk image is created.
+      # TODO(alexstephen): Figure out cross-module ResourceRefs
+      - !ruby/object:Api::Type::String
+        name: 'source'
+        required: true
+        description: |
+          The full Google Cloud Storage URL where disk storage is stored
+          You must provide either this property or the sourceDisk property
+          but not both.
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'sourceDisk'
+    description: |
+      The source disk to create this image based on.
+      You must provide either this property or the
+      rawDisk.source property but not both to create an image.
+    resource: 'Disk'
+    imports: 'selfLink'
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'sourceImage'
+    description: |
+      URL of the source image used to create this image. In order to create an image, you must provide the full or partial
+      URL of one of the following:
+
+      * The selfLink URL
+      * This property
+      * The rawDisk.source URL
+      * The sourceDisk URL
+    resource: 'Image'
+    imports: 'selfLink'
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'sourceSnapshot'
+    description: |
+      URL of the source snapshot used to create this image.
+
+      In order to create an image, you must provide the full or partial URL of one of the following:
+
+      * The selfLink URL
+      * This property
+      * The sourceImage URL
+      * The rawDisk.source URL
+      * The sourceDisk URL
+    resource: 'Snapshot'
+    imports: 'selfLink'
+# State is not applicable for state convergence.

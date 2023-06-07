@@ -36,7 +36,7 @@
     directly inserted from YAML.
 -%>
 <%
-  tf_product = (@config.legacy_name || product_ns).underscore
+  tf_product = (object.__product.legacy_name || product_ns).underscore
   tf_subcategory = (object.__product.display_name)
   terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   properties = object.all_user_properties
@@ -50,7 +50,6 @@
 ---
 <%= lines(autogen_notice(:yaml, pwd)) -%>
 subcategory: "<%= tf_subcategory -%>"
-page_title: "Google: <%= terraform_name -%>"
 description: |-
 <%= indent(object.description.first_sentence, 2) %>
 ---
@@ -87,11 +86,12 @@ To get more information about <%= object.name -%>, see:
 <%- end -%>
 <%- if !sensitive_props.empty? -%>
 <%-
-  sense_props = sensitive_props.map! {|prop| "`"+prop.lineage+"`"}.to_sentence
+  sense_props = sensitive_props.map! {|prop| "`"+prop.lineage+"`"}.join(', ')
 -%>
 
-~> **Warning:** All arguments including <%= sense_props -%> will be stored in the raw
-state as plain-text. [Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
+~> **Warning:** All arguments including the following potentially sensitive
+values will be stored in the raw state as plain text: <%=sense_props%>.
+[Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
 <%- end -%>
 
 <%#- We over-generate examples/oics buttons here; they'll all be _valid_ just not necessarily intended for this provider version.
@@ -105,7 +105,7 @@ state as plain-text. [Read more about sensitive data in state](https://www.terra
   </a>
 </div>
     <%- end -%>
-## Example Usage - <%= example.name.camelize(:upper).titleize %>
+## Example Usage - <%= example.name.camelize(:upper).title %>
 
 
 <%= example.config_documentation(pwd) -%>
@@ -173,7 +173,7 @@ In addition to the arguments listed above, the following computed attributes are
 ## Timeouts
 
 This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
 
 - `create` - Default is <%= timeouts.insert_minutes -%> minutes.
 <% if updatable?(object, properties) -%>

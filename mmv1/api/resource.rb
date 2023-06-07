@@ -44,7 +44,7 @@ module Api
       # [Optional] If set to true, don't generate the resource.
       attr_reader :exclude
       # [Optional] If set to true, the resource is not able to be updated.
-      attr_reader :input
+      attr_reader :immutable
       # [Optional] If set to true, this resource uses an update mask to perform
       # updates. This is typical of newer GCP APIs.
       attr_reader :update_mask
@@ -90,7 +90,7 @@ module Api
       #
       # [Optional] This is the name of the list of items
       # within the collection (list) json. Will default to the
-      # camelcase pluralize name of the resource.
+      # camelcase plural name of the resource.
       attr_reader :collection_url_key
       # [Optional] An ordered list of names of parameters that uniquely identify
       # the resource.
@@ -124,6 +124,89 @@ module Api
       # [Optional] If set to true, indicates that a resource is not configurable
       # such as GCP regions.
       attr_reader :readonly
+
+      # ====================
+      # Terraform Overrides
+      # ====================
+
+      # [Optional] If non-empty, overrides the full filename prefix
+      # i.e. google/resource_product_{{resource_filename_override}}.go
+      # i.e. google/resource_product_{{resource_filename_override}}_test.go
+      attr_reader :filename_override
+
+      # If non-empty, overrides the full given resource name.
+      # i.e. 'google_project' for resourcemanager.Project
+      # Use Provider::Terraform::Config.legacy_name to override just
+      # product name.
+      # Note: This should not be used for vanity names for new products.
+      # This was added to handle preexisting handwritten resources that
+      # don't match the natural generated name exactly, and to support
+      # services with a mix of handwritten and generated resources.
+      attr_reader :legacy_name
+
+      # The Terraform resource id format used when calling #setId(...).
+      # For instance, `{{name}}` means the id will be the resource name.
+      attr_reader :id_format
+      # Override attribute used to handwrite the formats for generating regex strings
+      # that match templated values to a self_link when importing, only necessary when
+      # a resource is not adequately covered by the standard provider generated options.
+      # Leading a token with `%`
+      # i.e. {{%parent}}/resource/{{resource}}
+      # will allow that token to hold multiple /'s.
+      attr_reader :import_format
+      attr_reader :custom_code
+      attr_reader :docs
+
+      # Lock name for a mutex to prevent concurrent API calls for a given
+      # resource.
+      attr_reader :mutex
+
+      # Examples in documentation. Backed by generated tests, and have
+      # corresponding OiCS walkthroughs.
+      attr_reader :examples
+
+      # Virtual fields on the Terraform resource. Usage and differences from url_param_only
+      # are documented in provider/terraform/virtual_fields.rb
+      attr_reader :virtual_fields
+
+      # TODO(alexstephen): Deprecate once all resources using autogen async.
+      # If true, generates product operation handling logic.
+      attr_reader :autogen_async
+
+      # If true, resource is not importable
+      attr_reader :exclude_import
+
+      # If true, exclude resource from Terraform Validator
+      # (i.e. terraform-provider-conversion)
+      attr_reader :exclude_validator
+
+      # If true, skip sweeper generation for this resource
+      attr_reader :skip_sweeper
+
+      attr_reader :timeouts
+
+      # An array of function names that determine whether an error is retryable.
+      attr_reader :error_retry_predicates
+
+      attr_reader :schema_version
+
+      # Set to true for resources that are unable to be deleted, such as KMS keyrings or project
+      # level resources such as firebase project
+      attr_reader :skip_delete
+
+      # This enables resources that get their project via a reference to a different resource
+      # instead of a project field to use User Project Overrides
+      attr_reader :supports_indirect_user_project_override
+
+      # Function to transform a read error so that handleNotFound recognises
+      # it as a 404. This should be added as a handwritten fn that takes in
+      # an error and returns one.
+      attr_reader :read_error_transform
+
+      # If true, resources that failed creation will be marked as tainted. As a consequence
+      # these resources will be deleted and recreated on the next apply call. This pattern
+      # is preferred over deleting the resource directly in post_create_failure hooks.
+      attr_reader :taint_resource_on_failed_create
     end
 
     include Properties
@@ -160,14 +243,14 @@ module Api
               `has exactly one :identity property"'
       end
 
-      check :collection_url_key, default: @name.pluralize.camelize(:lower)
+      check :collection_url_key, default: @name.plural.camelize(:lower)
 
       check :create_verb, type: Symbol, default: :POST, allowed: %i[POST PUT PATCH]
       check :read_verb, type: Symbol, default: :GET, allowed: %i[GET POST]
       check :delete_verb, type: Symbol, default: :DELETE, allowed: %i[POST PUT PATCH DELETE]
       check :update_verb, type: Symbol, default: :PUT, allowed: %i[POST PUT PATCH]
 
-      check :input, type: :boolean
+      check :immutable, type: :boolean
       check :min_version, type: String
 
       check :has_self_link, type: :boolean, default: false
@@ -180,6 +263,33 @@ module Api
 
       check :iam_policy, type: Api::Resource::IamPolicy
       check :exclude_resource, type: :boolean, default: false
+
+      @examples ||= []
+
+      check :filename_override, type: String
+      check :legacy_name, type: String
+      check :id_format, type: String
+      check :examples, item_type: Provider::Terraform::Examples, type: Array, default: []
+      check :virtual_fields,
+            item_type: Api::Type,
+            type: Array,
+            default: []
+
+      check :custom_code, type: Provider::Terraform::CustomCode,
+                          default: Provider::Terraform::CustomCode.new
+      check :docs, type: Provider::Terraform::Docs, default: Provider::Terraform::Docs.new
+      check :import_format, type: Array, item_type: String, default: []
+      check :autogen_async, type: :boolean, default: false
+      check :exclude_import, type: :boolean, default: false
+
+      check :timeouts, type: Api::Timeouts
+      check :error_retry_predicates, type: Array, item_type: String
+      check :schema_version, type: Integer
+      check :skip_delete, type: :boolean, default: false
+      check :supports_indirect_user_project_override, type: :boolean, default: false
+      check :read_error_transform, type: String
+      check :taint_resource_on_failed_create, type: :boolean, default: false
+      check :skip_sweeper, type: :boolean, default: false
 
       validate_identity unless @identity.nil?
     end
@@ -384,6 +494,24 @@ module Api
       end
     end
 
+    def merge(other)
+      result = self.class.new
+      instance_variables.each do |v|
+        result.instance_variable_set(v, instance_variable_get(v))
+      end
+
+      other.instance_variables.each do |v|
+        if other.instance_variable_get(v).instance_of?(Array)
+          result.instance_variable_set(v, deep_merge(result.instance_variable_get(v),
+                                                     other.instance_variable_get(v)))
+        else
+          result.instance_variable_set(v, other.instance_variable_get(v))
+        end
+      end
+
+      result
+    end
+
     # ====================
     # Debugging Methods
     # ====================
@@ -409,8 +537,8 @@ module Api
         json_out[v] = instance_variable_get(v) unless ignored_fields.include? v
       end
 
-      json_out.merge!(properties.map { |p| [p.name, p] }.to_h)
-      json_out.merge!(parameters.map { |p| [p.name, p] }.to_h)
+      json_out.merge!(properties.to_h { |p| [p.name, p] })
+      json_out.merge!(parameters.to_h { |p| [p.name, p] })
 
       JSON.generate(json_out, opts)
     end

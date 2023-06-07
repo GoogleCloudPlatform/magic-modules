@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud DNS"
-page_title: "Google: google_dns_record_set"
 description: |-
   Get a DNS record set within Google Cloud DNS
 ---
@@ -34,6 +33,8 @@ The following arguments are supported:
 * `managed_zone` - (Required) The Name of the zone.
 
 * `name` - (Required) The DNS name for the resource.
+
+* `type` - (Required) The RRSet type. [See this table for supported types](https://cloud.google.com/dns/docs/records#record_type).
 
 * `project` - (Optional) The ID of the project for the Google Cloud.
 

@@ -3,12 +3,17 @@ package google
 import (
 	"fmt"
 
+	"regexp"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"regexp"
 )
 
-func dataSourceGoogleServiceAccountKey() *schema.Resource {
+func DataSourceGoogleServiceAccountKey() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleServiceAccountKeyRead,
 
@@ -16,7 +21,7 @@ func dataSourceGoogleServiceAccountKey() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validateRegexp(ServiceAccountKeyNameRegex),
+				ValidateFunc: verify.ValidateRegexp(verify.ServiceAccountKeyNameRegex),
 			},
 			"public_key_type": {
 				Type:         schema.TypeString,
@@ -41,8 +46,8 @@ func dataSourceGoogleServiceAccountKey() *schema.Resource {
 }
 
 func dataSourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -51,9 +56,9 @@ func dataSourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interfac
 
 	// Validate name since interpolated values (i.e from a key or service
 	// account resource) will not get validated at plan time.
-	r := regexp.MustCompile(ServiceAccountKeyNameRegex)
+	r := regexp.MustCompile(verify.ServiceAccountKeyNameRegex)
 	if !r.MatchString(keyName) {
-		return fmt.Errorf("invalid key name %q does not match regexp %q", keyName, ServiceAccountKeyNameRegex)
+		return fmt.Errorf("invalid key name %q does not match regexp %q", keyName, verify.ServiceAccountKeyNameRegex)
 	}
 
 	publicKeyType := d.Get("public_key_type").(string)
@@ -61,7 +66,7 @@ func dataSourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interfac
 	// Confirm the service account key exists
 	sak, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Keys.Get(keyName).PublicKeyType(publicKeyType).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Service Account Key %q", keyName))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Service Account Key %q", keyName))
 	}
 
 	d.SetId(sak.Name)

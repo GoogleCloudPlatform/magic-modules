@@ -12,8 +12,8 @@
         # See the License for the specific language governing permissions and
         # limitations under the License.
 #%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-        project, err := getProject(d, config)
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+        project, err := tpgresource.GetProject(d, config)
         if err != nil {
                 return "", err
         }

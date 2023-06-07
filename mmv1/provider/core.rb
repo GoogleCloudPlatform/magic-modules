@@ -25,6 +25,13 @@ module Provider
   class Core
     include Compile::Core
 
+    TERRAFORM_PROVIDER_GA = 'github.com/hashicorp/terraform-provider-google'.freeze
+    TERRAFORM_PROVIDER_BETA = 'github.com/hashicorp/terraform-provider-google-beta'.freeze
+    TERRAFORM_PROVIDER_PRIVATE = 'internal/terraform-next'.freeze
+    RESOURCE_DIRECTORY_GA = 'google'.freeze
+    RESOURCE_DIRECTORY_BETA = 'google-beta'.freeze
+    RESOURCE_DIRECTORY_PRIVATE = 'google-private'.freeze
+
     def initialize(config, api, version_name, start_time)
       @config = config
       @api = api
@@ -59,7 +66,7 @@ module Provider
         true
       else
         Google::LOGGER.warn 'Either gofmt or goimports is not installed; go ' \
-          'code will be poorly formatted and will likely not compile.'
+                            'code will be poorly formatted and will likely not compile.'
         false
       end
     end
@@ -67,8 +74,7 @@ module Provider
     # Main entry point for generation.
     def generate(output_folder, types, product_path, dump_yaml, generate_code, generate_docs)
       generate_objects(output_folder, types, generate_code, generate_docs)
-      copy_files(output_folder) \
-        unless @config.files.nil? || @config.files.copy.nil?
+
       # Compilation has to be the last step, as some files (e.g.
       # CONTRIBUTING.md) may depend on the list of all files previously copied
       # or compiled.
@@ -78,12 +84,10 @@ module Provider
       compile_product_files(output_folder) \
         unless @config.files.nil? || @config.files.compile.nil?
 
-      FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+      FileUtils.mkpath output_folder
       pwd = Dir.pwd
       if generate_code
         Dir.chdir output_folder
-        generate_datasources(pwd, output_folder, types) \
-          unless @config.datasources.nil?
 
         generate_operation(pwd, output_folder, types)
         Dir.chdir pwd
@@ -103,10 +107,6 @@ module Provider
     end
 
     def generate_operation(pwd, output_folder, types); end
-
-    def copy_files(output_folder)
-      copy_file_list(output_folder, @config.files.copy)
-    end
 
     # generate_code and generate_docs are actually used because all of the variables
     # in scope in this method are made available within the templates by the compile call.
@@ -133,7 +133,7 @@ module Provider
           target_file = File.join(output_folder, target)
           target_dir = File.dirname(target_file)
           Google::LOGGER.debug "Copying #{source} => #{target}"
-          FileUtils.mkpath target_dir unless Dir.exist?(target_dir)
+          FileUtils.mkpath target_dir
 
           # If we've modified a file since starting an MM run, it's a reasonable
           # assumption that it was this run that modified it.
@@ -142,6 +142,9 @@ module Provider
           end
 
           FileUtils.copy_entry source, target_file
+
+          add_hashicorp_copyright_header(output_folder, target) if File.extname(target) == '.go'
+          replace_import_path(output_folder, target) if File.extname(target) == '.go'
         end
       end.map(&:join)
     end
@@ -181,15 +184,140 @@ module Provider
     end
 
     def compile_file_list(output_folder, files, file_template, pwd = Dir.pwd)
-      FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+      FileUtils.mkpath output_folder
       Dir.chdir output_folder
       files.map do |target, source|
         Thread.new do
           Google::LOGGER.debug "Compiling #{source} => #{target}"
           file_template.generate(pwd, source, target, self)
+
+          add_hashicorp_copyright_header(output_folder, target)
+          replace_import_path(output_folder, target)
         end
       end.map(&:join)
       Dir.chdir pwd
+    end
+
+    def add_hashicorp_copyright_header(output_folder, target)
+      unless expected_output_folder?(output_folder)
+        Google::LOGGER.info "Unexpected output folder (#{output_folder}) detected " \
+                            'when deciding to add HashiCorp copyright headers. ' \
+                            'Watch out for unexpected changes to copied files'
+      end
+      # only add copyright headers when generating TPG and TPGB
+      return unless output_folder.end_with?('terraform-provider-google') ||
+                    output_folder.end_with?('terraform-provider-google-beta')
+
+      # Prevent adding copyright header to files with paths or names matching the strings below
+      # NOTE: these entries need to match the content of the .copywrite.hcl file originally
+      #       created in https://github.com/GoogleCloudPlatform/magic-modules/pull/7336
+      #       The test-fixtures folder is not included here as it's copied as a whole,
+      #       not file by file (see common~copy.yaml)
+      ignored_folders = [
+        '.release/',
+        '.changelog/',
+        'examples/',
+        'scripts/',
+        'META.d/'
+      ]
+      ignored_files = [
+        'go.mod',
+        '.goreleaser.yml',
+        '.golangci.yml',
+        'terraform-registry-manifest.json'
+      ]
+      should_add_header = true
+      ignored_folders.each do |folder|
+        # folder will be path leading to file
+        next unless target.start_with? folder
+
+        Google::LOGGER.debug 'Not adding HashiCorp copyright headers in ' \
+                             "ignored folder #{folder} : #{target}"
+        should_add_header = false
+      end
+      return unless should_add_header
+
+      ignored_files.each do |file|
+        # file will be the filename and extension, with no preceding path
+        next unless target.end_with? file
+
+        Google::LOGGER.debug 'Not adding HashiCorp copyright headers to ' \
+                             "ignored file #{file} : #{target}"
+        should_add_header = false
+      end
+      return unless should_add_header
+
+      Google::LOGGER.debug "Adding HashiCorp copyright header to : #{target}"
+      data = File.read("#{output_folder}/#{target}")
+
+      copyright_header = ['Copyright (c) HashiCorp, Inc.', 'SPDX-License-Identifier: MPL-2.0']
+      lang = language_from_filename(target)
+
+      # Some file types we don't want to add headers to
+      # e.g. .sh where headers are functional
+      # Also, this guards against new filetypes being added and triggering build errors
+      return unless lang != :unsupported
+
+      # File is not ignored and is appropriate file type to add header to
+      header = comment_block(copyright_header, lang)
+      File.write("#{output_folder}/#{target}", header)
+
+      File.write("#{output_folder}/#{target}", data, mode: 'a') # append mode
+    end
+
+    def expected_output_folder?(output_folder)
+      expected_folders = %w[
+        terraform-provider-google
+        terraform-provider-google-beta
+        terraform-next
+        terraform-google-conversion
+        tfplan2cai
+      ]
+      folder_name = output_folder.split('/')[-1] # Possible issue with Windows OS
+      is_expected = false
+      expected_folders.each do |folder|
+        next unless folder_name == folder
+
+        is_expected = true
+        break
+      end
+      is_expected
+    end
+
+    def replace_import_path(output_folder, target)
+      return unless @target_version_name != 'ga'
+
+      # Replace the import pathes in utility files
+      case @target_version_name
+      when 'beta'
+        tpg = TERRAFORM_PROVIDER_BETA
+        dir = RESOURCE_DIRECTORY_BETA
+      else
+        tpg = TERRAFORM_PROVIDER_PRIVATE
+        dir = RESOURCE_DIRECTORY_PRIVATE
+      end
+
+      data = File.read("#{output_folder}/#{target}")
+      data = data.gsub(
+        "#{TERRAFORM_PROVIDER_GA}/#{RESOURCE_DIRECTORY_GA}",
+        "#{tpg}/#{dir}"
+      )
+      data = data.gsub(
+        "#{TERRAFORM_PROVIDER_GA}/version",
+        "#{tpg}/version"
+      )
+      File.write("#{output_folder}/#{target}", data)
+    end
+
+    def import_path
+      case @target_version_name
+      when 'ga'
+        "#{TERRAFORM_PROVIDER_GA}/#{RESOURCE_DIRECTORY_GA}"
+      when 'beta'
+        "#{TERRAFORM_PROVIDER_BETA}/#{RESOURCE_DIRECTORY_BETA}"
+      else
+        "#{TERRAFORM_PROVIDER_PRIVATE}/#{RESOURCE_DIRECTORY_PRIVATE}"
+      end
     end
 
     def generate_objects(output_folder, types, generate_code, generate_docs)
@@ -219,7 +347,7 @@ module Provider
       pwd = Dir.pwd
       data = build_object_data(pwd, object, output_folder, version_name)
       unless object.exclude_resource
-        FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+        FileUtils.mkpath output_folder
         Dir.chdir output_folder
         Google::LOGGER.debug "Generating #{object.name} resource"
         generate_resource(pwd, data.clone, generate_code, generate_docs)
@@ -235,7 +363,7 @@ module Provider
       # if iam_policy is not defined or excluded, don't generate it
       return if object.iam_policy.nil? || object.iam_policy.exclude
 
-      FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+      FileUtils.mkpath output_folder
       Dir.chdir output_folder
       Google::LOGGER.debug "Generating #{object.name} IAM policy"
       generate_iam_policy(pwd, data.clone, generate_code, generate_docs)
@@ -244,39 +372,6 @@ module Provider
 
     # Generate files at a per-resource basis.
     def generate_resource_files(pwd, data) end
-
-    def generate_datasources(pwd, output_folder, types)
-      # We need to apply overrides for datasources
-      @api = Overrides::Runner.build(@api, @config.datasources,
-                                     @config.resource_override,
-                                     @config.property_override)
-      @api.validate
-
-      @api.set_properties_based_on_version(@version)
-      @api.objects.each do |object|
-        if !types.empty? && !types.include?(object.name)
-          Google::LOGGER.info(
-            "Excluding #{object.name} datasource per user request"
-          )
-        elsif types.empty? && object.exclude
-          Google::LOGGER.info(
-            "Excluding #{object.name} datasource per API catalog"
-          )
-        elsif types.empty? && object.not_in_version?(@version)
-          Google::LOGGER.info(
-            "Excluding #{object.name} datasource per API version"
-          )
-        else
-          generate_datasource(pwd, object, output_folder)
-        end
-      end
-    end
-
-    def generate_datasource(pwd, object, output_folder)
-      data = build_object_data(pwd, object, output_folder, @target_version_name)
-
-      compile_datasource(pwd, data.clone)
-    end
 
     def build_object_data(_pwd, object, output_folder, version)
       ProductFileTemplate.file_for_resource(output_folder, object, version, @config, build_env)
@@ -297,36 +392,27 @@ module Provider
 
     # Filter the properties to keep only the ones requiring custom update
     # method and group them by update url & verb.
-    def properties_by_custom_update(properties, behavior = :new)
+    def properties_by_custom_update(properties)
       update_props = properties.reject do |p|
         p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
       end
 
-      # TODO(rambleraptor): Add support to Ansible for one-at-a-time updates.
-      if behavior == :old
-        update_props.group_by do |p|
-          { update_url: p.update_url, update_verb: p.update_verb, fingerprint: p.fingerprint_name }
-        end
-      else
-        update_props.group_by do |p|
-          {
-            update_url: p.update_url,
-            update_verb: p.update_verb,
-            update_id: p.update_id,
-            fingerprint_name: p.fingerprint_name
-          }
-        end
+      update_props.group_by do |p|
+        {
+          update_url: p.update_url,
+          update_verb: p.update_verb,
+          update_id: p.update_id,
+          fingerprint_name: p.fingerprint_name
+        }
       end
     end
 
     # Filter the properties to keep only the ones don't have custom update
     # method and group them by update url & verb.
     def properties_without_custom_update(properties)
-      update_props = properties.select do |p|
+      properties.select do |p|
         p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
       end
-
-      update_props
     end
 
     # Takes a update_url and returns the list of custom updatable properties
@@ -380,6 +466,36 @@ module Provider
         return matcher[:year] unless matcher.nil?
       end
       Time.now.year
+    end
+
+    # Adapted from the method used in templating
+    # See: mmv1/compile/core.rb
+    def comment_block(text, lang)
+      case lang
+      when :ruby, :python, :yaml, :git, :gemfile
+        header = text.map { |t| t&.empty? ? '#' : "# #{t}" }
+      when :go
+        header = text.map { |t| t&.empty? ? '//' : "// #{t}" }
+      else
+        raise "Unknown language for comment: #{lang}"
+      end
+
+      header_string = header.join("\n")
+      "#{header_string}\n" # add trailing newline to returned value
+    end
+
+    def language_from_filename(filename)
+      extension = filename.split('.')[-1]
+      case extension
+      when 'go'
+        :go
+      when 'rb'
+        :ruby
+      when 'yaml', 'yml'
+        :yaml
+      else
+        :unsupported
+      end
     end
   end
 end

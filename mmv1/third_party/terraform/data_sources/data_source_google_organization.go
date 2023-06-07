@@ -5,11 +5,13 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
-func dataSourceGoogleOrganization() *schema.Resource {
+func DataSourceGoogleOrganization() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceOrganizationRead,
 		Schema: map[string]*schema.Schema{
@@ -49,8 +51,8 @@ func dataSourceGoogleOrganization() *schema.Resource {
 }
 
 func dataSourceOrganizationRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -59,12 +61,15 @@ func dataSourceOrganizationRead(d *schema.ResourceData, meta interface{}) error 
 	if v, ok := d.GetOk("domain"); ok {
 		filter := fmt.Sprintf("domain=%s", v.(string))
 		var resp *cloudresourcemanager.SearchOrganizationsResponse
-		err := retryTimeDuration(func() (err error) {
-			resp, err = config.NewResourceManagerClient(userAgent).Organizations.Search(&cloudresourcemanager.SearchOrganizationsRequest{
-				Filter: filter,
-			}).Do()
-			return err
-		}, d.Timeout(schema.TimeoutRead))
+		err := transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() (err error) {
+				resp, err = config.NewResourceManagerClient(userAgent).Organizations.Search(&cloudresourcemanager.SearchOrganizationsRequest{
+					Filter: filter,
+				}).Do()
+				return err
+			},
+			Timeout: d.Timeout(schema.TimeoutRead),
+		})
 		if err != nil {
 			return fmt.Errorf("Error reading organization: %s", err)
 		}
@@ -90,12 +95,15 @@ func dataSourceOrganizationRead(d *schema.ResourceData, meta interface{}) error 
 
 	} else if v, ok := d.GetOk("organization"); ok {
 		var resp *cloudresourcemanager.Organization
-		err := retryTimeDuration(func() (err error) {
-			resp, err = config.NewResourceManagerClient(userAgent).Organizations.Get(canonicalOrganizationName(v.(string))).Do()
-			return err
-		}, d.Timeout(schema.TimeoutRead))
+		err := transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() (err error) {
+				resp, err = config.NewResourceManagerClient(userAgent).Organizations.Get(canonicalOrganizationName(v.(string))).Do()
+				return err
+			},
+			Timeout: d.Timeout(schema.TimeoutRead),
+		})
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Organization Not Found : %s", v))
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Organization Not Found : %s", v))
 		}
 
 		organization = resp
@@ -107,7 +115,7 @@ func dataSourceOrganizationRead(d *schema.ResourceData, meta interface{}) error 
 	if err := d.Set("name", organization.Name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
-	if err := d.Set("org_id", GetResourceNameFromSelfLink(organization.Name)); err != nil {
+	if err := d.Set("org_id", tpgresource.GetResourceNameFromSelfLink(organization.Name)); err != nil {
 		return fmt.Errorf("Error setting org_id: %s", err)
 	}
 	if err := d.Set("domain", organization.DisplayName); err != nil {

@@ -7,11 +7,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/servicenetworking/v1"
 )
 
-func resourceGoogleServiceNetworkingPeeredDNSDomain() *schema.Resource {
+func ResourceGoogleServiceNetworkingPeeredDNSDomain() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceGoogleServiceNetworkingPeeredDNSDomainCreate,
 		Read:   resourceGoogleServiceNetworkingPeeredDNSDomainRead,
@@ -90,13 +93,13 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainImport(d *schema.ResourceData
 }
 
 func resourceGoogleServiceNetworkingPeeredDNSDomainCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -127,7 +130,7 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainCreate(d *schema.ResourceData
 		return err
 	}
 
-	if err := serviceNetworkingOperationWaitTime(config, op, "Create Service Networking Peered DNS Domain", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
+	if err := ServiceNetworkingOperationWaitTime(config, op, "Create Service Networking Peered DNS Domain", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
 		return err
 	}
 
@@ -140,13 +143,13 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainCreate(d *schema.ResourceData
 }
 
 func resourceGoogleServiceNetworkingPeeredDNSDomainRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -208,8 +211,8 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainRead(d *schema.ResourceData, 
 }
 
 func resourceGoogleServiceNetworkingPeeredDNSDomainDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -218,11 +221,14 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainDelete(d *schema.ResourceData
 	apiService := config.NewServiceNetworkingClient(userAgent)
 	peeredDnsDomainsService := servicenetworking.NewServicesProjectsGlobalNetworksPeeredDnsDomainsService(apiService)
 
-	if err := retryTimeDuration(func() error {
-		_, delErr := peeredDnsDomainsService.Delete(d.Id()).Do()
-		return delErr
-	}, d.Timeout(schema.TimeoutDelete)); err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Peered DNS domain %s", name))
+	if err := transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			_, delErr := peeredDnsDomainsService.Delete(d.Id()).Do()
+			return delErr
+		},
+		Timeout: d.Timeout(schema.TimeoutDelete),
+	}); err != nil {
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Peered DNS domain %s", name))
 	}
 
 	d.SetId("")
@@ -232,11 +238,11 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainDelete(d *schema.ResourceData
 // NOTE(deviavir): An out of band aspect of this API is that it uses a unique formatting of network
 // different from the standard self_link URI. It requires a call to the resource manager to get the project
 // number for the current project.
-func getProjectNumber(d *schema.ResourceData, config *Config, project, userAgent string) (string, error) {
+func getProjectNumber(d *schema.ResourceData, config *transport_tpg.Config, project, userAgent string) (string, error) {
 	log.Printf("[DEBUG] Retrieving project number by doing a GET with the project id, as required by service networking")
 	// err == nil indicates that the billing_project value was found
 	billingProject := project
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 

@@ -7,17 +7,19 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
-type configAttrGetter func(cfg *Config) string
+type configAttrGetter func(cfg *transport_tpg.Config) string
 
-func getCredentials(cfg *Config) string {
+func getCredentials(cfg *transport_tpg.Config) string {
 	return cfg.Credentials
 }
-func getAccessToken(cfg *Config) string {
+func getAccessToken(cfg *transport_tpg.Config) string {
 	return cfg.AccessToken
 }
-func getImpersonateServiceAccount(cfg *Config) string {
+func getImpersonateServiceAccount(cfg *transport_tpg.Config) string {
 	return cfg.ImpersonateServiceAccount
 }
 
@@ -122,7 +124,7 @@ func TestNewConfigUserAgent(t *testing.T) {
 				t.Fatalf("error building config: %s", err)
 			}
 
-			assert.Equal(t, c.expected, cfg.UserAgent())
+			assert.Equal(t, c.expected, cfg.UserAgent)
 		})
 	}
 }
@@ -135,7 +137,7 @@ func TestNewConfigUserAgent_nilClientUsesDefault(t *testing.T) {
 		t.Fatalf("error building config: %s", err)
 	}
 
-	assert.NotEmpty(t, cfg.Client())
+	assert.NotEmpty(t, cfg.Client)
 }
 
 func TestNewConfigUserAgent_usesPassedClient(t *testing.T) {
@@ -147,5 +149,5 @@ func TestNewConfigUserAgent_usesPassedClient(t *testing.T) {
 		t.Fatalf("error building config: %s", err)
 	}
 
-	assert.Exactly(t, client, cfg.Client())
+	assert.Exactly(t, client, cfg.Client)
 }

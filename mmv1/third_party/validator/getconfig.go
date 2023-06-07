@@ -5,48 +5,40 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
+
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
-// Return the value of the private userAgent field
-func (c *Config) UserAgent() string {
-	return c.userAgent
-}
-
-// Return the value of the private client field
-func (c *Config) Client() *http.Client {
-	return c.client
-}
-
-func NewConfig(ctx context.Context, project, zone, region string, offline bool, userAgent string, client *http.Client) (*Config, error) {
-	cfg := &Config{
+func NewConfig(ctx context.Context, project, zone, region string, offline bool, userAgent string, client *http.Client) (*transport_tpg.Config, error) {
+	cfg := &transport_tpg.Config{
 		Project:   project,
 		Zone:      zone,
 		Region:    region,
-		userAgent: userAgent,
+		UserAgent: userAgent,
 	}
 
 	// Search for default credentials
-	cfg.Credentials = multiEnvSearch([]string{
+	cfg.Credentials = transport_tpg.MultiEnvSearch([]string{
 		"GOOGLE_CREDENTIALS",
 		"GOOGLE_CLOUD_KEYFILE_JSON",
 		"GCLOUD_KEYFILE_JSON",
 	})
 
-	cfg.AccessToken = multiEnvSearch([]string{
+	cfg.AccessToken = transport_tpg.MultiEnvSearch([]string{
 		"GOOGLE_OAUTH_ACCESS_TOKEN",
 	})
 
-	cfg.ImpersonateServiceAccount = multiEnvSearch([]string{
+	cfg.ImpersonateServiceAccount = transport_tpg.MultiEnvSearch([]string{
 		"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
 	})
 
 	if !offline {
-		ConfigureBasePaths(cfg)
+		transport_tpg.ConfigureBasePaths(cfg)
 		if err := cfg.LoadAndValidate(ctx); err != nil {
 			return nil, errors.Wrap(err, "load and validate config")
 		}
 		if client != nil {
-			cfg.client = client
+			cfg.Client = client
 		}
 	}
 

@@ -1,0 +1,192 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'ServiceAttachment'
+kind: 'compute#ServiceAttachment'
+base_url: projects/{{project}}/regions/{{region}}/serviceAttachments
+has_self_link: true
+update_verb: :PATCH
+description: |
+  Represents a ServiceAttachment resource.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Configuring Private Service Connect to access services': 'https://cloud.google.com/vpc/docs/configure-private-service-connect-services'
+  api: 'https://cloud.google.com/compute/docs/reference/beta/serviceAttachments'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'service_attachment_basic'
+    primary_resource_id: 'psc_ilb_service_attachment'
+    vars:
+      service_attachment_name: 'my-psc-ilb'
+      network_name: 'psc-ilb-network'
+      nat_subnetwork_name: 'psc-ilb-nat'
+      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
+      producer_health_check_name: 'producer-service-health-check'
+      producer_service_name: 'producer-service'
+      producer_forwarding_rule_name: 'producer-forwarding-rule'
+      consumer_address_name: 'psc-ilb-consumer-address'
+      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'service_attachment_explicit_projects'
+    primary_resource_id: 'psc_ilb_service_attachment'
+    vars:
+      service_attachment_name: 'my-psc-ilb'
+      network_name: 'psc-ilb-network'
+      nat_subnetwork_name: 'psc-ilb-nat'
+      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
+      producer_health_check_name: 'producer-service-health-check'
+      producer_service_name: 'producer-service'
+      producer_forwarding_rule_name: 'producer-forwarding-rule'
+      consumer_address_name: 'psc-ilb-consumer-address'
+      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  update_encoder: 'templates/terraform/update_encoder/compute_service_attachment.go.erb'
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'region'
+    resource: 'Region'
+    imports: 'name'
+    description: |
+      URL of the region where the resource resides.
+    required: false
+    immutable: true
+    default_from_api: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    required: true
+    description: |
+      Name of the resource. The name must be 1-63 characters long, and
+      comply with RFC1035. Specifically, the name must be 1-63 characters
+      long and match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?`
+      which means the first character must be a lowercase letter, and all
+      following characters must be a dash, lowercase letter, or digit,
+      except the last character, which cannot be a dash.
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      An optional description of this resource.
+  - !ruby/object:Api::Type::Fingerprint
+    name: 'fingerprint'
+    description: |
+      Fingerprint of this resource. This field is used internally during
+      updates of this resource.
+  - !ruby/object:Api::Type::String
+    name: 'connectionPreference'
+    required: true
+    description: |
+      The connection preference to use for this service attachment. Valid
+      values include "ACCEPT_AUTOMATIC", "ACCEPT_MANUAL".
+  - !ruby/object:Api::Type::Array
+    name: 'connectedEndpoints'
+    output: true
+    description: |
+      An array of the consumer forwarding rules connected to this service
+      attachment.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'endpoint'
+          output: true
+          description: |
+            The URL of the consumer forwarding rule.
+        - !ruby/object:Api::Type::String
+          name: 'status'
+          output: true
+          description: |
+            The status of the connection from the consumer forwarding rule to
+            this service attachment.
+  - !ruby/object:Api::Type::ResourceRef
+    name: targetService
+    required: true
+    immutable: true
+    resource: 'ForwardingRule'
+    imports: 'selfLink'
+    description: |
+      The URL of a forwarding rule that represents the service identified by
+      this service attachment.
+  - !ruby/object:Api::Type::Array
+    name: 'natSubnets'
+    required: true
+    send_empty_value: true
+    description: |
+      An array of subnets that is provided for NAT in this service attachment.
+    item_type: !ruby/object:Api::Type::ResourceRef
+      name: 'subnet'
+      resource: 'Subnetwork'
+      imports: 'selfLink'
+      description: |
+        A subnet that is provided for NAT in this service attachment.
+  - !ruby/object:Api::Type::Boolean
+    name: 'enableProxyProtocol'
+    required: true
+    immutable: true
+    description: |
+      If true, enable the proxy protocol which is for supplying client TCP/IP
+      address data in TCP connections that traverse proxies on their way to
+      destination servers.
+  - !ruby/object:Api::Type::Array
+    name: 'domainNames'
+    immutable: true
+    item_type: Api::Type::String
+    description: |
+      If specified, the domain name will be used during the integration between
+      the PSC connected endpoints and the Cloud DNS. For example, this is a
+      valid domain name: "p.mycompany.com.". Current max number of domain names
+      supported is 1.
+  - !ruby/object:Api::Type::Array
+    name: 'consumerRejectLists'
+    item_type: Api::Type::String
+    send_empty_value: true
+    description: |
+      An array of projects that are not allowed to connect to this service
+      attachment.
+  - !ruby/object:Api::Type::Array
+    name: 'consumerAcceptLists'
+    description: |
+      An array of projects that are allowed to connect to this service
+      attachment.
+    send_empty_value: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'projectIdOrNum'
+          required: true
+          description: |
+            A project that is allowed to connect to this service attachment.
+        - !ruby/object:Api::Type::Integer
+          name: 'connectionLimit'
+          required: true
+          description: |
+            The number of consumer forwarding rules the consumer project can
+            create.

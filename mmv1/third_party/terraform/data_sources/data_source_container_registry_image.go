@@ -5,9 +5,11 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleContainerImage() *schema.Resource {
+func DataSourceGoogleContainerImage() *schema.Resource {
 	return &schema.Resource{
 		Read: containerRegistryImageRead,
 		Schema: map[string]*schema.Schema{
@@ -41,8 +43,8 @@ func dataSourceGoogleContainerImage() *schema.Resource {
 }
 
 func containerRegistryImageRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	project, err := getProject(d, config)
+	config := meta.(*transport_tpg.Config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}

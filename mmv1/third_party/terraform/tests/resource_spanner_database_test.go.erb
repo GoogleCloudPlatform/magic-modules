@@ -7,21 +7,30 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/spanner"
 )
 
 func TestAccSpannerDatabase_basic(t *testing.T) {
 	t.Parallel()
 
-	project := getTestProjectFromEnv()
-	rnd := randString(t, 10)
+	project := acctest.GetTestProjectFromEnv()
+	rnd := RandString(t, 10)
 	instanceName := fmt.Sprintf("tf-test-%s", rnd)
 	databaseName := fmt.Sprintf("tfgen_%s", rnd)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSpannerDatabaseDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerDatabase_virtualUpdate(instanceName, databaseName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_database.basic", "state"),
+					resource.TestCheckResourceAttr("google_spanner_database.basic", "version_retention_period", "1h"), // default set by API
+				),
+			},
 			{
 				Config: testAccSpannerDatabase_basic(instanceName, databaseName),
 				Check: resource.ComposeTestCheckFunc(
@@ -120,17 +129,38 @@ resource "google_spanner_database" "basic" {
 `, instanceName, instanceName, databaseName)
 }
 
+func testAccSpannerDatabase_virtualUpdate(instanceName, databaseName string) string {
+	return fmt.Sprintf(`
+resource "google_spanner_instance" "basic" {
+  name         = "%s"
+  config       = "regional-us-central1"
+  display_name = "%s-display"
+  num_nodes    = 1
+}
+
+resource "google_spanner_database" "basic" {
+  instance = google_spanner_instance.basic.name
+  name     = "%s"
+  ddl = [
+	"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+	"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
+  ]
+  deletion_protection = true
+}
+`, instanceName, instanceName, databaseName)
+}
+
 func TestAccSpannerDatabase_postgres(t *testing.T) {
 	t.Parallel()
 
-	rnd := randString(t, 10)
+	rnd := RandString(t, 10)
 	instanceName := fmt.Sprintf("tf-test-%s", rnd)
 	databaseName := fmt.Sprintf("tfgen_%s", rnd)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSpannerDatabaseDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSpannerDatabase_postgres(instanceName, databaseName),
@@ -212,14 +242,14 @@ resource "google_spanner_database" "basic_spangres" {
 func TestAccSpannerDatabase_versionRetentionPeriod(t *testing.T) {
 	t.Parallel()
 
-	rnd := randString(t, 10)
+	rnd := RandString(t, 10)
 	instanceName := fmt.Sprintf("tf-test-%s", rnd)
 	databaseName := fmt.Sprintf("tfgen_%s", rnd)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSpannerDatabaseDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				// Test creating a database with `version_retention_period` set
@@ -371,84 +401,6 @@ func TestDatabaseNameForApi(t *testing.T) {
 	expectEquals(t, expected, actual)
 }
 
-// Unit Tests for ForceNew when the change in ddl
-func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFuncForceNew(t *testing.T) {
-	t.Parallel()
-
-	cases := map[string]struct {
-		before   interface{}
-		after    interface{}
-		forcenew bool
-	}{
-		"remove_old_statements": {
-			before: []interface{}{
-				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)"},
-			after: []interface{}{
-				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)"},
-			forcenew: true,
-		},
-		"append_new_statements": {
-			before: []interface{}{
-				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)"},
-			after: []interface{}{
-				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
-				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
-			},
-			forcenew: false,
-		},
-		"no_change": {
-			before: []interface{}{
-				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)"},
-			after: []interface{}{
-				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)"},
-			forcenew: false,
-		},
-		"order_of_statments_change": {
-			before: []interface{}{
-				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
-				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
-				"CREATE TABLE t3 (t3 INT64 NOT NULL,) PRIMARY KEY(t3)",
-			},
-			after: []interface{}{
-				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
-				"CREATE TABLE t3 (t3 INT64 NOT NULL,) PRIMARY KEY(t3)",
-				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
-			},
-			forcenew: true,
-		},
-		"missing_an_old_statement": {
-			before: []interface{}{
-				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
-				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
-				"CREATE TABLE t3 (t3 INT64 NOT NULL,) PRIMARY KEY(t3)",
-			},
-			after: []interface{}{
-				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
-				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
-			},
-			forcenew: true,
-		},
-	}
-
-	for tn, tc := range cases {
-		d := &ResourceDiffMock{
-			Before: map[string]interface{}{
-				"ddl": tc.before,
-			},
-			After: map[string]interface{}{
-				"ddl": tc.after,
-			},
-		}
-		err := resourceSpannerDBDdlCustomDiffFunc(d)
-		if err != nil {
-			t.Errorf("failed, expected no error but received - %s for the condition %s", err, tn)
-		}
-		if d.IsForceNew != tc.forcenew {
-			t.Errorf("ForceNew not setup correctly for the condition-'%s', expected:%v;actual:%v", tn, tc.forcenew, d.IsForceNew)
-		}
-	}
-}
-
 // Unit Tests for validation of retention period argument
 func TestValidateDatabaseRetentionPeriod(t *testing.T) {
 	t.Parallel()
@@ -506,7 +458,7 @@ func TestValidateDatabaseRetentionPeriod(t *testing.T) {
 
 	for tn, tc := range testCases {
 		t.Run(tn, func(t *testing.T) {
-			_, errs := validateDatabaseRetentionPeriod(tc.input, "foobar")
+			_, errs := spanner.ValidateDatabaseRetentionPeriod(tc.input, "foobar")
 			var wantErrCount string
 			if tc.expectError {
 				wantErrCount = "1+"
@@ -521,17 +473,17 @@ func TestValidateDatabaseRetentionPeriod(t *testing.T) {
 }
 
 func TestAccSpannerDatabase_deletionProtection(t *testing.T) {
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSpannerDatabaseDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSpannerDatabase_deletionProtection(context),
@@ -576,17 +528,17 @@ resource "google_spanner_database" "database" {
 <% unless version == 'ga' -%>
 <%# Field is not beta, but google_project_service_identity dependency is -%>
 func TestAccSpannerDatabase_cmek(t *testing.T) {
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckSpannerDatabaseDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckSpannerDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSpannerDatabase_cmek(context),

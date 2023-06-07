@@ -6,19 +6,20 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccServiceNetworkingConnection_create(t *testing.T) {
 	t.Parallel()
 
 	network := BootstrapSharedTestNetwork(t, "service-networking-connection-create")
-	addr := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	addr := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	service := "servicenetworking.googleapis.com"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testServiceNetworkingConnectionDestroy(t, service, network),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testServiceNetworkingConnectionDestroy(t, service, network),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceNetworkingConnection(network, addr, "servicenetworking.googleapis.com"),
@@ -36,14 +37,14 @@ func TestAccServiceNetworkingConnection_update(t *testing.T) {
 	t.Parallel()
 
 	network := BootstrapSharedTestNetwork(t, "service-networking-connection-update")
-	addr1 := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	addr2 := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	addr1 := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	addr2 := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	service := "servicenetworking.googleapis.com"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testServiceNetworkingConnectionDestroy(t, service, network),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testServiceNetworkingConnectionDestroy(t, service, network),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceNetworkingConnection(network, addr1, "servicenetworking.googleapis.com"),
@@ -68,12 +69,12 @@ func TestAccServiceNetworkingConnection_update(t *testing.T) {
 
 func testServiceNetworkingConnectionDestroy(t *testing.T, parent, network string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 		parentService := "services/" + parent
-		networkName := fmt.Sprintf("projects/%s/global/networks/%s", getTestProjectFromEnv(), network)
-		listCall := config.NewServiceNetworkingClient(config.userAgent).Services.Connections.List(parentService).Network(networkName)
+		networkName := fmt.Sprintf("projects/%s/global/networks/%s", acctest.GetTestProjectFromEnv(), network)
+		listCall := config.NewServiceNetworkingClient(config.UserAgent).Services.Connections.List(parentService).Network(networkName)
 		if config.UserProjectOverride {
-			listCall.Header().Add("X-Goog-User-Project", getTestProjectFromEnv())
+			listCall.Header().Add("X-Goog-User-Project", acctest.GetTestProjectFromEnv())
 		}
 		response, err := listCall.Do()
 		if err != nil {

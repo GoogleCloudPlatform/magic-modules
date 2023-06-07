@@ -1,10 +1,15 @@
 <%
   product_name = object.__product.name
   has_project = object.base_url.include?("{{project}}")
+  has_project = has_project || (object.async.is_a? Api::OpAsync and object.async.include_project)
 -%>
+<% if hc_downstream -%>
+<%= lines(hashicorp_copyright_header(:go, pwd)) -%>
+<% end -%>
+
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package google
+package <%= product_ns.downcase -%>
 
 import (
 <% if async.result.resource_inside_response -%>
@@ -12,18 +17,21 @@ import (
 <% end -%>
   "fmt"
   "time"
+
+  "<%= import_path() -%>/tpgresource"
+  transport_tpg "<%= import_path() -%>/transport"
 )
 
 type <%= product_name -%>OperationWaiter struct {
-  Config    *Config
+  Config    *transport_tpg.Config
   UserAgent string
 <% if has_project -%>
   Project string
 <% end -%>
 <%  if object.__product.operation_retry -%>
-	retryCount int
+  retryCount int
 <% end -%>
-  CommonOperationWaiter
+  tpgresource.CommonOperationWaiter
 }
 
 func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
@@ -37,17 +45,28 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
   url := fmt.Sprintf("%s<%= [async.operation.base_url].flatten.join.gsub('{{op_id}}', '%s')-%>", w.Config.<%= product_name -%>BasePath, w.CommonOperationWaiter.Op.Name)
   <% end -%>
 
-  return sendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, w.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+  return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config: w.Config,
+    Method: "GET",
+    <% if has_project -%>
+    Project: w.Project,
+    <% end -%>
+    RawURL: url,
+    UserAgent: w.UserAgent,
+    <% if object.error_retry_predicates -%>
+    ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+    <% end -%>
+  })
 }
 
 <%  if object.__product.operation_retry -%>
 func (w *<%= product_name -%>OperationWaiter) IsRetryable(err error) bool {
-	<%= lines(compile(pwd + '/' + object.__product.operation_retry)) -%>
+  <%= lines(compile(pwd + '/' + object.__product.operation_retry)) -%>
 }
 <% end -%>
 
 
-func create<%= product_name %>Waiter(config *Config, op map[string]interface{}, <% if has_project -%> project, <% end -%> activity, userAgent string) (*<%=product_name%>OperationWaiter, error) {
+func create<%= product_name %>Waiter(config *transport_tpg.Config, op map[string]interface{}, <% if has_project -%> project, <% end -%> activity, userAgent string) (*<%=product_name%>OperationWaiter, error) {
   w := &<%= product_name -%>OperationWaiter{
     Config:    config,
     UserAgent: userAgent,
@@ -67,19 +86,19 @@ func create<%= product_name %>Waiter(config *Config, op map[string]interface{}, 
     Might as well just nolint it so we can pass the linter checks.
 -%>
 // nolint: deadcode,unused
-func <%= product_name.camelize(:lower) -%>OperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{},<% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
+func <%= product_name.camelize() -%>OperationWaitTimeWithResponse(config *transport_tpg.Config, op map[string]interface{}, response *map[string]interface{},<% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
   w, err := create<%= product_name %>Waiter(config, op, <% if has_project -%> project, <%end-%> activity, userAgent)
   if err != nil {
       return err
   }
-  if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
+  if err := tpgresource.OperationWait(w, activity, timeout, config.PollInterval); err != nil {
       return err
   }
   return json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), response)
 }
 <% end -%>
 
-func <%= product_name.camelize(:lower) -%>OperationWaitTime(config *Config, op map[string]interface{}, <% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
+func <%= product_name.camelize() -%>OperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, <% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
   if val, ok := op["name"]; !ok || val == "" {
     // This was a synchronous call - there is no operation to wait for.
     return nil
@@ -89,5 +108,5 @@ func <%= product_name.camelize(:lower) -%>OperationWaitTime(config *Config, op m
       // If w is nil, the op was synchronous.
       return err
   }
-  return OperationWait(w, activity, timeout, config.PollInterval)
+  return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }

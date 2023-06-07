@@ -1,0 +1,370 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'RouterNat'
+base_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+self_link: projects/{{project}}/regions/{{region}}/routers/{{router}}
+create_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+update_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+delete_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+create_verb: :PATCH
+update_verb: :PATCH
+delete_verb: :PATCH
+identity:
+  - name
+collection_url_key: nats
+nested_query: !ruby/object:Api::Resource::NestedQuery
+  modify_by_patch: true
+  keys:
+    - nats
+description: |
+  A NAT service created in a router.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Google Cloud Router': 'https://cloud.google.com/router/docs/'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+exclude_validator: true
+id_format: '{{project}}/{{region}}/{{router}}/{{name}}'
+mutex: router/{{region}}/{{router}}
+examples:
+  # These examples are not used to autogenerate tests, as fine-grained
+  # resources do not fit the normal test flow - we need to test deletion
+  # in a test step while parent resource still exists vs in CheckDestroy
+  # when all resources have been deleted.
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'router_nat_basic'
+    primary_resource_id: 'nat'
+    skip_test: true
+    vars:
+      router_name: 'my-router'
+      nat_name: 'my-router-nat'
+      network_name: 'my-network'
+      subnet_name: 'my-subnetwork'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'router_nat_manual_ips'
+    primary_resource_id: 'nat_manual'
+    skip_test: true
+    vars:
+      router_name: 'my-router'
+      nat_name: 'my-router-nat'
+      network_name: 'my-network'
+      subnet_name: 'my-subnetwork'
+      address_name: 'nat-manual-ip'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'router_nat_rules'
+    primary_resource_id: 'nat_rules'
+    skip_test: true
+    vars:
+      router_name: 'my-router'
+      nat_name: 'my-router-nat'
+      network_name: 'my-network'
+      subnet_name: 'my-subnetwork'
+      address_name1: 'nat-address1'
+      address_name2: 'nat-address2'
+      address_name3: 'nat-address3'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: 'templates/terraform/constants/router_nat.go.erb'
+  resource_definition: 'templates/terraform/resource_definition/router_nat.go.erb'
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'router'
+    resource: 'Router'
+    imports: 'name'
+    description: |
+      The name of the Cloud Router in which this NAT will be configured.
+    required: true
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::ResourceRef
+    name: region
+    resource: Region
+    imports: name
+    description: Region where the router and NAT reside.
+    immutable: true
+    required: false
+    url_param_only: true
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      Name of the NAT service. The name must be 1-63 characters long and
+      comply with RFC1035.
+    required: true
+    immutable: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'verify.ValidateRFC1035Name(2, 63)'
+  - !ruby/object:Api::Type::Enum
+    name: 'natIpAllocateOption'
+    required: true
+    description: |
+      How external IPs should be allocated for this NAT. Valid values are
+      `AUTO_ONLY` for only allowing NAT IPs allocated by Google Cloud
+      Platform, or `MANUAL_ONLY` for only user-allocated NAT IP addresses.
+    values:
+      - :MANUAL_ONLY
+      - :AUTO_ONLY
+  - !ruby/object:Api::Type::Array
+    name: 'natIps'
+    description: |
+      Self-links of NAT IPs. Only valid if natIpAllocateOption
+      is set to MANUAL_ONLY.
+    send_empty_value: true
+    is_set: true
+    set_hash_func: computeRouterNatIPsHash
+    item_type: !ruby/object:Api::Type::ResourceRef
+      name: 'address'
+      resource: 'Address'
+      imports: 'selfLink'
+      description: 'A reference to an address associated with this NAT'
+  - !ruby/object:Api::Type::Array
+    name: 'drainNatIps'
+    description: |
+      A list of URLs of the IP resources to be drained. These IPs must be
+      valid static external IPs that have been assigned to the NAT.
+    send_empty_value: true
+    is_set: true
+    item_type: !ruby/object:Api::Type::ResourceRef
+      name: 'address'
+      resource: 'Address'
+      imports: 'selfLink'
+      description: 'A reference to an address associated with this NAT'
+  - !ruby/object:Api::Type::Enum
+    name: 'sourceSubnetworkIpRangesToNat'
+    required: true
+    description: |
+      How NAT should be configured per Subnetwork.
+      If `ALL_SUBNETWORKS_ALL_IP_RANGES`, all of the
+      IP ranges in every Subnetwork are allowed to Nat.
+      If `ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES`, all of the primary IP
+      ranges in every Subnetwork are allowed to Nat.
+      `LIST_OF_SUBNETWORKS`: A list of Subnetworks are allowed to Nat
+      (specified in the field subnetwork below). Note that if this field
+      contains ALL_SUBNETWORKS_ALL_IP_RANGES or
+      ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES, then there should not be any
+      other RouterNat section in any Router for this network in this region.
+    values:
+      - :ALL_SUBNETWORKS_ALL_IP_RANGES
+      - :ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES
+      - :LIST_OF_SUBNETWORKS
+  - !ruby/object:Api::Type::Array
+    name: subnetwork
+    api_name: 'subnetworks'
+    send_empty_value: true
+    description: |
+      One or more subnetwork NAT configurations. Only used if
+      `source_subnetwork_ip_ranges_to_nat` is set to `LIST_OF_SUBNETWORKS`
+    is_set: true
+    set_hash_func: computeRouterNatSubnetworkHash
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::ResourceRef
+          name: 'name'
+          resource: 'Subnetwork'
+          imports: 'selfLink'
+          description: 'Self-link of subnetwork to NAT'
+          required: true
+        - !ruby/object:Api::Type::Array
+          name: 'sourceIpRangesToNat'
+          description: |
+            List of options for which source IPs in the subnetwork
+            should have NAT enabled. Supported values include:
+            `ALL_IP_RANGES`, `LIST_OF_SECONDARY_IP_RANGES`,
+            `PRIMARY_IP_RANGE`.
+          required: true
+          min_size: 1
+          is_set: true
+          item_type: Api::Type::String
+        - !ruby/object:Api::Type::Array
+          name: 'secondaryIpRangeNames'
+          description: |
+            List of the secondary ranges of the subnetwork that are allowed
+            to use NAT. This can be populated only if
+            `LIST_OF_SECONDARY_IP_RANGES` is one of the values in
+            sourceIpRangesToNat
+          is_set: true
+          item_type: Api::Type::String
+  - !ruby/object:Api::Type::Integer
+    name: minPortsPerVm
+    description: |
+      Minimum number of ports allocated to a VM from this NAT.
+  - !ruby/object:Api::Type::Integer
+    name: maxPortsPerVm
+    description: |
+      Maximum number of ports allocated to a VM from this NAT.
+      This field can only be set when enableDynamicPortAllocation is enabled.
+  - !ruby/object:Api::Type::Boolean
+    name: enableDynamicPortAllocation
+    description: |
+      Enable Dynamic Port Allocation.
+      If minPortsPerVm is set, minPortsPerVm must be set to a power of two greater than or equal to 32.
+      If minPortsPerVm is not set, a minimum of 32 ports will be allocated to a VM from this NAT config.
+      If maxPortsPerVm is set, maxPortsPerVm must be set to a power of two greater than minPortsPerVm.
+      If maxPortsPerVm is not set, a maximum of 65536 ports will be allocated to a VM from this NAT config.
+
+      Mutually exclusive with enableEndpointIndependentMapping.
+    default_from_api: true
+    send_empty_value: true
+  - !ruby/object:Api::Type::Integer
+    name: udpIdleTimeoutSec
+    description: |
+      Timeout (in seconds) for UDP connections. Defaults to 30s if not set.
+    default_value: 30
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+  - !ruby/object:Api::Type::Integer
+    name: icmpIdleTimeoutSec
+    description: |
+      Timeout (in seconds) for ICMP connections. Defaults to 30s if not set.
+    default_value: 30
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+  - !ruby/object:Api::Type::Integer
+    name: tcpEstablishedIdleTimeoutSec
+    description: |
+      Timeout (in seconds) for TCP established connections.
+      Defaults to 1200s if not set.
+    default_value: 1200
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+  - !ruby/object:Api::Type::Integer
+    name: tcpTransitoryIdleTimeoutSec
+    description: |
+      Timeout (in seconds) for TCP transitory connections.
+      Defaults to 30s if not set.
+    default_value: 30
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+  - !ruby/object:Api::Type::Integer
+    name: tcpTimeWaitTimeoutSec
+    description: |
+      Timeout (in seconds) for TCP connections that are in TIME_WAIT state.
+      Defaults to 120s if not set.
+    default_value: 120
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+  - !ruby/object:Api::Type::NestedObject
+    name: logConfig
+    description: |
+      Configuration for logging on NAT
+    send_empty_value: true
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'enable'
+        description: |
+          Indicates whether or not to export logs.
+        required: true
+      - !ruby/object:Api::Type::Enum
+        name: 'filter'
+        description: |
+          Specifies the desired filtering of logs on this NAT.
+        required: true
+        values:
+          - :ERRORS_ONLY
+          - :TRANSLATIONS_ONLY
+          - :ALL
+  - !ruby/object:Api::Type::Array
+    name: rules
+    description: 'A list of rules associated with this NAT.'
+    send_empty_value: true
+    is_set: true
+    set_hash_func: computeRouterNatRulesHash
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::Integer
+          name: 'ruleNumber'
+          description: |
+            An integer uniquely identifying a rule in the list.
+            The rule number must be a positive value between 0 and 65000, and must be unique among rules within a NAT.
+          required: true
+          send_empty_value: true
+          validation: !ruby/object:Provider::Terraform::Validation
+            function: validation.IntBetween(0, 65000)
+        - !ruby/object:Api::Type::String
+          name: 'description'
+          description: 'An optional description of this rule.'
+        - !ruby/object:Api::Type::String
+          name: 'match'
+          description: |
+            CEL expression that specifies the match condition that egress traffic from a VM is evaluated against.
+            If it evaluates to true, the corresponding action is enforced.
+
+            The following examples are valid match expressions for public NAT:
+
+            "inIpRange(destination.ip, '1.1.0.0/16') || inIpRange(destination.ip, '2.2.0.0/16')"
+
+            "destination.ip == '1.1.0.1' || destination.ip == '8.8.8.8'"
+
+            The following example is a valid match expression for private NAT:
+
+            "nexthop.hub == 'https://networkconnectivity.googleapis.com/v1alpha1/projects/my-project/global/hub/hub-1'"
+          required: true
+        - !ruby/object:Api::Type::NestedObject
+          name: 'action'
+          description:
+            'The action to be enforced for traffic that matches this rule.'
+          default_from_api: true
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: 'sourceNatActiveIps'
+              description: |
+                A list of URLs of the IP resources used for this NAT rule.
+                These IP addresses must be valid static external IP addresses assigned to the project.
+                This field is used for public NAT.
+              is_set: true
+              set_hash_func: computeRouterNatIPsHash
+              custom_flatten: 'templates/terraform/custom_flatten/nat_rules_ip_set.erb'
+              item_type: !ruby/object:Api::Type::ResourceRef
+                name: 'address'
+                resource: 'Address'
+                imports: 'selfLink'
+                description:
+                  'A reference to an address associated with this NAT'
+            - !ruby/object:Api::Type::Array
+              name: 'sourceNatDrainIps'
+              description: |
+                A list of URLs of the IP resources to be drained.
+                These IPs must be valid static external IPs that have been assigned to the NAT.
+                These IPs should be used for updating/patching a NAT rule only.
+                This field is used for public NAT.
+              is_set: true
+              set_hash_func: computeRouterNatIPsHash
+              custom_flatten: 'templates/terraform/custom_flatten/nat_rules_ip_set.erb'
+              item_type: !ruby/object:Api::Type::ResourceRef
+                name: 'address'
+                resource: 'Address'
+                imports: 'selfLink'
+                description:
+                  'A reference to an address associated with this NAT'
+  - !ruby/object:Api::Type::Boolean
+    name: enableEndpointIndependentMapping
+    description: |
+      Specifies if endpoint independent mapping is enabled. This is enabled by default. For more information
+      see the [official documentation](https://cloud.google.com/nat/docs/overview#specs-rfcs).
+    default_value: true
+    send_empty_value: true

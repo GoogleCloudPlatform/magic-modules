@@ -1,17 +1,23 @@
 package google
 
-import "fmt"
+import (
+	"fmt"
 
-func resourceConverterProjectIamPolicy() ResourceConverter {
-	return ResourceConverter{
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgiamresource"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+)
+
+func resourceConverterProjectIamPolicy() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType:         "cloudresourcemanager.googleapis.com/Project",
 		Convert:           GetProjectIamPolicyCaiObject,
 		MergeCreateUpdate: MergeProjectIamPolicy,
 	}
 }
 
-func resourceConverterProjectIamBinding() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterProjectIamBinding() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType:         "cloudresourcemanager.googleapis.com/Project",
 		Convert:           GetProjectIamBindingCaiObject,
 		FetchFullResource: FetchProjectIamPolicy,
@@ -20,8 +26,8 @@ func resourceConverterProjectIamBinding() ResourceConverter {
 	}
 }
 
-func resourceConverterProjectIamMember() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterProjectIamMember() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType:         "cloudresourcemanager.googleapis.com/Project",
 		Convert:           GetProjectIamMemberCaiObject,
 		FetchFullResource: FetchProjectIamPolicy,
@@ -30,72 +36,72 @@ func resourceConverterProjectIamMember() ResourceConverter {
 	}
 }
 
-func GetProjectIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
-	return newProjectIamAsset(d, config, expandIamPolicyBindings)
+func GetProjectIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	return newProjectIamAsset(d, config, tpgiamresource.ExpandIamPolicyBindings)
 }
 
-func GetProjectIamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
-	return newProjectIamAsset(d, config, expandIamRoleBindings)
+func GetProjectIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	return newProjectIamAsset(d, config, tpgiamresource.ExpandIamRoleBindings)
 }
 
-func GetProjectIamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
-	return newProjectIamAsset(d, config, expandIamMemberBindings)
+func GetProjectIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	return newProjectIamAsset(d, config, tpgiamresource.ExpandIamMemberBindings)
 }
 
-func MergeProjectIamPolicy(existing, incoming Asset) Asset {
+func MergeProjectIamPolicy(existing, incoming tpgresource.Asset) tpgresource.Asset {
 	existing.IAMPolicy = incoming.IAMPolicy
 	return existing
 }
 
-func MergeProjectIamBinding(existing, incoming Asset) Asset {
-	return mergeIamAssets(existing, incoming, mergeAuthoritativeBindings)
+func MergeProjectIamBinding(existing, incoming tpgresource.Asset) tpgresource.Asset {
+	return tpgiamresource.MergeIamAssets(existing, incoming, tpgiamresource.MergeAuthoritativeBindings)
 }
 
-func MergeProjectIamBindingDelete(existing, incoming Asset) Asset {
-	return mergeDeleteIamAssets(existing, incoming, mergeDeleteAuthoritativeBindings)
+func MergeProjectIamBindingDelete(existing, incoming tpgresource.Asset) tpgresource.Asset {
+	return tpgiamresource.MergeDeleteIamAssets(existing, incoming, tpgiamresource.MergeDeleteAuthoritativeBindings)
 }
 
-func MergeProjectIamMember(existing, incoming Asset) Asset {
-	return mergeIamAssets(existing, incoming, mergeAdditiveBindings)
+func MergeProjectIamMember(existing, incoming tpgresource.Asset) tpgresource.Asset {
+	return tpgiamresource.MergeIamAssets(existing, incoming, tpgiamresource.MergeAdditiveBindings)
 }
 
-func MergeProjectIamMemberDelete(existing, incoming Asset) Asset {
-	return mergeDeleteIamAssets(existing, incoming, mergeDeleteAdditiveBindings)
+func MergeProjectIamMemberDelete(existing, incoming tpgresource.Asset) tpgresource.Asset {
+	return tpgiamresource.MergeDeleteIamAssets(existing, incoming, tpgiamresource.MergeDeleteAdditiveBindings)
 }
 
 func newProjectIamAsset(
-	d TerraformResourceData,
-	config *Config,
-	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
-) ([]Asset, error) {
+	d tpgresource.TerraformResourceData,
+	config *transport_tpg.Config,
+	expandBindings func(d tpgresource.TerraformResourceData) ([]tpgresource.IAMBinding, error),
+) ([]tpgresource.Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
-		return []Asset{}, fmt.Errorf("expanding bindings: %v", err)
+		return []tpgresource.Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
 	// Ideally we should use project_number, but since that is generated server-side,
 	// we substitute project_id.
-	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project}}")
+	name, err := tpgresource.AssetName(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project}}")
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 
-	return []Asset{{
+	return []tpgresource.Asset{{
 		Name: name,
 		Type: "cloudresourcemanager.googleapis.com/Project",
-		IAMPolicy: &IAMPolicy{
+		IAMPolicy: &tpgresource.IAMPolicy{
 			Bindings: bindings,
 		},
 	}}, nil
 }
 
-func FetchProjectIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+func FetchProjectIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgresource.Asset, error) {
 	if _, ok := d.GetOk("project"); !ok {
-		return Asset{}, ErrEmptyIdentityField
+		return tpgresource.Asset{}, tpgresource.ErrEmptyIdentityField
 	}
 
 	// We use project_id in the asset name template to be consistent with newProjectIamAsset.
-	return fetchIamPolicy(
+	return tpgiamresource.FetchIamPolicy(
 		NewProjectIamUpdater,
 		d,
 		config,

@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud (Stackdriver) Logging"
-page_title: "Google: google_logging_project_sink"
 description: |-
   Manages a project-level logging sink.
 ---
@@ -25,7 +24,7 @@ Manages a project-level logging sink. For more information see:
 resource "google_logging_project_sink" "my-sink" {
   name = "my-pubsub-instance-sink"
 
-  # Can export to pubsub, cloud storage, or bigquery
+  # Can export to pubsub, cloud storage, bigquery, log bucket, or another project
   destination = "pubsub.googleapis.com/projects/my-project/topics/instance-activity"
 
   # Log all WARN or higher severity messages relating to instances

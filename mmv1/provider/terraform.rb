@@ -31,6 +31,13 @@ module Provider
     include Provider::Terraform::SubTemplate
     include Google::GolangUtils
 
+    def generating_hashicorp_repo?
+      # The default Provider is used to generate TPG and TPGB in HashiCorp-owned repos.
+      # The compiler deviates from the default behaviour with a -f flag to produce
+      # non-HashiCorp downstreams.
+      true
+    end
+
     # ProductFileTemplate with Terraform specific fields
     class TerraformProductFileTemplate < Provider::ProductFileTemplate
       # The async object used for making operations.
@@ -90,12 +97,13 @@ module Provider
     end
 
     def updatable?(resource, properties)
-      !resource.input || !properties.reject { |p| p.update_url.nil? }.empty?
+      !resource.immutable || !properties.reject { |p| p.update_url.nil? }.empty?
     end
 
     def force_new?(property, resource)
       !property.output &&
-        (property.input || (resource.input && property.update_url.nil? && property.input.nil? &&
+        (property.immutable || (resource.immutable && property.update_url.nil? &&
+                              property.immutable.nil? &&
                             (property.parent.nil? ||
                              force_new?(property.parent, resource))))
     end
@@ -186,10 +194,13 @@ module Provider
     # GCP Resource on Terraform.
     def generate_resource(pwd, data, generate_code, generate_docs)
       if generate_code
-        FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+        # @api.api_name is the service folder name
+        product_name = @api.api_name
+        target_folder = File.join(folder_name(data.version), 'services', product_name)
+        FileUtils.mkpath target_folder
         data.generate(pwd,
                       '/templates/terraform/resource.erb',
-                      "#{folder_name(data.version)}/resource_#{full_resource_name(data)}.go",
+                      "#{target_folder}/resource_#{full_resource_name(data)}.go",
                       self)
       end
 
@@ -215,7 +226,7 @@ module Provider
                 end
                     .empty?
 
-      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+      FileUtils.mkpath folder_name(data.version)
       data.generate(
         pwd,
         'templates/terraform/examples/base_configs/test_file.go.erb',
@@ -233,7 +244,7 @@ module Provider
 
       file_name =
         "#{folder_name(data.version)}/resource_#{full_resource_name(data)}_sweeper_test.go"
-      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+      FileUtils.mkpath folder_name(data.version)
       data.generate(pwd,
                     'templates/terraform/sweeper_file.go.erb',
                     file_name,
@@ -243,16 +254,18 @@ module Provider
     def generate_operation(pwd, output_folder, _types)
       return if @api.objects.select(&:autogen_async).empty?
 
-      product_name = @api.name.underscore
+      product_name = @api.api_name
+      product_name_underscore = @api.name.underscore
       data = build_object_data(pwd, @api.objects.first, output_folder, @target_version_name)
 
       data.object = @api.objects.select(&:autogen_async).first
 
       data.async = data.object.async
-      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+      target_folder = File.join(folder_name(data.version), 'services', product_name)
+      FileUtils.mkpath target_folder
       data.generate(pwd,
                     'templates/terraform/operation.go.erb',
-                    "#{folder_name(data.version)}/#{product_name}_operation.go",
+                    "#{target_folder}/#{product_name_underscore}_operation.go",
                     self)
     end
 
@@ -262,10 +275,12 @@ module Provider
       if generate_code \
         && (!data.object.iam_policy.min_version \
         || data.object.iam_policy.min_version >= data.version)
-        FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+        product_name = @api.api_name
+        target_folder = File.join(folder_name(data.version), 'services', product_name)
+        FileUtils.mkpath target_folder
         data.generate(pwd,
                       'templates/terraform/iam_policy.go.erb',
-                      "#{folder_name(data.version)}/iam_#{full_resource_name(data)}.go",
+                      "#{target_folder}/iam_#{full_resource_name(data)}.go",
                       self)
 
         # Only generate test if testable examples exist.
@@ -286,12 +301,18 @@ module Provider
 
     def generate_iam_documentation(pwd, data)
       target_folder = data.output_folder
-      target_folder = File.join(target_folder, 'website', 'docs', 'r')
-      FileUtils.mkpath target_folder
+      resource_doc_folder = File.join(target_folder, 'website', 'docs', 'r')
+      datasource_doc_folder = File.join(target_folder, 'website', 'docs', 'd')
+      FileUtils.mkpath resource_doc_folder
       filepath =
-        File.join(target_folder, "#{full_resource_name(data)}_iam.html.markdown")
+        File.join(resource_doc_folder, "#{full_resource_name(data)}_iam.html.markdown")
 
       data.generate(pwd, 'templates/terraform/resource_iam.html.markdown.erb', filepath, self)
+      FileUtils.mkpath datasource_doc_folder
+      filepath =
+        File.join(datasource_doc_folder, "#{full_resource_name(data)}_iam_policy.html.markdown")
+
+      data.generate(pwd, 'templates/terraform/datasource_iam.html.markdown.erb', filepath, self)
     end
 
     def build_object_data(_pwd, object, output_folder, version)
@@ -305,7 +326,7 @@ module Provider
     end
 
     def extract_identifiers(url)
-      url.scan(/\{\{\%?(\w+)\}\}/).flatten
+      url.scan(/\{\{%?(\w+)\}\}/).flatten
     end
 
     # Returns the id format of an object, or self_link_uri if none is explicitly defined
@@ -320,7 +341,7 @@ module Provider
         data.object.legacy_name.sub(/^google_/, '')
       else
         name = data.object.filename_override || data.object.name.underscore
-        product_name = @config.legacy_name || data.product.name.underscore
+        product_name = data.product.legacy_name || data.product.name.underscore
         "#{product_name}_#{name}"
       end
     end

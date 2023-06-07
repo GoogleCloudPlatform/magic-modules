@@ -22,7 +22,7 @@ class Logger
   @@old_initialize = Logger.instance_method :initialize
 
   def initialize
-    @@old_initialize.bind(self).call(STDERR) unless ENV['GOOGLE_LOGGER'] == '0'
+    @@old_initialize.bind(self).call($stderr) unless ENV['GOOGLE_LOGGER'] == '0'
   end
   # rubocop:enable Style/ClassVars
 end

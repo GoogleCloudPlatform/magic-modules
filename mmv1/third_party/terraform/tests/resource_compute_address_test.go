@@ -5,18 +5,19 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccComputeAddress_networkTier(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeAddress_networkTier(randString(t, 10)),
+				Config: testAccComputeAddress_networkTier(RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_address.foobar",
@@ -28,13 +29,13 @@ func TestAccComputeAddress_networkTier(t *testing.T) {
 }
 
 func TestAccComputeAddress_internal(t *testing.T) {
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeAddress_internal(randString(t, 10)),
+				Config: testAccComputeAddress_internal(RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_address.internal",
@@ -60,7 +61,7 @@ func TestAccComputeAddress_internal(t *testing.T) {
 func testAccComputeAddress_internal(i string) string {
 	return fmt.Sprintf(`
 resource "google_compute_address" "internal" {
-  name         = "address-test-internal-%s"
+  name         = "tf-test-address-internal-%s"
   address_type = "INTERNAL"
   region       = "us-east1"
 }
@@ -77,7 +78,7 @@ resource "google_compute_subnetwork" "foo" {
 }
 
 resource "google_compute_address" "internal_with_subnet" {
-  name         = "address-test-internal-with-subnet-%s"
+  name         = "tf-test-address-internal-with-subnet-%s"
   subnetwork   = google_compute_subnetwork.foo.self_link
   address_type = "INTERNAL"
   region       = "us-east1"
@@ -86,7 +87,7 @@ resource "google_compute_address" "internal_with_subnet" {
 // We can't test the address alone, because we don't know what IP range the
 // default subnetwork uses.
 resource "google_compute_address" "internal_with_subnet_and_address" {
-  name         = "address-test-internal-with-subnet-and-address-%s"
+  name         = "tf-test-address-internal-with-subnet-and-address-%s"
   subnetwork   = google_compute_subnetwork.foo.self_link
   address_type = "INTERNAL"
   address      = "10.0.42.42"
@@ -104,7 +105,7 @@ resource "google_compute_address" "internal_with_subnet_and_address" {
 func testAccComputeAddress_networkTier(i string) string {
 	return fmt.Sprintf(`
 resource "google_compute_address" "foobar" {
-  name         = "address-test-%s"
+  name         = "tf-test-address-%s"
   network_tier = "STANDARD"
 }
 `, i)

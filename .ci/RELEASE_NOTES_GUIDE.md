@@ -1,39 +1,40 @@
-# Release Notes for Terraform/Magic Modules Auto-CHANGELOG
+# Terraform Release Notes Guide
 
-## Background
+Release notes from pull request messages in this repository are propagated
+into Terraform provider commits, attaching them to the feature added by
+an original MM PR. These are then collected as part of the release cut
+and shared direcltly with end users in the provider changelog & GitHub release
+details.
 
-The Magician bot has the ability to copy specifically formatted release notes
-from upstream Magic-Modules PRs to downstream PRs that have CHANGELOGS, namely
-PRs generated in the Terraform providers (GA, beta).
+Whoever merges a PR is responsible for the release note. For most contributors
+that means their reviewer, and for maintainers, that means they are responsible
+themselves.
 
-Code lives in magic-modules/downstream_changelog_metadata.py
+Release notes are user-focused. That means that, depending on the change they
+should:
 
-This guide discusses the style and format of release notes to add
-in PR descriptions so they will be copied downstream and used
-in CHANGELOGs.
+  * Describe to the Terraform resource or field they add (rather than the name of the API field)
+  * The bug end users encountered and is now resolved (rather than the implementation of the fix)
+  * Changes in behaviour in the provider (rather than internal fixes, documentation, etc.)
 
 ## Expected Format
 
-The description should have Markdown-formatted code blocks with language
-headings (i.e. text right after the three ticks) like this:
+A release note is a Markdown code block using a language heading of `release-note:{{TYPE}}`,
+where the `{{TYPE}}` describes the change category.  For example:
 
 ~~~
-PR Description
-
-...
+< pr description>
 
 ```release-note:enhancement
 compute: Fixed permadiff for `bar` in `google_compute_foo`
 ```
 ~~~
 
-You can have multiple code blocks to have multiple release notes per PR, i.e.
+A single PR can contain multiple release notes, i.e.
 
 ~~~
 
-PR Description
-
-...
+< pr description>
 
 ```release-note:deprecation
 container: Deprecated `region` for `google_container_cluster` - use location instead.
@@ -48,9 +49,8 @@ container: Added general field `location` to `google_container_cluster`
 Do not indent the block and make sure to leave newlines, so you don't confuse
 the Markdown parser. 
 
-To qualify that a change is specific to the beta provider add `(beta)`
-at the end of the release note.\
-This will omit the note from changelogs for the ga release.
+If a change only affects the beta provider add `(beta)` at the end of the release
+note. This will omit the note from changelogs for the ga release.
 
 ~~~
 
@@ -62,7 +62,7 @@ compute: added field `multiwriter` to resource `disk` (beta)
 
 ## Headings
 
-Release notes should be formatted with one of the following headings:
+Release notes should be formatted with one of the following types:
 - `release-note:enhancement`
 - `release-note:bug`
 - `release-note:note`
@@ -84,7 +84,7 @@ By including this block explicitly, it lets whoever is generating the changelog 
 a release note was explicitly omitted, not just forgotten. It'll also let your PR pass any
 future automation around release note correctness checking.
 
-## Release Note Style Guide (Terraform-specific)
+## Release Note Style Guide
 
 Notes SHOULD:
 - Start with a verb
@@ -93,12 +93,11 @@ Notes SHOULD:
   changes, deprecations, or new behavior.
 - Impersonal third person (no “I”, “you”, etc.)
 - Start with {{service}} if changing an existing resource (see below)
+- List specific added or changed resources or fields
 
-Notes, breaking changes, and features are exceptions. These are more free-form and left to
-the discretion of the PR author and reviewer. The overarching goal should be a good user
-experience when reading the changelog.
-
-See examples below for good release notes.
+Notes and breaking changes are exceptions, these are more free-form and left to
+the discretion of the PR author and/or reviewer. The changelog should be clear,
+and easy to understand for end users not familiar with provider internals.
 
 ### Examples:
 
@@ -153,6 +152,7 @@ container: deprecated `region` and `zone` on `google_container_unicorn`. Use `lo
 ```release-note:note
 Starting on Nov 1, 2019, Cloud Functions API will be private by default. Add appropriate bindings through `google_cloud_function_iam_*` resources to manage privileges for `google_cloud_function` resources created by Terraform.
 ```
+
 ### Counter-examples:
 
 The following changelog entries are not ideal.

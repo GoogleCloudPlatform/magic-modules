@@ -28,6 +28,11 @@ module Api
       # boolean of if this binding should be generated
       attr_reader :exclude_validator
 
+      # Boolean of if tests for IAM resources should exclude import test steps
+      # Used to handle situations where typical generated IAM tests cannot import
+      # due to the parent resource having an API-generated id
+      attr_reader :skip_import_test
+
       # Character that separates resource identifier from method call in URL
       # For example, PubSub subscription uses {resource}:getIamPolicy
       # While Compute subnetwork uses {resource}/getIamPolicy
@@ -72,7 +77,7 @@ module Api
       attr_reader :test_project_name
 
       # Resource name may need a custom diff suppress function. Default is to use
-      # compareSelfLinkOrResourceName
+      # CompareSelfLinkOrResourceName
       attr_reader :custom_diff_suppress
 
       # Some resources (IAP) use fields named differently from the parent resource.
@@ -98,18 +103,23 @@ module Api
       attr_reader :self_link
 
       # [Optional] Version number in the request payload.
-      # if set, it overrides the default iamPolicyVersion
+      # if set, it overrides the default IamPolicyVersion
       attr_reader :iam_policy_version
 
       # [Optional] Min version to make IAM resources available at
       # If unset, defaults to 'ga'
       attr_reader :min_version
 
+      # [Optional] Check to see if zone value should be replaced with GOOGLE_ZONE in iam tests
+      # Defaults to true
+      attr_reader :substitute_zone_value
+
       def validate
         super
 
         check :exclude, type: :boolean, default: false
         check :exclude_validator, type: :boolean, default: false
+        check :skip_import_test, type: :boolean, default: false
         check :method_name_separator, type: String, default: '/'
         check :parent_resource_type, type: String
         check :fetch_iam_policy_verb, type: Symbol, default: :GET, allowed: %i[GET POST]
@@ -132,6 +142,7 @@ module Api
         )
         check :iam_policy_version, type: String
         check :min_version, type: String
+        check :substitute_zone_value, type: :boolean, default: true
       end
     end
   end

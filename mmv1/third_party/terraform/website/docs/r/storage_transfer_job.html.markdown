@@ -1,6 +1,5 @@
 ---
 subcategory: "Storage Transfer Service"
-page_title: "Google: google_storage_transfer_job"
 description: |-
   Creates a new Transfer Job in Google Cloud Storage Transfer.
 ---
@@ -130,6 +129,10 @@ The following arguments are supported:
 
 <a name="nested_transfer_spec"></a>The `transfer_spec` block supports:
 
+* `source_agent_pool_name` - (Optional) Specifies the agent pool name associated with the posix data source. When unspecified, the default name is used.
+
+* `sink_agent_pool_name` - (Optional) Specifies the agent pool name associated with the posix data sink. When unspecified, the default name is used.
+
 * `gcs_data_sink` - (Optional) A Google Cloud Storage data sink. Structure [documented below](#nested_gcs_data_sink).
 
 * `posix_data_sink` - (Optional) A POSIX data sink. Structure [documented below](#nested_posix_data_sink).
@@ -169,6 +172,10 @@ A duration in seconds with up to nine fractional digits, terminated by 's'. Exam
 
 * `exclude_prefixes` - (Optional) `exclude_prefixes` must follow the requirements described for `include_prefixes`. See [Requirements](https://cloud.google.com/storage-transfer/docs/reference/rest/v1/TransferSpec#ObjectConditions).
 
+* `last_modified_since` - (Optional) If specified, only objects with a "last modification time" on or after this timestamp and objects that don't have a "last modification time" are transferred. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+
+* `last_modified_before` - (Optional) If specified, only objects with a "last modification time" before this timestamp and objects that don't have a "last modification time" are transferred. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+
 <a name="nested_transfer_options"></a>The `transfer_options` block supports:
 
 * `overwrite_objects_already_existing_in_sink` - (Optional) Whether overwriting objects that already exist in the sink is allowed.
@@ -203,6 +210,8 @@ A duration in seconds with up to nine fractional digits, terminated by 's'. Exam
 <a name="nested_aws_s3_data_source"></a>The `aws_s3_data_source` block supports:
 
 * `bucket_name` - (Required) S3 Bucket name.
+
+* `path` - (Optional) Root path to transfer objects. Must be an empty string or full path name that ends with a '/'. This field is treated as an object prefix. As such, it should generally not begin with a '/'.
 
 * `aws_access_key` - (Optional) AWS credentials block.
 
