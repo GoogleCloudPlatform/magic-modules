@@ -1,3 +1,22 @@
+
+<% unless compiler == "terraformvalidator-codegen" -%>
+// diffsupress for hyperdisk provisioned_iops
+func hyperDiskIopsUpdateDiffSupress(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	if !strings.Contains(d.Get("type").(string), "hyperdisk") {
+		resourceSchema := ResourceComputeDisk().Schema
+		for field := range resourceSchema {
+			if field == "provisioned_iops" && d.HasChange(field) {
+				if err := d.ForceNew(field); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
+}
+<% end -%>
+
 // diffsupress for beta and to check change in source_disk attribute
 func sourceDiskDiffSupress(_, old, new string, _ *schema.ResourceData) bool {
 	s1 := strings.TrimPrefix(old, "https://www.googleapis.com/compute/beta")
