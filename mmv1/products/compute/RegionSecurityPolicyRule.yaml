@@ -57,6 +57,12 @@ examples:
     min_version: 'beta'
     vars:
       sec_policy_name: 'policyruletest'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_security_policy_rule_with_preconfigured_waf_config'
+    primary_resource_id: 'policy_rule'
+    min_version: 'beta'
+    vars:
+      sec_policy_name: 'policyruletest'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -92,15 +98,14 @@ properties:
       If it evaluates to true, the corresponding 'action' is enforced.
     required: true
     properties:
-    # TODO(felipegc): REMOVE this comment: match.expr: only supported in Global Security Policies
       - !ruby/object:Api::Type::Enum
-          name: 'versionedExpr'
-          description: |
-            Preconfigured versioned expression. If this field is specified, config must also be specified.
-            Available preconfigured expressions along with their requirements are: SRC_IPS_V1 - must specify the corresponding srcIpRange field in config.
-          values:
-            - :SRC_IPS_V1
-          default_value: :SRC_IPS_V1
+        name: 'versionedExpr'
+        description: |
+          Preconfigured versioned expression. If this field is specified, config must also be specified.
+          Available preconfigured expressions along with their requirements are: SRC_IPS_V1 - must specify the corresponding srcIpRange field in config.
+        values:
+          - :SRC_IPS_V1
+        default_value: :SRC_IPS_V1
       - !ruby/object:Api::Type::NestedObject
         name: 'config'
         description: | 
@@ -113,39 +118,89 @@ properties:
             description: |
               CIDR IP address range. Maximum number of srcIpRanges allowed is 10.
             item_type: Api::Type::String
-            #  TODO(felipegc): This field may only be specified when versionedExpr is set to FIREWALL.
-            # exactly_one_of:
-            #   - match.0.config.0.src_ip_ranges
-            #   - match.0.config.0.dest_ip_ranges
-          # - !ruby/object:Api::Type::Array
-          #   name: 'destIpRanges'
-          #   description: |
-          #     CIDR IP address range.
-          #   item_type: Api::Type::String
-          #   exactly_one_of:
-          #     - match.0.config.0.src_ip_ranges
-          #     - match.0.config.0.dest_ip_ranges
-          #  TODO(felipegc): This field may only be specified when versionedExpr is set to FIREWALL.
-          # - !ruby/object:Api::Type::Array
-          #   name: 'layer4Config'
   - !ruby/object:Api::Type::String
     name: 'action'
     description: |
       The Action to perform when the rule is matched. The following are the valid actions:
-      allow: allow access to target.
-      deny(STATUS): deny access to target, returns the HTTP response code specified. Valid values for STATUS are 403, 404, and 502.
-      rate_based_ban: limit client traffic to the configured threshold and ban the client if the traffic exceeds the threshold. Configure parameters for this action in RateLimitOptions. Requires rateLimitOptions to be set.
-      redirect: redirect to a different target. This can either be an internal reCAPTCHA redirect, or an external URL-based redirect via a 302 response. Parameters for this action can be configured via redirectOptions. This action is only supported in Global Security Policies of type CLOUD_ARMOR.
-      throttle: limit client traffic to the configured threshold. Configure parameters for this action in rateLimitOptions. Requires rateLimitOptions to be set for this.
+
+      * allow: allow access to target.
+
+      * deny(STATUS): deny access to target, returns the HTTP response code specified. Valid values for STATUS are 403, 404, and 502.
+
+      * rate_based_ban: limit client traffic to the configured threshold and ban the client if the traffic exceeds the threshold. Configure parameters for this action in RateLimitOptions. Requires rateLimitOptions to be set.
+
+      * redirect: redirect to a different target. This can either be an internal reCAPTCHA redirect, or an external URL-based redirect via a 302 response. Parameters for this action can be configured via redirectOptions. This action is only supported in Global Security Policies of type CLOUD_ARMOR.
+
+      * throttle: limit client traffic to the configured threshold. Configure parameters for this action in rateLimitOptions. Requires rateLimitOptions to be set for this.
     required: true
   - !ruby/object:Api::Type::Boolean
     name: 'preview'
     description: |
       If set to true, the specified action is not enforced.
-  # TODO(felipegc): REMOVE this comment: 
-  # rules.direction: This field may only be specified when versionedExpr is set to FIREWALL
-  # rules.targetResources: This field may only be specified when versionedExpr is set to FIREWALL.
-  # rules.enableLogging: This field may only be specified when the versionedExpr is set to FIREWALL.
-
-   
-            
+  # TODO(felipegc): the patchRule for preconfiguredWafConfig is currently not working resulting no changes while updating.
+  - !ruby/object:Api::Type::NestedObject
+        name: 'preconfiguredWafConfig'
+        description: | 
+          Preconfigured WAF configuration to be applied for the rule.
+          If the rule does not evaluate preconfigured WAF rules, i.e., if evaluatePreconfiguredWaf() is not used, this field will have no effect.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'exclusions'
+            description: |
+              A list of exclusions to apply during preconfigured WAF evaluation.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'targetRuleSet'
+                  description: |
+                    Target WAF rule set to apply the preconfigured WAF exclusion.
+                - !ruby/object:Api::Type::Array
+                  name: 'targetRuleIds'
+                  description: |
+                    A list of target rule IDs under the WAF rule set to apply the preconfigured WAF exclusion.
+                    If omitted, it refers to all the rule IDs under the WAF rule set.
+                  item_type: Api::Type::String
+                - !ruby/object:Api::Type::Array
+                  name: 'requestQueryParamsToExclude'
+                  description: | 
+                    A list of request query parameter names whose value will be excluded from inspection during preconfigured WAF evaluation.
+                    Note that the parameter can be in the query string or in the POST body.
+                  item_type: !ruby/object:Api::Type::NestedObject
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: 'val'
+                        description: |
+                          The value of the field.
+                      - !ruby/object:Api::Type::Enum
+                        name: 'op'
+                        description: |
+                          The match operator for the field.
+                        values:
+                          - :CONTAINS
+                          - :ENDS_WITH
+                          - :EQUALS
+                          - :EQUALS_ANY
+                          - :STARTS_WITH
+                        default_value: :CONTAINS
+                - !ruby/object:Api::Type::Array
+                  name: 'requestUrisToExclude'
+                  description: | 
+                    A list of request URIs from the request line to be excluded from inspection during preconfigured WAF evaluation.
+                    When specifying this field, the query or fragment part should be excluded.
+                  item_type: !ruby/object:Api::Type::NestedObject
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: 'val'
+                        description: |
+                          The value of the field.
+                      - !ruby/object:Api::Type::Enum
+                        name: 'op'
+                        description: |
+                          The match operator for the field.
+                        values:
+                          - :CONTAINS
+                          - :ENDS_WITH
+                          - :EQUALS
+                          - :EQUALS_ANY
+                          - :STARTS_WITH
+                        default_value: :CONTAINS
