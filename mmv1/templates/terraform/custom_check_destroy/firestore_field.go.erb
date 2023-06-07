@@ -4,12 +4,17 @@
 
 config := GoogleProviderConfig(t)
 
-url, err := replaceVarsForTest(config, rs, "{{FirestoreBasePath}}projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/fields/{{field}}")
+url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{FirestoreBasePath}}projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/fields/{{field}}")
 if err != nil {
   return err
 }
 
-res, err := SendRequest(config, "GET", "", url, config.UserAgent, nil)
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "GET",
+	RawURL: url,
+	UserAgent: config.UserAgent,
+})
 if err != nil {
   return err
 }

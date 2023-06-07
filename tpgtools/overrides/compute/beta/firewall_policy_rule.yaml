@@ -1,4 +1,3 @@
 - type: CUSTOM_RESOURCE_NAME
   details:
-    title: firewall_policy_rule
-
+    diffsuppressfunc: tpgresource.CompareSelfLinkOrResourceName

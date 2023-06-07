@@ -30,7 +30,7 @@ description: |
 id_format: 'projects/{{project}}/hmacKeys/{{access_id}}'
 import_format: ['projects/{{project}}/hmacKeys/{{access_id}}']
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
   actions: ['create']
 skip_sweeper: true
 examples:
@@ -80,12 +80,6 @@ properties:
     output: true
     description: |
       The access ID of the HMAC Key.
-  - !ruby/object:Api::Type::String
-    name: 'id'
-    output: true
-    description: |
-      The ID of the HMAC key, including the Project ID and the Access ID.
-    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'timeCreated'
     output: true

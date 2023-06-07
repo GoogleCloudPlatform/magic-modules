@@ -171,11 +171,6 @@ examples:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
-    description: 'Creation timestamp in RFC3339 text format.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'pscConnectionId'
     description: 'The PSC connection id of the PSC Forwarding Rule.'
@@ -191,11 +186,6 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   # This is a multi-resource resource reference (Address, GlobalAddress)
   - !ruby/object:Api::Type::String
     name: 'IPAddress'

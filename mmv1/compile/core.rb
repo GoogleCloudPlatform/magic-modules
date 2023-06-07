@@ -211,6 +211,11 @@ module Compile
       end
     end
 
+    def hashicorp_copyright_header(lang, pwd)
+      Thread.current[:autogen] = true
+      comment_block(compile("#{pwd}/templates/hashicorp_copyright_header.erb").split("\n"), lang)
+    end
+
     def autogen_notice(lang, pwd)
       Thread.current[:autogen] = true
       comment_block(compile("#{pwd}/templates/autogen_notice.erb").split("\n"), lang)

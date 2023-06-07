@@ -22,6 +22,7 @@ description: |
   A License resource represents a software license. Licenses are used to
   track software usage in images, persistent disks, snapshots, and virtual
   machine instances.
+# Used as a resource reference
 exclude: true
 properties:
   - !ruby/object:Api::Type::String

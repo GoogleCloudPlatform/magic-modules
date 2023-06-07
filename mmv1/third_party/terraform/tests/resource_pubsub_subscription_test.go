@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/pubsub"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -275,7 +276,7 @@ func TestGetComputedTopicName(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		computedTopicName := getComputedTopicName(testCase.project, testCase.topic)
+		computedTopicName := pubsub.GetComputedTopicName(testCase.project, testCase.topic)
 		if computedTopicName != testCase.expected {
 			t.Fatalf("bad computed topic name: %s' => expected %s", computedTopicName, testCase.expected)
 		}
@@ -286,7 +287,12 @@ func testAccCheckPubsubSubscriptionCache404(t *testing.T, subName string) resour
 	return func(s *terraform.State) error {
 		config := GoogleProviderConfig(t)
 		url := fmt.Sprintf("%sprojects/%s/subscriptions/%s", config.PubsubBasePath, acctest.GetTestProjectFromEnv(), subName)
-		resp, err := transport_tpg.SendRequest(config, "GET", "", url, config.UserAgent, nil)
+		resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
 		if err == nil {
 			return fmt.Errorf("Expected Pubsub Subscription %q not to exist, was found", resp["name"])
 		}

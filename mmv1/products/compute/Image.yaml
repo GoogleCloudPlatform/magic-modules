@@ -75,6 +75,13 @@ examples:
     primary_resource_id: 'example'
     vars:
       image_name: 'example-image'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'image_basic_storage_location'
+    primary_resource_id: 'example'
+    vars:
+      image_name: 'example-sl-image'
+      primary_resource_name:
+        'fmt.Sprintf("tf-test-sl-example-image%s", context["random_suffix"])'
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'archiveSizeBytes'
@@ -86,57 +93,19 @@ properties:
     name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'deprecated'
-    description: The deprecation status associated with this image.
-    output: true
-    exclude: true
-    properties:
-      - !ruby/object:Api::Type::Time
-        name: 'deleted'
-        description: |
-          An optional RFC3339 timestamp on or after which the state of this
-          resource is intended to change to DELETED. This is only
-          informational and the status will not change unless the client
-          explicitly changes it.
-      - !ruby/object:Api::Type::Time
-        name: 'deprecated'
-        description: |
-          An optional RFC3339 timestamp on or after which the state of this
-          resource is intended to change to DEPRECATED. This is only
-          informational and the status will not change unless the client
-          explicitly changes it.
-      - !ruby/object:Api::Type::Time
-        name: 'obsolete'
-        description: |
-          An optional RFC3339 timestamp on or after which the state of this
-          resource is intended to change to OBSOLETE. This is only
-          informational and the status will not change unless the client
-          explicitly changes it.
-      - !ruby/object:Api::Type::String
-        name: 'replacement'
-        description: |
-          The URL of the suggested replacement for a deprecated resource.
-          The suggested replacement resource must be the same kind of
-          resource as the deprecated resource.
-      - !ruby/object:Api::Type::Enum
-        name: 'state'
-        description: |
-          The deprecation state of this resource. This can be DEPRECATED,
-          OBSOLETE, or DELETED. Operations which create a new resource
-          using a DEPRECATED resource will return successfully, but with a
-          warning indicating the deprecated resource and recommending its
-          replacement. Operations which use OBSOLETE or DELETED resources
-          will be rejected and result in an error.
-        values:
-          - :DEPRECATED
-          - :OBSOLETE
-          - :DELETED
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
+  - !ruby/object:Api::Type::Array
+    name: 'storageLocations'
+    description: |
+      Cloud Storage bucket storage location of the image
+      (regional or multi-regional).
+      Reference link: https://cloud.google.com/compute/docs/reference/rest/v1/images
+    item_type: Api::Type::String
+    default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: 'diskSizeGb'
     description: |
@@ -178,14 +147,6 @@ properties:
             - :SEV_SNP_CAPABLE
             - :SUSPEND_RESUME_COMPATIBLE
             - :TDX_CAPABLE
-
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: |
-      The unique identifier for the resource. This identifier
-      is defined by the server.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: 'imageEncryptionKey'
     description: |
@@ -195,20 +156,6 @@ properties:
       provide the same key if you use the image later (e.g. to create a
       disk from the image)
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'rawKey'
-        description: |
-          Specifies a 256-bit customer-supplied encryption key, encoded in
-          RFC 4648 base64 to either encrypt or decrypt this resource.
-        exclude: true
-      - !ruby/object:Api::Type::String
-        name: 'sha256'
-        description: |
-          The RFC 4648 base64 encoded SHA-256 hash of the
-          customer-supplied encryption key that protects this resource.
-        output: true
-        exclude: true
-        # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
       - !ruby/object:Api::Type::String
         name: 'kmsKeySelfLink'
         api_name: 'kmsKeyName'
@@ -292,37 +239,6 @@ properties:
       rawDisk.source property but not both to create an image.
     resource: 'Disk'
     imports: 'selfLink'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'sourceDiskEncryptionKey'
-    description: |
-      The customer-supplied encryption key of the source disk. Required if
-      the source disk is protected by a customer-supplied encryption key.
-    exclude: true
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'rawKey'
-        description: |
-          Specifies a 256-bit customer-supplied encryption key, encoded in
-          RFC 4648 base64 to either encrypt or decrypt this resource.
-      - !ruby/object:Api::Type::String
-        name: 'sha256'
-        description: |
-          The RFC 4648 base64 encoded SHA-256 hash of the
-          customer-supplied encryption key that protects this resource.
-        output: true
-        # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
-      - !ruby/object:Api::Type::String
-        name: 'kmsKeyName'
-        min_version: beta
-        description: |
-          The name of the encryption key that is stored in Google Cloud KMS.
-  - !ruby/object:Api::Type::String
-    name: 'sourceDiskId'
-    description: |
-      The ID value of the disk used to create this image. This value may
-      be used to determine whether the image was taken from the current
-      or a previous instance of a given disk name.
-    exclude: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'sourceImage'
     description: |
@@ -349,27 +265,4 @@ properties:
       * The sourceDisk URL
     resource: 'Snapshot'
     imports: 'selfLink'
-  - !ruby/object:Api::Type::Enum
-    name: 'sourceType'
-    description: |
-      The type of the image used to create this disk. The default and
-      only value is RAW
-    values:
-      - :RAW
-    exclude: true
-  - !ruby/object:Api::Type::String
-    name: 'selfLink'
-    exclude: true
-    description: |
-      The self link of the image
-  - !ruby/object:Api::Type::Enum
-    name: 'status'
-    output: true
-    exclude: true
-    description: |
-      The status of the image. Either `READY` `PENDING` or `FAILED`.
-    values:
-      - :READY
-      - :PENDING
-      - :FAILED
 # State is not applicable for state convergence.

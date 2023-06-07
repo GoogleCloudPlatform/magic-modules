@@ -92,12 +92,6 @@ properties:
     immutable: true
     description: |
       An optional description of this resource.
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    output: true
-    description: |
-      The unique identifier for the resource.
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true

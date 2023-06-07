@@ -64,6 +64,14 @@ steps:
           - --no-ff
           - head/$_HEAD_BRANCH
 
+    - name: 'gcr.io/graphite-docker-images/pre-build-validator'
+      id: pre-build-validate
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["merged"]
+      env:
+        - COMMIT_SHA=$COMMIT_SHA
+        - PR_NUMBER=$_PR_NUMBER
+
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
       id: tpg-head
@@ -106,7 +114,6 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       id: tgc-head
-      allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged", "tpg-head"]
       args:
@@ -117,7 +124,6 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       id: tgc-base
-      allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged", "tpg-base"]
       args:
