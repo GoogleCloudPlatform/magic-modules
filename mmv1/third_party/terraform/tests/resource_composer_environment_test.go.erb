@@ -1678,11 +1678,12 @@ resource "google_composer_environment" "test" {
 				triggerer {
 					cpu         = 0.5
 					memory_gb   = 2.0
-					count   		= 1
+					count   		= 2
 				}
 				<% end -%>
       }
       environment_size = "ENVIRONMENT_SIZE_MEDIUM"
+	  resilience_mode = "HIGH_RESILIENCE"
       private_environment_config {
         enable_private_endpoint                 = true
         cloud_composer_network_ipv4_cidr_block   = "10.3.192.0/24"
@@ -1707,69 +1708,6 @@ resource "google_compute_subnetwork" "test" {
 }
 
 `, envName, network, subnetwork)
-}
-
-func testAccComposerEnvironment_composerV2HighResilience(envName, network, subnetwork string) string {
-	return fmt.Sprintf(`
-resource "google_composer_environment" "test" {
-  name   = "%s"
-  region = "us-east1"
-
-    config {
-      node_config {
-        network          = google_compute_network.test.self_link
-        subnetwork       = google_compute_subnetwork.test.self_link
-        ip_allocation_policy {
-          cluster_ipv4_cidr_block = "10.0.0.0/16"
-        }
-      }
-
-      software_config {
-        image_version = "composer-2-airflow-2"
-<% unless version == "ga" -%>
-        cloud_data_lineage_integration {
-          enabled = true
-        }
-<% end -%>
-      }
-
-      workloads_config {
-        scheduler {
-          cpu         = 1.25
-          memory_gb   = 2.5
-          storage_gb   = 5.4
-          count       = 2
-        }
-        web_server {
-          cpu         = 1.75
-          memory_gb   = 3.0
-          storage_gb   = 4.4
-        }
-        worker {
-          cpu         = 0.5
-          memory_gb   = 2.0
-          storage_gb   = 3.4
-          min_count   = 2
-          max_count   = 5
-        }
-				<% unless version == "ga" -%>
-				triggerer {
-					cpu         = 0.5
-					memory_gb   = 2.0
-					count   		= 1
-				}
-				<% end -%>
-      }
-      environment_size = "ENVIRONMENT_SIZE_MEDIUM"
-	  resilience_mode = "HIGH_RESILIENCE"
-      private_environment_config {
-        enable_private_endpoint                 = true
-        cloud_composer_network_ipv4_cidr_block   = "10.3.192.0/24"
-        master_ipv4_cidr_block                   = "172.16.194.0/23"
-        cloud_sql_ipv4_cidr_block               = "10.3.224.0/20"
-      }
-    }
-
 }
 
 resource "google_compute_network" "test" {
