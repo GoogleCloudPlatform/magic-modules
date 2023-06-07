@@ -222,7 +222,7 @@ func (p Property) DefaultStateGetter() string {
 }
 
 func (p Property) ChangeStateGetter() string {
-	return buildGetter(p, fmt.Sprintf("oldValue(d.GetChange(%q))", p.Name()))
+	return buildGetter(p, fmt.Sprintf("tpgdclresource.OldValue(d.GetChange(%q))", p.Name()))
 }
 
 // Builds a Getter for constructing a shallow
@@ -256,7 +256,7 @@ func buildGetter(p Property, rawGetter string) string {
 			return fmt.Sprintf("%s.%sEnumRef(%s.(string))", p.resource.Package(), p.ObjectType(), rawGetter)
 		}
 		if p.EnumBool {
-			return fmt.Sprintf("expandEnumBool(%s.(string))", rawGetter)
+			return fmt.Sprintf("tpgdclresource.ExpandEnumBool(%s.(string))", rawGetter)
 		}
 		if p.Computed {
 			return fmt.Sprintf("dcl.StringOrNil(%s.(string))", rawGetter)
@@ -279,11 +279,11 @@ func buildGetter(p Property, rawGetter string) string {
 			return fmt.Sprintf("expand%s%sArray(%s)", p.resource.PathType(), p.PackagePath(), rawGetter)
 		}
 		if p.Type.typ.Items != nil && p.Type.typ.Items.Type == "string" {
-			return fmt.Sprintf("expandStringArray(%s)", rawGetter)
+			return fmt.Sprintf("tpgdclresource.ExpandStringArray(%s)", rawGetter)
 		}
 
 		if p.Type.typ.Items != nil && p.Type.typ.Items.Type == "integer" {
-			return fmt.Sprintf("expandIntegerArray(%s)", rawGetter)
+			return fmt.Sprintf("tpgdclresource.ExpandIntegerArray(%s)", rawGetter)
 		}
 
 		if p.Type.typ.Items != nil && len(p.Properties) > 0 {
@@ -354,7 +354,7 @@ func (p Property) flattenGetterWithParent(parent string) string {
 		fallthrough
 	case SchemaTypeMap:
 		if p.EnumBool {
-			return fmt.Sprintf("flattenEnumBool(%s.%s)", parent, p.PackageName)
+			return fmt.Sprintf("tpgdclresource.FlattenEnumBool(%s.%s)", parent, p.PackageName)
 		}
 		return fmt.Sprintf("%s.%s", parent, p.PackageName)
 	case SchemaTypeList, SchemaTypeSet:
@@ -396,7 +396,7 @@ func (p Property) DefaultDiffSuppress() *string {
 	case SchemaTypeString:
 		// Field is reference to another resource
 		if _, ok := p.typ.Extension["x-dcl-references"]; ok {
-			dsf := "compareSelfLinkOrResourceName"
+			dsf := "tpgresource.CompareSelfLinkOrResourceName"
 			return &dsf
 		}
 	}
@@ -629,7 +629,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				i := Type{typ: v.Items}
 				e := fmt.Sprintf("&schema.Schema{Type: schema.%s}", i.String())
 				if _, ok := v.Extension["x-dcl-references"]; ok {
-					e = fmt.Sprintf("&schema.Schema{Type: schema.%s, DiffSuppressFunc: compareSelfLinkOrResourceName, }", i.String())
+					e = fmt.Sprintf("&schema.Schema{Type: schema.%s, DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName, }", i.String())
 				}
 				p.Elem = &e
 				p.ElemIsBasicType = true
@@ -697,7 +697,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				if p.customName != "" {
 					propertyName = p.customName
 				}
-				ig := fmt.Sprintf("get%s(d, config)", renderSnakeAsTitle(miscellaneousNameSnakeCase(propertyName)))
+				ig := fmt.Sprintf("tpgresource.Get%s(d, config)", renderSnakeAsTitle(miscellaneousNameSnakeCase(propertyName)))
 				if cigOk {
 					ig = fmt.Sprintf("%s(d, config)", cig.Function)
 				}
@@ -837,9 +837,9 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			} else {
 				parent = "obj"
 			}
-			enumBoolSS := fmt.Sprintf("d.Set(%q, flattenEnumBool(%s.%s))", p.Name(), parent, p.PackageName)
+			enumBoolSS := fmt.Sprintf("d.Set(%q, tpgdclresource.FlattenEnumBool(%s.%s))", p.Name(), parent, p.PackageName)
 			p.StateSetter = &enumBoolSS
-			enumBoolSG := fmt.Sprintf("expandEnumBool(d.Get(%q))", p.Name())
+			enumBoolSG := fmt.Sprintf("tpgdclresource.ExpandEnumBool(d.Get(%q))", p.Name())
 			p.StateGetter = &enumBoolSG
 		}
 
