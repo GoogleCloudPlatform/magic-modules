@@ -32,6 +32,13 @@ examples:
       instance_name: 'my-instance'
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'looker_instance_full'
+    primary_resource_id: 'looker-instance'
+    vars:
+      instance_name: 'my-instance'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
 parameters:
   # TODO: resourceref?
   - !ruby/object:Api::Type::String
