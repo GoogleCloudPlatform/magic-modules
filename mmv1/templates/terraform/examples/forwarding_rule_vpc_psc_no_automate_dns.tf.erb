@@ -1,4 +1,4 @@
-// Forwarding rule for VPC private service connect
+// Forwarding rule for VPC private service connect with no automate dns zone
 resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   name                    = "<%= ctx[:vars]['forwarding_rule_name'] %>"
   region                  = "us-central1"
@@ -7,6 +7,7 @@ resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   network                 = google_compute_network.consumer_net.name
   ip_address              = google_compute_address.consumer_address.id
   allow_psc_global_access = true
+  no_automate_dns_zone    = false
 }
 
 // Consumer service endpoint
