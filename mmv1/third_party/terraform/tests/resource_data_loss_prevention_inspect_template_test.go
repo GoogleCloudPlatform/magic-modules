@@ -1029,9 +1029,6 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 		custom_info_types {
 			info_type {
 				name = "MY_CUSTOM_TYPE"
-				sensitivity_score {
-					score = "SENSITIVITY_HIGH"
-				}
 			}
 			sensitivity_score {
 				score = "SENSITIVITY_LOW"
@@ -1071,9 +1068,6 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 					exclude_info_types {
 						info_types {
 							name = "LAST_NAME"
-							sensitivity_score {
-								score = "SENSITIVITY_MODERATE"
-							}
 						}
 					}
 					matching_type = "MATCHING_TYPE_FULL_MATCH"
@@ -1083,9 +1077,6 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 		rule_set {
 			info_types {
 				name = "EMAIL_ADDRESS"
-				sensitivity_score {
-					score = "SENSITIVITY_HIGH"
-				}
 			}
 			info_types {
 				name = "DOMAIN_NAME"
@@ -1150,9 +1141,6 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 					score = "SENSITIVITY_LOW"
 				}
 			}
-			sensitivity_score {
-				score = "SENSITIVITY_MODERATE"
-			}
 			surrogate_type {}
 		}
 		info_types {
@@ -1200,9 +1188,6 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 		rule_set {
 			info_types {
 				name = "EMAIL_ADDRESS"
-				sensitivity_score {
-					score = "SENSITIVITY_MODERATE"
-				}
 			}
 			info_types {
 				name = "DOMAIN_NAME"
