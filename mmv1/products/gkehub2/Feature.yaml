@@ -67,6 +67,21 @@ examples:
     skip_test: true
     primary_resource_name: 'fmt.Sprint("servicemesh")'
     primary_resource_id: 'feature'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'enable_fleet_observability_for_default_logs_with_COPY'
+    skip_test: true
+    primary_resource_name: 'fmt.Sprint("fleetobservability")'
+    primary_resource_id: 'feature'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'enable_fleet_observability_for_scope_logs_with_MOVE'
+    skip_test: true
+    primary_resource_name: 'fmt.Sprint("fleetobservability")'
+    primary_resource_id: 'feature'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'enable_fleet_observability_for_both_default_and_scope_logs'
+    skip_test: true
+    primary_resource_name: 'fmt.Sprint("fleetobservability")'
+    primary_resource_id: 'feature'
 autogen_async: true
 # Skip sweeper gen since this is a child resource.
 skip_sweeper: true
