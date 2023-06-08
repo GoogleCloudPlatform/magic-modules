@@ -17,6 +17,9 @@ func TestAccPubsubSchema_update(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPubsubSchema_basic(schema),
@@ -45,6 +48,17 @@ func testAccPubsubSchema_basic(schema string) string {
 		type = "PROTOCOL_BUFFER"
 		definition = "syntax = \"proto3\";\nmessage Results {\nstring message_request = 1;\nstring message_response = 2;\n}"
 	}
+
+	# Need to introduce delay for updates in order for tests to complete
+	# successfully due to caching effects.
+	resource "time_sleep" "wait_121_seconds" {
+		create_duration = "121s"
+		lifecycle {
+			replace_triggered_by = [
+				google_pubsub_schema.foo
+			]
+		}
+	}
 `, schema)
 }
 
@@ -54,6 +68,17 @@ func testAccPubsubSchema_updated(schema string) string {
 		name = "%s"
 		type = "PROTOCOL_BUFFER"
 		definition = "syntax = \"proto3\";\nmessage Results {\nstring message_request = 1;\nstring message_response = 2;\nstring timestamp_request = 3;\n}"
+	}
+
+	# Need to introduce delay for updates in order for tests to complete
+	# successfully due to caching effects.
+	resource "time_sleep" "wait_121_seconds" {
+		create_duration = "121s"
+		lifecycle {
+			replace_triggered_by = [
+				google_pubsub_schema.foo
+			]
+		}
 	}
 `, schema)
 }
