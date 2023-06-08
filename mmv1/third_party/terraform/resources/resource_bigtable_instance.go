@@ -199,6 +199,10 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 		conf.InstanceType = bigtable.PRODUCTION
 	}
 
+	if err := verifyDuplicatedClusters(d.Get("cluster").([]interface{})); err != nil {
+		return err
+	}
+
 	conf.Clusters, err = expandBigtableClusters(d.Get("cluster").([]interface{}), conf.InstanceID, config)
 	if err != nil {
 		return err
@@ -342,6 +346,10 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 		conf.InstanceType = bigtable.PRODUCTION
 	}
 
+	if err := verifyDuplicatedClusters(d.Get("cluster").([]interface{})); err != nil {
+		return err
+	}
+
 	conf.Clusters, err = expandBigtableClusters(d.Get("cluster").([]interface{}), conf.InstanceID, config)
 	if err != nil {
 		return err
@@ -433,6 +441,19 @@ func getUnavailableClusterZones(clusters []interface{}, unavailableZones []strin
 		}
 	}
 	return zones
+}
+
+func verifyDuplicatedClusters(clusters []interface{}) error {
+	clusterIDs := map[string]bool{}
+	for _, c := range clusters {
+		cluster := c.(map[string]interface{})
+		clusterID := cluster["cluster_id"].(string)
+		if clusterIDs[clusterID] {
+			return fmt.Errorf("duplicated cluster_id: %q", clusterID)
+		}
+		clusterIDs[clusterID] = true
+	}
+	return nil
 }
 
 func expandBigtableClusters(clusters []interface{}, instanceID string, config *transport_tpg.Config) ([]bigtable.ClusterConfig, error) {
