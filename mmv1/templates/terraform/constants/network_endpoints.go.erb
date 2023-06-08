@@ -79,6 +79,10 @@ func networkEndpointsPaginatedMutate(d *schema.ResourceData, endpoints []interfa
 			}
 			j = len(endpoints)
 		}
+        timeoutType := schema.TimeoutCreate
+        if verb != "attachNetworkEndpoints" {
+            timeoutType = schema.TimeoutDelete
+        }
 		body := map[string]interface{}{"networkEndpoints": endpoints[i:j]}
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:	   config,
@@ -87,7 +91,7 @@ func networkEndpointsPaginatedMutate(d *schema.ResourceData, endpoints []interfa
 			RawURL:	   url,
 			UserAgent: userAgent,
 			Body:	   body,
-			Timeout:   d.Timeout(schema.TimeoutDefault),
+			Timeout:   d.Timeout(timeoutType),
 		})
 		if err != nil {
 			return nil, fmt.Errorf("Error during %s: %s", verb, err)
