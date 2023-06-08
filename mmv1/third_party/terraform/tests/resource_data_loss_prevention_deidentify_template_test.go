@@ -395,7 +395,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
               name = "CUSTOM_INFO_TYPEF"
               version = "version-2"
               sensitivity_score {
-                score = "SENSITIVIY_MODERATE"
+                score = "SENSITIVITY_MODERATE"
               }
             }
           }

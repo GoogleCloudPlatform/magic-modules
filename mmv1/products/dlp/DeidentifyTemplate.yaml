@@ -170,6 +170,7 @@ properties:
                             properties:
                               - !ruby/object:Api::Type::Enum
                                 name: 'score'
+                                required: true
                                 description: |
                                   The sensitivity score applied to the resource.
                                 values:
@@ -236,6 +237,7 @@ properties:
                         properties:
                           - !ruby/object:Api::Type::Enum
                             name: 'score'
+                            required: true
                             description: |
                               The sensitivity score applied to the resource.
                             values:
@@ -465,6 +467,7 @@ properties:
                               properties:
                                 - !ruby/object:Api::Type::Enum
                                   name: 'score'
+                                  required: true
                                   description: |
                                     The sensitivity score applied to the resource.
                                   values:
@@ -592,6 +595,7 @@ properties:
                               properties:
                                 - !ruby/object:Api::Type::Enum
                                   name: 'score'
+                                  required: true
                                   description: |
                                     The sensitivity score applied to the resource.
                                   values:
@@ -1454,6 +1458,7 @@ properties:
                               properties:
                                 - !ruby/object:Api::Type::Enum
                                   name: 'score'
+                                  required: true
                                   description: |
                                     The sensitivity score applied to the resource.
                                   values:
@@ -2160,6 +2165,7 @@ properties:
                               properties:
                                 - !ruby/object:Api::Type::Enum
                                   name: 'score'
+                                  required: true
                                   description: |
                                     The sensitivity score applied to the resource.
                                   values:
@@ -2238,6 +2244,7 @@ properties:
                                   properties:
                                     - !ruby/object:Api::Type::Enum
                                       name: 'score'
+                                      required: true
                                       description: |
                                         The sensitivity score applied to the resource.
                                       values:
@@ -2515,6 +2522,7 @@ properties:
                                         properties:
                                           - !ruby/object:Api::Type::Enum
                                             name: 'score'
+                                            required: true
                                             description: |
                                               The sensitivity score applied to the resource.
                                             values:
@@ -3031,6 +3039,7 @@ properties:
                                         properties:
                                           - !ruby/object:Api::Type::Enum
                                             name: 'score'
+                                            required: true
                                             description: |
                                               The sensitivity score applied to the resource.
                                             values:
