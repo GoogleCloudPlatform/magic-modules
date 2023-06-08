@@ -156,7 +156,7 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 	// This method may return before the table's creation is complete - we may need to wait until
 	// it exists in the future.
 	// Set a longer timeout as creating table and adding column families can be pretty slow.
-	ctxWithTimeout, cancel := context.WithTimeout(ctx, d.Timeout(schema.TimeoutCreate)-5*time.Second)
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, d.Timeout(schema.TimeoutCreate))
 	defer cancel() // Always call cancel.
 	err = c.CreateTableFromConf(ctxWithTimeout, &tblConf)
 	if err != nil {
@@ -275,7 +275,7 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	ctxWithTimeout, cancel := context.WithTimeout(ctx, d.Timeout(schema.TimeoutCreate)-5*time.Second)
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, d.Timeout(schema.TimeoutCreate))
 	defer cancel()
 	if d.HasChange("deletion_protection") {
 		deletionProtection := d.Get("deletion_protection")
