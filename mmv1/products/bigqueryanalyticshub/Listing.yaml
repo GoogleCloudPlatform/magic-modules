@@ -37,6 +37,8 @@ import_format:
   [
     'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}',
   ]
+# Skipping the sweeper due to the non-standard base_url
+skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_analyticshub_listing_basic'

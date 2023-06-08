@@ -124,7 +124,7 @@ properties:
         name: 'kmsKeyName'
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
-        diff_suppress_func: compareCryptoKeyVersions
+        diff_suppress_func: tpgresource.CompareCryptoKeyVersions
       - !ruby/object:Api::Type::String
         name: 'kmsKeyServiceAccount'
         description: |

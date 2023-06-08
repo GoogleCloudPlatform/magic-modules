@@ -33,7 +33,7 @@ if v, ok := readRes["users"].([]interface{}); ok {
 			return fmt.Errorf("Error retrieving instance %s: %s", instance, err.Error())
 		}
 		for _, disk := range i.Disks {
-			if compareSelfLinkOrResourceName("", disk.Source, self, nil) {
+			if tpgresource.CompareSelfLinkOrResourceName("", disk.Source, self, nil) {
 				detachCalls = append(detachCalls, detachArgs{
 					project:    instanceProject,
 					zone:       tpgresource.GetResourceNameFromSelfLink(i.Zone),
@@ -53,7 +53,7 @@ if v, ok := readRes["users"].([]interface{}); ok {
 		err = ComputeOperationWaitTime(config, op, call.project,
 			fmt.Sprintf("Detaching disk from %s/%s/%s", call.project, call.zone, call.instance), userAgent, d.Timeout(schema.TimeoutDelete))
 		if err != nil {
-			if opErr, ok := err.(compute.ComputeOperationError); ok && len(opErr.Errors) == 1 && opErr.Errors[0].Code == "RESOURCE_NOT_FOUND" {
+			if opErr, ok := err.(ComputeOperationError); ok && len(opErr.Errors) == 1 && opErr.Errors[0].Code == "RESOURCE_NOT_FOUND" {
 				log.Printf("[WARN] instance %q was deleted while awaiting detach", call.instance)
 				continue
 			}

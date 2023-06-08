@@ -28,6 +28,8 @@ taint_resource_on_failed_create: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "gkeonprem_bare_metal_cluster_basic"
+    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14417
+    skip_test: true
     min_version: beta
     primary_resource_id: "cluster-basic"
     vars:
@@ -36,6 +38,8 @@ examples:
       project: "fake-backend-360322"
   - !ruby/object:Provider::Terraform::Examples
     name: "gkeonprem_bare_metal_cluster_manuallb"
+    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14417
+    skip_test: true
     min_version: beta
     primary_resource_id: "cluster-manuallb"
     vars:
@@ -44,6 +48,8 @@ examples:
       project: "fake-backend-360322"
   - !ruby/object:Provider::Terraform::Examples
     name: "gkeonprem_bare_metal_cluster_bgplb"
+    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14417
+    skip_test: true
     min_version: beta
     primary_resource_id: "cluster-bgplb"
     vars:
@@ -71,7 +77,7 @@ properties:
     description: |
       The Admin Cluster this Bare Metal User Cluster belongs to.
       This is the full resource name of the Admin Cluster's hub membership.
-    diff_suppress_func: ProjectNumberDiffSuppress
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
   - !ruby/object:Api::Type::String
     name: "description"
     description: |
