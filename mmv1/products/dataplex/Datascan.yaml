@@ -21,7 +21,7 @@ update_mask: true
 import_format:
   [
     'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}',
-    '{{data_scan_id}}'
+    '{{data_scan_id}}',
   ]
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -46,13 +46,16 @@ async: !ruby/object:Api::OpAsync
 autogen_async: true
 read_query_params: '?view=FULL'
 description: |
-      Represents a user-visible job which provides the insights for the related data source.
+  Represents a user-visible job which provides the insights for the related data source.
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   parent_resource_attribute: 'data_scan_id'
   fetch_iam_policy_verb: :GET
   import_format:
-    ['projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}', '{{data_scan_id}}']
+    [
+      'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}',
+      '{{data_scan_id}}',
+    ]
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/dataplex/docs'
@@ -61,25 +64,29 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_datascan_basic_profile'
     primary_resource_id: 'basic_profile'
-    primary_resource_name: 'fmt.Sprintf("tf-test-datascan%s", context["random_suffix"])'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-datascan%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_datascan_full_profile'
     primary_resource_id: 'full_profile'
-    primary_resource_name: 'fmt.Sprintf("tf-test-datascan%s", context["random_suffix"])'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-datascan%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_datascan_basic_quality'
     primary_resource_id: 'basic_quality'
-    primary_resource_name: 'fmt.Sprintf("tf-test-datascan%s", context["random_suffix"])'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-datascan%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_datascan_full_quality'
     primary_resource_id: 'full_quality'
-    primary_resource_name: 'fmt.Sprintf("tf-test-datascan%s", context["random_suffix"])'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-datascan%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
 parameters:
@@ -190,7 +197,7 @@ properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'schedule'
             description: |
-             The scan is scheduled to run periodically.
+              The scan is scheduled to run periodically.
             exactly_one_of:
               - execution_spec.0.trigger.0.on_demand
               - execution_spec.0.trigger.0.schedule
@@ -198,7 +205,9 @@ properties:
               - !ruby/object:Api::Type::String
                 name: 'cron'
                 required: true
-                description: Cron schedule for running scans periodically. This field is required for Schedule scans.
+                description:
+                  Cron schedule for running scans periodically. This field is
+                  required for Schedule scans.
       - !ruby/object:Api::Type::String
         name: 'field'
         immutable: true
@@ -255,16 +264,16 @@ properties:
             - !ruby/object:Api::Type::String
               name: 'column'
               description: |
-                 The unnested column which this rule is evaluated against.
+                The unnested column which this rule is evaluated against.
             - !ruby/object:Api::Type::Boolean
               name: 'ignoreNull'
               description: |
-                 Rows with null values will automatically fail a rule, unless ignoreNull is true. In that case, such null rows are trivially considered passing. Only applicable to ColumnMap rules.
+                Rows with null values will automatically fail a rule, unless ignoreNull is true. In that case, such null rows are trivially considered passing. Only applicable to ColumnMap rules.
             - !ruby/object:Api::Type::String
               name: 'dimension'
               required: true
               description: |
-                 The dimension a rule belongs to. Results are also aggregated at the dimension level. Supported dimensions are ["COMPLETENESS", "ACCURACY", "CONSISTENCY", "VALIDITY", "UNIQUENESS", "INTEGRITY"]
+                The dimension a rule belongs to. Results are also aggregated at the dimension level. Supported dimensions are ["COMPLETENESS", "ACCURACY", "CONSISTENCY", "VALIDITY", "UNIQUENESS", "INTEGRITY"]
             - !ruby/object:Api::Type::Double
               name: 'threshold'
               description: |
@@ -272,73 +281,73 @@ properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'rangeExpectation'
               description: |
-                 ColumnMap rule which evaluates whether each column value lies between a specified range.
+                ColumnMap rule which evaluates whether each column value lies between a specified range.
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'minValue'
                   description: |
-                     The minimum column value allowed for a row to pass this validation. At least one of minValue and maxValue need to be provided.
+                    The minimum column value allowed for a row to pass this validation. At least one of minValue and maxValue need to be provided.
                 - !ruby/object:Api::Type::String
                   name: 'maxValue'
                   description: |
-                     The maximum column value allowed for a row to pass this validation. At least one of minValue and maxValue need to be provided.
+                    The maximum column value allowed for a row to pass this validation. At least one of minValue and maxValue need to be provided.
                 - !ruby/object:Api::Type::Boolean
                   name: 'strictMinEnabled'
                   default_value: false
                   description: |
-                     Whether each value needs to be strictly greater than ('>') the minimum, or if equality is allowed.
-                     Only relevant if a minValue has been defined. Default = false.
+                    Whether each value needs to be strictly greater than ('>') the minimum, or if equality is allowed.
+                    Only relevant if a minValue has been defined. Default = false.
                 - !ruby/object:Api::Type::Boolean
                   name: 'strictMaxEnabled'
                   default_value: false
                   description: |
-                     Whether each value needs to be strictly lesser than ('<') the maximum, or if equality is allowed.
-                     Only relevant if a maxValue has been defined. Default = false.
+                    Whether each value needs to be strictly lesser than ('<') the maximum, or if equality is allowed.
+                    Only relevant if a maxValue has been defined. Default = false.
             - !ruby/object:Api::Type::NestedObject
               name: 'nonNullExpectation'
               allow_empty_object: true
               send_empty_value: true
               description: |
-                 ColumnMap rule which evaluates whether each column value is null.
+                ColumnMap rule which evaluates whether each column value is null.
               properties: []
             - !ruby/object:Api::Type::NestedObject
               name: 'setExpectation'
               description: |
-                 ColumnMap rule which evaluates whether each column value is contained by a specified set.
+                ColumnMap rule which evaluates whether each column value is contained by a specified set.
               properties:
                 - !ruby/object:Api::Type::Array
                   name: 'values'
                   required: true
                   description: |
-                     Expected values for the column value.
+                    Expected values for the column value.
                   item_type: Api::Type::String
             - !ruby/object:Api::Type::NestedObject
               name: 'regexExpectation'
               description: |
-                 ColumnMap rule which evaluates whether each column value matches a specified regex.
+                ColumnMap rule which evaluates whether each column value matches a specified regex.
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'regex'
                   required: true
                   description: |
-                     A regular expression the column value is expected to match.
+                    A regular expression the column value is expected to match.
             - !ruby/object:Api::Type::NestedObject
               name: 'uniquenessExpectation'
               allow_empty_object: true
               send_empty_value: true
               description: |
-                 ColumnAggregate rule which evaluates whether the column has duplicates.
+                ColumnAggregate rule which evaluates whether the column has duplicates.
               properties: []
             - !ruby/object:Api::Type::NestedObject
               name: 'statisticRangeExpectation'
               description: |
-                 ColumnAggregate rule which evaluates whether the column aggregate statistic lies between a specified range.
+                ColumnAggregate rule which evaluates whether the column aggregate statistic lies between a specified range.
               properties:
                 - !ruby/object:Api::Type::Enum
                   name: 'statistic'
                   required: true
                   description: |
-                           column statistics.
+                    column statistics.
                   values:
                     - :STATISTIC_UNDEFINED
                     - :MEAN
@@ -347,45 +356,45 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: 'minValue'
                   description: |
-                     The minimum column statistic value allowed for a row to pass this validation.
-                     At least one of minValue and maxValue need to be provided.
+                    The minimum column statistic value allowed for a row to pass this validation.
+                    At least one of minValue and maxValue need to be provided.
                 - !ruby/object:Api::Type::String
                   name: 'maxValue'
                   description: |
-                     The maximum column statistic value allowed for a row to pass this validation.
-                     At least one of minValue and maxValue need to be provided.
+                    The maximum column statistic value allowed for a row to pass this validation.
+                    At least one of minValue and maxValue need to be provided.
                 - !ruby/object:Api::Type::Boolean
                   name: 'strictMinEnabled'
                   default_value: false
                   description: |
-                     Whether column statistic needs to be strictly greater than ('>') the minimum, or if equality is allowed.
-                     Only relevant if a minValue has been defined. Default = false.
+                    Whether column statistic needs to be strictly greater than ('>') the minimum, or if equality is allowed.
+                    Only relevant if a minValue has been defined. Default = false.
                 - !ruby/object:Api::Type::Boolean
                   name: 'strictMaxEnabled'
                   default_value: false
                   description: |
-                     Whether column statistic needs to be strictly lesser than ('<') the maximum, or if equality is allowed.
-                     Only relevant if a maxValue has been defined. Default = false.
+                    Whether column statistic needs to be strictly lesser than ('<') the maximum, or if equality is allowed.
+                    Only relevant if a maxValue has been defined. Default = false.
             - !ruby/object:Api::Type::NestedObject
               name: 'rowConditionExpectation'
               description: |
-                 Table rule which evaluates whether each row passes the specified condition.
+                Table rule which evaluates whether each row passes the specified condition.
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'sqlExpression'
                   required: true
                   description: |
-                     The SQL expression.
+                    The SQL expression.
             - !ruby/object:Api::Type::NestedObject
               name: 'tableConditionExpectation'
               description: |
-                 Table rule which evaluates whether the provided expression is true.
+                Table rule which evaluates whether the provided expression is true.
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'sqlExpression'
                   required: true
                   description: |
-                     The SQL expression.
+                    The SQL expression.
   - !ruby/object:Api::Type::NestedObject
     name: 'dataProfileSpec'
     allow_empty_object: true
@@ -524,7 +533,7 @@ properties:
                     - !ruby/object:Api::Type::Enum
                       name: 'statistic'
                       description: |
-                              column statistics.
+                        column statistics.
                       values:
                         - :STATISTIC_UNDEFINED
                         - :MEAN
