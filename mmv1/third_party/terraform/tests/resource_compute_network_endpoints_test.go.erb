@@ -1,13 +1,14 @@
 <% autogen_exception -%>
 package google
+
 import (
 	"fmt"
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -22,7 +23,7 @@ func TestAccComputeNetworkEndpoints_networkEndpointsBasic(t *testing.T) {
 		"add2_port":     102,
 		"add3_port":     103,
 		"add4_port":     104,
-        "add5_port":     105,
+		"add5_port":     105,
 	}
 	negId := fmt.Sprintf("projects/%s/zones/%s/networkEndpointGroups/tf-test-neg-%s",
 		acctest.GetTestProjectFromEnv(), acctest.GetTestZoneFromEnv(), context["random_suffix"])
@@ -83,7 +84,7 @@ func TestAccComputeNetworkEndpoints_networkEndpointsBasic(t *testing.T) {
 				// delete all endpoints
 				Config: testAccComputeNetworkEndpoints_noNetworkEndpoints(context),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeNetworkEndpointsWithPortsDestroyed(t, negId, "100"),
+					testAccCheckComputeNetworkEndpointsWithAllEndpointsDestroyed(t, negId),
 				),
 			},
 		},
@@ -96,7 +97,7 @@ resource "google_compute_network_endpoints" "default" {
   zone                   = "us-central1-a"
   network_endpoint_group = google_compute_network_endpoint_group.neg.id
 
-  endpoints {
+  network_endpoints {
     instance   = google_compute_instance.default.name
     ip_address = google_compute_instance.default.network_interface[0].network_ip
     port       = google_compute_network_endpoint_group.neg.default_port
@@ -111,7 +112,7 @@ resource "google_compute_network_endpoints" "default" {
   zone                   = "us-central1-a"
   network_endpoint_group = google_compute_network_endpoint_group.neg.name
 
-  endpoints {
+  network_endpoints {
     instance   = google_compute_instance.default.name
     ip_address = google_compute_instance.default.network_interface[0].network_ip
     port       = "%{modified_port}"
@@ -126,32 +127,32 @@ resource "google_compute_network_endpoints" "default" {
   zone                   = "us-central1-a"
   network_endpoint_group = google_compute_network_endpoint_group.neg.id
  
-  endpoints {
+  network_endpoints {
     instance   = google_compute_instance.default.name
     ip_address = google_compute_instance.default.network_interface[0].network_ip
     port       = "%{modified_port}"
   }
-  endpoints {
+  network_endpoints {
     instance   = google_compute_instance.default.name
     ip_address = google_compute_instance.default.network_interface[0].network_ip
     port       = "%{add1_port}"
   }
-  endpoints {
+  network_endpoints {
     instance   = google_compute_instance.default.name
     ip_address = google_compute_instance.default.network_interface[0].network_ip
     port       = "%{add2_port}"
   }
-  endpoints {
+  network_endpoints {
     instance   = google_compute_instance.default.name
     ip_address = google_compute_instance.default.network_interface[0].network_ip
     port       = "%{add3_port}"
   }
-  endpoints {
+  network_endpoints {
     instance   = google_compute_instance.default.name
     ip_address = google_compute_instance.default.network_interface[0].network_ip
     port       = "%{add4_port}"
   }
-  endpoints {
+  network_endpoints {
     instance   = google_compute_instance.default.name
     ip_address = google_compute_instance.default.network_interface[0].network_ip
     port       = "%{add5_port}"
@@ -161,18 +162,18 @@ resource "google_compute_network_endpoints" "default" {
 }
 
 func testAccComputeNetworkEndpoints_networkEndpointsPaginated(context map[string]interface{}, lower, upper int) string {
-    context["for_each"] = networkEndpointsGenerateRanges(lower, upper)
+	context["for_each"] = networkEndpointsGenerateRanges(lower, upper)
 	return Nprintf(`
 resource "google_compute_network_endpoints" "default" {
   zone                   = "us-central1-a"
   network_endpoint_group = google_compute_network_endpoint_group.neg.name
 
-  dynamic "endpoints" {
+  dynamic "network_endpoints" {
     for_each = %{for_each}
     content {
       instance   = google_compute_instance.default.name
       ip_address = google_compute_instance.default.network_interface[0].network_ip
-      port       = endpoints.value
+      port       = network_endpoints.value
     }
   }
 }
@@ -182,17 +183,17 @@ resource "google_compute_network_endpoints" "default" {
 // Terraform `range` can only generate a list of 1024 elements, so we need to
 // concat them to get a longer list
 func networkEndpointsGenerateRanges(lower, upper int) string {
-    var ranges []string
+	var ranges []string
 	l := lower
-    for l < upper {
-	    u := l + 1024
+	for l < upper {
+		u := l + 1024
 		if u > upper {
-		    u = upper
+			u = upper
 		}
-        ranges = append(ranges, fmt.Sprintf("range(%d, %d)", l, u))
-        l += 1024
-    }
-    return fmt.Sprintf("concat(%s)", strings.Join(ranges, ", "))
+		ranges = append(ranges, fmt.Sprintf("range(%d, %d)", l, u))
+		l += 1024
+	}
+	return fmt.Sprintf("concat(%s)", strings.Join(ranges, ", "))
 }
 
 func testAccComputeNetworkEndpoints_noNetworkEndpoints(context map[string]interface{}) string {
@@ -260,14 +261,27 @@ func testAccCheckComputeNetworkEndpointsWithPortsDestroyed(t *testing.T, negId s
 	}
 }
 
-func testAccComputeNetworkEndpointsListEndpointPorts(t *testing.T, negId string) (map[string]struct{}, error) {
+func testAccCheckComputeNetworkEndpointsWithAllEndpointsDestroyed(t *testing.T, negId string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		endpoints, err := testAccComputeNetworkEndpointsListEndpoints(t, negId)
+		if err != nil {
+			return fmt.Errorf("unable to confirm all endpoints were destroyed: %v", err)
+		}
+		if len(endpoints) > 0 {
+			return fmt.Errorf("Not all network endpoints were deleted: %v", endpoints)
+		}
+		return nil
+	}
+}
+
+func testAccComputeNetworkEndpointsListEndpoints(t *testing.T, negId string) ([]interface{}, error) {
 	config := GoogleProviderConfig(t)
 
-	url := fmt.Sprintf("https://www.googleapis.com/compute/<% if version == 'ga' %>v1<% else %>beta<% end %>/%s/listNetworkEndpoints", negId)
+	url := fmt.Sprintf("https://www.googleapis.com/compute/v1/%s/listNetworkEndpoints", negId)
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config: config,
-		Method: "POST",
-		RawURL: url,
+		Config:    config,
+		Method:    "POST",
+		RawURL:    url,
 		UserAgent: config.UserAgent,
 	})
 	if err != nil {
@@ -278,7 +292,14 @@ func testAccComputeNetworkEndpointsListEndpointPorts(t *testing.T, negId string)
 	if !ok || v == nil {
 		return nil, nil
 	}
-	items := v.([]interface{})
+	return v.([]interface{}), nil
+}
+
+func testAccComputeNetworkEndpointsListEndpointPorts(t *testing.T, negId string) (map[string]struct{}, error) {
+	items, err := testAccComputeNetworkEndpointsListEndpoints(t, negId)
+	if err != nil {
+		return nil, err
+	}
 	ports := make(map[string]struct{})
 	for _, item := range items {
 		endptWithHealth := item.(map[string]interface{})

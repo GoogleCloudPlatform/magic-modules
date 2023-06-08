@@ -1,5 +1,5 @@
 detachUrl, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}/detachNetworkEndpoints")
-o, n := d.GetChange("endpoints")
+o, n := d.GetChange("network_endpoints")
 
 oldEndpoints := make(map[NetworkEndpointsNetworkEndpoint]struct{})
 newEndpoints := make(map[NetworkEndpointsNetworkEndpoint]struct{})

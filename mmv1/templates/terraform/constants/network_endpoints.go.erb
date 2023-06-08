@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#	 http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,29 +15,29 @@
 -%>
 
 type NetworkEndpointsNetworkEndpoint struct {
-    IPAddress string
-    Port      int
-    Instance  string
+	IPAddress string
+	Port	  int
+	Instance  string
 }
 
 func NetworkEndpointsNetworkEndpointConvertToStruct(endpoint interface{}) NetworkEndpointsNetworkEndpoint {
-    e := endpoint.(map[string]interface{})
-    ipAddress := e["ip_address"].(string)
-    port := e["port"].(int)
-    instance, _ := e["instance"].(string)
-    return NetworkEndpointsNetworkEndpoint{
-        IPAddress: ipAddress,
-        Port: port,
-        Instance: instance,
-    }
+	e := endpoint.(map[string]interface{})
+	ipAddress := e["ip_address"].(string)
+	port := e["port"].(int)
+	instance, _ := e["instance"].(string)
+	return NetworkEndpointsNetworkEndpoint{
+		IPAddress: ipAddress,
+		Port: port,
+		Instance: instance,
+	}
 }
 
 func NetworkEndpointsNetworkEndpointConvertToAny(endpoint NetworkEndpointsNetworkEndpoint) interface{} {
-    m := make(map[string]interface{})
-    m["ip_address"] = endpoint.IPAddress
-    m["port"] = endpoint.Port
-    m["instance"] = endpoint.Instance
-    return m
+	m := make(map[string]interface{})
+	m["ip_address"] = endpoint.IPAddress
+	m["port"] = endpoint.Port
+	m["instance"] = endpoint.Instance
+	return m
 }
 
 // Continues to read network endpoints as long as there are unread pages remaining
@@ -45,10 +45,10 @@ func networkEndpointsPaginatedRead(d *schema.ResourceData, config *transport_tpg
 	var allEndpoints []interface{}
 	for len(pt) > 0 {
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "POST",
+			Config:	config,
+			Method:	"POST",
 			Project:   billingProject,
-			RawURL:    fmt.Sprintf("%s?pageToken=%s", url, pt),
+			RawURL:	fmt.Sprintf("%s?pageToken=%s", url, pt),
 			UserAgent: userAgent,
 		})
 		if err != nil {
@@ -66,11 +66,11 @@ func networkEndpointsPaginatedRead(d *schema.ResourceData, config *transport_tpg
 func networkEndpointsPaginatedMutate(d *schema.ResourceData, endpoints []interface{}, config *transport_tpg.Config, userAgent, url, project, billingProject string, chunkSize int, returnLastPage bool) ([]interface{}, error) {
 	// Pull out what this mutation is doing - either attachNetworkEndpoints or detachNetworkEndpoints
 	verb := url[len(url)-len("attachNetworkEndpoints"):]
-    id, err := tpgresource.ReplaceVars(d, config, "{{project}}/{{zone}}/{{network_endpoint_group}}/endpoints")
+	id, err := tpgresource.ReplaceVars(d, config, "{{project}}/{{zone}}/{{network_endpoint_group}}/endpoints")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
-    i := 0
+	i := 0
 	for ; i < len(endpoints); i += chunkSize {
 		j := i + chunkSize
 		if j > len(endpoints) {
@@ -81,12 +81,12 @@ func networkEndpointsPaginatedMutate(d *schema.ResourceData, endpoints []interfa
 		}
 		body := map[string]interface{}{"networkEndpoints": endpoints[i:j]}
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "POST",
+			Config:	   config,
+			Method:	   "POST",
 			Project:   billingProject,
-			RawURL:    url,
+			RawURL:	   url,
 			UserAgent: userAgent,
-			Body:      body,
+			Body:	   body,
 			Timeout:   d.Timeout(schema.TimeoutDefault),
 		})
 		if err != nil {
@@ -104,8 +104,8 @@ func networkEndpointsPaginatedMutate(d *schema.ResourceData, endpoints []interfa
 
 		log.Printf("[DEBUG] Finished %s %q: %#v", verb, id, res)
 	}
-    if returnLastPage {
-	    return endpoints[i:], nil
-    }
-    return nil, nil
+	if returnLastPage {
+		return endpoints[i:], nil
+	}
+	return nil, nil
 }

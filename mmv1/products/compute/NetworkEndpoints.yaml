@@ -18,9 +18,9 @@ base_url: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_e
 description: |
   A set of network endpoints belonging to a network endpoint group (NEG). A
   single network endpoint represents a IP address and port combination that is
-  part of a specific (NEG). NEGs are zonal collections of these endpoints for
-  GCP resources within a single subnet. **NOTE**: Network endpoints cannot be
-  created outside of a network endpoint group.
+  part of a specific network endpoint group  (NEG). NEGs are zonal collections
+  of these endpoints for GCP resources within a single subnet. **NOTE**:
+  Network endpoints cannot be created outside of a network endpoint group.
 
   This resource is authoritative for a single NEG. Any endpoints not specified
   by this resource will be deleted when the resource configuration is applied.
@@ -99,15 +99,14 @@ parameters:
     resource: 'NetworkEndpointGroup'
     imports: 'name'
     description: |
-      The network endpoint group this endpoint is part of.
+      The network endpoint group these endpoints are part of.
     required: true
     url_param_only: true
     ignore_read: true
     diff_suppress_func: tpgresource.CompareResourceNames
 properties:
   - !ruby/object:Api::Type::Array
-    name: 'endpoints'
-    api_name: 'networkEndpoints'
+    name: 'networkEndpoints'
     is_set: true
     description: |
       The network endpoints to be added to the enclosing network endpoint group
@@ -122,7 +121,7 @@ properties:
           description: |
             The name for a specific VM instance that the IP address belongs to.
             This is required for network endpoints of type GCE_VM_IP_PORT.
-            The instance must be in the same zone of network endpoint group.
+            The instance must be in the same zone as the network endpoint group.
           custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.erb'
         - !ruby/object:Api::Type::Integer
           name: 'port'

@@ -1,6 +1,6 @@
 var endpointsToDelete []interface{}
 
-endpoints := d.Get("endpoints").(*schema.Set).List()
+endpoints := d.Get("network_endpoints").(*schema.Set).List()
 
 for _, e := range(endpoints) {
     endpoint := e.(map[string]interface{})

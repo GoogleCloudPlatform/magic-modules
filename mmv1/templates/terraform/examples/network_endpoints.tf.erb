@@ -1,12 +1,12 @@
 resource "google_compute_network_endpoints" "<%= ctx[:primary_resource_id] %>" {
   network_endpoint_group = google_compute_network_endpoint_group.neg.name
 
-  endpoints {
+  network_endpoints {
     instance   = google_compute_instance.endpoint-instance1.name
     port       = google_compute_network_endpoint_group.neg.default_port
     ip_address = google_compute_instance.endpoint-instance1.network_interface[0].network_ip
   }
-  endpoints {
+  network_endpoints {
     instance   = google_compute_instance.endpoint-instance2.name
     port       = google_compute_network_endpoint_group.neg.default_port
     ip_address = google_compute_instance.endpoint-instance2.network_interface[0].network_ip
