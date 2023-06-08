@@ -9,23 +9,23 @@ import (
 
 const CloudFunctionsCloudFunctionAssetType string = "cloudfunctions.googleapis.com/CloudFunction"
 
-func resourceConverterCloudFunctionsCloudFunction() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterCloudFunctionsCloudFunction() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType: CloudFunctionsCloudFunctionAssetType,
 		Convert:   GetCloudFunctionsCloudFunctionCaiObject,
 	}
 }
 
-func GetCloudFunctionsCloudFunctionCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//cloudfunctions.googleapis.com/projects/{{project}}/locations/{{region}}/functions/{{name}}")
+func GetCloudFunctionsCloudFunctionCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	name, err := tpgresource.AssetName(d, config, "//cloudfunctions.googleapis.com/projects/{{project}}/locations/{{region}}/functions/{{name}}")
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 	if obj, err := GetCloudFunctionsCloudFunctionApiObject(d, config); err == nil {
-		return []Asset{{
+		return []tpgresource.Asset{{
 			Name: name,
 			Type: CloudFunctionsCloudFunctionAssetType,
-			Resource: &AssetResource{
+			Resource: &tpgresource.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/cloudfunctions/v1/rest",
 				DiscoveryName:        "CloudFunction",
@@ -33,7 +33,7 @@ func GetCloudFunctionsCloudFunctionCaiObject(d tpgresource.TerraformResourceData
 			},
 		}}, nil
 	} else {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 }
 
