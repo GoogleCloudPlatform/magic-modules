@@ -1,5 +1,5 @@
 func bigqueryReservationCapacityCommitmentPlanDiffSuppressFunc(_, old, new string, _ *schema.ResourceData) bool {
-	if (old == "FLEX" || new == "MONTHLY" || old == "ANNUAL") && new == old+"_FLAT_RATE" {
+	if (old == "FLEX" || old == "MONTHLY" || old == "ANNUAL") && new == old+"_FLAT_RATE" {
 		return true
 	}
 	return false
