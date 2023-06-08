@@ -75,7 +75,7 @@ examples:
       gateway_name_1: 'my-gateway1'
       scope_1: 'my-default-scope1'
     ignore_read_extra:
-      - "delete_swg_autogen_router_on_destroy"
+      - 'delete_swg_autogen_router_on_destroy'
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
     name: 'network_services_gateway_multiple_swp_same_network'
@@ -92,7 +92,7 @@ examples:
       scope_1: 'my-default-scope1'
       scope_2: 'my-default-scope2'
     ignore_read_extra:
-      - "delete_swg_autogen_router_on_destroy"
+      - 'delete_swg_autogen_router_on_destroy'
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'delete_swg_autogen_router_on_destroy'
