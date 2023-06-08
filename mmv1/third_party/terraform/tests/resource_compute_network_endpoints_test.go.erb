@@ -2,6 +2,7 @@
 package google
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -11,8 +12,6 @@ import (
 )
 
 func TestAccComputeNetworkEndpoints_networkEndpointsBasic(t *testing.T) {
-	// Multiple fine-grained resources
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -24,7 +23,6 @@ func TestAccComputeNetworkEndpoints_networkEndpointsBasic(t *testing.T) {
 		"add3_port":     103,
 		"add4_port":     104,
         "add5_port":     105,
-
 	}
 	negId := fmt.Sprintf("projects/%s/zones/%s/networkEndpointGroups/tf-test-neg-%s",
 		acctest.GetTestProjectFromEnv(), acctest.GetTestZoneFromEnv(), context["random_suffix"])
@@ -57,6 +55,24 @@ func TestAccComputeNetworkEndpoints_networkEndpointsBasic(t *testing.T) {
 			{
 				// Add four new endpoints
 				Config: testAccComputeNetworkEndpoints_networkEndpointsAdditional(context),
+			},
+			{
+				ResourceName:      "google_compute_network_endpoints.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Add enough endpoints to trigger pagination
+				Config: testAccComputeNetworkEndpoints_networkEndpointsPaginated(context, 100, 1300),
+			},
+			{
+				ResourceName:      "google_compute_network_endpoints.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Remove enough endpoints to trigger pagination
+				Config: testAccComputeNetworkEndpoints_networkEndpointsPaginated(context, 700, 1900),
 			},
 			{
 				ResourceName:      "google_compute_network_endpoints.default",
@@ -142,6 +158,41 @@ resource "google_compute_network_endpoints" "default" {
   }
 }
 `, context) + testAccComputeNetworkEndpoints_noNetworkEndpoints(context)
+}
+
+func testAccComputeNetworkEndpoints_networkEndpointsPaginated(context map[string]interface{}, lower, upper int) string {
+    context["for_each"] = networkEndpointsGenerateRanges(lower, upper)
+	return Nprintf(`
+resource "google_compute_network_endpoints" "default" {
+  zone                   = "us-central1-a"
+  network_endpoint_group = google_compute_network_endpoint_group.neg.name
+
+  dynamic "endpoints" {
+    for_each = %{for_each}
+    content {
+      instance   = google_compute_instance.default.name
+      ip_address = google_compute_instance.default.network_interface[0].network_ip
+      port       = endpoints.value
+    }
+  }
+}
+`, context) + testAccComputeNetworkEndpoints_noNetworkEndpoints(context)
+}
+
+// Terraform `range` can only generate a list of 1024 elements, so we need to
+// concat them to get a longer list
+func networkEndpointsGenerateRanges(lower, upper int) string {
+    var ranges []string
+	l := lower
+    for l < upper {
+	    u := l + 1024
+		if u > upper {
+		    u = upper
+		}
+        ranges = append(ranges, fmt.Sprintf("range(%d, %d)", l, u))
+        l += 1024
+    }
+    return fmt.Sprintf("concat(%s)", strings.Join(ranges, ", "))
 }
 
 func testAccComputeNetworkEndpoints_noNetworkEndpoints(context map[string]interface{}) string {
