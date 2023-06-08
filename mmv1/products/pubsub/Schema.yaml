@@ -13,7 +13,6 @@
 
 --- !ruby/object:Api::Resource
 name: 'Schema'
-immutable: true
 description: |
   A schema is a format that messages must follow,
   creating a contract between publisher and subscriber that Pub/Sub will enforce.
@@ -23,6 +22,9 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.schemas'
 base_url: projects/{{project}}/schemas
 create_url: projects/{{project}}/schemas?schemaId={{name}}
+update_url: projects/{{project}}/schemas/{{name}}:commit
+update_verb: :POST
+update_mask: false
 async: !ruby/object:Provider::Terraform::PollAsync
   check_response_func_existence: transport_tpg.PollCheckForExistence
   check_response_func_absence: transport_tpg.PollCheckForAbsence
@@ -52,6 +54,8 @@ parameters:
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  update_encoder: templates/terraform/update_encoder/pubsub_schema.erb
 properties:
   - !ruby/object:Api::Type::Enum
     name: 'type'
@@ -67,5 +71,3 @@ properties:
       The definition of the schema.
       This should contain a string representing the full definition of the schema
       that is a valid schema definition of the type specified in type.
-
-    ignore_read: true
