@@ -1,5 +1,5 @@
 <% autogen_exception -%>
-package google
+package firebase
 <% unless version == 'ga' -%>
 
 import (
@@ -12,6 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+
+	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
+	"github.com/hashicorp/terraform-provider-google/google/fwresource"
+	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
 )
 
 // Ensure the implementation satisfies the expected interfaces
@@ -87,25 +91,25 @@ func (d *GoogleFirebaseAppleAppConfigDataSource) Configure(ctx context.Context, 
 		return
 	}
 
-	p, ok := req.ProviderData.(*frameworkProvider)
+	p, ok := req.ProviderData.(*fwtransport.FrameworkProviderConfig)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *frameworkProvider, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *fwtransport.FrameworkProviderConfig, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}
 
-	d.client = p.NewFirebaseClient(p.userAgent, &resp.Diagnostics)
+	d.client = p.NewFirebaseClient(p.UserAgent, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	d.project = p.project
+	d.project = p.Project
 }
 
 func (d *GoogleFirebaseAppleAppConfigDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data GoogleFirebaseAppleAppConfigModel
-	var metaData *ProviderMetaModel
+	var metaData *fwmodels.ProviderMetaModel
 
 	// Read Provider meta into the meta model
 	resp.Diagnostics.Append(req.ProviderMeta.Get(ctx, &metaData)...)
@@ -113,7 +117,7 @@ func (d *GoogleFirebaseAppleAppConfigDataSource) Read(ctx context.Context, req d
 		return
 	}
 
-	d.client.UserAgent = generateFrameworkUserAgentString(metaData, d.client.UserAgent)
+	d.client.UserAgent = fwtransport.GenerateFrameworkUserAgentString(metaData, d.client.UserAgent)
 
 	client := firebase.NewProjectsIosAppsService(d.client)
 
@@ -123,7 +127,7 @@ func (d *GoogleFirebaseAppleAppConfigDataSource) Read(ctx context.Context, req d
 		return
 	}
 
-	data.Project = getProjectFramework(data.Project, d.project, &resp.Diagnostics)
+	data.Project = fwresource.GetProjectFramework(data.Project, d.project, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -133,7 +137,7 @@ func (d *GoogleFirebaseAppleAppConfigDataSource) Read(ctx context.Context, req d
 
 	clientResp, err := client.GetConfig(appName).Do()
 	if err != nil {
-		handleDatasourceNotFoundError(ctx, err, &resp.State, fmt.Sprintf("dataSourceFirebaseAppleAppConfig %q", data.AppId.ValueString()), &resp.Diagnostics)
+		fwtransport.HandleDatasourceNotFoundError(ctx, err, &resp.State, fmt.Sprintf("dataSourceFirebaseAppleAppConfig %q", data.AppId.ValueString()), &resp.Diagnostics)
 		if resp.Diagnostics.HasError() {
 			return
 		}

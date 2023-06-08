@@ -1,12 +1,12 @@
 <% autogen_exception -%>
-package google
+package fwmodels
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// ProviderModel describes the provider data model.
+// ProviderModel describes the provider config data model.
 type ProviderModel struct {
 	Credentials                        types.String `tfsdk:"credentials"`
 	AccessToken                        types.String `tfsdk:"access_token"`
@@ -67,6 +67,11 @@ type ProviderModel struct {
 	// internal definition is removed.
 	RunCustomEndpoint                  types.String `tfsdk:"run_custom_endpoint"`
 <% end -%>
+}
+
+type ProviderBatching struct {
+	SendAfter      types.String `tfsdk:"send_after"`
+	EnableBatching types.Bool   `tfsdk:"enable_batching"`
 }
 
 var ProviderBatchingAttributes = map[string]attr.Type{
