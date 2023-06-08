@@ -19,11 +19,6 @@ resource "google_bigtable_instance" "instance" {
     storage_type = "HDD"
   }
 
-  timeouts {
-    create = "1h30m"
-    update = "2h"
-  }
-
   deletion_protection  = "<%= ctx[:vars]['deletion_protection'] %>"
 }
 
