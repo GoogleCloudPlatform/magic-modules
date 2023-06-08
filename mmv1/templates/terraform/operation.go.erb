@@ -9,7 +9,7 @@
 
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package google
+package <%= product_ns.downcase -%>
 
 import (
 <% if async.result.resource_inside_response -%>

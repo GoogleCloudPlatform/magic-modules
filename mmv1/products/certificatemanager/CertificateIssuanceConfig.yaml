@@ -40,7 +40,10 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 docs: !ruby/object:Provider::Terraform::Docs
 autogen_async: true
-import_format: ["projects/{{project}}/locations/{{location}}/certificateIssuanceConfigs/{{name}}"]
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/certificateIssuanceConfigs/{{name}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'certificate_manager_certificate_issuance_config'
@@ -63,7 +66,7 @@ parameters:
       The Certificate Manager location. If not specified, "global" is used.
     default_value: global
     url_param_only: true
-properties:  
+properties:
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -71,9 +74,9 @@ properties:
   - !ruby/object:Api::Type::Integer
     name: 'rotationWindowPercentage'
     description: |
-      It specifies the percentage of elapsed time of the certificate lifetime to wait before renewing the certificate. 
+      It specifies the percentage of elapsed time of the certificate lifetime to wait before renewing the certificate.
       Must be a number between 1-99, inclusive.
-      You must set the rotation window percentage in relation to the certificate lifetime so that certificate renewal occurs at least 7 days after 
+      You must set the rotation window percentage in relation to the certificate lifetime so that certificate renewal occurs at least 7 days after
       the certificate has been issued and at least 7 days before it expires.
     required: true
   - !ruby/object:Api::Type::Enum
@@ -87,7 +90,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'lifetime'
     description: |
-      Lifetime of issued certificates. A duration in seconds with up to nine fractional digits, ending with 's'. 
+      Lifetime of issued certificates. A duration in seconds with up to nine fractional digits, ending with 's'.
       Example: "1814400s". Valid values are from 21 days (1814400s) to 30 days (2592000s)
     required: true
   - !ruby/object:Api::Type::String
@@ -107,7 +110,7 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: |
-      'Set of label tags associated with the CertificateIssuanceConfig resource. 
+      'Set of label tags associated with the CertificateIssuanceConfig resource.
        An object containing a list of "key": value pairs. Example: { "name": "wrench", "count": "3" }.
   - !ruby/object:Api::Type::NestedObject
     name: 'certificateAuthorityConfig'
@@ -118,12 +121,12 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'certificateAuthorityServiceConfig'
         description: Defines a CertificateAuthorityServiceConfig.
-        properties: 
+        properties:
           - !ruby/object:Api::Type::String
             name: 'caPool'
             required: true
             description: |
-              A CA pool resource used to issue a certificate. 
-              The CA pool string has a relative resource path following the form 
+              A CA pool resource used to issue a certificate.
+              The CA pool string has a relative resource path following the form
               "projects/{project}/locations/{location}/caPools/{caPool}".
-            diff_suppress_func: 'tpgresource.CompareResourceNames' 
+            diff_suppress_func: 'tpgresource.CompareResourceNames'
