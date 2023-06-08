@@ -25,6 +25,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/dlp/docs/concepts-templates'
   api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates'
 id_format: '{{parent}}/deidentifyTemplates/{{name}}'
+# Skip sweeper due to non-standard URL
+skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_deidentify_template_basic'

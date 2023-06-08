@@ -25,6 +25,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/dlp/docs/creating-templates-inspect'
   api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.inspectTemplates'
 id_format: '{{parent}}/inspectTemplates/{{name}}'
+# Skip sweeper due to non-standard URL
+skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_inspect_template_basic'
