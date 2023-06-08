@@ -1,6 +1,5 @@
 <% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -13,6 +12,145 @@ import (
   "github.com/hashicorp/terraform-provider-google/google/tpgresource"
   transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
+
+<% unless version == 'ga' -%>
+func TestAccGKEHubFeature_gkehubFeatureFleetObservability(t *testing.T) {
+  // VCR fails to handle batched project services
+  acctest.SkipIfVcr(t)
+  t.Parallel()
+
+  context := map[string]interface{}{
+    "random_suffix":   RandString(t, 10),
+    "org_id":          acctest.GetTestOrgFromEnv(t),
+    "billing_account": acctest.GetTestBillingAccountFromEnv(t),
+  }
+
+  VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+    CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
+    ExternalProviders: map[string]resource.ExternalProvider{
+			"time":   {},
+		},
+    Steps: []resource.TestStep{
+      {
+        Config: testAccGKEHubFeature_gkehubFeatureFleetObservability(context),
+      },
+      {
+        ResourceName:      "google_gke_hub_feature.feature",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccGKEHubFeature_gkehubFeatureFleetObservabilityUpdate1(context),
+      },
+      {
+        ResourceName:      "google_gke_hub_feature.feature",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccGKEHubFeature_gkehubFeatureFleetObservabilityUpdate2(context),
+      },
+      {
+        ResourceName:      "google_gke_hub_feature.feature",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
+}
+
+func testAccGKEHubFeature_gkehubFeatureFleetObservability(context map[string]interface{}) string {
+  return gkeHubFeatureProjectBetaSetup(context) + Nprintf(`
+resource "google_gke_hub_feature" "feature" {
+  name = "fleetobservability"
+  location = "global"
+  project = google_project.beta_project.project_id
+  spec {
+    fleetobservability {
+      logging_config {
+        default_config {
+	  mode = "MOVE"
+        }
+        fleet_scope_logs_config {
+          mode = "COPY"
+        }
+      }
+    }
+  }
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
+  provider = google-beta
+}
+`, context)
+}
+
+func testAccGKEHubFeature_gkehubFeatureFleetObservabilityUpdate1(context map[string]interface{}) string {
+  return gkeHubFeatureProjectBetaSetup(context) + Nprintf(`
+resource "google_gke_hub_feature" "feature" {
+  name = "fleetobservability"
+  location = "global"
+  project = google_project.beta_project.project_id
+  spec {
+    fleetobservability {
+      logging_config {
+        default_config {
+	  mode = "MOVE"
+        }
+      }
+    }
+  }
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
+  provider = google-beta
+}
+`, context)
+}
+
+func testAccGKEHubFeature_gkehubFeatureFleetObservabilityUpdate2(context map[string]interface{}) string {
+  return gkeHubFeatureProjectBetaSetup(context) + Nprintf(`
+resource "google_gke_hub_feature" "feature" {
+  name = "fleetobservability"
+  location = "global"
+  project = google_project.beta_project.project_id
+  spec {
+    fleetobservability {
+      logging_config {
+        fleet_scope_logs_config {
+          mode = "COPY"
+        }
+      }
+    }
+  }
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
+  provider = google-beta
+}
+`, context)
+}
+
+func gkeHubFeatureProjectBetaSetup(context map[string]interface{}) string {
+  return Nprintf(`
+resource "google_project" "beta_project" {
+  name            = "tf-test-gkehub%{random_suffix}"
+  project_id      = "tf-test-gkehub%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  provider        = google-beta
+}
+
+resource "google_project_service" "gkehub" {
+  project = google_project.beta_project.project_id
+  service = "gkehub.googleapis.com"
+  disable_on_destroy = false
+  provider = google-beta
+}
+
+resource "time_sleep" "wait_for_gkehub_enablement" {
+  create_duration = "150s"
+  depends_on = [google_project_service.gkehub]
+}
+`, context)
+}
+<% end -%>
 
 func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
   // VCR fails to handle batched project services
@@ -27,7 +165,7 @@ func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
 
   VcrTest(t, resource.TestCase{
     PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+    ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
     CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -60,7 +198,6 @@ resource "google_container_cluster" "primary" {
   location           = "us-central1-a"
   initial_node_count = 1
   project = google_project.project.project_id
-  provider = google-beta
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
@@ -69,7 +206,6 @@ resource "google_container_cluster" "secondary" {
   location           = "us-central1-a"
   initial_node_count = 1
   project = google_project.project.project_id
-  provider = google-beta
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
@@ -82,7 +218,6 @@ resource "google_gke_hub_membership" "membership" {
   }
   description = "test resource."
   project = google_project.project.project_id
-  provider = google-beta
 }
 
 resource "google_gke_hub_membership" "membership_second" {
@@ -94,7 +229,6 @@ resource "google_gke_hub_membership" "membership_second" {
   }
   description = "test resource."
   project = google_project.project.project_id
-  provider = google-beta
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -106,7 +240,6 @@ resource "google_gke_hub_feature" "feature" {
     }
   }
   project = google_project.project.project_id
-  provider = google-beta
 }
 `, context)
 }
@@ -118,7 +251,6 @@ resource "google_container_cluster" "primary" {
   location           = "us-central1-a"
   initial_node_count = 1
   project = google_project.project.project_id
-  provider = google-beta
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
@@ -127,7 +259,6 @@ resource "google_container_cluster" "secondary" {
   location           = "us-central1-a"
   initial_node_count = 1
   project = google_project.project.project_id
-  provider = google-beta
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
@@ -140,7 +271,6 @@ resource "google_gke_hub_membership" "membership" {
   }
   description = "test resource."
   project = google_project.project.project_id
-  provider = google-beta
 }
 
 resource "google_gke_hub_membership" "membership_second" {
@@ -152,7 +282,6 @@ resource "google_gke_hub_membership" "membership_second" {
   }
   description = "test resource."
   project = google_project.project.project_id
-  provider = google-beta
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -167,7 +296,6 @@ resource "google_gke_hub_feature" "feature" {
     foo = "bar"
   }
   project = google_project.project.project_id
-  provider = google-beta
 }
 `, context)
 }
@@ -185,7 +313,7 @@ func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
 
   VcrTest(t, resource.TestCase{
     PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+    ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
     CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -217,7 +345,6 @@ resource "google_gke_hub_feature" "feature" {
   labels = {
     foo = "bar"
   }
-  provider = google-beta
   depends_on = [google_project_service.mcsd]
 }
 `, context)
@@ -233,7 +360,6 @@ resource "google_gke_hub_feature" "feature" {
     foo = "quux"
     baz = "qux"
   }
-  provider = google-beta
   depends_on = [google_project_service.mcsd]
 }
 `, context)
@@ -246,52 +372,44 @@ resource "google_project" "project" {
   project_id      = "tf-test-gkehub%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
-  provider        = google-beta
 }
 
 resource "google_project_service" "mesh" {
   project = google_project.project.project_id
   service = "meshconfig.googleapis.com"
-  provider = google-beta
 }
 
 resource "google_project_service" "mci" {
   project = google_project.project.project_id
   service = "multiclusteringress.googleapis.com"
-  provider = google-beta
 }
 
 resource "google_project_service" "acm" {
   project = google_project.project.project_id
   service = "anthosconfigmanagement.googleapis.com"
-  provider = google-beta
 }
 
 resource "google_project_service" "mcsd" {
   project = google_project.project.project_id
   service = "multiclusterservicediscovery.googleapis.com"
-  provider = google-beta
 }
 
 resource "google_project_service" "compute" {
   project = google_project.project.project_id
   service = "compute.googleapis.com"
   disable_on_destroy = false
-  provider = google-beta
 }
 
 resource "google_project_service" "container" {
   project = google_project.project.project_id
   service = "container.googleapis.com"
   disable_on_destroy = false
-  provider = google-beta
 }
 
 resource "google_project_service" "gkehub" {
   project = google_project.project.project_id
   service = "gkehub.googleapis.com"
   disable_on_destroy = false
-  provider = google-beta
 }
 `, context)
 }
@@ -308,7 +426,7 @@ func testAccCheckGKEHubFeatureDestroyProducer(t *testing.T) func(s *terraform.St
 
       config := GoogleProviderConfig(t)
 
-      url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{GkeHubBasePath}}projects/{{project}}/locations/{{location}}/features/{{name}}")
+      url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{GKEHub2BasePath}}projects/{{project}}/locations/{{location}}/features/{{name}}")
       if err != nil {
         return err
       }
@@ -334,4 +452,3 @@ func testAccCheckGKEHubFeatureDestroyProducer(t *testing.T) func(s *terraform.St
     return nil
   }
 }
-<% end -%>

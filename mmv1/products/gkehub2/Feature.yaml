@@ -53,14 +53,20 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
     ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'gkehub_feature_basic'
+    name: 'gkehub_feature_multi_cluster_ingress'
+    skip_test: true
+    primary_resource_name: 'fmt.Sprint("multiclusteringress")'
+    primary_resource_id: 'feature'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'gkehub_feature_multi_cluster_service_discovery'
+    skip_test: true
     primary_resource_name: 'fmt.Sprint("multiclusterservicediscovery")'
     primary_resource_id: 'feature'
-    region_override: 'global'
-    test_env_vars:
-      project_name: :PROJECT_NAME
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'gkehub_feature_anthos_service_mesh'
+    skip_test: true
+    primary_resource_name: 'fmt.Sprint("servicemesh")'
+    primary_resource_id: 'feature'
 autogen_async: true
 # Skip sweeper gen since this is a child resource.
 skip_sweeper: true
@@ -116,10 +122,39 @@ properties:
         properties:
           - !ruby/object:Api::Type::String
             name: configMembership
-#            resource: 'Membership'
-#            imports: 'name'
             description: 'Fully-qualified Membership name which hosts the MultiClusterIngress CRD. Example: `projects/foo-proj/locations/global/memberships/bar`'
             required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: fleetobservability
+        description: Fleet Observability feature spec.
+        min_version: beta
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: loggingConfig
+            description: 'Specified if fleet logging feature is enabled for the entire fleet. If UNSPECIFIED, fleet logging feature is disabled for the entire fleet.'
+            properties:
+              - !ruby/object:Api::Type::NestedObject
+                name: defaultConfig
+                description: 'Specified if applying the default routing config to logs not specified in other configs.'
+                properties:
+                  - !ruby/object:Api::Type::Enum
+                    name: mode
+                    description: Specified if fleet logging feature is enabled.
+                    values:
+                      - :MODE_UNSPECIFIED
+                      - :COPY
+                      - :MOVE
+              - !ruby/object:Api::Type::NestedObject
+                name: fleetScopeLogsConfig
+                description: 'Specified if applying the routing config to all logs for all fleet scopes.'
+                properties:
+                  - !ruby/object:Api::Type::Enum
+                    name: mode
+                    description: Specified if fleet logging feature is enabled.
+                    values:
+                      - :MODE_UNSPECIFIED
+                      - :COPY
+                      - :MOVE
   - !ruby/object:Api::Type::NestedObject
     name: state
     description: Output only. The Hub-wide Feature state
