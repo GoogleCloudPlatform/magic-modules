@@ -1,4 +1,4 @@
-package google
+package monitoring
 
 import (
 	"fmt"

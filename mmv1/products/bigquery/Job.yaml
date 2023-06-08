@@ -34,7 +34,7 @@ import_format:
 skip_delete: true
 id_format: projects/{{project}}/jobs/{{job_id}}
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
   actions: ['create']
 examples:
   - !ruby/object:Provider::Terraform::Examples

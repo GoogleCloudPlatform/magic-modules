@@ -180,7 +180,6 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'inspectTemplateName'
         description: The name of the template to run when this job is triggered.
-        required: true
       - !ruby/object:Api::Type::NestedObject
         name: 'inspectConfig'
         description: The core content of the template.
@@ -906,7 +905,6 @@ properties:
                   * `"pipeline" : "etl"`
       - !ruby/object:Api::Type::Array
         name: 'actions'
-        required: true
         description: |
           A task to execute on the completion of a job.
         item_type: !ruby/object:Api::Type::NestedObject

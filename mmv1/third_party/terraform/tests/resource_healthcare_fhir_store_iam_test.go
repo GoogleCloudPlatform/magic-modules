@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/healthcare"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -19,7 +20,7 @@ func TestAccHealthcareFhirStoreIamBinding(t *testing.T) {
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.fhirStoreAdmin"
 	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	datasetId := &HealthcareDatasetId{
+	datasetId := &healthcare.HealthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
@@ -68,7 +69,7 @@ func TestAccHealthcareFhirStoreIamMember(t *testing.T) {
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.fhirResourceEditor"
 	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	datasetId := &HealthcareDatasetId{
+	datasetId := &healthcare.HealthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
@@ -103,7 +104,7 @@ func TestAccHealthcareFhirStoreIamPolicy(t *testing.T) {
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.fhirResourceEditor"
 	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	datasetId := &HealthcareDatasetId{
+	datasetId := &healthcare.HealthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
@@ -142,7 +143,7 @@ func testAccCheckGoogleHealthcareFhirStoreIamBindingExists(t *testing.T, binding
 		}
 
 		config := GoogleProviderConfig(t)
-		fhirStoreId, err := ParseHealthcareFhirStoreId(bindingRs.Primary.Attributes["fhir_store_id"], config)
+		fhirStoreId, err := healthcare.ParseHealthcareFhirStoreId(bindingRs.Primary.Attributes["fhir_store_id"], config)
 
 		if err != nil {
 			return err
@@ -178,7 +179,7 @@ func testAccCheckGoogleHealthcareFhirStoreIamMemberExists(t *testing.T, n, role,
 		}
 
 		config := GoogleProviderConfig(t)
-		fhirStoreId, err := ParseHealthcareFhirStoreId(rs.Primary.Attributes["fhir_store_id"], config)
+		fhirStoreId, err := healthcare.ParseHealthcareFhirStoreId(rs.Primary.Attributes["fhir_store_id"], config)
 
 		if err != nil {
 			return err
@@ -213,7 +214,7 @@ func testAccCheckGoogleHealthcareFhirStoreIamPolicyExists(t *testing.T, n, role,
 		}
 
 		config := GoogleProviderConfig(t)
-		fhirStoreId, err := ParseHealthcareFhirStoreId(rs.Primary.Attributes["fhir_store_id"], config)
+		fhirStoreId, err := healthcare.ParseHealthcareFhirStoreId(rs.Primary.Attributes["fhir_store_id"], config)
 
 		if err != nil {
 			return err
