@@ -1,25 +1,22 @@
-package google
+package appengine
 
 import (
 	"context"
-	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+// This will sweep both Standard and Flexible App Engine App Versions
 func init() {
-	resource.AddTestSweepers("StorageBucket", &resource.Sweeper{
-		Name: "StorageBucket",
-		F:    testSweepStorageBucket,
-	})
+	sweeper.AddTestSweepers("AppEngineAppVersion", testSweepAppEngineAppVersion)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
-func testSweepStorageBucket(region string) error {
-	resourceName := "StorageBucket"
+func testSweepAppEngineAppVersion(region string) error {
+	resourceName := "AppEngineAppVersion"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
 	config, err := acctest.SharedConfigForRegion(region)
@@ -34,16 +31,7 @@ func testSweepStorageBucket(region string) error {
 		return err
 	}
 
-	params := map[string]string{
-		"project":    config.Project,
-		"projection": "noAcl", // returns 1000 items instead of 200
-	}
-
-	servicesUrl, err := transport_tpg.AddQueryParams("https://storage.googleapis.com/storage/v1/b", params)
-	if err != nil {
-		return err
-	}
-
+	servicesUrl := "https://appengine.googleapis.com/v1/apps/" + config.Project + "/services"
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
@@ -56,7 +44,7 @@ func testSweepStorageBucket(region string) error {
 		return nil
 	}
 
-	resourceList, ok := res["items"]
+	resourceList, ok := res["services"]
 	if !ok {
 		log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
 		return nil
@@ -69,15 +57,20 @@ func testSweepStorageBucket(region string) error {
 	nonPrefixCount := 0
 	for _, ri := range rl {
 		obj := ri.(map[string]interface{})
+		if obj["id"] == nil {
+			log.Printf("[INFO][SWEEPER_LOG] %s resource id was nil", resourceName)
+			return nil
+		}
 
-		id := obj["name"].(string)
+		id := obj["id"].(string)
 		// Increment count and skip if resource is not sweepable.
 		if !acctest.IsSweepableTestResource(id) {
 			nonPrefixCount++
 			continue
 		}
 
-		deleteUrl := fmt.Sprintf("https://storage.googleapis.com/storage/v1/b/%s", id)
+		deleteUrl := servicesUrl + "/" + id
+		// Don't wait on operations as we may have a lot to delete
 		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "DELETE",
@@ -88,12 +81,12 @@ func testSweepStorageBucket(region string) error {
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", deleteUrl, err)
 		} else {
-			log.Printf("[INFO][SWEEPER_LOG] Deleted a %s resource: %s", resourceName, id)
+			log.Printf("[INFO][SWEEPER_LOG] Sent delete request for %s resource: %s", resourceName, id)
 		}
 	}
 
 	if nonPrefixCount > 0 {
-		log.Printf("[INFO][SWEEPER_LOG] %d items without tf-test prefix remain.", nonPrefixCount)
+		log.Printf("[INFO][SWEEPER_LOG] %d items without tf_test prefix remain.", nonPrefixCount)
 	}
 
 	return nil
