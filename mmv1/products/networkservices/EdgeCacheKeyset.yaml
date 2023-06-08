@@ -42,6 +42,7 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 import_format:
   ['projects/{{project}}/locations/global/edgeCacheKeysets/{{name}}']
+error_abort_predicates: ['transport_tpg.Is429QuotaError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'network_services_edge_cache_keyset_basic'
