@@ -1277,23 +1277,6 @@ resource "google_data_loss_prevention_deidentify_template" "config" {
 
       transformations {
         info_types {
-          name = "CRYPTO_HASH_WRAPPED_EXAMPLE"
-        }
-
-        primitive_transformation {
-          crypto_hash_config {
-            crypto_key {
-              kms_wrapped {
-                wrapped_key     = "B64/WRAPPED/TOKENIZATION/KEY"
-                crypto_key_name = "%{kms_key_name}"
-              }
-            }
-          }
-        }
-      }
-
-      transformations {
-        info_types {
           name = "REDACT_EXAMPLE"
         }
 
@@ -1437,23 +1420,7 @@ resource "google_data_loss_prevention_deidentify_template" "config" {
 
       transformations {
         info_types {
-          name = "CRYPTO_HASH_UNWRAPPED_UPDATED_EXAMPLE"
-        }
-
-        primitive_transformation {
-          crypto_hash_config {
-            crypto_key {
-              unwrapped {
-                key = "VVdWVWFGZHRXbkUwZERkM0lYb2xRdz09"
-              }
-            }
-          }
-        }
-      }
-
-      transformations {
-        info_types {
-          name = "CRYPTO_HASH_WRAPPED_UPDATED_EXAMPLE"
+          name = "CRYPTO_HASH_WRAPPED_EXAMPLE"
         }
 
         primitive_transformation {
