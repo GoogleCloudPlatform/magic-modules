@@ -43,17 +43,15 @@ resource "google_looker_instance" "<%= ctx[:primary_resource_id] %>" {
   admin_settings {
     allowed_email_domains = ["example.com"]
   }
-
-  // This example assumes this network already exists.
-  // The API creates a tenant network per network authorized for a
-  // Looker instance and that network is not deleted when the user-created
-  // network (consumer_network) is deleted, so this prevents issues
-  // with tenant network quota.
-  // If this network hasn't been created and you are using this example in your
-  // config, add an additional network resource or change
-  // this from "data"to "resource"
-  data "google_compute_network" "looker-network" {
-    name = "<%= ctx[:vars]['network_name'] %>"
-  }
-
 }
+ // This example assumes this network already exists.
+ // The API creates a tenant network per network authorized for a
+ // Looker instance and that network is not deleted when the user-created
+ // network (consumer_network) is deleted, so this prevents issues
+ // with tenant network quota.
+ // If this network hasn't been created and you are using this example in your
+ // config, add an additional network resource or change
+ // this from "data"to "resource"
+ data "google_compute_network" "looker-network" {
+   name = "<%= ctx[:vars]['network_name'] %>"
+ }

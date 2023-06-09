@@ -28,7 +28,7 @@ collection_url_key: 'ingressRules'
 import_format: ['apps/{{project}}/firewall/ingressRules/{{priority}}']
 mutex: 'apps/{{project}}'
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
   actions: ['create']
 skip_sweeper: true
 examples:
