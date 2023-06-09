@@ -747,26 +747,47 @@ properties:
                                           Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
                                       - !ruby/object:Api::Type::Integer
                                         name: minutes
-                                        description: Minutes of hour of day. Must be from 0 to 59.
+                                        description:
+                                          Minutes of hour of day. Must be from 0
+                                          to 59.
                                       - !ruby/object:Api::Type::Integer
                                         name: seconds
-                                        description: Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
+                                        description:
+                                          Seconds of minutes of the time. Must
+                                          normally be from 0 to 59. An API may
+                                          allow the value 60 if it allows
+                                          leap-seconds.
                                       - !ruby/object:Api::Type::Integer
                                         name: nanos
-                                        description: Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                                        description:
+                                          Fractions of seconds in nanoseconds.
+                                          Must be from 0 to 999,999,999.
                                   - !ruby/object:Api::Type::NestedObject
                                     name: dateValue
-                                    description: Represents a whole or partial calendar date.
+                                    description:
+                                      Represents a whole or partial calendar
+                                      date.
                                     properties:
                                       - !ruby/object:Api::Type::Integer
                                         name: year
-                                        description: Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
+                                        description:
+                                          Year of the date. Must be from 1 to
+                                          9999, or 0 to specify a date without a
+                                          year.
                                       - !ruby/object:Api::Type::Integer
                                         name: month
-                                        description: Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
+                                        description:
+                                          Month of a year. Must be from 1 to 12,
+                                          or 0 to specify a year without a month
+                                          and day.
                                       - !ruby/object:Api::Type::Integer
                                         name: day
-                                        description: Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
+                                        description:
+                                          Day of a month. Must be from 1 to 31
+                                          and valid for the year and month, or 0
+                                          to specify a year by itself or a year
+                                          and month where the day isn't
+                                          significant.
                                   - !ruby/object:Api::Type::Enum
                                     name: dayOfWeekValue
                                     description: Represents a day of the week.
@@ -807,26 +828,47 @@ properties:
                                           Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
                                       - !ruby/object:Api::Type::Integer
                                         name: minutes
-                                        description: Minutes of hour of day. Must be from 0 to 59.
+                                        description:
+                                          Minutes of hour of day. Must be from 0
+                                          to 59.
                                       - !ruby/object:Api::Type::Integer
                                         name: seconds
-                                        description: Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
+                                        description:
+                                          Seconds of minutes of the time. Must
+                                          normally be from 0 to 59. An API may
+                                          allow the value 60 if it allows
+                                          leap-seconds.
                                       - !ruby/object:Api::Type::Integer
                                         name: nanos
-                                        description: Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                                        description:
+                                          Fractions of seconds in nanoseconds.
+                                          Must be from 0 to 999,999,999.
                                   - !ruby/object:Api::Type::NestedObject
                                     name: dateValue
-                                    description: Represents a whole or partial calendar date.
+                                    description:
+                                      Represents a whole or partial calendar
+                                      date.
                                     properties:
                                       - !ruby/object:Api::Type::Integer
                                         name: year
-                                        description: Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
+                                        description:
+                                          Year of the date. Must be from 1 to
+                                          9999, or 0 to specify a date without a
+                                          year.
                                       - !ruby/object:Api::Type::Integer
                                         name: month
-                                        description: Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
+                                        description:
+                                          Month of a year. Must be from 1 to 12,
+                                          or 0 to specify a year without a month
+                                          and day.
                                       - !ruby/object:Api::Type::Integer
                                         name: day
-                                        description: Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
+                                        description:
+                                          Day of a month. Must be from 1 to 31
+                                          and valid for the year and month, or 0
+                                          to specify a year by itself or a year
+                                          and month where the day isn't
+                                          significant.
                                   - !ruby/object:Api::Type::Enum
                                     name: dayOfWeekValue
                                     description: Represents a day of the week.
@@ -868,26 +910,47 @@ properties:
                                           Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
                                       - !ruby/object:Api::Type::Integer
                                         name: minutes
-                                        description: Minutes of hour of day. Must be from 0 to 59.
+                                        description:
+                                          Minutes of hour of day. Must be from 0
+                                          to 59.
                                       - !ruby/object:Api::Type::Integer
                                         name: seconds
-                                        description: Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
+                                        description:
+                                          Seconds of minutes of the time. Must
+                                          normally be from 0 to 59. An API may
+                                          allow the value 60 if it allows
+                                          leap-seconds.
                                       - !ruby/object:Api::Type::Integer
                                         name: nanos
-                                        description: Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                                        description:
+                                          Fractions of seconds in nanoseconds.
+                                          Must be from 0 to 999,999,999.
                                   - !ruby/object:Api::Type::NestedObject
                                     name: dateValue
-                                    description: Represents a whole or partial calendar date.
+                                    description:
+                                      Represents a whole or partial calendar
+                                      date.
                                     properties:
                                       - !ruby/object:Api::Type::Integer
                                         name: year
-                                        description: Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
+                                        description:
+                                          Year of the date. Must be from 1 to
+                                          9999, or 0 to specify a date without a
+                                          year.
                                       - !ruby/object:Api::Type::Integer
                                         name: month
-                                        description: Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
+                                        description:
+                                          Month of a year. Must be from 1 to 12,
+                                          or 0 to specify a year without a month
+                                          and day.
                                       - !ruby/object:Api::Type::Integer
                                         name: day
-                                        description: Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
+                                        description:
+                                          Day of a month. Must be from 1 to 31
+                                          and valid for the year and month, or 0
+                                          to specify a year by itself or a year
+                                          and month where the day isn't
+                                          significant.
                                   - !ruby/object:Api::Type::Enum
                                     name: dayOfWeekValue
                                     description: Represents a day of the week.
@@ -901,7 +964,9 @@ properties:
                                       - :SUNDAY
                     - !ruby/object:Api::Type::NestedObject
                       name: timePartConfig
-                      description: For use with Date, Timestamp, and TimeOfDay, extract or preserve a portion of the value.
+                      description:
+                        For use with Date, Timestamp, and TimeOfDay, extract or
+                        preserve a portion of the value.
                       properties:
                         - !ruby/object:Api::Type::Enum
                           name: partToExtract
@@ -922,6 +987,61 @@ properties:
                       # A side-effect is null values when the field is unused, see: https://github.com/hashicorp/terraform-provider-google/issues/13201
                       send_empty_value: true
                       allow_empty_object: true
+                    - !ruby/object:Api::Type::NestedObject
+                      name: cryptoHashConfig
+                      description: |
+                        Pseudonymization method that generates surrogates via cryptographic hashing. Uses SHA-256. The key size must be either 32 or 64 bytes.
+                        Outputs a base64 encoded representation of the hashed output (for example, L7k0BHmF1ha5U3NfGykjro4xWi1MPVQPjhMAZbSV9mM=).
+                        Currently, only string and integer values can be hashed.
+                        See https://cloud.google.com/dlp/docs/pseudonymization to learn more.
+                      properties:
+                        - !ruby/object:Api::Type::NestedObject
+                          name: 'cryptoKey'
+                          description: |
+                            The key used by the encryption function.
+                          properties:
+                            - !ruby/object:Api::Type::NestedObject
+                              name: 'transient'
+                              description: |
+                                Transient crypto key. Use this to have a random data crypto key generated. It will be discarded after the request finishes.
+                              properties:
+                                - !ruby/object:Api::Type::String
+                                  name: 'name'
+                                  required: true
+                                  description: |
+                                    Name of the key. This is an arbitrary string used to differentiate different keys. A unique key is generated per name: two separate `TransientCryptoKey` protos share the same generated key if their names are the same. When the data crypto key is generated, this name is not used in any way (repeating the api call will result in a different key being generated).
+                            - !ruby/object:Api::Type::NestedObject
+                              name: 'unwrapped'
+                              description: |
+                                Unwrapped crypto key. Using raw keys is prone to security risks due to accidentally leaking the key. Choose another type of key if possible.
+                              properties:
+                                - !ruby/object:Api::Type::String
+                                  name: 'key'
+                                  required: true
+                                  description: |
+                                    A 128/192/256 bit key.
+
+                                    A base64-encoded string.
+                            - !ruby/object:Api::Type::NestedObject
+                              name: 'kmsWrapped'
+                              description: |
+                                KMS wrapped key.
+                                Include to use an existing data crypto key wrapped by KMS. The wrapped key must be a 128-, 192-, or 256-bit key. Authorization requires the following IAM permissions when sending a request to perform a crypto transformation using a KMS-wrapped crypto key: dlp.kms.encrypt
+                                For more information, see [Creating a wrapped key](https://cloud.google.com/dlp/docs/create-wrapped-key).
+                                Note: When you use Cloud KMS for cryptographic operations, [charges apply](https://cloud.google.com/kms/pricing).
+                              properties:
+                                - !ruby/object:Api::Type::String
+                                  name: 'wrappedKey'
+                                  required: true
+                                  description: |
+                                    The wrapped data crypto key.
+
+                                    A base64-encoded string.
+                                - !ruby/object:Api::Type::String
+                                  name: 'cryptoKeyName'
+                                  required: true
+                                  description: |
+                                    The resource name of the KMS CryptoKey to use for unwrapping.
       - !ruby/object:Api::Type::NestedObject
         name: 'recordTransformations'
         description:
@@ -2174,7 +2294,8 @@ properties:
                                     properties:
                                       - !ruby/object:Api::Type::String
                                         name: integerValue
-                                        description: An integer value (int64 format)
+                                        description:
+                                          An integer value (int64 format)
                                       - !ruby/object:Api::Type::Double
                                         name: floatValue
                                         description: A float value.
@@ -2202,31 +2323,38 @@ properties:
                                               Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
                                             validation:
                                               !ruby/object:Provider::Terraform::Validation
-                                              function: 'validation.IntBetween(0, 24)' # "An API may choose to allow the value "24:00:00" for scenarios like business closing time."
+                                              function:
+                                                'validation.IntBetween(0, 24)'  # "An API may choose to allow the value "24:00:00" for scenarios like business closing time."
                                           - !ruby/object:Api::Type::Integer
                                             name: minutes
                                             description: |
                                               Minutes of hour of day. Must be from 0 to 59.
                                             validation:
                                               !ruby/object:Provider::Terraform::Validation
-                                              function: 'validation.IntBetween(0, 59)'
+                                              function:
+                                                'validation.IntBetween(0, 59)'
                                           - !ruby/object:Api::Type::Integer
                                             name: seconds
                                             description: |
                                               Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
                                             validation:
                                               !ruby/object:Provider::Terraform::Validation
-                                              function: 'validation.IntBetween(0, 60)' # "An API may allow the value 60 if it allows leap-seconds."
+                                              function:
+                                                'validation.IntBetween(0, 60)'  # "An API may allow the value 60 if it allows leap-seconds."
                                           - !ruby/object:Api::Type::Integer
                                             name: nanos
                                             description: |
                                               Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
                                             validation:
                                               !ruby/object:Provider::Terraform::Validation
-                                              function: 'validation.IntBetween(0, 999999999)'
+                                              function:
+                                                'validation.IntBetween(0,
+                                                999999999)'
                                       - !ruby/object:Api::Type::NestedObject
                                         name: dateValue
-                                        description: Represents a whole or partial calendar date.
+                                        description:
+                                          Represents a whole or partial calendar
+                                          date.
                                         properties:
                                           - !ruby/object:Api::Type::Integer
                                             name: year
@@ -2234,24 +2362,28 @@ properties:
                                               Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
                                             validation:
                                               !ruby/object:Provider::Terraform::Validation
-                                              function: 'validation.IntBetween(1, 9999)'
+                                              function:
+                                                'validation.IntBetween(1, 9999)'
                                           - !ruby/object:Api::Type::Integer
                                             name: month
                                             description: |
                                               Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
                                             validation:
                                               !ruby/object:Provider::Terraform::Validation
-                                              function: 'validation.IntBetween(0, 12)'
+                                              function:
+                                                'validation.IntBetween(0, 12)'
                                           - !ruby/object:Api::Type::Integer
                                             name: day
                                             description: |
                                               Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
                                             validation:
                                               !ruby/object:Provider::Terraform::Validation
-                                              function: 'validation.IntBetween(0, 31)'
+                                              function:
+                                                'validation.IntBetween(0, 31)'
                                       - !ruby/object:Api::Type::Enum
                                         name: dayOfWeekValue
-                                        description: Represents a day of the week.
+                                        description:
+                                          Represents a day of the week.
                                         values:
                                           - :MONDAY
                                           - :TUESDAY
@@ -2301,7 +2433,8 @@ properties:
                                     name: charactersToIgnore
                                     description: |
                                       Characters to skip when doing de-identification of a value. These will be left alone and skipped.
-                                    item_type: !ruby/object:Api::Type::NestedObject
+                                    item_type:
+                                      !ruby/object:Api::Type::NestedObject
                                       properties:
                                         - !ruby/object:Api::Type::String
                                           name: charactersToSkip
@@ -2459,7 +2592,8 @@ properties:
                                     properties:
                                       - !ruby/object:Api::Type::String
                                         name: integerValue
-                                        description: An integer value (int64 format)
+                                        description:
+                                          An integer value (int64 format)
                                       - !ruby/object:Api::Type::Double
                                         name: floatValue
                                         description: A float value.
@@ -2473,7 +2607,8 @@ properties:
                                     properties:
                                       - !ruby/object:Api::Type::String
                                         name: integerValue
-                                        description: An integer value (int64 format)
+                                        description:
+                                          An integer value (int64 format)
                                       - !ruby/object:Api::Type::Double
                                         name: floatValue
                                         description: A float value.
@@ -2498,7 +2633,8 @@ properties:
                                     description: |
                                       Set of buckets. Ranges must be non-overlapping.
                                       Bucket is represented as a range, along with replacement values.
-                                    item_type: !ruby/object:Api::Type::NestedObject
+                                    item_type:
+                                      !ruby/object:Api::Type::NestedObject
                                       properties:
                                         - !ruby/object:Api::Type::NestedObject
                                           name: min
@@ -2508,7 +2644,8 @@ properties:
                                           properties:
                                             - !ruby/object:Api::Type::String
                                               name: integerValue
-                                              description: An integer value (int64 format)
+                                              description:
+                                                An integer value (int64 format)
                                             - !ruby/object:Api::Type::Double
                                               name: floatValue
                                               description: A float value.
@@ -2521,7 +2658,8 @@ properties:
                                                 A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
                                             - !ruby/object:Api::Type::NestedObject
                                               name: timeValue
-                                              description: Represents a time of day.
+                                              description:
+                                                Represents a time of day.
                                               properties:
                                                 - !ruby/object:Api::Type::Integer
                                                   name: hours
@@ -2529,29 +2667,56 @@ properties:
                                                     Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
                                                 - !ruby/object:Api::Type::Integer
                                                   name: minutes
-                                                  description: Minutes of hour of day. Must be from 0 to 59.
+                                                  description:
+                                                    Minutes of hour of day. Must
+                                                    be from 0 to 59.
                                                 - !ruby/object:Api::Type::Integer
                                                   name: seconds
-                                                  description: Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
+                                                  description:
+                                                    Seconds of minutes of the
+                                                    time. Must normally be from
+                                                    0 to 59. An API may allow
+                                                    the value 60 if it allows
+                                                    leap-seconds.
                                                 - !ruby/object:Api::Type::Integer
                                                   name: nanos
-                                                  description: Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                                                  description:
+                                                    Fractions of seconds in
+                                                    nanoseconds. Must be from 0
+                                                    to 999,999,999.
                                             - !ruby/object:Api::Type::NestedObject
                                               name: dateValue
-                                              description: Represents a whole or partial calendar date.
+                                              description:
+                                                Represents a whole or partial
+                                                calendar date.
                                               properties:
                                                 - !ruby/object:Api::Type::Integer
                                                   name: year
-                                                  description: Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
+                                                  description:
+                                                    Year of the date. Must be
+                                                    from 1 to 9999, or 0 to
+                                                    specify a date without a
+                                                    year.
                                                 - !ruby/object:Api::Type::Integer
                                                   name: month
-                                                  description: Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
+                                                  description:
+                                                    Month of a year. Must be
+                                                    from 1 to 12, or 0 to
+                                                    specify a year without a
+                                                    month and day.
                                                 - !ruby/object:Api::Type::Integer
                                                   name: day
-                                                  description: Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
+                                                  description:
+                                                    Day of a month. Must be from
+                                                    1 to 31 and valid for the
+                                                    year and month, or 0 to
+                                                    specify a year by itself or
+                                                    a year and month where the
+                                                    day isn't significant.
                                             - !ruby/object:Api::Type::Enum
                                               name: dayOfWeekValue
-                                              description: Represents a day of the week.
+                                              description:
+                                                Represents a day of the week.
                                               values:
                                                 - :MONDAY
                                                 - :TUESDAY
@@ -2568,7 +2733,8 @@ properties:
                                           properties:
                                             - !ruby/object:Api::Type::String
                                               name: integerValue
-                                              description: An integer value (int64 format)
+                                              description:
+                                                An integer value (int64 format)
                                             - !ruby/object:Api::Type::Double
                                               name: floatValue
                                               description: A float value.
@@ -2581,7 +2747,8 @@ properties:
                                                 A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
                                             - !ruby/object:Api::Type::NestedObject
                                               name: timeValue
-                                              description: Represents a time of day.
+                                              description:
+                                                Represents a time of day.
                                               properties:
                                                 - !ruby/object:Api::Type::Integer
                                                   name: hours
@@ -2589,29 +2756,56 @@ properties:
                                                     Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
                                                 - !ruby/object:Api::Type::Integer
                                                   name: minutes
-                                                  description: Minutes of hour of day. Must be from 0 to 59.
+                                                  description:
+                                                    Minutes of hour of day. Must
+                                                    be from 0 to 59.
                                                 - !ruby/object:Api::Type::Integer
                                                   name: seconds
-                                                  description: Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
+                                                  description:
+                                                    Seconds of minutes of the
+                                                    time. Must normally be from
+                                                    0 to 59. An API may allow
+                                                    the value 60 if it allows
+                                                    leap-seconds.
                                                 - !ruby/object:Api::Type::Integer
                                                   name: nanos
-                                                  description: Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                                                  description:
+                                                    Fractions of seconds in
+                                                    nanoseconds. Must be from 0
+                                                    to 999,999,999.
                                             - !ruby/object:Api::Type::NestedObject
                                               name: dateValue
-                                              description: Represents a whole or partial calendar date.
+                                              description:
+                                                Represents a whole or partial
+                                                calendar date.
                                               properties:
                                                 - !ruby/object:Api::Type::Integer
                                                   name: year
-                                                  description: Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
+                                                  description:
+                                                    Year of the date. Must be
+                                                    from 1 to 9999, or 0 to
+                                                    specify a date without a
+                                                    year.
                                                 - !ruby/object:Api::Type::Integer
                                                   name: month
-                                                  description: Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
+                                                  description:
+                                                    Month of a year. Must be
+                                                    from 1 to 12, or 0 to
+                                                    specify a year without a
+                                                    month and day.
                                                 - !ruby/object:Api::Type::Integer
                                                   name: day
-                                                  description: Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
+                                                  description:
+                                                    Day of a month. Must be from
+                                                    1 to 31 and valid for the
+                                                    year and month, or 0 to
+                                                    specify a year by itself or
+                                                    a year and month where the
+                                                    day isn't significant.
                                             - !ruby/object:Api::Type::Enum
                                               name: dayOfWeekValue
-                                              description: Represents a day of the week.
+                                              description:
+                                                Represents a day of the week.
                                               values:
                                                 - :MONDAY
                                                 - :TUESDAY
@@ -2629,7 +2823,8 @@ properties:
                                           properties:
                                             - !ruby/object:Api::Type::String
                                               name: integerValue
-                                              description: An integer value (int64 format)
+                                              description:
+                                                An integer value (int64 format)
                                             - !ruby/object:Api::Type::Double
                                               name: floatValue
                                               description: A float value.
@@ -2642,7 +2837,8 @@ properties:
                                                 A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
                                             - !ruby/object:Api::Type::NestedObject
                                               name: timeValue
-                                              description: Represents a time of day.
+                                              description:
+                                                Represents a time of day.
                                               properties:
                                                 - !ruby/object:Api::Type::Integer
                                                   name: hours
@@ -2650,29 +2846,56 @@ properties:
                                                     Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
                                                 - !ruby/object:Api::Type::Integer
                                                   name: minutes
-                                                  description: Minutes of hour of day. Must be from 0 to 59.
+                                                  description:
+                                                    Minutes of hour of day. Must
+                                                    be from 0 to 59.
                                                 - !ruby/object:Api::Type::Integer
                                                   name: seconds
-                                                  description: Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
+                                                  description:
+                                                    Seconds of minutes of the
+                                                    time. Must normally be from
+                                                    0 to 59. An API may allow
+                                                    the value 60 if it allows
+                                                    leap-seconds.
                                                 - !ruby/object:Api::Type::Integer
                                                   name: nanos
-                                                  description: Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                                                  description:
+                                                    Fractions of seconds in
+                                                    nanoseconds. Must be from 0
+                                                    to 999,999,999.
                                             - !ruby/object:Api::Type::NestedObject
                                               name: dateValue
-                                              description: Represents a whole or partial calendar date.
+                                              description:
+                                                Represents a whole or partial
+                                                calendar date.
                                               properties:
                                                 - !ruby/object:Api::Type::Integer
                                                   name: year
-                                                  description: Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
+                                                  description:
+                                                    Year of the date. Must be
+                                                    from 1 to 9999, or 0 to
+                                                    specify a date without a
+                                                    year.
                                                 - !ruby/object:Api::Type::Integer
                                                   name: month
-                                                  description: Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
+                                                  description:
+                                                    Month of a year. Must be
+                                                    from 1 to 12, or 0 to
+                                                    specify a year without a
+                                                    month and day.
                                                 - !ruby/object:Api::Type::Integer
                                                   name: day
-                                                  description: Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
+                                                  description:
+                                                    Day of a month. Must be from
+                                                    1 to 31 and valid for the
+                                                    year and month, or 0 to
+                                                    specify a year by itself or
+                                                    a year and month where the
+                                                    day isn't significant.
                                             - !ruby/object:Api::Type::Enum
                                               name: dayOfWeekValue
-                                              description: Represents a day of the week.
+                                              description:
+                                                Represents a day of the week.
                                               values:
                                                 - :MONDAY
                                                 - :TUESDAY
@@ -2692,7 +2915,9 @@ properties:
                                 allow_empty_object: true
                               - !ruby/object:Api::Type::NestedObject
                                 name: timePartConfig
-                                description: For use with Date, Timestamp, and TimeOfDay, extract or preserve a portion of the value.
+                                description:
+                                  For use with Date, Timestamp, and TimeOfDay,
+                                  extract or preserve a portion of the value.
                                 properties:
                                   - !ruby/object:Api::Type::Enum
                                     name: partToExtract
@@ -2941,7 +3166,9 @@ properties:
                                           Name describing the field.
                               - !ruby/object:Api::Type::NestedObject
                                 name: replaceDictionaryConfig
-                                description: Replace with a value randomly drawn (with replacement) from a dictionary.
+                                description:
+                                  Replace with a value randomly drawn (with
+                                  replacement) from a dictionary.
                                 properties:
                                   - !ruby/object:Api::Type::NestedObject
                                     name: wordList
