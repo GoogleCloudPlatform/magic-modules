@@ -418,7 +418,7 @@ func TestAccBigtableInstance_MultipleClustersSameID(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccBigtableInstance_multipleClustersSameID(instanceName),
-				ExpectError: regexp.MustCompile(fmt.Sprintf("duplicated cluster_id LOL: %q", instanceName)),
+				ExpectError: regexp.MustCompile(fmt.Sprintf("duplicated cluster_id: %q", instanceName)),
 			},
 			{
 				ResourceName:            "google_bigtable_instance.instance",
