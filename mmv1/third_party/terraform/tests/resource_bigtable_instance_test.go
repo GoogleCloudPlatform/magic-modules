@@ -420,6 +420,19 @@ func TestAccBigtableInstance_MultipleClustersSameID(t *testing.T) {
 				Config:      testAccBigtableInstance_multipleClustersSameID(instanceName),
 				ExpectError: regexp.MustCompile(fmt.Sprintf("duplicated cluster_id: %q", instanceName)),
 			},
+			{
+				Config: testAccBigtableInstance(instanceName, 3),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
+			},
+			{
+				Config:      testAccBigtableInstance_multipleClustersSameID(instanceName),
+				ExpectError: regexp.MustCompile(fmt.Sprintf("duplicated cluster_id: %q", instanceName)),
+			},
 		},
 	})
 }
