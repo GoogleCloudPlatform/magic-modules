@@ -233,6 +233,7 @@ properties:
       resource: 'License'
       imports: 'selfLink'
       description: 'A reference to a license associated with this snapshot'
+      custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: Labels to apply to this Snapshot.

@@ -191,6 +191,7 @@ properties:
       description: 'An applicable license URI'
       resource: 'License'
       imports: 'selfLink'
+      custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |

@@ -275,6 +275,7 @@ properties:
       description: |
         URL of an address that has been reserved for the interconnect
         attachment.
+      custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Enum
     name: 'encryption'
     description: |

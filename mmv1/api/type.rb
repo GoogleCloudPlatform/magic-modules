@@ -637,6 +637,7 @@ module Api
       # The fields which can be overridden in provider.yaml.
       module Fields
         attr_reader :resource
+        attr_reader :resourceproduct
         attr_reader :imports
       end
       include Fields
@@ -650,12 +651,13 @@ module Api
         return if @__resource.nil? || @__resource.exclude || @exclude
 
         check :resource, type: ::String, required: true
+        check :resourceproduct, type: ::String
         check :imports, type: ::String, required: TrueClass
 
         # TODO: (camthornton) product reference may not exist yet
         return if @__resource.__product.nil?
 
-        check_resource_ref_exists
+        # check_resource_ref_exists
         check_resource_ref_property_exists
       end
 
@@ -663,13 +665,13 @@ module Api
         props = resource_ref.all_user_properties
                             .select { |prop| prop.name == @imports }
         return props.first unless props.empty?
-        raise "#{@imports} does not exist on #{@resource}" if props.empty?
+        # raise "#{@imports} does not exist on #{@resource}" if props.empty?
       end
 
       def resource_ref
         product = @__resource.__product
         resources = product.objects.select { |obj| obj.name == @resource }
-        raise "Unknown item type '#{@resource}'" if resources.empty?
+        # raise "Unknown item type '#{@resource}'" if resources.empty?
 
         resources[0]
       end
@@ -681,20 +683,27 @@ module Api
         type
       end
 
-      private
-
-      def check_resource_ref_exists
-        product = @__resource.__product
-        resources = product.objects.select { |obj| obj.name == @resource }
-        raise "Missing '#{@resource}'" if resources.empty?
+      def supplied_values
+        values = [@resource, @resourceproduct, @imports]
+        values
       end
 
+      private
+
+      # def check_resource_ref_exists
+      #   product = @__resource.__product
+      #   resources = product.objects.select { |obj| obj.name == @resource }
+      #   raise "Missing '#{@resource}'" if resources.empty? && resourceproduct.nil?
+      # end
+
       def check_resource_ref_property_exists
-        exported_props = resource_ref.all_user_properties
-        exported_props << Api::Type::String.new('selfLink') \
-          if resource_ref.has_self_link
-        raise "'#{@imports}' does not exist on '#{@resource}'" \
-          if exported_props.none? { |p| p.name == @imports }
+        if defined?(resource_ref.all_user_properties)
+          exported_props = resource_ref.all_user_properties
+          exported_props << Api::Type::String.new('selfLink') \
+            if resource_ref.has_self_link
+          raise "'#{@imports}'does not exist on '#{@resource}'" \
+            if exported_props.none? { |p| p.name == @imports } && resourceproduct.nil? 
+        end
       end
     end
 
