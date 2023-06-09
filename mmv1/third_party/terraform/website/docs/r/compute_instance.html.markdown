@@ -411,6 +411,10 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `values` (Required) - The values for the node affinity label.
 
+<a name="nested_params"></a>The `params` block supports:
+
+* `resource_manager_tags` (Optional) - A tag is a key-value pair that can be attached to a Google Cloud resource. You can use tags to conditionally allow or deny policies based on whether a resource has a specific tag.
+
 <a name="nested_shielded_instance_config"></a>The `shielded_instance_config` block supports:
 
 * `enable_secure_boot` (Optional) -- Verify the digital signature of all boot components, and halt the boot process if signature verification fails. Defaults to false.

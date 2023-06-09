@@ -1589,6 +1589,24 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
+	if d.HasChange("tags") {
+	    tags := resourceInstanceTags(d)
+		tagsV1 := &compute.Tags{}
+		if err := tpgresource.Convert(tags, tagsV1); err != nil {
+			return err
+		}
+		op, err := config.NewComputeClient(userAgent).Instances.SetTags(
+			project, zone, d.Get("name").(string), tagsV1).Do()
+		if err != nil {
+			return fmt.Errorf("Error updating tags: %s", err)
+		}
+
+		opErr := ComputeOperationWaitTime(config, op, project, "tags to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if opErr != nil {
+			return opErr
+		}
+	}
+
 	if d.HasChange("labels") {
 		labels := tpgresource.ExpandLabels(d)
 		labelFingerprint := d.Get("label_fingerprint").(string)
