@@ -7,32 +7,32 @@ import (
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
-func resourceConverterBigtableCluster() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterBigtableCluster() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType: "bigtableadmin.googleapis.com/Cluster",
 		Convert:   GetBigtableClusterCaiObject,
 	}
 }
 
-func GetBigtableClusterCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetBigtableClusterCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
 
 	objs, err := GetBigtableClusterApiObjects(d, config)
 
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 
-	assets := []Asset{}
+	assets := []tpgresource.Asset{}
 	for _, obj := range objs {
-		name, err := assetName(d, config, "//bigtable.googleapis.com/projects/{{project}}/instances/{{name}}/clusters/{{cluster_id}}")
+		name, err := tpgresource.AssetName(d, config, "//bigtable.googleapis.com/projects/{{project}}/instances/{{name}}/clusters/{{cluster_id}}")
 		if err != nil {
-			return []Asset{}, err
+			return []tpgresource.Asset{}, err
 		}
 
-		asset := Asset{
+		asset := tpgresource.Asset{
 			Name: name,
 			Type: "bigtableadmin.googleapis.com/Cluster",
-			Resource: &AssetResource{
+			Resource: &tpgresource.AssetResource{
 				Version:              "v2",
 				DiscoveryDocumentURI: "https://bigtableadmin.googleapis.com/$discovery/rest",
 				DiscoveryName:        "Cluster",

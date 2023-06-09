@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/privateca"
 	"github.com/hashicorp/terraform-provider-google/google/services/sql"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -528,20 +529,26 @@ func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, serv
 	if billingAccount != "" {
 		billingClient := config.NewBillingClient(config.UserAgent)
 		var pbi *cloudbilling.ProjectBillingInfo
-		err = transport_tpg.RetryTimeDuration(func() error {
-			var reqErr error
-			pbi, reqErr = billingClient.Projects.GetBillingInfo(PrefixedProject(projectID)).Do()
-			return reqErr
-		}, 30*time.Second)
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() error {
+				var reqErr error
+				pbi, reqErr = billingClient.Projects.GetBillingInfo(PrefixedProject(projectID)).Do()
+				return reqErr
+			},
+			Timeout: 30 * time.Second,
+		})
 		if err != nil {
 			t.Fatalf("Error getting billing info for project %q: %v", projectID, err)
 		}
 		if strings.TrimPrefix(pbi.BillingAccountName, "billingAccounts/") != billingAccount {
 			pbi.BillingAccountName = "billingAccounts/" + billingAccount
-			err := transport_tpg.RetryTimeDuration(func() error {
-				_, err := config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(PrefixedProject(projectID), pbi).Do()
-				return err
-			}, 2*time.Minute)
+			err := transport_tpg.Retry(transport_tpg.RetryOptions{
+				RetryFunc: func() error {
+					_, err := config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(PrefixedProject(projectID), pbi).Do()
+					return err
+				},
+				Timeout: 2 * time.Minute,
+			})
 			if err != nil {
 				t.Fatalf("Error setting billing account for project %q to %q: %s", projectID, billingAccount, err)
 			}
@@ -644,14 +651,18 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 		}
 
 		var op *sqladmin.Operation
-		err = transport_tpg.RetryTimeDuration(func() (operr error) {
-			op, operr = config.NewSqlAdminClient(config.UserAgent).Instances.Insert(project, bootstrapInstance).Do()
-			return operr
-		}, time.Duration(20)*time.Minute, transport_tpg.IsSqlOperationInProgressError)
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() (operr error) {
+				op, operr = config.NewSqlAdminClient(config.UserAgent).Instances.Insert(project, bootstrapInstance).Do()
+				return operr
+			},
+			Timeout:              20 * time.Minute,
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+		})
 		if err != nil {
 			t.Fatalf("Error, failed to create instance %s: %s", bootstrapInstance.Name, err)
 		}
-		err = sql.SqlAdminOperationWaitTime(config, op, project, "Create Instance", config.UserAgent, time.Duration(40)*time.Minute)
+		err = sql.SqlAdminOperationWaitTime(config, op, project, "Create Instance", config.UserAgent, 40*time.Minute)
 		if err != nil {
 			t.Fatalf("Error, failed to create instance %s: %s", bootstrapInstance.Name, err)
 		}
@@ -670,14 +681,18 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 		}
 
 		var op *sqladmin.Operation
-		err = transport_tpg.RetryTimeDuration(func() (operr error) {
-			op, operr = config.NewSqlAdminClient(config.UserAgent).BackupRuns.Insert(project, bootstrapInstance.Name, backupRun).Do()
-			return operr
-		}, time.Duration(20)*time.Minute, transport_tpg.IsSqlOperationInProgressError)
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() (operr error) {
+				op, operr = config.NewSqlAdminClient(config.UserAgent).BackupRuns.Insert(project, bootstrapInstance.Name, backupRun).Do()
+				return operr
+			},
+			Timeout:              20 * time.Minute,
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+		})
 		if err != nil {
 			t.Fatalf("Error, failed to create instance backup: %s", err)
 		}
-		err = sql.SqlAdminOperationWaitTime(config, op, project, "Backup Instance", config.UserAgent, time.Duration(20)*time.Minute)
+		err = sql.SqlAdminOperationWaitTime(config, op, project, "Backup Instance", config.UserAgent, 20*time.Minute)
 		if err != nil {
 			t.Fatalf("Error, failed to create instance backup: %s", err)
 		}
@@ -725,7 +740,7 @@ func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
 
 		log.Printf("[DEBUG] Waiting for CA pool creation to finish")
 		var opRes map[string]interface{}
-		err = PrivatecaOperationWaitTimeWithResponse(
+		err = privateca.PrivatecaOperationWaitTimeWithResponse(
 			config, res, &opRes, project, "Creating CA pool", config.UserAgent,
 			4*time.Minute)
 		if err != nil {
@@ -745,6 +760,130 @@ func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
 	return poolName
 }
 
+func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string {
+	projectID := acctest.GetTestProjectFromEnv()
+	region := acctest.GetTestRegionFromEnv()
+
+	config := BootstrapConfig(t)
+	if config == nil {
+		t.Fatal("Could not bootstrap config.")
+	}
+
+	computeService := config.NewComputeClient(config.UserAgent)
+	if computeService == nil {
+		t.Fatal("Could not create compute client.")
+	}
+
+	// In order to create a networkAttachment we need to bootstrap a subnet.
+	_, err := computeService.Subnetworks.Get(projectID, region, subnetName).Do()
+	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		log.Printf("[DEBUG] Subnet %q not found, bootstrapping", subnetName)
+
+		networkUrl := fmt.Sprintf("%sprojects/%s/global/networks/%s", config.ComputeBasePath, projectID, networkName)
+		url := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks", config.ComputeBasePath, projectID, region)
+
+		subnetObj := map[string]interface{}{
+			"name":        subnetName,
+			"region ":     region,
+			"network":     networkUrl,
+			"ipCidrRange": "10.77.1.0/28",
+		}
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   projectID,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+			Body:      subnetObj,
+			Timeout:   4 * time.Minute,
+		})
+
+		log.Printf("Response is, %s", res)
+		if err != nil {
+			t.Fatalf("Error bootstrapping test subnet %s: %s", subnetName, err)
+		}
+
+		log.Printf("[DEBUG] Waiting for network creation to finish")
+		err = ComputeOperationWaitTime(config, res, projectID, "Error bootstrapping test subnet", config.UserAgent, 4*time.Minute)
+		if err != nil {
+			t.Fatalf("Error bootstrapping test subnet %s: %s", subnetName, err)
+		}
+	}
+
+	subnet, err := computeService.Subnetworks.Get(projectID, region, subnetName).Do()
+
+	if subnet == nil {
+		t.Fatalf("Error getting test subnet %s: is nil", subnetName)
+	}
+
+	if err != nil {
+		t.Fatalf("Error getting test subnet %s: %s", subnetName, err)
+	}
+	return subnet.Name
+}
+
+func BootstrapNetworkAttachment(t *testing.T, networkAttachmentName string, subnetName string) string {
+	projectID := acctest.GetTestProjectFromEnv()
+	region := acctest.GetTestRegionFromEnv()
+
+	config := BootstrapConfig(t)
+	if config == nil {
+		return ""
+	}
+
+	computeService := config.NewComputeClient(config.UserAgent)
+	if computeService == nil {
+		return ""
+	}
+
+	networkAttachment, err := computeService.NetworkAttachments.Get(projectID, region, networkAttachmentName).Do()
+	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		// Create Network Attachment Here.
+		log.Printf("[DEBUG] Network Attachment %s not found, bootstrapping", networkAttachmentName)
+		url := fmt.Sprintf("%sprojects/%s/regions/%s/networkAttachments", config.ComputeBasePath, projectID, region)
+
+		subnetURL := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks/%s", config.ComputeBasePath, projectID, region, subnetName)
+		networkAttachmentObj := map[string]interface{}{
+			"name":                 networkAttachmentName,
+			"region":               region,
+			"subnetworks":          []string{subnetURL},
+			"connectionPreference": "ACCEPT_AUTOMATIC",
+		}
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   projectID,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+			Body:      networkAttachmentObj,
+			Timeout:   4 * time.Minute,
+		})
+		if err != nil {
+			t.Fatalf("Error bootstrapping test Network Attachment %s: %s", networkAttachmentName, err)
+		}
+
+		log.Printf("[DEBUG] Waiting for network creation to finish")
+		err = ComputeOperationWaitTime(config, res, projectID, "Error bootstrapping shared test subnet", config.UserAgent, 4*time.Minute)
+		if err != nil {
+			t.Fatalf("Error bootstrapping test Network Attachment %s: %s", networkAttachmentName, err)
+		}
+	}
+
+	networkAttachment, err = computeService.NetworkAttachments.Get(projectID, region, networkAttachmentName).Do()
+
+	if networkAttachment == nil {
+		t.Fatalf("Error getting test network attachment %s: is nil", networkAttachmentName)
+	}
+
+	if err != nil {
+		t.Fatalf("Error getting test Network Attachment %s: %s", networkAttachmentName, err)
+	}
+
+	return networkAttachment.Name
+}
+
 func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *transport_tpg.Config) (string, error) {
 	// Create project-1 and project-2
 	rmService := config.NewResourceManagerClient(config.UserAgent)
@@ -759,10 +898,13 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	}
 
 	var op *cloudresourcemanager.Operation
-	err := transport_tpg.RetryTimeDuration(func() (reqErr error) {
-		op, reqErr = rmService.Projects.Create(project).Do()
-		return reqErr
-	}, 5*time.Minute)
+	err := transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() (reqErr error) {
+			op, reqErr = rmService.Projects.Create(project).Do()
+			return reqErr
+		},
+		Timeout: 5 * time.Minute,
+	})
 	if err != nil {
 		return "", err
 	}
@@ -790,10 +932,13 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	project.ProjectId = p2
 	project.Name = fmt.Sprintf("%s-2", pid)
 
-	err = transport_tpg.RetryTimeDuration(func() (reqErr error) {
-		op, reqErr = rmService.Projects.Create(project).Do()
-		return reqErr
-	}, 5*time.Minute)
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() (reqErr error) {
+			op, reqErr = rmService.Projects.Create(project).Do()
+			return reqErr
+		},
+		Timeout: 5 * time.Minute,
+	})
 	if err != nil {
 		return "", err
 	}

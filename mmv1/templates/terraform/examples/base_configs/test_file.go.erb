@@ -147,6 +147,9 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 			<% if object.error_retry_predicates -%>
 			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
 			<% end -%>
+			<% if object.error_abort_predicates -%>
+			ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_abort_predicates.join(',') -%>},
+			<% end -%>
 		})
 		if err == nil {
 				return fmt.Errorf("<%= resource_name -%> still exists at %s", url)
