@@ -34,6 +34,7 @@ DIFFS=""
 NEWLINE=$'\n'
 
 # TPG difference
+rm -rf $TPG_LOCAL_PATH
 mkdir -p $TPG_LOCAL_PATH
 git clone -b $NEW_BRANCH $TPG_SCRATCH_PATH $TPG_LOCAL_PATH
 pushd $TPG_LOCAL_PATH
@@ -43,6 +44,7 @@ if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
     DIFFS="${DIFFS}${NEWLINE}Terraform GA: [Diff](https://github.com/modular-magician/terraform-provider-google/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
 fi
 TPG_LOCAL_PATH_OLD="${TPG_LOCAL_PATH}old"
+rm -rf $TPG_LOCAL_PATH_OLD
 mkdir -p $TPG_LOCAL_PATH_OLD
 cp -r $TPG_LOCAL_PATH/. $TPG_LOCAL_PATH_OLD
 
@@ -71,6 +73,7 @@ set -e
 popd
 
 # TPGB
+rm -rf TPGB_LOCAL_PATH
 mkdir -p $TPGB_LOCAL_PATH
 git clone -b $NEW_BRANCH $TPGB_SCRATCH_PATH $TPGB_LOCAL_PATH
 pushd $TPGB_LOCAL_PATH
@@ -80,6 +83,7 @@ if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
     DIFFS="${DIFFS}${NEWLINE}Terraform Beta: [Diff](https://github.com/modular-magician/terraform-provider-google-beta/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
 fi
 TPGB_LOCAL_PATH_OLD="${TPGB_LOCAL_PATH}old"
+rm -rf $TPGB_LOCAL_PATH_OLD
 mkdir -p $TPGB_LOCAL_PATH_OLD
 cp -r $TPGB_LOCAL_PATH/. $TPGB_LOCAL_PATH_OLD
 
