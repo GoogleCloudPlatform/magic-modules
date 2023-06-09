@@ -89,8 +89,8 @@ properties:
         imports: 'selfLink'
         required: true
         immutable: true
+        custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
     required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Integer
     name: priority
     description: |

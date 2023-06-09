@@ -217,7 +217,7 @@ properties:
                   imports: 'selfLink'
                   description: |
                     The URL of the reservation for this IP address.
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+                  custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
       - !ruby/object:Api::Type::Map
         name: 'externalIp'
         min_version: beta
@@ -246,3 +246,4 @@ properties:
                   imports: 'selfLink'
                   description: |
                     The URL of the reservation for this IP address.
+                  custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
