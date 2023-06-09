@@ -200,7 +200,7 @@ properties:
       description: 'The targetPool to receive managed instances.'
       resource: 'TargetPool'
       imports: 'selfLink'
-      custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Integer
     name: 'targetSize'
     description: |

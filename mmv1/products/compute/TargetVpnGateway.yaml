@@ -102,4 +102,5 @@ properties:
     description: |
       The network this VPN gateway is accepting traffic for.
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
     immutable: true

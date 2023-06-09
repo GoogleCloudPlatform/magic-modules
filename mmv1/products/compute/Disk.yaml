@@ -338,7 +338,7 @@ properties:
       resource: 'Instance'
       imports: 'selfLink'
       description: 'A reference to a user of this disk'
-      custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
     output: true
   - !ruby/object:Api::Type::Integer
     name: 'physicalBlockSizeBytes'
@@ -427,7 +427,7 @@ properties:
       description:
         'A resource policy applied to this disk for automatic snapshot
         creations.'
-      custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Boolean
     name: 'multiWriter'
     description: |
@@ -497,4 +497,4 @@ properties:
       description: 'An applicable license URI'
       resource: 'License'
       imports: 'selfLink'
-      custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'

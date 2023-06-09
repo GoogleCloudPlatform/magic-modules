@@ -102,4 +102,5 @@ properties:
       to the BackendService.
     required: true
     update_verb: :POST
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
     update_url: 'projects/{{project}}/regions/{{region}}/targetHttpProxies/{{name}}/setUrlMap'

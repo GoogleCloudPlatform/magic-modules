@@ -149,7 +149,7 @@ properties:
       imports: 'selfLink'
       description: |
         A subnet that is provided for NAT in this service attachment.
-      custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Boolean
     name: 'enableProxyProtocol'
     required: true

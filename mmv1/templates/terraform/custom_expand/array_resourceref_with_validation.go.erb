@@ -12,6 +12,9 @@
 # limitations under the License.
 -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+<%  if property.is_set -%>
+  v = v.(*schema.Set).List()
+<%  end -%>
   l := v.([]interface{})
   req := make([]interface{}, 0, len(l))
   for _, raw := range l {

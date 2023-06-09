@@ -123,7 +123,7 @@ properties:
       resource: 'RegionSslCertificate'
       imports: 'selfLink'
       description: 'The SSL certificates used by this TargetHttpsProxy'
-      custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'sslPolicy'
     resource: 'RegionSslPolicy'
@@ -148,4 +148,5 @@ properties:
       to the RegionBackendService.
     required: true
     update_verb: :POST
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
     update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setUrlMap'

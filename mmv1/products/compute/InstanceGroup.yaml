@@ -64,7 +64,7 @@ parameters:
       description: 'An instance being added to the InstanceGroup'
       resource: 'Instance'
       imports: 'selfLink'
-      custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -130,3 +130,4 @@ properties:
     imports: 'selfLink'
     description: |
       The subnetwork to which all instances in the instance group belong.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
