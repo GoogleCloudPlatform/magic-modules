@@ -198,6 +198,7 @@ properties:
           imports: 'selfLink'
           description: 'Self-link of subnetwork to NAT'
           required: true
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
         - !ruby/object:Api::Type::Array
           name: 'sourceIpRangesToNat'
           description: |

@@ -68,6 +68,7 @@ parameters:
     description: |
       Region where the regional interconnect attachment resides.
     default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Boolean
     name: 'adminEnabled'
@@ -208,6 +209,7 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: |
