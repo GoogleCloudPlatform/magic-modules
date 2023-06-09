@@ -69,6 +69,7 @@ examples:
     min_version: 'beta'
     vars:
       sec_policy_name: 'policyfornetworkmatch'
+  # TODO(felipegc): create test for rateLimitOptions once I manage to play around with it.
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -187,7 +188,6 @@ properties:
                           - :EQUALS
                           - :EQUALS_ANY
                           - :STARTS_WITH
-                        default_value: :CONTAINS
                 - !ruby/object:Api::Type::Array
                   name: 'requestUrisToExclude'
                   description: | 
@@ -209,25 +209,17 @@ properties:
                           - :EQUALS
                           - :EQUALS_ANY
                           - :STARTS_WITH
-                        default_value: :CONTAINS
   # TODO(felipegc): waiting whitelisting networkMatch for testing
   - !ruby/object:Api::Type::NestedObject
     name: 'networkMatch'
     description: |
       A match condition that incoming packets are evaluated against for CLOUD_ARMOR_NETWORK security policies. If it matches, the corresponding 'action' is enforced.
-
       The match criteria for a rule consists of built-in match fields (like 'srcIpRanges') and potentially multiple user-defined match fields ('userDefinedFields').
-
       Field values may be extracted directly from the packet or derived from it (e.g. 'srcRegionCodes'). Some fields may not be present in every packet (e.g. 'srcPorts'). A user-defined field is only present if the base header is found in the packet and the entire field is in bounds.
-
       Each match field may specify which values can match it, listing one or more ranges, prefixes, or exact values that are considered a match for the field. A field value must be present in order to match a specified match field. If no match values are specified for a match field, then any field value is considered to match it, and it's not required to be present. For strings specifying '*' is also equivalent to match all.
-
       For a packet to match a rule, all specified match fields must match the corresponding field values derived from the packet.
-
       Example:
-
       networkMatch: srcIpRanges: - "192.0.2.0/24" - "198.51.100.0/24" userDefinedFields: - name: "ipv4_fragment_offset" values: - "1-0x1fff"
-
       The above match condition matches packets with a source IP in 192.0.2.0/24 or 198.51.100.0/24 and a user-defined field named "ipv4_fragment_offset" with a value between 1 and 0x1fff inclusive
     properties:
       - !ruby/object:Api::Type::NestedObject
@@ -279,3 +271,130 @@ properties:
         description: |
           BGP Autonomous System Number associated with the source IP address.
         item_type: Api::Type::Integer
+  # TODO(felipegc): waiting whitelisting rateLimitOptions for testing
+  - !ruby/object:Api::Type::NestedObject
+    name: 'rateLimitOptions'
+    description: |
+      Must be specified if the action is "rate_based_ban" or "throttle". Cannot be specified for any other actions.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'rateLimitThreshold'
+        description: |
+          Threshold at which to begin ratelimiting.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'count'
+            description: |
+              Number of HTTP(S) requests for calculating the threshold.
+          - !ruby/object:Api::Type::String
+            name: 'intervalSec'
+            description: |
+              Interval over which the threshold is computed.
+      - !ruby/object:Api::Type::String
+        name: 'conformAction'
+        description: |
+          Action to take for requests that are under the configured rate limit threshold.
+          Valid option is "allow" only.
+      # TODO(felipegc): test if somehow the value above can be set for region.
+      - !ruby/object:Api::Type::String
+        name: 'exceedAction'
+        description: |
+          Action to take for requests that are above the configured rate limit threshold, to either deny with a specified HTTP response code, or redirect to a different endpoint.
+          Valid options are deny(STATUS), where valid values for STATUS are 403, 404, 429, and 502.
+      - !ruby/object:Api::Type::Enum
+        name: 'enforceOnKey'
+        description: |
+          Determines the key to enforce the rateLimitThreshold on. Possible values are:
+
+          * ALL: A single rate limit threshold is applied to all the requests matching this rule. This is the default value if "enforceOnKey" is not configured.
+
+          * IP: The source IP address of the request is the key. Each IP has this limit enforced separately.
+
+          * HTTP_HEADER: The value of the HTTP header whose name is configured under "enforceOnKeyName". The key value is truncated to the first 128 bytes of the header value. If no such header is present in the request, the key type defaults to ALL.
+
+          * XFF_IP: The first IP address (i.e. the originating client IP address) specified in the list of IPs under X-Forwarded-For HTTP header. If no such header is present or the value is not a valid IP, the key defaults to the source IP address of the request i.e. key type IP.
+
+          * HTTP_COOKIE: The value of the HTTP cookie whose name is configured under "enforceOnKeyName". The key value is truncated to the first 128 bytes of the cookie value. If no such cookie is present in the request, the key type defaults to ALL.
+
+          * HTTP_PATH: The URL path of the HTTP request. The key value is truncated to the first 128 bytes.
+
+          * SNI: Server name indication in the TLS session of the HTTPS request. The key value is truncated to the first 128 bytes. The key type defaults to ALL on a HTTP session.
+
+          * REGION_CODE: The country/region from which the request originates.
+        values:
+          - :ALL
+          - :IP
+          - :HTTP_HEADER
+          - :XFF_IP
+          - :HTTP_COOKIE
+          - :HTTP_PATH
+          - :SNI
+          - :REGION_CODE
+      - !ruby/object:Api::Type::String
+        name: 'enforceOnKeyName'
+        description: |
+          Rate limit key name applicable only for the following key types: 
+          HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value.
+          HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.
+      - !ruby/object:Api::Type::Array
+        name: 'enforceOnKeyConfigs'
+        description: |
+          If specified, any combination of values of enforceOnKeyType/enforceOnKeyName is treated as the key on which ratelimit threshold/action is enforced.
+          You can specify up to 3 enforceOnKeyConfigs.
+          If enforceOnKeyConfigs is specified, enforceOnKey must not be specified.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: 'enforceOnKeyType'
+              description: |
+                Determines the key to enforce the rateLimitThreshold on. Possible values are:
+
+                * ALL: A single rate limit threshold is applied to all the requests matching this rule. This is the default value if "enforceOnKeyConfigs" is not configured.
+
+                * IP: The source IP address of the request is the key. Each IP has this limit enforced separately.
+
+                * HTTP_HEADER: The value of the HTTP header whose name is configured under "enforceOnKeyName". The key value is truncated to the first 128 bytes of the header value. If no such header is present in the request, the key type defaults to ALL.
+
+                * XFF_IP: The first IP address (i.e. the originating client IP address) specified in the list of IPs under X-Forwarded-For HTTP header. If no such header is present or the value is not a valid IP, the key defaults to the source IP address of the request i.e. key type IP.
+
+                * HTTP_COOKIE: The value of the HTTP cookie whose name is configured under "enforceOnKeyName". The key value is truncated to the first 128 bytes of the cookie value. If no such cookie is present in the request, the key type defaults to ALL.
+
+                * HTTP_PATH: The URL path of the HTTP request. The key value is truncated to the first 128 bytes.
+
+                * SNI: Server name indication in the TLS session of the HTTPS request. The key value is truncated to the first 128 bytes. The key type defaults to ALL on a HTTP session.
+
+                * REGION_CODE: The country/region from which the request originates.
+              values:
+                - :ALL
+                - :IP
+                - :HTTP_HEADER
+                - :XFF_IP
+                - :HTTP_COOKIE
+                - :SNI
+                - :REGION_CODE
+            - !ruby/object:Api::Type::String
+              name: 'enforceOnKeyName'
+              description: |
+                Rate limit key name applicable only for the following key types:
+                HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value.
+                HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'banThreshold'
+        description: |
+          Can only be specified if the action for the rule is "rate_based_ban".
+          If specified, the key will be banned for the configured 'banDurationSec' when the number of requests that exceed the 'rateLimitThreshold' also exceed this 'banThreshold'.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'count'
+            description: |
+              Number of HTTP(S) requests for calculating the threshold.
+          - !ruby/object:Api::Type::Integer
+            name: 'intervalSec'
+            description: |
+              Interval over which the threshold is computed.
+          - !ruby/object:Api::Type::Integer
+            name: 'banDurationSec'
+            description: |
+              Can only be specified if the action for the rule is "rate_based_ban".
+              If specified, determines the time (in seconds) the traffic will continue to be banned by the rate limit after the rate falls below the threshold.
+          
