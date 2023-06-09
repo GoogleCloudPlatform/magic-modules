@@ -15,7 +15,7 @@ resource "google_dataplex_task" "<%= ctx[:primary_resource_id] %>" {
     }
     
     execution_spec {
-        service_account = "285091628941-compute@developer.gserviceaccount.com"
+        service_account = "<%= ctx[:test_env_vars]['project_number'] %>-compute@developer.gserviceaccount.com"
     }
     
     spark {
