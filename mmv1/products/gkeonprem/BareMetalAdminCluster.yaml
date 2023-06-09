@@ -14,14 +14,15 @@
 name: "BareMetalAdminCluster"
 min_version: beta
 base_url: "projects/{{project}}/locations/{{location}}/bareMetalAdminClusters"
-create_url: "projects/{{project}}/locations/{{location}}/bareMetalAdminClusters/{{name}}?update_mask=description,bare_metal_version,annotations,network_config,control_plane,load_balancer,storage,cluster_operations,maintenance_config,node_config,proxy,security_config,node_access_config"
+create_url: "projects/{{project}}/locations/{{location}}/bareMetalAdminClusters/{{name}}?bare_metal_admin_cluster_id={{name}}"
 update_url: "projects/{{project}}/locations/{{location}}/bareMetalAdminClusters/{{name}}"
+delete_url: "projects/{{project}}/locations/{{location}}/bareMetalAdminClusters/{{name}}:unenroll"
 self_link: "projects/{{project}}/locations/{{location}}/bareMetalAdminClusters/{{name}}"
-create_verb: :PATCH
 update_verb: :PATCH
 update_mask: true
 autogen_async: false
 id_format: "projects/{{project}}/locations/{{location}}/bareMetalAdminClusters/{{name}}"
+import_format: ["projects/{{project}}/locations/{{location}}/bareMetalAdminClusters/{{name}}"]
 description: "A Google Bare Metal Admin Cluster."
 examples:
   - !ruby/object:Provider::Terraform::Examples
