@@ -19,8 +19,12 @@ update_verb: :PATCH
 update_mask: true
 description: |
   A Google Cloud Looker instance.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/looker/docs/looker-core'
+  api: 'https://cloud.google.com/looker/docs/reference/rest/v1/projects.locations.instances'
 timeouts: !ruby/object:Api::Timeouts
-  insert_minutes: 90
+  insert_minutes: 180
   update_minutes: 90
   delete_minutes: 60
 autogen_async: true
@@ -39,6 +43,7 @@ examples:
       instance_name: 'my-instance'
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
+      network_name: 'looker-test-network'
 parameters:
   # TODO: resourceref?
   - !ruby/object:Api::Type::String
@@ -273,8 +278,7 @@ properties:
       The ID of the instance or a fully qualified identifier for the instance.
     required: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    url_param_only: true
     validation: !ruby/object:Provider::Terraform::Validation
       regex: '^[a-z][a-z0-9-]{0,39}[a-z0-9]$'
   # Oauth Object
@@ -326,7 +330,7 @@ properties:
     name: reservedRange
     description: |
       Name of a reserved IP address range within the consumer network, to be used for
-      private servicie access connection. User may or may not specify this in a request.
+      private service access connection. User may or may not specify this in a request.
   - !ruby/object:Api::Type::Time
     name: updateTime
     description: |
