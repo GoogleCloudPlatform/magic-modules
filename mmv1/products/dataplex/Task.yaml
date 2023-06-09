@@ -20,9 +20,27 @@ update_url: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{
 delete_url: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}'
 description: |
   Used to create Dataplex Tasks
-async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
-  actions: ['create']
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 5
+      update_minutes: 5
+      delete_minutes: 5
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+autogen_async: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/dataplex/docs'
