@@ -1,3 +1,7 @@
+data "google_project" "project" {
+
+}
+
 resource "google_dataplex_lake" "<%= ctx[:primary_resource_id] %>" {
   name         = "tf-test-lake%{random_suffix}"
   location     = "us-central1"
@@ -15,7 +19,7 @@ resource "google_dataplex_task" "<%= ctx[:primary_resource_id] %>" {
     }
     
     execution_spec {
-        service_account = "<%= ctx[:test_env_vars]['project_number'] %>-compute@developer.gserviceaccount.com"
+        service_account = "${data.google_project.project.number}-compute@developer.gserviceaccount.com"
     }
     
     spark {
