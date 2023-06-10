@@ -12,6 +12,8 @@ import (
 
 func TestAccDataSourceGoogleFirebaseAndroidAppConfig(t *testing.T) {
 	t.Parallel()
+	// Framework-based resources and datasources don't work with VCR yet
+	acctest.SkipIfVcr(t)
 
 	context := map[string]interface{}{
 		"project_id":   acctest.GetTestProjectFromEnv(),
