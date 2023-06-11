@@ -59,7 +59,6 @@ examples:
     primary_resource_id: 'default'
     vars:
       target_https_proxy_name: 'test-http-keep-alive-timeout-proxy'
-      http_keep_alive_timeout_sec: 120
       ssl_certificate_name: 'my-certificate'
       url_map_name: 'url-map'
       backend_service_name: 'backend-service'
