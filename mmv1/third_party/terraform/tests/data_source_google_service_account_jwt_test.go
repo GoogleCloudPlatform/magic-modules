@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 const (
@@ -83,7 +84,7 @@ func testAccCheckServiceAccountJwtValue(name, audience string) resource.TestChec
 			return fmt.Errorf("invalid 'foo', expected '%s', got '%s'", jwtTestComplexFooNested, payload.ComplexFoo.Nested)
 		}
 
-		expectedExpiration := dataSourceGoogleServiceAccountJwtNow().Add(jwtTestExpiresIn * time.Second).Unix()
+		expectedExpiration := resourcemanager.DataSourceGoogleServiceAccountJwtNow().Add(jwtTestExpiresIn * time.Second).Unix()
 
 		if payload.Expiration != expectedExpiration {
 			return fmt.Errorf("invalid 'exp', expected '%d', got '%d'", expectedExpiration, payload.Expiration)
@@ -103,7 +104,7 @@ func TestAccDataSourceGoogleServiceAccountJwt(t *testing.T) {
 	staticTime := time.Now()
 
 	// Override the current time with one that is set to a static value, to compare against later.
-	dataSourceGoogleServiceAccountJwtNow = func() time.Time {
+	resourcemanager.DataSourceGoogleServiceAccountJwtNow = func() time.Time {
 		return staticTime
 	}
 
