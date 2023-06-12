@@ -65,7 +65,7 @@ check "check_vm_status" {
 }
 ```
 
-# Example - Check if a certificate will expire within a certain timeframe (`google_privateca_certificate`)
+## Example - Check if a certificate will expire within a certain timeframe (`google_privateca_certificate`)
 
 Certificates can be provisioned using either the Certificate Manager, Certificate Authority Service (‘Private CA’), and Compute Engine APIs. In this example we provision a certificate via the Certificate Authority Service that has a user-supplied [lifetime argument](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/privateca_certificate#lifetime). After the lifetime duration passes the certificate is automatically deleted in GCP. By creating a check that asserts the certificate’s expiration date is more than 30 days away we can be notified by TFC health checks when the certificate is approaching expiration and needs manual intervention.
 
@@ -184,7 +184,7 @@ google_privateca_certificate.default.certificate_description[0].subject_descript
 }
 ```
 
-# Example - Validate the status of a Cloud Function (`google_cloudfunctions2_function`)
+## Example - Validate the status of a Cloud Function (`google_cloudfunctions2_function`)
 
 Cloud Functions can have multiple statuses depending on issues that occur during deployment or triggering the function. These are: ACTIVE, FAILED, DEPLOYING, DELETING
  
