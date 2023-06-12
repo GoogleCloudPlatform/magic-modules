@@ -253,6 +253,20 @@ properties:
                           name: 'version'
                           description: |
                             Version of the information type to use. By default, the version is set to stable
+                        - !ruby/object:Api::Type::NestedObject
+                          name: 'sensitivityScore'
+                          description: |
+                            Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                          properties:
+                            - !ruby/object:Api::Type::Enum
+                              name: 'score'
+                              required: true
+                              description: |
+                                The sensitivity score applied to the resource.
+                              values:
+                                - :SENSITIVITY_LOW
+                                - :SENSITIVITY_MODERATE
+                                - :SENSITIVITY_HIGH
                     - !ruby/object:Api::Type::Integer
                       name: 'maxFindings'
                       description: Max findings limit for the given infoType.
@@ -276,6 +290,20 @@ properties:
                   name: 'version'
                   description: |
                     Version of the information type to use. By default, the version is set to stable
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'sensitivityScore'
+                  description: |
+                    Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                  properties:
+                    - !ruby/object:Api::Type::Enum
+                      name: 'score'
+                      required: true
+                      description: |
+                        The sensitivity score applied to the resource.
+                      values:
+                        - :SENSITIVITY_LOW
+                        - :SENSITIVITY_MODERATE
+                        - :SENSITIVITY_HIGH
           - !ruby/object:Api::Type::Array
             name: 'ruleSet'
             description: |
@@ -299,6 +327,20 @@ properties:
                         name: 'version'
                         description: |
                           Version of the information type to use. By default, the version is set to stable.
+                      - !ruby/object:Api::Type::NestedObject
+                        name: 'sensitivityScore'
+                        description: |
+                          Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                        properties:
+                          - !ruby/object:Api::Type::Enum
+                            name: 'score'
+                            required: true
+                            description: |
+                              The sensitivity score applied to the resource.
+                            values:
+                              - :SENSITIVITY_LOW
+                              - :SENSITIVITY_MODERATE
+                              - :SENSITIVITY_HIGH
                 - !ruby/object:Api::Type::Array
                   name: 'rules'
                   required: true
@@ -450,6 +492,20 @@ properties:
                                       name: 'version'
                                       description: |
                                         Version of the information type to use. By default, the version is set to stable.
+                                    - !ruby/object:Api::Type::NestedObject
+                                      name: 'sensitivityScore'
+                                      description: |
+                                        Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                                      properties:
+                                        - !ruby/object:Api::Type::Enum
+                                          name: 'score'
+                                          required: true
+                                          description: |
+                                            The sensitivity score applied to the resource.
+                                          values:
+                                            - :SENSITIVITY_LOW
+                                            - :SENSITIVITY_MODERATE
+                                            - :SENSITIVITY_HIGH
                           - !ruby/object:Api::Type::NestedObject
                             name: 'excludeByHotword'
                             description:
@@ -515,6 +571,20 @@ properties:
                       name: 'version'
                       description: |
                         Version of the information type to use. By default, the version is set to stable.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'sensitivityScore'
+                      description: |
+                        Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                      properties:
+                        - !ruby/object:Api::Type::Enum
+                          name: 'score'
+                          required: true
+                          description: |
+                            The sensitivity score applied to the resource.
+                          values:
+                            - :SENSITIVITY_LOW
+                            - :SENSITIVITY_MODERATE
+                            - :SENSITIVITY_HIGH
                 - !ruby/object:Api::Type::Enum
                   name: 'likelihood'
                   description: |
@@ -533,6 +603,20 @@ properties:
                     If set to EXCLUSION_TYPE_EXCLUDE this infoType will not cause a finding to be returned. It still can be used for rules matching.
                   values:
                     - :EXCLUSION_TYPE_EXCLUDE
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'sensitivityScore'
+                  description: |
+                    Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                  properties:
+                    - !ruby/object:Api::Type::Enum
+                      name: 'score'
+                      required: true
+                      description: |
+                        The sensitivity score applied to the resource.
+                      values:
+                        - :SENSITIVITY_LOW
+                        - :SENSITIVITY_MODERATE
+                        - :SENSITIVITY_HIGH
                 - !ruby/object:Api::Type::NestedObject
                   name: 'regex'
                   description: Regular expression which defines the rule.
