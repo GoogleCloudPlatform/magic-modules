@@ -10,7 +10,7 @@ The Continuous Validation feature in Terraform Cloud (TFC) allows users to make 
 
 Users can add checks to their Terraform configuration using an HCL language feature called [check{} blocks](https://developer.hashicorp.com/terraform/language/checks). Check blocks contain assertions that are defined with a custom condition expression and an error message. When the condition expression evaluates to true the check passes, but when the expression evaluates to false Terraform will show a warning message that includes the user-defined error message.
 
-Custom conditions can be created using data from Terraform providers’ resources and data sources. Data can also be combined from multiple sources; for example, you can use checks to monitor expirable resources by comparing a resource’s expiration date attribute to the current time returned by Terraform’s built-in time functions. These include the [plantime function](https://developer.hashicorp.com/terraform/language/functions/plantimestamp), which was added in Terraform 1.5.
+Custom conditions can be created using data from Terraform providers’ resources and data sources. Data can also be combined from multiple sources; for example, you can use checks to monitor expirable resources by comparing a resource’s expiration date attribute to the current time returned by Terraform’s built-in time functions. These include the [plantimestamp function](https://developer.hashicorp.com/terraform/language/functions/plantimestamp), which was added in Terraform 1.5.
 
 For more information about continuous validation visit the [Workspace Health page in the Terraform Cloud documentation](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/health#continuous-validation).
 
