@@ -148,6 +148,8 @@ is desired, you will need to modify your state file manually using
 `Intel Haswell` or `Intel Skylake`. See the complete list [here](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform).
     **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
+* `params` - (Optional) Additional instance parameters.
+.
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
