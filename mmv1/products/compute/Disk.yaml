@@ -62,6 +62,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/disk.erb
   decoder: templates/terraform/decoders/disk.erb
   resource_definition: templates/terraform/resource_definition/disk.erb
+  update_encoder: templates/terraform/update_encoder/hyper_disk.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'disk_basic'
@@ -429,8 +430,11 @@ properties:
     name: 'provisionedIops'
     description: |
       Indicates how many IOPS must be provisioned for the disk.
+      Note: Update currently only supported by hyperdisk skus, allowing for an update of IOPS every 4 hours
     required: false
     default_from_api: true
+    update_verb: :PATCH
+    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}?paths=provisionedIops'
   - !ruby/object:Api::Type::NestedObject
     name: 'asyncPrimaryDisk'
     min_version: 'beta'

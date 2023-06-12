@@ -180,7 +180,6 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'inspectTemplateName'
         description: The name of the template to run when this job is triggered.
-        required: true
       - !ruby/object:Api::Type::NestedObject
         name: 'inspectConfig'
         description: The core content of the template.
@@ -762,6 +761,8 @@ properties:
                     - :AVRO
                     - :CSV
                     - :TSV
+                    - :POWERPOINT
+                    - :EXCEL
               - !ruby/object:Api::Type::Enum
                 name: 'sampleMethod'
                 description: |
@@ -912,14 +913,15 @@ properties:
           properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'saveFindings'
-              exactly_one_of:
-                - save_findings
-                - pub_sub
-                - publish_findings_to_cloud_data_catalog
-                - publish_summary_to_cscc
-                - job_notification_emails
-                - deidentify
-                - publish_to_stackdriver
+              # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
+              # exactly_one_of:
+              #   - save_findings
+              #   - pub_sub
+              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_summary_to_cscc
+              #   - job_notification_emails
+              #   - deidentify
+              #   - publish_to_stackdriver
               description: |
                 If set, the detailed findings will be persisted to the specified OutputStorageConfig. Only a single instance of this action can be specified. Compatible with: Inspect, Risk
               properties:
@@ -969,14 +971,15 @@ properties:
                         - :ALL_COLUMNS
             - !ruby/object:Api::Type::NestedObject
               name: 'pubSub'
-              exactly_one_of:
-                - save_findings
-                - pub_sub
-                - publish_findings_to_cloud_data_catalog
-                - publish_summary_to_cscc
-                - job_notification_emails
-                - deidentify
-                - publish_to_stackdriver
+              # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
+              # exactly_one_of:
+              #   - save_findings
+              #   - pub_sub
+              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_summary_to_cscc
+              #   - job_notification_emails
+              #   - deidentify
+              #   - publish_to_stackdriver
               description: |
                 Publish a message into a given Pub/Sub topic when the job completes.
               properties:
@@ -987,14 +990,15 @@ properties:
                     Cloud Pub/Sub topic to send notifications to.
             - !ruby/object:Api::Type::NestedObject
               name: 'publishSummaryToCscc'
-              exactly_one_of:
-                - save_findings
-                - pub_sub
-                - publish_findings_to_cloud_data_catalog
-                - publish_summary_to_cscc
-                - job_notification_emails
-                - deidentify
-                - publish_to_stackdriver
+              # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
+              # exactly_one_of:
+              #   - save_findings
+              #   - pub_sub
+              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_summary_to_cscc
+              #   - job_notification_emails
+              #   - deidentify
+              #   - publish_to_stackdriver
               allow_empty_object: true
               send_empty_value: true
               properties: []
@@ -1002,14 +1006,15 @@ properties:
                 Publish the result summary of a DlpJob to the Cloud Security Command Center.
             - !ruby/object:Api::Type::NestedObject
               name: 'publishFindingsToCloudDataCatalog'
-              exactly_one_of:
-                - save_findings
-                - pub_sub
-                - publish_findings_to_cloud_data_catalog
-                - publish_summary_to_cscc
-                - job_notification_emails
-                - deidentify
-                - publish_to_stackdriver
+              # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
+              # exactly_one_of:
+              #   - save_findings
+              #   - pub_sub
+              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_summary_to_cscc
+              #   - job_notification_emails
+              #   - deidentify
+              #   - publish_to_stackdriver
               allow_empty_object: true
               send_empty_value: true
               properties: []
@@ -1017,14 +1022,15 @@ properties:
                 Publish findings of a DlpJob to Data Catalog.
             - !ruby/object:Api::Type::NestedObject
               name: 'jobNotificationEmails'
-              exactly_one_of:
-                - save_findings
-                - pub_sub
-                - publish_findings_to_cloud_data_catalog
-                - publish_summary_to_cscc
-                - job_notification_emails
-                - deidentify
-                - publish_to_stackdriver
+              # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
+              # exactly_one_of:
+              #   - save_findings
+              #   - pub_sub
+              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_summary_to_cscc
+              #   - job_notification_emails
+              #   - deidentify
+              #   - publish_to_stackdriver
               allow_empty_object: true
               send_empty_value: true
               properties: []
@@ -1032,14 +1038,15 @@ properties:
                 Sends an email when the job completes. The email goes to IAM project owners and technical Essential Contacts.
             - !ruby/object:Api::Type::NestedObject
               name: 'deidentify'
-              exactly_one_of:
-                - save_findings
-                - pub_sub
-                - publish_findings_to_cloud_data_catalog
-                - publish_summary_to_cscc
-                - job_notification_emails
-                - deidentify
-                - publish_to_stackdriver
+              # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
+              # exactly_one_of:
+              #   - save_findings
+              #   - pub_sub
+              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_summary_to_cscc
+              #   - job_notification_emails
+              #   - deidentify
+              #   - publish_to_stackdriver
               description: |
                 Create a de-identified copy of the requested table or files.
               properties:
@@ -1120,14 +1127,15 @@ properties:
                             is 1,024 characters.
             - !ruby/object:Api::Type::NestedObject
               name: 'publishToStackdriver'
-              exactly_one_of:
-                - save_findings
-                - pub_sub
-                - publish_findings_to_cloud_data_catalog
-                - publish_summary_to_cscc
-                - job_notification_emails
-                - deidentify
-                - publish_to_stackdriver
+              # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
+              # exactly_one_of:
+              #   - save_findings
+              #   - pub_sub
+              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_summary_to_cscc
+              #   - job_notification_emails
+              #   - deidentify
+              #   - publish_to_stackdriver
               allow_empty_object: true
               send_empty_value: true
               properties: []

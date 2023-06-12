@@ -1,5 +1,5 @@
 
-This configuration is expected to be run locally by an administrator. It specifies the configuration needed for a test environment where the full set of acceptance tests can be run.
+There is no automation around this configuration, and it is expected to be run locally by an administrator. It specifies the configuration needed for a test environment where the full set of acceptance tests can be run.
 
 Googlers can find record of internal requests at b/268353203.
 
