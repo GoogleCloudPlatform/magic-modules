@@ -237,6 +237,8 @@ is desired, you will need to modify your state file manually using
 * `labels` - (Optional) A set of key/value label pairs assigned to the disk. This  
     field is only applicable for persistent disks.
 
+* `resource_manager_tags` - (Optional) A tag is a key-value pair that can be attached to a Google Cloud resource. You can use tags to conditionally allow or deny policies based on whether a resource has a specific tag.
+
 <a name="nested_scratch_disk"></a>The `scratch_disk` block supports:
 
 * `interface` - (Required) The disk interface to use for attaching this disk; either SCSI or NVME.
