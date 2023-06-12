@@ -78,21 +78,9 @@ func TestAccStorageBucket_basicWithAutoclass(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
+			// Autoclass is ForceNew, so this destroys & recreates, but does test the explicitly disabled config
 			{
 				Config: testAccStorageBucket_basicWithAutoclass(bucketName, false),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_storage_bucket.bucket", "force_destroy", "false"),
-				),
-			},
-			{
-				ResourceName:            "google_storage_bucket.bucket",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
-			},
-			{
-				Config: testAccStorageBucket_basicWithAutoclass(bucketName, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_storage_bucket.bucket", "force_destroy", "false"),
