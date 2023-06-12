@@ -7,6 +7,9 @@ readRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 <% if object.error_retry_predicates -%>
 	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
 <% end -%>
+<% if object.error_abort_predicates -%>
+	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_abort_predicates.join(',') -%>},
+<% end -%>
 })
 if err != nil {
 	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeDisk %q", d.Id()))

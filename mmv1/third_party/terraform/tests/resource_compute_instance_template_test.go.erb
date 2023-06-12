@@ -1139,6 +1139,48 @@ func TestAccComputeInstanceTemplate_sourceImageEncryptionKey(t *testing.T) {
 	})
 }
 
+<% if version == "beta" -%>
+func TestAccComputeInstanceTemplate_NetworkAttachment(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+
+	testNetworkName := BootstrapSharedTestNetwork(t, "attachment-network")
+	subnetName := BootstrapSubnet(t, "tf-test-subnet", testNetworkName)
+	networkAttachmentName := BootstrapNetworkAttachment(t, "tf-test-attachment", subnetName)
+
+	// Need to have the full network attachment name in the format project/{project_id}/regions/{region_id}/networkAttachments/{networkAttachmentName}
+	fullFormNetworkAttachmentName := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", acctest.GetTestProjectFromEnv(), acctest.GetTestRegionFromEnv(), networkAttachmentName)
+
+	context := map[string]interface{}{
+		"subnet":             subnetName,
+		"suffix":             (RandString(t, 10)),
+		"network_attachment": fullFormNetworkAttachmentName,
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_network_attachment(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate),
+					testAccCheckComputeInstanceTemplateHasNetworkAttachment(&instanceTemplate, fmt.Sprintf("https://www.googleapis.com/compute/beta/%s", fullFormNetworkAttachmentName)),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+<% end -%>
+
 func testAccCheckComputeInstanceTemplateDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := GoogleProviderConfig(t)
@@ -1468,6 +1510,19 @@ func testAccCheckComputeInstanceTemplateHasMinCpuPlatform(instanceTemplate *comp
 		return nil
 	}
 }
+
+<% if version == "beta" -%>
+func testAccCheckComputeInstanceTemplateHasNetworkAttachment(instanceTemplate *compute.InstanceTemplate, networkAttachmentName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, networkInterface := range instanceTemplate.Properties.NetworkInterfaces {
+			if networkInterface.NetworkAttachment != "" && networkInterface.NetworkAttachment == networkAttachmentName {
+				return nil
+			}
+		}
+		return fmt.Errorf("Network Attachment %s, was not found in the instance template", networkAttachmentName)
+	}
+}
+<% end -%>
 
 func testAccCheckComputeInstanceTemplateHasInstanceResourcePolicies(instanceTemplate *compute.InstanceTemplate, resourcePolicy string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -3266,3 +3321,39 @@ resource "google_compute_instance_template" "template" {
 }
 `, context)
 }
+
+<% if version == "beta" -%>
+func testAccComputeInstanceTemplate_network_attachment(context map[string]interface{}) string {
+	return Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+
+resource "google_compute_instance_template" "foobar" {
+  name         = "tf-test-instance-template-%{suffix}"
+  machine_type = "e2-medium"
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    disk_size_gb = 10
+    boot         = true
+  }
+
+  network_interface {
+	network = "default"
+  }
+
+  network_interface {
+	network_attachment = "%{network_attachment}"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+}
+`, context)
+}
+<% end -%>
