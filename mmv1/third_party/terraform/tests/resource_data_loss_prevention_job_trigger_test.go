@@ -2428,8 +2428,8 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 				name = "FIRST_NAME"
 			}
 		
-			min_likelihood		= "UNLIKELY"
-			include_quote		= false
+			min_likelihood      = "UNLIKELY"
+			include_quote       = false
 			exclude_info_types  = false
 			rule_set {
 				info_types {
@@ -2557,8 +2557,8 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 				name = "FIRST_NAME"
 			}
 		
-			min_likelihood		= "UNLIKELY"
-			include_quote		= false
+			min_likelihood      = "UNLIKELY"
+			include_quote       = false
 			exclude_info_types  = false
 			rule_set {
 				info_types {
@@ -2686,8 +2686,8 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 				name = "FIRST_NAME"
 			}
 		
-			min_likelihood		= "UNLIKELY"
-			include_quote		= false
+			min_likelihood      = "UNLIKELY"
+			include_quote       = false
 			exclude_info_types  = false
 			rule_set {
 				info_types {
