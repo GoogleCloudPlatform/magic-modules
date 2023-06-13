@@ -31,13 +31,16 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
 
 1. [Install git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 1. [Install rbenv](https://github.com/rbenv/rbenv#installation)
-1. [Use rbenv to install ruby 3.1.0](https://github.com/rbenv/rbenv#installing-ruby-versions)
+1. Use rbenv to install ruby 3.1.0
    ```bash
    rbenv install 3.1.0
    ```
 1. [Install bundler](https://bundler.io/guides/getting_started.html)
 1. [Install go](https://go.dev/doc/install)
-1. [Install goimports](https://pkg.go.dev/golang.org/x/tools/cmd/goimports)
+1. Install goimports
+   ```bash
+   go install golang.org/x/tools/cmd/goimports@latest
+   ```
 1. [Install terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 1. [Clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the [`magic-modules`](https://github.com/GoogleCloudPlatform/magic-modules) repository
    ```bash
