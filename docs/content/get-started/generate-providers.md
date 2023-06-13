@@ -18,7 +18,7 @@ This quickstart guides you through setting up your development environment, maki
 1. [Install the gcloud CLI.](https://cloud.google.com/sdk/docs/install)
 1. In the Google Cloud console, on the project selector page, select or [create a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects).
    {{< hint info >}}
-   **Note:** If you don't already have a project to use for testing changes to the Terraform providers, create a project instead of selecting an existing poject. After you finish making your changes, you can delete the project, removing all resources associated with the project.
+   **Note:** If you don't already have a project to use for testing changes to the Terraform providers, create a project instead of selecting an existing poject. After you finish these steps, you can delete the project, removing all resources associated with the project.
    {{< /hint >}}
    {{< button href="https://console.cloud.google.com/projectselector2/home/dashboard" >}}Go to project selector{{< /button >}}
 1. Make sure that billing is enabled for your Google Cloud project. Learn how to [check if billing is enabled on a project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled).
