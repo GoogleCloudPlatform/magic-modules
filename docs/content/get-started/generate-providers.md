@@ -11,7 +11,9 @@ aliases:
 
 # Generate `google` and `google-beta` providers
 
-This quickstart guides you through setting up your development environment, making a change to [Magic Modules](https://github.com/GoogleCloudPlatform/magic-modules), generating provider changes to the `google` and `google-beta` Terraform providers, and running tests related to the change.
+This quickstart guides you through setting up your development environment, making a change to `magic-modules`, generating provider changes to the `google` and `google-beta` Terraform providers, and running tests related to the change.
+
+This document assumes that 
 
 ## Before you begin
 
@@ -42,12 +44,12 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
    go install golang.org/x/tools/cmd/goimports@latest
    ```
 1. [Install terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
-1. [Clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the [`magic-modules`](https://github.com/GoogleCloudPlatform/magic-modules) repository
+1. Clone the `magic-modules` repository
    ```bash
    cd ~
    git clone https://github.com/GoogleCloudPlatform/magic-modules.git
    ```
-1. Run the following command from the root of your cloned Magic Modules repository.
+1. Run the following command from the root of your cloned `magic-modules` repository.
   
    ```bash
    cd magic-modules
@@ -75,14 +77,14 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
 
 ## Generate a provider change
 
-1. In your cloned magic-modules repository, edit [`mmv1/products/pubsub/Topic.yaml`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/products/pubsub/Topic.yaml) to change the description for the schemaSettings field:
+1. In your cloned magic-modules repository, edit `mmv1/products/pubsub/Topic.yaml` to change the description for the schemaSettings field:
    ```yaml
    - !ruby/object:Api::Type::NestedObject
      name: 'schemaSettings'
      description: |
-       UPDATED DESCRIPTION
+       UPDATED_DESCRIPTION
    ```
-1. Clone the [`google`](https://github.com/hashicorp/terraform-provider-google) and [`google-beta`](https://github.com/hashicorp/terraform-provider-google-beta) provider repositories with the following commands:
+1. Clone the `google` and `google-beta` provider repositories with the following commands:
 
    ```bash
    git clone https://github.com/hashicorp/terraform-provider-google.git $GOPATH/src/github.com/hashicorp/terraform-provider-google
@@ -112,13 +114,13 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
    +++ b/google-beta/resource_pubsub_topic.go
    @@ -115 +115 @@ and is not a valid configuration.`,
    -                               Description: `Settings for validating messages published against a schema.`,
-   +                               Description: `UPDATED DESCRIPTION`,
+   +                               Description: `UPDATED_DESCRIPTION`,
    diff --git a/website/docs/r/pubsub_topic.html.markdown b/website/docs/r/pubsub_topic.html.markdown
    --- a/website/docs/r/pubsub_topic.html.markdown
    +++ b/website/docs/r/pubsub_topic.html.markdown
    @@ -146 +146 @@ The following arguments are supported:
    -  Settings for validating messages published against a schema.
-   +  UPDATED DESCRIPTION
+   +  UPDATED_DESCRIPTION
    ```
 
    {{< hint info >}}
