@@ -13,8 +13,6 @@ aliases:
 
 This quickstart guides you through setting up your development environment, making a change to `magic-modules`, generating provider changes to the `google` and `google-beta` Terraform providers, and running tests related to the change.
 
-This document assumes that 
-
 ## Before you begin
 
 1. [Install the gcloud CLI.](https://cloud.google.com/sdk/docs/install)
