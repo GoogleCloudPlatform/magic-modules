@@ -51,7 +51,7 @@ func GetProjectOrgPolicyApiObject(d tpgresource.TerraformResourceData, config *t
 	}
 
 	policy := tpgresource.OrgPolicy{
-		Constraint:     canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
+		Constraint:     CanonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 		BooleanPolicy:  expandBooleanOrganizationPolicy(d.Get("boolean_policy").([]interface{})),
 		ListPolicy:     listPolicy,
 		RestoreDefault: restoreDefault,
@@ -133,7 +133,7 @@ func expandBooleanOrganizationPolicy(configured []interface{}) *tpgresource.Bool
 	}
 }
 
-func canonicalOrgPolicyConstraint(constraint string) string {
+func CanonicalOrgPolicyConstraint(constraint string) string {
 	if strings.HasPrefix(constraint, "constraints/") {
 		return constraint
 	}
