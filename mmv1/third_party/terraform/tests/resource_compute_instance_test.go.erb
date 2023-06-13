@@ -239,12 +239,19 @@ func TestAccComputeInstance_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
 	var instanceName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
+    context := map[string]interface{}{
+		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"random_suffix": RandString(t, 10),
+	}
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsTagValue_basic(context),
+			},
 			{
 				Config: testAccComputeInstance_resourceManagerTags(instanceName),
 			},
@@ -3303,6 +3310,23 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
+// func testAccTagsTagValue_basic() string {
+// 	return Nprintf(`
+// resource "google_tags_tag_key" "key" {
+
+//   parent = "organizations/%{org_id}"
+//   short_name = "foobar%{random_suffix}"
+//   description = "For foo/bar resources."
+// }
+
+// resource "google_tags_tag_value" "value" {
+
+//   parent = "tagKeys/${google_tags_tag_key.key.name}"
+//   short_name = "foo%{random_suffix}"
+//   description = "For foo resources."
+// }
+// `, context)
+// }
 func testAccComputeInstance_resourceManagerTags(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
