@@ -3320,7 +3320,16 @@ resource "google_compute_instance" "foobar" {
   boot_disk {
     initialize_params {
       image = data.google_compute_image.my_image.self_link
+	  resource_manager_tags = {
+		"tagKeys/123" = "tagValues/45678"
+	  }
     }
+  }
+
+  params {
+	resource_manager_tags = {
+		"tagKeys/123" = "tagValues/45678"
+	}
   }
 
   network_interface {
