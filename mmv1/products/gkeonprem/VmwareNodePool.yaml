@@ -120,12 +120,14 @@ properties:
         description: |
           The OS image to be used for each node in a node pool.
           Currently `cos`, `ubuntu`, `ubuntu_containerd` and `windows` are supported.
+        default_from_api: true
       - !ruby/object:Api::Type::String
         name: "image"
         description: The OS image name in vCenter, only valid when using Windows.
       - !ruby/object:Api::Type::Integer
         name: "bootDiskSizeGb"
         description: VMware disk size to be used during creation.
+        default_from_api: true
       - !ruby/object:Api::Type::Array
         name: "taints"
         description: The initial taints assigned to nodes of this node pool.
