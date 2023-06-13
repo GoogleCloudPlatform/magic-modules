@@ -3,6 +3,7 @@ title: Use built provider
 weight: 40
 aliases:
   - /docs/getting-started/use-built-provider
+  - /getting-started/use-built-provider
 ---
 
 # Use built provider locally
