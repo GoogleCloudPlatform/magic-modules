@@ -10,7 +10,7 @@ weight: 10
 
 Generates the code for the downstream `google` and `google-beta` providers.
 
-{{< hint >}}
+{{< hint info >}}
 **Note:** Generation works best if the downstream provider has a commit checked out corresponding to the latest `main` branch commit that is present in your `magic-modules` working branch. This can generally be identified based on matching commit messages.
 {{< /hint >}}
 
