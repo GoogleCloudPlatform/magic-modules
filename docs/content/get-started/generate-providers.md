@@ -77,7 +77,7 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
    - !ruby/object:Api::Type::NestedObject
      name: 'schemaSettings'
      description: |
-       Settings for validating messages published against a schema. UPDATED DESCRIPTION
+       UPDATED DESCRIPTION
    ```
 1. Clone the [`google`](https://github.com/hashicorp/terraform-provider-google) and [`google-beta`](https://github.com/hashicorp/terraform-provider-google-beta) provider repositories with the following commands:
 
@@ -109,13 +109,13 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
    +++ b/google-beta/resource_pubsub_topic.go
    @@ -115 +115 @@ and is not a valid configuration.`,
    -                               Description: `Settings for validating messages published against a schema.`,
-   +                               Description: `Settings for validating messages published against a schema. UPDATED DESCRIPTION`,
+   +                               Description: `UPDATED DESCRIPTION`,
    diff --git a/website/docs/r/pubsub_topic.html.markdown b/website/docs/r/pubsub_topic.html.markdown
    --- a/website/docs/r/pubsub_topic.html.markdown
    +++ b/website/docs/r/pubsub_topic.html.markdown
    @@ -146 +146 @@ The following arguments are supported:
    -  Settings for validating messages published against a schema.
-   +  Settings for validating messages published against a schema. UPDATED DESCRIPTION
+   +  UPDATED DESCRIPTION
    ```
 
    {{< hint info >}}
@@ -140,7 +140,7 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
 
 1. Enable required APIs
    ```bash
-   gcloud config set project $PROJECT_ID
+   gcloud config set project $GOOGLE_PROJECT
    gcloud services enable pubsub.googleapis.com
    gcloud services enable cloudkms.googleapis.com
    ```
