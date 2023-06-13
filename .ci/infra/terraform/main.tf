@@ -231,6 +231,7 @@ module "project-services" {
     "firebaseappdistribution.googleapis.com",
     "firebasedatabase.googleapis.com",
     "firebasedynamiclinks.googleapis.com",
+    "firebaseextensions.googleapis.com",
     "firebasehosting.googleapis.com",
     "firebaseinstallations.googleapis.com",
     "firebaseremoteconfig.googleapis.com",
