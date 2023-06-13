@@ -1,15 +1,14 @@
-package google
+package cloudfunctions
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func DataSourceGoogleComposerEnvironment() *schema.Resource {
-	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceComposerEnvironment().Schema)
+func DataSourceGoogleCloudFunctionsFunction() *schema.Resource {
+	// Generate datasource schema from resource
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceCloudFunctionsFunction().Schema)
 
 	// Set 'Required' schema elements
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name")
@@ -18,24 +17,36 @@ func DataSourceGoogleComposerEnvironment() *schema.Resource {
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project", "region")
 
 	return &schema.Resource{
-		Read:   dataSourceGoogleComposerEnvironmentRead,
+		Read:   dataSourceGoogleCloudFunctionsFunctionRead,
 		Schema: dsSchema,
 	}
 }
 
-func dataSourceGoogleComposerEnvironmentRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceGoogleCloudFunctionsFunctionRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
+
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
+
 	region, err := tpgresource.GetRegion(d, config)
 	if err != nil {
 		return err
 	}
-	envName := d.Get("name").(string)
 
-	d.SetId(fmt.Sprintf("projects/%s/locations/%s/environments/%s", project, region, envName))
+	cloudFuncId := &CloudFunctionId{
+		Project: project,
+		Region:  region,
+		Name:    d.Get("name").(string),
+	}
 
-	return resourceComposerEnvironmentRead(d, meta)
+	d.SetId(cloudFuncId.CloudFunctionId())
+
+	err = resourceCloudFunctionsRead(d, meta)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
