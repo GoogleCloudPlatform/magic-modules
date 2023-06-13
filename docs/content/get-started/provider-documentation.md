@@ -3,6 +3,7 @@ title: "Provider documentation"
 weight: 60
 aliases:
   - /docs/getting-started/provider-documentation
+  - /getting-started/provider-documentation
 ---
 
 # Provider documentation
