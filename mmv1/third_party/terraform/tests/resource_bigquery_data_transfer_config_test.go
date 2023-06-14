@@ -417,7 +417,7 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_update_service_account(t *
 	})
 }
 
-// retrieve transfer config ID and stores it in transferConfigID
+// Retrieve transfer config ID and stores it in transferConfigID
 func testAccCheckDataTransferConfigID(resourceName string, transferConfigID *string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 
@@ -427,7 +427,7 @@ func testAccCheckDataTransferConfigID(resourceName string, transferConfigID *str
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Widget ID is not set")
+			return fmt.Errorf("Transfer config ID is not set")
 		}
 
 		*transferConfigID = rs.Primary.ID
@@ -435,6 +435,7 @@ func testAccCheckDataTransferConfigID(resourceName string, transferConfigID *str
 	}
 }
 
+// Check if transfer config ID matches the one stored in transferConfigID
 func testAccCheckDataTransferConfigIDChange(resourceName string, transferConfigID *string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 
@@ -444,7 +445,7 @@ func testAccCheckDataTransferConfigIDChange(resourceName string, transferConfigI
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Widget ID is not set")
+			return fmt.Errorf("Transfer config ID is not set")
 		}
 
 		if *transferConfigID != rs.Primary.ID {
