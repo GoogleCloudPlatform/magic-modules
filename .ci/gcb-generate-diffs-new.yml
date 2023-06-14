@@ -68,89 +68,97 @@ steps:
       secretEnv: ["GITHUB_TOKEN"]
       id: tpg-head
       waitFor: ["merged"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
       args:
           - 'head'
           - 'terraform'
           - 'ga'
           - $_PR_NUMBER
-          - BASE_BRANCH=$_BASE_BRANCH
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder:shuyama-feature-branch-test'
       id: tpg-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
       args:
           - 'base'
           - 'terraform'
           - 'ga'
           - $_PR_NUMBER
-          - BASE_BRANCH=$_BASE_BRANCH
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder:shuyama-feature-branch-test'
       secretEnv: ["GITHUB_TOKEN"]
       id: tpgb-head
       waitFor: ["merged"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
       args:
           - 'head'
           - 'terraform'
           - 'beta'
           - $_PR_NUMBER
-          - BASE_BRANCH=$_BASE_BRANCH
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder:shuyama-feature-branch-test'
       id: tpgb-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
       args:
           - 'base'
           - 'terraform'
           - 'beta'
           - $_PR_NUMBER
-          - BASE_BRANCH=$_BASE_BRANCH
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder:shuyama-feature-branch-test'
       id: tgc-head
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged", "tpg-head"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
       args:
           - 'head'
           - 'terraform-google-conversion'
           - 'ga'
           - $_PR_NUMBER
-          - BASE_BRANCH=$_BASE_BRANCH
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder:shuyama-feature-branch-test'
       id: tgc-base
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged", "tpg-base"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
       args:
           - 'base'
           - 'terraform-google-conversion'
           - 'ga'
           - $_PR_NUMBER
-          - BASE_BRANCH=$_BASE_BRANCH
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder:shuyama-feature-branch-test'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
       args:
           - 'head'
           - 'tf-oics'
           - 'beta'
           - $_PR_NUMBER
-          - BASE_BRANCH=$_BASE_BRANCH
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder:shuyama-feature-branch-test'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
       args:
           - 'base'
           - 'tf-oics'
           - 'beta'
           - $_PR_NUMBER
-          - BASE_BRANCH=$_BASE_BRANCH
 
     - name: 'gcr.io/graphite-docker-images/github-differ'
       id: diff
