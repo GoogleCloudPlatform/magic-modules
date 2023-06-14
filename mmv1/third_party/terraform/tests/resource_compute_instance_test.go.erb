@@ -240,7 +240,7 @@ func TestAccComputeInstance_resourceManagerTags(t *testing.T) {
 
 	var instanceName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
     context := map[string]interface{}{
-		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"project":        acctest.GetTestProjectFromEnv(),
 		"random_suffix": RandString(t, 10),
 		"instance_name": instanceName,
 	}
@@ -3311,7 +3311,7 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeInstance_resourceManagerTags(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_tags_tag_key" "key" {
-  parent = "organizations/%{org_id}"
+  parent = "projects/%{project}"
   short_name = "foobarbaz%{random_suffix}"
   description = "For foo/bar resources."
 }
