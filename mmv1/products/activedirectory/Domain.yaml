@@ -53,6 +53,7 @@ import_format: ['{{name}}']
 autogen_async: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
+error_abort_predicates: ['transport_tpg.Is429QuotaError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'active_directory_domain_basic'

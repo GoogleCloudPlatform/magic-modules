@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -115,7 +116,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
-			customdiff.ForceNewIfChange("settings.0.disk_size", isDiskShrinkage),
+			customdiff.ForceNewIfChange("settings.0.disk_size", compute.IsDiskShrinkage),
 			customdiff.ForceNewIfChange("master_instance_name", isMasterInstanceNameSet),
 			customdiff.IfValueChange("instance_type", isReplicaPromoteRequested, checkPromoteConfigurationsAndUpdateDiff),
 			privateNetworkCustomizeDiff,
@@ -625,7 +626,7 @@ is set to true. Defaults to ZONAL.`,
 			"database_version": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: `The MySQL, PostgreSQL or SQL Server (beta) version to use. Supported values include MYSQL_5_6, MYSQL_5_7, MYSQL_8_0, POSTGRES_9_6, POSTGRES_10, POSTGRES_11, POSTGRES_12, POSTGRES_13, POSTGRES_14, SQLSERVER_2017_STANDARD, SQLSERVER_2017_ENTERPRISE, SQLSERVER_2017_EXPRESS, SQLSERVER_2017_WEB. Database Version Policies includes an up-to-date reference of supported versions.`,
+				Description: `The MySQL, PostgreSQL or SQL Server (beta) version to use. Supported values include MYSQL_5_6, MYSQL_5_7, MYSQL_8_0, POSTGRES_9_6, POSTGRES_10, POSTGRES_11, POSTGRES_12, POSTGRES_13, POSTGRES_14, POSTGRES_15, SQLSERVER_2017_STANDARD, SQLSERVER_2017_ENTERPRISE, SQLSERVER_2017_EXPRESS, SQLSERVER_2017_WEB. Database Version Policies includes an up-to-date reference of supported versions.`,
 			},
 
 			"encryption_key_name": {
@@ -1198,7 +1199,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		DataDiskType:               _settings["disk_type"].(string),
 		PricingPlan:                _settings["pricing_plan"].(string),
 		DeletionProtectionEnabled:  _settings["deletion_protection_enabled"].(bool),
-		UserLabels:                 convertStringMap(_settings["user_labels"].(map[string]interface{})),
+		UserLabels:                 tpgresource.ConvertStringMap(_settings["user_labels"].(map[string]interface{})),
 		BackupConfiguration:        expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
 		DatabaseFlags:              expandDatabaseFlags(_settings["database_flags"].([]interface{})),
 		IpConfiguration:            expandIpConfiguration(_settings["ip_configuration"].([]interface{}), databaseVersion),

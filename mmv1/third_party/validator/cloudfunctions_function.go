@@ -7,16 +7,16 @@ import (
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
-func GetCloudFunctionsFunctionCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//cloudfunctions.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/functions/{{name}}")
+func GetCloudFunctionsFunctionCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	name, err := tpgresource.AssetName(d, config, "//cloudfunctions.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/functions/{{name}}")
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 	if obj, err := GetCloudFunctionsFunctionApiObject(d, config); err == nil {
-		return []Asset{{
+		return []tpgresource.Asset{{
 			Name: name,
 			Type: "cloudfunctions.googleapis.com/CloudFunction",
-			Resource: &AssetResource{
+			Resource: &tpgresource.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://cloudfunctions.googleapis.com/$discovery/rest",
 				DiscoveryName:        "CloudFunction",
@@ -24,7 +24,7 @@ func GetCloudFunctionsFunctionCaiObject(d tpgresource.TerraformResourceData, con
 			},
 		}}, nil
 	} else {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 }
 

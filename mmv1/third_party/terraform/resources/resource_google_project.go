@@ -12,6 +12,8 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	tpgserviceusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -227,7 +229,7 @@ func resourceGoogleProjectCheckPreRequisites(config *transport_tpg.Config, d *sc
 	if err != nil {
 		return fmt.Errorf("failed to check permissions on billing account %q: %v", ba, err)
 	}
-	if !stringInSlice(resp.Permissions, perm) {
+	if !tpgresource.StringInSlice(resp.Permissions, perm) {
 		return fmt.Errorf("missing permission on %q: %v", ba, perm)
 	}
 	if !d.Get("auto_create_network").(bool) {
@@ -688,7 +690,7 @@ func doEnableServicesRequest(services []string, project, billingProject, userAge
 				return errwrap.Wrapf("failed on request preconditions: {{err}}", err)
 			}
 
-			waitErr := serviceUsageOperationWait(config, op, billingProject, fmt.Sprintf("Enable Project %q Services: %+v", project, services), userAgent, timeout)
+			waitErr := tpgserviceusage.ServiceUsageOperationWait(config, op, billingProject, fmt.Sprintf("Enable Project %q Services: %+v", project, services), userAgent, timeout)
 			if waitErr != nil {
 				return waitErr
 			}
