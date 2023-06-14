@@ -551,6 +551,9 @@ func resourceBigtableInstanceClusterReorderTypeList(_ context.Context, diff *sch
 	for i := 0; i < newCount.(int); i++ {
 		_, newId := diff.GetChange(fmt.Sprintf("cluster.%d.cluster_id", i))
 		_, c := diff.GetChange(fmt.Sprintf("cluster.%d", i))
+		if _, ok := clusters[newId.(string)]; ok {
+			return fmt.Errorf("duplicated cluster_id: %q", newId.(string))
+		}
 		clusters[newId.(string)] = c
 	}
 
