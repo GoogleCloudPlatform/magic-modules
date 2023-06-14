@@ -351,6 +351,8 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_vertex_ai_index":                           vertexai.DataSourceVertexAIIndex(),
 		<% unless version == 'ga' -%>
 		"google_vmwareengine_network":                    	vmwareengine.DataSourceVmwareengineNetwork(),
+		"google_vmwareengine_private_cloud": 								vmwareengine.DataSourceVmwareenginePrivateCloud(),
+		"google_vmwareengine_cluster": 											vmwareengine.DataSourceVmwareengineCluster(),
 		<% end -%>
 		// ####### END datasources ###########
 		// ####### END handwritten datasources ###########
