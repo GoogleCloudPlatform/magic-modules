@@ -1,0 +1,63 @@
+resource "google_storage_bucket" "images" {
+  provider                    = google-beta
+  project                     = "<%= ctx[:test_env_vars]['project_id'] %>"
+  name                        = "<%= ctx[:vars]['bucket_id'] %>"
+  location                    = "US"
+  uniform_bucket_level_access = true
+
+  # Delete all objects when the bucket is deleted
+  force_destroy = true
+}
+
+resource "google_service_account" "resize_image" {
+  provider     = google-beta
+  project      = "<%= ctx[:test_env_vars]['project_id'] %>"
+  account_id   = "<%= ctx[:vars]['service-account-id'] %>"
+}
+
+resource "google_project_iam_member" "resize_image" {
+  provider = google-beta
+  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
+  role     = "roles/datastore.user"
+  member   = "serviceAccount:${google_service_account.resize_image.email}"
+}
+
+resource "google_firebase_extensions_instance" "resize_image" {
+  provider = google-beta
+  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
+  instance_id = "<%= ctx[:vars]['instance-id'] %>"
+  service_account_email = google_service_account.resize_image.email
+  config {
+    extension_ref = "firebase/storage-resize-images"
+    extension_version = "0.1.37"
+
+    # The following params apply to the firebase/storage-resize-images extension. 
+    # Different extensions may have different params
+    params = {
+      DELETE_ORIGINAL_FILE = false
+      MAKE_PUBLIC          = false
+      IMAGE_TYPE           = false
+      IS_ANIMATED          = true
+      FUNCTION_MEMORY      = 1024
+      DO_BACKFILL          = false
+      IMG_SIZES            = "200x200"
+      IMG_BUCKET           = google_storage_bucket.images.name
+      LOCATION             = "<%= ctx[:vars]['location'] %>"
+    }
+
+    system_params = {
+      "firebaseextensions.v1beta.function/maxInstances"               = 3000
+      "firebaseextensions.v1beta.function/memory"                     = 256
+      "firebaseextensions.v1beta.function/minInstances"               = 0
+      "firebaseextensions.v1beta.function/vpcConnectorEgressSettings" = "VPC_CONNECTOR_EGRESS_SETTINGS_UNSPECIFIED"
+    }
+
+    allowed_event_types = [
+      "firebase.extensions.storage-resize-images.v1.complete"
+    ]
+
+    eventarc_channel = "projects/<%= ctx[:test_env_vars]['project_id'] %>/locations/<%= ctx[:vars]['location'] %>/channels/firebase"
+  }
+
+  depends_on = [ google_project_iam_member.resize_image ]
+}
