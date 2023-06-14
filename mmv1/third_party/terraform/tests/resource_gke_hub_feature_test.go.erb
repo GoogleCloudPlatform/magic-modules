@@ -62,11 +62,16 @@ func TestAccGKEHubFeature_gkehubFeatureFleetObservability(t *testing.T) {
 }
 
 func testAccGKEHubFeature_gkehubFeatureFleetObservability(context map[string]interface{}) string {
-  return gkeHubFeatureProjectBetaSetup(context) + Nprintf(`
+  return gkeHubFeatureProjectSetup(context) + Nprintf(`
+resource "time_sleep" "wait_for_gkehub_enablement" {
+  create_duration = "150s"
+  depends_on = [google_project_service.gkehub]
+}
+  
 resource "google_gke_hub_feature" "feature" {
   name = "fleetobservability"
   location = "global"
-  project = google_project.beta_project.project_id
+  project = google_project.project.project_id
   spec {
     fleetobservability {
       logging_config {
@@ -86,11 +91,16 @@ resource "google_gke_hub_feature" "feature" {
 }
 
 func testAccGKEHubFeature_gkehubFeatureFleetObservabilityUpdate1(context map[string]interface{}) string {
-  return gkeHubFeatureProjectBetaSetup(context) + Nprintf(`
+  return gkeHubFeatureProjectSetup(context) + Nprintf(`
+resource "time_sleep" "wait_for_gkehub_enablement" {
+  create_duration = "150s"
+  depends_on = [google_project_service.gkehub]
+}
+
 resource "google_gke_hub_feature" "feature" {
   name = "fleetobservability"
   location = "global"
-  project = google_project.beta_project.project_id
+  project = google_project.project.project_id
   spec {
     fleetobservability {
       logging_config {
@@ -107,11 +117,16 @@ resource "google_gke_hub_feature" "feature" {
 }
 
 func testAccGKEHubFeature_gkehubFeatureFleetObservabilityUpdate2(context map[string]interface{}) string {
-  return gkeHubFeatureProjectBetaSetup(context) + Nprintf(`
+  return gkeHubFeatureProjectSetup(context) + Nprintf(`
+resource "time_sleep" "wait_for_gkehub_enablement" {
+  create_duration = "150s"
+  depends_on = [google_project_service.gkehub]
+}
+
 resource "google_gke_hub_feature" "feature" {
   name = "fleetobservability"
   location = "global"
-  project = google_project.beta_project.project_id
+  project = google_project.project.project_id
   spec {
     fleetobservability {
       logging_config {
@@ -127,9 +142,9 @@ resource "google_gke_hub_feature" "feature" {
 `, context)
 }
 
-func gkeHubFeatureProjectBetaSetup(context map[string]interface{}) string {
+func gkeHubFeatureProjectSetup(context map[string]interface{}) string {
   return Nprintf(`
-resource "google_project" "beta_project" {
+resource "google_project" "project" {
   name            = "tf-test-gkehub%{random_suffix}"
   project_id      = "tf-test-gkehub%{random_suffix}"
   org_id          = "%{org_id}"
@@ -137,16 +152,49 @@ resource "google_project" "beta_project" {
   provider        = google-beta
 }
 
-resource "google_project_service" "gkehub" {
-  project = google_project.beta_project.project_id
-  service = "gkehub.googleapis.com"
+resource "google_project_service" "mesh" {
+  project = google_project.project.project_id
+  service = "meshconfig.googleapis.com"
+  provider = google-beta
+}
+
+resource "google_project_service" "mci" {
+  project = google_project.project.project_id
+  service = "multiclusteringress.googleapis.com"
+  provider = google-beta
+}
+
+resource "google_project_service" "acm" {
+  project = google_project.project.project_id
+  service = "anthosconfigmanagement.googleapis.com"
+  provider = google-beta
+}
+
+resource "google_project_service" "mcsd" {
+  project = google_project.project.project_id
+  service = "multiclusterservicediscovery.googleapis.com"
+  provider = google-beta
+}
+
+resource "google_project_service" "compute" {
+  project = google_project.project.project_id
+  service = "compute.googleapis.com"
   disable_on_destroy = false
   provider = google-beta
 }
 
-resource "time_sleep" "wait_for_gkehub_enablement" {
-  create_duration = "150s"
-  depends_on = [google_project_service.gkehub]
+resource "google_project_service" "container" {
+  project = google_project.project.project_id
+  service = "container.googleapis.com"
+  disable_on_destroy = false
+  provider = google-beta
+}
+
+resource "google_project_service" "gkehub" {
+  project = google_project.project.project_id
+  service = "gkehub.googleapis.com"
+  disable_on_destroy = false
+  provider = google-beta
 }
 `, context)
 }
@@ -191,7 +239,7 @@ func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
 }
 
 func testAccGKEHubFeature_gkehubFeatureMciUpdateStart(context map[string]interface{}) string {
-  return gkeHubFeatureProjectSetup(context) + Nprintf(`
+  return gkeHubFeatureProjectSetupForGA(context) + Nprintf(`
 
 resource "google_container_cluster" "primary" {
   name               = "tf-test%{random_suffix}"
@@ -216,7 +264,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-  description = "test resource."
   project = google_project.project.project_id
 }
 
@@ -227,7 +274,6 @@ resource "google_gke_hub_membership" "membership_second" {
       resource_link = "//container.googleapis.com/${google_container_cluster.secondary.id}"
     }
   }
-  description = "test resource."
   project = google_project.project.project_id
 }
 
@@ -245,7 +291,7 @@ resource "google_gke_hub_feature" "feature" {
 }
 
 func testAccGKEHubFeature_gkehubFeatureMciChangeMembership(context map[string]interface{}) string {
-  return gkeHubFeatureProjectSetup(context) + Nprintf(`
+  return gkeHubFeatureProjectSetupForGA(context) + Nprintf(`
 resource "google_container_cluster" "primary" {
   name               = "tf-test%{random_suffix}"
   location           = "us-central1-a"
@@ -269,7 +315,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-  description = "test resource."
   project = google_project.project.project_id
 }
 
@@ -280,7 +325,6 @@ resource "google_gke_hub_membership" "membership_second" {
       resource_link = "//container.googleapis.com/${google_container_cluster.secondary.id}"
     }
   }
-  description = "test resource."
   project = google_project.project.project_id
 }
 
@@ -337,7 +381,7 @@ func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
 }
 
 func testAccGKEHubFeature_gkehubFeatureMcsd(context map[string]interface{}) string {
-  return gkeHubFeatureProjectSetup(context) + Nprintf(`
+  return gkeHubFeatureProjectSetupForGA(context) + Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   name = "multiclusterservicediscovery"
   location = "global"
@@ -351,7 +395,7 @@ resource "google_gke_hub_feature" "feature" {
 }
 
 func testAccGKEHubFeature_gkehubFeatureMcsdUpdate(context map[string]interface{}) string {
-  return gkeHubFeatureProjectSetup(context) + Nprintf(`
+  return gkeHubFeatureProjectSetupForGA(context) + Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   name = "multiclusterservicediscovery"
   location = "global"
@@ -365,7 +409,7 @@ resource "google_gke_hub_feature" "feature" {
 `, context)
 }
 
-func gkeHubFeatureProjectSetup(context map[string]interface{}) string {
+func gkeHubFeatureProjectSetupForGA(context map[string]interface{}) string {
   return Nprintf(`
 resource "google_project" "project" {
   name            = "tf-test-gkehub%{random_suffix}"
