@@ -238,6 +238,7 @@ func TestAccComputeInstance_basic5(t *testing.T) {
 func TestAccComputeInstance_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
+	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
     context := map[string]interface{}{
 		"project":        acctest.GetTestProjectFromEnv(),
@@ -252,6 +253,9 @@ func TestAccComputeInstance_resourceManagerTags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_resourceManagerTags(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance)),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},

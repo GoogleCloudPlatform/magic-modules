@@ -2575,6 +2575,7 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 			"image":  diskDetails.SourceImage,
 			"size":   diskDetails.SizeGb,
 			"labels": diskDetails.Labels,
+			"resource_manager_tags": d.Get("boot_disk.0.initialize_params.0.resource_manager_tags"),
 		}}
 	}
 
