@@ -35,6 +35,7 @@ func ResourceBigtableInstance() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			resourceBigtableInstanceClusterReorderTypeList,
+			resourceBigtableInstanceUniqueClusterID,
 		),
 
 		SchemaVersion: 1,
@@ -205,10 +206,6 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 		conf.InstanceType = bigtable.PRODUCTION
 	}
 
-	if err := verifyDuplicatedClusters(d.Get("cluster").([]interface{})); err != nil {
-		return err
-	}
-
 	conf.Clusters, err = expandBigtableClusters(d.Get("cluster").([]interface{}), conf.InstanceID, config)
 	if err != nil {
 		return err
@@ -353,10 +350,6 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 		conf.InstanceType = bigtable.PRODUCTION
 	}
 
-	if err := verifyDuplicatedClusters(d.Get("cluster").([]interface{})); err != nil {
-		return err
-	}
-
 	conf.Clusters, err = expandBigtableClusters(d.Get("cluster").([]interface{}), conf.InstanceID, config)
 	if err != nil {
 		return err
@@ -451,19 +444,6 @@ func getUnavailableClusterZones(clusters []interface{}, unavailableZones []strin
 	return zones
 }
 
-func verifyDuplicatedClusters(clusters []interface{}) error {
-	clusterIDs := map[string]bool{}
-	for _, c := range clusters {
-		cluster := c.(map[string]interface{})
-		clusterID := cluster["cluster_id"].(string)
-		if clusterIDs[clusterID] {
-			return fmt.Errorf("duplicated cluster_id: %q", clusterID)
-		}
-		clusterIDs[clusterID] = true
-	}
-	return nil
-}
-
 func expandBigtableClusters(clusters []interface{}, instanceID string, config *transport_tpg.Config) ([]bigtable.ClusterConfig, error) {
 	results := make([]bigtable.ClusterConfig, 0, len(clusters))
 	for _, c := range clusters {
@@ -515,6 +495,23 @@ func getBigtableZone(z string, config *transport_tpg.Config) (string, error) {
 	return tpgresource.GetResourceNameFromSelfLink(z), nil
 }
 
+// resourceBigtableInstanceUniqueClusterID asserts cluster ID uniqueness.
+func resourceBigtableInstanceUniqueClusterID(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	_, newCount := diff.GetChange("cluster.#")
+	clusters := map[string]bool{}
+
+	for i := 0; i < newCount.(int); i++ {
+		_, newId := diff.GetChange(fmt.Sprintf("cluster.%d.cluster_id", i))
+		clusterID := newId.(string)
+		if clusters[clusterID] {
+			return fmt.Errorf("duplicated cluster_id: %q", clusterID)
+		}
+		clusters[clusterID] = true
+	}
+
+	return nil
+}
+
 // resourceBigtableInstanceClusterReorderTypeList causes the cluster block to
 // act like a TypeSet while it's a TypeList underneath. It preserves state
 // ordering on updates, and causes the resource to get recreated if it would
@@ -551,9 +548,6 @@ func resourceBigtableInstanceClusterReorderTypeList(_ context.Context, diff *sch
 	for i := 0; i < newCount.(int); i++ {
 		_, newId := diff.GetChange(fmt.Sprintf("cluster.%d.cluster_id", i))
 		_, c := diff.GetChange(fmt.Sprintf("cluster.%d", i))
-		if _, ok := clusters[newId.(string)]; ok {
-			return fmt.Errorf("duplicated cluster_id: %q", newId.(string))
-		}
 		clusters[newId.(string)] = c
 	}
 
