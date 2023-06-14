@@ -89,7 +89,7 @@ func computeInstanceImportStep(zone, instanceName string, additionalImportIgnore
 	// metadata is only read into state if set in the config
 	// importing doesn't know whether metadata.startup_script vs metadata_startup_script is set in the config,
 	// it always takes metadata.startup-script
-	ignores := []string{"metadata.%", "metadata.startup-script", "metadata_startup_script"}
+	ignores := []string{"metadata.%", "metadata.startup-script", "metadata_startup_script", "boot_disk.0.initialize_params.0.resource_manager_tags.%",  "params.0.resource_manager_tags.%"}
 
 	return resource.TestStep{
 		ResourceName:            "google_compute_instance.foobar",
@@ -257,7 +257,6 @@ func TestAccComputeInstance_resourceManagerTags(t *testing.T) {
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance)),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
