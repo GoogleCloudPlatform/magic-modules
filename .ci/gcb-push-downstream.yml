@@ -139,6 +139,8 @@ steps:
     - name: 'gcr.io/graphite-docker-images/vcr-cassette-merger'
       secretEnv: ["GITHUB_TOKEN", "GOOGLE_PROJECT"]
       waitFor: ["tpg-push"]
+      env:
+        - BRANCH_NAME=$BRANCH_NAME
       args:
           - $COMMIT_SHA
 

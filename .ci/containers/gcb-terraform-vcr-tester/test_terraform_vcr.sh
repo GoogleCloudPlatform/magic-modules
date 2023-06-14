@@ -58,7 +58,11 @@ set +e
 # cassette retrieval
 mkdir fixtures
 gsutil -m -q cp gs://ci-vcr-cassettes/beta/fixtures/* fixtures/
-# copy branch specific cassettes over master. This might fail but that's ok if the folder doesnt exist
+if [ -n "$BASE_BRANCH" ]; then
+  # copy feature branch specific cassettes over master. This might fail but that's ok if the folder doesnt exist
+  gsutil -m -q cp gs://ci-vcr-cassettes/beta/refs/branches/$BASE_BRANCH/fixtures/* fixtures/
+fi
+# copy PR branch specific cassettes over master. This might fail but that's ok if the folder doesnt exist
 gsutil -m -q cp gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-$pr_number/fixtures/* fixtures/
 
 echo $SA_KEY > sa_key.json
