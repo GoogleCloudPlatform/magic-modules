@@ -12,9 +12,6 @@ set +e
 gsutil ls gs://ci-vcr-cassettes/refs/heads/auto-pr-$PR_NUMBER/fixtures/
 if [ $? -eq 0 ]; then
   # We have recorded new cassettes for this branch
-  gsutil -m cp gs://ci-vcr-cassettes/refs/heads/auto-pr-$PR_NUMBER/fixtures/* gs://ci-vcr-cassettes/fixtures/
-  gsutil -m rm -r gs://ci-vcr-cassettes/refs/heads/auto-pr-$PR_NUMBER/
-
   if [ -n "$BRANCH_NAME" ]; then
       if [ "$BRANCH_NAME" == "main" ]; then
         gsutil -m cp gs://ci-vcr-cassettes/refs/heads/auto-pr-$PR_NUMBER/fixtures/* gs://ci-vcr-cassettes/fixtures/
