@@ -290,3 +290,16 @@ properties:
     description: |
       Anthos version for the node pool. Defaults to the user cluster version.
     output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: "upgrade_policy"
+    description: Upgrade policy for the node pool.
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: "independent"
+        description: |
+          Specify the intent to upgrade the node pool with or without the control
+          plane upgrade.
+          Defaults to false i.e. upgrade the node pool with control plane upgrade.
+          Set this to true to upgrade or downgrade the node pool independently from
+          the control plane.
+    
