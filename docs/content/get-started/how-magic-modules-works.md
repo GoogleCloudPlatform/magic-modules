@@ -12,9 +12,9 @@ Magic Modules can be thought of as a source of truth for how to map a GCP API re
 
 Generation of the downstream repositories happens for every new commit in a PR (to a temporary branch owned by the [`modular-magician`](https://github.com/modular-magician/) robot user) and on every merge into the main branch (to the main branch of downstreams). Generation for PR commits allows contributors to manually examine the changes, as well as allowing automatic running of unit tests, acceptance tests, and automated checks such as breaking change detection.
 
-There are three types of resources supported by Magic Modules: MMv1, Handwritten, and DCL/tpgtools. These are described in more detail in the following section.
-
 ## Resource types
+
+There are three types of resources supported by Magic Modules: MMv1, Handwritten, and DCL/tpgtools. These are described in more detail in the following sections.
 
 ### MMv1
 
