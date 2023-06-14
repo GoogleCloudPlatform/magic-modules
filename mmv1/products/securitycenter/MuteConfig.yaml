@@ -33,6 +33,8 @@ examples:
       mute_config_id: 'my-config'
     test_env_vars:
       org_id: :ORG_ID
+# Skipping sweeper since this is a child resource
+skip_sweeper: true
 import_format: ['{{name}}']
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/scc_mute_config.go.erb

@@ -1,3 +1,9 @@
+# There is no automation around this configuration, and it is expected to be
+# run locally by an administrator. It specifies the configuration needed for a
+# test environment where the full set of acceptance tests can be run.
+#
+# More info can be found in the ./README.md
+
 provider "google" {}
 
 data "google_organization" "org" {
@@ -226,6 +232,7 @@ module "project-services" {
     "firebaseappdistribution.googleapis.com",
     "firebasedatabase.googleapis.com",
     "firebasedynamiclinks.googleapis.com",
+    "firebaseextensions.googleapis.com",
     "firebasehosting.googleapis.com",
     "firebaseinstallations.googleapis.com",
     "firebaseremoteconfig.googleapis.com",

@@ -9,7 +9,7 @@
 
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package google
+package <%= product_ns.downcase -%>
 
 import (
 <% if async.result.resource_inside_response -%>
@@ -55,6 +55,9 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
     UserAgent: w.UserAgent,
     <% if object.error_retry_predicates -%>
     ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+    <% end -%>
+    <% if object.error_abort_predicates -%>
+    ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_abort_predicates.join(',') -%>},
     <% end -%>
   })
 }
