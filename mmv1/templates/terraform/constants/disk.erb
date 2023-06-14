@@ -2,14 +2,16 @@
 <% unless compiler == "terraformvalidator-codegen" -%>
 // diffsupress for hyperdisk provisioned_iops
 func hyperDiskIopsUpdateDiffSupress(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	forceNewCheck := []string{"pd-extreme"}
 	if !strings.Contains(d.Get("type").(string), "hyperdisk") {
 		resourceSchema := ResourceComputeDisk().Schema
 		for field := range resourceSchema {
-			if field == "provisioned_iops" && d.HasChange(field) {
+			if field == "provisioned_iops" && d.HasChange(field) && tpgresource.StringContainsSlice(forceNewCheck, d.Get("type").(string)) {
 				if err := d.ForceNew(field); err != nil {
 					return err
 				}
 			}
+
 		}
 	}
 

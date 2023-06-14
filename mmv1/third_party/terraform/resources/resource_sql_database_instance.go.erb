@@ -923,15 +923,6 @@ func privateNetworkCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta
 	return nil
 }
 
-// helper function to see if string within list contains a particular substring
-func stringContainsSlice(arr []string, str string) bool {
-	for _, i := range arr {
-		if strings.Contains(str, i) {
-			return true
-		}
-	}
-	return false
-}
 
 // Point in time recovery for MySQL database instances needs binary_log_enabled set to true and
 // not point_in_time_recovery_enabled, which is confusing to users. This checks for
@@ -941,7 +932,7 @@ func pitrSupportDbCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v 
 	pitr := diff.Get("settings.0.backup_configuration.0.point_in_time_recovery_enabled").(bool)
 	dbVersion := diff.Get("database_version").(string)
 	dbVersionPitrValid := []string{"POSTGRES", "SQLSERVER"}
-	if pitr && !stringContainsSlice(dbVersionPitrValid, dbVersion) {
+	if pitr && !tpgresource.StringContainsSlice(dbVersionPitrValid, dbVersion) {
 		return fmt.Errorf("point_in_time_recovery_enabled is only available for the following %v. You may want to consider using binary_log_enabled instead and remove point_in_time_recovery_enabled (removing point_in_time_recovery_enabled and adding binary_log_enabled will enable pitr for MYSQL)", dbVersionPitrValid)
 	}
 	return nil

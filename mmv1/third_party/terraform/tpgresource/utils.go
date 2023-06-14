@@ -418,6 +418,16 @@ func StringInSlice(arr []string, str string) bool {
 	return false
 }
 
+// helper function to see if  strings within a list contains a particular substring
+func StringContainsSlice(arr []string, str string) bool {
+	for _, i := range arr {
+		if strings.Contains(str, i) {
+			return true
+		}
+	}
+	return false
+}
+
 func MigrateStateNoop(v int, is *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
 	return is, nil
 }
