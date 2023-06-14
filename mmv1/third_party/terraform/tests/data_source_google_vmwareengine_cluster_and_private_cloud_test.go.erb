@@ -34,9 +34,7 @@ func TestAccDataSourceVmwareEnginePrivateCloudAndCluster_basic(t *testing.T) {
 				Config: testAccDataSourceVmwareEngineClusterConfig(context),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_vmwareengine_cluster.ds", "google_vmwareengine_cluster.cls", map[string]struct{}{}),
-				),
-        Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_vmwareengine_private_cloud.ds", "google_vmwareengine_private_cloud.pc", map[string]struct{}{}),
+          acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_vmwareengine_private_cloud.ds", "google_vmwareengine_private_cloud.pc", map[string]struct{}{}),
 				),
 			},
 		},
