@@ -25,9 +25,11 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/dlp/docs/creating-stored-infotypes'
   api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.storedInfoTypes'
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
   actions: ['create']
 id_format: '{{parent}}/storedInfoTypes/{{name}}'
+# Skip sweeper due to non-standard URL
+skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_stored_info_type_basic'
@@ -47,11 +49,19 @@ examples:
       object_name: tf-test-object
     test_env_vars:
       project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_stored_info_type_with_id'
+    primary_resource_id: 'with_stored_info_type_id'
+    vars:
+      name: 'id-'
+    test_env_vars:
+      project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   resource_definition: templates/terraform/resource_definition/dlp_stored_info_type.go.erb
   constants: templates/terraform/constants/dlp_stored_info_type.go.erb
   decoder: templates/terraform/decoders/dlp_stored_info_type.go.erb
   encoder: templates/terraform/encoders/dlp_stored_info_type.go.erb
+  update_encoder: templates/terraform/update_encoder/dlp_stored_info_type.go.erb
   custom_import: templates/terraform/custom_import/dlp_import.go.erb
 parameters:
   - !ruby/object:Api::Type::String
@@ -81,6 +91,15 @@ properties:
     name: 'displayName'
     description: |
       User set display name of the info type.
+  - !ruby/object:Api::Type::String
+    name: 'storedInfoTypeId'
+    description: |
+      The storedInfoType ID can contain uppercase and lowercase letters, numbers, and hyphens;
+      that is, it must match the regular expression: [a-zA-Z\d-_]+. The maximum length is 100
+      characters. Can be empty to allow the system to generate one.
+    immutable: true
+    default_from_api: true
+    url_param_only: true
   - !ruby/object:Api::Type::NestedObject
     name: 'regex'
     description: Regular expression which defines the rule.

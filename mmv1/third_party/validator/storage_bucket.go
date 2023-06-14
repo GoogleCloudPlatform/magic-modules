@@ -20,23 +20,23 @@ import (
 
 const StorageBucketAssetType string = "storage.googleapis.com/Bucket"
 
-func resourceConverterStorageBucket() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterStorageBucket() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType: StorageBucketAssetType,
 		Convert:   GetStorageBucketCaiObject,
 	}
 }
 
-func GetStorageBucketCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//storage.googleapis.com/{{name}}")
+func GetStorageBucketCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	name, err := tpgresource.AssetName(d, config, "//storage.googleapis.com/{{name}}")
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 	if obj, err := GetStorageBucketApiObject(d, config); err == nil {
-		return []Asset{{
+		return []tpgresource.Asset{{
 			Name: name,
 			Type: StorageBucketAssetType,
-			Resource: &AssetResource{
+			Resource: &tpgresource.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/storage/v1/rest",
 				DiscoveryName:        "Bucket",
@@ -44,7 +44,7 @@ func GetStorageBucketCaiObject(d tpgresource.TerraformResourceData, config *tran
 			},
 		}}, nil
 	} else {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 }
 
@@ -105,7 +105,7 @@ func GetStorageBucketApiObject(d tpgresource.TerraformResourceData, config *tran
 		}
 	}
 
-	m, err := jsonMap(sb)
+	m, err := tpgresource.JsonMap(sb)
 	if err != nil {
 		return nil, err
 	}

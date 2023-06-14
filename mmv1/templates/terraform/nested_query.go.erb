@@ -197,7 +197,7 @@ func resource<%= resource_name -%>PatchDeleteEncoder(d *schema.ResourceData, met
   }
   if item == nil {
     // Spoof 404 error for proper handling by Delete (i.e. no-op)
-    return nil, fake404("nested", "<%= resource_name%>")
+    return nil, tpgresource.Fake404("nested", "<%= resource_name%>")
   }
 
   updatedItems := append(currItems[:idx], currItems[idx+1:]...)
@@ -252,6 +252,9 @@ func resource<%= resource_name -%>ListForPatch(d *schema.ResourceData, meta inte
     UserAgent: userAgent,
     <% if object.error_retry_predicates -%>
     ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+    <% end -%>
+    <% if object.error_abort_predicates -%>
+    ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_abort_predicates.join(',') -%>},
     <% end -%>
   })
   if err != nil {

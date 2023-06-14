@@ -26,7 +26,7 @@ resource "google_service_networking_connection" "default" {
 }
 
 resource "google_cloudbuild_bitbucket_server_config" "<%= ctx[:primary_resource_id] %>" {
-    config_id = "mybbsconfig"
+    config_id = "<%= ctx[:vars]['config_id'] %>"
     location = "us-central1"
     host_uri = "https://bbs.com"
     secrets {
