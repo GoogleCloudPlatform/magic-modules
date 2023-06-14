@@ -1,6 +1,6 @@
 ---
 title: "Generate the providers"
-weight: 1
+weight: 10
 aliases:
   - /docs/getting-started/setup
   - /getting-started/setup
@@ -194,6 +194,6 @@ gcloud auth revoke
 
 ## What's next
 
-- [Learn about Magic Modules]({{< ref "/how-to/types-of-resources.md" >}})
+- [Learn about Magic Modules]({{< ref "/get-started/how-magic-modules-works.md" >}})
 - [Learn about the contribution process]({{< ref "/get-started/contributing.md" >}})
 - [Learn about make commands]({{< ref "/reference/make-commands.md" >}})
