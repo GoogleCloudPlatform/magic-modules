@@ -3,7 +3,7 @@ title: "How Magic Modules works"
 weight: 20
 aliases:
   - /docs/how-to/types-of-resources
-  - /how-to-/types-of-resources
+  - /how-to/types-of-resources
 ---
 
 # How Magic Modules works
