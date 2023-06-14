@@ -81,6 +81,10 @@ setting values to `false`, and omit them instead.
     field is set in a user's config, Terraform will treat it as an optional
     field, detecting drift and correcting drift. If it is not set, it will be
     treated as an output-only field.
+*   `url_param_only: true` indicates that a field is not a part of the resource
+    body, and generally indicates that it is part of the URL. These fields can
+    be referenced in template strings or custom code. Typically projects,
+    regions, zones, locations, and parent fields will be annotated as parameters. 
 *   `ignore_read: true` indicates that a value is not returned from an API, and
     Terraform should not look for it in API responses.
 *   `custom_expand` and `custom_flatten` are custom functions to read/write a
