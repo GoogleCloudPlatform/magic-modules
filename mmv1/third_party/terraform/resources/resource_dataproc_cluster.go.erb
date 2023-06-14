@@ -2,6 +2,7 @@
 package google
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -116,7 +117,8 @@ var (
 	}
 )
 
-const resourceDataprocGoogleProvidedLabelPrefix = "labels.goog-dataproc"
+const resourceDataprocGoogleLabelPrefix = "goog-dataproc"
+const resourceDataprocGoogleProvidedLabelPrefix = "labels." + resourceDataprocGoogleLabelPrefix
 
 func resourceDataprocLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	if strings.HasPrefix(k, resourceDataprocGoogleProvidedLabelPrefix) && new == "" {
@@ -149,17 +151,48 @@ func resourceDataprocPropertyDiffSuppress(k, old, new string, d *schema.Resource
 	return false
 }
 
+func SetTerraformLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	
+	// Merge provider default labels with the user defined labels in the resource to get terraform managed labels
+	terraformLabels := make(map[string]string)
+	for k, v := range config.DefaultLabels {
+		terraformLabels[k] = v
+	}
+
+	labels := d.Get("labels").(map[string]interface{})
+	for k, v := range labels {
+		terraformLabels[k] = v.(string)
+	}
+
+	if err := d.SetNew("terraform_labels", terraformLabels); err != nil {
+		return fmt.Errorf("error setting new terraform_labels diff: %w", err)
+	}
+
+	return nil
+}
+
 func ResourceDataprocCluster() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDataprocClusterCreate,
 		Read:   resourceDataprocClusterRead,
 		Update: resourceDataprocClusterUpdate,
 		Delete: resourceDataprocClusterDelete,
+		CustomizeDiff: SetTerraformLabelsDiff,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(45 * time.Minute),
 			Update: schema.DefaultTimeout(45 * time.Minute),
 			Delete: schema.DefaultTimeout(45 * time.Minute),
+		},
+
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    resourceDataprocClusterResourceV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: ResourceDataprocClusterStateUpgradeV0,
+				Version: 0,
+			},
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -218,8 +251,18 @@ func ResourceDataprocCluster() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				// GCP automatically adds labels
-				DiffSuppressFunc: resourceDataprocLabelDiffSuppress,
+				Description: `The list of labels (key/value pairs) to be applied to instances in the cluster. GCP generates some itself including goog-dataproc-cluster-name which is the name of the cluster.`,
+			},
+
+			"terraform_labels": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"effective_labels": {
+				Type:     schema.TypeMap,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed:    true,
 				Description: `The list of labels (key/value pairs) to be applied to instances in the cluster. GCP generates some itself including goog-dataproc-cluster-name which is the name of the cluster.`,
 			},
@@ -1324,8 +1367,8 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	if _, ok := d.GetOk("labels"); ok {
-		cluster.Labels = tpgresource.ExpandLabels(d)
+	if _, ok := d.GetOk("terraform_labels"); ok {
+		cluster.Labels = tpgresource.ExpandTerraformLabels(d)
 	}
 
 	// Checking here caters for the case where the user does not specify cluster_config
@@ -1969,8 +2012,9 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 
 	updMask := []string{}
 
-	if d.HasChange("labels") {
-		v := d.Get("labels")
+	if d.HasChange("terraform_labels") {
+		v := d.Get("terraform_labels")
+
 		m := make(map[string]string)
 		for k, val := range v.(map[string]interface{}) {
 			m[k] = val.(string)
@@ -2083,8 +2127,36 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("region", region); err != nil {
 		return fmt.Errorf("Error setting region: %s", err)
 	}
-	if err := d.Set("labels", cluster.Labels); err != nil {
-		return fmt.Errorf("Error setting labels: %s", err)
+
+	clusterLabels := make(map[string]interface{})
+
+	if v, ok := d.GetOk("labels"); ok {
+		if cluster.Labels != nil {
+			for k, _ := range v.(map[string]interface{}) {
+				clusterLabels[k] = cluster.Labels[k]
+			}
+		}
+
+		if err := d.Set("labels", clusterLabels); err != nil {
+			return fmt.Errorf("Error setting labels: %s", err)
+		}
+	}
+
+	if err := d.Set("effective_labels", cluster.Labels); err != nil {
+		return fmt.Errorf("Error setting effective_labels: %s", err)
+	}
+
+	terraformLabels := make(map[string]interface{})
+	if v, ok := d.GetOk("terraform_labels"); ok {
+		if cluster.Labels != nil {
+			for k, _ := range v.(map[string]interface{}) {
+				terraformLabels[k] = cluster.Labels[k]
+			}
+		}
+
+		if err := d.Set("terraform_labels", terraformLabels); err != nil {
+			return fmt.Errorf("Error setting terraform_labels: %s", err)
+		}
 	}
 
 	var cfg []map[string]interface{}

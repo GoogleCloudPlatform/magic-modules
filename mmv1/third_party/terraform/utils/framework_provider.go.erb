@@ -55,6 +55,7 @@ type frameworkProvider struct {
     userAgent string
     userProjectOverride bool
     version string
+    DefaultLabels              map[string]string
 
     // paths for client setup
     <% products.each do |product| -%>
@@ -132,6 +133,10 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             "request_reason": schema.StringAttribute{
                 Optional: true,
             },
+            "default_labels": schema.MapAttribute{
+				Optional:    true,
+				ElementType: types.StringType,
+			},
 
             // Generated Products
             <% products.each do |product| -%>

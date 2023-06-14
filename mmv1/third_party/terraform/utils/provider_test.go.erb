@@ -736,6 +736,21 @@ func TestAccProviderBasePath_setInvalidBasePath(t *testing.T) {
 	})
 }
 
+func TestAccProviderBasePath_setDefaultLabels(t *testing.T) {
+	t.Parallel()
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeAddressDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccProviderDefaultLabels_basic(),
+			},
+		},
+	})
+}
+
 func TestAccProviderMeta_setModuleName(t *testing.T) {
 	t.Parallel()
 
@@ -849,6 +864,17 @@ resource "google_compute_address" "default" {
   provider = google.compute_custom_endpoint
   name     = "tf-test-address-%s"
 }`, endpoint, name)
+}
+
+func testAccProviderDefaultLabels_basic() string {
+	return fmt.Sprintf(`
+provider "google" {
+	alias  = "project-1-default-labels"
+	default_labels = {
+		default_key1 = "value1"
+	}
+}
+`)
 }
 
 func testAccProviderMeta_setModuleName(key, name string) string {
