@@ -80,7 +80,7 @@ Replace `DATASOURCE_NAME` according to the pull request content. For example:
 ~~~
 {{< /tab >}}
 {{< tab "No user impact" >}}
-If there is no user impact, use an empty release block of type `none`. Example:
+If there is no user impact, use an empty release note block of type `none`. Example:
 
 ~~~markdown
 ```release-note:none
