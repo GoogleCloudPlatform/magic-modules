@@ -7,6 +7,9 @@ path."
 weight: 10
 aliases:
   - /docs/how-to/add-mmv1-resource
+  - /how-to/add-mmv1-resource
+  - /docs/how-to
+  - /how-to
 ---
 
 # Add an MMv1 resource

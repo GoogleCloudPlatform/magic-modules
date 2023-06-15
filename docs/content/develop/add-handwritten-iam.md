@@ -5,6 +5,7 @@ using [MMv1](/magic-modules/docs/how-to/add-mmv1-iam)."
 weight: 23
 aliases:
   - /docs/how-to/add-handwritten-iam
+  - /how-to/add-handwritten-iam
 ---
 
 # Add handwritten IAM resources

@@ -4,6 +4,7 @@ summary: "The Google providers for Terraform have a large number of handwritten 
 weight: 20
 aliases:
   - /docs/how-to/update-handwritten-resource
+  - /how-to/update-handwritten-resource
 ---
 
 # Update a handwritten resource

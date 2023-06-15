@@ -4,6 +4,7 @@ summary: "An example terraform configuration can be used to generate docs and te
 weight: 12
 aliases:
   - /docs/how-to/add-mmv1-test
+  - /how-to/add-mmv1-test
 ---
 
 # Add an MMv1 test
