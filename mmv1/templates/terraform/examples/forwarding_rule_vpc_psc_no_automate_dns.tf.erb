@@ -7,11 +7,10 @@ resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   network                 = google_compute_network.consumer_net.name
   ip_address              = google_compute_address.consumer_address.id
   allow_psc_global_access = true
-  no_automate_dns_zone    = false
+  no_automate_dns_zone    = true
 }
 
 // Consumer service endpoint
-
 resource "google_compute_network" "consumer_net" {
   name                    = "<%= ctx[:vars]['consumer_network_name'] %>"
   auto_create_subnetworks = false
@@ -33,7 +32,6 @@ resource "google_compute_address" "consumer_address" {
 
 
 // Producer service attachment
-
 resource "google_compute_network" "producer_net" {
   name                    = "<%= ctx[:vars]['producer_network_name'] %>"
   auto_create_subnetworks = false
