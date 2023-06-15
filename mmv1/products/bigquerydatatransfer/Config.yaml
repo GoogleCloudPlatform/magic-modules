@@ -15,8 +15,7 @@
 name: 'Config'
 base_url: projects/{{project}}/locations/{{location}}/transferConfigs?serviceAccountName={{service_account_name}}
 self_link: '{{name}}'
-# see comment at service_account_name, PATCHing service_account_name also required update_mask entry
-# update_url: "{{name}}?serviceAccountName={{service_account_name}}"
+update_url: "{{name}}?serviceAccountName={{service_account_name}}"
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -57,10 +56,6 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'serviceAccountName'
     url_param_only: true
-    # The API would support PATCHing the service account, but setting the
-    # update_mask accordingly for a url_param_only is currently not
-    # supported in magic-modules
-    immutable: true
     default_value: ''
     description: |
       Service account email. If this field is set, transfer config will

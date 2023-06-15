@@ -188,6 +188,9 @@ module Api
       # An array of function names that determine whether an error is retryable.
       attr_reader :error_retry_predicates
 
+      # An array of function names that determine whether an error is not retryable.
+      attr_reader :error_abort_predicates
+
       attr_reader :schema_version
 
       # Set to true for resources that are unable to be deleted, such as KMS keyrings or project
@@ -284,6 +287,7 @@ module Api
 
       check :timeouts, type: Api::Timeouts
       check :error_retry_predicates, type: Array, item_type: String
+      check :error_abort_predicates, type: Array, item_type: String
       check :schema_version, type: Integer
       check :skip_delete, type: :boolean, default: false
       check :supports_indirect_user_project_override, type: :boolean, default: false
