@@ -360,19 +360,16 @@ func TestAccComputeDisk_pdHyperDiskProvisionedIopsLifeCycle(t *testing.T) {
 	context_1 := map[string]interface{}{
 		"random_suffix":    RandString(t, 10),
 		"provisioned_iops": 10000,
-		"disk_size":        64,
 		"lifecycle_bool":   true,
 	}
 	context_2 := map[string]interface{}{
 		"random_suffix":    context_1["random_suffix"],
 		"provisioned_iops": 11000,
-		"disk_size":        64,
 		"lifecycle_bool":   true,
 	}
 	context_3 := map[string]interface{}{
 		"random_suffix":    context_1["random_suffix"],
 		"provisioned_iops": 11000,
-		"disk_size":        64,
 		"lifecycle_bool":   false,
 	}
 
@@ -415,23 +412,17 @@ func TestAccComputeDisk_pdHyperDiskProvisionedThroughputLifeCycle(t *testing.T) 
 	context_1 := map[string]interface{}{
 		"random_suffix":          RandString(t, 10),
 		"provisioned_throughput": 180,
-		"disk_size":              2048,
 		"lifecycle_bool":         true,
-		"zone":                   "us-east4-c"
 	}
 	context_2 := map[string]interface{}{
 		"random_suffix":          context_1["random_suffix"],
 		"provisioned_throughput": 20,
-		"disk_size":              2048,
 		"lifecycle_bool":         true,
-		"zone":                   "us-east4-c"
 	}
 	context_3 := map[string]interface{}{
 		"random_suffix":          context_1["random_suffix"],
 		"provisioned_throughput": 20,
-		"disk_size":              2048,
-		"lifecycle_bool":         true,
-		"zone":                   "us-east4-c"
+		"lifecycle_bool":         false,
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -1035,12 +1026,12 @@ resource "google_compute_instance_group_manager" "manager" {
 func testAccComputeDisk_pdHyperDiskProvisionedIopsLifeCycle(context map[string]interface{}) string {
 	return Nprintf(`
 	resource "google_compute_disk" "foobar" {
-		name  = "tf-test-hyperdisk-%{random_suffix}"
-		type = "hyperdisk-extreme"
-		provisioned_iops = %{provisioned_iops}
-		size = %{disk_size}
+		name                    = "tf-test-hyperdisk-%{random_suffix}"
+		type                    = "hyperdisk-extreme"
+		provisioned_iops        = %{provisioned_iops}
+		size                    = 64
 		lifecycle {
-		  prevent_destroy = %{lifecycle_bool}
+		  prevent_destroy       = %{lifecycle_bool}
 		}
 	  }
 `, context)
@@ -1049,14 +1040,13 @@ func testAccComputeDisk_pdHyperDiskProvisionedIopsLifeCycle(context map[string]i
 func testAccComputeDisk_pdHyperDiskProvisionedThroughputLifeCycle(context map[string]interface{}) string {
 	return Nprintf(`
 	resource "google_compute_disk" "foobar" {
-		name  = "tf-test-hyperdisk-%{random_suffix}"
-		type = "hyperdisk-throughput"
-		# Not currenlty in all regions
-		zone  = "%{zone}"
+		name                   = "tf-test-hyperdisk-%{random_suffix}"
+		type                   = "hyperdisk-throughput"
+		zone                   = "us-east4-c""
 		provisioned_throughput = %{provisioned_throughput}
-		size = %{disk_size}
+		size                   = 2048
 		lifecycle {
-		  prevent_destroy = %{lifecycle_bool}
+		  prevent_destroy      = %{lifecycle_bool}
 		}
 	  }
 `, context)
