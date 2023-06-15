@@ -1042,7 +1042,7 @@ func testAccComputeDisk_pdHyperDiskProvisionedThroughputLifeCycle(context map[st
 	resource "google_compute_disk" "foobar" {
 		name                   = "tf-test-hyperdisk-%{random_suffix}"
 		type                   = "hyperdisk-throughput"
-		zone                   = "us-east4-c""
+		zone                   = "us-east4-c"
 		provisioned_throughput = %{provisioned_throughput}
 		size                   = 2048
 		lifecycle {
@@ -1051,7 +1051,6 @@ func testAccComputeDisk_pdHyperDiskProvisionedThroughputLifeCycle(context map[st
 	  }
 `, context)
 }
-
 
 
 func testAccComputeDisk_pdExtremeImplicitProvisionedIops(diskName string) string {
