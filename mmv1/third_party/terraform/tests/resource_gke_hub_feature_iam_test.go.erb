@@ -11,6 +11,8 @@ import (
 )
 
 func TestAccGKEHub2FeatureIamBindingGenerated(t *testing.T) {
+	// VCR fails to handle batched project services
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
