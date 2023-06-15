@@ -54,3 +54,5 @@ Quotas that will need to be adjusted to support all tests:
 - CPUS quota in `us-central1`
 - AlloyDB cluster quota in `us-central1`
 - Cloud Workstation cluster quota in `us-central1`
+- VMWare Engine nodes per region in `southamerica-west1`
+- VMWare Engine nodes across regions

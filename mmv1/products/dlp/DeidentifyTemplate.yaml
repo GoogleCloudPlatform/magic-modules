@@ -25,6 +25,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/dlp/docs/concepts-templates'
   api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates'
 id_format: '{{parent}}/deidentifyTemplates/{{name}}'
+# Skip sweeper due to non-standard URL
+skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_deidentify_template_basic'
@@ -163,6 +165,20 @@ properties:
                             name: 'version'
                             description: |
                               Version name for this InfoType.
+                          - !ruby/object:Api::Type::NestedObject
+                            name: 'sensitivityScore'
+                            description: |
+                              Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                            properties:
+                              - !ruby/object:Api::Type::Enum
+                                name: 'score'
+                                required: true
+                                description: |
+                                  The sensitivity score applied to the resource.
+                                values:
+                                  - :SENSITIVITY_LOW
+                                  - :SENSITIVITY_MODERATE
+                                  - :SENSITIVITY_HIGH
                 - !ruby/object:Api::Type::NestedObject
                   name: 'allInfoTypes'
                   description:
@@ -216,6 +232,20 @@ properties:
                         name: 'version'
                         description: |
                           Version name for this InfoType.
+                      - !ruby/object:Api::Type::NestedObject
+                        name: 'sensitivityScore'
+                        description: |
+                          Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                        properties:
+                          - !ruby/object:Api::Type::Enum
+                            name: 'score'
+                            required: true
+                            description: |
+                              The sensitivity score applied to the resource.
+                            values:
+                              - :SENSITIVITY_LOW
+                              - :SENSITIVITY_MODERATE
+                              - :SENSITIVITY_HIGH
                 - !ruby/object:Api::Type::NestedObject
                   name: 'primitiveTransformation'
                   required: true
@@ -432,6 +462,20 @@ properties:
                               name: 'version'
                               description: |
                                 Optional version name for this InfoType.
+                            - !ruby/object:Api::Type::NestedObject
+                              name: 'sensitivityScore'
+                              description: |
+                                Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                              properties:
+                                - !ruby/object:Api::Type::Enum
+                                  name: 'score'
+                                  required: true
+                                  description: |
+                                    The sensitivity score applied to the resource.
+                                  values:
+                                    - :SENSITIVITY_LOW
+                                    - :SENSITIVITY_MODERATE
+                                    - :SENSITIVITY_HIGH
                         - !ruby/object:Api::Type::NestedObject
                           name: 'context'
                           description: |
@@ -546,6 +590,20 @@ properties:
                               name: 'version'
                               description: |
                                 Optional version name for this InfoType.
+                            - !ruby/object:Api::Type::NestedObject
+                              name: 'sensitivityScore'
+                              description: |
+                                Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                              properties:
+                                - !ruby/object:Api::Type::Enum
+                                  name: 'score'
+                                  required: true
+                                  description: |
+                                    The sensitivity score applied to the resource.
+                                  values:
+                                    - :SENSITIVITY_LOW
+                                    - :SENSITIVITY_MODERATE
+                                    - :SENSITIVITY_HIGH
                         - !ruby/object:Api::Type::Enum
                           name: 'commonAlphabet'
                           description: |
@@ -1515,6 +1573,20 @@ properties:
                               name: 'version'
                               description: |
                                 Optional version name for this InfoType.
+                            - !ruby/object:Api::Type::NestedObject
+                              name: 'sensitivityScore'
+                              description: |
+                                Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                              properties:
+                                - !ruby/object:Api::Type::Enum
+                                  name: 'score'
+                                  required: true
+                                  description: |
+                                    The sensitivity score applied to the resource.
+                                  values:
+                                    - :SENSITIVITY_LOW
+                                    - :SENSITIVITY_MODERATE
+                                    - :SENSITIVITY_HIGH
                         - !ruby/object:Api::Type::Enum
                           name: 'commonAlphabet'
                           description: |
@@ -2208,6 +2280,20 @@ properties:
                               name: 'version'
                               description: |
                                 Optional version name for this InfoType.
+                            - !ruby/object:Api::Type::NestedObject
+                              name: 'sensitivityScore'
+                              description: |
+                                Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                              properties:
+                                - !ruby/object:Api::Type::Enum
+                                  name: 'score'
+                                  required: true
+                                  description: |
+                                    The sensitivity score applied to the resource.
+                                  values:
+                                    - :SENSITIVITY_LOW
+                                    - :SENSITIVITY_MODERATE
+                                    - :SENSITIVITY_HIGH
                         - !ruby/object:Api::Type::NestedObject
                           name: 'context'
                           description: |
@@ -2273,6 +2359,20 @@ properties:
                                   name: version
                                   description: |
                                     Version name for this InfoType.
+                                - !ruby/object:Api::Type::NestedObject
+                                  name: 'sensitivityScore'
+                                  description: |
+                                    Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                                  properties:
+                                    - !ruby/object:Api::Type::Enum
+                                      name: 'score'
+                                      required: true
+                                      description: |
+                                        The sensitivity score applied to the resource.
+                                      values:
+                                        - :SENSITIVITY_LOW
+                                        - :SENSITIVITY_MODERATE
+                                        - :SENSITIVITY_HIGH
                           - !ruby/object:Api::Type::NestedObject
                             name: primitiveTransformation
                             required: true
@@ -2550,6 +2650,20 @@ properties:
                                         name: version
                                         description: |
                                           Optional version name for this InfoType.
+                                      - !ruby/object:Api::Type::NestedObject
+                                        name: 'sensitivityScore'
+                                        description: |
+                                          Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                                        properties:
+                                          - !ruby/object:Api::Type::Enum
+                                            name: 'score'
+                                            required: true
+                                            description: |
+                                              The sensitivity score applied to the resource.
+                                            values:
+                                              - :SENSITIVITY_LOW
+                                              - :SENSITIVITY_MODERATE
+                                              - :SENSITIVITY_HIGH
                                   - !ruby/object:Api::Type::Enum
                                     name: commonAlphabet
                                     description: |
@@ -3145,6 +3259,20 @@ properties:
                                         name: version
                                         description: |
                                           Optional version name for this InfoType.
+                                      - !ruby/object:Api::Type::NestedObject
+                                        name: 'sensitivityScore'
+                                        description: |
+                                          Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                                        properties:
+                                          - !ruby/object:Api::Type::Enum
+                                            name: 'score'
+                                            required: true
+                                            description: |
+                                              The sensitivity score applied to the resource.
+                                            values:
+                                              - :SENSITIVITY_LOW
+                                              - :SENSITIVITY_MODERATE
+                                              - :SENSITIVITY_HIGH
                                   - !ruby/object:Api::Type::NestedObject
                                     name: context
                                     description: |
