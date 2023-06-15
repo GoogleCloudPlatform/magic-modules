@@ -22,15 +22,16 @@ update_verb: :PATCH
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.privateClouds'
 description: / Represents a private cloud resource. Private clouds are zonal resources.
+error_abort_predicates: ['transport_tpg.Is429QuotaError']
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: "name"
     base_url: "{{op_id}}"
     wait_ms: 5000
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 180
-      update_minutes: 160
-      delete_minutes: 120
+      insert_minutes: 210
+      update_minutes: 190
+      delete_minutes: 150
   result: !ruby/object:Api::OpAsync::Result
     path: "response"
   status: !ruby/object:Api::OpAsync::Status
