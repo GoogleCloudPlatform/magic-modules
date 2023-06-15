@@ -1,28 +1,47 @@
-resource "google_compute_region_security_policy" "default" {
+# First activate advanced network DDoS protection for the desired region
+resource "google_compute_region_security_policy" "policyddosprotection" {
   provider    = google-beta
-  
+
+  region      = "asia-southeast1"
+  name        = "policyddosprotection"
+  description = "policy for activating network DDoS protection for the desired region"
+  type        = "CLOUD_ARMOR_NETWORK"
+  ddos_protection_config {
+    ddos_protection = "ADVANCED_PREVIEW"
+  }
+}
+
+resource "google_compute_network_edge_security_service" "edge_sec_service" {
+  provider        = google-beta
+
+  region          = "asia-southeast1"
+  name            = "edgesecservice"
+  description     = "linking policy to edge security service"
+  security_policy = google_compute_region_security_policy.policyddosprotection.self_link
+}
+
+# Add the desired policy and custom rule.
+resource "google_compute_region_security_policy" "policynetworkmatch" {
+  provider    = google-beta
+
   region      = "asia-southeast1"
   name        = "<%= ctx[:vars]['sec_policy_name'] %>"
   description = "region security policy for network match"
   type        = "CLOUD_ARMOR_NETWORK"
+  depends_on  = [google_compute_network_edge_security_service.edge_sec_service]
 }
 
 resource "google_compute_region_security_policy_rule" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
-  
+  provider        = google-beta
+
   region          = "asia-southeast1"
-  security_policy = google_compute_region_security_policy.default.name
-  description     = "new rule"
+  security_policy = google_compute_region_security_policy.policynetworkmatch.name
+  description     = "custom rule for network match"
   priority        = 100
-  match {
-    versioned_expr = "SRC_IPS_V1"
-    config {
-      src_ip_ranges = ["10.10.0.0/16"]
-    }
-  }
   network_match {
-    src_ip_ranges = ["1.1.1.1/32"]
+    src_ip_ranges = ["10.10.0.0/16"]
   }
   action          = "allow"
   preview         = true
+  rule_number     = "100"
 }

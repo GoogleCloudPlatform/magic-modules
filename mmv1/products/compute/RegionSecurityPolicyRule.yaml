@@ -65,7 +65,7 @@ examples:
       sec_policy_name: 'policyruletest'
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_security_policy_rule_with_network_match'
-    primary_resource_id: 'policy_rule'
+    primary_resource_id: 'policy_rule_network_match'
     min_version: 'beta'
     vars:
       sec_policy_name: 'policyfornetworkmatch'
@@ -75,7 +75,6 @@ parameters:
     name: 'region'
     description: | 
       The Region in which the created Region Security Policy rule should reside.
-      If it is not provided, the provider region is used.'A region where the prefix will reside.'
     url_param_only: true
     required: true
   - !ruby/object:Api::Type::String
@@ -103,7 +102,8 @@ properties:
     description: |
       A match condition that incoming traffic is evaluated against.
       If it evaluates to true, the corresponding 'action' is enforced.
-    required: true
+    # TODO(felipegc): this is not required because networkMatch 
+    required: false
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'versionedExpr'

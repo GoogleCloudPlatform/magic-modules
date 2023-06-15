@@ -70,28 +70,196 @@ resource "google_compute_region_security_policy_rule" "policy_rule" {
 
 func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePostUpdateExample(context map[string]interface{}) string {
 	return Nprintf(`
-  resource "google_compute_region_security_policy" "default" {
-    region      = "asia-southeast1"
-    name        = "tf-test%{random_suffix}"
-    description = "basic region security policy"
-    type        = "CLOUD_ARMOR"
-  }
-  
-  resource "google_compute_region_security_policy_rule" "policy_rule" {
-    security_policy = google_compute_region_security_policy.default.name
-    region          = "asia-southeast1"
-    description     = "basic rule post update"
-    action          = "deny(403)"
-    priority        = 100
-    preview         = true
-    rule_number     = "154"
-    match {
-      versioned_expr = "SRC_IPS_V1"
-      config {
-        src_ip_ranges = ["172.16.0.0/12"]
-      }
+resource "google_compute_region_security_policy" "default" {
+  region      = "asia-southeast1"
+  name        = "tf-test%{random_suffix}"
+  description = "basic region security policy"
+  type        = "CLOUD_ARMOR"
+}
+
+resource "google_compute_region_security_policy_rule" "policy_rule" {
+  security_policy = google_compute_region_security_policy.default.name
+  region          = "asia-southeast1"
+  description     = "basic rule post update"
+  action          = "deny(403)"
+  priority        = 100
+  preview         = true
+  rule_number     = "154"
+  match {
+    versioned_expr = "SRC_IPS_V1"
+    config {
+      src_ip_ranges = ["172.16.0.0/12"]
     }
   }
+}
 `, context)
 }
+
+func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdateExample(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": RandString(t, 10),
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionSecurityPolicyRuleDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchBasicExample(context),
+			},
+      {
+        ResourceName:      "google_compute_region_security_policy_rule.policy_rule_network_match",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdateExample(context),
+      },
+      {
+        ResourceName:      "google_compute_region_security_policy_rule.policy_rule_network_match",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      # TODO(felipegc): consider adding a step where the network match has its properties erased. Currently the beta does not allow that.
+		},
+	})
+}
+
+func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchBasicExample(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_compute_region_security_policy" "policyddosprotection" {
+  region      = "asia-southeast1"
+  name        = "tf-test-policyddos%{random_suffix}"
+  description = "region security policy for network match"
+  type        = "CLOUD_ARMOR_NETWORK"
+  ddos_protection_config {
+    ddos_protection = "ADVANCED_PREVIEW"
+  }
+}
+  
+resource "google_compute_network_edge_security_service" "edge_sec_service" {
+  region          = "asia-southeast1"
+  name            = "tf-test-edgesec%{random_suffix}"
+  security_policy = google_compute_region_security_policy.policyddosprotection.self_link
+}
+  
+resource "google_compute_region_security_policy" "policynetworkmatch" {
+  region      = "asia-southeast1"
+  project     = "ciandt-cloudarmor-gcam"
+  name        = "tf-test-polnetmatch%{random_suffix}"
+  description = "region security policy for network match"
+  type        = "CLOUD_ARMOR_NETWORK"
+  depends_on  = [google_compute_network_edge_security_service.edge_sec_service]
+}
+  
+resource "google_compute_region_security_policy_rule" "policy_rule_network_match" {
+  region          = "asia-southeast1"
+  project         = "ciandt-cloudarmor-gcam"
+  security_policy = google_compute_region_security_policy.policynetworkmatch.name
+  priority = 100
+  network_match {
+    src_ip_ranges    = ["10.10.0.0/16"]
+    src_asns         = [15169]
+    src_ports        = [443]
+    src_region_codes = ["AU"]
+    ip_protocols     = ["UDP"]
+    dest_ip_ranges   = ["10.0.0.0/8"]
+    dest_ports       = [80]
+    # TODO(felipegc): think about including this field in this test
+    # SIG1_AT_0;0x8700,SIG2_AT_8;0x12345678
+    # user_defined_fields {
+    #   name = "SIG1_AT_0"
+    #   values = ["0x8700"]
+    # }
+  }
+  action = "allow"
+  preview = true
+  rule_number = "100"
+}
+`, context)
+}
+
+func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdateExample(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_compute_region_security_policy" "policyddosprotection" {
+  region      = "asia-southeast1"
+  name        = "tf-test-policyddos%{random_suffix}"
+  description = "region security policy for network match"
+  type        = "CLOUD_ARMOR_NETWORK"
+  ddos_protection_config {
+    ddos_protection = "ADVANCED_PREVIEW"
+  }
+}
+  
+resource "google_compute_network_edge_security_service" "edge_sec_service" {
+  region          = "asia-southeast1"
+  name            = "tf-test-edgesec%{random_suffix}"
+  security_policy = google_compute_region_security_policy.policyddosprotection.self_link
+}
+  
+resource "google_compute_region_security_policy" "policynetworkmatch" {
+  region      = "asia-southeast1"
+  project     = "ciandt-cloudarmor-gcam"
+  name        = "tf-test-polnetmatch%{random_suffix}"
+  description = "region security policy for network match"
+  type        = "CLOUD_ARMOR_NETWORK"
+  depends_on  = [google_compute_network_edge_security_service.edge_sec_service]
+}
+  
+resource "google_compute_region_security_policy_rule" "policy_rule_network_match" {
+  region          = "asia-southeast1"
+  project         = "ciandt-cloudarmor-gcam"
+  security_policy = google_compute_region_security_policy.policynetworkmatch.name
+  priority = 100
+  network_match {
+    src_ip_ranges    = ["10.0.0.0/8"]
+    src_asns         = [333]
+    src_ports        = [80]
+    src_region_codes = ["BR"]
+    ip_protocols     = ["TCP"]
+    dest_ip_ranges   = ["10.10.0.0/16"]
+    dest_ports       = [443]
+  }
+  action = "allow"
+  preview = true
+  rule_number = "100"
+}
+`, context)
+}
+
+# TODO(felipegc): finish implementing this function once the policy preconfigured waf update starts working properly.
+# func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePreconfiguredWafUpdateExample(t *testing.T) {
+# 	t.Parallel()
+
+# 	context := map[string]interface{}{
+# 		"random_suffix": RandString(t, 10),
+# 	}
+
+# 	VcrTest(t, resource.TestCase{
+# 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+# 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+# 		CheckDestroy:             testAccCheckComputeRegionSecurityPolicyRuleDestroyProducer(t),
+# 		Steps: []resource.TestStep{
+# 			{
+# 				Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePreconfiguredWafBasicExample(context),
+# 			},
+#       {
+#         ResourceName:      "google_compute_region_security_policy_rule.policy_rule_preconfigured_waf",
+#         ImportState:       true,
+#         ImportStateVerify: true,
+#       },
+#       {
+#         Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyPreconfiguredWafUpdateExample(context),
+#       },
+#       {
+#         ResourceName:      "google_compute_region_security_policy_rule.policy_rule_network_match",
+#         ImportState:       true,
+#         ImportStateVerify: true,
+#       },
+# 		},
+# 	})
+# }
 <% end -%>
