@@ -4,6 +4,7 @@ summary: "Handwritten resources and datasources have handwritten documentation t
 weight: 24
 aliases:
   - /docs/how-to/update-handwritten-documentation
+  - /how-to/update-handwritten-documentation
 ---
 
 # Update handwritten provider documentation (for handwritten resource or datasource)

@@ -4,6 +4,7 @@ summary: "Generated resources have generated documentation. This page describes 
 weight: 13
 aliases:
   - /docs/how-to/mmv1-resource-documentation
+  - /how-to/mmv1-resource-documentation
 ---
 
 # MMv1 resource documentation

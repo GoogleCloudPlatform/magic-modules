@@ -4,6 +4,7 @@ summary: "Datasources are like terraform resources except they don't *create* an
 weight: 22
 aliases:
   - /docs/how-to/add-handwritten-datasource
+  - /how-to/add-handwritten-datasource
 ---
 
 # Add a handwritten datasource

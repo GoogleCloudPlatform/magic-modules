@@ -5,6 +5,7 @@ handwritten tests must be added."
 weight: 21
 aliases:
   - /docs/how-to/add-handwritten-test
+  - /how-to/add-handwritten-test
 ---
 
 
