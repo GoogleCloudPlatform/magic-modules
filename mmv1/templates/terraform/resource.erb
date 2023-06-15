@@ -267,6 +267,9 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%    if object.error_retry_predicates -%>
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
 <%    end -%>
+<%    if object.error_abort_predicates -%>
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_abort_predicates.join(',') -%>},
+<%    end -%>
     })
     if err != nil {
 <%    if object.custom_code.post_create_failure && object.async.nil? # Only add if not handled by async error handling -%>
@@ -442,6 +445,9 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
 <%      if object.error_retry_predicates -%>
             ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
 <%      end -%>
+<%      if object.error_abort_predicates -%>
+            ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_abort_predicates.join(',') -%>},
+<%      end -%>
         })
         if err != nil {
             return res, err
@@ -515,6 +521,9 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         UserAgent: userAgent,
 <%  if object.error_retry_predicates -%>
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+<%  end -%>
+<%  if object.error_abort_predicates -%>
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_abort_predicates.join(',') -%>},
 <%  end -%>
     })
     if err != nil {
@@ -721,6 +730,9 @@ if len(updateMask) > 0 {
 <%      if object.error_retry_predicates -%>
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
 <%      end -%>
+<%      if object.error_abort_predicates -%>
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_abort_predicates.join(',') -%>},
+<%      end -%>
     })
 
     if err != nil {
@@ -787,6 +799,9 @@ if len(updateMask) > 0 {
             UserAgent: userAgent,
 <%        if object.error_retry_predicates -%>
             ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+<%        end -%>
+<%        if object.error_abort_predicates -%>
+            ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_abort_predicates.join(',') -%>},
 <%        end -%>
         })
         if err != nil {
@@ -875,6 +890,9 @@ if len(updateMask) > 0 {
             Timeout: d.Timeout(schema.TimeoutUpdate),
 <%        if object.error_retry_predicates -%>
             ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+<%        end -%>
+<%        if object.error_abort_predicates -%>
+            ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_abort_predicates.join(',') -%>},
 <%        end -%>
         })
         if err != nil {
@@ -1000,6 +1018,9 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
         Timeout: d.Timeout(schema.TimeoutDelete),
 <%      if object.error_retry_predicates -%>
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+<%      end -%>
+<%      if object.error_abort_predicates -%>
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_abort_predicates.join(',') -%>},
 <%      end -%>
     })
     if err != nil {

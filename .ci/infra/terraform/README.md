@@ -1,5 +1,5 @@
 
-This configuration is expected to be run locally by an administrator. It specifies the configuration needed for a test environment where the full set of acceptance tests can be run.
+There is no automation around this configuration, and it is expected to be run locally by an administrator. It specifies the configuration needed for a test environment where the full set of acceptance tests can be run.
 
 Googlers can find record of internal requests at b/268353203.
 
@@ -54,3 +54,5 @@ Quotas that will need to be adjusted to support all tests:
 - CPUS quota in `us-central1`
 - AlloyDB cluster quota in `us-central1`
 - Cloud Workstation cluster quota in `us-central1`
+- VMWare Engine nodes per region in `southamerica-west1`
+- VMWare Engine nodes across regions
