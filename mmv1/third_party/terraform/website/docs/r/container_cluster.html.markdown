@@ -868,10 +868,11 @@ Structure is [documented below](#nested_kubelet_config).
 
 ```
 kubelet_config {
-  cpu_manager_policy   = "static"
-  cpu_cfs_quota        = true
-  cpu_cfs_quota_period = "100us"
-  pod_pids_limit       = 1024
+  cpu_manager_policy                     = "static"
+  cpu_cfs_quota                          = true
+  cpu_cfs_quota_period                   = "100us"
+  insecure_kubelet_readonly_port_enabled = false
+  pod_pids_limit                         = 1024
 }
 ```
 

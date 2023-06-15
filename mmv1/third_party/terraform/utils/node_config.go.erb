@@ -497,6 +497,11 @@ func schemaNodeConfig() *schema.Schema {
 								Optional: true,
 								Description: `Set the CPU CFS quota period value 'cpu.cfs_period_us'.`,
 							},
+							"insecure_kubelet_readonly_port_enabled" {
+								Type:     schema.TypeBool,
+                                Optional: true,
+                                Description: `Disable the Kubelet read only API port. Default enabled.`,
+							},
 							"pod_pids_limit": {
 								Type:        schema.TypeInt,
 								Optional:    true,
