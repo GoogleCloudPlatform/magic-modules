@@ -12,13 +12,13 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: GKEHub
+name: GKEHub2
 display_name: GKEHub
 legacy_name: gke_hub
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://gkehub.googleapis.com/v1beta1/
+    base_url: https://gkehub.googleapis.com/v1beta/
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://gkehub.googleapis.com/v1/
