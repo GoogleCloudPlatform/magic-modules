@@ -56,7 +56,7 @@ examples:
       bucket_name: 'cloudfunctions-function-example-bucket'
       zip_path: 'path/to/index.zip'
     test_vars_overrides:
-      zip_path: 'createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
+      zip_path: 'acctest.CreateZIPArchiveForCloudFunctionSource(t, acctest.TestHTTPTriggerPath)'
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_network_endpoint_group_cloudrun'
     primary_resource_id: 'cloudrun_neg'
