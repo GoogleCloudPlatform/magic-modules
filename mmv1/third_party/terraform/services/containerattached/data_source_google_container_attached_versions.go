@@ -1,4 +1,4 @@
-package google
+package containerattached
 
 import (
 	"fmt"
@@ -9,9 +9,9 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func DataSourceGoogleContainerAttachedInstallManifest() *schema.Resource {
+func DataSourceGoogleContainerAttachedVersions() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceGoogleContainerAttachedInstallManifestRead,
+		Read: dataSourceGoogleContainerAttachedVersionsRead,
 		Schema: map[string]*schema.Schema{
 			"project": {
 				Type:     schema.TypeString,
@@ -21,31 +21,21 @@ func DataSourceGoogleContainerAttachedInstallManifest() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"cluster_id": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"platform_version": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"manifest": {
-				Type:     schema.TypeString,
+			"valid_versions": {
+				Type:     schema.TypeList,
 				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
 }
 
-func dataSourceGoogleContainerAttachedInstallManifestRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceGoogleContainerAttachedVersionsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
-
-	clusterId := d.Get("cluster_id").(string)
-	platformVersion := d.Get("platform_version").(string)
 
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
@@ -60,15 +50,7 @@ func dataSourceGoogleContainerAttachedInstallManifestRead(d *schema.ResourceData
 		return fmt.Errorf("Cannot determine location: set location in this data source or at provider-level")
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ContainerAttachedBasePath}}projects/{{project}}/locations/{{location}}:generateAttachedClusterInstallManifest")
-	if err != nil {
-		return err
-	}
-	params := map[string]string{
-		"attached_cluster_id": clusterId,
-		"platform_version":    platformVersion,
-	}
-	url, err = transport_tpg.AddQueryParams(url, params)
+	url, err := tpgresource.ReplaceVars(d, config, "{{ContainerAttachedBasePath}}projects/{{project}}/locations/{{location}}/attachedServerConfig")
 	if err != nil {
 		return err
 	}
@@ -82,9 +64,13 @@ func dataSourceGoogleContainerAttachedInstallManifestRead(d *schema.ResourceData
 	if err != nil {
 		return err
 	}
-
-	if err := d.Set("manifest", res["manifest"]); err != nil {
-		return fmt.Errorf("Error setting manifest: %s", err)
+	var validVersions []string
+	for _, v := range res["validVersions"].([]interface{}) {
+		vm := v.(map[string]interface{})
+		validVersions = append(validVersions, vm["version"].(string))
+	}
+	if err := d.Set("valid_versions", validVersions); err != nil {
+		return err
 	}
 
 	d.SetId(time.Now().UTC().String())
