@@ -45,7 +45,7 @@ var (
 		"boot_disk.0.initialize_params.0.type",
 		"boot_disk.0.initialize_params.0.image",
 		"boot_disk.0.initialize_params.0.labels",
-        "boot_disk.0.initialize_params.0.resource_manager_tags",
+        	"boot_disk.0.initialize_params.0.resource_manager_tags",
 	}
 
 	schedulingKeys = []string{
@@ -555,7 +555,7 @@ func ResourceComputeInstance() *schema.Resource {
 				},
 			},
 
-	        "params": {
+	        	"params": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Optional:    true,
@@ -1085,7 +1085,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		return nil, fmt.Errorf("Error creating scheduling: %s", err)
 	}
 
-        params, err := expandParams(d)
+	params, err := expandParams(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating params: %s", err)
 	}
