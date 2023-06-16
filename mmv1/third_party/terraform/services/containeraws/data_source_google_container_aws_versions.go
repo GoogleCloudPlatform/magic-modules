@@ -1,4 +1,4 @@
-package google
+package containeraws
 
 import (
 	"fmt"
@@ -9,9 +9,9 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func DataSourceGoogleContainerAzureVersions() *schema.Resource {
+func DataSourceGoogleContainerAwsVersions() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceGoogleContainerAzureVersionsRead,
+		Read: dataSourceGoogleContainerAwsVersionsRead,
 		Schema: map[string]*schema.Schema{
 			"project": {
 				Type:     schema.TypeString,
@@ -35,7 +35,7 @@ func DataSourceGoogleContainerAzureVersions() *schema.Resource {
 	}
 }
 
-func dataSourceGoogleContainerAzureVersionsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceGoogleContainerAwsVersionsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -55,7 +55,7 @@ func dataSourceGoogleContainerAzureVersionsRead(d *schema.ResourceData, meta int
 		return fmt.Errorf("Cannot determine location: set location in this data source or at provider-level")
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ContainerAzureBasePath}}projects/{{project}}/locations/{{location}}/azureServerConfig")
+	url, err := tpgresource.ReplaceVars(d, config, "{{ContainerAwsBasePath}}projects/{{project}}/locations/{{location}}/awsServerConfig")
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func dataSourceGoogleContainerAzureVersionsRead(d *schema.ResourceData, meta int
 	if err != nil {
 		return err
 	}
-	if err := d.Set("supported_regions", res["supportedAzureRegions"]); err != nil {
+	if err := d.Set("supported_regions", res["supportedAwsRegions"]); err != nil {
 		return err
 	}
 	var validVersions []string
