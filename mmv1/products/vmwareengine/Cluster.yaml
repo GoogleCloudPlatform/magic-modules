@@ -25,6 +25,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 description: |
   A cluster in a private cloud.
 error_abort_predicates: ['transport_tpg.Is429QuotaError']
+# Skipping the sweeper because PrivateCloud will sweep nested clusters too.
+skip_sweeper: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: "name"

@@ -44,6 +44,8 @@ async: !ruby/object:Api::OpAsync
 import_format:
   ["projects/{{project}}/locations/{{location}}/vmwareEngineNetworks/{{name}}"]
 autogen_async: true
+# Skipping the sweeper because Network sweeper is handwritten.
+skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vmware_engine_network_legacy"

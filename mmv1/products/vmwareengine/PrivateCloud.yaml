@@ -23,6 +23,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.privateClouds'
 description: / Represents a private cloud resource. Private clouds are zonal resources.
 error_abort_predicates: ['transport_tpg.Is429QuotaError']
+# Skipping the sweeper because its handwritten.
+skip_sweeper: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: "name"
