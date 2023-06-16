@@ -1,38 +1,212 @@
 ---
-title: "Add an MMv1 resource"
-summary: "Generated resources are created using the `mmv1` code generator, and are
-configured by editing definition files under the
-[`mmv1/products`](https://github.com/GoogleCloudPlatform/magic-modules/tree/master/mmv1/products)
-path."
+title: "Add a resource"
 weight: 10
 aliases:
   - /docs/how-to/add-mmv1-resource
   - /how-to/add-mmv1-resource
+  - /develop/add-mmv1-resource
+  - /docs/how-to/mmv1-resource-documentation
+  - /how-to/mmv1-resource-documentation
+  - /develop/mmv1-resource-documentation
+  - /docs/how-to/add-mmv1-iam
+  - /how-to/add-mmv1-iam
+  - /develop/add-mmv1-iam
   - /docs/how-to
   - /how-to
 ---
 
-# Add an MMv1 resource
+# Add a resource to an existing product
 
-Generated resources are created using the `mmv1` code generator, and are
-configured by editing definition files under the
-[`mmv1/products`](https://github.com/GoogleCloudPlatform/magic-modules/tree/master/mmv1/products)
-path. Go to the service for your resource like
-[`compute`](https://github.com/GoogleCloudPlatform/magic-modules/tree/master/mmv1/products/compute)
-and open the `ResourceName.yaml` and `product.yaml` files.
+This page contains information about adding new resources to the `google` or `google-beta` Terraform providers using MMv1 and/or handwritten code.
 
-For example, for `google_spanner_database`:
+For more information about types of resources and the generation process overall, see [How Magic Modules works]({{< ref "/get-started/how-magic-modules-works.md" >}}).
 
-*   [`Database.yaml`](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/spanner/Database.yaml)
+## Before you begin
 
-*   [`product.yaml`](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/spanner/product.yaml)
+1. Complete the [Generate the providers]({{< ref "/get-started/generate-providers" >}}) quickstart to set up your environment and your Google Cloud project.
+2. Ensure that your `magic-modules`, `terraform-provider-google`, and `terraform-provider-google-beta` repositories are up to date.
+   ```
+   cd ~/magic-modules
+   git checkout main && git clean -f . && git checkout -- . && git pull
+   cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+   git checkout main && git clean -f . && git checkout -- . && git pull
+   cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+   git checkout main && git clean -f . && git checkout -- . && git pull
+   ```
 
-In short, `properties` is an array of the resource's fields. `Database.yaml` is named after the resource 
-in PascalCase and contains the fields of the resource based on how it behaves in the API.
-`product.yaml` is lower cased and contains the product-level information that applies to all resources
-within that product.
+## Add the resource
 
-## Field Configuration
+{{< tabs "resource" >}}
+{{< tab "MMv1" >}}
+
+### Create the resource configuration
+
+1. In your cloned `magic-modules` repository, list the folders in `mmv1/products`.
+   ```bash
+   cd ~/magic-modules
+   ls mmv1/products
+   ```
+
+   Output will look like:
+
+   ```
+   accessapproval          firebasehosting
+   accesscontextmanager    firebasestorage
+   activedirectory         firestore
+   alloydb                 gameservices
+   apigateway              gkebackup
+   apigee                  gkehub
+   appengine               gkehub2
+   ...
+   ```
+2. Navigate to the folder your resource belongs to. For example, a new Apigee resource would be added to the `apigee` folder.
+
+   ```bash
+   cd PRODUCT
+   ```
+
+   Replace `PRODUCT` with the name of the folder.
+3. Create a new file for your new resource.
+
+   ```bash
+   touch RESOURCE_NAME.yaml
+   ```
+
+   Replace RESOURCE_NAME with the name of the API resource you are adding support for. For example, the [NatAddress](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses) resource would be represented by `NatAddress.yaml`.
+4. Open RESOURCE_NAME.yaml in an editor of your choice. Copy in the following template:
+   ```yaml
+   # Copyright 2023 Google Inc.
+   # Licensed under the Apache License, Version 2.0 (the "License");
+   # you may not use this file except in compliance with the License.
+   # You may obtain a copy of the License at
+   #
+   #     http://www.apache.org/licenses/LICENSE-2.0
+   #
+   # Unless required by applicable law or agreed to in writing, software
+   # distributed under the License is distributed on an "AS IS" BASIS,
+   # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   # See the License for the specific language governing permissions and
+   # limitations under the License.
+
+   --- !ruby/object:Api::Resource
+   # API resource name
+   name: 'ResourceName'
+   # Resource description for the provider documentation.
+   description: |
+     RESOURCE_DESCRIPTION
+   references: !ruby/object:Api::Resource::ReferenceLinks
+     guides:
+      # Link to quickstart in the API's Guides section. For example:
+      # 'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
+       'QUICKSTART_TITLE': 'QUICKSTART_URL'
+     # Link to the REST API reference for the resource. For example,
+     # https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups
+     api: 'API_REFERENCE_URL'
+   # Uncomment for beta resources
+   # min_version: beta
+
+   # Allows inserting styled markdown into the header of the resource's page
+   # in the provider documentation.
+   # docs:
+   #   warning: WARNING_MARKDOWN
+   #   note: NOTE_MARKDOWN
+
+   # URL for the resource within the API domain. This should match the
+   # resource's create URL (excluding any query parameters).
+   # Terraform field names enclosed in double curly braces will be replaced
+   # with the field values from the resource.
+   base_url: 'projects/{{project}}/locations/{{location}}/resourcenames'
+   # URL for a created resource within the API domain. This should match
+   # the URL for getting a single resource.
+   # Terraform field names enclosed in double curly braces will be replaced
+   # with the field values from the resource.
+   self_link: 'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_id}}'
+   # URL for importing a resource that already exists in GCP. In general
+   # this will be a list containing self_link. If the resource cannot be read
+   # from GCP, comment this out and set exclude_import: true instead.
+   import_format: ['projects/{{project}}/locations/{{location}}/resourcenames/{{resource_id}}']
+   # exclude_import: true
+
+   # Uncomment for resources that are primarily immutable (even if some
+   # fields can be updated).
+   # immutable: true
+
+   # Uncomment to override one or more timeouts.
+   # timeouts: !ruby/object:Api::Timeouts
+   #   insert_minutes: 20 
+   #   update_minutes: 20 
+   #   delete_minutes: 20 
+
+   # URL for creating a new resource, including query parameters.
+   # Terraform field names enclosed in double curly braces will be replaced
+   # with the field values from the resource.
+   create_url: 'projects/{{project}}/locations/{{location}}/resourcenames?resourceId={{resource_id}}'
+   # Uncomment to override the HTTP verb used to create a new resource.
+   # Allowed values: :POST, :PUT, :PATCH. Default: :POST
+   # create_verb: :POST
+
+   # Uncomment to override the update URL for the resource. (Otherwise, the
+   # self_link URL will be used.)
+   # update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_id}}'
+   # The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
+   update_verb: :PATCH
+   # True if the resource should use an update mask for updates.
+   update_mask: true
+
+   # Uncomment to override the delete URL for the resource. (Otherwise, the
+   # self_link URL will be used.)
+   # delete_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_id}}'
+   # Uncomment to override the HTTP verb used to delete a resource.
+   # Allowed values: :POST, :PUT, :PATCH, :DELETE. Default: :DELETE
+   # delete_verb: :DELETE
+
+   # Enable generation of code to handle API calls that return operations.
+   autogen_async: true
+   # Set parameters for handling operations returned by the API.
+   async: !ruby/object:Api::OpAsync
+     # Uncomment to override which API calls return operations.
+     # Default: ['create', 'update', 'delete']
+     # actions: ['create', 'update', 'delete']
+     operation: !ruby/object:Api::OpAsync::Operation
+       base_url: '{{op_id}}'
+     # Uncomment if the completed operation's returned JSON will contain
+     # a full resource in the "response" field
+     # result: !ruby/object:Api::OpAsync::Result
+     #   resource_inside_response: true
+
+   # All resources (of all kinds) that share a mutex value will block rather
+   # than executing concurrent API requests.
+   # Terraform field names enclosed in double curly braces will be replaced
+   # with the field values from the resource.
+   # mutex: RESOURCE_NAME/{{resource_id}}
+
+   # IAM_GOES_HERE
+
+   # EXAMPLES_GO_HERE
+
+   parameters:
+     - !ruby/object:Api::Type::String
+       name: 'location'
+       required: true
+       immutable: true
+       url_param_only: true
+       description: |
+         LOCATION_DESCRIPTION
+     - !ruby/object:Api::Type::String
+       name: 'resource_id'
+       required: true
+       immutable: true
+       url_param_only: true
+       description: |
+         RESOURCE_ID_DESCRIPTION
+
+   properties:
+     # Fields go here
+   ```
+
+   Modify the template as needed to match the API resource's documented behavior. These are the most commonly-used fields. For a comprehensive reference, see [ResourceName.yaml reference]({{<ref "/reference/iam-policy-reference.md" >}}).
+
+### Add fields
 
 ### `ResourceName.yaml`
 
@@ -354,32 +528,6 @@ versions:
     base_url: https://runtimeconfig.googleapis.com/v1beta1/
 ```
 
-Next, annotate the resource (`Config.yaml`) i.e.:
-
-```diff
----!ruby/object:Api::Resource
-name: 'Config'
-base_url: projects/{{project}}/configs
-self_link: projects/{{project}}/configs/{{name}}
-+min_version: beta
-description: |
-  A RuntimeConfig resource is the primary resource in the Cloud RuntimeConfig service.
-  A RuntimeConfig resource consists of metadata and a hierarchy of variables.
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  parent_resource_attribute: 'config'
-  method_name_separator: ':'
-  exclude: false
-properties:
-...
-```
-
-You'll notice above that the `iam_policy` is not annotated with a version tag.
-Due to the resource having a `min_version` tagged already, that's passed through
-to the `iam_policy` (although the same is *not* true for `examples` entries used
-to [create tests](#tests-that-use-a-beta-feature)). IAM-level tagging is only
-necessary in the (rare) case that a resource is available at a higher stability
-level than its `getIamPolicy`/`setIamPolicy` methods.
-
 ## Adding beta field(s)
 
 NOTE: If a resource is already tagged as `min_version: beta`, follow the general
@@ -454,3 +602,107 @@ Alternatively, for field promotions, you may use `{{service}}: promoted
 container: promoted `node_locations` field in google_container_cluster` to GA
 ```
 ~~~
+{{< /tab >}}
+{{< tab "Handwritten" >}}
+> **Warning:** Handwritten resources are much more difficult to develop and maintain. Please try to make an MMv1 resource first. If you believe that is not possible, get explicit confirmation from the core team that it is okay to add a new handwritten resource before proceeding.
+
+1. In your cloned `magic-modules` repository, list the folders in `mmv1/products`.
+   ```bash
+   cd ~/magic-modules
+   ls mmv1/third_party/terraform/services
+   ```
+
+   Output will look like:
+
+   ```
+   accessapproval   containerattached   networksecurity
+   alloydb          datalossprevention  privateca
+   apigee           dataproc            pubsub
+   appengine        dataprocmetastore   redis
+   ...
+   ```
+2. Navigate to the folder your resource belongs to. For example, a new Apigee resource would be added to the `apigee` folder.
+
+   ```bash
+   cd PRODUCT
+   ```
+
+   Replace `PRODUCT` with the name of the folder.
+
+   > **Tip:** Create a new folder if one does not exist. The name of the folder should match the API subdomain the resource will interact with.
+3. Create a file for the resource code.
+
+   ```bash
+   touch resource_PRODUCT_RESOURCE_NAME.go
+   ```
+
+   Replace `RESOURCE_NAME` with the name of the API resource, split with `_` at any word breaks and lowercased. For example,
+   `resource_alloydb_backup.go`.
+4. Open the file in the editor of your choice and write the code for the
+   resource.
+
+   The `google` and `google-beta` providers use resources based on Terraform Plugin SDK v2. Please consult [Hashicorp's documentation](https://developer.hashicorp.com/terraform/plugin/sdkv2) for guidance on creating new resources.
+
+   Alternately, create an MMv1 resource, [generate the providers]({{< ref "/get-started/generate-providers.md" >}}), and then copy the generated code as a starting point.
+{{< /tab >}}
+{{< /tabs >}}
+
+## Add IAM support
+
+{{< tabs "IAM" >}}
+{{< tab "MMv1" >}}
+
+If the API resource supports IAM policies (indicated with `setIamPolicy` and `getIamPolicy` methods in the API documentation for the resource), add the following top-level block to `ResourceName.yaml`, replacing `IAM_GOES_HERE`.
+
+```yaml
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  # Name of the field on the terraform IAM resources which will reference
+  # the parent resource. Update to match the parent resource's name.
+  parent_resource_attribute: 'resource_name'
+  # Character preceding setIamPolicy in the full URL for the API method.
+  # Usually `:`
+  method_name_separator: ':'
+  # HTTP method for getIamPolicy. Usually :POST.
+  # Allowed values: :GET, :POST. Default: :GET
+  fetch_iam_policy_verb: :POST
+  # Uncomment to override HTTP method for setIamPolicy.
+  # Allowed values: :POST, :PUT. Default: :POST
+  # set_iam_policy_verb: :POST
+
+  # Must match the parent resource's import_format, but with the
+  # parent_resource_attribute value substituted for the final field.
+  import_format: [
+    'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_name}}'
+  ]
+  # Valid IAM role that can be set by generated tests. Default: 'roles/viewer'
+  # allowed_iam_role: 'roles/viewer'
+
+  # If IAM conditions are supported, set this attribute to indicate how the
+  # conditions should be passed to the API. Allowed values: :QUERY_PARAM,
+  # :REQUEST_BODY, :QUERY_PARAM_NESTED. Note: :QUERY_PARAM_NESTED should
+  # only be used if the query param field contains a `.`
+  # iam_conditions_request_type: :REQUEST_BODY
+
+  # Uncomment for beta-only IAM support
+  # min_version: beta
+```
+
+Modify the template as needed to match the API resource's documented behavior. These are the most commonly-used fields. For a comprehensive reference, see [IAM policy YAML reference]({{<ref "/reference/iam-policy-reference.md" >}}).
+{{< /tab >}}
+{{< tab "Handwritten" >}}
+{{< /tab >}}
+{{< /tabs >}}
+
+## Add documentation
+
+{{< tabs "docs" >}}
+{{< tab "MMv1" >}}
+Documentation is autogenerated for MMv1 resources.
+{{< /tab >}}
+{{< tab "Handwritten" >}}
+{{< /tab >}}
+{{< /tabs >}}
+
+ It is a good idea to check the markdown changes when you [generate the providers]({{< ref "/get-started/generate-providers.md" >}}), especially if you are making lots of changes.
+
+ You can copy and paste markdown into the Hashicorp Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it will be rendered.

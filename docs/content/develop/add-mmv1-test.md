@@ -199,3 +199,30 @@ resource "google_pubsub_subscription" "<%= ctx[:primary_resource_id] %>" {
           topic_name: "example-topic"
           subscription_name: "example-subscription"
 ```
+
+
+## IAM (temporary holding spot)
+
+Additionally, in order to generate IAM tests based on a preexisting resource
+configuration, the first `examples` entry in `ResourceName.yaml` must be modified
+to include a `primary_resource_name` entry:
+
+```diff
+      - !ruby/object:Provider::Terraform::Examples
+        name: "disk_basic"
+        primary_resource_id: "default"
++        primary_resource_name: "fmt.Sprintf(\"tf-test-test-disk%s\", context[\"random_suffix\"])"
+        vars:
+          disk_name: "test-disk"
+```
+
+`primary_resource_name` - Typically
+`"fmt.Sprintf(\"tf-test-{{shortname}}%s\", context[\"random_suffix\"])"`,
+substituting the parent resource's shortname from the example configuration for
+`{{shortname}}`, such as `test-disk` above. This value is variable, as both the
+key and value are user-defined parts of the example configuration. In some cases
+the value must be customized further, albeit rarely.
+
+Once an `iam_policy` block is added and filled out, and `primary_resource_name`
+is set on the first example, you're finished, and you can run MMv1 to generate
+the IAM resources you've added, alongside documentation, and tests.

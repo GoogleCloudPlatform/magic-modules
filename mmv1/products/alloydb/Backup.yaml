@@ -23,26 +23,13 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'AlloyDB': 'https://cloud.google.com/alloydb/docs/'
   api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups/create'
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 10
+  update_minutes: 10
+  delete_minutes: 10
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
     base_url: '{{op_id}}'
-    wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 10
-      update_minutes: 10
-      delete_minutes: 10
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error'
-    message: 'message'
 import_format:
   ['projects/{{project}}/locations/{{location}}/backups/{{backup_id}}']
 autogen_async: true
