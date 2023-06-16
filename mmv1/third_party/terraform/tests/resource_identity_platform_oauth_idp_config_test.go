@@ -1,4 +1,4 @@
-package google
+package identityplatform_test
 
 import (
 	"testing"

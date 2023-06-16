@@ -1,4 +1,4 @@
-package google
+package securitycenter_test
 
 import (
 	"testing"

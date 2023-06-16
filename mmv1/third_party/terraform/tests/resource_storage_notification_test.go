@@ -24,7 +24,7 @@ func TestAccStorageNotification_basic(t *testing.T) {
 	acctest.SkipIfEnvNotSet(t, "GOOGLE_PROJECT")
 
 	var notification storage.Notification
-	bucketName := testBucketName(t)
+	bucketName := acctest.TestBucketName(t)
 	topicName := fmt.Sprintf("tf-pstopic-test-%d", acctest.RandInt(t))
 	topic := fmt.Sprintf("//pubsub.googleapis.com/projects/%s/topics/%s", os.Getenv("GOOGLE_PROJECT"), topicName)
 
@@ -68,7 +68,7 @@ func TestAccStorageNotification_withEventsAndAttributes(t *testing.T) {
 	acctest.SkipIfEnvNotSet(t, "GOOGLE_PROJECT")
 
 	var notification storage.Notification
-	bucketName := testBucketName(t)
+	bucketName := acctest.TestBucketName(t)
 	topicName := fmt.Sprintf("tf-pstopic-test-%d", acctest.RandInt(t))
 	topic := fmt.Sprintf("//pubsub.googleapis.com/projects/%s/topics/%s", os.Getenv("GOOGLE_PROJECT"), topicName)
 	eventType1 := "OBJECT_FINALIZE"

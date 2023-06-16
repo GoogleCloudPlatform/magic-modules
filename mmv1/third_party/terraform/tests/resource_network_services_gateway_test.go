@@ -1,4 +1,4 @@
-package google
+package networkservices_test
 
 import (
 	"fmt"

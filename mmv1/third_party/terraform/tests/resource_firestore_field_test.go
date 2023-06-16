@@ -1,4 +1,4 @@
-package google
+package firestore_test
 
 import (
 	"fmt"
@@ -6,13 +6,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccFirestoreField_firestoreFieldUpdateAddIndexExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    GetTestFirestoreProjectFromEnv(t),
+		"project_id":    envvar.GetTestFirestoreProjectFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 		"resource_name": "add_index",
 	}
@@ -23,7 +24,7 @@ func TestAccFirestoreField_firestoreFieldUpdateAddTTLExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    GetTestFirestoreProjectFromEnv(t),
+		"project_id":    envvar.GetTestFirestoreProjectFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 		"resource_name": "add_ttl",
 	}
