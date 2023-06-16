@@ -1745,13 +1745,6 @@ resource "google_composer_environment" "test" {
 				min_count   = 2
 				max_count   = 5
 			}
-			<% unless version == "ga" -%>
-			triggerer {
-				cpu         = 0.5
-				memory_gb   = 2.0
-				count       = 2
-			}
-			<% end -%>
 		}
 		environment_size = "ENVIRONMENT_SIZE_MEDIUM"
 		resilience_mode = "HIGH_RESILIENCE"
