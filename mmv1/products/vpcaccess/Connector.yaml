@@ -15,13 +15,14 @@
 name: 'Connector'
 kind: 'vpcaccess#Connector'
 description: 'Serverless VPC Access connector resource.'
-immutable: true
 base_url: projects/{{project}}/locations/{{region}}/connectors
 create_url: projects/{{project}}/locations/{{region}}/connectors?connectorId={{name}}
+update_verb: :PATCH
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Configuring Serverless VPC Access': 'https://cloud.google.com/vpc/docs/configure-serverless-vpc-access'
   api: 'https://cloud.google.com/vpc/docs/reference/vpcaccess/rest/v1/projects.locations.connectors'
+update_mask: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -55,6 +56,8 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/no_send_name.go.erb
   post_create: templates/terraform/post_create/sleep.go.erb
   decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
+  constants: templates/terraform/constants/connector.erb
+  resource_definition: templates/terraform/resource_definition/connector.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -68,6 +71,7 @@ properties:
     name: name
     description: |
       The name of the resource (Max 25 characters).
+    immutable: true
     required: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
@@ -77,6 +81,7 @@ properties:
     exactly_one_of:
       - network
       - subnet.0.name
+    immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.erb'
     diff_suppress_func: 'tpgresource.CompareResourceNames'
@@ -87,6 +92,7 @@ properties:
       The range of internal addresses that follows RFC 4632 notation. Example: `10.132.0.0/28`.
     required_with:
       - network
+    immutable: true
   - !ruby/object:Api::Type::Enum
     name: state
     description: |
@@ -102,34 +108,36 @@ properties:
     name: machineType
     description: |
       Machine type of VM Instance underlying connector. Default is e2-micro
+    immutable: false
     default_value: e2-micro
   - !ruby/object:Api::Type::Integer
     name: minThroughput
     description: |
       Minimum throughput of the connector in Mbps. Default and min is 200.
-    default_value: 200
+    immutable: true
+    default_from_api: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validation.IntBetween(200, 1000)'
+      function: 'validation.IntBetween(200, 900)'
   - !ruby/object:Api::Type::Integer
     name: minInstances
     description: |
       Minimum value of instances in autoscaling group underlying the connector.
+    immutable: false
     default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: maxInstances
     description: |
       Maximum value of instances in autoscaling group underlying the connector.
+    immutable: false
     default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: maxThroughput
-    # The API documentation says this will default to 200, but when I tried that I got an error that the minimum
-    # throughput must be lower than the maximum. The console defaults to 1000, so I changed it to that.
-    # API returns 300 if it is not sent
     description: |
-      Maximum throughput of the connector in Mbps, must be greater than `min_throughput`. Default is 300.
-    default_value: 300
+      Maximum throughput of the connector in Mbps, must be greater than `min_throughput`. Default is 1000.
+    immutable: true
+    default_from_api: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validation.IntBetween(200, 1000)'
+      function: 'validation.IntBetween(300, 1000)'
   - !ruby/object:Api::Type::String
     name: 'selfLink'
     description: |
@@ -147,6 +155,7 @@ properties:
     immutable: true
     description: |
       The subnet in which to house the connector
+    immutable: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
