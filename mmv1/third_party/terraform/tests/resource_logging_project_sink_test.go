@@ -33,6 +33,36 @@ func TestAccLoggingProjectSink_basic(t *testing.T) {
 	})
 }
 
+func TestAccLoggingProjectSink_default(t *testing.T) {
+	t.Parallel()
+	sinkName := "_Default"
+	projectID := "tf-test-" + RandString(t, 10)
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckLoggingProjectSinkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingProjectSink_defaultloggingbucket(sinkName, projectID, ""),
+			},
+			{
+				ResourceName:      "google_logging_project_sink.defaultloggingbucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccLoggingProjectSink_defaultloggingbucket(sinkName, projectID, `NOT LOG_ID("externalaudit.googleapis.com/activity")`),
+			},
+			{
+				ResourceName:      "google_logging_project_sink.defaultloggingbucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccLoggingProjectSink_described(t *testing.T) {
 	t.Parallel()
 
@@ -333,8 +363,19 @@ func testAccCheckLoggingProjectSinkDestroyProducer(t *testing.T) func(s *terrafo
 
 			attributes := rs.Primary.Attributes
 
+			reservedName := false
+			for _, reserved := range ReservedLoggingProjectSinks {
+				if attributes["name"] == reserved {
+					reservedName = true
+					break
+				}
+			}
+
 			_, err := config.NewLoggingClient(config.UserAgent).Projects.Sinks.Get(attributes["id"]).Do()
-			if err == nil {
+			if reservedName && IsGoogleApiErrorWithCode(err, 404) {
+				return fmt.Errorf("reserved log sinks should not be deleted")
+			}
+			if !reservedName && err == nil {
 				return fmt.Errorf("project sink still exists")
 			}
 		}
@@ -556,4 +597,32 @@ resource "google_logging_project_sink" "loggingbucket" {
 }
 
 `, name, project, project)
+}
+
+func testAccLoggingProjectSink_defaultloggingbucket(name, project, filter string) string {
+	if filter == "" {
+		filter = `NOT LOG_ID("externalaudit.googleapis.com/activity") 
+		AND NOT LOG_ID("cloudaudit.googleapis.com/system_event")
+		AND NOT LOG_ID("externalaudit.googleapis.com/system_event") 
+		AND NOT LOG_ID("cloudaudit.googleapis.com/access_transparency") 
+		AND NOT LOG_ID("externalaudit.googleapis.com/access_transparency")`
+	}
+
+	return fmt.Sprintf(`
+resource "google_project" "defaultloggingbucket" {
+	name        = "%s"
+	org_id      = "%{org_id}"
+	project_id  = "%s"
+}
+
+resource "google_logging_project_sink" "defaultloggingbucket" {
+  name        = "%s"
+  project     = "%s"
+  destination = "logging.googleapis.com/projects/%s/locations/global/buckets/_Default"
+  unique_writer_identity = true
+  filter =<<EOF
+  	%s
+  EOF
+}
+`, project, project, name, project, project, filter)
 }

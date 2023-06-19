@@ -18,6 +18,8 @@ Manages a project-level logging sink. For more information see:
 
 ~> **Note** You must [enable the Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com)
 
+~> **Note** Log sinks `_Required` and `_Default` are automatically created for each project. Creating a resource of this type will acquire and update the resource that already exists at the desired location. These buckets cannot be removed so deleting this resource will remove the bucket config from your terraform state but will leave the sink unchanged. 
+
 ## Example Usage
 
 ```hcl
