@@ -10,6 +10,9 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/privateca"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/services/sql"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -335,7 +338,7 @@ func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
 		}
 
 		log.Printf("[DEBUG] Waiting for network creation to finish")
-		err = ComputeOperationWaitTime(config, res, project, "Error bootstrapping shared test network", config.UserAgent, 4*time.Minute)
+		err = tpgcompute.ComputeOperationWaitTime(config, res, project, "Error bootstrapping shared test network", config.UserAgent, 4*time.Minute)
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared test network %q: %s", networkName, err)
 		}
@@ -391,7 +394,7 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 			t.Fatalf("Error bootstrapping shared test project: %s", err)
 		}
 
-		err = ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 4)
+		err = resourcemanager.ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 4)
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared test project: %s", err)
 		}
@@ -506,7 +509,7 @@ func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, serv
 			t.Fatalf("Error converting create project operation to map: %s", err)
 		}
 
-		err = ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 4*time.Minute)
+		err = resourcemanager.ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 4*time.Minute)
 		if err != nil {
 			t.Fatalf("Error waiting for create project operation: %s", err)
 		}
@@ -531,7 +534,7 @@ func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, serv
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
 				var reqErr error
-				pbi, reqErr = billingClient.Projects.GetBillingInfo(PrefixedProject(projectID)).Do()
+				pbi, reqErr = billingClient.Projects.GetBillingInfo(resourcemanager.PrefixedProject(projectID)).Do()
 				return reqErr
 			},
 			Timeout: 30 * time.Second,
@@ -543,7 +546,7 @@ func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, serv
 			pbi.BillingAccountName = "billingAccounts/" + billingAccount
 			err := transport_tpg.Retry(transport_tpg.RetryOptions{
 				RetryFunc: func() error {
-					_, err := config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(PrefixedProject(projectID), pbi).Do()
+					_, err := config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(resourcemanager.PrefixedProject(projectID), pbi).Do()
 					return err
 				},
 				Timeout: 2 * time.Minute,
@@ -556,7 +559,7 @@ func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, serv
 
 	if len(services) > 0 {
 
-		enabledServices, err := ListCurrentlyEnabledServices(projectID, "", config.UserAgent, config, 1*time.Minute)
+		enabledServices, err := resourcemanager.ListCurrentlyEnabledServices(projectID, "", config.UserAgent, config, 1*time.Minute)
 		if err != nil {
 			t.Fatalf("Error listing services for project %q: %s", projectID, err)
 		}
@@ -569,7 +572,7 @@ func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, serv
 		}
 
 		if len(servicesToEnable) > 0 {
-			if err := EnableServiceUsageProjectServices(servicesToEnable, projectID, "", config.UserAgent, config, 10*time.Minute); err != nil {
+			if err := resourcemanager.EnableServiceUsageProjectServices(servicesToEnable, projectID, "", config.UserAgent, config, 10*time.Minute); err != nil {
 				t.Fatalf("Error enabling services for project %q: %s", projectID, err)
 			}
 		}
@@ -739,7 +742,7 @@ func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
 
 		log.Printf("[DEBUG] Waiting for CA pool creation to finish")
 		var opRes map[string]interface{}
-		err = PrivatecaOperationWaitTimeWithResponse(
+		err = privateca.PrivatecaOperationWaitTimeWithResponse(
 			config, res, &opRes, project, "Creating CA pool", config.UserAgent,
 			4*time.Minute)
 		if err != nil {
@@ -757,6 +760,130 @@ func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
 		}
 	}
 	return poolName
+}
+
+func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string {
+	projectID := acctest.GetTestProjectFromEnv()
+	region := acctest.GetTestRegionFromEnv()
+
+	config := BootstrapConfig(t)
+	if config == nil {
+		t.Fatal("Could not bootstrap config.")
+	}
+
+	computeService := config.NewComputeClient(config.UserAgent)
+	if computeService == nil {
+		t.Fatal("Could not create compute client.")
+	}
+
+	// In order to create a networkAttachment we need to bootstrap a subnet.
+	_, err := computeService.Subnetworks.Get(projectID, region, subnetName).Do()
+	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		log.Printf("[DEBUG] Subnet %q not found, bootstrapping", subnetName)
+
+		networkUrl := fmt.Sprintf("%sprojects/%s/global/networks/%s", config.ComputeBasePath, projectID, networkName)
+		url := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks", config.ComputeBasePath, projectID, region)
+
+		subnetObj := map[string]interface{}{
+			"name":        subnetName,
+			"region ":     region,
+			"network":     networkUrl,
+			"ipCidrRange": "10.77.1.0/28",
+		}
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   projectID,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+			Body:      subnetObj,
+			Timeout:   4 * time.Minute,
+		})
+
+		log.Printf("Response is, %s", res)
+		if err != nil {
+			t.Fatalf("Error bootstrapping test subnet %s: %s", subnetName, err)
+		}
+
+		log.Printf("[DEBUG] Waiting for network creation to finish")
+		err = tpgcompute.ComputeOperationWaitTime(config, res, projectID, "Error bootstrapping test subnet", config.UserAgent, 4*time.Minute)
+		if err != nil {
+			t.Fatalf("Error bootstrapping test subnet %s: %s", subnetName, err)
+		}
+	}
+
+	subnet, err := computeService.Subnetworks.Get(projectID, region, subnetName).Do()
+
+	if subnet == nil {
+		t.Fatalf("Error getting test subnet %s: is nil", subnetName)
+	}
+
+	if err != nil {
+		t.Fatalf("Error getting test subnet %s: %s", subnetName, err)
+	}
+	return subnet.Name
+}
+
+func BootstrapNetworkAttachment(t *testing.T, networkAttachmentName string, subnetName string) string {
+	projectID := acctest.GetTestProjectFromEnv()
+	region := acctest.GetTestRegionFromEnv()
+
+	config := BootstrapConfig(t)
+	if config == nil {
+		return ""
+	}
+
+	computeService := config.NewComputeClient(config.UserAgent)
+	if computeService == nil {
+		return ""
+	}
+
+	networkAttachment, err := computeService.NetworkAttachments.Get(projectID, region, networkAttachmentName).Do()
+	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		// Create Network Attachment Here.
+		log.Printf("[DEBUG] Network Attachment %s not found, bootstrapping", networkAttachmentName)
+		url := fmt.Sprintf("%sprojects/%s/regions/%s/networkAttachments", config.ComputeBasePath, projectID, region)
+
+		subnetURL := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks/%s", config.ComputeBasePath, projectID, region, subnetName)
+		networkAttachmentObj := map[string]interface{}{
+			"name":                 networkAttachmentName,
+			"region":               region,
+			"subnetworks":          []string{subnetURL},
+			"connectionPreference": "ACCEPT_AUTOMATIC",
+		}
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   projectID,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+			Body:      networkAttachmentObj,
+			Timeout:   4 * time.Minute,
+		})
+		if err != nil {
+			t.Fatalf("Error bootstrapping test Network Attachment %s: %s", networkAttachmentName, err)
+		}
+
+		log.Printf("[DEBUG] Waiting for network creation to finish")
+		err = tpgcompute.ComputeOperationWaitTime(config, res, projectID, "Error bootstrapping shared test subnet", config.UserAgent, 4*time.Minute)
+		if err != nil {
+			t.Fatalf("Error bootstrapping test Network Attachment %s: %s", networkAttachmentName, err)
+		}
+	}
+
+	networkAttachment, err = computeService.NetworkAttachments.Get(projectID, region, networkAttachmentName).Do()
+
+	if networkAttachment == nil {
+		t.Fatalf("Error getting test network attachment %s: is nil", networkAttachmentName)
+	}
+
+	if err != nil {
+		t.Fatalf("Error getting test Network Attachment %s: %s", networkAttachmentName, err)
+	}
+
+	return networkAttachment.Name
 }
 
 func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *transport_tpg.Config) (string, error) {
@@ -790,7 +917,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 		return "", err
 	}
 
-	waitErr := ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 5*time.Minute)
+	waitErr := resourcemanager.ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 5*time.Minute)
 	if waitErr != nil {
 		return "", waitErr
 	}
@@ -798,7 +925,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	ba := &cloudbilling.ProjectBillingInfo{
 		BillingAccountName: fmt.Sprintf("billingAccounts/%s", billing),
 	}
-	_, err = config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(PrefixedProject(pid), ba).Do()
+	_, err = config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(resourcemanager.PrefixedProject(pid), ba).Do()
 	if err != nil {
 		return "", err
 	}
@@ -824,12 +951,12 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 		return "", err
 	}
 
-	waitErr = ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 5*time.Minute)
+	waitErr = resourcemanager.ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 5*time.Minute)
 	if waitErr != nil {
 		return "", waitErr
 	}
 
-	_, err = config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(PrefixedProject(p2), ba).Do()
+	_, err = config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(resourcemanager.PrefixedProject(p2), ba).Do()
 	if err != nil {
 		return "", err
 	}

@@ -152,14 +152,14 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 			"network": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 				Description:      `The network to which VMs will be assigned. If it is not provided, "default" will be used.`,
 			},
 
 			"subnetwork": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 				Description:      `The subnetwork to which VMs will be assigned. Should be of the form "regions/REGION/subnetworks/SUBNETWORK".`,
 			},
 
@@ -277,7 +277,7 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 
 func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_tpg.Config) (dataflow.FlexTemplateRuntimeEnvironment, error) {
 
-	additionalExperiments := convertStringSet(d.Get("additional_experiments").(*schema.Set))
+	additionalExperiments := tpgresource.ConvertStringSet(d.Get("additional_experiments").(*schema.Set))
 
 	env := dataflow.FlexTemplateRuntimeEnvironment{
 		AdditionalUserLabels:  tpgresource.ExpandStringMap(d, "labels"),

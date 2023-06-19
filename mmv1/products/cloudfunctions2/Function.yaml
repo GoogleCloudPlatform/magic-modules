@@ -231,6 +231,10 @@ properties:
       - :ENVIRONMENT_UNSPECIFIED
       - :GEN_1
       - :GEN_2
+  - !ruby/object:Api::Type::String
+    name: 'url'
+    output: true
+    description: 'Output only. The deployed url for the function.'
   - !ruby/object:Api::Type::Enum
     name: 'state'
     output: true

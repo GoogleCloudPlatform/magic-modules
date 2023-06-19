@@ -25,9 +25,11 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/dlp/docs/creating-stored-infotypes'
   api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.storedInfoTypes'
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
   actions: ['create']
 id_format: '{{parent}}/storedInfoTypes/{{name}}'
+# Skip sweeper due to non-standard URL
+skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_stored_info_type_basic'

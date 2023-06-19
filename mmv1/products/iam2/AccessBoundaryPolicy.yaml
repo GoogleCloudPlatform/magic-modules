@@ -20,6 +20,8 @@ description: |
   **NOTE**: This is a private feature and users should contact GCP support
   if they would like to test it.
 autogen_async: true
+# Skipping sweeper since this is a child resource
+skip_sweeper: true
 import_format: ['{{parent}}/{{name}}']
 id_format: '{{parent}}/{{name}}'
 examples:
