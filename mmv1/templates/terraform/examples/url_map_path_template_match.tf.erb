@@ -35,6 +35,14 @@ resource "google_compute_url_map" "<%= ctx[:primary_resource_id] %>" {
       priority = 2
     }
   }
+
+  test {
+    service = google_compute_backend_bucket.static.id
+    host    = "mysite.com"
+    path    = "/xyzwebservices/v2/xyz/users/123/carts/456"
+    expected_output_url = "http://mysite.com/123-456"
+    service = google_compute_backend_service.cart-backend.id
+  }
 }
 
 resource "google_compute_backend_service" "cart-backend" {

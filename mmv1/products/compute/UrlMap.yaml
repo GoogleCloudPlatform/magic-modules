@@ -1923,6 +1923,9 @@ properties:
       succeed only if all of the test cases pass. You can specify a maximum of 100
       tests per UrlMap.
     item_type: !ruby/object:Api::Type::NestedObject
+      exactly_one_of:
+        - service
+        - expected_redirect_response_code
       properties:
         - !ruby/object:Api::Type::String
           name: 'description'
@@ -1945,6 +1948,42 @@ properties:
           required: true
           description: The backend service or backend bucket link that should be matched by this test.
           custom_expand: 'templates/terraform/custom_expand/reference_to_backend.erb'
+        - !ruby/object:Api::Type::Array
+          name: 'headers'
+          description: |
+            HTTP headers for this request. If headers contains a host header, then host must also match the header value.
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'name'
+                required: true
+                description: |
+                  Header name.
+              - !ruby/object:Api::Type::String
+                name: 'value'
+                required: true
+                description: |
+                  Header value.
+        - !ruby/object:Api::Type::String
+          name: 'expected_output_url'
+          required: true
+          description: |
+            The expected output URL evaluated by the load balancer containing the scheme, host, path and query parameters.
+            For rules that forward requests to backends, the test passes only when expectedOutputUrl matches the request
+            forwarded by the load balancer to backends. For rules with urlRewrite, the test verifies that the forwarded
+            request matches hostRewrite and pathPrefixRewrite in the urlRewrite action. When service is specified,
+            expectedOutputUrl`s scheme is ignored.
+            For rules with urlRedirect, the test passes only if expectedOutputUrl matches the URL in the load balancer's
+            redirect response. If urlRedirect specifies httpsRedirect, the test passes only if the scheme in
+            expectedOutputUrl is also set to HTTPS. If urlRedirect specifies stripQuery, the test passes only if
+            expectedOutputUrl does not contain any query parameters.
+            expectedOutputUrl is optional when service is specified.
+        - !ruby/object:Api::Type::Integer
+          name: 'expected_redirect_response_code'
+          required: true
+          description: |
+            For rules with urlRedirect, the test passes only if expectedRedirectResponseCode matches the HTTP status code in load balancer's redirect response.
+            expectedRedirectResponseCode cannot be set when service is set.
   - !ruby/object:Api::Type::NestedObject
     name: 'defaultUrlRedirect'
     exactly_one_of:
