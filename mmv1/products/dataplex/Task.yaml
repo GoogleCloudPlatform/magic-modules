@@ -16,10 +16,9 @@ name: 'Task'
 base_url: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks?task_id={{task_id}}'
-update_url: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}'
 delete_url: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}'
 description: |
-  Used to create Dataplex Tasks
+  A Dataplex task represents the work that you want Dataplex to do on a schedule. It encapsulates code, parameters, and the schedule.
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -44,7 +43,7 @@ autogen_async: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/dataplex/docs'
-  api: 'https://cloud.google.com/dataplex/docs/reference/rest'
+  api: 'https://cloud.google.com/dataplex/docs/reference/rest/v1/projects.locations.lakes.tasks'
 import_format: ['projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}']
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   exclude: false
@@ -132,7 +131,6 @@ properties:
         description: |
           Trigger type of the user-specified Task
         values:
-          - :TYPE_UNSPECIFIED
           - :ON_DEMAND
           - :RECURRING
       - !ruby/object:Api::Type::Time
