@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -182,8 +183,8 @@ func testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t *testing.T) fun
 				continue
 			}
 
-			folder := canonicalFolderId(rs.Primary.Attributes["folder"])
-			constraint := canonicalOrgPolicyConstraint(rs.Primary.Attributes["constraint"])
+			folder := resourcemanager.CanonicalFolderId(rs.Primary.Attributes["folder"])
+			constraint := resourcemanager.CanonicalOrgPolicyConstraint(rs.Primary.Attributes["constraint"])
 			policy, err := config.NewResourceManagerClient(config.UserAgent).Folders.GetOrgPolicy(folder, &cloudresourcemanager.GetOrgPolicyRequest{
 				Constraint: constraint,
 			}).Do()
@@ -296,7 +297,7 @@ func getGoogleFolderOrganizationPolicyTestResource(t *testing.T, s *terraform.St
 	}
 
 	config := GoogleProviderConfig(t)
-	folder := canonicalFolderId(rs.Primary.Attributes["folder"])
+	folder := resourcemanager.CanonicalFolderId(rs.Primary.Attributes["folder"])
 
 	return config.NewResourceManagerClient(config.UserAgent).Folders.GetOrgPolicy(folder, &cloudresourcemanager.GetOrgPolicyRequest{
 		Constraint: rs.Primary.Attributes["constraint"],
