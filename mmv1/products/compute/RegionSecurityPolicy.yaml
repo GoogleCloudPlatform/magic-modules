@@ -53,6 +53,11 @@ examples:
     primary_resource_id: 'region-sec-policy-ddos-protection'
     vars:
       sec_policy_name: 'my-sec-policy-ddos-protection'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_security_policy_with_user_defined_fields'
+    primary_resource_id: 'region-sec-policy-user-defined-fields'
+    vars:
+      sec_policy_name: 'my-sec-policy-user-defined-fields'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -125,4 +130,43 @@ properties:
     output: true
     description: |
       Server-defined URL for this resource with the resource id.
-
+  - !ruby/object:Api::Type::Array
+    name: 'userDefinedFields'
+    description: |
+      Definitions of user-defined fields for CLOUD_ARMOR_NETWORK policies.
+      A user-defined field consists of up to 4 bytes extracted from a fixed offset in the packet, relative to the IPv4, IPv6, TCP, or UDP header, with an optional mask to select certain bits.
+      Rules may then specify matching values for these fields.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'name'
+          description: |
+            The name of this field. Must be unique within the policy.
+        - !ruby/object:Api::Type::Enum
+          name: 'base'
+          required: true
+          description: | 
+            The base relative to which 'offset' is measured. Possible values are:
+            - IPV4: Points to the beginning of the IPv4 header.
+            - IPV6: Points to the beginning of the IPv6 header.
+            - TCP: Points to the beginning of the TCP header, skipping over any IPv4 options or IPv6 extension headers. Not present for non-first fragments.
+            - UDP: Points to the beginning of the UDP header, skipping over any IPv4 options or IPv6 extension headers. Not present for non-first fragments.
+          values:
+            - :IPV4
+            - :IPV6
+            - :TCP
+            - :UDP
+        - !ruby/object:Api::Type::Integer
+          name: 'offset'
+          description: |
+            Offset of the first byte of the field (in network byte order) relative to 'base'.
+        - !ruby/object:Api::Type::Integer
+          name: 'size'
+          description: |
+            Size of the field in bytes. Valid values: 1-4.
+        - !ruby/object:Api::Type::String
+          name: 'mask'
+          description: |
+            If specified, apply this mask (bitwise AND) to the field to ignore bits before matching.
+            Encoded as a hexadecimal number (starting with "0x").
+            The last byte of the field (in network byte order) corresponds to the least significant byte of the mask.
