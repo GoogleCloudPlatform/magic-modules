@@ -202,7 +202,7 @@ properties:
     description: |
       The email of the service account to be used at runtime by compute resources
       created for the operation of the Extension instance.
-    default_from_api: true
+    output: true
   - !ruby/object:Api::Type::String
     name: lastOperationName
     output: true
