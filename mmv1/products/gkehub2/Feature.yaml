@@ -82,6 +82,11 @@ examples:
     skip_test: true
     primary_resource_name: 'fmt.Sprint("fleetobservability")'
     primary_resource_id: 'feature'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'disable_fleet_observability'
+    skip_test: true
+    primary_resource_name: 'fmt.Sprint("fleetobservability")'
+    primary_resource_id: 'feature'
 autogen_async: true
 # Skip sweeper gen since this is a child resource.
 skip_sweeper: true
