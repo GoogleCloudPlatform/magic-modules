@@ -50,7 +50,12 @@ steps:
       entrypoint: 'bash'
       args:
           - -c
-          - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpg-sync
+          - |
+            if [ "$BRANCH_NAME" == "main" ]; then
+              git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpg-sync
+            else 
+              git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:FEATURE-BRANCH-$$BRANCH_NAME-tpg-sync
+            fi
 
     # TPGB
     - name: 'gcr.io/graphite-docker-images/downstream-waiter'
@@ -78,7 +83,12 @@ steps:
       entrypoint: 'bash'
       args:
           - -c
-          - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpgb-sync
+          - |
+            if [ "$BRANCH_NAME" == "main" ]; then
+              git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpgb-sync
+            else 
+              git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:FEATURE-BRANCH-$$BRANCH_NAME-tpgb-sync
+            fi
 
     # TGC
     - name: 'gcr.io/graphite-docker-images/downstream-waiter'
@@ -106,7 +116,12 @@ steps:
       entrypoint: 'bash'
       args:
           - -c
-          - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tgc-sync
+          - |
+            if [ "$BRANCH_NAME" == "main" ]; then
+              git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tgc-sync
+            else 
+              git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:FEATURE-BRANCH-$$BRANCH_NAME-tgc-sync
+            fi
 
     # TF-OICS
     - name: 'gcr.io/graphite-docker-images/downstream-waiter'
@@ -134,7 +149,12 @@ steps:
       entrypoint: 'bash'
       args:
           - -c
-          - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-oics-sync
+          - |
+            if [ "$BRANCH_NAME" == "main" ]; then
+              git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-oics-sync
+            else 
+              git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:FEATURE-BRANCH-$$BRANCH_NAME-tf-oics-sync
+            fi
 
     - name: 'gcr.io/graphite-docker-images/vcr-cassette-merger'
       secretEnv: ["GITHUB_TOKEN", "GOOGLE_PROJECT"]
