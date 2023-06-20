@@ -133,7 +133,7 @@ properties:
       not be present on primary.'
   - !ruby/object:Api::Type::Enum
     name: 'availabilityType'
-    description:
+    description: |
       'Availability type of an Instance. Defaults to REGIONAL for both primary and read instances.
       Note that primary and read instances can have different availability types.
       Only READ_POOL instance supports ZONAL type. Users can't specify the zone for READ_POOL instance.
