@@ -8,7 +8,7 @@ import (
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
-func resourceConverterSpannerInstanceIamPolicy() tpgresource.ResourceConverter {
+func ResourceConverterSpannerInstanceIamPolicy() tpgresource.ResourceConverter {
 	return tpgresource.ResourceConverter{
 		AssetType:         "spanner.googleapis.com/Instance",
 		Convert:           GetSpannerInstanceIamPolicyCaiObject,
@@ -16,7 +16,7 @@ func resourceConverterSpannerInstanceIamPolicy() tpgresource.ResourceConverter {
 	}
 }
 
-func resourceConverterSpannerInstanceIamBinding() tpgresource.ResourceConverter {
+func ResourceConverterSpannerInstanceIamBinding() tpgresource.ResourceConverter {
 	return tpgresource.ResourceConverter{
 		AssetType:         "spanner.googleapis.com/Instance",
 		Convert:           GetSpannerInstanceIamBindingCaiObject,
@@ -26,7 +26,7 @@ func resourceConverterSpannerInstanceIamBinding() tpgresource.ResourceConverter 
 	}
 }
 
-func resourceConverterSpannerInstanceIamMember() tpgresource.ResourceConverter {
+func ResourceConverterSpannerInstanceIamMember() tpgresource.ResourceConverter {
 	return tpgresource.ResourceConverter{
 		AssetType:         "spanner.googleapis.com/Instance",
 		Convert:           GetSpannerInstanceIamMemberCaiObject,
