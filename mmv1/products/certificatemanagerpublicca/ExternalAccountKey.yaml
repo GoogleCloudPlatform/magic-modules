@@ -54,7 +54,7 @@ properties:
     default_value: :PROD
     description: |
       The ACME directory URL for the production or staging environment. Default is production environment.
-      Set to https://dv.acme-v02.test-api.pki.goog/directory to use staging
+      Set to `STAGING` to use staging environment.
   - !ruby/object:Api::Type::String
     name: 'keyId'
     output: true
