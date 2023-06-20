@@ -1,0 +1,11 @@
+server_type, ok := d.GetOk("server_type")
+if !ok {
+	return fmt.Errorf("Server Type is required to create ExternalAccountKey: %s", err)
+}
+
+// Remove the key from API payload since this is only used to configure server type.
+delete(obj, "serverType")
+
+if server_type.(string) == "STAGING" {
+	transport_tpg.AddPrefixToHost(url, "preprod-")
+}

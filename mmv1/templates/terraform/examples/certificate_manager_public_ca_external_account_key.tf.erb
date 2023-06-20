@@ -1,3 +1,4 @@
 resource "google_certificate_manager_public_ca_external_account_key" "<%= ctx[:primary_resource_id] %>" {
-  project = "<%= ctx[:vars]['project'] %>"
+  project     = "<%= ctx[:vars]['project'] %>"
+  server_type = "STAGING"
 }

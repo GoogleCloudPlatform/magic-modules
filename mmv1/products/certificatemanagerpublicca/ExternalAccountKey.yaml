@@ -32,6 +32,7 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_create: templates/terraform/pre_create/public_ca_ext_account_key.go.erb
   custom_read: templates/terraform/custom_read/public_ca_ext_account_key.go
 docs: !ruby/object:Provider::Terraform::Docs
 identity:
@@ -44,6 +45,16 @@ properties:
     output: true
     description: |
       Resource name. projects/{project}/locations/{location}/externalAccountKeys/{keyId}.
+  - !ruby/object:Api::Type::Enum
+    name: 'serverType'
+    required: false
+    values:
+      - :STAGING
+      - :PROD
+    default_value: :PROD
+    description: |
+      The ACME directory URL for the production or staging environment. Default is production environment.
+      Set to https://dv.acme-v02.test-api.pki.goog/directory to use staging
   - !ruby/object:Api::Type::String
     name: 'keyId'
     output: true
