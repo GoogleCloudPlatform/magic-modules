@@ -1,4 +1,4 @@
-package google
+package osconfig
 
 import (
 	"fmt"
@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 )
 
 func ResourceOSConfigOSPolicyAssignment() *schema.Resource {
@@ -128,7 +129,7 @@ A VM is selected if its inventory data matches at least one of the following inv
 						"mode": {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validateEnum([]string{"MODE_UNSPECIFIED", "VALIDATION", "ENFORCEMENT"}),
+							ValidateFunc: verify.ValidateEnum([]string{"MODE_UNSPECIFIED", "VALIDATION", "ENFORCEMENT"}),
 							Description:  `Policy mode Possible values: ["MODE_UNSPECIFIED", "VALIDATION", "ENFORCEMENT"]`,
 						},
 						"resource_groups": {
@@ -171,7 +172,7 @@ If none of the resource groups are applicable for a VM, the VM is considered to 
 																		"interpreter": {
 																			Type:         schema.TypeString,
 																			Required:     true,
-																			ValidateFunc: validateEnum([]string{"INTERPRETER_UNSPECIFIED", "NONE", "SHELL", "POWERSHELL"}),
+																			ValidateFunc: verify.ValidateEnum([]string{"INTERPRETER_UNSPECIFIED", "NONE", "SHELL", "POWERSHELL"}),
 																			Description:  `The script interpreter to use. Possible values: ["INTERPRETER_UNSPECIFIED", "NONE", "SHELL", "POWERSHELL"]`,
 																		},
 																		"args": {
@@ -271,7 +272,7 @@ Remote: A checksum must be specified. Cloud Storage: An object generation number
 																		"interpreter": {
 																			Type:         schema.TypeString,
 																			Required:     true,
-																			ValidateFunc: validateEnum([]string{"INTERPRETER_UNSPECIFIED", "NONE", "SHELL", "POWERSHELL"}),
+																			ValidateFunc: verify.ValidateEnum([]string{"INTERPRETER_UNSPECIFIED", "NONE", "SHELL", "POWERSHELL"}),
 																			Description:  `The script interpreter to use. Possible values: ["INTERPRETER_UNSPECIFIED", "NONE", "SHELL", "POWERSHELL"]`,
 																		},
 																		"args": {
@@ -378,7 +379,7 @@ Remote: A checksum must be specified. Cloud Storage: An object generation number
 															"state": {
 																Type:         schema.TypeString,
 																Required:     true,
-																ValidateFunc: validateEnum([]string{"OS_POLICY_COMPLIANCE_STATE_UNSPECIFIED", "COMPLIANT", "NON_COMPLIANT", "UNKNOWN", "NO_OS_POLICIES_APPLICABLE"}),
+																ValidateFunc: verify.ValidateEnum([]string{"OS_POLICY_COMPLIANCE_STATE_UNSPECIFIED", "COMPLIANT", "NON_COMPLIANT", "UNKNOWN", "NO_OS_POLICIES_APPLICABLE"}),
 																Description:  `Desired state of the file. Possible values: ["OS_POLICY_COMPLIANCE_STATE_UNSPECIFIED", "COMPLIANT", "NON_COMPLIANT", "UNKNOWN", "NO_OS_POLICIES_APPLICABLE"]`,
 															},
 															"content": {
@@ -470,7 +471,7 @@ Below are some examples of permissions and their associated values: read, write,
 															"desired_state": {
 																Type:         schema.TypeString,
 																Required:     true,
-																ValidateFunc: validateEnum([]string{"DESIRED_STATE_UNSPECIFIED", "INSTALLED", "REMOVED"}),
+																ValidateFunc: verify.ValidateEnum([]string{"DESIRED_STATE_UNSPECIFIED", "INSTALLED", "REMOVED"}),
 																Description:  `The desired state the agent should maintain for this package. Possible values: ["DESIRED_STATE_UNSPECIFIED", "INSTALLED", "REMOVED"]`,
 															},
 															"apt": {
@@ -799,7 +800,7 @@ Remote: A checksum must be specified. Cloud Storage: An object generation number
 																		"archive_type": {
 																			Type:         schema.TypeString,
 																			Required:     true,
-																			ValidateFunc: validateEnum([]string{"ARCHIVE_TYPE_UNSPECIFIED", "DEB", "DEB_SRC"}),
+																			ValidateFunc: verify.ValidateEnum([]string{"ARCHIVE_TYPE_UNSPECIFIED", "DEB", "DEB_SRC"}),
 																			Description:  `Type of archive files in this repository. Possible values: ["ARCHIVE_TYPE_UNSPECIFIED", "DEB", "DEB_SRC"]`,
 																		},
 																		"components": {
@@ -1050,10 +1051,12 @@ For a given OS policy assignment, there is only one revision with a value of 'tr
 				Description: `Set to true to skip awaiting rollout during resource creation and update.`,
 			},
 			"project": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+				Description:      "The project for the resource",
 			},
 		},
 		UseJSONNumber: true,
@@ -1062,7 +1065,7 @@ For a given OS policy assignment, there is only one revision with a value of 'tr
 
 func resourceOSConfigOSPolicyAssignmentCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1071,45 +1074,49 @@ func resourceOSConfigOSPolicyAssignmentCreate(d *schema.ResourceData, meta inter
 	descriptionProp, err := expandOSConfigOSPolicyAssignmentDescription(d.Get("description"), d, config)
 	if err != nil {
 		return err
-	} else if v, ok := d.GetOkExists("description"); !isEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
+	} else if v, ok := d.GetOkExists("description"); !tpgresource.IsEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
 		obj["description"] = descriptionProp
 	}
 	osPoliciesProp, err := expandOSConfigOSPolicyAssignmentOsPolicies(d.Get("os_policies"), d, config)
 	if err != nil {
 		return err
-	} else if v, ok := d.GetOkExists("os_policies"); !isEmptyValue(reflect.ValueOf(osPoliciesProp)) && (ok || !reflect.DeepEqual(v, osPoliciesProp)) {
+	} else if v, ok := d.GetOkExists("os_policies"); !tpgresource.IsEmptyValue(reflect.ValueOf(osPoliciesProp)) && (ok || !reflect.DeepEqual(v, osPoliciesProp)) {
 		obj["osPolicies"] = osPoliciesProp
 	}
 	instanceFilterProp, err := expandOSConfigOSPolicyAssignmentInstanceFilter(d.Get("instance_filter"), d, config)
 	if err != nil {
 		return err
-	} else if v, ok := d.GetOkExists("instance_filter"); !isEmptyValue(reflect.ValueOf(instanceFilterProp)) && (ok || !reflect.DeepEqual(v, instanceFilterProp)) {
+	} else if v, ok := d.GetOkExists("instance_filter"); !tpgresource.IsEmptyValue(reflect.ValueOf(instanceFilterProp)) && (ok || !reflect.DeepEqual(v, instanceFilterProp)) {
 		obj["instanceFilter"] = instanceFilterProp
 	}
 	rolloutProp, err := expandOSConfigOSPolicyAssignmentRollout(d.Get("rollout"), d, config)
 	if err != nil {
 		return err
-	} else if v, ok := d.GetOkExists("rollout"); !isEmptyValue(reflect.ValueOf(rolloutProp)) && (ok || !reflect.DeepEqual(v, rolloutProp)) {
+	} else if v, ok := d.GetOkExists("rollout"); !tpgresource.IsEmptyValue(reflect.ValueOf(rolloutProp)) && (ok || !reflect.DeepEqual(v, rolloutProp)) {
 		obj["rollout"] = rolloutProp
 	}
-
-	url, err := ReplaceVars(d, config, "{{OSConfigBasePath}}projects/{{project}}/locations/{{location}}/osPolicyAssignments?osPolicyAssignmentId={{name}}")
-	if err != nil {
-		return err
-	}
-	url = strings.ReplaceAll(url, "https://osconfig.googleapis.com/v1beta", "https://osconfig.googleapis.com/v1")
 
 	log.Printf("[DEBUG] Creating new OSPolicyAssignment: %#v", obj)
 	billingProject := ""
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return fmt.Errorf("Error fetching project for OSPolicyAssignment: %s", err)
 	}
-	billingProject = project
+	// Shorten long form project id to short form.
+	billingProject = tpgresource.GetResourceNameFromSelfLink(project)
+
+	url, err := tpgresource.ReplaceVars(d, config, "{{OSConfigBasePath}}projects/{{project}}/locations/{{location}}/osPolicyAssignments?osPolicyAssignmentId={{name}}")
+	if err != nil {
+		return err
+	}
+	// Always use GA endpoints for this resource.
+	url = strings.ReplaceAll(url, "https://osconfig.googleapis.com/v1beta", "https://osconfig.googleapis.com/v1")
+	// Remove redundant projects/ from url.
+	url = strings.ReplaceAll(url, "projects/projects/", "projects/")
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
@@ -1127,10 +1134,12 @@ func resourceOSConfigOSPolicyAssignmentCreate(d *schema.ResourceData, meta inter
 	}
 
 	// Store the ID now
-	id, err := ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/osPolicyAssignments/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/osPolicyAssignments/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
+	// Remove redundant projects/ from id.
+	id = strings.ReplaceAll(id, "projects/projects/", "projects/")
 	d.SetId(id)
 
 	if skipAwaitRollout := d.Get("skip_await_rollout").(bool); !skipAwaitRollout {
@@ -1152,10 +1161,12 @@ func resourceOSConfigOSPolicyAssignmentCreate(d *schema.ResourceData, meta inter
 		}
 
 		// This may have caused the ID to update - update it if so.
-		id, err = ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/osPolicyAssignments/{{name}}")
+		id, err = tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/osPolicyAssignments/{{name}}")
 		if err != nil {
 			return fmt.Errorf("Error constructing id: %s", err)
 		}
+		// Remove redundant projects/ from id.
+		id = strings.ReplaceAll(id, "projects/projects/", "projects/")
 		d.SetId(id)
 	}
 
@@ -1166,27 +1177,31 @@ func resourceOSConfigOSPolicyAssignmentCreate(d *schema.ResourceData, meta inter
 
 func resourceOSConfigOSPolicyAssignmentRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
-
-	url, err := ReplaceVars(d, config, "{{OSConfigBasePath}}projects/{{project}}/locations/{{location}}/osPolicyAssignments/{{name}}")
-	if err != nil {
-		return err
-	}
-	url = strings.ReplaceAll(url, "https://osconfig.googleapis.com/v1beta", "https://osconfig.googleapis.com/v1")
 
 	billingProject := ""
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return fmt.Errorf("Error fetching project for OSPolicyAssignment: %s", err)
 	}
-	billingProject = project
+	// Shorten long form project id to short form
+	billingProject = tpgresource.GetResourceNameFromSelfLink(project)
+
+	url, err := tpgresource.ReplaceVars(d, config, "{{OSConfigBasePath}}projects/{{project}}/locations/{{location}}/osPolicyAssignments/{{name}}")
+	if err != nil {
+		return err
+	}
+	// Always use GA endpoints for this resource.
+	url = strings.ReplaceAll(url, "https://osconfig.googleapis.com/v1beta", "https://osconfig.googleapis.com/v1")
+	// Remove redundant projects/ from url.
+	url = strings.ReplaceAll(url, "projects/projects/", "projects/")
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
@@ -1202,6 +1217,11 @@ func resourceOSConfigOSPolicyAssignmentRead(d *schema.ResourceData, meta interfa
 	}
 
 	// Explicitly set virtual fields to default values if unset
+	if _, ok := d.GetOkExists("skip_await_rollout"); !ok {
+		if err := d.Set("skip_await_rollout", false); err != nil {
+			return fmt.Errorf("Error setting skip_await_rollout: %s", err)
+		}
+	}
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error reading OSPolicyAssignment: %s", err)
 	}
@@ -1251,50 +1271,54 @@ func resourceOSConfigOSPolicyAssignmentRead(d *schema.ResourceData, meta interfa
 
 func resourceOSConfigOSPolicyAssignmentUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	billingProject := ""
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return fmt.Errorf("Error fetching project for OSPolicyAssignment: %s", err)
 	}
-	billingProject = project
+	// Shorten long form project id to short form
+	billingProject = tpgresource.GetResourceNameFromSelfLink(project)
 
 	obj := make(map[string]interface{})
 	descriptionProp, err := expandOSConfigOSPolicyAssignmentDescription(d.Get("description"), d, config)
 	if err != nil {
 		return err
-	} else if v, ok := d.GetOkExists("description"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
+	} else if v, ok := d.GetOkExists("description"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
 		obj["description"] = descriptionProp
 	}
 	osPoliciesProp, err := expandOSConfigOSPolicyAssignmentOsPolicies(d.Get("os_policies"), d, config)
 	if err != nil {
 		return err
-	} else if v, ok := d.GetOkExists("os_policies"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, osPoliciesProp)) {
+	} else if v, ok := d.GetOkExists("os_policies"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, osPoliciesProp)) {
 		obj["osPolicies"] = osPoliciesProp
 	}
 	instanceFilterProp, err := expandOSConfigOSPolicyAssignmentInstanceFilter(d.Get("instance_filter"), d, config)
 	if err != nil {
 		return err
-	} else if v, ok := d.GetOkExists("instance_filter"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, instanceFilterProp)) {
+	} else if v, ok := d.GetOkExists("instance_filter"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, instanceFilterProp)) {
 		obj["instanceFilter"] = instanceFilterProp
 	}
 	rolloutProp, err := expandOSConfigOSPolicyAssignmentRollout(d.Get("rollout"), d, config)
 	if err != nil {
 		return err
-	} else if v, ok := d.GetOkExists("rollout"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, rolloutProp)) {
+	} else if v, ok := d.GetOkExists("rollout"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, rolloutProp)) {
 		obj["rollout"] = rolloutProp
 	}
 
-	url, err := ReplaceVars(d, config, "{{OSConfigBasePath}}projects/{{project}}/locations/{{location}}/osPolicyAssignments/{{name}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{OSConfigBasePath}}projects/{{project}}/locations/{{location}}/osPolicyAssignments/{{name}}")
 	if err != nil {
 		return err
 	}
+	// Always use GA endpoints for this resource.
 	url = strings.ReplaceAll(url, "https://osconfig.googleapis.com/v1beta", "https://osconfig.googleapis.com/v1")
+	// Remove redundant projects/ from url.
+	url = strings.ReplaceAll(url, "projects/projects/", "projects/")
 
 	log.Printf("[DEBUG] Updating OSPolicyAssignment %q: %#v", d.Id(), obj)
 	updateMask := []string{}
@@ -1314,7 +1338,7 @@ func resourceOSConfigOSPolicyAssignmentUpdate(d *schema.ResourceData, meta inter
 	if d.HasChange("rollout") {
 		updateMask = append(updateMask, "rollout")
 	}
-	// updateMask is a URL parameter but not present in the schema, so ReplaceVars
+	// updateMask is a URL parameter but not present in the schema, so tpgresource.ReplaceVars
 	// won't set it
 	url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 	if err != nil {
@@ -1322,7 +1346,7 @@ func resourceOSConfigOSPolicyAssignmentUpdate(d *schema.ResourceData, meta inter
 	}
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
@@ -1357,29 +1381,33 @@ func resourceOSConfigOSPolicyAssignmentUpdate(d *schema.ResourceData, meta inter
 
 func resourceOSConfigOSPolicyAssignmentDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	billingProject := ""
 
-	project, err := getProject(d, config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return fmt.Errorf("Error fetching project for OSPolicyAssignment: %s", err)
 	}
-	billingProject = project
+	// Shorten long form project id to short form
+	billingProject = tpgresource.GetResourceNameFromSelfLink(project)
 
-	url, err := ReplaceVars(d, config, "{{OSConfigBasePath}}projects/{{project}}/locations/{{location}}/osPolicyAssignments/{{name}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{OSConfigBasePath}}projects/{{project}}/locations/{{location}}/osPolicyAssignments/{{name}}")
 	if err != nil {
 		return err
 	}
+	// Always use GA endpoints for this resource.
 	url = strings.ReplaceAll(url, "https://osconfig.googleapis.com/v1beta", "https://osconfig.googleapis.com/v1")
+	// Remove redundant projects/ from url.
+	url = strings.ReplaceAll(url, "projects/projects/", "projects/")
 
 	log.Printf("[DEBUG] Deleting OSPolicyAssignment %q", d.Id())
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
@@ -1411,7 +1439,7 @@ func resourceOSConfigOSPolicyAssignmentDelete(d *schema.ResourceData, meta inter
 
 func resourceOSConfigOSPolicyAssignmentImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
-	if err := ParseImportId([]string{
+	if err := tpgresource.ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/osPolicyAssignments/(?P<name>[^/]+)",
 		"(?P<project>[^/]+)/(?P<location>[^/]+)/(?P<name>[^/]+)",
 		"(?P<location>[^/]+)/(?P<name>[^/]+)",
@@ -1420,13 +1448,18 @@ func resourceOSConfigOSPolicyAssignmentImport(d *schema.ResourceData, meta inter
 	}
 
 	// Replace import id for the resource id
-	id, err := ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/osPolicyAssignments/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/osPolicyAssignments/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
+	// Remove redundant projects/ from id.
+	id = strings.ReplaceAll(id, "projects/projects/", "projects/")
 	d.SetId(id)
 
 	// Explicitly set virtual fields to default values on import
+	if err := d.Set("skip_await_rollout", false); err != nil {
+		return nil, fmt.Errorf("Error setting skip_await_rollout: %s", err)
+	}
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -1447,7 +1480,7 @@ func flattenOSConfigOSPolicyAssignmentName(v interface{}, d *schema.ResourceData
 	if v == nil {
 		return v
 	}
-	return NameFromSelfLinkStateFunc(v)
+	return tpgresource.NameFromSelfLinkStateFunc(v)
 }
 
 func flattenOSConfigOSPolicyAssignmentDescription(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
@@ -1693,7 +1726,7 @@ func flattenOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDebSou
 func flattenOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDebSourceGcsGeneration(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := StringToFixed64(strVal); err == nil {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -1838,7 +1871,7 @@ func flattenOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgRpmSou
 func flattenOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgRpmSourceGcsGeneration(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := StringToFixed64(strVal); err == nil {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -1966,7 +1999,7 @@ func flattenOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgMsiSou
 func flattenOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgMsiSourceGcsGeneration(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := StringToFixed64(strVal); err == nil {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -2251,7 +2284,7 @@ func flattenOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValid
 func flattenOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValidateFileGcsGeneration(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := StringToFixed64(strVal); err == nil {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -2380,7 +2413,7 @@ func flattenOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnfor
 func flattenOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforceFileGcsGeneration(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := StringToFixed64(strVal); err == nil {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -2509,7 +2542,7 @@ func flattenOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFileFileG
 func flattenOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFileFileGcsGeneration(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := StringToFixed64(strVal); err == nil {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -2678,7 +2711,7 @@ func flattenOSConfigOSPolicyAssignmentRolloutDisruptionBudget(v interface{}, d *
 func flattenOSConfigOSPolicyAssignmentRolloutDisruptionBudgetFixed(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := StringToFixed64(strVal); err == nil {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -2695,7 +2728,7 @@ func flattenOSConfigOSPolicyAssignmentRolloutDisruptionBudgetFixed(v interface{}
 func flattenOSConfigOSPolicyAssignmentRolloutDisruptionBudgetPercent(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := StringToFixed64(strVal); err == nil {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -2766,35 +2799,35 @@ func expandOSConfigOSPolicyAssignmentOsPolicies(v interface{}, d tpgresource.Ter
 		transformedId, err := expandOSConfigOSPolicyAssignmentOsPoliciesId(original["id"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedId); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedId); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["id"] = transformedId
 		}
 
 		transformedDescription, err := expandOSConfigOSPolicyAssignmentOsPoliciesDescription(original["description"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedDescription); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedDescription); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["description"] = transformedDescription
 		}
 
 		transformedMode, err := expandOSConfigOSPolicyAssignmentOsPoliciesMode(original["mode"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedMode); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedMode); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["mode"] = transformedMode
 		}
 
 		transformedResourceGroups, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroups(original["resource_groups"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedResourceGroups); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedResourceGroups); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["resourceGroups"] = transformedResourceGroups
 		}
 
 		transformedAllowNoResourceGroupMatch, err := expandOSConfigOSPolicyAssignmentOsPoliciesAllowNoResourceGroupMatch(original["allow_no_resource_group_match"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedAllowNoResourceGroupMatch); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedAllowNoResourceGroupMatch); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["allowNoResourceGroupMatch"] = transformedAllowNoResourceGroupMatch
 		}
 
@@ -2828,14 +2861,14 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroups(v interface{}, d t
 		transformedInventoryFilters, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsInventoryFilters(original["inventory_filters"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedInventoryFilters); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedInventoryFilters); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["inventoryFilters"] = transformedInventoryFilters
 		}
 
 		transformedResources, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResources(original["resources"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedResources); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedResources); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["resources"] = transformedResources
 		}
 
@@ -2857,14 +2890,14 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsInventoryFilters(v 
 		transformedOsShortName, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsInventoryFiltersOsShortName(original["os_short_name"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedOsShortName); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedOsShortName); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["osShortName"] = transformedOsShortName
 		}
 
 		transformedOsVersion, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsInventoryFiltersOsVersion(original["os_version"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedOsVersion); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedOsVersion); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["osVersion"] = transformedOsVersion
 		}
 
@@ -2894,35 +2927,35 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResources(v interfa
 		transformedId, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesId(original["id"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedId); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedId); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["id"] = transformedId
 		}
 
 		transformedPkg, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkg(original["pkg"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedPkg); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedPkg); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["pkg"] = transformedPkg
 		}
 
 		transformedRepository, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepository(original["repository"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedRepository); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedRepository); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["repository"] = transformedRepository
 		}
 
 		transformedExec, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExec(original["exec"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedExec); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedExec); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["exec"] = transformedExec
 		}
 
 		transformedFile, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFile(original["file"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedFile); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedFile); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["file"] = transformedFile
 		}
 
@@ -2947,56 +2980,56 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkg(v inte
 	transformedDesiredState, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDesiredState(original["desired_state"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedDesiredState); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedDesiredState); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["desiredState"] = transformedDesiredState
 	}
 
 	transformedApt, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgApt(original["apt"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedApt); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedApt); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["apt"] = transformedApt
 	}
 
 	transformedDeb, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDeb(original["deb"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedDeb); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedDeb); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["deb"] = transformedDeb
 	}
 
 	transformedYum, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgYum(original["yum"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedYum); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedYum); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["yum"] = transformedYum
 	}
 
 	transformedZypper, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgZypper(original["zypper"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedZypper); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedZypper); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["zypper"] = transformedZypper
 	}
 
 	transformedRpm, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgRpm(original["rpm"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedRpm); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedRpm); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["rpm"] = transformedRpm
 	}
 
 	transformedGooget, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgGooget(original["googet"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGooget); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGooget); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["googet"] = transformedGooget
 	}
 
 	transformedMsi, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgMsi(original["msi"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedMsi); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedMsi); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["msi"] = transformedMsi
 	}
 
@@ -3019,7 +3052,7 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgApt(v i
 	transformedName, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgAptName(original["name"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedName); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedName); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["name"] = transformedName
 	}
 
@@ -3042,14 +3075,14 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDeb(v i
 	transformedSource, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDebSource(original["source"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedSource); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedSource); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["source"] = transformedSource
 	}
 
 	transformedPullDeps, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDebPullDeps(original["pull_deps"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedPullDeps); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedPullDeps); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["pullDeps"] = transformedPullDeps
 	}
 
@@ -3068,28 +3101,28 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDebSour
 	transformedRemote, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDebSourceRemote(original["remote"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedRemote); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedRemote); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["remote"] = transformedRemote
 	}
 
 	transformedGcs, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDebSourceGcs(original["gcs"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGcs); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGcs); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["gcs"] = transformedGcs
 	}
 
 	transformedLocalPath, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDebSourceLocalPath(original["local_path"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedLocalPath); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedLocalPath); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["localPath"] = transformedLocalPath
 	}
 
 	transformedAllowInsecure, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDebSourceAllowInsecure(original["allow_insecure"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedAllowInsecure); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedAllowInsecure); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["allowInsecure"] = transformedAllowInsecure
 	}
 
@@ -3108,14 +3141,14 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDebSour
 	transformedUri, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDebSourceRemoteUri(original["uri"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedUri); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedUri); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["uri"] = transformedUri
 	}
 
 	transformedSha256Checksum, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDebSourceRemoteSha256Checksum(original["sha256_checksum"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedSha256Checksum); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedSha256Checksum); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["sha256Checksum"] = transformedSha256Checksum
 	}
 
@@ -3142,21 +3175,21 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDebSour
 	transformedBucket, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDebSourceGcsBucket(original["bucket"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedBucket); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedBucket); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["bucket"] = transformedBucket
 	}
 
 	transformedObject, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDebSourceGcsObject(original["object"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedObject); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedObject); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["object"] = transformedObject
 	}
 
 	transformedGeneration, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgDebSourceGcsGeneration(original["generation"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGeneration); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGeneration); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["generation"] = transformedGeneration
 	}
 
@@ -3199,7 +3232,7 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgYum(v i
 	transformedName, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgYumName(original["name"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedName); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedName); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["name"] = transformedName
 	}
 
@@ -3222,7 +3255,7 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgZypper(
 	transformedName, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgZypperName(original["name"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedName); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedName); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["name"] = transformedName
 	}
 
@@ -3245,14 +3278,14 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgRpm(v i
 	transformedSource, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgRpmSource(original["source"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedSource); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedSource); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["source"] = transformedSource
 	}
 
 	transformedPullDeps, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgRpmPullDeps(original["pull_deps"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedPullDeps); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedPullDeps); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["pullDeps"] = transformedPullDeps
 	}
 
@@ -3271,28 +3304,28 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgRpmSour
 	transformedRemote, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgRpmSourceRemote(original["remote"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedRemote); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedRemote); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["remote"] = transformedRemote
 	}
 
 	transformedGcs, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgRpmSourceGcs(original["gcs"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGcs); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGcs); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["gcs"] = transformedGcs
 	}
 
 	transformedLocalPath, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgRpmSourceLocalPath(original["local_path"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedLocalPath); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedLocalPath); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["localPath"] = transformedLocalPath
 	}
 
 	transformedAllowInsecure, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgRpmSourceAllowInsecure(original["allow_insecure"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedAllowInsecure); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedAllowInsecure); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["allowInsecure"] = transformedAllowInsecure
 	}
 
@@ -3311,14 +3344,14 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgRpmSour
 	transformedUri, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgRpmSourceRemoteUri(original["uri"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedUri); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedUri); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["uri"] = transformedUri
 	}
 
 	transformedSha256Checksum, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgRpmSourceRemoteSha256Checksum(original["sha256_checksum"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedSha256Checksum); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedSha256Checksum); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["sha256Checksum"] = transformedSha256Checksum
 	}
 
@@ -3345,21 +3378,21 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgRpmSour
 	transformedBucket, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgRpmSourceGcsBucket(original["bucket"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedBucket); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedBucket); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["bucket"] = transformedBucket
 	}
 
 	transformedObject, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgRpmSourceGcsObject(original["object"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedObject); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedObject); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["object"] = transformedObject
 	}
 
 	transformedGeneration, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgRpmSourceGcsGeneration(original["generation"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGeneration); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGeneration); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["generation"] = transformedGeneration
 	}
 
@@ -3402,7 +3435,7 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgGooget(
 	transformedName, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgGoogetName(original["name"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedName); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedName); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["name"] = transformedName
 	}
 
@@ -3425,14 +3458,14 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgMsi(v i
 	transformedSource, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgMsiSource(original["source"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedSource); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedSource); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["source"] = transformedSource
 	}
 
 	transformedProperties, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgMsiProperties(original["properties"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedProperties); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedProperties); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["properties"] = transformedProperties
 	}
 
@@ -3451,28 +3484,28 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgMsiSour
 	transformedRemote, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgMsiSourceRemote(original["remote"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedRemote); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedRemote); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["remote"] = transformedRemote
 	}
 
 	transformedGcs, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgMsiSourceGcs(original["gcs"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGcs); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGcs); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["gcs"] = transformedGcs
 	}
 
 	transformedLocalPath, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgMsiSourceLocalPath(original["local_path"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedLocalPath); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedLocalPath); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["localPath"] = transformedLocalPath
 	}
 
 	transformedAllowInsecure, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgMsiSourceAllowInsecure(original["allow_insecure"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedAllowInsecure); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedAllowInsecure); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["allowInsecure"] = transformedAllowInsecure
 	}
 
@@ -3491,14 +3524,14 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgMsiSour
 	transformedUri, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgMsiSourceRemoteUri(original["uri"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedUri); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedUri); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["uri"] = transformedUri
 	}
 
 	transformedSha256Checksum, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgMsiSourceRemoteSha256Checksum(original["sha256_checksum"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedSha256Checksum); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedSha256Checksum); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["sha256Checksum"] = transformedSha256Checksum
 	}
 
@@ -3525,21 +3558,21 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgMsiSour
 	transformedBucket, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgMsiSourceGcsBucket(original["bucket"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedBucket); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedBucket); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["bucket"] = transformedBucket
 	}
 
 	transformedObject, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgMsiSourceGcsObject(original["object"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedObject); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedObject); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["object"] = transformedObject
 	}
 
 	transformedGeneration, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesPkgMsiSourceGcsGeneration(original["generation"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGeneration); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGeneration); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["generation"] = transformedGeneration
 	}
 
@@ -3582,28 +3615,28 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepository
 	transformedApt, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryApt(original["apt"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedApt); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedApt); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["apt"] = transformedApt
 	}
 
 	transformedYum, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryYum(original["yum"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedYum); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedYum); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["yum"] = transformedYum
 	}
 
 	transformedZypper, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryZypper(original["zypper"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedZypper); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedZypper); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["zypper"] = transformedZypper
 	}
 
 	transformedGoo, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryGoo(original["goo"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGoo); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGoo); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["goo"] = transformedGoo
 	}
 
@@ -3622,35 +3655,35 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepository
 	transformedArchiveType, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryAptArchiveType(original["archive_type"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedArchiveType); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedArchiveType); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["archiveType"] = transformedArchiveType
 	}
 
 	transformedUri, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryAptUri(original["uri"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedUri); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedUri); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["uri"] = transformedUri
 	}
 
 	transformedDistribution, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryAptDistribution(original["distribution"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedDistribution); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedDistribution); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["distribution"] = transformedDistribution
 	}
 
 	transformedComponents, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryAptComponents(original["components"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedComponents); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedComponents); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["components"] = transformedComponents
 	}
 
 	transformedGpgKey, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryAptGpgKey(original["gpg_key"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGpgKey); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGpgKey); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["gpgKey"] = transformedGpgKey
 	}
 
@@ -3689,28 +3722,28 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepository
 	transformedId, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryYumId(original["id"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedId); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedId); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["id"] = transformedId
 	}
 
 	transformedDisplayName, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryYumDisplayName(original["display_name"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedDisplayName); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedDisplayName); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["displayName"] = transformedDisplayName
 	}
 
 	transformedBaseUrl, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryYumBaseUrl(original["base_url"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedBaseUrl); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedBaseUrl); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["baseUrl"] = transformedBaseUrl
 	}
 
 	transformedGpgKeys, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryYumGpgKeys(original["gpg_keys"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGpgKeys); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGpgKeys); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["gpgKeys"] = transformedGpgKeys
 	}
 
@@ -3745,28 +3778,28 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepository
 	transformedId, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryZypperId(original["id"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedId); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedId); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["id"] = transformedId
 	}
 
 	transformedDisplayName, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryZypperDisplayName(original["display_name"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedDisplayName); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedDisplayName); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["displayName"] = transformedDisplayName
 	}
 
 	transformedBaseUrl, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryZypperBaseUrl(original["base_url"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedBaseUrl); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedBaseUrl); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["baseUrl"] = transformedBaseUrl
 	}
 
 	transformedGpgKeys, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryZypperGpgKeys(original["gpg_keys"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGpgKeys); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGpgKeys); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["gpgKeys"] = transformedGpgKeys
 	}
 
@@ -3801,14 +3834,14 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepository
 	transformedName, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryGooName(original["name"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedName); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedName); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["name"] = transformedName
 	}
 
 	transformedUrl, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesRepositoryGooUrl(original["url"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedUrl); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedUrl); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["url"] = transformedUrl
 	}
 
@@ -3835,14 +3868,14 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExec(v int
 	transformedValidate, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValidate(original["validate"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedValidate); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedValidate); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["validate"] = transformedValidate
 	}
 
 	transformedEnforce, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforce(original["enforce"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedEnforce); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedEnforce); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["enforce"] = transformedEnforce
 	}
 
@@ -3861,35 +3894,35 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValida
 	transformedFile, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValidateFile(original["file"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedFile); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedFile); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["file"] = transformedFile
 	}
 
 	transformedScript, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValidateScript(original["script"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedScript); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedScript); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["script"] = transformedScript
 	}
 
 	transformedArgs, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValidateArgs(original["args"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedArgs); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedArgs); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["args"] = transformedArgs
 	}
 
 	transformedInterpreter, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValidateInterpreter(original["interpreter"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedInterpreter); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedInterpreter); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["interpreter"] = transformedInterpreter
 	}
 
 	transformedOutputFilePath, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValidateOutputFilePath(original["output_file_path"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedOutputFilePath); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedOutputFilePath); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["outputFilePath"] = transformedOutputFilePath
 	}
 
@@ -3908,28 +3941,28 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValida
 	transformedRemote, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValidateFileRemote(original["remote"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedRemote); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedRemote); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["remote"] = transformedRemote
 	}
 
 	transformedGcs, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValidateFileGcs(original["gcs"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGcs); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGcs); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["gcs"] = transformedGcs
 	}
 
 	transformedLocalPath, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValidateFileLocalPath(original["local_path"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedLocalPath); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedLocalPath); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["localPath"] = transformedLocalPath
 	}
 
 	transformedAllowInsecure, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValidateFileAllowInsecure(original["allow_insecure"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedAllowInsecure); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedAllowInsecure); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["allowInsecure"] = transformedAllowInsecure
 	}
 
@@ -3948,14 +3981,14 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValida
 	transformedUri, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValidateFileRemoteUri(original["uri"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedUri); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedUri); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["uri"] = transformedUri
 	}
 
 	transformedSha256Checksum, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValidateFileRemoteSha256Checksum(original["sha256_checksum"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedSha256Checksum); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedSha256Checksum); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["sha256Checksum"] = transformedSha256Checksum
 	}
 
@@ -3982,21 +4015,21 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValida
 	transformedBucket, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValidateFileGcsBucket(original["bucket"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedBucket); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedBucket); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["bucket"] = transformedBucket
 	}
 
 	transformedObject, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValidateFileGcsObject(original["object"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedObject); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedObject); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["object"] = transformedObject
 	}
 
 	transformedGeneration, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecValidateFileGcsGeneration(original["generation"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGeneration); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGeneration); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["generation"] = transformedGeneration
 	}
 
@@ -4051,35 +4084,35 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforc
 	transformedFile, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforceFile(original["file"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedFile); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedFile); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["file"] = transformedFile
 	}
 
 	transformedScript, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforceScript(original["script"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedScript); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedScript); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["script"] = transformedScript
 	}
 
 	transformedArgs, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforceArgs(original["args"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedArgs); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedArgs); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["args"] = transformedArgs
 	}
 
 	transformedInterpreter, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforceInterpreter(original["interpreter"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedInterpreter); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedInterpreter); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["interpreter"] = transformedInterpreter
 	}
 
 	transformedOutputFilePath, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforceOutputFilePath(original["output_file_path"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedOutputFilePath); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedOutputFilePath); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["outputFilePath"] = transformedOutputFilePath
 	}
 
@@ -4098,28 +4131,28 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforc
 	transformedRemote, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforceFileRemote(original["remote"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedRemote); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedRemote); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["remote"] = transformedRemote
 	}
 
 	transformedGcs, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforceFileGcs(original["gcs"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGcs); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGcs); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["gcs"] = transformedGcs
 	}
 
 	transformedLocalPath, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforceFileLocalPath(original["local_path"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedLocalPath); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedLocalPath); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["localPath"] = transformedLocalPath
 	}
 
 	transformedAllowInsecure, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforceFileAllowInsecure(original["allow_insecure"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedAllowInsecure); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedAllowInsecure); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["allowInsecure"] = transformedAllowInsecure
 	}
 
@@ -4138,14 +4171,14 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforc
 	transformedUri, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforceFileRemoteUri(original["uri"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedUri); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedUri); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["uri"] = transformedUri
 	}
 
 	transformedSha256Checksum, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforceFileRemoteSha256Checksum(original["sha256_checksum"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedSha256Checksum); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedSha256Checksum); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["sha256Checksum"] = transformedSha256Checksum
 	}
 
@@ -4172,21 +4205,21 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforc
 	transformedBucket, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforceFileGcsBucket(original["bucket"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedBucket); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedBucket); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["bucket"] = transformedBucket
 	}
 
 	transformedObject, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforceFileGcsObject(original["object"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedObject); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedObject); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["object"] = transformedObject
 	}
 
 	transformedGeneration, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesExecEnforceFileGcsGeneration(original["generation"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGeneration); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGeneration); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["generation"] = transformedGeneration
 	}
 
@@ -4241,35 +4274,35 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFile(v int
 	transformedFile, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFileFile(original["file"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedFile); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedFile); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["file"] = transformedFile
 	}
 
 	transformedContent, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFileContent(original["content"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedContent); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedContent); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["content"] = transformedContent
 	}
 
 	transformedPath, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFilePath(original["path"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedPath); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedPath); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["path"] = transformedPath
 	}
 
 	transformedState, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFileState(original["state"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedState); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedState); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["state"] = transformedState
 	}
 
 	transformedPermissions, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFilePermissions(original["permissions"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedPermissions); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedPermissions); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["permissions"] = transformedPermissions
 	}
 
@@ -4288,28 +4321,28 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFileFile(v
 	transformedRemote, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFileFileRemote(original["remote"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedRemote); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedRemote); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["remote"] = transformedRemote
 	}
 
 	transformedGcs, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFileFileGcs(original["gcs"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGcs); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGcs); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["gcs"] = transformedGcs
 	}
 
 	transformedLocalPath, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFileFileLocalPath(original["local_path"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedLocalPath); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedLocalPath); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["localPath"] = transformedLocalPath
 	}
 
 	transformedAllowInsecure, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFileFileAllowInsecure(original["allow_insecure"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedAllowInsecure); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedAllowInsecure); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["allowInsecure"] = transformedAllowInsecure
 	}
 
@@ -4328,14 +4361,14 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFileFileRe
 	transformedUri, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFileFileRemoteUri(original["uri"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedUri); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedUri); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["uri"] = transformedUri
 	}
 
 	transformedSha256Checksum, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFileFileRemoteSha256Checksum(original["sha256_checksum"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedSha256Checksum); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedSha256Checksum); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["sha256Checksum"] = transformedSha256Checksum
 	}
 
@@ -4362,21 +4395,21 @@ func expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFileFileGc
 	transformedBucket, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFileFileGcsBucket(original["bucket"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedBucket); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedBucket); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["bucket"] = transformedBucket
 	}
 
 	transformedObject, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFileFileGcsObject(original["object"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedObject); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedObject); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["object"] = transformedObject
 	}
 
 	transformedGeneration, err := expandOSConfigOSPolicyAssignmentOsPoliciesResourceGroupsResourcesFileFileGcsGeneration(original["generation"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGeneration); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGeneration); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["generation"] = transformedGeneration
 	}
 
@@ -4435,28 +4468,28 @@ func expandOSConfigOSPolicyAssignmentInstanceFilter(v interface{}, d tpgresource
 	transformedAll, err := expandOSConfigOSPolicyAssignmentInstanceFilterAll(original["all"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedAll); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedAll); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["all"] = transformedAll
 	}
 
 	transformedInclusionLabels, err := expandOSConfigOSPolicyAssignmentInstanceFilterInclusionLabels(original["inclusion_labels"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedInclusionLabels); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedInclusionLabels); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["inclusionLabels"] = transformedInclusionLabels
 	}
 
 	transformedExclusionLabels, err := expandOSConfigOSPolicyAssignmentInstanceFilterExclusionLabels(original["exclusion_labels"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedExclusionLabels); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedExclusionLabels); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["exclusionLabels"] = transformedExclusionLabels
 	}
 
 	transformedInventories, err := expandOSConfigOSPolicyAssignmentInstanceFilterInventories(original["inventories"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedInventories); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedInventories); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["inventories"] = transformedInventories
 	}
 
@@ -4480,7 +4513,7 @@ func expandOSConfigOSPolicyAssignmentInstanceFilterInclusionLabels(v interface{}
 		transformedLabels, err := expandOSConfigOSPolicyAssignmentInstanceFilterInclusionLabelsLabels(original["labels"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedLabels); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedLabels); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["labels"] = transformedLabels
 		}
 
@@ -4513,7 +4546,7 @@ func expandOSConfigOSPolicyAssignmentInstanceFilterExclusionLabels(v interface{}
 		transformedLabels, err := expandOSConfigOSPolicyAssignmentInstanceFilterExclusionLabelsLabels(original["labels"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedLabels); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedLabels); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["labels"] = transformedLabels
 		}
 
@@ -4546,14 +4579,14 @@ func expandOSConfigOSPolicyAssignmentInstanceFilterInventories(v interface{}, d 
 		transformedOsShortName, err := expandOSConfigOSPolicyAssignmentInstanceFilterInventoriesOsShortName(original["os_short_name"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedOsShortName); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedOsShortName); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["osShortName"] = transformedOsShortName
 		}
 
 		transformedOsVersion, err := expandOSConfigOSPolicyAssignmentInstanceFilterInventoriesOsVersion(original["os_version"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedOsVersion); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedOsVersion); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["osVersion"] = transformedOsVersion
 		}
 
@@ -4582,14 +4615,14 @@ func expandOSConfigOSPolicyAssignmentRollout(v interface{}, d tpgresource.Terraf
 	transformedDisruptionBudget, err := expandOSConfigOSPolicyAssignmentRolloutDisruptionBudget(original["disruption_budget"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedDisruptionBudget); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedDisruptionBudget); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["disruptionBudget"] = transformedDisruptionBudget
 	}
 
 	transformedMinWaitDuration, err := expandOSConfigOSPolicyAssignmentRolloutMinWaitDuration(original["min_wait_duration"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedMinWaitDuration); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedMinWaitDuration); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["minWaitDuration"] = transformedMinWaitDuration
 	}
 
@@ -4608,14 +4641,14 @@ func expandOSConfigOSPolicyAssignmentRolloutDisruptionBudget(v interface{}, d tp
 	transformedFixed, err := expandOSConfigOSPolicyAssignmentRolloutDisruptionBudgetFixed(original["fixed"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedFixed); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedFixed); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["fixed"] = transformedFixed
 	}
 
 	transformedPercent, err := expandOSConfigOSPolicyAssignmentRolloutDisruptionBudgetPercent(original["percent"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedPercent); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedPercent); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["percent"] = transformedPercent
 	}
 
