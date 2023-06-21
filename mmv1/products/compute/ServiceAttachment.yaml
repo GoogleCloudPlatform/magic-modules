@@ -206,6 +206,7 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: reconcileConnections
     default_value: true
+    send_empty_value: true
     description: |
       This flag determines whether a consumer accept/reject list change can reconcile the statuses of existing ACCEPTED or REJECTED PSC endpoints.
 

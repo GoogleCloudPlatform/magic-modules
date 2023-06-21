@@ -5,9 +5,17 @@ resource "google_compute_service_attachment" "<%= ctx[:primary_resource_id] %>" 
 
   domain_names             = ["gcp.tfacc.hashicorptest.com."]
   enable_proxy_protocol    = true
-  connection_preference    = "ACCEPT_AUTOMATIC"
+  connection_preference    = "ACCEPT_MANUAL"
   nat_subnets              = [google_compute_subnetwork.psc_ilb_nat.id]
   target_service           = google_compute_forwarding_rule.psc_ilb_target_service.id
+
+  consumer_reject_lists = ["673497134629", "482878270665"]
+
+  consumer_accept_lists {
+    project_id_or_num = "658859330310"
+    connection_limit  = 4
+  }
+
   reconcile_connections    = false
 }
 
@@ -15,7 +23,7 @@ resource "google_compute_address" "psc_ilb_consumer_address" {
   name   = "<%= ctx[:vars]['consumer_address_name'] %>"
   region = "us-west2"
 
-  subnetwork   = "default"
+  subnetwork   = google_compute_subnetwork.psc_ilb_producer_subnetwork.id
   address_type = "INTERNAL"
 }
 
@@ -25,7 +33,7 @@ resource "google_compute_forwarding_rule" "psc_ilb_consumer" {
 
   target                = google_compute_service_attachment.psc_ilb_service_attachment.id
   load_balancing_scheme = ""
-  network               = "default"
+  network               = google_compute_network.psc_ilb_network.id
   ip_address            = google_compute_address.psc_ilb_consumer_address.id
 }
 
