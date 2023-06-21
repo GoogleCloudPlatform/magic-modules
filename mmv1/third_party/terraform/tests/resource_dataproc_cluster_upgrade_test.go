@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package google
-<% if version == "private" -%>
+
 import (
 	"testing"
 
@@ -209,4 +208,3 @@ func TestAccDataprocClusterLabelsMigration_withRemoval(t *testing.T) {
 		},
 	})
 }
-<% end -%>

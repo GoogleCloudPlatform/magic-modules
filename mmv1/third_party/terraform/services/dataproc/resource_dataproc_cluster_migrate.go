@@ -1,6 +1,6 @@
 <% autogen_exception -%>
 package dataproc
-<% if version == "private" -%>
+
 import (
 	"context"
 	"fmt"
@@ -1007,4 +1007,3 @@ func ResourceDataprocClusterStateUpgradeV0(_ context.Context, rawState map[strin
 
 	return rawState, nil
 }
-<% end -%>

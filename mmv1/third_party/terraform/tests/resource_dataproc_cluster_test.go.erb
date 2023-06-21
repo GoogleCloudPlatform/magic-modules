@@ -690,17 +690,11 @@ func TestAccDataprocCluster_withLabels(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
 
-<% unless version == "private" -%>
-					// We only provide one, but GCP adds three and we added goog-dataproc-autozone internally, so expect 5.
-					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "labels.%", "5"),
-<% else -%>
 					// We only provide one, so expect 1.
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "labels.%", "1"),
-<% end -%>
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "labels.key1", "value1"),
 				),
 			},
-<% if version == "private" -%>
 			{
 				Config: testAccDataprocCluster_withLabelsUpdate(rnd),
 				Check: resource.ComposeTestCheckFunc(
@@ -711,12 +705,10 @@ func TestAccDataprocCluster_withLabels(t *testing.T) {
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "labels.key2", "value2"),
 				),
 			},
-<% end -%>
 		},
 	})
 }
 
-<% if version == "private" -%>
 func TestAccDataprocCluster_withLabelsUpdate(t *testing.T) {
 	SkipIfVcr(t)
 	t.Parallel()
@@ -764,7 +756,6 @@ func TestAccDataprocCluster_withLabelsUpdate(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccDataprocCluster_withNetworkRefs(t *testing.T) {
 	// Multiple fine-grained resources
@@ -1789,7 +1780,6 @@ resource "google_dataproc_cluster" "with_labels" {
 `, rnd)
 }
 
-<% if version == "private" -%>
 func testAccDataprocCluster_withLabelsUpdate(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_labels" {
@@ -1811,7 +1801,6 @@ resource "google_dataproc_cluster" "with_labels" {
 }
 `, rnd)
 }
-<% end -%>
 
 func testAccDataprocCluster_withEndpointConfig(rnd string) string {
 	return fmt.Sprintf(`
