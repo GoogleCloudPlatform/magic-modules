@@ -45,7 +45,7 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-import_format: 
+import_format:
   ['projects/{{project}}/regions/{{region}}/networkEdgeSecurityServices/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -56,28 +56,29 @@ examples:
     test_env_vars:
       project_id: :PROJECT_NAME
 parameters:
-  - !ruby/object:Api::Type::String
+  - !ruby/object:Api::Type::ResourceRef
     name: 'region'
-    required: true
+    resource: 'Region'
+    imports: 'name'
+    required: false
+    immutable: true
     description: |
       The region of the gateway security policy.
-    url_param_only: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'validateOnly'
-    description: |
-      If true, the request will not be committed.
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
+    immutable: true
     description: |
       Name of the resource. Provided by the client when the resource is created.
+    required: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
       Free-text description of the resource.
   - !ruby/object:Api::Type::String
-    name: 'id'
+    name: 'serviceId'
+    api_name: 'id'
     output: true
     description: |
       The unique identifier for the resource. This identifier is defined by the server.
@@ -92,7 +93,8 @@ properties:
     description: |
       Server-defined URL for the resource.
   - !ruby/object:Api::Type::String
-    name: 'selfLinkWithId'
+    name: 'selfLinkWithServiceId'
+    api_name: 'selfLinkWithId'
     output: true
     description: |
       Server-defined URL for this resource with the resource id.
@@ -100,10 +102,9 @@ properties:
     name: 'fingerprint'
     output: true
     description: |
-      Fingerprint of this resource. A hash of the contents stored in this object. This field is used in optimistic locking. This field will be ignored when inserting a NetworkEdgeSecurityService. 
+      Fingerprint of this resource. A hash of the contents stored in this object. This field is used in optimistic locking. This field will be ignored when inserting a NetworkEdgeSecurityService.
       An up-to-date fingerprint must be provided in order to update the NetworkEdgeSecurityService, otherwise the request will fail with error 412 conditionNotMet.
   - !ruby/object:Api::Type::String
     name: 'securityPolicy'
     description: |
       The resource URL for the network edge security service associated with this network edge security service.
-  
