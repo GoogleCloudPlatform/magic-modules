@@ -65,7 +65,7 @@ if [ -n "$BASE_BRANCH" ]; then
     gsutil -m -q cp gs://ci-vcr-cassettes/beta/fixtures/* fixtures/
   fi
   if [ "$BASE_BRANCH" == "main" ]; then
-  # copy feature branch specific cassettes over main. This might fail but that's ok if the folder doesnt exist
+    # copy feature branch specific cassettes over main. This might fail but that's ok if the folder doesnt exist
     gsutil -m -q cp gs://ci-vcr-cassettes/beta/refs/branches/$BASE_BRANCH/fixtures/* fixtures/
   fi
 else
