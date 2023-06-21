@@ -11,7 +11,6 @@ import (
 // Tests schema version migration by creating a cluster with an old version of the provider (4.65.0)
 // and then updating it with the current version the provider.
 func TestAccDataprocClusterLabelsMigration_withoutLabels_withoutChanges(t *testing.T) {
-	SkipIfVcr(t)
 	t.Parallel()
 
 	rnd := RandString(t, 10)
@@ -60,7 +59,6 @@ func TestAccDataprocClusterLabelsMigration_withoutLabels_withoutChanges(t *testi
 }
 
 func TestAccDataprocClusterLabelsMigration_withLabels_withoutChanges(t *testing.T) {
-	SkipIfVcr(t)
 	t.Parallel()
 
 	rnd := RandString(t, 10)
@@ -112,7 +110,6 @@ func TestAccDataprocClusterLabelsMigration_withLabels_withoutChanges(t *testing.
 }
 
 func TestAccDataprocClusterLabelsMigration_withUpdate(t *testing.T) {
-	SkipIfVcr(t)
 	t.Parallel()
 
 	rnd := RandString(t, 10)
@@ -161,7 +158,6 @@ func TestAccDataprocClusterLabelsMigration_withUpdate(t *testing.T) {
 }
 
 func TestAccDataprocClusterLabelsMigration_withRemoval(t *testing.T) {
-	SkipIfVcr(t)
 	t.Parallel()
 
 	rnd := RandString(t, 10)
