@@ -228,7 +228,7 @@ func ResourceDataprocCluster() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Description: `The list of labels (key/value pairs) to be applied to instances in the cluster. GCP generates some itself including goog-dataproc-cluster-name which is the name of the cluster.`,
+				Description: `The list of the labels (key/value pairs) configured on the resource and to be applied to instances in the cluster.`,
 			},
 
 			"effective_labels": {
