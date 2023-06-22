@@ -1,4 +1,3 @@
-// START vpc_subnet_private_access
 resource "google_compute_network" "network" {
   provider      = google-beta
   project       = "<%= ctx[:test_env_vars]['project'] %>"
@@ -16,7 +15,6 @@ resource "google_compute_subnetwork" "vpc_subnetwork" {
   private_ip_google_access = true
 }
 
-// START compute_internal_ip_private_access
 resource "google_compute_global_address" "default" {
   provider      = google-beta
   project       = google_compute_network.network.project
@@ -27,7 +25,6 @@ resource "google_compute_global_address" "default" {
   address       = "100.100.100.106"
 }
 
-// START compute_forwarding_rule_private_access
 resource "google_compute_global_forwarding_rule" "default" {
   provider      = google-beta
   project       = google_compute_network.network.project
