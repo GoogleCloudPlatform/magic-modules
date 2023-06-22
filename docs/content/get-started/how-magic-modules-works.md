@@ -16,7 +16,7 @@ Generation of the downstream repositories happens for every new commit in a PR (
 
 There are three types of resources supported by Magic Modules: MMv1, Handwritten, and DCL/tpgtools. These are described in more detail in the following sections.
 
-### MMv1
+### MMv1 (preferred)
 
 MMv1 is a Ruby-based code generator that implements Terraform Provider Google (TPG) resources from YAML specification files.
 

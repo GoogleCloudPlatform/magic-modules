@@ -11,6 +11,12 @@ aliases:
   - /docs/how-to/add-mmv1-iam
   - /how-to/add-mmv1-iam
   - /develop/add-mmv1-iam
+  - /docs/how-to/update-handwritten-resource
+  - /how-to/update-handwritten-resource
+  - /develop/update-handwritten-resource
+  - /docs/how-to/update-handwritten-documentation
+  - /how-to/update-handwritten-documentation
+  - /develop/update-handwritten-documentation
   - /docs/how-to
   - /how-to
 ---
@@ -38,15 +44,8 @@ For more information about types of resources and the generation process overall
 
 {{< tabs "resource" >}}
 {{< tab "MMv1" >}}
-1. Open the [product folder]({{<ref "/get-started/how-magic-modules-works.md#mmv1" >}}) for the resource.
-3. Create a new file for your new resource.
-
-   ```bash
-   touch RESOURCE_NAME.yaml
-   ```
-
-   Replace RESOURCE_NAME with the name of the API resource you are adding support for. For example, the [NatAddress](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses) resource would be represented by `NatAddress.yaml`.
-4. Open RESOURCE_NAME.yaml in an editor of your choice. Copy in the following template:
+1. Using an editor of your choice, in the appropriate [product folder]({{<ref "/get-started/how-magic-modules-works.md#mmv1" >}}), create a file called `RESOURCE_NAME.yaml`. Replace `RESOURCE_NAME` with the name of the API resource you are adding support for. For example, a configuration file for [NatAddress](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses) would be called `NatAddress.yaml`.
+2. Copy the following template into the new file:
    ```yaml
    # Copyright 2023 Google Inc.
    # Licensed under the Apache License, Version 2.0 (the "License");
@@ -186,55 +185,34 @@ For more information about types of resources and the generation process overall
      # Fields go here
    ```
 
-5. Modify the template as needed to match the API resource's documented behavior. These are the most commonly-used fields. For a comprehensive reference, see [ResourceName.yaml reference]({{<ref "/reference/resource-reference.md" >}}).
+3. Modify the template as needed to match the API resource's documented behavior.
+
+> **Note:** The template includes the most commonly-used fields. For a comprehensive reference, see [ResourceName.yaml reference ↗]({{<ref "/reference/resource-reference.md" >}}).
 {{< /tab >}}
 {{< tab "Handwritten" >}}
-> **Warning:** Handwritten resources are much more difficult to develop and maintain. Please make an MMv1 resource instead. If you believe that is not possible, get explicit confirmation from the core team that it is okay to add a new handwritten resource before proceeding.
+> **Warning:** Handwritten resources are much more difficult to develop and maintain. New handwritten resources will only be accepted if the resource cannot be implemented using MMv1.
 
-1. In your cloned `magic-modules` repository, list the folders in `mmv1/products`.
-   ```bash
-   cd ~/magic-modules
-   ls mmv1/third_party/terraform/services
-   ```
-
-   Output will look like:
-
-   ```
-   accessapproval   containerattached   networksecurity
-   alloydb          datalossprevention  privateca
-   apigee           dataproc            pubsub
-   appengine        dataprocmetastore   redis
-   ...
-   ```
-2. Navigate to the folder your resource belongs to. For example, a new Apigee resource would be added to the `apigee` folder.
-
-   ```bash
-   cd PRODUCT
-   ```
-
-   Replace `PRODUCT` with the name of the folder.
-
-   > **Tip:** Create a new folder if one does not exist. The name of the folder should match the API subdomain the resource will interact with.
-3. Create a file for the resource code.
-
-   ```bash
-   touch resource_PRODUCT_RESOURCE_NAME.go
-   ```
-
-   Replace `RESOURCE_NAME` with the name of the API resource, split with `_` at any word breaks and lowercased. For example,
-   `resource_alloydb_backup.go`.
-4. Open the file in the editor of your choice and write the code for the
-   resource.
-
-   The `google` and `google-beta` providers use resources based on Terraform Plugin SDK v2. Please consult [Hashicorp's documentation](https://developer.hashicorp.com/terraform/plugin/sdkv2) for guidance on creating new resources.
-
-   Alternately, create an MMv1 resource, [generate the providers]({{< ref "/get-started/generate-providers.md" >}}), and then copy the generated code as a starting point.
+1. Add the resource in MMv1.
+2. [Generate the beta provider]({{< ref "/get-started/generate-providers.md" >}})
+3. From the beta provider, copy the files generated for the resource to the following locations:
+   - Resource: Copy to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
+   - Documentation: [`magic-modules/mmv1/third_party/terraform/website/docs/r`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r)
+   - Tests: [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests)
+   - Sweepers: [`magic-modules/mmv1/third_party/terraform/utils`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/utils)
+4. Modify the Go code as needed.
+   - Replace the comments at the top of the file with the following:
+     ```
+     <% autogen_exception -%>
+     ```
+   - If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.erb` and wrap the beta-only code in a version guard: `<% unless version = 'ga' -%>...<% else -%>...<% end -%>`.
+5. Register the resource in [`magic-modules/mmv1/third_party/terraform/utils/provider.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/utils/provider.go.erb) under "START handwritten resources"
+   - Add a version guard for any beta-only resources.
 {{< /tab >}}
 {{< /tabs >}}
 
 ## Add fields
 
-{{< tabs "docs" >}}
+{{< tabs "fields" >}}
 {{< tab "MMv1" >}}
 1. For each API field, copy the following template into the resource's `properties` attribute. Be sure to indent appropriately.
 
@@ -347,9 +325,26 @@ For more information about types of resources and the generation process overall
   #     description: |
   #       MULTI_LINE_FIELD_DESCRIPTION
 ```
-2. Modify the field configuration according to the API documentation and behavior. These are the most commonly-used fields. For a comprehensive reference, see [Field reference]({{<ref "/reference/field-reference.md" >}})
+2. Modify the field configuration according to the API documentation and behavior.
+
+> **Note:** The template includes the most commonly-used fields. For a comprehensive reference, see [Field reference ↗]({{<ref "/reference/field-reference.md" >}}).
 {{< /tab >}}
 {{< tab "Handwritten" >}}
+1. Add the field to the handwritten resource's schema.
+   - The new field(s) should mirror the API's structure to ease predictability and maintenance. However, if there is an existing related / similar field in the resource that uses a different convention, follow that convention instead.
+   - Enum fields in the API should be represented as `TypeString` in Terraform for forwards-compatibility. Link to the API documentation of allowed values in the field description.
+   - Terraform field names should always use [snake case ↗](https://en.wikipedia.org/wiki/Snake_case).
+   - See [Schema Types ↗](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-types) and [Schema Behaviors ↗](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors) for more information about field schemas.
+2. Add handling for the new field in the resource's Create method and Update methods.
+   - "Expanders" convert Terraform resource data to API request data.
+   - For top level fields, add an expander. If the field is set or has changed, call the expander and add the resulting value to the API request.
+   - For other fields, add logic to the parent field's expander to add the field to the API request. Use a nested expander for complex logic.
+3. Add handling for the new field in the resource's Read method.
+   - "Flatteners" convert API response data to Terraform resource data.
+   - For top level fields, add a flattener. Call `d.Set()` on the flattened API response value to store it in Terraform state.
+   - For other fields, add logic to the parent field's flattener to convert the value from the API response to the Terraform state value. Use a nested flattener for complex logic.
+4. If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.erb` and wrap the beta-only code in a version guard: `<% unless version = 'ga' -%>...<% else -%>...<% end -%>`.
+   - Add a new guard rather than adding the field to an existing guard; it is easier to read.
 {{< /tab >}}
 {{< /tabs >}}
 
@@ -395,14 +390,32 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   # min_version: beta
 ```
 
-2. Modify the template as needed to match the API resource's documented behavior. These are the most commonly-used fields. For a comprehensive reference, see [IAM policy YAML reference]({{<ref "/reference/iam-policy-reference.md" >}}).
+2. Modify the template as needed to match the API resource's documented behavior. These are the most commonly-used fields. For a comprehensive reference, see [IAM policy YAML reference ↗]({{<ref "/reference/iam-policy-reference.md" >}}).
 {{< /tab >}}
 {{< tab "Handwritten" >}}
-Handwritten resources should use MMv1-based IAM support.
+> **Warning:** IAM support for handwritten resources should be implemented using MMv1. New handwritten IAM resources will only be accepted if they cannot be implemented using MMv1.
+
+### Add support in MMv1
 
 1. Follow the MMv1 directions in [Add the resource]({{<ref "#add-the-resource" >}}) to create a skeleton ResourceName.yaml file for the handwritten resource, but set only the following top-level fields: `name`, `base_url` (set to URL of IAM parent resource), `self_link` (set to same value as `base_url`) `description` (required but unused), `id_format`, `import_format`, and `properties`.
 2. Follow the MMv1 directions in [Add fields]({{<ref "#add-fields" >}}) to add only the fields used by base_url.
 3. Follow the MMv1 directions in this section to add IAM support.
+
+### Convert to handwritten (not usually necessary)
+
+1. [Generate the beta provider]({{< ref "/get-started/generate-providers.md" >}})
+2. From the beta provider, copy the files generated for the IAM resources to the following locations:
+   - Resource: Copy to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
+   - Documentation: [`magic-modules/mmv1/third_party/terraform/website/docs/r`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r)
+   - Tests: [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests)
+3. Modify the Go code as needed.
+   - Replace the comments at the top of the file with the following:
+     ```
+     <% autogen_exception -%>
+     ```
+   - If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.erb` and wrap the beta-only code in a version guard: `<% unless version = 'ga' -%>...<% else -%>...<% end -%>`.
+4. Register the binding, member, and policy resources in [`magic-modules/mmv1/third_party/terraform/utils/provider.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/utils/provider.go.erb) under "START non-generated IAM resources"
+   - Add a version guard for any beta-only resources.
 {{< /tab >}}
 {{< /tabs >}}
 
@@ -410,12 +423,31 @@ Handwritten resources should use MMv1-based IAM support.
 
 {{< tabs "docs" >}}
 {{< tab "MMv1" >}}
-Documentation is autogenerated for MMv1 resources.
+Documentation is autogenerated based on the resource and field configurations. To preview the documentation:
+
+1. [Generate the providers]({{< ref "/get-started/generate-providers.md" >}})
+2. Copy and paste the generated documentation into the Hashicorp Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it will be rendered.
 {{< /tab >}}
 {{< tab "Handwritten" >}}
+1. Open the resource documentation in [`magic-modules/third_party/terraform/website/docs/r/`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r) using an editor of your choice.
+   - The name of the file will be the name of the resource without a `google_` prefix. For example, for `google_compute_instance`, the file is called `compute_instance.html.markdown`
+2. For beta-only resources, add the following snippet directly above the first example: 
+
+   ```markdown
+   ~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
+   See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
+   ```
+3. For resources that are in the `google` provider but have beta-only fields, make sure that all beta-only fields are clearly marked. For example:
+   ```markdown
+   * `FIELD_NAME` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) FIELD_DESCRIPTION
+   ```
+
+   Replace `FIELD_NAME` and `FIELD_DESCRIPTION` with the field's name and description.
+4. [Generate the providers]({{< ref "/get-started/generate-providers.md" >}})
+5. Copy and paste the generated documentation into the Hashicorp Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it will be rendered.
 {{< /tab >}}
 {{< /tabs >}}
 
- It is a good idea to check the markdown changes when you [generate the providers]({{< ref "/get-started/generate-providers.md" >}}), especially if you are making lots of changes.
+## What's next?
 
- You can copy and paste markdown into the Hashicorp Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it will be rendered.
+- [Test your changes]({{< ref "/get-started/run-provider-tests.md" >}}) 

@@ -5,6 +5,7 @@ weight: 12
 aliases:
   - /docs/how-to/add-mmv1-test
   - /how-to/add-mmv1-test
+  - /develop/add-mmv1-test
 ---
 
 # Add an MMv1 test
@@ -245,3 +246,12 @@ In `ResourceName.yaml`, replace `EXAMPLES_GO_HERE` with the following block:
 ## Add update tests
 
 Every resource with at least one updatable field should have update tests that exercise all updatable fields. These tests must be handwritten.
+
+Once your field has been implemented, go to the corresponding test file for
+your resource and extend it. If your field is updatable it's good practice to
+have a two step apply to ensure that the field *can* be updated. You'll notice
+a lot of our tests have a import state verify directly after apply. These
+steps are important as they will essentially attempt to import the resource
+you just provisioned and *verify* that the field values are consistent with the
+applied state. Please test all fields you've added to the provider. It's important
+for us to ensure all fields are usable and workable.
