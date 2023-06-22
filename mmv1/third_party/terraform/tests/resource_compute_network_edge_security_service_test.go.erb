@@ -46,13 +46,14 @@ resource "google_compute_region_security_policy" "foobar" {
   name        = "%s"
   description = "basic region security policy"
   type        = "CLOUD_ARMOR_NETWORK"
-  region      = "asia-southeast1"
+  # can only exist one of this resource per region
+  region      = "us-central1"
 }
 
 resource "google_compute_network_edge_security_service" "foobar" {
-  name     = "%s"
-  region = "asia-southeast1"
-  description  = "My basic resource using security policy"
+  name            = "%s"
+  region          = "us-central1"
+  description     = "My basic resource using security policy"
   security_policy = google_compute_region_security_policy.foobar.self_link
 }
 `, pName, nesName)
@@ -64,13 +65,13 @@ resource "google_compute_region_security_policy" "foobar" {
   name        = "%s"
   description = "basic region security policy"
   type        = "CLOUD_ARMOR_NETWORK"
-  region      = "asia-southeast1"
+  region      = "us-central1"
 }
 
 resource "google_compute_network_edge_security_service" "foobar" {
-  name     = "%s"
-  region = "asia-southeast1"
-  description  = "My basic updated resource using security policy"
+  name            = "%s"
+  region          = "us-central1"
+  description     = "My basic updated resource using security policy"
   security_policy = google_compute_region_security_policy.foobar.self_link
 }
 `, pName, nesName)
