@@ -1,11 +1,10 @@
 ---
 title: "Add an MMv1 test"
 summary: "An example terraform configuration can be used to generate docs and tests for a resource."
-weight: 12
+weight: 40
 aliases:
   - /docs/how-to/add-mmv1-test
   - /how-to/add-mmv1-test
-  - /develop/add-mmv1-test
 ---
 
 # Add an MMv1 test
@@ -200,58 +199,3 @@ resource "google_pubsub_subscription" "<%= ctx[:primary_resource_id] %>" {
           topic_name: "example-topic"
           subscription_name: "example-subscription"
 ```
-
-
-## IAM (temporary holding spot)
-
-Additionally, in order to generate IAM tests based on a preexisting resource
-configuration, the first `examples` entry in `ResourceName.yaml` must be modified
-to include a `primary_resource_name` entry:
-
-```diff
-      - !ruby/object:Provider::Terraform::Examples
-        name: "disk_basic"
-        primary_resource_id: "default"
-+        primary_resource_name: "fmt.Sprintf(\"tf-test-test-disk%s\", context[\"random_suffix\"])"
-        vars:
-          disk_name: "test-disk"
-```
-
-`primary_resource_name` - Typically
-`"fmt.Sprintf(\"tf-test-{{shortname}}%s\", context[\"random_suffix\"])"`,
-substituting the parent resource's shortname from the example configuration for
-`{{shortname}}`, such as `test-disk` above. This value is variable, as both the
-key and value are user-defined parts of the example configuration. In some cases
-the value must be customized further, albeit rarely.
-
-Once an `iam_policy` block is added and filled out, and `primary_resource_name`
-is set on the first example, you're finished, and you can run MMv1 to generate
-the IAM resources you've added, alongside documentation, and tests.
-
-
-
-## Add basic tests
-
-Every resource should have basic tests that exercise creation and deletion of the resource, resource importing, and all settable fields.
-
-{{< tabs "Basic tests" >}}
-{{< tab "MMv1" >}}
-In `ResourceName.yaml`, replace `EXAMPLES_GO_HERE` with the following block:
-
-```yaml
-```
-{{< /tab >}}
-{{< /tabs >}}
-
-## Add update tests
-
-Every resource with at least one updatable field should have update tests that exercise all updatable fields. These tests must be handwritten.
-
-Once your field has been implemented, go to the corresponding test file for
-your resource and extend it. If your field is updatable it's good practice to
-have a two step apply to ensure that the field *can* be updated. You'll notice
-a lot of our tests have a import state verify directly after apply. These
-steps are important as they will essentially attempt to import the resource
-you just provisioned and *verify* that the field values are consistent with the
-applied state. Please test all fields you've added to the provider. It's important
-for us to ensure all fields are usable and workable.
