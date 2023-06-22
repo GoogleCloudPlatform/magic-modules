@@ -3075,3 +3075,57 @@ resource "google_container_node_pool" "with_sole_tenant_config" {
 }
 `, cluster, np)
 }
+
+<% unless version == 'ga' -%>
+func TestAccContainerNodePool_tpuTopology(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_tpuTopology(cluster, np, "2x2x2"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.with_tpu_topology", "placement_policy.0.tpu_topology", "2x2x2"),
+					resource.TestCheckResourceAttr("google_container_node_pool.with_tpu_topology", "placement_policy.0.type", "COMPACT"),
+				),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_tpu_topology",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccContainerNodePool_tpuTopology(cluster, np, tpuTopology string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-c"
+  initial_node_count = 1
+}
+
+resource "google_container_node_pool" "with_tpu_topology" {
+  name               = "%s"
+  location           = "us-central1-c"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 2
+
+  node_config {
+    machine_type = "c2-standard-4"
+  }
+  placement_policy {
+	type = "COMPACT"
+	tpu_topology = "%s"
+  }
+}
+`, cluster, np, tpuTopology)
+}
+<% end -%>

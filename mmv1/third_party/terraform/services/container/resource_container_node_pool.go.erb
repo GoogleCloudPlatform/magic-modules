@@ -191,6 +191,13 @@ var schemaNodePool = map[string]*schema.Schema{
 					Required:     true,
 					Description:  `Type defines the type of placement policy`,
 				},
+<% unless version == 'ga' -%>
+				"tpu_topology": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: `TPU placement topology for pod slice node pool.`,
+				},
+<% end -%>
 			},
 		},
 	},
@@ -877,6 +884,9 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 			placement_policy := v.([]interface{})[0].(map[string]interface{})
 			np.PlacementPolicy = &container.PlacementPolicy{
 				Type: placement_policy["type"].(string),
+<% unless version == 'ga' -%>
+				TpuTopology: placement_policy["tpu_topology"].(string),
+<% end -%>
 			}
 		}
 	}
@@ -1068,6 +1078,9 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		nodePool["placement_policy"] = []map[string]interface{}{
 			{
 				"type": np.PlacementPolicy.Type,
+<% unless version == 'ga' -%>
+				"tpu_topology": np.PlacementPolicy.TpuTopology,
+<% end -%>
 			},
 		}
 	}
