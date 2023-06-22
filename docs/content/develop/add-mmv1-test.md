@@ -226,3 +226,22 @@ the value must be customized further, albeit rarely.
 Once an `iam_policy` block is added and filled out, and `primary_resource_name`
 is set on the first example, you're finished, and you can run MMv1 to generate
 the IAM resources you've added, alongside documentation, and tests.
+
+
+
+## Add basic tests
+
+Every resource should have basic tests that exercise creation and deletion of the resource, resource importing, and all settable fields.
+
+{{< tabs "Basic tests" >}}
+{{< tab "MMv1" >}}
+In `ResourceName.yaml`, replace `EXAMPLES_GO_HERE` with the following block:
+
+```yaml
+```
+{{< /tab >}}
+{{< /tabs >}}
+
+## Add update tests
+
+Every resource with at least one updatable field should have update tests that exercise all updatable fields. These tests must be handwritten.
