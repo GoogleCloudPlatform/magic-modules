@@ -7,5 +7,9 @@ if !ok {
 delete(obj, "serverType")
 
 if server_type.(string) == "STAGING" {
-	transport_tpg.AddPrefixToHost(url, "preprod-")
+	url, err = transport_tpg.AddPrefixToHost(url, "preprod-")
+	if err != nil {
+		return fmt.Errorf("Couldn't update the URL for the required env: %s", err)
+	}
+	fmt.Printf("[DEBUG] Full request URL: %s", url)
 }

@@ -128,7 +128,7 @@ func AddPrefixToHost(rawurl string, prefix string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	u.Host += prefix
+	u.Host = prefix + u.Host
 	return u.String(), nil
 }
 
