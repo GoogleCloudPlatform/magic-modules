@@ -1,5 +1,5 @@
 ---
-title: "Add a resource"
+title: "Add or modify a resource"
 weight: 30
 aliases:
   - /docs/how-to/add-mmv1-resource
@@ -21,7 +21,7 @@ aliases:
   - /how-to
 ---
 
-# Add a resource
+# Add or modify a resource
 
 This page describes how to add a new resource to the `google` or `google-beta` Terraform provider using MMv1 and/or handwritten code.
 
@@ -40,7 +40,7 @@ For more information about types of resources and the generation process overall
    git checkout main && git clean -f . && git checkout -- . && git pull
    ```
 
-## Add the resource
+## Add a resource
 
 {{< tabs "resource" >}}
 {{< tab "MMv1" >}}
