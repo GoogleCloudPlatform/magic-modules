@@ -173,7 +173,7 @@ func TestAccBigQueryDataset_storageBillModel(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
 		Steps: []resource.TestStep{
