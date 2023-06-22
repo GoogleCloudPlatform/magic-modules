@@ -63,8 +63,6 @@ examples:
     skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_repo'
-    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14390
-    skip_test: true
     min_version: beta
     primary_resource_id: 'repo-trigger'
     vars:
@@ -93,8 +91,6 @@ examples:
     primary_resource_id: 'allow-exit-codes-trigger'
   - !ruby/object:Provider::Terraform::Examples
     name: "cloudbuild_trigger_pubsub_with_repo"
-    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14390
-    skip_test: true
     min_version: beta
     primary_resource_id: "pubsub-with-repo-trigger"
     vars:
