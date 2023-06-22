@@ -5,6 +5,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/composer"
  	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"testing"
 
@@ -36,36 +38,6 @@ func allComposerServiceAgents() []string {
 		"container-engine-robot",
 		"gcp-sa-artifactregistry",
 		"gcp-sa-pubsub",
-	}
-}
-
-func TestComposerImageVersionDiffSuppress(t *testing.T) {
-	t.Parallel()
-
-	cases := []struct {
-		name string
-		old string
-		new string
-		expected bool
-	}{
-		{"matches", "composer-1.4.0-airflow-1.10.0", "composer-1.4.0-airflow-1.10.0", true},
-		{"preview matches", "composer-1.17.0-preview.0-airflow-2.0.1", "composer-1.17.0-preview.0-airflow-2.0.1", true},
-		{"old latest", "composer-latest-airflow-1.10.0", "composer-1.4.1-airflow-1.10.0", true},
-		{"new latest", "composer-1.4.1-airflow-1.10.0", "composer-latest-airflow-1.10.0", true},
-		{"composer major alias equivalent", "composer-1.4.0-airflow-1.10.0", "composer-1-airflow-1.10", true},
-		{"composer major alias different", "composer-1.4.0-airflow-2.1.4", "composer-2-airflow-2.2", false},
-		{"composer different", "composer-1.4.0-airflow-1.10.0", "composer-1.4.1-airflow-1.10.0", false},
-		{"airflow major alias equivalent", "composer-1.4.0-airflow-1.10.0", "composer-1.4.0-airflow-1", true},
-		{"airflow major alias different", "composer-1.4.0-airflow-1.10.0", "composer-1.4.0-airflow-2", false},
-		{"airflow major.minor alias equivalent", "composer-1.4.0-airflow-1.10.0", "composer-1.4.0-airflow-1.10", true},
-		{"airflow major.minor alias different", "composer-1.4.0-airflow-2.1.4", "composer-1.4.0-airflow-2.2", false},
-		{"airflow different", "composer-1.4.0-airflow-1.10.0", "composer-1.4.0-airflow-1.9.0", false},
-	}
-
-	for _, tc := range cases {
-		if actual := composerImageVersionDiffSuppress("", tc.old, tc.new, nil); actual != tc.expected {
-			t.Errorf("'%s' failed, expected %v but got %v", tc.name, tc.expected, actual)
-		}
 	}
 }
 
@@ -520,6 +492,40 @@ func TestAccComposerEnvironment_ComposerV2(t *testing.T) {
 				PlanOnly:					 true,
 				ExpectNonEmptyPlan: false,
 				Config:						 testAccComposerEnvironment_composerV2(envName, network, subnetwork),
+				Check:							testAccCheckClearComposerEnvironmentFirewalls(t, network),
+			},
+		},
+	})
+}
+
+
+func TestAccComposerEnvironment_ComposerV2HighResilience(t *testing.T) {
+	t.Parallel()
+
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	subnetwork := network + "-1"
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:		          func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComposerEnvironment_composerV2HighResilience(envName, network, subnetwork),
+			},
+			{
+				ResourceName:			"google_composer_environment.test",
+				ImportState:			 true,
+				ImportStateVerify: true,
+			},
+			// This is a terrible clean-up step in order to get destroy to succeed,
+			// due to dangling firewall rules left by the Composer Environment blocking network deletion.
+			// TODO(dzarmola): Remove this check if firewall rules bug gets fixed by Composer.
+			{
+				PlanOnly:					 true,
+				ExpectNonEmptyPlan: false,
+				Config:						 testAccComposerEnvironment_composerV2HighResilience(envName, network, subnetwork),
 				Check:							testAccCheckClearComposerEnvironmentFirewalls(t, network),
 			},
 		},
@@ -1033,15 +1039,15 @@ func testAccComposerEnvironmentDestroyProducer(t *testing.T) func(s *terraform.S
 			if len(idTokens) != 6 {
 				return fmt.Errorf("Invalid ID %q, expected format projects/{project}/regions/{region}/environments/{environment}", rs.Primary.ID)
 			}
-			envName := &composerEnvironmentName{
+			envName := &composer.ComposerEnvironmentName{
 				Project:		 idTokens[1],
 				Region:			idTokens[3],
 				Environment: idTokens[5],
 			}
 
-			_, err := config.NewComposerClient(config.UserAgent).Projects.Locations.Environments.Get(envName.resourceName()).Do()
+			_, err := config.NewComposerClient(config.UserAgent).Projects.Locations.Environments.Get(envName.ResourceName()).Do()
 			if err == nil {
-				return fmt.Errorf("environment %s still exists", envName.resourceName())
+				return fmt.Errorf("environment %s still exists", envName.ResourceName())
 			}
 		}
 
@@ -1658,6 +1664,69 @@ resource "google_composer_environment" "test" {
       }
     }
 
+}
+
+resource "google_compute_network" "test" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "test" {
+  name          = "%s"
+  ip_cidr_range = "10.2.0.0/16"
+  region        = "us-east1"
+   network       = google_compute_network.test.self_link
+  private_ip_google_access = true
+}
+
+`, envName, network, subnetwork)
+}
+
+func testAccComposerEnvironment_composerV2HighResilience(envName, network, subnetwork string) string {
+	return fmt.Sprintf(`
+resource "google_composer_environment" "test" {
+  name   = "%s"
+  region = "us-east1"
+
+	config {
+		node_config {
+			network          = google_compute_network.test.self_link
+			subnetwork       = google_compute_subnetwork.test.self_link
+		}
+
+		software_config {
+			image_version = "composer-2-airflow-2"
+		}
+
+		workloads_config {
+			scheduler {
+				cpu         = 1.25
+				memory_gb   = 2.5
+				storage_gb  = 5.4
+				count       = 2
+			}
+			web_server {
+				cpu         = 1.75
+				memory_gb   = 3.0
+				storage_gb  = 4.4
+			}
+			worker {
+				cpu         = 0.5
+				memory_gb   = 2.0
+				storage_gb  = 3.4
+				min_count   = 2
+				max_count   = 5
+			}
+		}
+		environment_size = "ENVIRONMENT_SIZE_MEDIUM"
+		resilience_mode = "HIGH_RESILIENCE"
+		private_environment_config {
+			enable_private_endpoint                  = true
+			cloud_composer_network_ipv4_cidr_block   = "10.3.192.0/24"
+			master_ipv4_cidr_block                   = "172.16.194.0/23"
+			cloud_sql_ipv4_cidr_block                = "10.3.224.0/20"
+		}
+	}
 }
 
 resource "google_compute_network" "test" {
@@ -2619,7 +2688,7 @@ func testAccCheckClearComposerEnvironmentFirewalls(t *testing.T, networkName str
 				continue
 			}
 
-			waitErr := ComputeOperationWaitTime(config, op, config.Project,
+			waitErr := tpgcompute.ComputeOperationWaitTime(config, op, config.Project,
 				"Sweeping test composer environment firewalls", config.UserAgent, 10)
 			if waitErr != nil {
 				allErrors = multierror.Append(allErrors,
