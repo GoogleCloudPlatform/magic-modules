@@ -382,13 +382,6 @@ resource "google_project_iam_member" "aiplatform_agent_encrypter_decrypter" {
   member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
 }
 
-# TestAccCertificateManagerPublicCAExternalAccountKey_certificateManagerPublicCaExternalAccountKeyExample
-resource "google_project_iam_member" "sa_public_ca_ext_account_key_creator" {
-  project = google_project.proj.project_id
-  role   = "roles/publicca.externalAccountKeyCreator"
-  member = google_service_account.sa.member
-}
-
 data "google_organization" "org2" {
   organization = var.org2_id
 }
