@@ -1,0 +1,24 @@
+name: Auto PR to sync major release branch with main
+
+permissions: read-all
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'
+#   push:
+#     branches:
+#       - main
+env:
+    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  pull-request:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: pull-request
+        run: |
+          gh pr create --head main --base FEATURE-BRANCH-major-release-5.0.0 --title "Merge main branch" --body "This is for testing"
