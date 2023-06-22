@@ -271,6 +271,7 @@ module "project-services" {
     "privateca.googleapis.com",
     "pubsub.googleapis.com",
     "pubsublite.googleapis.com",
+    "publicca.googleapis.com",
     "recaptchaenterprise.googleapis.com",
     "redis.googleapis.com",
     "replicapool.googleapis.com",
@@ -379,6 +380,12 @@ resource "google_project_iam_member" "aiplatform_agent_encrypter_decrypter" {
   project = google_project.proj.project_id
   role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "sa_public_ca_ext_account_key_creator" {
+  project = google_project.proj.project_id
+  role   = "roles/publicca.externalAccountKeyCreator"
+  member = google_service_account.sa.member
 }
 
 data "google_organization" "org2" {
