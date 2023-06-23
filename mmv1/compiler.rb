@@ -329,7 +329,4 @@ if generate_code
     )
   end
 end
-
-
-
 # rubocop:enable Metrics/BlockLength
