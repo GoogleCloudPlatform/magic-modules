@@ -77,12 +77,13 @@ func dataSourceGoogleServiceAccountIdTokenRead(d *schema.ResourceData, meta inte
 		return fmt.Errorf("error calling getCredentials(): %v", err)
 	}
 
-	// If the source credential is not a service account key, use the API to generate the idToken
-	if creds.JSON == nil {
+	targetServiceAccount := d.Get("target_service_account").(string)
+	// If a target service account is provided, use the API to generate the idToken
+	if targetServiceAccount != "" {
 		// Use
 		// https://cloud.google.com/iam/docs/reference/credentials/rest/v1/projects.serviceAccounts/generateIdToken
 		service := config.NewIamCredentialsClient(userAgent)
-		name := fmt.Sprintf("projects/-/serviceAccounts/%s", d.Get("target_service_account").(string))
+		name := fmt.Sprintf("projects/-/serviceAccounts/%s", targetServiceAccount)
 		tokenRequest := &iamcredentials.GenerateIdTokenRequest{
 			Audience:     targetAudience,
 			IncludeEmail: d.Get("include_email").(bool),
@@ -93,7 +94,7 @@ func dataSourceGoogleServiceAccountIdTokenRead(d *schema.ResourceData, meta inte
 			return fmt.Errorf("error calling iamcredentials.GenerateIdToken: %v", err)
 		}
 
-		d.SetId(d.Get("target_service_account").(string))
+		d.SetId(targetServiceAccount)
 		if err := d.Set("id_token", at.Token); err != nil {
 			return fmt.Errorf("Error setting id_token: %s", err)
 		}
