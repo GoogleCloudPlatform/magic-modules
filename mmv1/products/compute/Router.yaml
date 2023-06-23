@@ -61,7 +61,9 @@ examples:
       network_name: 'test-network'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/router.go.erb
-  resource_definition: templates/terraform/resource_definition/router.go.erb
+  custom_diff: [
+    'resourceComputeRouterCustomDiff',
+  ]
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: region

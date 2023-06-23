@@ -60,7 +60,10 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/detach_disk.erb
   encoder: templates/terraform/encoders/disk.erb
   decoder: templates/terraform/decoders/disk.erb
-  resource_definition: templates/terraform/resource_definition/disk.erb
+  custom_diff: [
+    'customdiff.ForceNewIfChange("size", IsDiskShrinkage)',
+    'hyperDiskIopsUpdateDiffSupress',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_disk_basic'

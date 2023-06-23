@@ -53,8 +53,10 @@ examples:
       custom_ssl_policy_name: 'custom-ssl-policy'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/ssl_policy.erb'
-  resource_definition: 'templates/terraform/resource_definition/ssl_policy.erb'
   update_encoder: 'templates/terraform/update_encoder/ssl_policy.erb'
+  custom_diff: [
+    'sslPolicyCustomizeDiff',
+  ]
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'

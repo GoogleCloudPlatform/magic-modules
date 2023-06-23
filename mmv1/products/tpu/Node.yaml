@@ -38,7 +38,9 @@ examples:
       global_address_name: 'my-global-address'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/tpu_node.erb'
-  resource_definition: 'templates/terraform/resource_definition/tpu_node.erb'
+  custom_diff: [
+    'tpuNodeCustomizeDiff',
+  ]
 parameters:
   # TODO: resourceref?
   - !ruby/object:Api::Type::String

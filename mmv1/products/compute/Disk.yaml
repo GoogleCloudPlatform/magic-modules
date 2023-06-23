@@ -61,8 +61,11 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/disk.erb
   encoder: templates/terraform/encoders/disk.erb
   decoder: templates/terraform/decoders/disk.erb
-  resource_definition: templates/terraform/resource_definition/disk.erb
   update_encoder: templates/terraform/update_encoder/hyper_disk.go.erb
+  custom_diff: [
+    'customdiff.ForceNewIfChange("size", IsDiskShrinkage)',
+    'hyperDiskIopsUpdateDiffSupress',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'disk_basic'

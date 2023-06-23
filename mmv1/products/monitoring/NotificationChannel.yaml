@@ -69,12 +69,14 @@ virtual_fields:
       referenced by an existing alerting policy will fail to be
       deleted in a delete operation.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/monitoring_notification_channel.erb
   encoder: templates/terraform/encoders/monitoring_notification_channel.go.erb
   decoder: templates/terraform/decoders/monitoring_notification_channel.go.erb
   constants: templates/terraform/constants/monitoring_notification_channel.go.erb
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
   post_create: templates/terraform/post_create/set_computed_name.erb
+  custom_diff: [
+    'sensitiveLabelCustomizeDiff',
+  ]
 properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: labels
