@@ -270,15 +270,17 @@ For more information about types of resources and the generation process overall
   # or changing a default value is a breaking change.
   # default_value: DEFAULT_VALUE
 
-  # If true, and the user has not set a value for this field in their
-  # configuration, the provider will accept any value returned from the API as
-  # the value for the field. If false, the provider will show a diff if the API
-  # returns a value and none is set in the user's config. This is useful for
-  # complex or frequently-changed API-side defaults, but provides less useful
-  # information at plan time than default_value.
+  # If true, and the field is either not set or set to a value that Terraform
+  # considers "empty" (such as zero, false, or empty strings), the resource will
+  # accept any value returned from the API as the value for the field. If false,
+  # and the field is either not set or set to an "empty" value, the provider will
+  # show a diff if the API returns a non-empty value for the field. This is
+  # useful for complex or frequently-changed API-side defaults, but provides
+  # less useful information at plan time than default_value and prevents users
+  # from setting the field to an "empty" value.
   # default_from_api: true
 
-  # If true, the provider will send values that Terraform core considers "empty"
+  # If true, the resource will send values that Terraform considers "empty"
   # (such as zero, false, or empty strings) to the API if set explicitly in the
   # user's config. If false, values that Terraform core considers "empty" will
   # cause the field to be omitted entirely from the API request. This is useful
