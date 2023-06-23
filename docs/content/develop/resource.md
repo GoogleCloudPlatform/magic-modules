@@ -86,13 +86,11 @@ For more information about types of resources and the generation process overall
    #   note: |
    #     MULTILINE_NOTE_MARKDOWN
 
-   # URL for the resource within the API domain. This should match the
-   # resource's create URL (excluding any query parameters).
+   # URL for the resource's standard List method. https://google.aip.dev/132
    # Terraform field names enclosed in double curly braces will be replaced
    # with the field values from the resource at runtime.
    base_url: 'projects/{{project}}/locations/{{location}}/resourcenames'
-   # URL for a created resource within the API domain. This should match
-   # the URL for getting a single resource.
+   # URL for the resource's standard Get method. https://google.aip.dev/131
    # Terraform field names enclosed in double curly braces will be replaced
    # with the field values from the resource at runtime.
    self_link: 'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_id}}'
@@ -116,7 +114,8 @@ For more information about types of resources and the generation process overall
    #   update_minutes: 20 
    #   delete_minutes: 20 
 
-   # URL for creating a new resource, including query parameters.
+   # URL for the resource's standard Create method, including query parameters.
+   # https://google.aip.dev/133
    # Terraform field names enclosed in double curly braces will be replaced
    # with the field values from the resource at runtime.
    create_url: 'projects/{{project}}/locations/{{location}}/resourcenames?resourceId={{resource_id}}'
@@ -124,8 +123,8 @@ For more information about types of resources and the generation process overall
    # Allowed values: :POST, :PUT, :PATCH. Default: :POST
    # create_verb: :POST
 
-   # Overrides the update URL for the resource. (Otherwise, the self_link URL
-   # will be used.)
+   # Overrides the URL for the resource's standard Update method. (If unset, the
+   # self_link URL will be used by default.) https://google.aip.dev/134
    # Terraform field names enclosed in double curly braces will be replaced
    # with the field values from the resource at runtime.
    # update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_id}}'
@@ -134,8 +133,8 @@ For more information about types of resources and the generation process overall
    # True if the resource should use an update mask for updates.
    update_mask: true
 
-   # Overrides the delete URL for the resource. (Otherwise, the self_link URL
-   # will be used.)
+   # Overrides the URL for the resource's standard Delete method. (If unset, the
+   # self_link URL will be used by default.) https://google.aip.dev/135
    # Terraform field names enclosed in double curly braces will be replaced
    # with the field values from the resource at runtime.
    # delete_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_id}}'
