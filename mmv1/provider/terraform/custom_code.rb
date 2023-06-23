@@ -128,10 +128,6 @@ module Provider
       # resource was successfully deleted. Use this if the API responds
       # with a success HTTP code for deleted resources
       attr_reader :test_check_destroy
-      # This code inserts entries into the customdiff.All() block in the
-      # resource schema -- the code for these custom diff must be included
-      # in the resource constants or tpgresource
-      attr_reader :custom_import
       # This block inserts entries into the customdiff.All() block in the
       # resource schema -- the code for these custom diff functions must
       # be included in the resource constants or come from tpgresource

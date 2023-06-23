@@ -191,8 +191,9 @@ module Api
       # An array of function names that determine whether an error is not retryable.
       attr_reader :error_abort_predicates
 
-      # Optional attributes for declaring a resource's current version and generating 
-      # state_upgrader code to the output .go file from files stored at templates/terraform/state_migrations/
+      # Optional attributes for declaring a resource's current version and generating
+      # state_upgrader code to the output .go file from files stored at
+      # mmv1/templates/terraform/state_migrations/
       # used for maintaining state stability with resources first provisioned on older api versions.
       attr_reader :schema_version
       attr_reader :state_upgraders
