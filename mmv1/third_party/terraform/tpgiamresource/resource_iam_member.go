@@ -210,9 +210,7 @@ func resourceIamMemberCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBat
 		}
 
 		memberBind := getResourceIamMember(d)
-		log.Print("[DEBUG]: ASDFG")
 		modifyF := func(ep *cloudresourcemanager.Policy) error {
-			writeLog()
 			// Merge the bindings together
 			ep.Bindings = MergeBindings(append(ep.Bindings, memberBind))
 			ep.Version = IamPolicyVersion
@@ -233,10 +231,6 @@ func resourceIamMemberCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBat
 		}
 		return resourceIamMemberRead(newUpdaterFunc)(d, meta)
 	}
-}
-
-func writeLog() {
-	log.Print("[DEBUG]: ModifyF is CREATE")
 }
 
 func resourceIamMemberRead(newUpdaterFunc NewResourceIamUpdaterFunc) schema.ReadFunc {
@@ -312,7 +306,6 @@ func resourceIamMemberDelete(newUpdaterFunc NewResourceIamUpdaterFunc, enableBat
 
 		memberBind := getResourceIamMember(d)
 		modifyF := func(ep *cloudresourcemanager.Policy) error {
-			log.Print("[DEBUG]: ModifyF is DELETE")
 			// Merge the bindings together
 			ep.Bindings = subtractFromBindings(ep.Bindings, memberBind)
 			return nil
