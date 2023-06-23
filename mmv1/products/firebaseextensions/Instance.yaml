@@ -126,6 +126,7 @@ properties:
         description: The ref of the Extension from the Registry (e.g. publisher-id/awesome-extension)
         # Installing from an extensionRef is the only way for now
         required: true
+        immutable: true
       - !ruby/object:Api::Type::String
         name: extensionVersion
         description: |
