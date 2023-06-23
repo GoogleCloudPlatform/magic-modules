@@ -7685,7 +7685,7 @@ func testAccContainerCluster_autopilot_minimal(name string) string {
 resource "google_container_cluster" "primary" {
   name             = "%s"
   location         = "us-central1"
-	enable_autopilot = true
+  enable_autopilot = true
 }`, name)
 }
 =======
