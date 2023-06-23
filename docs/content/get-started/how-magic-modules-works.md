@@ -18,7 +18,7 @@ There are three types of resources supported by Magic Modules: MMv1, Handwritten
 
 ### MMv1
 
-MMv1 consists of a set of "products", which each contain one or more "resources".
+MMv1 consists of a set of "products"; each product contains one or more "resources".
 
 Each product has a folder in [`magic-modules/mmv1/products`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/products). The name of the folder is the "product name", which usually corresponds to the API subdomain covered by the product (such as `compute.googleapis.com`). Each product folder contains a product configuration file (`product.yaml`) and one or more resource configuration files (`ResourceName.yaml`). The actual name of a `ResourceName.yaml` file usually matches the name of a GCP API resource in the product's subdomain.
 
