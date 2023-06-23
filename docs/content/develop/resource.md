@@ -193,7 +193,7 @@ For more information about types of resources and the generation process overall
 > **Note:** The template includes the most commonly-used fields. For a comprehensive reference, see [ResourceName.yaml reference ↗]({{<ref "/reference/resource-reference.md" >}}).
 {{< /tab >}}
 {{< tab "Handwritten" >}}
-> **Warning:** Handwritten resources are much more difficult to develop and maintain. New handwritten resources will only be accepted if the resource cannot be implemented using MMv1.
+> **Warning:** Handwritten resources are more difficult to develop and maintain. New handwritten resources will only be accepted if implementing the resource in MMv1 would require entirely overriding more than one CRUD method.
 
 1. Add the resource in MMv1.
 2. [Generate the beta provider]({{< ref "/get-started/generate-providers.md" >}})
