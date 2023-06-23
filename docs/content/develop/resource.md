@@ -89,12 +89,12 @@ For more information about types of resources and the generation process overall
    # URL for the resource within the API domain. This should match the
    # resource's create URL (excluding any query parameters).
    # Terraform field names enclosed in double curly braces will be replaced
-   # with the field values from the resource.
+   # with the field values from the resource at runtime.
    base_url: 'projects/{{project}}/locations/{{location}}/resourcenames'
    # URL for a created resource within the API domain. This should match
    # the URL for getting a single resource.
    # Terraform field names enclosed in double curly braces will be replaced
-   # with the field values from the resource.
+   # with the field values from the resource at runtime.
    self_link: 'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_id}}'
    # URL for importing a resource that already exists in GCP. In general
    # this will be a list containing self_link. If the resource cannot be read
@@ -118,7 +118,7 @@ For more information about types of resources and the generation process overall
 
    # URL for creating a new resource, including query parameters.
    # Terraform field names enclosed in double curly braces will be replaced
-   # with the field values from the resource.
+   # with the field values from the resource at runtime.
    create_url: 'projects/{{project}}/locations/{{location}}/resourcenames?resourceId={{resource_id}}'
    # Overrides the HTTP verb used to create a new resource.
    # Allowed values: :POST, :PUT, :PATCH. Default: :POST
@@ -127,7 +127,7 @@ For more information about types of resources and the generation process overall
    # Overrides the update URL for the resource. (Otherwise, the self_link URL
    # will be used.)
    # Terraform field names enclosed in double curly braces will be replaced
-   # with the field values from the resource.
+   # with the field values from the resource at runtime.
    # update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_id}}'
    # The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
    update_verb: :PATCH
@@ -137,7 +137,7 @@ For more information about types of resources and the generation process overall
    # Overrides the delete URL for the resource. (Otherwise, the self_link URL
    # will be used.)
    # Terraform field names enclosed in double curly braces will be replaced
-   # with the field values from the resource.
+   # with the field values from the resource at runtime.
    # delete_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_id}}'
    # Overrides the HTTP verb used to delete a resource.
    # Allowed values: :POST, :PUT, :PATCH, :DELETE. Default: :DELETE
@@ -160,7 +160,7 @@ For more information about types of resources and the generation process overall
    # All resources (of all kinds) that share a mutex value will block rather
    # than executing concurrent API requests.
    # Terraform field names enclosed in double curly braces will be replaced
-   # with the field values from the resource.
+   # with the field values from the resource at runtime.
    # mutex: RESOURCE_NAME/{{resource_id}}
 
    # IAM_GOES_HERE
