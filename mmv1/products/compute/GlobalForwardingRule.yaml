@@ -17,6 +17,7 @@ kind: 'compute#forwardingRule'
 base_url: projects/{{project}}/global/forwardingRules
 immutable: true
 has_self_link: true
+long_form_project: true
 collection_url_key: 'items'
 description: |
   Represents a GlobalForwardingRule resource. Global forwarding rules are
