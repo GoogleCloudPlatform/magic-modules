@@ -130,7 +130,8 @@ For more information about types of resources and the generation process overall
    # update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_id}}'
    # The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
    update_verb: :PATCH
-   # True if the resource should use an update mask for updates.
+   # If true, the resource sets an `updateMask` query parameter listing modified
+   # fields when updating the resource. If false, it does not.
    update_mask: true
 
    # Overrides the URL for the resource's standard Delete method. (If unset, the
@@ -142,7 +143,8 @@ For more information about types of resources and the generation process overall
    # Allowed values: :POST, :PUT, :PATCH, :DELETE. Default: :DELETE
    # delete_verb: :DELETE
 
-   # Enables generation of code to handle API calls that return operations.
+   # If true, code for handling long-running operations is generated along with
+   # the resource. If false, that code is not generated.
    autogen_async: true
    # Sets parameters for handling operations returned by the API.
    async: !ruby/object:Api::OpAsync
