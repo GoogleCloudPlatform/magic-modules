@@ -246,9 +246,9 @@ For more information about types of resources and the generation process overall
   # with the field values from the resource.
   # update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_id}}/setFieldName'
 
-  # Overrides the verb used to update this specific field. Allowed values:
-  # :POST, :PUT, :PATCH. Default: Resource's update_verb (which defaults to :PUT
-  # if unset).
+  # If update_url is also set, overrides the verb used to update this specific
+  # field. Allowed values: :POST, :PUT, :PATCH. Default: Resource's update_verb
+  # (which defaults to :PUT if unset).
   # update_verb: :POST
 
   # If true, the field is required. If unset or false, the field is optional.
