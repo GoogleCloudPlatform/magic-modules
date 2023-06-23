@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -14,7 +15,8 @@ import (
 )
 
 func init() {
-	resource.AddTestSweepers("FirebaseAndroidApp", &resource.Sweeper{
+	_, filename, _, _ := runtime.Caller(0)
+	resource.AddTestSweepers("FirebaseAndroidApp"+filename, &resource.Sweeper{
 		Name: "FirebaseAndroidApp",
 		F:    testSweepFirebaseAndroidApp,
 	})

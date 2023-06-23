@@ -1,4 +1,4 @@
-package google_test
+package google
 
 import (
 	"testing"
