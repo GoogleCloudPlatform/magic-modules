@@ -93,15 +93,7 @@ For more information about types of resources and the generation process overall
    # URL for the resource's standard Get method. https://google.aip.dev/131
    # Terraform field names enclosed in double curly braces will be replaced
    # with the field values from the resource at runtime.
-   self_link: 'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_id}}'
-   # URL for importing a resource that already exists in GCP. In general
-   # this will be a list containing self_link. If the resource cannot be read
-   # from GCP, comment this out and set exclude_import: true instead.
-   import_format: ['projects/{{project}}/locations/{{location}}/resourcenames/{{resource_id}}']
-   # If true, import code will not be generated for this resource. This should
-   # only be used if the resource cannot be read from GCP due to either API or
-   # provider constraints.
-   # exclude_import: true
+   self_link: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
 
    # If true, the resource and all its fields will be considered immutable - that
    # is, only creatable, not updatable. Individual fields can override this if
@@ -118,7 +110,7 @@ For more information about types of resources and the generation process overall
    # https://google.aip.dev/133
    # Terraform field names enclosed in double curly braces will be replaced
    # with the field values from the resource at runtime.
-   create_url: 'projects/{{project}}/locations/{{location}}/resourcenames?resourceId={{resource_id}}'
+   create_url: 'projects/{{project}}/locations/{{location}}/resourcenames?resourceId={{name}}'
    # Overrides the HTTP verb used to create a new resource.
    # Allowed values: :POST, :PUT, :PATCH. Default: :POST
    # create_verb: :POST
@@ -127,7 +119,7 @@ For more information about types of resources and the generation process overall
    # self_link URL will be used by default.) https://google.aip.dev/134
    # Terraform field names enclosed in double curly braces will be replaced
    # with the field values from the resource at runtime.
-   # update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_id}}'
+   # update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
    # The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
    update_verb: :PATCH
    # If true, the resource sets an `updateMask` query parameter listing modified
@@ -138,7 +130,7 @@ For more information about types of resources and the generation process overall
    # self_link URL will be used by default.) https://google.aip.dev/135
    # Terraform field names enclosed in double curly braces will be replaced
    # with the field values from the resource at runtime.
-   # delete_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_id}}'
+   # delete_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
    # Overrides the HTTP verb used to delete a resource.
    # Allowed values: :POST, :PUT, :PATCH, :DELETE. Default: :DELETE
    # delete_verb: :DELETE
@@ -173,7 +165,7 @@ For more information about types of resources and the generation process overall
    # than executing concurrent API requests.
    # Terraform field names enclosed in double curly braces will be replaced
    # with the field values from the resource at runtime.
-   # mutex: RESOURCE_NAME/{{resource_id}}
+   # mutex: RESOURCE_NAME/{{name}}
 
    # IAM_GOES_HERE
 
@@ -188,12 +180,12 @@ For more information about types of resources and the generation process overall
        description: |
          LOCATION_DESCRIPTION
      - !ruby/object:Api::Type::String
-       name: 'resource_id'
+       name: 'name'
        required: true
        immutable: true
        url_param_only: true
        description: |
-         RESOURCE_ID_DESCRIPTION
+         NAME_DESCRIPTION
 
    properties:
      # Fields go here
@@ -255,7 +247,7 @@ For more information about types of resources and the generation process overall
   # immutable.
   # Terraform field names enclosed in double curly braces will be replaced
   # with the field values from the resource.
-  # update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_id}}/setFieldName'
+  # update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}/setFieldName'
 
   # If update_url is also set, overrides the verb used to update this specific
   # field. Allowed values: :POST, :PUT, :PATCH. Default: Resource's update_verb
