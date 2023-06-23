@@ -40,9 +40,8 @@ Handwritten resources and datasources can be grouped by "service", which general
 
 In addition to the core implementation, handwritten resources and datasources will also have documentation, tests, and sweepers (which clean up stray resources left behind by tests). Each type of code is stored in the following locations:
 
-- Resource implementation: In the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
+- Resource & datasource implementation: In the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
 - Resource documentation: [`magic-modules/mmv1/third_party/terraform/website/docs/r`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r)
-- Datasource implementation: [`magic-modules/mmv1/third_party/terraform/data_sources`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/data_sources)
 - Datasource documentation: [`magic-modules/mmv1/third_party/terraform/webside/docs/d`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/webside/docs/d)
 - Tests: [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests)
 - Sweepers: [`magic-modules/mmv1/third_party/terraform/utils`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/utils)
