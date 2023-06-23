@@ -194,3 +194,8 @@ properties:
             - !ruby/object:Api::Type::String
               name: 'value'
               description: Value of the property.
+  - !ruby/object:Api::Type::String
+    name: 'apigeeProjectId'
+    description: |
+      Output only. Project ID of the Apigee Tenant Project.
+    output: true

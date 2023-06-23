@@ -25,15 +25,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/network-intelligence-center/docs'
   api: 'https://cloud.google.com/network-intelligence-center/docs/connectivity-tests/reference/networkmanagement/rest/v1/projects.locations.global.connectivityTests'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: true
-  method_name_separator: ':'
-  parent_resource_attribute: 'connectivityTest'
-  import_format:
-    [
-      'projects/{{project}}/locations/global/connectivityTests/{{connectivityTest}}',
-      '{{connectivityTest}}',
-    ]
 filename_override: 'connectivity_test_resource'
 id_format: projects/{{project}}/locations/global/connectivityTests/{{name}}
 autogen_async: true

@@ -92,7 +92,6 @@ properties:
     description: |
       State of the VPC access connector.
     output: true
-    exclude: false
     values:
       - :READY
       - :CREATING
@@ -137,6 +136,12 @@ properties:
       The fully qualified name of this VPC connector
     output: true
     ignore_read: true
+  - !ruby/object:Api::Type::Array
+    name: connectedProjects
+    description: |
+      List of projects using the connector.
+    output: true
+    item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: 'subnet'
     immutable: true

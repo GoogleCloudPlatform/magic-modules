@@ -88,33 +88,6 @@ properties:
         example.com, the entity would be domain-example.com.
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'entityId'
-    description: 'The ID for the entity'
-    output: true
-    # | 'etag' is not applicable for state convergence.
-    exclude: true
-  - !ruby/object:Api::Type::String
-    name: 'id'
-    description: 'The ID of the access-control entry.'
-    output: true
-    exclude: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'projectTeam'
-    description: 'The project team associated with the entity'
-    output: true
-    exclude: true
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'projectNumber'
-        description: 'The project team associated with the entity'
-      - !ruby/object:Api::Type::Enum
-        name: 'team'
-        description: 'The team.'
-        values:
-          - :editors
-          - :owners
-          - :viewers
   - !ruby/object:Api::Type::Enum
     name: 'role'
     description: 'The access permission for the entity.'

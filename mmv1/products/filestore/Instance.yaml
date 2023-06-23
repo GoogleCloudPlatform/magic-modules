@@ -26,7 +26,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Use with Kubernetes': 'https://cloud.google.com/filestore/docs/accessing-fileshares'
     'Copying Data In/Out': 'https://cloud.google.com/filestore/docs/copying-data'
   api: 'https://cloud.google.com/filestore/docs/reference/rest/v1beta1/projects.locations.instances/create'
-error_retry_predicates: ['transport_tpg.IsNotFilestoreQuotaError']
+error_abort_predicates: ['transport_tpg.Is429QuotaError']
 autogen_async: true
 schema_version: 1
 examples:
@@ -86,18 +86,6 @@ properties:
     name: 'description'
     description: |
       A description of the instance.
-  - !ruby/object:Api::Type::String
-    name: 'state'
-    description: |
-      The instance state - short description.
-    output: true
-    exclude: true
-  - !ruby/object:Api::Type::String
-    name: 'statusMessage'
-    description: |
-      Additional information about the instance state, if available.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: Creation timestamp in RFC3339 text format.

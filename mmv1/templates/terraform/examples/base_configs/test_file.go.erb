@@ -1,3 +1,7 @@
+<% if hc_downstream -%>
+<%= lines(hashicorp_copyright_header(:go, pwd)) -%>
+<% end -%>
+
 <%= lines(autogen_notice(:go, pwd)) -%>
 
 package google
@@ -142,6 +146,9 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 			UserAgent: config.UserAgent,
 			<% if object.error_retry_predicates -%>
 			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+			<% end -%>
+			<% if object.error_abort_predicates -%>
+			ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_abort_predicates.join(',') -%>},
 			<% end -%>
 		})
 		if err == nil {

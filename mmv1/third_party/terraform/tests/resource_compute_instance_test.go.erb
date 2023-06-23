@@ -18,8 +18,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 <% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
@@ -89,7 +90,7 @@ func computeInstanceImportStep(zone, instanceName string, additionalImportIgnore
 	// metadata is only read into state if set in the config
 	// importing doesn't know whether metadata.startup_script vs metadata_startup_script is set in the config,
 	// it always takes metadata.startup-script
-	ignores := []string{"metadata.%", "metadata.startup-script", "metadata_startup_script"}
+	ignores := []string{"metadata.%", "metadata.startup-script", "metadata_startup_script", "boot_disk.0.initialize_params.0.resource_manager_tags.%",  "params.0.resource_manager_tags.%"}
 
 	return resource.TestStep{
 		ResourceName:            "google_compute_instance.foobar",
@@ -230,6 +231,32 @@ func TestAccComputeInstance_basic5(t *testing.T) {
 					testAccCheckComputeInstanceMetadata(&instance, "foo", "bar"),
 					testAccCheckComputeInstanceDisk(&instance, instanceName, true, true),
 				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstance_resourceManagerTags(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
+    context := map[string]interface{}{
+		"project":        acctest.GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
+		"instance_name": instanceName,
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_resourceManagerTags(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance)),
 			},
 		},
 	})
@@ -1299,7 +1326,6 @@ func TestAccComputeInstance_private_image_family(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeInstance_networkPerformanceConfig(t *testing.T) {
 	t.Parallel()
 
@@ -1324,7 +1350,6 @@ func TestAccComputeInstance_networkPerformanceConfig(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccComputeInstance_forceChangeMachineTypeManually(t *testing.T) {
 	t.Parallel()
@@ -2380,135 +2405,6 @@ func TestAccComputeInstance_spotVM_maxRunDuration_update(t *testing.T) {
 }
 <% end -%>
 
-
-func TestComputeInstance_networkIPCustomizedDiff(t *testing.T) {
-	t.Parallel()
-
-	d := &tpgresource.ResourceDiffMock{
-		Before: map[string]interface{}{
-			"network_interface.#": 0,
-		},
-		After: map[string]interface{}{
-			"network_interface.#": 1,
-		},
-	}
-
-	err := forceNewIfNetworkIPNotUpdatableFunc(d)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if d.IsForceNew {
-		t.Errorf("Expected not force new if network_interface array size changes")
-	}
-
-	type NetworkInterface struct {
-		Network           string
-		Subnetwork        string
-		SubnetworkProject string
-		NetworkIP         string
-	}
-	NIBefore := NetworkInterface{
-		Network:           "a",
-		Subnetwork:        "a",
-		SubnetworkProject: "a",
-		NetworkIP:         "a",
-	}
-
-	cases := map[string]struct {
-		ExpectedForceNew bool
-		Before           NetworkInterface
-		After            NetworkInterface
-	}{
-		"NetworkIP only change": {
-			ExpectedForceNew: true,
-			Before:           NIBefore,
-			After: NetworkInterface{
-				Network:           "a",
-				Subnetwork:        "a",
-				SubnetworkProject: "a",
-				NetworkIP:         "b",
-			},
-		},
-		"NetworkIP and Network change": {
-			ExpectedForceNew: false,
-			Before:           NIBefore,
-			After: NetworkInterface{
-				Network:           "b",
-				Subnetwork:        "a",
-				SubnetworkProject: "a",
-				NetworkIP:         "b",
-			},
-		},
-		"NetworkIP and Subnetwork change": {
-			ExpectedForceNew: false,
-			Before:           NIBefore,
-			After: NetworkInterface{
-				Network:           "a",
-				Subnetwork:        "b",
-				SubnetworkProject: "a",
-				NetworkIP:         "b",
-			},
-		},
-		"NetworkIP and SubnetworkProject change": {
-			ExpectedForceNew: false,
-			Before:           NIBefore,
-			After: NetworkInterface{
-				Network:           "a",
-				Subnetwork:        "a",
-				SubnetworkProject: "b",
-				NetworkIP:         "b",
-			},
-		},
-		"All change": {
-			ExpectedForceNew: false,
-			Before:           NIBefore,
-			After: NetworkInterface{
-				Network:           "b",
-				Subnetwork:        "b",
-				SubnetworkProject: "b",
-				NetworkIP:         "b",
-			},
-		},
-		"No change": {
-			ExpectedForceNew: false,
-			Before:           NIBefore,
-			After: NetworkInterface{
-				Network:           "a",
-				Subnetwork:        "a",
-				SubnetworkProject: "a",
-				NetworkIP:         "a",
-			},
-		},
-	}
-
-	for tn, tc := range cases {
-		d := &tpgresource.ResourceDiffMock{
-			Before: map[string]interface{}{
-				"network_interface.#":                    1,
-				"network_interface.0.network":            tc.Before.Network,
-				"network_interface.0.subnetwork":         tc.Before.Subnetwork,
-				"network_interface.0.subnetwork_project": tc.Before.SubnetworkProject,
-				"network_interface.0.network_ip":         tc.Before.NetworkIP,
-			},
-			After: map[string]interface{}{
-				"network_interface.#":                    1,
-				"network_interface.0.network":            tc.After.Network,
-				"network_interface.0.subnetwork":         tc.After.Subnetwork,
-				"network_interface.0.subnetwork_project": tc.After.SubnetworkProject,
-				"network_interface.0.network_ip":         tc.After.NetworkIP,
-			},
-		}
-		err := forceNewIfNetworkIPNotUpdatableFunc(d)
-		if err != nil {
-			t.Error(err)
-		}
-		if tc.ExpectedForceNew != d.IsForceNew {
-			t.Errorf("%v: expected d.IsForceNew to be %v, but was %v", tn, tc.ExpectedForceNew, d.IsForceNew)
-		}
-	}
-}
-
 func TestAccComputeInstance_metadataStartupScript_update(t *testing.T) {
 	t.Parallel()
 
@@ -2555,7 +2451,7 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 		if err != nil {
 			return fmt.Errorf("Could not stop instance: %s", err)
 		}
-		err = ComputeOperationWaitTime(config, op, config.Project, "Waiting on stop", config.UserAgent, 20*time.Minute)
+		err = tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "Waiting on stop", config.UserAgent, 20*time.Minute)
 		if err != nil {
 			return fmt.Errorf("Could not stop instance: %s", err)
 		}
@@ -2569,7 +2465,7 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 		if err != nil {
 			return fmt.Errorf("Could not change machine type: %s", err)
 		}
-		err = ComputeOperationWaitTime(config, op, config.Project, "Waiting machine type change", config.UserAgent, 20*time.Minute)
+		err = tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "Waiting machine type change", config.UserAgent, 20*time.Minute)
 		if err != nil {
 			return fmt.Errorf("Could not change machine type: %s", err)
 		}
@@ -3066,7 +2962,6 @@ func testAccCheckComputeInstanceHasNetworkIP(instance *compute.Instance, network
 	}
 }
 
-<% unless version == "ga" -%>
 func testAccCheckComputeInstanceHasNetworkPerformanceConfig(instance *compute.Instance, bandwidthTier string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if instance.NetworkPerformanceConfig == nil {
@@ -3079,7 +2974,6 @@ func testAccCheckComputeInstanceHasNetworkPerformanceConfig(instance *compute.In
 		return nil
 	}
 }
-<% end -%>
 
 func testAccCheckComputeInstanceHasMultiNic(instance *compute.Instance) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -3416,6 +3310,58 @@ resource "google_compute_instance" "foobar" {
   }
 }
 `, instance)
+}
+
+func testAccComputeInstance_resourceManagerTags(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_tags_tag_key" "key" {
+  parent = "projects/%{project}"
+  short_name = "foobarbaz%{random_suffix}"
+  description = "For foo/bar resources."
+}
+
+resource "google_tags_tag_value" "value" {
+  parent = "tagKeys/${google_tags_tag_key.key.name}"
+  short_name = "foo%{random_suffix}"
+  description = "For foo resources."
+}
+
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name           = "%{instance_name}"
+  machine_type   = "e2-medium"
+  zone           = "us-central1-a"
+  can_ip_forward = false
+  tags           = ["tag-key", "tag-value"]
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+      resource_manager_tags = {
+        "tagKeys/${google_tags_tag_key.key.name}" = "tagValues/${google_tags_tag_value.value.name}"
+      }
+    }
+  }
+
+  params {
+    resource_manager_tags = {
+      "tagKeys/${google_tags_tag_key.key.name}" = "tagValues/${google_tags_tag_value.value.name}"
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+}
+`, context)
 }
 
 func testAccComputeInstance_basic_deletionProtectionFalse(instance string) string {
@@ -5211,7 +5157,6 @@ resource "google_compute_instance" "foobar" {
 `, disk, family, family, instance)
 }
 
-<% unless version == "ga" -%>
 func testAccComputeInstance_networkPerformanceConfig(disk string, image string, instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -5263,7 +5208,6 @@ resource "google_compute_instance" "foobar" {
 }
 `, disk, image, instance)
 }
-<% end -%>
 
 func testAccComputeInstance_multiNic(instance, network, subnetwork string) string {
 	return fmt.Sprintf(`

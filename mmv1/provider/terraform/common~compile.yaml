@@ -58,10 +58,38 @@
 <% end -%>
 
 <%
+  Dir["third_party/terraform/provider/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/provider/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/provider/<%= fname -%>'
+<% end -%>
+
+<%
+  Dir["third_party/terraform/tpgiamresource/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/tpgiamresource/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/tpgiamresource/<%= fname -%>'
+<% end -%>
+
+<%
   Dir["third_party/terraform/tpgresource/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
 '<%= dir -%>/tpgresource/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/tpgresource/<%= fname -%>'
+<% end -%>
+
+<%
+  Dir["third_party/terraform/fwmodels/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/fwmodels/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/fwmodels/<%= fname -%>'
+<% end -%>
+
+<%
+  Dir["third_party/terraform/fwtransport/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/fwtransport/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/fwtransport/<%= fname -%>'
 <% end -%>
 
 <%
@@ -101,3 +129,4 @@
 '.goreleaser.yml': 'third_party/terraform/.goreleaser.yml.erb'
 'terraform-registry-manifest.json': 'third_party/terraform/terraform-registry-manifest.json.erb'
 '.release/release-metadata.hcl': 'third_party/terraform/release-metadata.hcl.erb'
+'.copywrite.hcl': 'third_party/terraform/.copywrite.hcl.erb'

@@ -21,7 +21,6 @@ exclude_resource: true
 description: |
   Only used to generate IAM resources
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   method_name_separator: ':'
   parent_resource_type: 'google_compute_instance'
   parent_resource_attribute: 'instance'

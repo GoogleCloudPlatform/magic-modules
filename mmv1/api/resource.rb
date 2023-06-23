@@ -147,6 +147,12 @@ module Api
       # The Terraform resource id format used when calling #setId(...).
       # For instance, `{{name}}` means the id will be the resource name.
       attr_reader :id_format
+      # Override attribute used to handwrite the formats for generating regex strings
+      # that match templated values to a self_link when importing, only necessary when
+      # a resource is not adequately covered by the standard provider generated options.
+      # Leading a token with `%`
+      # i.e. {{%parent}}/resource/{{resource}}
+      # will allow that token to hold multiple /'s.
       attr_reader :import_format
       attr_reader :custom_code
       attr_reader :docs
@@ -181,6 +187,9 @@ module Api
 
       # An array of function names that determine whether an error is retryable.
       attr_reader :error_retry_predicates
+
+      # An array of function names that determine whether an error is not retryable.
+      attr_reader :error_abort_predicates
 
       attr_reader :schema_version
 
@@ -278,6 +287,7 @@ module Api
 
       check :timeouts, type: Api::Timeouts
       check :error_retry_predicates, type: Array, item_type: String
+      check :error_abort_predicates, type: Array, item_type: String
       check :schema_version, type: Integer
       check :skip_delete, type: :boolean, default: false
       check :supports_indirect_user_project_override, type: :boolean, default: false

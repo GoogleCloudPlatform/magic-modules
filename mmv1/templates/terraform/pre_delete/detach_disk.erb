@@ -7,6 +7,9 @@ readRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 <% if object.error_retry_predicates -%>
 	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
 <% end -%>
+<% if object.error_abort_predicates -%>
+	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_abort_predicates.join(',') -%>},
+<% end -%>
 })
 if err != nil {
 	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeDisk %q", d.Id()))
@@ -17,7 +20,7 @@ if v, ok := readRes["users"].([]interface{}); ok {
 	type detachArgs struct{ project, zone, instance, deviceName string }
 	var detachCalls []detachArgs
 
-	for _, instance := range convertStringArr(v) {
+	for _, instance := range tpgresource.ConvertStringArr(v) {
 		self := d.Get("self_link").(string)
 		instanceProject, instanceZone, instanceName, err := tpgresource.GetLocationalResourcePropertiesFromSelfLinkString(instance)
 		if err != nil {
@@ -33,7 +36,7 @@ if v, ok := readRes["users"].([]interface{}); ok {
 			return fmt.Errorf("Error retrieving instance %s: %s", instance, err.Error())
 		}
 		for _, disk := range i.Disks {
-			if compareSelfLinkOrResourceName("", disk.Source, self, nil) {
+			if tpgresource.CompareSelfLinkOrResourceName("", disk.Source, self, nil) {
 				detachCalls = append(detachCalls, detachArgs{
 					project:    instanceProject,
 					zone:       tpgresource.GetResourceNameFromSelfLink(i.Zone),
