@@ -154,12 +154,7 @@ module Api
       # i.e. {{%parent}}/resource/{{resource}}
       # will allow that token to hold multiple /'s.
       attr_reader :import_format
-
       attr_reader :custom_code
-
-      # An optional attribute for adding reference to a customize diff function.
-      attr_reader :customize_diff
-
       attr_reader :docs
 
       # Lock name for a mutex to prevent concurrent API calls for a given
