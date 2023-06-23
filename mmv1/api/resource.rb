@@ -154,7 +154,12 @@ module Api
       # i.e. {{%parent}}/resource/{{resource}}
       # will allow that token to hold multiple /'s.
       attr_reader :import_format
+
       attr_reader :custom_code
+
+      # An optional attribute for adding reference to a customize diff function.
+      attr_reader :customize_diff
+
       attr_reader :docs
 
       # Lock name for a mutex to prevent concurrent API calls for a given
@@ -191,7 +196,14 @@ module Api
       # An array of function names that determine whether an error is not retryable.
       attr_reader :error_abort_predicates
 
+      # Optional attributes for declaring a resource's current version and generating 
+      # state_upgrader code to the output .go file from files stored at templates/terraform/state_migrations/
+      # used for maintaining state stability with resources first provisioned on older api versions.
       attr_reader :schema_version
+      attr_reader :state_upgraders
+      # included for backwards compatibility as an older state migration method
+      # and should not be used for new resources.
+      attr_reader :migrate_state
 
       # Set to true for resources that are unable to be deleted, such as KMS keyrings or project
       # level resources such as firebase project
@@ -289,6 +301,8 @@ module Api
       check :error_retry_predicates, type: Array, item_type: String
       check :error_abort_predicates, type: Array, item_type: String
       check :schema_version, type: Integer
+      check :state_upgraders, type: :boolean, default: false
+      check :migrate_state, type: String
       check :skip_delete, type: :boolean, default: false
       check :supports_indirect_user_project_override, type: :boolean, default: false
       check :read_error_transform, type: String
@@ -345,7 +359,7 @@ module Api
     # All settable properties in the resource.
     # Fingerprints aren't *really" settable properties, but they behave like one.
     # At Create, they have no value but they can just be read in anyways, and after a Read
-    # they will need ot be set in every Update.
+    # they will need to be set in every Update.
     def settable_properties
       all_user_properties.reject { |v| v.output && !v.is_a?(Api::Type::Fingerprint) }
                          .reject(&:url_param_only)

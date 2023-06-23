@@ -108,7 +108,10 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_import: templates/terraform/post_import/cloudbuild_trigger.go.erb
   pre_update: templates/terraform/pre_update/cloudbuild_trigger.go.erb
   constants: templates/terraform/constants/cloudbuild_trigger.erb
-  resource_definition: templates/terraform/resource_definition/cloudbuild_trigger.go.erb
+  custom_diff:
+    [
+      'customDiffRegionBackendService',
+    ]
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
