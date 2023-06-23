@@ -111,7 +111,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/cloudbuild_trigger.erb
   custom_diff:
     [
-      'customDiffRegionBackendService',
+      'stepTimeoutCustomizeDiff',
     ]
 parameters:
   - !ruby/object:Api::Type::String

@@ -120,7 +120,7 @@ func Resource<%= resource_name -%>() *schema.Resource {
           object.settable_properties.select { |p| p.unordered_list }
             .map { |p| "resource#{resource_name}#{p.name.camelize(:upper)}SetStyleDiff"}
             .join(",\n")
-        -%>
+        -%>,
 <%      end -%>
 <%      if object.custom_code.custom_diff -%>
 <%          for cdiff in object.custom_code.custom_diff-%>
