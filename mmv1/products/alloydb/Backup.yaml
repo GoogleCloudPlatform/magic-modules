@@ -30,6 +30,16 @@ timeouts: !ruby/object:Api::Timeouts
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     base_url: '{{op_id}}'
+    path: 'unused'
+    wait_ms: 0  # unused
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'unused'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'unused'
+    allowed: []
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'unused'
+    message: 'unused'
 import_format:
   ['projects/{{project}}/locations/{{location}}/backups/{{backup_id}}']
 autogen_async: true

@@ -157,6 +157,17 @@ For more information about types of resources and the generation process overall
      # contain a full resource in the "response" field
      # result: !ruby/object:Api::OpAsync::Result
      #   resource_inside_response: true
+     # The following are all required but unused.
+       path: 'unused'
+       wait_ms: 0  # unused
+     result: !ruby/object:Api::OpAsync::Result
+       path: 'unused'
+     status: !ruby/object:Api::OpAsync::Status
+       path: 'unused'
+       allowed: []
+     error: !ruby/object:Api::OpAsync::Error
+       path: 'unused'
+       message: 'unused'
 
    # All resources (of all kinds) that share a mutex value will block rather
    # than executing concurrent API requests.
