@@ -1,7 +1,9 @@
 package acctest
 
 import (
+	"encoding/hex"
 	"fmt"
+	"hash/crc32"
 	"runtime"
 	"strings"
 
@@ -58,7 +60,12 @@ func IsSweepableTestResource(resourceName string) bool {
 
 func AddTestSweepers(name string, sweeper func(region string) error) {
 	_, filename, _, _ := runtime.Caller(0)
-	resource.AddTestSweepers(name+filename, &resource.Sweeper{
+	hash := crc32.NewIEEE()
+	hash.Write([]byte(filename))
+	hashedFilename := hex.EncodeToString(hash.Sum(nil))
+	uniqueName := name + "_" + hashedFilename
+
+	resource.AddTestSweepers(uniqueName, &resource.Sweeper{
 		Name: name,
 		F:    sweeper,
 	})
