@@ -4,12 +4,11 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-// This will sweep GCE Disk resources
+// This will sweepGCE Disk resources
 func init() {
 	sweeper.AddTestSweepers("BigtableInstance", testSweepBigtableInstance)
 }
@@ -21,7 +20,7 @@ func testSweepBigtableInstance(region string) error {
 	resourceName := "BigtableInstance"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
-	config, err := acctest.SharedConfigForRegion(region)
+	config, err := sweeper.SharedConfigForRegion(region)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
 		return err
@@ -65,7 +64,7 @@ func testSweepBigtableInstance(region string) error {
 
 		id := obj["displayName"].(string)
 		// Increment count and skip if resource is not sweepable.
-		if !acctest.IsSweepableTestResource(id) {
+		if !sweeper.IsSweepableTestResource(id) {
 			nonPrefixCount++
 			continue
 		}

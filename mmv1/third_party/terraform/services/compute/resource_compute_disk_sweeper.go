@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -19,7 +18,7 @@ func testSweepDisk(region string) error {
 	resourceName := "ComputeDisk"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
-	config, err := acctest.SharedConfigForRegion(region)
+	config, err := sweeper.SharedConfigForRegion(region)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
 		return err
@@ -60,13 +59,13 @@ func testSweepDisk(region string) error {
 		for _, ri := range rl {
 			obj := ri.(map[string]interface{})
 			if obj["id"] == nil {
-				log.Printf("[INFO][SWEEPER_LOG] %s resource id was nil", resourceName)
+				log.Printf("[INFO][SWEEPER_LOG] %s sweeper. id was nil", resourceName)
 				return nil
 			}
 
 			id := obj["name"].(string)
-			// Increment count and skip if resource is not sweepable.
-			if !acctest.IsSweepableTestResource(id) {
+			// Increment count and skip if sweeper. is not sweepable.
+			if !sweeper.IsSweepableTestResource(id) {
 				nonPrefixCount++
 				continue
 			}
@@ -83,7 +82,7 @@ func testSweepDisk(region string) error {
 			if err != nil {
 				log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", deleteUrl, err)
 			} else {
-				log.Printf("[INFO][SWEEPER_LOG] Sent delete request for %s resource: %s", resourceName, id)
+				log.Printf("[INFO][SWEEPER_LOG] Sent delete request for %s sweeper.: %s", resourceName, id)
 			}
 		}
 

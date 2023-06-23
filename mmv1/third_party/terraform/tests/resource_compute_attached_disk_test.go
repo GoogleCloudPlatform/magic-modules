@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
@@ -15,7 +16,7 @@ func TestAccComputeAttachedDisk_basic(t *testing.T) {
 
 	diskName := fmt.Sprintf("tf-test-disk-%d", RandInt(t))
 	instanceName := fmt.Sprintf("tf-test-inst-%d", RandInt(t))
-	importID := fmt.Sprintf("%s/us-central1-a/%s/%s", acctest.GetTestProjectFromEnv(), instanceName, diskName)
+	importID := fmt.Sprintf("%s/us-central1-a/%s/%s", envvar.GetTestProjectFromEnv(), instanceName, diskName)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -47,7 +48,7 @@ func TestAccComputeAttachedDisk_full(t *testing.T) {
 
 	diskName := fmt.Sprintf("tf-test-%d", RandInt(t))
 	instanceName := fmt.Sprintf("tf-test-%d", RandInt(t))
-	importID := fmt.Sprintf("%s/us-central1-a/%s/%s", acctest.GetTestProjectFromEnv(), instanceName, diskName)
+	importID := fmt.Sprintf("%s/us-central1-a/%s/%s", envvar.GetTestProjectFromEnv(), instanceName, diskName)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,7 +75,7 @@ func TestAccComputeAttachedDisk_region(t *testing.T) {
 
 	diskName := fmt.Sprintf("tf-test-%d", RandInt(t))
 	instanceName := fmt.Sprintf("tf-test-%d", RandInt(t))
-	importID := fmt.Sprintf("%s/us-central1-a/%s/%s", acctest.GetTestProjectFromEnv(), instanceName, diskName)
+	importID := fmt.Sprintf("%s/us-central1-a/%s/%s", envvar.GetTestProjectFromEnv(), instanceName, diskName)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -130,7 +131,7 @@ func testCheckAttachedDiskIsNowDetached(t *testing.T, instanceName, diskName str
 	return func(s *terraform.State) error {
 		config := GoogleProviderConfig(t)
 
-		instance, err := config.NewComputeClient(config.UserAgent).Instances.Get(acctest.GetTestProjectFromEnv(), "us-central1-a", instanceName).Do()
+		instance, err := config.NewComputeClient(config.UserAgent).Instances.Get(envvar.GetTestProjectFromEnv(), "us-central1-a", instanceName).Do()
 		if err != nil {
 			return err
 		}
@@ -148,7 +149,7 @@ func testCheckAttachedDiskContainsManyDisks(t *testing.T, instanceName string, c
 	return func(s *terraform.State) error {
 		config := GoogleProviderConfig(t)
 
-		instance, err := config.NewComputeClient(config.UserAgent).Instances.Get(acctest.GetTestProjectFromEnv(), "us-central1-a", instanceName).Do()
+		instance, err := config.NewComputeClient(config.UserAgent).Instances.Get(envvar.GetTestProjectFromEnv(), "us-central1-a", instanceName).Do()
 		if err != nil {
 			return err
 		}

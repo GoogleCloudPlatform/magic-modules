@@ -10,32 +10,6 @@ import (
 
 const TestEnvVar = "TF_ACC"
 
-// ProviderConfigEnvNames returns a list of all the environment variables that could be set by a user to configure the provider
-func ProviderConfigEnvNames() []string {
-
-	envs := []string{}
-
-	// Use existing collections of ENV names
-	envVarsSets := [][]string{
-		CredsEnvVars,   // credentials field
-		ProjectEnvVars, // project field
-		RegionEnvVars,  //region field
-		ZoneEnvVars,    // zone field
-	}
-	for _, set := range envVarsSets {
-		envs = append(envs, set...)
-	}
-
-	// Add remaining ENVs
-	envs = append(envs, "GOOGLE_OAUTH_ACCESS_TOKEN")          // access_token field
-	envs = append(envs, "GOOGLE_BILLING_PROJECT")             // billing_project field
-	envs = append(envs, "GOOGLE_IMPERSONATE_SERVICE_ACCOUNT") // impersonate_service_account field
-	envs = append(envs, "USER_PROJECT_OVERRIDE")              // user_project_override field
-	envs = append(envs, "CLOUDSDK_CORE_REQUEST_REASON")       // request_reason field
-
-	return envs
-}
-
 var CredsEnvVars = []string{
 	"GOOGLE_CREDENTIALS",
 	"GOOGLE_CLOUD_KEYFILE_JSON",
@@ -116,54 +90,6 @@ var MasterBillingAccountEnvVars = []string{
 var PapDescriptionEnvVars = []string{
 	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
 }
-
-// func AccTestPreCheck(t *testing.T) {
-// 	if v := os.Getenv("GOOGLE_CREDENTIALS_FILE"); v != "" {
-// 		creds, err := ioutil.ReadFile(v)
-// 		if err != nil {
-// 			t.Fatalf("Error reading GOOGLE_CREDENTIALS_FILE path: %s", err)
-// 		}
-// 		os.Setenv("GOOGLE_CREDENTIALS", string(creds))
-// 	}
-
-// 	if v := transport_tpg.MultiEnvSearch(CredsEnvVars); v == "" {
-// 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(CredsEnvVars, ", "))
-// 	}
-
-// 	if v := transport_tpg.MultiEnvSearch(ProjectEnvVars); v == "" {
-// 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(ProjectEnvVars, ", "))
-// 	}
-
-// 	if v := transport_tpg.MultiEnvSearch(RegionEnvVars); v == "" {
-// 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(RegionEnvVars, ", "))
-// 	}
-
-// 	if v := transport_tpg.MultiEnvSearch(ZoneEnvVars); v == "" {
-// 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(ZoneEnvVars, ", "))
-// 	}
-// }
-
-// GetTestRegion has the same logic as the provider's GetRegion, to be used in tests.
-// func GetTestRegion(is *terraform.InstanceState, config *transport_tpg.Config) (string, error) {
-// 	if res, ok := is.Attributes["region"]; ok {
-// 		return res, nil
-// 	}
-// 	if config.Region != "" {
-// 		return config.Region, nil
-// 	}
-// 	return "", fmt.Errorf("%q: required field is not set", "region")
-// }
-
-// GetTestProject has the same logic as the provider's GetProject, to be used in tests.
-// func GetTestProject(is *terraform.InstanceState, config *transport_tpg.Config) (string, error) {
-// 	if res, ok := is.Attributes["project"]; ok {
-// 		return res, nil
-// 	}
-// 	if config.Project != "" {
-// 		return config.Project, nil
-// 	}
-// 	return "", fmt.Errorf("%q: required field is not set", "project")
-// }
 
 // AccTestPreCheck ensures at least one of the project env variables is set.
 func GetTestProjectNumberFromEnv() string {

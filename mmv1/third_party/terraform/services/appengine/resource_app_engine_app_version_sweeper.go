@@ -4,12 +4,11 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-// This will sweep both Standard and Flexible App Engine App Versions
+// This will sweepboth Standard and Flexible App Engine App Versions
 func init() {
 	sweeper.AddTestSweepers("AppEngineAppVersion", testSweepAppEngineAppVersion)
 }
@@ -19,7 +18,7 @@ func testSweepAppEngineAppVersion(region string) error {
 	resourceName := "AppEngineAppVersion"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
-	config, err := acctest.SharedConfigForRegion(region)
+	config, err := sweeper.SharedConfigForRegion(region)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
 		return err
@@ -64,7 +63,7 @@ func testSweepAppEngineAppVersion(region string) error {
 
 		id := obj["id"].(string)
 		// Increment count and skip if resource is not sweepable.
-		if !acctest.IsSweepableTestResource(id) {
+		if !sweeper.IsSweepableTestResource(id) {
 			nonPrefixCount++
 			continue
 		}

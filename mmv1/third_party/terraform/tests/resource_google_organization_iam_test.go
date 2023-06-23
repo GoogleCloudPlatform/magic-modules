@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -47,7 +48,7 @@ func TestAccOrganizationIamMembersAndBindings(t *testing.T) {
 }
 
 func testAccOrganizationIamBinding_basic(t *testing.T) {
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "tfIamTest" + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
@@ -58,7 +59,7 @@ func testAccOrganizationIamBinding_basic(t *testing.T) {
 				// Test Iam Binding creation
 				Config: testAccOrganizationIamBinding_basicConfig(account, roleId, org),
 				Check: testAccCheckGoogleOrganizationIamBindingExists(t, "foo", "test-role", []string{
-					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, acctest.GetTestProjectFromEnv()),
+					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, envvar.GetTestProjectFromEnv()),
 				}),
 			},
 			{
@@ -71,8 +72,8 @@ func testAccOrganizationIamBinding_basic(t *testing.T) {
 				// Test Iam Binding update
 				Config: testAccOrganizationIamBinding_update(account, roleId, org),
 				Check: testAccCheckGoogleOrganizationIamBindingExists(t, "foo", "test-role", []string{
-					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, acctest.GetTestProjectFromEnv()),
-					fmt.Sprintf("serviceAccount:%s-2@%s.iam.gserviceaccount.com", account, acctest.GetTestProjectFromEnv()),
+					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, envvar.GetTestProjectFromEnv()),
+					fmt.Sprintf("serviceAccount:%s-2@%s.iam.gserviceaccount.com", account, envvar.GetTestProjectFromEnv()),
 				}),
 			},
 			{
@@ -86,7 +87,7 @@ func testAccOrganizationIamBinding_basic(t *testing.T) {
 }
 
 func testAccOrganizationIamBinding_condition(t *testing.T) {
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "tfIamTest" + RandString(t, 10)
 	conditionTitle := "expires_after_2019_12_31"
@@ -98,7 +99,7 @@ func testAccOrganizationIamBinding_condition(t *testing.T) {
 				// Test Iam Binding creation
 				Config: testAccOrganizationIamBinding_conditionConfig(account, roleId, org, conditionTitle),
 				Check: testAccCheckGoogleOrganizationIamBindingExists(t, "foo", "test-role", []string{
-					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, acctest.GetTestProjectFromEnv()),
+					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, envvar.GetTestProjectFromEnv()),
 				}),
 			},
 			{
@@ -112,7 +113,7 @@ func testAccOrganizationIamBinding_condition(t *testing.T) {
 }
 
 func testAccOrganizationIamMember_basic(t *testing.T) {
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -122,12 +123,12 @@ func testAccOrganizationIamMember_basic(t *testing.T) {
 				// Test Iam Member creation (no update for member, no need to test)
 				Config: testAccOrganizationIamMember_basicConfig(account, org),
 				Check: testAccCheckGoogleOrganizationIamMemberExists(t, "foo", "roles/browser",
-					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, acctest.GetTestProjectFromEnv()),
+					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, envvar.GetTestProjectFromEnv()),
 				),
 			},
 			{
 				ResourceName:      "google_organization_iam_member.foo",
-				ImportStateId:     fmt.Sprintf("%s roles/browser serviceAccount:%s@%s.iam.gserviceaccount.com", org, account, acctest.GetTestProjectFromEnv()),
+				ImportStateId:     fmt.Sprintf("%s roles/browser serviceAccount:%s@%s.iam.gserviceaccount.com", org, account, envvar.GetTestProjectFromEnv()),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -136,7 +137,7 @@ func testAccOrganizationIamMember_basic(t *testing.T) {
 }
 
 func testAccOrganizationIamMember_condition(t *testing.T) {
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	conditionTitle := "expires_after_2019_12_31"
 	VcrTest(t, resource.TestCase{
@@ -147,7 +148,7 @@ func testAccOrganizationIamMember_condition(t *testing.T) {
 				// Test Iam Member creation (no update for member, no need to test)
 				Config: testAccOrganizationIamMember_conditionConfig(account, org, conditionTitle),
 				Check: testAccCheckGoogleOrganizationIamMemberExists(t, "foo", "roles/browser",
-					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, acctest.GetTestProjectFromEnv()),
+					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, envvar.GetTestProjectFromEnv()),
 				),
 			},
 			{
@@ -156,7 +157,7 @@ func testAccOrganizationIamMember_condition(t *testing.T) {
 					"%s roles/browser serviceAccount:%s@%s.iam.gserviceaccount.com %s",
 					org,
 					account,
-					acctest.GetTestProjectFromEnv(),
+					envvar.GetTestProjectFromEnv(),
 					conditionTitle,
 				),
 				ImportState:       true,

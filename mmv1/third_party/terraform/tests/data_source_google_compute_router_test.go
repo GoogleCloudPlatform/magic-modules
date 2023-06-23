@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDataSourceComputeRouter(t *testing.T) {
@@ -21,7 +22,7 @@ func TestAccDataSourceComputeRouter(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_compute_router.myrouter", "id", name),
 					resource.TestCheckResourceAttr("data.google_compute_router.myrouter", "name", name),
-					resource.TestCheckResourceAttr("data.google_compute_router.myrouter", "network", fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", acctest.GetTestProjectFromEnv(), name)),
+					resource.TestCheckResourceAttr("data.google_compute_router.myrouter", "network", fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", envvar.GetTestProjectFromEnv(), name)),
 				),
 			},
 		},

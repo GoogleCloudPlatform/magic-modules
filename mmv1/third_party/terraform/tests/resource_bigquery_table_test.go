@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccBigQueryTable_Basic(t *testing.T) {
@@ -515,7 +516,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchemaAndConnectionID_UpdateNoConn
 	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 	connectionID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 
-	projectID := acctest.GetTestProjectFromEnv()
+	projectID := envvar.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -554,7 +555,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateToConnectionID(t *tes
 	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 	connectionID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 
-	projectID := acctest.GetTestProjectFromEnv()
+	projectID := envvar.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -633,7 +634,7 @@ func TestAccBigQueryDataTable_bigtable(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": RandString(t, 8),
-		"project":       acctest.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 	}
 
 	VcrTest(t, resource.TestCase{

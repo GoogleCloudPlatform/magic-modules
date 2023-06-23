@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/healthcare"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -16,7 +17,7 @@ import (
 func TestAccHealthcareDicomStoreIamBinding(t *testing.T) {
 	t.Parallel()
 
-	projectId := acctest.GetTestProjectFromEnv()
+	projectId := envvar.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.dicomStoreAdmin"
 	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -65,7 +66,7 @@ func TestAccHealthcareDicomStoreIamBinding(t *testing.T) {
 func TestAccHealthcareDicomStoreIamMember(t *testing.T) {
 	t.Parallel()
 
-	projectId := acctest.GetTestProjectFromEnv()
+	projectId := envvar.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.dicomEditor"
 	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -100,7 +101,7 @@ func TestAccHealthcareDicomStoreIamMember(t *testing.T) {
 func TestAccHealthcareDicomStoreIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	projectId := acctest.GetTestProjectFromEnv()
+	projectId := envvar.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.dicomViewer"
 	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
