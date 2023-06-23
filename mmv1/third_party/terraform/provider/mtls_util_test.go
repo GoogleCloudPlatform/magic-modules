@@ -1,4 +1,4 @@
-package google
+package provider
 
 import (
 	"strings"

@@ -516,7 +516,7 @@ func generateProviderResourcesFile(resources []*Resource) {
 
 	if oPath == nil || *oPath == "" {
 		fmt.Print(string(formatted))
-	} else if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, "provider_dcl_resources.go"), formatted, 0644); err != nil {
+	} else if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, "provider", "provider_dcl_resources.go"), formatted, 0644); err != nil {
 		glog.Exit(err)
 	}
 }
