@@ -81,8 +81,10 @@ For more information about types of resources and the generation process overall
    # Inserts styled markdown into the header of the resource's page in the
    # provider documentation.
    # docs:
-   #   warning: WARNING_MARKDOWN
-   #   note: NOTE_MARKDOWN
+   #   warning: |
+   #     MULTILINE_WARNING_MARKDOWN
+   #   note: |
+   #     MULTILINE_NOTE_MARKDOWN
 
    # URL for the resource within the API domain. This should match the
    # resource's create URL (excluding any query parameters).
