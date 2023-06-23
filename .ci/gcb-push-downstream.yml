@@ -97,7 +97,7 @@ steps:
       args:
           - 'downstream'
           - 'terraform-google-conversion'
-          - 'ga'
+          - 'beta'
           - $COMMIT_SHA
 
     - name: 'gcr.io/cloud-builders/git'
