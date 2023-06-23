@@ -57,6 +57,14 @@ func TestAccGKEHubFeature_gkehubFeatureFleetObservability(t *testing.T) {
         ImportState:       true,
         ImportStateVerify: true,
       },
+      {
+        Config: testAccGKEHubFeature_gkehubFeatureFleetObservabilityUpdate3(context),
+      },
+      {
+        ResourceName:      "google_gke_hub_feature.feature",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
     },
   })
 }
@@ -132,6 +140,35 @@ resource "google_gke_hub_feature" "feature" {
       logging_config {
         fleet_scope_logs_config {
           mode = "COPY"
+        }
+      }
+    }
+  }
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
+  provider = google-beta
+}
+`, context)
+}
+
+func testAccGKEHubFeature_gkehubFeatureFleetObservabilityUpdate3(context map[string]interface{}) string {
+  return gkeHubFeatureProjectSetup(context) + Nprintf(`
+resource "time_sleep" "wait_for_gkehub_enablement" {
+  create_duration = "150s"
+  depends_on = [google_project_service.gkehub]
+}
+
+resource "google_gke_hub_feature" "feature" {
+  name = "fleetobservability"
+  location = "global"
+  project = google_project.project.project_id
+  spec {
+    fleetobservability {
+      logging_config {
+        default_config {
+          mode = "MODE_UNSPECIFIED"
+        }
+        fleet_scope_logs_config {
+          mode = "MODE_UNSPECIFIED"
         }
       }
     }
