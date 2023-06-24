@@ -155,7 +155,6 @@ properties:
     immutable: true
     description: |
       The subnet in which to house the connector
-    immutable: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
