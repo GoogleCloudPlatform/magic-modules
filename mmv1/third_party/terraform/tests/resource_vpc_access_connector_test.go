@@ -91,13 +91,13 @@ resource "google_compute_network" "custom_test" {
 }
 
 func testAccVPCAccessConnector_vpcAccessConnectorMachineAndInstancesChanged(context map[string]interface{}) string {
-        return Nprintf(`
+	return Nprintf(`
 resource "google_vpc_access_connector" "connector" {
   name          = "tf-test-vpc-con%{random_suffix}"
   subnet {
     name = google_compute_subnetwork.custom_test.name
   }
-  machine_type = "e2-micro"
+  machine_type  = "e2-micro"
   min_instances = 3
   max_instances = 5
   region        = "us-central1"
