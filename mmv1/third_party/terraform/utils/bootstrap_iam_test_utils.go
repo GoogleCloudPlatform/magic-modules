@@ -15,6 +15,7 @@ import (
 // This is important to bootstrap because using iam policy resources means that
 // deleting them removes permissions for concurrent tests.
 // Return whether the bindings changed.
+// TEST
 func BootstrapAllPSARoles(t *testing.T, prefix string, agentNames, roles []string) bool {
 	return acctest.BootstrapAllPSARoles(t, prefix, agentNames, roles)
 }
