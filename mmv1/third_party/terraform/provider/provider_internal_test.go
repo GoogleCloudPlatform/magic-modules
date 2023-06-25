@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -98,10 +98,10 @@ func ProviderConfigEnvNames() []string {
 
 	// Use existing collections of ENV names
 	envVarsSets := [][]string{
-		CredsEnvVars,   // credentials field
-		ProjectEnvVars, // project field
-		RegionEnvVars,  //region field
-		ZoneEnvVars,    // zone field
+		envvar.CredsEnvVars,   // credentials field
+		envvar.ProjectEnvVars, // project field
+		envvar.RegionEnvVars,  //region field
+		envvar.ZoneEnvVars,    // zone field
 	}
 	for _, set := range envVarsSets {
 		envs = append(envs, set...)

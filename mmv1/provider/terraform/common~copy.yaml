@@ -127,10 +127,10 @@
 <% end -%>
 
 <%
-  Dir["third_party/terraform/sweep/*.go"].each do |file_path|
+  Dir["third_party/terraform/sweeper/*.go"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
-'<%= dir -%>/sweep/<%= fname -%>': 'third_party/terraform/sweep/<%= fname -%>'
+'<%= dir -%>/sweeper/<%= fname -%>': 'third_party/terraform/sweeper/<%= fname -%>'
 <% end -%>
 
 <%

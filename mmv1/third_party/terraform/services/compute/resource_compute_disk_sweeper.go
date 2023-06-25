@@ -64,7 +64,7 @@ func testSweepDisk(region string) error {
 			}
 
 			id := obj["name"].(string)
-			// Increment count and skip if sweeper. is not sweepable.
+			// Increment count and skip if resource is not sweepable.
 			if !sweeper.IsSweepableTestResource(id) {
 				nonPrefixCount++
 				continue
