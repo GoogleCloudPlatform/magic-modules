@@ -57,7 +57,7 @@ examples:
     min_version: beta
     primary_resource_id: 'default'
     vars:
-      target_http_proxy_name: 'test-proxy'
+      target_http_proxy_name: 'test-http-keep-alive-timeout-proxy'
       url_map_name: 'url-map'
       backend_service_name: 'backend-service'
       http_health_check_name: 'http-health-check'
