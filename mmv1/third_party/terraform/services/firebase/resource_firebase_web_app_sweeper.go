@@ -1,28 +1,25 @@
-package google
+package firebase
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func init() {
-	resource.AddTestSweepers("ApigeeKeystoresAliasesKeyCertFile", &resource.Sweeper{
-		Name: "ApigeeKeystoresAliasesKeyCertFile",
-		F:    testSweepApigeeKeystoresAliasesKeyCertFile,
-	})
+	sweeper.AddTestSweepers("FirebaseWebApp", testSweepFirebaseWebApp)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
-func testSweepApigeeKeystoresAliasesKeyCertFile(region string) error {
-	resourceName := "ApigeeKeystoresAliasesKeyCertFile"
+func testSweepFirebaseWebApp(region string) error {
+	resourceName := "FirebaseWebApp"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
 	config, err := acctest.SharedConfigForRegion(region)
@@ -51,7 +48,7 @@ func testSweepApigeeKeystoresAliasesKeyCertFile(region string) error {
 		},
 	}
 
-	listTemplate := strings.Split("https://apigee.googleapis.com/v1/organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}", "?")[0]
+	listTemplate := strings.Split("https://firebase.googleapis.com/v1beta1/projects/{{project}}/webApps", "?")[0]
 	listUrl, err := tpgresource.ReplaceVars(d, config, listTemplate)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error preparing sweeper list url: %s", err)
@@ -70,7 +67,7 @@ func testSweepApigeeKeystoresAliasesKeyCertFile(region string) error {
 		return nil
 	}
 
-	resourceList, ok := res["keystoresAliasesKeyCertFiles"]
+	resourceList, ok := res["apps"]
 	if !ok {
 		log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
 		return nil
@@ -83,37 +80,31 @@ func testSweepApigeeKeystoresAliasesKeyCertFile(region string) error {
 	nonPrefixCount := 0
 	for _, ri := range rl {
 		obj := ri.(map[string]interface{})
-		var name string
-		// Id detected in the delete URL, attempt to use id.
-		if obj["id"] != nil {
-			name = tpgresource.GetResourceNameFromSelfLink(obj["id"].(string))
-		} else if obj["alias"] != nil {
-			name = tpgresource.GetResourceNameFromSelfLink(obj["alias"].(string))
-		} else {
-			log.Printf("[INFO][SWEEPER_LOG] %s resource name and id were nil", resourceName)
+		if obj["displayName"] == nil {
+			log.Printf("[INFO][SWEEPER_LOG] %s resource name was nil", resourceName)
 			return nil
 		}
+
 		// Skip resources that shouldn't be sweeped
-		if !acctest.IsSweepableTestResource(name) {
+		if !acctest.IsSweepableTestResource(obj["displayName"].(string)) {
 			nonPrefixCount++
 			continue
 		}
 
-		deleteTemplate := "https://apigee.googleapis.com/v1/organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}"
-		deleteUrl, err := tpgresource.ReplaceVars(d, config, deleteTemplate)
-		if err != nil {
-			log.Printf("[INFO][SWEEPER_LOG] error preparing delete url: %s", err)
-			return nil
-		}
-		deleteUrl = deleteUrl + name
+		name := obj["name"].(string)
+		deleteUrl := fmt.Sprintf("https://firebase.googleapis.com/v1beta1/%s:remove", name)
+
+		body := make(map[string]interface{})
+		body["immediate"] = true
 
 		// Don't wait on operations as we may have a lot to delete
 		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
-			Method:    "DELETE",
+			Method:    "POST",
 			Project:   config.Project,
 			RawURL:    deleteUrl,
 			UserAgent: config.UserAgent,
+			Body:      body,
 		})
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", deleteUrl, err)

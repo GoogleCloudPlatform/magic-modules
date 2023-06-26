@@ -1,20 +1,17 @@
-package google
+package compute
 
 import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // This will sweep GCE Disk resources
 func init() {
-	resource.AddTestSweepers("ComputeDisk", &resource.Sweeper{
-		Name: "ComputeDisk",
-		F:    testSweepDisk,
-	})
+	sweeper.AddTestSweepers("ComputeDisk", testSweepDisk)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region

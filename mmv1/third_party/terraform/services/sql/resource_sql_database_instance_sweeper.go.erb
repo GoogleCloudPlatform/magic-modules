@@ -1,5 +1,5 @@
 <% autogen_exception -%>
-package google
+package sql
 
 import (
 	"context"
@@ -8,15 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 )
 
 func init() {
-	resource.AddTestSweepers("SQLDatabaseInstance", &resource.Sweeper{
-		Name: "SQLDatabaseInstance",
-		F:    testSweepSQLDatabaseInstance,
-	})
+	sweeper.AddTestSweepers("SQLDatabaseInstance", testSweepSQLDatabaseInstance)
 }
 
 func testSweepSQLDatabaseInstance(region string) error {

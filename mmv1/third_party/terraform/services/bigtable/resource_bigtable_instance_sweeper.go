@@ -1,25 +1,24 @@
-package google
+package bigtable
 
 import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-// This will sweep both Standard and Flexible App Engine App Versions
+// This will sweep GCE Disk resources
 func init() {
-	resource.AddTestSweepers("AppEngineAppVersion", &resource.Sweeper{
-		Name: "AppEngineAppVersion",
-		F:    testSweepAppEngineAppVersion,
-	})
+	sweeper.AddTestSweepers("BigtableInstance", testSweepBigtableInstance)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
-func testSweepAppEngineAppVersion(region string) error {
-	resourceName := "AppEngineAppVersion"
+// We don't have a way to filter the list by zone, and it's not clear it's worth the
+// effort as we only create within us-central1.
+func testSweepBigtableInstance(region string) error {
+	resourceName := "BigtableInstance"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
 	config, err := acctest.SharedConfigForRegion(region)
@@ -33,8 +32,7 @@ func testSweepAppEngineAppVersion(region string) error {
 		log.Printf("[INFO][SWEEPER_LOG] error loading: %s", err)
 		return err
 	}
-
-	servicesUrl := "https://appengine.googleapis.com/v1/apps/" + config.Project + "/services"
+	servicesUrl := "https://bigtableadmin.googleapis.com/v2/projects/" + config.Project + "/instances"
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
@@ -47,7 +45,7 @@ func testSweepAppEngineAppVersion(region string) error {
 		return nil
 	}
 
-	resourceList, ok := res["services"]
+	resourceList, ok := res["instances"]
 	if !ok {
 		log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
 		return nil
@@ -60,12 +58,12 @@ func testSweepAppEngineAppVersion(region string) error {
 	nonPrefixCount := 0
 	for _, ri := range rl {
 		obj := ri.(map[string]interface{})
-		if obj["id"] == nil {
+		if obj["name"] == nil {
 			log.Printf("[INFO][SWEEPER_LOG] %s resource id was nil", resourceName)
 			return nil
 		}
 
-		id := obj["id"].(string)
+		id := obj["displayName"].(string)
 		// Increment count and skip if resource is not sweepable.
 		if !acctest.IsSweepableTestResource(id) {
 			nonPrefixCount++
@@ -89,7 +87,7 @@ func testSweepAppEngineAppVersion(region string) error {
 	}
 
 	if nonPrefixCount > 0 {
-		log.Printf("[INFO][SWEEPER_LOG] %d items without tf_test prefix remain.", nonPrefixCount)
+		log.Printf("[INFO][SWEEPER_LOG] %d items without tf-test prefix remain.", nonPrefixCount)
 	}
 
 	return nil

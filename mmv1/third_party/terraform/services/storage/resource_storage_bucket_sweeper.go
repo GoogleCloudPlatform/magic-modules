@@ -1,25 +1,22 @@
-package google
+package storage
 
 import (
 	"context"
+	"fmt"
 	"log"
-	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func init() {
-	resource.AddTestSweepers("SpannerInstance", &resource.Sweeper{
-		Name: "SpannerInstance",
-		F:    testSweepSpannerInstance,
-	})
+	sweeper.AddTestSweepers("StorageBucket", testSweepStorageBucket)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
-func testSweepSpannerInstance(region string) error {
-	resourceName := "SpannerInstance"
+func testSweepStorageBucket(region string) error {
+	resourceName := "StorageBucket"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
 	config, err := acctest.SharedConfigForRegion(region)
@@ -34,21 +31,29 @@ func testSweepSpannerInstance(region string) error {
 		return err
 	}
 
-	spannerUrl := "https://spanner.googleapis.com/v1"
-	listUrl := spannerUrl + "/projects/" + config.Project + "/instances"
+	params := map[string]string{
+		"project":    config.Project,
+		"projection": "noAcl", // returns 1000 items instead of 200
+	}
+
+	servicesUrl, err := transport_tpg.AddQueryParams("https://storage.googleapis.com/storage/v1/b", params)
+	if err != nil {
+		return err
+	}
+
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
 		Project:   config.Project,
-		RawURL:    listUrl,
+		RawURL:    servicesUrl,
 		UserAgent: config.UserAgent,
 	})
 	if err != nil {
-		log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", listUrl, err)
+		log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", servicesUrl, err)
 		return nil
 	}
 
-	resourceList, ok := res["instances"]
+	resourceList, ok := res["items"]
 	if !ok {
 		log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
 		return nil
@@ -61,22 +66,15 @@ func testSweepSpannerInstance(region string) error {
 	nonPrefixCount := 0
 	for _, ri := range rl {
 		obj := ri.(map[string]interface{})
-		if obj["name"] == nil {
-			log.Printf("[INFO][SWEEPER_LOG] %s resource name was nil", resourceName)
-			return nil
-		}
 
-		name := obj["name"].(string)
-		shortName := name[strings.LastIndex(name, "/")+1:]
-
+		id := obj["name"].(string)
 		// Increment count and skip if resource is not sweepable.
-		if !acctest.IsSweepableTestResource(shortName) {
+		if !acctest.IsSweepableTestResource(id) {
 			nonPrefixCount++
 			continue
 		}
 
-		deleteUrl := spannerUrl + "/" + name
-		// Don't wait on operations as we may have a lot to delete
+		deleteUrl := fmt.Sprintf("https://storage.googleapis.com/storage/v1/b/%s", id)
 		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "DELETE",
@@ -87,12 +85,12 @@ func testSweepSpannerInstance(region string) error {
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", deleteUrl, err)
 		} else {
-			log.Printf("[INFO][SWEEPER_LOG] Sent delete request for %s resource: %s", resourceName, shortName)
+			log.Printf("[INFO][SWEEPER_LOG] Deleted a %s resource: %s", resourceName, id)
 		}
 	}
 
 	if nonPrefixCount > 0 {
-		log.Printf("[INFO][SWEEPER_LOG] %d items without tf_test prefix remain.", nonPrefixCount)
+		log.Printf("[INFO][SWEEPER_LOG] %d items without tf-test prefix remain.", nonPrefixCount)
 	}
 
 	return nil
