@@ -480,6 +480,10 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
 <%  end # if object.async&.is_a? Provider::Terraform::PollAsync -%>
 
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
+<%  if object.skip_read -%>
+  // This resource could not be read from the API.
+  return nil
+<%  else  -%>
     config := meta.(*transport_tpg.Config)
     userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
@@ -621,6 +625,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  end -%>
 
     return nil
+<%  end # if skip_read -%>
 }
 
 <%  if updatable?(object, object.root_properties) -%>
