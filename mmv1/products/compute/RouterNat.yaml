@@ -93,7 +93,9 @@ examples:
       address_name3: 'nat-address3'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/router_nat.go.erb'
-  resource_definition: 'templates/terraform/resource_definition/router_nat.go.erb'
+custom_diff: [
+  'resourceComputeRouterNatDrainNatIpsCustomDiff',
+]
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'router'
