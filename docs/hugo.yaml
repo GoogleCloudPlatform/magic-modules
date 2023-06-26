@@ -4,7 +4,7 @@ title: Magic Modules
 enableGitInfo: true
 disableKinds:
   - taxonomy
-  - taxonomyTerm
+  - term
 module:
   imports:
     - path: github.com/alex-shpak/hugo-book
