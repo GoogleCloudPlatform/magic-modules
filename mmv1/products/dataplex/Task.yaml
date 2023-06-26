@@ -18,6 +18,8 @@ self_link: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{t
 create_url: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks?task_id={{task_id}}'
 update_url: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}'
 delete_url: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}'
+update_verb: :PATCH
+update_mask: true
 description: |
   A Dataplex task represents the work that you want Dataplex to do on a schedule. It encapsulates code, parameters, and the schedule.
 async: !ruby/object:Api::OpAsync
@@ -49,7 +51,7 @@ import_format: ['projects/{{project}}/locations/{{location}}/lakes/{{lake}}/task
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   exclude: false
   method_name_separator: ':'
-  parent_resource_attribute: 'task'
+  parent_resource_attribute: 'task_id'
   fetch_iam_policy_verb: :POST
   import_format:
     [
@@ -477,7 +479,7 @@ properties:
         item_type: Api::Type::String
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'dataplex_task_primary'
+    name: 'dataplex_task_basic'
     primary_resource_id: 'example'
     primary_resource_name:
       'fmt.Sprintf("tf-test-lake%s", context["random_suffix"]),

@@ -18,19 +18,15 @@
 package google
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func TestAccDataplexTaskDataplexTaskPrimary_update(t *testing.T) {
+func TestAccDataplexTaskDataplexTask_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -137,41 +133,3 @@ resource "google_dataplex_task" "example" {
 `, context)
 }
 
-func testAccCheckDataplexTaskDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		for name, rs := range s.RootModule().Resources {
-			if rs.Type != "google_dataplex_task" {
-				continue
-			}
-			if strings.HasPrefix(name, "data.") {
-				continue
-			}
-
-			config := GoogleProviderConfig(t)
-
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{DataplexBasePath}}projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}")
-			if err != nil {
-				return err
-			}
-
-			billingProject := ""
-
-			if config.BillingProject != "" {
-				billingProject = config.BillingProject
-			}
-
-			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    config,
-				Method:    "GET",
-				Project:   billingProject,
-				RawURL:    url,
-				UserAgent: config.UserAgent,
-			})
-			if err == nil {
-				return fmt.Errorf("DataplexTask still exists at %s", url)
-			}
-		}
-
-		return nil
-	}
-}
