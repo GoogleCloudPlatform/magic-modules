@@ -1,4 +1,4 @@
-baseURL: 'https://googlecloudplatform.github.io/magic-modules/'
+baseURL: https://googlecloudplatform.github.io/magic-modules/
 languageCode: en-us
 title: Magic Modules
 enableGitInfo: true
@@ -11,7 +11,7 @@ module:
 params:
   BookTheme: light
   BookLogo: magic-modules.svg
-  BookRepo: 'https://github.com/GoogleCloudPlatform/magic-modules'
+  BookRepo: https://github.com/GoogleCloudPlatform/magic-modules
   BookCommitPath: commit
   BookEditPath: edit/main/docs
   BookComments: false
