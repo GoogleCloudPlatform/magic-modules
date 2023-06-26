@@ -80,15 +80,6 @@ func Resource<%= resource_name -%>() *schema.Resource {
         Update: resource<%= resource_name -%>Update,
 <%  end -%>
         Delete: resource<%= resource_name -%>Delete,
-<%  if object.settable_properties.any? {|p| p.unordered_list} && !object.custom_code.resource_definition -%>
-        CustomizeDiff: customdiff.All(
-<%=
-  object.settable_properties.select { |p| p.unordered_list }
-    .map { |p| "resource#{resource_name}#{p.name.camelize(:upper)}SetStyleDiff"}
-    .join(",\n")
--%>
-        ),
-<%  end -%>
 
 <%  unless object.exclude_import -%>
         Importer: &schema.ResourceImporter{
@@ -106,15 +97,37 @@ func Resource<%= resource_name -%>() *schema.Resource {
 
 <%  if object.schema_version -%>
         SchemaVersion: <%= object.schema_version -%>,
+<%  end -%>
+<%  if object.migrate_state -%>
+        MigrateState: <%= object.migrate_state -%>,
+<%  end -%>
+<%  if object.state_upgraders -%>
+
         StateUpgraders: []schema.StateUpgrader{
-<%    for v in 0..object.schema_version-1 -%>
+<%      for v in 0..object.schema_version-1 -%>
             {
                 Type: resource<%= "#{resource_name}ResourceV#{v}" -%>().CoreConfigSchema().ImpliedType(),
                 Upgrade: Resource<%= "#{resource_name}UpgradeV#{v}" -%>,
                 Version: <%= v -%>,
             },
-<%    end -%>
+<%      end -%>
         },
+<%  end -%>
+<%  if object.custom_diff.any? || object.settable_properties.any? {|p| p.unordered_list}-%>
+        CustomizeDiff: customdiff.All(
+<%      if object.settable_properties.any? {|p| p.unordered_list} -%>
+        <%=
+          object.settable_properties.select { |p| p.unordered_list }
+            .map { |p| "resource#{resource_name}#{p.name.camelize(:upper)}SetStyleDiff"}
+            .join(",\n")
+        -%>,
+<%      end -%>
+<%      if object.custom_diff -%>
+<%          for cdiff in object.custom_diff-%>
+        <%= cdiff%>,
+<%          end -%>
+<%      end -%>
+        ),
 <%  end -%>
 
 <%= lines(compile(pwd + '/' + object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>
@@ -1138,6 +1151,6 @@ func resource<%= resource_name -%>PostCreateFailure(d *schema.ResourceData, meta
 }
 <%  end -%>
 
-<%  if object.schema_version -%>
+<%  if object.schema_version && object.state_upgraders -%>
 <%= lines(compile(pwd + "/templates/terraform/state_migrations/#{product_ns.underscore}_#{object.name.underscore}.go.erb")) -%>
 <%  end -%>

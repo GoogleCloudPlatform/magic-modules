@@ -73,8 +73,13 @@ examples:
       project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/firewall.erb
-  resource_definition: templates/terraform/resource_definition/firewall.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/firewall.erb
+custom_diff: [
+  'resourceComputeFirewallEnableLoggingCustomizeDiff',
+  'resourceComputeFirewallSourceFieldsCustomizeDiff',
+]
+migrate_state: 'resourceComputeFirewallMigrateState'
+schema_version: 1
 properties:
   # TODO(nelsonjr): [nice to have] Make the format here simpler to use, in
   # the form of # 22/tcp, [12345-23456]/tcp. It requires a conversion
