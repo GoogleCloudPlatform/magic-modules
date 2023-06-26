@@ -1,0 +1,12 @@
+if d.Get("wait_dns_verification") == true {
+    var opRes map[string]interface{}
+    err = FirebaseHostingOperationWaitTimeWithResponse(
+        config, res, &opRes, project, "Creating CustomDomain", userAgent,
+        d.Timeout(schema.TimeoutCreate))
+    if err != nil {
+        // The resource didn't actually create
+        d.SetId("")
+
+        return fmt.Errorf("Error waiting to create CustomDomain: %s", err)
+    }
+}
