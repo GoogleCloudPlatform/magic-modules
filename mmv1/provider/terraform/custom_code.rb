@@ -149,7 +149,6 @@ module Provider
         check :custom_import, type: String
         check :post_import, type: String
         check :test_check_destroy, type: String
-        check :migrate_state, type: String
       end
     end
   end
