@@ -197,6 +197,10 @@ module Api
       # level resources such as firebase project
       attr_reader :skip_delete
 
+      # Set to true for resources that are unable to be read from the API, such as
+      # public ca external account keys
+      attr_reader :skip_read
+
       # This enables resources that get their project via a reference to a different resource
       # instead of a project field to use User Project Overrides
       attr_reader :supports_indirect_user_project_override
@@ -290,6 +294,7 @@ module Api
       check :error_abort_predicates, type: Array, item_type: String
       check :schema_version, type: Integer
       check :skip_delete, type: :boolean, default: false
+      check :skip_read, type: :boolean, default: false
       check :supports_indirect_user_project_override, type: :boolean, default: false
       check :read_error_transform, type: String
       check :taint_resource_on_failed_create, type: :boolean, default: false
