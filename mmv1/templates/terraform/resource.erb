@@ -98,8 +98,8 @@ func Resource<%= resource_name -%>() *schema.Resource {
 <%  if object.schema_version -%>
         SchemaVersion: <%= object.schema_version -%>,
 <%  end -%>
-<%  if object.custom_code.migrate_state -%>
-        MigrateState: <%= object.custom_code.migrate_state -%>,
+<%  if object.migrate_state -%>
+        MigrateState: <%= object.migrate_state -%>,
 <%  end -%>
 <%  if object.state_upgraders -%>
 
@@ -113,7 +113,7 @@ func Resource<%= resource_name -%>() *schema.Resource {
 <%      end -%>
         },
 <%  end -%>
-<%  if object.custom_code.custom_diff.any? || object.settable_properties.any? {|p| p.unordered_list}-%>
+<%  if object.custom_diff.any? || object.settable_properties.any? {|p| p.unordered_list}-%>
         CustomizeDiff: customdiff.All(
 <%      if object.settable_properties.any? {|p| p.unordered_list} -%>
         <%=
@@ -122,8 +122,8 @@ func Resource<%= resource_name -%>() *schema.Resource {
             .join(",\n")
         -%>,
 <%      end -%>
-<%      if object.custom_code.custom_diff -%>
-<%          for cdiff in object.custom_code.custom_diff-%>
+<%      if object.custom_diff -%>
+<%          for cdiff in object.custom_diff-%>
         <%= cdiff%>,
 <%          end -%>
 <%      end -%>

@@ -110,10 +110,10 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/region_backend_service.go.erb
   encoder: templates/terraform/encoders/region_backend_service.go.erb
   decoder: templates/terraform/decoders/region_backend_service.go.erb
-  custom_diff: [
-    'customDiffRegionBackendService',
-  ]
-  migrate_state: 'tpgresource.MigrateStateNoop'
+custom_diff: [
+  'customDiffRegionBackendService',
+]
+migrate_state: 'tpgresource.MigrateStateNoop'
 schema_version: 1
 parameters:
   - !ruby/object:Api::Type::ResourceRef

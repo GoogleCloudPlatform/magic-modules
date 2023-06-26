@@ -34,10 +34,10 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/bigquery_data_transfer.go.erb
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
   post_create: templates/terraform/post_create/set_computed_name.erb
-  custom_diff: [
-    'sensitiveParamCustomizeDiff',
-    'paramsCustomizeDiff',
-  ]
+custom_diff: [
+  'sensitiveParamCustomizeDiff',
+  'paramsCustomizeDiff',
+]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     skip_test: true

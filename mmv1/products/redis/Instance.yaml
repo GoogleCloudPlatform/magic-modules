@@ -33,9 +33,9 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/redis_instance.go.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/redis_instance.erb
   constants: templates/terraform/constants/redis_instance.go
-  custom_diff: [
-    'customdiff.ForceNewIfChange("redis_version", isRedisVersionDecreasing)',
-  ]
+custom_diff: [
+  'customdiff.ForceNewIfChange("redis_version", isRedisVersionDecreasing)',
+]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'redis_instance_basic'

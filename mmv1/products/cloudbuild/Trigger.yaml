@@ -109,10 +109,9 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_import: templates/terraform/post_import/cloudbuild_trigger.go.erb
   pre_update: templates/terraform/pre_update/cloudbuild_trigger.go.erb
   constants: templates/terraform/constants/cloudbuild_trigger.erb
-  custom_diff:
-    [
-      'stepTimeoutCustomizeDiff',
-    ]
+custom_diff: [
+  'stepTimeoutCustomizeDiff',
+]
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'

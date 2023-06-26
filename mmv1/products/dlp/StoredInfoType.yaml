@@ -62,9 +62,9 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/dlp_stored_info_type.go.erb
   update_encoder: templates/terraform/update_encoder/dlp_stored_info_type.go.erb
   custom_import: templates/terraform/custom_import/dlp_import.go.erb
-  custom_diff: [
-    'storedInfoTypeCustomizeDiff',
-  ]
+custom_diff: [
+  'storedInfoTypeCustomizeDiff',
+]
 parameters:
   - !ruby/object:Api::Type::String
     name: 'parent'

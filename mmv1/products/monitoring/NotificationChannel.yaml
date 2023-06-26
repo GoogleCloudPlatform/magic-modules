@@ -74,9 +74,9 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/monitoring_notification_channel.go.erb
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
   post_create: templates/terraform/post_create/set_computed_name.erb
-  custom_diff: [
-    'sensitiveLabelCustomizeDiff',
-  ]
+custom_diff: [
+  'sensitiveLabelCustomizeDiff',
+]
 properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: labels

@@ -128,14 +128,6 @@ module Provider
       # resource was successfully deleted. Use this if the API responds
       # with a success HTTP code for deleted resources
       attr_reader :test_check_destroy
-      # This block inserts entries into the customdiff.All() block in the
-      # resource schema -- the code for these custom diff functions must
-      # be included in the resource constants or come from tpgresource
-      attr_reader :custom_diff
-      # This block inserts the named function and its attribute into the
-      # resource schema -- the code for the migrate_state function must
-      # be included in the resource constants or come from tpgresource
-      attr_reader :migrate_state
 
       def validate
         super
@@ -157,7 +149,6 @@ module Provider
         check :custom_import, type: String
         check :post_import, type: String
         check :test_check_destroy, type: String
-        check :custom_diff, type: Array, item_type: String, default: []
         check :migrate_state, type: String
       end
     end

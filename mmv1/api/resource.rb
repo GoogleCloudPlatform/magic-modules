@@ -157,6 +157,11 @@ module Api
       attr_reader :custom_code
       attr_reader :docs
 
+      # This block inserts entries into the customdiff.All() block in the
+      # resource schema -- the code for these custom diff functions must
+      # be included in the resource constants or come from tpgresource
+      attr_reader :custom_diff
+
       # Lock name for a mutex to prevent concurrent API calls for a given
       # resource.
       attr_reader :mutex
@@ -197,6 +202,9 @@ module Api
       # used for maintaining state stability with resources first provisioned on older api versions.
       attr_reader :schema_version
       attr_reader :state_upgraders
+      # This block inserts the named function and its attribute into the
+      # resource schema -- the code for the migrate_state function must
+      # be included in the resource constants or come from tpgresource
       # included for backwards compatibility as an older state migration method
       # and should not be used for new resources.
       attr_reader :migrate_state
@@ -292,7 +300,7 @@ module Api
       check :import_format, type: Array, item_type: String, default: []
       check :autogen_async, type: :boolean, default: false
       check :exclude_import, type: :boolean, default: false
-
+      check :custom_diff, type: Array, item_type: String, default: []
       check :timeouts, type: Api::Timeouts
       check :error_retry_predicates, type: Array, item_type: String
       check :error_abort_predicates, type: Array, item_type: String

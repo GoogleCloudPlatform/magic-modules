@@ -88,9 +88,9 @@ custom_code:
   post_create_failure: 'templates/terraform/post_create_failure/delete_on_failure.go.erb'
   # Custom diff to force new if 'preview' is true
   constants: 'templates/terraform/constants/deployment_manager_deployment.go.erb'
-  custom_diff: [
-    'customDiffDeploymentManagerDeployment',
-  ]
+custom_diff: [
+  'customDiffDeploymentManagerDeployment',
+]
 parameters:
   # These properties are query parameters given on create/update/delete.
   # They should be tracked and updatable.

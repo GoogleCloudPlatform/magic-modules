@@ -31,9 +31,9 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   update_encoder: templates/terraform/update_encoder/cloud_scheduler.go.erb
   post_create: templates/terraform/post_create/cloud_scheduler.go.erb
   post_update: templates/terraform/post_update/cloud_scheduler.go.erb
-  custom_diff: [
-    'validateAuthHeaders',
-  ]
+custom_diff: [
+  'validateAuthHeaders',
+]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'scheduler_job_pubsub'

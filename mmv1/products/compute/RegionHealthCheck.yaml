@@ -120,9 +120,9 @@ examples:
       health_check_name: 'grpc-region-health-check'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/health_check_type.erb
-  custom_diff: [
-    'healthCheckCustomizeDiff',
-  ]
+custom_diff: [
+  'healthCheckCustomizeDiff',
+]
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'

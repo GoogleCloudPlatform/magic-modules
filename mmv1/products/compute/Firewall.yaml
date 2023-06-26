@@ -74,11 +74,11 @@ examples:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/firewall.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/firewall.erb
-  custom_diff: [
-    'resourceComputeFirewallEnableLoggingCustomizeDiff',
-    'resourceComputeFirewallSourceFieldsCustomizeDiff',
-  ]
-  migrate_state: 'resourceComputeFirewallMigrateState'
+custom_diff: [
+  'resourceComputeFirewallEnableLoggingCustomizeDiff',
+  'resourceComputeFirewallSourceFieldsCustomizeDiff',
+]
+migrate_state: 'resourceComputeFirewallMigrateState'
 schema_version: 1
 properties:
   # TODO(nelsonjr): [nice to have] Make the format here simpler to use, in

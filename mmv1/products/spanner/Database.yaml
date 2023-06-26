@@ -81,9 +81,9 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/spanner_database.go.erb
   pre_delete: templates/terraform/pre_delete/resource_spanner_database.go
   pre_update: templates/terraform/pre_update/spanner_database.go.erb
-  custom_diff: [
-    'resourceSpannerDBDdlCustomDiff',
-  ]
+custom_diff: [
+  'resourceSpannerDBDdlCustomDiff',
+]
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'instance'
