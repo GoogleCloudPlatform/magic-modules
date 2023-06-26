@@ -140,15 +140,11 @@ properties:
               name: 'functionUri'
               description: |
                 HTTP URI trigger for the Cloud Function.
-            - !ruby/object:Api::Type::NestedObject
+            - !ruby/object:Api::Type::Time
               name: 'updateTime'
+              output: true
               description: |
                 When the trigger was changed.
-              properties:
-                - !ruby/object:Api::Type::Integer
-                  name: 'seconds'
-                - !ruby/object:Api::Type::Integer
-                  name: 'nanos'
       - !ruby/object:Api::Type::NestedObject
         name: 'forwardInboundCredentials'
         description: |
@@ -181,79 +177,17 @@ properties:
             name: 'quota'
             description: |
               Corresponds to the 'refill_token_count' field in QuotaServer config.
-          - !ruby/object:Api::Type::NestedObject
+          - !ruby/object:Api::Type::Time
             name: 'startTime'
             description: |
               When this quota will take affect.
-            properties:
-              - !ruby/object:Api::Type::Integer
-                name: 'seconds'
-              - !ruby/object:Api::Type::Integer
-                name: 'nanos'
-          - !ruby/object:Api::Type::NestedObject
+          - !ruby/object:Api::Type::String
             name: 'quotaDuration'
             description: |
-              How long this quota will be active for.
-            properties:
-              - !ruby/object:Api::Type::Integer
-                name: 'seconds'
-              - !ruby/object:Api::Type::Integer
-                name: 'nanos'         
+              How long this quota will be active for.    
            
-  - !ruby/object:Api::Type::NestedObject
-    name: 'recaptchaConfig'
+  - !ruby/object:Api::Type::Array
+    name: authorizedDomains
     description: |
-      The project-level reCAPTCHA config.
-    properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'emailPasswordEnforcementState'
-        description: |
-          The reCAPTCHA config for email/password provider, containing the enforcement status.
-          The email/password provider contains all related user flows protected by reCAPTCHA.
-        values:
-          - :RECAPTCHA_PROVIDER_ENFORCEMENT_STATE_UNSPECIFIED
-          - :OFF
-          - :AUDIT
-          - :ENFORCE
-      - !ruby/object:Api::Type::Array
-        name: 'managedRules'
-        description: |
-          The managed rules for authentication action based on reCAPTCHA scores.
-          The rules are shared across providers for a given tenant project.
-        item_type: Api::Type::NestedObject
-          properties:
-            - !ruby/object:Api::Type::Integer
-              name: 'endScore'
-              description: |
-                The end score (inclusive) of the score range for an action.
-            - !ruby/object:Api::Type::Enum
-              name: 'action'
-              description: |
-                The action taken if the reCAPTCHA score of a request is within the interval [start_score, end_score].
-              values:
-                - :RECAPTCHA_ACTION_UNSPECIFIED
-                - :BLOCK
-      - !ruby/object:Api::Type::Array
-        name: 'recaptchaKeys'
-        description: |
-          The reCAPTCHA keys.
-        item_type: Api::Type::NestedObject
-          properties:
-            - !ruby/object:Api::Type::String
-              name: 'key'
-              description: |
-                The reCAPTCHA Enterprise key resource name, e.g. "projects/{project}/keys/{key}".
-            - !ruby/object:Api::Type::Enum
-              name: 'type'
-              description: |
-                The client's platform type.
-              values:
-                - :CLIENT_TYPE_UNSPECIFIED
-                - :WEB
-                - :IOS
-                - :ANDROID
-      - !ruby/object:Api::Type::Boolean
-        name: 'useAccountDefender'
-        description: |
-          Whether to use the account defender for reCAPTCHA assessment. Defaults to `false`.
-     
+      List of domains authorized for OAuth redirects.
+    item_type: Api::Type::String
