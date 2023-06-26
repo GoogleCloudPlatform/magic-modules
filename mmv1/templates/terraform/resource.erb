@@ -113,7 +113,7 @@ func Resource<%= resource_name -%>() *schema.Resource {
 <%      end -%>
         },
 <%  end -%>
-<%  if object.custom_code.custom_diff || object.settable_properties.any? {|p| p.unordered_list}-%>
+<%  if object.custom_code.custom_diff.any? || object.settable_properties.any? {|p| p.unordered_list}-%>
         CustomizeDiff: customdiff.All(
 <%      if object.settable_properties.any? {|p| p.unordered_list} -%>
         <%=
