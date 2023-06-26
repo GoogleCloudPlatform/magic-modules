@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -53,8 +52,4 @@ func IsSweepableTestResource(resourceName string) bool {
 		}
 	}
 	return false
-}
-
-func AddTestSweepers(name string, sweeperFunc func(region string) error) {
-	sweeper.AddTestSweepers(name, sweeperFunc)
 }
