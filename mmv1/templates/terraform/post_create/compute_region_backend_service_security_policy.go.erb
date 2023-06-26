@@ -1,0 +1,27 @@
+<% unless version == 'ga' -%>
+// security_policy isn't set by Create / Update
+if o, n := d.GetChange("security_policy"); o.(string) != n.(string) {
+  pol, err := tpgresource.ParseSecurityPolicyRegionalFieldValue(n.(string), d, config)
+  if err != nil {
+    return errwrap.Wrapf("Error parsing Region Backend Service security policy: {{err}}", err)
+  }
+
+  region, err := tpgresource.GetRegion(d, config)
+  if err != nil {
+    return err
+  }
+
+  spr := emptySecurityPolicyReference()
+  spr.SecurityPolicy = pol.RelativeLink()
+
+  op, err := config.NewComputeClient(userAgent).RegionBackendServices.SetSecurityPolicy(project, region, obj["name"].(string), spr).Do()
+  if err != nil {
+    return errwrap.Wrapf("Error setting Region Backend Service security policy: {{err}}", err)
+  }
+  // This uses the create timeout for simplicity, though technically this code appears in both create and update
+  waitErr := ComputeOperationWaitTime(config, op, project, "Setting Region Backend Service Security Policy", userAgent, d.Timeout(schema.TimeoutCreate))
+  if waitErr != nil {
+    return waitErr
+  }
+}
+<% end -%>

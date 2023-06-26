@@ -110,6 +110,8 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/region_backend_service.go.erb
   encoder: templates/terraform/encoders/region_backend_service.go.erb
   decoder: templates/terraform/decoders/region_backend_service.go.erb
+  post_create: 'templates/terraform/post_create/compute_region_backend_service_security_policy.go.erb'
+  post_update: 'templates/terraform/post_create/compute_region_backend_service_security_policy.go.erb'
   resource_definition: 'templates/terraform/resource_definition/region_backend_service.go.erb'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
@@ -1124,6 +1126,12 @@ properties:
       - :GRPC
       - :UNSPECIFIED
     default_from_api: true
+  - !ruby/object:Api::Type::String
+    name: 'securityPolicy'
+    min_version: beta
+    description: |
+      The security policy associated with this backend service.
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Enum
     name: 'sessionAffinity'
     description: |
