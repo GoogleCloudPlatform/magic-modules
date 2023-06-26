@@ -271,6 +271,7 @@ module "project-services" {
     "privateca.googleapis.com",
     "pubsub.googleapis.com",
     "pubsublite.googleapis.com",
+    "publicca.googleapis.com",
     "recaptchaenterprise.googleapis.com",
     "redis.googleapis.com",
     "replicapool.googleapis.com",

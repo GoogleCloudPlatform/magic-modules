@@ -122,6 +122,7 @@ properties:
           - :ADVANCED
           - :ADVANCED_PREVIEW
           - :STANDARD
+        required: true
   - !ruby/object:Api::Type::String
     name: 'selfLink'
     output: true

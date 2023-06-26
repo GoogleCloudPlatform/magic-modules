@@ -5,11 +5,6 @@ test_hide:
 - github.yaml
 - github.tf.tmpl
 - ghe.tf.tmpl
-# TODO: https://github.com/hashicorp/terraform-provider-google/issues/14390
-# The following tests are being skipped while we resolve access issues in the
-# test environment
-- ghe_repository.yaml
-- github_repository.yaml
 doc_hide:
 # These tests depend on secrets stored in a separate project, so we prefer not
 # to show them in the docs.
