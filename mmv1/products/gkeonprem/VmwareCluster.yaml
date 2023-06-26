@@ -35,13 +35,13 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_vmware_cluster_basic'
     # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14417
-    skip_test: true
+    # skip_test: true
     min_version: beta
     primary_resource_id: 'cluster-basic'
     vars:
       name: 'basic'
     test_env_vars:
-      project: 'fake-backend-360322'
+      project: ':PROJECT_ID'
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_vmware_cluster_f5lb'
     # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14417
