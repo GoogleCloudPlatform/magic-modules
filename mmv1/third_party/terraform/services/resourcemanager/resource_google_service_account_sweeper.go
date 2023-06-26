@@ -1,21 +1,18 @@
-package google
+package resourcemanager
 
 import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // This will sweep Service Account resources
 func init() {
-	resource.AddTestSweepers("ServiceAccount", &resource.Sweeper{
-		Name: "ServiceAccount",
-		F:    testSweepServiceAccount,
-	})
+	sweeper.AddTestSweepers("ServiceAccount", testSweepServiceAccount)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region

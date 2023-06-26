@@ -1,4 +1,4 @@
-package google
+package bigqueryreservation
 
 import (
 	"context"
@@ -7,16 +7,13 @@ import (
 
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 )
 
 // This will sweep BigqueryReservation Reservation and Assignment resources
 func init() {
-	resource.AddTestSweepers("BigqueryReservation", &resource.Sweeper{
-		Name: "BigqueryReservation",
-		F:    testSweepBigqueryReservation,
-	})
+	sweeper.AddTestSweepers("BigqueryReservation", testSweepBigqueryReservation)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region

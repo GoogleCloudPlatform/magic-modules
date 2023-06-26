@@ -1,4 +1,4 @@
-package google
+package firebase
 
 import (
 	"context"
@@ -7,22 +7,19 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func init() {
-	resource.AddTestSweepers("FirebaseWebApp", &resource.Sweeper{
-		Name: "FirebaseWebApp",
-		F:    testSweepFirebaseWebApp,
-	})
+	sweeper.AddTestSweepers("FirebaseAppleApp", testSweepFirebaseAppleApp)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
-func testSweepFirebaseWebApp(region string) error {
-	resourceName := "FirebaseWebApp"
+func testSweepFirebaseAppleApp(region string) error {
+	resourceName := "FirebaseAppleApp"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
 	config, err := acctest.SharedConfigForRegion(region)
@@ -51,7 +48,7 @@ func testSweepFirebaseWebApp(region string) error {
 		},
 	}
 
-	listTemplate := strings.Split("https://firebase.googleapis.com/v1beta1/projects/{{project}}/webApps", "?")[0]
+	listTemplate := strings.Split("https://firebase.googleapis.com/v1beta1/projects/{{project}}/iosApps", "?")[0]
 	listUrl, err := tpgresource.ReplaceVars(d, config, listTemplate)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error preparing sweeper list url: %s", err)

@@ -1,19 +1,16 @@
-package google
+package compute
 
 import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 )
 
 // This will sweep Compute Instance Templates
 func init() {
-	resource.AddTestSweepers("ComputeInstanceTemplate", &resource.Sweeper{
-		Name: "ComputeInstanceTemplate",
-		F:    testSweepComputeInstanceTemplate,
-	})
+	sweeper.AddTestSweepers("ComputeInstanceTemplate", testSweepComputeInstanceTemplate)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region

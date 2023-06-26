@@ -1,29 +1,24 @@
-<% autogen_exception -%>
-package google
+package apigee
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"net/url"
+	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func init() {
-	resource.AddTestSweepers("CloudIdentityGroup", &resource.Sweeper{
-		Name: "CloudIdentityGroup",
-		F:    testSweepCloudIdentityGroup,
-	})
+	sweeper.AddTestSweepers("ApigeeSharedFlow", testSweepApigeeSharedFlow)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
-func testSweepCloudIdentityGroup(region string) error {
-	resourceName := "CloudIdentityGroup"
+func testSweepApigeeSharedFlow(region string) error {
+	resourceName := "ApigeeSharedFlow"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
 	config, err := acctest.SharedConfigForRegion(region)
@@ -39,24 +34,20 @@ func testSweepCloudIdentityGroup(region string) error {
 	}
 
 	t := &testing.T{}
-	custId := acctest.GetTestCustIdFromEnv(t)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
 
 	// Setup variables to replace in list template
 	d := &tpgresource.ResourceDataMock{
 		FieldsInSchema: map[string]interface{}{
-			"project":  config.Project,
-			"region":   region,
-			"location": region,
-			"zone":     "-",
-			"parent":   url.PathEscape(fmt.Sprintf("customers/%s", custId)),
+			"project":         config.Project,
+			"region":          region,
+			"location":        region,
+			"zone":            "-",
+			"billing_account": billingId,
 		},
 	}
 
-<% unless version == 'ga' -%>
-	listTemplate := "https://cloudidentity.googleapis.com/v1beta1/groups?parent={{parent}}"
-<% else -%>
-	listTemplate := "https://cloudidentity.googleapis.com/v1/groups?parent={{parent}}"
-<% end -%>
+	listTemplate := strings.Split("https://apigee.googleapis.com/v1/organizations/{{org_id}}/sharedflows/{{name}}", "?")[0]
 	listUrl, err := tpgresource.ReplaceVars(d, config, listTemplate)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error preparing sweeper list url: %s", err)
@@ -64,10 +55,10 @@ func testSweepCloudIdentityGroup(region string) error {
 	}
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config: config,
-		Method: "GET",
-		Project: config.Project,
-		RawURL: listUrl,
+		Config:    config,
+		Method:    "GET",
+		Project:   config.Project,
+		RawURL:    listUrl,
 		UserAgent: config.UserAgent,
 	})
 	if err != nil {
@@ -75,7 +66,7 @@ func testSweepCloudIdentityGroup(region string) error {
 		return nil
 	}
 
-	resourceList, ok := res["groups"]
+	resourceList, ok := res["sharedFlows"]
 	if !ok {
 		log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
 		return nil
@@ -88,23 +79,23 @@ func testSweepCloudIdentityGroup(region string) error {
 	nonPrefixCount := 0
 	for _, ri := range rl {
 		obj := ri.(map[string]interface{})
-		if obj["displayName"] == nil {
-			log.Printf("[INFO][SWEEPER_LOG] %s resource name was nil", resourceName)
+		var name string
+		// Id detected in the delete URL, attempt to use id.
+		if obj["id"] != nil {
+			name = tpgresource.GetResourceNameFromSelfLink(obj["id"].(string))
+		} else if obj["name"] != nil {
+			name = tpgresource.GetResourceNameFromSelfLink(obj["name"].(string))
+		} else {
+			log.Printf("[INFO][SWEEPER_LOG] %s resource name and id were nil", resourceName)
 			return nil
 		}
-
-		name := obj["name"].(string)
 		// Skip resources that shouldn't be sweeped
-		if !acctest.IsSweepableTestResource(obj["displayName"].(string)) {
+		if !acctest.IsSweepableTestResource(name) {
 			nonPrefixCount++
 			continue
 		}
 
-<% unless version == 'ga' -%>
-		deleteTemplate := "https://cloudidentity.googleapis.com/v1beta1/{{name}}"
-<% else -%>
-		deleteTemplate := "https://cloudidentity.googleapis.com/v1/{{name}}"
-<% end -%>
+		deleteTemplate := "https://apigee.googleapis.com/v1/organizations/{{org_id}}/sharedflows/{{name}}"
 		deleteUrl, err := tpgresource.ReplaceVars(d, config, deleteTemplate)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] error preparing delete url: %s", err)
@@ -114,10 +105,10 @@ func testSweepCloudIdentityGroup(region string) error {
 
 		// Don't wait on operations as we may have a lot to delete
 		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config: config,
-			Method: "DELETE",
-			Project: config.Project,
-			RawURL: deleteUrl,
+			Config:    config,
+			Method:    "DELETE",
+			Project:   config.Project,
+			RawURL:    deleteUrl,
 			UserAgent: config.UserAgent,
 		})
 		if err != nil {

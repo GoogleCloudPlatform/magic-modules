@@ -1,4 +1,4 @@
-package google
+package privateca
 
 import (
 	"context"
@@ -6,17 +6,14 @@ import (
 	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func init() {
-	resource.AddTestSweepers("CertificateAuthority", &resource.Sweeper{
-		Name: "CertificateAuthority",
-		F:    testSweepCertificateAuthority,
-	})
+	sweeper.AddTestSweepers("CertificateAuthority", testSweepCertificateAuthority)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
