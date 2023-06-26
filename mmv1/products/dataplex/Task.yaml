@@ -486,3 +486,19 @@ examples:
       fmt.Sprintf("tf-test-task%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataplex_task_spark'
+    primary_resource_id: 'example_spark'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-lake%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-task%s", context["random_suffix"])'
+    test_env_vars:
+      project_name: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataplex_task_notebook'
+    primary_resource_id: 'example_notebook'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-lake%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-task%s", context["random_suffix"])'
+    test_env_vars:
+      project_name: :PROJECT_NAME

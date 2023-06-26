@@ -1,0 +1,37 @@
+data "google_project" "project" {
+
+}
+
+resource "google_dataplex_lake" "<%= ctx[:primary_resource_id] %>" {
+  name         = "tf-test-lake%{random_suffix}"
+  location     = "us-central1"
+  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+}
+
+
+resource "google_dataplex_task" "<%= ctx[:primary_resource_id] %>" {
+
+    task_id      = "tf-test-task%{random_suffix}"
+    location     = "us-central1"
+    lake         = google_dataplex_lake.<%= ctx[:primary_resource_id] %>.name
+    trigger_spec  {
+        type = "ON_DEMAND"
+    }
+    
+    description = "task-spark-terraform"
+
+    execution_spec {
+        service_account = "${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+        args = {
+            TASK_ARGS  = "--output_location,gs://spark-job-jars-anrajitha/task-result, --output_format, json"
+        }
+
+    }
+    
+    spark {
+        sql_script = "show databases"
+    }
+    
+    project = "<%= ctx[:test_env_vars]['project_name'] %>"
+    
+}
