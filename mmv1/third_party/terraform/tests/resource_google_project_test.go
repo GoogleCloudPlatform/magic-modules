@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -267,9 +268,9 @@ func testAccCheckGoogleProjectHasBillingAccount(t *testing.T, r, pid, billingId 
 		// Actual value in API should match state and expected
 		// Read the billing account
 		config := GoogleProviderConfig(t)
-		ba, err := config.NewBillingClient(config.UserAgent).Projects.GetBillingInfo(PrefixedProject(pid)).Do()
+		ba, err := config.NewBillingClient(config.UserAgent).Projects.GetBillingInfo(resourcemanager.PrefixedProject(pid)).Do()
 		if err != nil {
-			return fmt.Errorf("Error reading billing account for project %q: %v", PrefixedProject(pid), err)
+			return fmt.Errorf("Error reading billing account for project %q: %v", resourcemanager.PrefixedProject(pid), err)
 		}
 		if billingId != strings.TrimPrefix(ba.BillingAccountName, "billingAccounts/") {
 			return fmt.Errorf("Billing ID returned by API (%s) did not match expected value (%s)", ba.BillingAccountName, billingId)

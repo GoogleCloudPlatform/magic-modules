@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -197,7 +198,7 @@ resource "google_project_default_service_accounts" "acceptance" {
 func testAccCheckGoogleProjectDefaultServiceAccountsChanges(t *testing.T, project, action string) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := GoogleProviderConfig(t)
-		response, err := config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.List(PrefixedProject(project)).Do()
+		response, err := config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.List(resourcemanager.PrefixedProject(project)).Do()
 		if err != nil {
 			return fmt.Errorf("failed to list service accounts on project %q: %v", project, err)
 		}
@@ -234,7 +235,7 @@ func testAccCheckGoogleProjectDefaultServiceAccountsChanges(t *testing.T, projec
 func testAccCheckGoogleProjectDefaultServiceAccountsRevert(t *testing.T, project, action string) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := GoogleProviderConfig(t)
-		response, err := config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.List(PrefixedProject(project)).Do()
+		response, err := config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.List(resourcemanager.PrefixedProject(project)).Do()
 		if err != nil {
 			return fmt.Errorf("failed to list service accounts on project %q: %v", project, err)
 		}
