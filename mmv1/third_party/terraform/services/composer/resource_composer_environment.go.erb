@@ -815,7 +815,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							Computed:     true,
-							ForceNew:     true,
+							ForceNew:     false,
 							AtLeastOneOf: composerConfigKeys,
 							ValidateFunc: validation.StringInSlice([]string{"HIGH_RESILIENCE"}, false),
 							Description:  `Whether high resilience is enabled or not. This field is supported for Cloud Composer environments in versions composer-2.1.15-airflow-*.*.* and newer.`,
@@ -1176,7 +1176,7 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			}
 		}
 
-    if d.HasChange("config.0.environment_size") {
+		if d.HasChange("config.0.environment_size") {
 			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
 			if config != nil {
 				patchObj.Config.EnvironmentSize = config.EnvironmentSize
@@ -1186,6 +1186,16 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
     }
+	if d.HasChange("config.0.resilience_mode") {
+		patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
+		if config != nil {
+			patchObj.Config.ResilienceMode = config.ResilienceMode
+		}
+		err = resourceComposerEnvironmentPatchField("config.ResilienceMode", userAgent, patchObj, d, tfConfig)
+  		if err != nil {
+			return err
+		}
+	}
 		if d.HasChange("config.0.master_authorized_networks_config") {
 			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
 			if config != nil {
