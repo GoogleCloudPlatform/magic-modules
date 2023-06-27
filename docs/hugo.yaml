@@ -16,3 +16,7 @@ params:
   BookEditPath: edit/main/docs
   BookComments: false
   BookSection: '*'
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
