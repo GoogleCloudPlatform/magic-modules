@@ -35,7 +35,6 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
    ```bash
    rbenv install 3.1.0
    ```
-1. [Install bundler](https://bundler.io/guides/getting_started.html)
 1. [Install go](https://go.dev/doc/install)
 1. Install goimports
    ```bash
@@ -58,8 +57,6 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
  
    ```
    Check for ruby in path...
-      found!
-   Check for bundle in path...
       found!
    Check for go in path...
       found!
