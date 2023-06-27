@@ -153,6 +153,7 @@ properties:
     default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: 'httpKeepAliveTimeoutSec'
+    min_version: beta
     description: |
       Specifies how long to keep a connection open, after completing a response,
       while there is no matching traffic (in seconds). If an HTTP keepalive is
