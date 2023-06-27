@@ -64,7 +64,7 @@ steps:
           - --no-ff
           - head/$_HEAD_BRANCH
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder:stephenrlewis'
       secretEnv: ["GITHUB_TOKEN"]
       id: tpg-head
       waitFor: ["merged"]
@@ -74,7 +74,7 @@ steps:
           - 'ga'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder:stephenrlewis'
       id: tpg-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
@@ -84,7 +84,7 @@ steps:
           - 'ga'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder:stephenrlewis'
       secretEnv: ["GITHUB_TOKEN"]
       id: tpgb-head
       waitFor: ["merged"]
@@ -94,7 +94,7 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder:stephenrlewis'
       id: tpgb-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
@@ -104,7 +104,7 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder:stephenrlewis'
       id: tgc-head
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged", "tpg-head"]
@@ -114,7 +114,7 @@ steps:
           - 'ga'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder:stephenrlewis'
       id: tgc-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged", "tpg-base"]
@@ -124,7 +124,7 @@ steps:
           - 'ga'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder:stephenrlewis'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       args:
@@ -133,7 +133,7 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder:stephenrlewis'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       args:
