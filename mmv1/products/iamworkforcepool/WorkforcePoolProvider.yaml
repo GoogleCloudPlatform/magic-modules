@@ -58,6 +58,8 @@ examples:
       provider_id: 'example-prvdr'
     test_env_vars:
       org_id: :ORG_ID
+    ignore_read_extra:
+      - 'oidc.0.client_secret.0.value.0.plain_text'
   - !ruby/object:Provider::Terraform::Examples
     name: 'iam_workforce_pool_provider_oidc_full'
     primary_resource_id: 'example'
@@ -66,6 +68,8 @@ examples:
       provider_id: 'example-prvdr'
     test_env_vars:
       org_id: :ORG_ID
+    ignore_read_extra:
+      - 'oidc.0.client_secret.0.value.0.plain_text'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/iam_workforce_pool_provider.go.erb
   decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
