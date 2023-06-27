@@ -29,24 +29,21 @@
 //
 // ----------------------------------------------------------------------------
 
-package google
+package {{$.Package}}
 
 import(
 	"context"
 	"log"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	{{$.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$.DCLPackage}}"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 )
 
 func init() {
-	resource.AddTestSweepers("{{$.TitleCaseFullName}}", &resource.Sweeper{
-		Name: "{{$.TitleCaseFullName}}",
-		F: testSweep{{$.TitleCaseFullName}},
-	})
+	sweeper.AddTestSweepers("{{$.TitleCaseFullName}}", testSweep{{$.TitleCaseFullName}})
 }
 
 func testSweep{{$.TitleCaseFullName}}(region string) error {

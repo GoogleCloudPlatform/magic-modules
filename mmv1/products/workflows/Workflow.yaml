@@ -32,6 +32,7 @@ autogen_async: true
 id_format: 'projects/{{project}}/locations/{{region}}/workflows/{{name}}'
 exclude_import: true
 schema_version: 1
+state_upgraders: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'workflow_basic'

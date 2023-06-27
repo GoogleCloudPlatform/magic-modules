@@ -112,7 +112,11 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/region_backend_service.go.erb
   post_create: 'templates/terraform/post_create/compute_region_backend_service_security_policy.go.erb'
   post_update: 'templates/terraform/post_create/compute_region_backend_service_security_policy.go.erb'
-  resource_definition: 'templates/terraform/resource_definition/region_backend_service.go.erb'
+custom_diff: [
+  'customDiffRegionBackendService',
+]
+migrate_state: 'tpgresource.MigrateStateNoop'
+schema_version: 1
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
