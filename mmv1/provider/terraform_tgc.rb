@@ -157,16 +157,6 @@ module Provider
       compile_file_list(
         output_folder,
         [
-          ['converters/google/resources/services/compute/compute_operation.go',
-           'third_party/terraform/services/compute/compute_operation.go.erb'],
-          ['converters/google/resources/transport/config.go',
-           'third_party/terraform/transport/config.go.erb'],
-          ['converters/google/resources/config_test_utils.go',
-           'third_party/terraform/utils/config_test_utils.go.erb'],
-          ['converters/google/resources/tpgiamresource/iam.go',
-           'third_party/terraform/tpgiamresource/iam.go.erb'],
-          ['converters/google/resources/tpgresource/common_diff_suppress.go',
-           'third_party/terraform/tpgresource/common_diff_suppress.go.erb'],
           ['converters/google/resources/services/compute/compute_instance_helpers.go',
            'third_party/terraform/services/compute/compute_instance_helpers.go.erb'],
           ['converters/google/resources/resource_converters.go',
@@ -178,7 +168,7 @@ module Provider
           ['converters/google/resources/services/compute/metadata.go',
            'third_party/terraform/services/compute/metadata.go.erb'],
           ['converters/google/resources/services/compute/compute_instance.go',
-           'third_party/tgc/services/compute/compute_instance.go.erb']
+           'third_party/tgc/compute_instance.go.erb']
         ],
         file_template
       )
