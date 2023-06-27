@@ -232,7 +232,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     if err != nil {
         return err
     }
-<%    if object.long_form_project -%>
+<%    if object.legacy_long_form_project -%>
     url = strings.ReplaceAll(url, "projects/projects/", "projects/")
 <%    end -%>
 
@@ -257,7 +257,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     if err != nil {
         return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
     }
-<%      if object.long_form_project -%>
+<%      if object.legacy_long_form_project -%>
     billingProject = strings.TrimPrefix(project, "projects/")
 <%      else -%>
     billingProject = project
@@ -313,7 +313,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     if err != nil {
         return fmt.Errorf("Error constructing id: %s", err)
     }
-<%    if object.long_form_project -%>
+<%    if object.legacy_long_form_project -%>
     id = strings.ReplaceAll(id, "projects/projects/", "projects/")
 <%    end -%>
     d.SetId(id)
@@ -374,7 +374,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     if err != nil {
         return fmt.Errorf("Error constructing id: %s", err)
     }
-<%          if object.long_form_project -%>
+<%          if object.legacy_long_form_project -%>
     id = strings.ReplaceAll(id, "projects/projects/", "projects/")
 <%          end -%>
     d.SetId(id)
@@ -436,7 +436,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
         if err != nil {
             return nil, err
         }
-<%      if object.long_form_project -%>
+<%      if object.legacy_long_form_project -%>
         url = strings.ReplaceAll(url, "projects/projects/", "projects/")
 <%      end -%>
 
@@ -447,7 +447,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
         if err != nil {
             return nil, fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
         }
-<%        if object.long_form_project -%>
+<%        if object.legacy_long_form_project -%>
         billingProject = strings.TrimPrefix(project, "projects/")
 <%        else -%>
         billingProject = project
@@ -528,7 +528,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     if err != nil {
         return err
     }
-<%  if object.long_form_project -%>
+<%  if object.legacy_long_form_project -%>
     url = strings.ReplaceAll(url, "projects/projects/", "projects/")
 <%  end -%>
 
@@ -539,7 +539,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     if err != nil {
         return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
     }
-<%    if object.long_form_project -%>
+<%    if object.legacy_long_form_project -%>
     billingProject = strings.TrimPrefix(project, "projects/")
 <%    else -%>
     billingProject = project
@@ -690,7 +690,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     if err != nil {
         return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
     }
-<%      if object.long_form_project -%>
+<%      if object.legacy_long_form_project -%>
     billingProject = strings.TrimPrefix(project, "projects/")
 <%      else -%>
     billingProject = project
@@ -743,7 +743,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     if err != nil {
         return err
     }
-<%      if object.long_form_project -%>
+<%      if object.legacy_long_form_project -%>
     url = strings.ReplaceAll(url, "projects/projects/", "projects/")
 <%      end -%>
 
@@ -920,7 +920,7 @@ if len(updateMask) > 0 {
         if err != nil {
             return err
         }
-<%        if object.long_form_project -%>
+<%        if object.legacy_long_form_project -%>
     url = strings.ReplaceAll(url, "projects/projects/", "projects/")
 <%        end -%>
 
@@ -1017,7 +1017,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     if err != nil {
         return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
     }
-<%        if object.long_form_project -%>
+<%        if object.legacy_long_form_project -%>
     billingProject = strings.TrimPrefix(project, "projects/")
 <%        else -%>
     billingProject = project
@@ -1037,7 +1037,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     if err != nil {
         return err
     }
-<%      if object.long_form_project -%>
+<%      if object.legacy_long_form_project -%>
     url = strings.ReplaceAll(url, "projects/projects/", "projects/")
 <%      end -%>
 
@@ -1137,7 +1137,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
     if err != nil {
         return nil, fmt.Errorf("Error constructing id: %s", err)
     }
-<%      if object.long_form_project -%>
+<%      if object.legacy_long_form_project -%>
     id = strings.ReplaceAll(id, "projects/projects/", "projects/")
 <%      end -%>
     d.SetId(id)

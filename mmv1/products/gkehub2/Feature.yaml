@@ -19,7 +19,7 @@ update_url: projects/{{project}}/locations/{{location}}/features/{{name}}
 self_link: projects/{{project}}/locations/{{location}}/features/{{name}}
 update_verb: :PATCH
 update_mask: true
-long_form_project: true
+legacy_long_form_project: true
 description: |
   Feature represents the settings and status of any Hub Feature.
 references: !ruby/object:Api::Resource::ReferenceLinks
