@@ -251,7 +251,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
     REPLAYING_FAILED_TESTS=$(grep "^--- FAIL: TestAcc" replaying_build_after_recording.log | sort -u -t' ' -k3,3 | awk -v pr_number=$pr_number -v build_id=$build_id '{print "`"$3"`[[Error message](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/build-log/replaying_build_after_recording/"$3"_replaying_test.log)] [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/replaying_after_recording/"$3".log)]"}')
     if [[ -n $REPLAYING_FAILED_TESTS ]]; then
       comment+="Tests failed when rerunning REPLAYING mode:${NEWLINE} $REPLAYING_FAILED_TESTS ${NEWLINE}${NEWLINE}"
-      comment+="Tests failed when the VCR replayed the response due to non-determinism or randomness when the HTTP request was made.${NEWLINE}${NEWLINE}"
+      comment+="Tests failed due to non-determinism or randomness when the VCR replayed the response after the HTTP request was made.${NEWLINE}${NEWLINE}"
       comment+="Please fix these to complete your PR. If you do not know how VCR tests work, please work with the code reviewer to figure out the reason why the tests failed and fix the tests.${NEWLINE}"
     else
       comment+="All tests passed after rerunning REPLAYING mode.${NEWLINE}"
