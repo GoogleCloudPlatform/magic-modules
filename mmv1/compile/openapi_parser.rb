@@ -60,7 +60,7 @@ def writeObject(name, obj, type, url_param)
   end
 
   # These methods are only available when the field is set
-  if obj.respond_to?(:read_only) && obj.read_only
+  if obj.respond_to?(:read_only)
     res.instance_variable_set(:@output, obj.read_only)
   end
 
@@ -92,11 +92,17 @@ def parse_openapi(spec_path, resource_path)
   path = root.paths.path[resource_path]
   parameters = []
   path.post.parameters.each do |param|
-    parameters.push(writeObject(param.name, param, param.schema.type, true))
+    parameter_object = writeObject(param.name, param, param.schema.type, true)
+    # All parameters are immutable
+    parameter_object.instance_variable_set(:@immutable, true)
+    parameters.push(parameter_object)
   end
   properties = []
+  required = path.post.request_body.content["application/json"].schema.required || []
   path.post.request_body.content["application/json"].schema.properties.each do |prop, i|
-    properties.push(writeObject(prop, i, i.type, false))
+    prop_object = writeObject(prop, i, i.type, false)
+    prop_object.instance_variable_set(:@required, required.include?(prop))
+    properties.push(prop_object)
   end
   return properties, parameters, path.post.parameters.last.name
 end
