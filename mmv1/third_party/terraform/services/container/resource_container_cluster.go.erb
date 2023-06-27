@@ -2238,6 +2238,10 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
+	if v, ok := d.GetOk("security_posture_config"); ok {
+		cluster.SecurityPostureConfig = expandSecurityPostureConfig(v)
+	}
+
 	req := &container.CreateClusterRequest{
 		Cluster: cluster,
 	}
@@ -2325,9 +2329,6 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
-	if v, ok := d.GetOk("security_posture_config"); ok {
-		cluster.SecurityPostureConfig = expandSecurityPostureConfig(v)
-	}
 
 	if err := resourceContainerClusterRead(d, meta); err != nil {
 		return err
