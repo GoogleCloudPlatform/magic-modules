@@ -122,7 +122,7 @@ parameters:
       If false, Terraform will not wait for DNS records on the `CustomDomain`. Any issues in 
       the `CustomDomain` will be returned and stored in the Terraform state.
     immutable: true
-    required: true
+    default_value: false
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
