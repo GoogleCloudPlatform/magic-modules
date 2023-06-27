@@ -248,6 +248,7 @@ properties:
       - :ACTIVE
   - !ruby/object:Api::Type::Enum
     name: certPreference
+    default_from_api: true
     description: |
       A field that lets you specify which SSL certificate type Hosting creates
       for your domain name. Spark plan `CustomDomain`s only have access to the
