@@ -8,7 +8,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-// This will sweepGCE Disk resources
+// This will sweep GCE Disk resources
 func init() {
 	sweeper.AddTestSweepers("BigtableInstance", testSweepBigtableInstance)
 }

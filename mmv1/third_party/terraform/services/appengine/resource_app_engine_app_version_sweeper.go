@@ -8,7 +8,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-// This will sweepboth Standard and Flexible App Engine App Versions
+// This will sweep both Standard and Flexible App Engine App Versions
 func init() {
 	sweeper.AddTestSweepers("AppEngineAppVersion", testSweepAppEngineAppVersion)
 }

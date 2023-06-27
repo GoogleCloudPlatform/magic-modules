@@ -9,7 +9,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-// This will sweepBigqueryReservation Reservation and Assignment resources
+// This will sweep BigqueryReservation Reservation and Assignment resources
 func init() {
 	sweeper.AddTestSweepers("BigqueryReservation", testSweepBigqueryReservation)
 }

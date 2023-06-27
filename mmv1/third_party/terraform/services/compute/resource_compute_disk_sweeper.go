@@ -59,7 +59,7 @@ func testSweepDisk(region string) error {
 		for _, ri := range rl {
 			obj := ri.(map[string]interface{})
 			if obj["id"] == nil {
-				log.Printf("[INFO][SWEEPER_LOG] %s sweeper. id was nil", resourceName)
+				log.Printf("[INFO][SWEEPER_LOG] %s resource id was nil", resourceName)
 				return nil
 			}
 
@@ -82,7 +82,7 @@ func testSweepDisk(region string) error {
 			if err != nil {
 				log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", deleteUrl, err)
 			} else {
-				log.Printf("[INFO][SWEEPER_LOG] Sent delete request for %s sweeper.: %s", resourceName, id)
+				log.Printf("[INFO][SWEEPER_LOG] Sent delete request for %s resource: %s", resourceName, id)
 			}
 		}
 

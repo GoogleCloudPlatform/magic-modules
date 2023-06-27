@@ -9,13 +9,13 @@ import (
 // functions for a given region
 //
 // Deprecated: For backward compatibility SharedConfigForRegion is still working,
-// but all new code should use SharedConfigForRegion in the sweeper.package instead.
+// but all new code should use SharedConfigForRegion in the sweeper package instead.
 func SharedConfigForRegion(region string) (*transport_tpg.Config, error) {
 	return sweeper.SharedConfigForRegion(region)
 }
 
 // Deprecated: For backward compatibility IsSweepableTestResource is still working,
-// but all new code should use IsSweepableTestResource in the sweeper.package instead.
+// but all new code should use IsSweepableTestResource in the sweeper package instead.
 func IsSweepableTestResource(resourceName string) bool {
 	return sweeper.IsSweepableTestResource(resourceName)
 }
