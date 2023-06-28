@@ -260,3 +260,13 @@ properties:
     output: true
     description: |
       The number of Kubernetes Pods backed up in the last successful Backup created via this BackupPlan.
+  - !ruby/object:Api::Type::String
+    name: state
+    output: True
+    description: |
+      The State of the BackupPlan.
+  - !ruby/object:Api::Type::String
+    name: stateReason
+    output: True
+    description: |
+      Detailed description of why BackupPlan is in its current state. 
