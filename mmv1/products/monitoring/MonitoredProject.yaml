@@ -57,4 +57,3 @@ properties:
     name: createTime
     description: Output only. The time when this `MonitoredProject` was created.
     output: true
-
