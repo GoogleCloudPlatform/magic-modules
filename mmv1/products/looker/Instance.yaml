@@ -223,7 +223,6 @@ properties:
         description: |
           Required. Day of the week for this MaintenanceWindow (in UTC).
 
-          - DAY_OF_WEEK_UNSPECIFIED: The day of the week is unspecified.
           - MONDAY: Monday
           - TUESDAY: Tuesday
           - WEDNESDAY: Wednesday
@@ -232,7 +231,6 @@ properties:
           - SATURDAY: Saturday
           - SUNDAY: Sunday
         values:
-          - :DAY_OF_WEEK_UNSPECIFIED
           - :MONDAY
           - :TUESDAY
           - :WEDNESDAY
