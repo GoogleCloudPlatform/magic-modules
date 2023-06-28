@@ -163,7 +163,6 @@ properties:
             name: 'refreshToken'
             description: |
               Whether to pass the user's OAuth identity provider's refresh token.
- 
   - !ruby/object:Api::Type::NestedObject
     name: 'quota'
     description: |
@@ -185,8 +184,7 @@ properties:
           - !ruby/object:Api::Type::String
             name: 'quotaDuration'
             description: |
-              How long this quota will be active for.    
-           
+              How long this quota will be active for.   
   - !ruby/object:Api::Type::Array
     name: authorizedDomains
     description: |
