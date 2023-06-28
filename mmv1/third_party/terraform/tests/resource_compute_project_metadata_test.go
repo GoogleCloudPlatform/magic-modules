@@ -7,14 +7,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 // Add two key value pairs
 func TestAccComputeProjectMetadata_basic(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
-	billingId := acctest.GetTestBillingAccountFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
+	billingId := envvar.GetTestBillingAccountFromEnv(t)
 	projectID := fmt.Sprintf("tf-test-%d", RandInt(t))
 
 	VcrTest(t, resource.TestCase{
@@ -38,8 +39,8 @@ func TestAccComputeProjectMetadata_basic(t *testing.T) {
 func TestAccComputeProjectMetadata_modify_1(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
-	billingId := acctest.GetTestBillingAccountFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
+	billingId := envvar.GetTestBillingAccountFromEnv(t)
 	projectID := fmt.Sprintf("tf-test-%d", RandInt(t))
 
 	VcrTest(t, resource.TestCase{
@@ -72,8 +73,8 @@ func TestAccComputeProjectMetadata_modify_1(t *testing.T) {
 func TestAccComputeProjectMetadata_modify_2(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
-	billingId := acctest.GetTestBillingAccountFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
+	billingId := envvar.GetTestBillingAccountFromEnv(t)
 	projectID := fmt.Sprintf("tf-test-%d", RandInt(t))
 
 	VcrTest(t, resource.TestCase{

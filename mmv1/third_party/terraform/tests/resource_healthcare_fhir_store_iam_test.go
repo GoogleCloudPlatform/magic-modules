@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/healthcare"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -16,7 +17,7 @@ import (
 func TestAccHealthcareFhirStoreIamBinding(t *testing.T) {
 	t.Parallel()
 
-	projectId := acctest.GetTestProjectFromEnv()
+	projectId := envvar.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.fhirStoreAdmin"
 	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -65,7 +66,7 @@ func TestAccHealthcareFhirStoreIamBinding(t *testing.T) {
 func TestAccHealthcareFhirStoreIamMember(t *testing.T) {
 	t.Parallel()
 
-	projectId := acctest.GetTestProjectFromEnv()
+	projectId := envvar.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.fhirResourceEditor"
 	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -100,7 +101,7 @@ func TestAccHealthcareFhirStoreIamMember(t *testing.T) {
 func TestAccHealthcareFhirStoreIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	projectId := acctest.GetTestProjectFromEnv()
+	projectId := envvar.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.fhirResourceEditor"
 	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))

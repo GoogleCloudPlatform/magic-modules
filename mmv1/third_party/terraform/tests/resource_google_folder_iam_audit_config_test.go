@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -14,7 +15,7 @@ import (
 func TestAccFolderIamAuditConfig_basic(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 	VcrTest(t, resource.TestCase{
@@ -42,7 +43,7 @@ func TestAccFolderIamAuditConfig_multiple(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
@@ -76,7 +77,7 @@ func TestAccFolderIamAuditConfig_multipleAtOnce(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
@@ -104,7 +105,7 @@ func TestAccFolderIamAuditConfig_multipleAtOnce(t *testing.T) {
 func TestAccFolderIamAuditConfig_update(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 
@@ -141,7 +142,7 @@ func TestAccFolderIamAuditConfig_remove(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
@@ -176,7 +177,7 @@ func TestAccFolderIamAuditConfig_remove(t *testing.T) {
 func TestAccFolderIamAuditConfig_addFirstExemptMember(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 	members := []string{}
@@ -209,7 +210,7 @@ func TestAccFolderIamAuditConfig_addFirstExemptMember(t *testing.T) {
 func TestAccFolderIamAuditConfig_removeLastExemptMember(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 	members2 := []string{}
@@ -242,7 +243,7 @@ func TestAccFolderIamAuditConfig_removeLastExemptMember(t *testing.T) {
 func TestAccFolderIamAuditConfig_updateNoExemptMembers(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	logType := "DATA_READ"
 	logType2 := "DATA_WRITE"

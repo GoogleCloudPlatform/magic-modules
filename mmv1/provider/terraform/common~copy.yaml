@@ -120,6 +120,13 @@
 <% end -%>
 
 <%
+  Dir["third_party/terraform/envvar/*.go"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/envvar/<%= fname -%>': 'third_party/terraform/envvar/<%= fname -%>'
+<% end -%>
+
+<%
   Dir["third_party/terraform/utils/*.go"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>

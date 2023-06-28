@@ -38,7 +38,7 @@ import(
 
 	{{$.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$.DCLPackage}}"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 )
 
@@ -49,7 +49,7 @@ func init() {
 func testSweep{{$.TitleCaseFullName}}(region string) error {
 	log.Print("[INFO][SWEEPER_LOG] Starting sweeper for {{$.TitleCaseFullName}}")
 
-	config, err := acctest.SharedConfigForRegion(region)
+	config, err := sweeper.SharedConfigForRegion(region)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
 		return err
@@ -62,7 +62,7 @@ func testSweep{{$.TitleCaseFullName}}(region string) error {
 	}
 
 	t := &testing.T{}
-	billingId := acctest.GetTestBillingAccountFromEnv(t)
+	billingId := envvar.GetTestBillingAccountFromEnv(t)
 
 	// Setup variables to be used for Delete arguments.
 	d := map[string]string{
@@ -82,5 +82,5 @@ func testSweep{{$.TitleCaseFullName}}(region string) error {
 }
 
 func isDeletable{{$.TitleCaseFullName}}(r *{{$.Package}}.{{$.DCLStructName}}) bool {
-	return acctest.IsSweepableTestResource(*r.Name)
+	return sweeper.IsSweepableTestResource(*r.Name)
 }

@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package sql
 
 import (
@@ -8,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 )
 
@@ -17,7 +15,7 @@ func init() {
 }
 
 func testSweepSQLDatabaseInstance(region string) error {
-	config, err := acctest.SharedConfigForRegion(region)
+	config, err := sweeper.SharedConfigForRegion(region)
 	if err != nil {
 		return fmt.Errorf("error getting shared config for region: %s", err)
 	}
@@ -41,7 +39,7 @@ func testSweepSQLDatabaseInstance(region string) error {
 	running := map[string]struct{}{}
 
 	for _, d := range found.Items {
-		if !acctest.IsSweepableTestResource(d.Name) {
+		if !sweeper.IsSweepableTestResource(d.Name) {
 			continue
 		}
 
@@ -52,7 +50,7 @@ func testSweepSQLDatabaseInstance(region string) error {
 	}
 
 	for _, d := range found.Items {
-		if !acctest.IsSweepableTestResource(d.Name) {
+		if !sweeper.IsSweepableTestResource(d.Name) {
 			continue
 		}
 
@@ -82,7 +80,7 @@ func testSweepSQLDatabaseInstance(region string) error {
 				return nil
 			}
 
-			err = SqlAdminOperationWaitTime(config, op, config.Project, "Stop Replica", config.UserAgent, 10 * time.Minute)
+			err = SqlAdminOperationWaitTime(config, op, config.Project, "Stop Replica", config.UserAgent, 10*time.Minute)
 			if err != nil {
 				if strings.Contains(err.Error(), "does not exist") {
 					log.Printf("Replication operation not found")
@@ -114,7 +112,7 @@ func testSweepSQLDatabaseInstance(region string) error {
 				return nil
 			}
 
-			err = SqlAdminOperationWaitTime(config, op, config.Project, "Delete Instance", config.UserAgent, 10 * time.Minute)
+			err = SqlAdminOperationWaitTime(config, op, config.Project, "Delete Instance", config.UserAgent, 10*time.Minute)
 			if err != nil {
 				if strings.Contains(err.Error(), "does not exist") {
 					log.Printf("SQL instance not found")
