@@ -49,10 +49,8 @@ parameters:
     name: 'region'
     description: |
       The name of the Looker region of the instance.
-    required: false
     immutable: true
     url_param_only: true
-    ignore_read: true
     default_from_api: true
 properties:
   # Admin Settings Object
