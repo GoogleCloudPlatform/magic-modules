@@ -7,48 +7,12 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
-
-func TestProjectServiceServiceValidateFunc(t *testing.T) {
-	cases := map[string]struct {
-		val                   interface{}
-		ExpectValidationError bool
-	}{
-		"ignoredProjectService": {
-			val:                   "dataproc-control.googleapis.com",
-			ExpectValidationError: true,
-		},
-		"bannedProjectService": {
-			val:                   "bigquery-json.googleapis.com",
-			ExpectValidationError: true,
-		},
-		"third party API": {
-			val:                   "whatever.example.com",
-			ExpectValidationError: false,
-		},
-		"not a domain": {
-			val:                   "monitoring",
-			ExpectValidationError: true,
-		},
-		"not a string": {
-			val:                   5,
-			ExpectValidationError: true,
-		},
-	}
-
-	for tn, tc := range cases {
-		_, errs := validateProjectServiceService(tc.val, "service")
-		if tc.ExpectValidationError && len(errs) == 0 {
-			t.Errorf("bad: %s, %q passed validation but was expected to fail", tn, tc.val)
-		}
-		if !tc.ExpectValidationError && len(errs) > 0 {
-			t.Errorf("bad: %s, %q failed validation but was expected to pass. errs: %q", tn, tc.val, errs)
-		}
-	}
-}
 
 // Test that services can be enabled and disabled on a project
 func TestAccProjectService_basic(t *testing.T) {
@@ -56,7 +20,7 @@ func TestAccProjectService_basic(t *testing.T) {
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
 	services := []string{"iam.googleapis.com", "cloudresourcemanager.googleapis.com"}
 	VcrTest(t, resource.TestCase{
@@ -111,8 +75,8 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
-	billingId := acctest.GetTestBillingAccountFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
+	billingId := envvar.GetTestBillingAccountFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
 	services := []string{"cloudbuild.googleapis.com", "containerregistry.googleapis.com"}
 
@@ -153,7 +117,7 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 func TestAccProjectService_handleNotFound(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
 	service := "iam.googleapis.com"
 	VcrTest(t, resource.TestCase{
@@ -178,16 +142,16 @@ func TestAccProjectService_handleNotFound(t *testing.T) {
 func TestAccProjectService_renamedService(t *testing.T) {
 	t.Parallel()
 
-	if len(renamedServices) == 0 {
+	if len(resourcemanager.RenamedServices) == 0 {
 		t.Skip()
 	}
 
 	var newName string
-	for _, new := range renamedServices {
+	for _, new := range resourcemanager.RenamedServices {
 		newName = new
 	}
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

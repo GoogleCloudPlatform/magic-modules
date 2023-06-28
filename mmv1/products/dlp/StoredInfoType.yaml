@@ -25,9 +25,11 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/dlp/docs/creating-stored-infotypes'
   api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.storedInfoTypes'
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
   actions: ['create']
 id_format: '{{parent}}/storedInfoTypes/{{name}}'
+# Skip sweeper due to non-standard URL
+skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_stored_info_type_basic'
@@ -55,12 +57,14 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/dlp_stored_info_type.go.erb
   constants: templates/terraform/constants/dlp_stored_info_type.go.erb
   decoder: templates/terraform/decoders/dlp_stored_info_type.go.erb
   encoder: templates/terraform/encoders/dlp_stored_info_type.go.erb
   update_encoder: templates/terraform/update_encoder/dlp_stored_info_type.go.erb
   custom_import: templates/terraform/custom_import/dlp_import.go.erb
+custom_diff: [
+  'storedInfoTypeCustomizeDiff',
+]
 parameters:
   - !ruby/object:Api::Type::String
     name: 'parent'

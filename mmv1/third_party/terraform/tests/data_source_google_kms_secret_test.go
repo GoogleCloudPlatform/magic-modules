@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	"google.golang.org/api/cloudkms/v1"
 )
 
@@ -17,8 +19,8 @@ func TestAccKmsSecret_basic(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	projectOrg := acctest.GetTestOrgFromEnv(t)
-	projectBillingAccount := acctest.GetTestBillingAccountFromEnv(t)
+	projectOrg := envvar.GetTestOrgFromEnv(t)
+	projectBillingAccount := envvar.GetTestBillingAccountFromEnv(t)
 
 	projectId := "tf-test-" + RandString(t, 10)
 	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -85,7 +87,7 @@ func TestAccKmsSecret_basic(t *testing.T) {
 	})
 }
 
-func testAccEncryptSecretDataWithCryptoKey(t *testing.T, s *terraform.State, cryptoKeyResourceName, plaintext, aad string) (string, *KmsCryptoKeyId, error) {
+func testAccEncryptSecretDataWithCryptoKey(t *testing.T, s *terraform.State, cryptoKeyResourceName, plaintext, aad string) (string, *kms.KmsCryptoKeyId, error) {
 	config := GoogleProviderConfig(t)
 
 	rs, ok := s.RootModule().Resources[cryptoKeyResourceName]
@@ -93,7 +95,7 @@ func testAccEncryptSecretDataWithCryptoKey(t *testing.T, s *terraform.State, cry
 		return "", nil, fmt.Errorf("Resource not found: %s", cryptoKeyResourceName)
 	}
 
-	cryptoKeyId, err := ParseKmsCryptoKeyId(rs.Primary.Attributes["id"], config)
+	cryptoKeyId, err := kms.ParseKmsCryptoKeyId(rs.Primary.Attributes["id"], config)
 
 	if err != nil {
 		return "", nil, err

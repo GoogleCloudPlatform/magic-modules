@@ -26,9 +26,10 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Use with Kubernetes': 'https://cloud.google.com/filestore/docs/accessing-fileshares'
     'Copying Data In/Out': 'https://cloud.google.com/filestore/docs/copying-data'
   api: 'https://cloud.google.com/filestore/docs/reference/rest/v1beta1/projects.locations.instances/create'
-error_retry_predicates: ['transport_tpg.IsNotFilestoreQuotaError']
+error_abort_predicates: ['transport_tpg.Is429QuotaError']
 autogen_async: true
 schema_version: 1
+state_upgraders: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'filestore_instance_basic'
@@ -43,7 +44,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'filestore_instance_enterprise'
     primary_resource_id: 'instance'
-    skip_test: true
+    skip_test: true # https://github.com/GoogleCloudPlatform/magic-modules/pull/5875#discussion_r844285335
     vars:
       instance_name: 'test-instance'
 custom_code: !ruby/object:Provider::Terraform::CustomCode

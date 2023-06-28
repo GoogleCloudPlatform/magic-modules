@@ -26,6 +26,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/network/forwarding-rules'
   api: 'https://cloud.google.com/compute/docs/reference/v1/forwardingRules'
 immutable: true
+legacy_long_form_project: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'

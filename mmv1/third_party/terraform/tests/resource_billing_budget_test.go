@@ -6,6 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/billing"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -13,7 +15,7 @@ func TestAccBillingBudget_billingBudgetCurrencycode(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_acct":  acctest.GetTestMasterBillingAccountFromEnv(t),
+		"billing_acct":  envvar.GetTestMasterBillingAccountFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -71,7 +73,7 @@ func TestAccBillingBudget_billingBudgetUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_acct":  acctest.GetTestMasterBillingAccountFromEnv(t),
+		"billing_acct":  envvar.GetTestMasterBillingAccountFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -128,7 +130,7 @@ func TestAccBillingBudget_billingFilterSubaccounts(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"master_billing_acct": acctest.GetTestMasterBillingAccountFromEnv(t),
+		"master_billing_acct": envvar.GetTestMasterBillingAccountFromEnv(t),
 		"random_suffix":       RandString(t, 10),
 	}
 
@@ -523,7 +525,7 @@ func TestBillingBudgetStateUpgradeV0(t *testing.T) {
 	}
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
-			actual, err := ResourceBillingBudgetUpgradeV0(context.Background(), tc.Attributes, tc.Meta)
+			actual, err := billing.ResourceBillingBudgetUpgradeV0(context.Background(), tc.Attributes, tc.Meta)
 
 			if err != nil {
 				t.Error(err)
@@ -543,9 +545,9 @@ func TestAccBillingBudget_budgetFilterProjectsOrdering(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org":                  acctest.GetTestOrgFromEnv(t),
-		"billing_acct":         acctest.GetTestMasterBillingAccountFromEnv(t),
-		"project_billing_acct": acctest.GetTestBillingAccountFromEnv(t),
+		"org":                  envvar.GetTestOrgFromEnv(t),
+		"billing_acct":         envvar.GetTestMasterBillingAccountFromEnv(t),
+		"project_billing_acct": envvar.GetTestBillingAccountFromEnv(t),
 		"random_suffix_1":      RandString(t, 10),
 		"random_suffix_2":      RandString(t, 10),
 	}

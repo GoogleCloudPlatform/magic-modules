@@ -36,8 +36,6 @@ import_format:
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuildv2_connection'
-    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14390
-    skip_test: true
     min_version: beta
     primary_resource_id: 'my-connection'
     primary_resource_name: "fmt.Sprintf(\"tf-test-connection%s\",

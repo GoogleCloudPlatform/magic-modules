@@ -112,10 +112,18 @@ if [ "$REPO" == "terraform-google-conversion" ]; then
 
     pushd $LOCAL_PATH
 
-    if [ "$COMMAND" == "downstream" ]; then
-      go get -d github.com/hashicorp/terraform-provider-google@main
-    else
-      go mod edit -replace github.com/hashicorp/terraform-provider-google=github.com/$SCRATCH_OWNER/terraform-provider-google@$BRANCH
+    if [ "$VERSION" == "ga" ]; then
+      if [ "$COMMAND" == "downstream" ]; then
+        go get -d github.com/hashicorp/terraform-provider-google@main
+      else
+        go mod edit -replace github.com/hashicorp/terraform-provider-google=github.com/$SCRATCH_OWNER/terraform-provider-google@$BRANCH
+      fi
+    elif [ "$VERSION" == "beta" ]; then
+      if [ "$COMMAND" == "downstream" ]; then
+        go get -d github.com/hashicorp/terraform-provider-google-beta@main
+      else
+        go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/$SCRATCH_OWNER/terraform-provider-google-beta@$BRANCH
+      fi
     fi
 
     go mod tidy
