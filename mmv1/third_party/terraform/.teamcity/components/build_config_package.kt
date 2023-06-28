@@ -1,6 +1,6 @@
 // this file is copied from mmv1, any changes made here will be overwritten
 
-import jetbrains.buildServer.configs.kotlin.v2019_2.*
+import jetbrains.buildServer.configs.kotlin.*
 
 class packageDetails(name: String, displayName: String, environment: String) {
     val packageName = name
@@ -49,6 +49,6 @@ class packageDetails(name: String, displayName: String, environment: String) {
     }
 
     fun uniqueID(provider : String) : String {
-        return "%s_SERVICE_%s_%s".format(provider.toUpperCase(), environment.toUpperCase(), packageName.toUpperCase())
+        return "%s_SERVICE_%s_%s".format(provider.replace("-", "").toUpperCase(), environment.toUpperCase(), packageName.toUpperCase())
     }
 }

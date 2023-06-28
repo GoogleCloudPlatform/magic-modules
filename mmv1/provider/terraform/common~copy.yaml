@@ -155,6 +155,5 @@
 <% end -%>
 '.teamcity/.gitignore': 'third_party/terraform/.teamcity/.gitignore'
 '.teamcity/Makefile': 'third_party/terraform/.teamcity/Makefile'
-'.teamcity/pom.xml': 'third_party/terraform/.teamcity/pom.xml'
 'version/version.go': 'third_party/terraform/version/version.go'
 'go.sum': 'third_party/terraform/go.sum'

@@ -1,9 +1,15 @@
+<% autogen_exception -%>
 <?xml version="1.0"?>
+<!--
+ Copyright (c) HashiCorp, Inc.
+ SPDX-License-Identifier: MPL-2.0
+-->
+
 <project>
   <modelVersion>4.0.0</modelVersion>
-  <name>TeamCity Config DSL Script</name>
-  <groupId>Configuration-As-Code</groupId>
-  <artifactId>Configuration-As-Code</artifactId>
+  <name>Terraform-Provider-Google<%= version.capitalize unless version == 'ga' -%> Config DSL Script</name>
+  <groupId>TerraformProviderGoogle<%= version.capitalize unless version == 'ga' -%></groupId>
+  <artifactId>TerraformProviderGoogle<%= version.capitalize unless version == 'ga' -%></artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <parent>
@@ -100,13 +106,13 @@
   <dependencies>
     <dependency>
       <groupId>org.jetbrains.teamcity</groupId>
-      <artifactId>configs-dsl-kotlin</artifactId>
+      <artifactId>configs-dsl-kotlin-latest</artifactId>
       <version>${teamcity.dsl.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jetbrains.teamcity</groupId>
-      <artifactId>configs-dsl-kotlin-plugins</artifactId>
+      <artifactId>configs-dsl-kotlin-plugins-latest</artifactId>
       <version>1.0-SNAPSHOT</version>
       <type>pom</type>
       <scope>compile</scope>

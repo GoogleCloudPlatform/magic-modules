@@ -146,7 +146,7 @@
   Dir["third_party/terraform/.teamcity/generated/*.erb"].each do |file_path|
     fname = file_path.delete_prefix("third_party/terraform/")
 -%>
-'<%= fname.delete_suffix(".erb").gsub("generated/", "") -%>.kts': '<%= file_path -%>'
+'<%= fname.delete_suffix(".erb").gsub("generated/", "") -%>': '<%= file_path -%>'
 <% end -%>
 'main.go': 'third_party/terraform/main.go.erb'
 'go.mod': 'third_party/terraform/go.mod.erb'
