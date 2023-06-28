@@ -149,7 +149,10 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: 'templates/terraform/encoders/cloud_run_service.go.erb'
   decoder: 'templates/terraform/decoders/cloud_run.go.erb'
   constants: templates/terraform/constants/cloud_run_service.go.erb
-  resource_definition: templates/terraform/resource_definition/cloud_run_service.go.erb
+custom_diff: [
+  'revisionNameCustomizeDiff',
+]
+schema_version: 1
 parameters:
   - !ruby/object:Api::Type::String
     name: location

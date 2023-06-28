@@ -4,7 +4,7 @@
 
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package google
+package <%= product_ns.downcase -%>
 
 import (
   "context"
@@ -12,9 +12,8 @@ import (
   "strings"
   "testing"
 
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-
   "<%= import_path() -%>/acctest"
+  "<%= import_path() -%>/sweeper"
   "<%= import_path() -%>/tpgresource"
   transport_tpg "<%= import_path() -%>/transport"
 )
@@ -32,10 +31,7 @@ delete_id = deleteUrlTemplate.include? "_id"
 -%>
 
 func init() {
-	resource.AddTestSweepers("<%= sweeper_name -%>", &resource.Sweeper{
-		Name: "<%= sweeper_name -%>",
-		F:    testSweep<%= sweeper_name -%>,
-	})
+	sweeper.AddTestSweepers("<%= sweeper_name -%>", testSweep<%= sweeper_name -%>)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
