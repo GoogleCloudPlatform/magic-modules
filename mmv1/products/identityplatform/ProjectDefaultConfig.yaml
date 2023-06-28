@@ -184,7 +184,7 @@ properties:
           - !ruby/object:Api::Type::String
             name: 'quotaDuration'
             description: |
-              How long this quota will be active for.   
+              How long this quota will be active for.
   - !ruby/object:Api::Type::Array
     name: authorizedDomains
     description: |
