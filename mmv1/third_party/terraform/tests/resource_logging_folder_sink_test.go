@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -16,7 +17,7 @@ import (
 func TestAccLoggingFolderSink_basic(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	sinkName := "tf-test-sink-" + RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
 	folderName := "tf-test-folder-" + RandString(t, 10)
@@ -46,7 +47,7 @@ func TestAccLoggingFolderSink_basic(t *testing.T) {
 func TestAccLoggingFolderSink_described(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	sinkName := "tf-test-sink-" + RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
 	folderName := "tf-test-folder-" + RandString(t, 10)
@@ -70,7 +71,7 @@ func TestAccLoggingFolderSink_described(t *testing.T) {
 func TestAccLoggingFolderSink_disabled(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	sinkName := "tf-test-sink-" + RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
 	folderName := "tf-test-folder-" + RandString(t, 10)
@@ -94,7 +95,7 @@ func TestAccLoggingFolderSink_disabled(t *testing.T) {
 func TestAccLoggingFolderSink_removeOptionals(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	sinkName := "tf-test-sink-" + RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
 	folderName := "tf-test-folder-" + RandString(t, 10)
@@ -127,7 +128,7 @@ func TestAccLoggingFolderSink_removeOptionals(t *testing.T) {
 func TestAccLoggingFolderSink_folderAcceptsFullFolderPath(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	sinkName := "tf-test-sink-" + RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
 	folderName := "tf-test-folder-" + RandString(t, 10)
@@ -157,7 +158,7 @@ func TestAccLoggingFolderSink_folderAcceptsFullFolderPath(t *testing.T) {
 func TestAccLoggingFolderSink_update(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	sinkName := "tf-test-sink-" + RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
 	updatedBucketName := "tf-test-sink-bucket-" + RandString(t, 10)
@@ -204,7 +205,7 @@ func TestAccLoggingFolderSink_update(t *testing.T) {
 func TestAccLoggingFolderSink_updateBigquerySink(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	sinkName := "tf-test-sink-" + RandString(t, 10)
 	bqDatasetID := "tf_test_sink_" + RandString(t, 10)
 	folderName := "tf-test-folder-" + RandString(t, 10)
@@ -237,7 +238,7 @@ func TestAccLoggingFolderSink_updateBigquerySink(t *testing.T) {
 func TestAccLoggingFolderSink_heredoc(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	sinkName := "tf-test-sink-" + RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
 	folderName := "tf-test-folder-" + RandString(t, 10)
@@ -356,7 +357,7 @@ resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
 }
-`, sinkName, acctest.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
+`, sinkName, envvar.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
 }
 
 func testAccLoggingFolderSink_described(sinkName, bucketName, folderName, folderParent string) string {
@@ -379,7 +380,7 @@ resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
 }
-`, sinkName, acctest.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
+`, sinkName, envvar.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
 }
 
 func testAccLoggingFolderSink_disabled(sinkName, bucketName, folderName, folderParent string) string {
@@ -402,7 +403,7 @@ resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
 }
-`, sinkName, acctest.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
+`, sinkName, envvar.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
 }
 
 func testAccLoggingFolderSink_removeOptionals(sinkName, bucketName, folderName, folderParent string) string {
@@ -445,7 +446,7 @@ resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
 }
-`, sinkName, acctest.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
+`, sinkName, envvar.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
 }
 
 func testAccLoggingFolderSink_heredoc(sinkName, bucketName, folderName, folderParent string) string {
@@ -475,7 +476,7 @@ resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
 }
-`, sinkName, acctest.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
+`, sinkName, envvar.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
 }
 
 func testAccLoggingFolderSink_bigquery_before(sinkName, bqDatasetID, folderName, folderParent string) string {
@@ -500,7 +501,7 @@ resource "google_bigquery_dataset" "logging_sink" {
 resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
-}`, sinkName, acctest.GetTestProjectFromEnv(), acctest.GetTestProjectFromEnv(), bqDatasetID, folderName, folderParent)
+}`, sinkName, envvar.GetTestProjectFromEnv(), envvar.GetTestProjectFromEnv(), bqDatasetID, folderName, folderParent)
 }
 
 func testAccLoggingFolderSink_bigquery_after(sinkName, bqDatasetID, folderName, folderParent string) string {
@@ -521,5 +522,5 @@ resource "google_bigquery_dataset" "logging_sink" {
 resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
-}`, sinkName, acctest.GetTestProjectFromEnv(), acctest.GetTestProjectFromEnv(), bqDatasetID, folderName, folderParent)
+}`, sinkName, envvar.GetTestProjectFromEnv(), envvar.GetTestProjectFromEnv(), bqDatasetID, folderName, folderParent)
 }

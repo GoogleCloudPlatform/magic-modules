@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccLoggingProjectCmekSettings_basic(t *testing.T) {
@@ -13,8 +14,8 @@ func TestAccLoggingProjectCmekSettings_basic(t *testing.T) {
 
 	context := map[string]interface{}{
 		"project_name":    "tf-test-" + RandString(t, 10),
-		"org_id":          acctest.GetTestOrgFromEnv(t),
-		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
 	resourceName := "data.google_logging_project_cmek_settings.cmek_settings"
 
@@ -45,8 +46,13 @@ resource "google_project" "default" {
 	billing_account = "%{billing_account}"
 }
 
+resource "google_project_service" "logging_service" {
+	project = google_project.default.project_id
+	service = "logging.googleapis.com"
+}
+
 data "google_logging_project_cmek_settings" "cmek_settings" {
-	project = google_project.default.name
+	project = google_project_service.logging_service.project
 }
 `, context)
 }

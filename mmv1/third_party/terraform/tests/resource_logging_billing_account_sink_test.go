@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"google.golang.org/api/logging/v2"
 )
 
@@ -15,7 +16,7 @@ func TestAccLoggingBillingAccountSink_basic(t *testing.T) {
 
 	sinkName := "tf-test-sink-" + RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
-	billingAccount := acctest.GetTestMasterBillingAccountFromEnv(t)
+	billingAccount := envvar.GetTestMasterBillingAccountFromEnv(t)
 
 	var sink logging.LogSink
 
@@ -45,7 +46,7 @@ func TestAccLoggingBillingAccountSink_update(t *testing.T) {
 	sinkName := "tf-test-sink-" + RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
 	updatedBucketName := "tf-test-sink-bucket-" + RandString(t, 10)
-	billingAccount := acctest.GetTestMasterBillingAccountFromEnv(t)
+	billingAccount := envvar.GetTestMasterBillingAccountFromEnv(t)
 
 	var sinkBefore, sinkAfter logging.LogSink
 
@@ -89,7 +90,7 @@ func TestAccLoggingBillingAccountSink_described(t *testing.T) {
 
 	sinkName := "tf-test-sink-" + RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
-	billingAccount := acctest.GetTestMasterBillingAccountFromEnv(t)
+	billingAccount := envvar.GetTestMasterBillingAccountFromEnv(t)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -112,7 +113,7 @@ func TestAccLoggingBillingAccountSink_disabled(t *testing.T) {
 
 	sinkName := "tf-test-sink-" + RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
-	billingAccount := acctest.GetTestMasterBillingAccountFromEnv(t)
+	billingAccount := envvar.GetTestMasterBillingAccountFromEnv(t)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -135,7 +136,7 @@ func TestAccLoggingBillingAccountSink_updateBigquerySink(t *testing.T) {
 
 	sinkName := "tf-test-sink-" + RandString(t, 10)
 	bqDatasetID := "tf_test_sink_" + RandString(t, 10)
-	billingAccount := acctest.GetTestMasterBillingAccountFromEnv(t)
+	billingAccount := envvar.GetTestMasterBillingAccountFromEnv(t)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -167,7 +168,7 @@ func TestAccLoggingBillingAccountSink_heredoc(t *testing.T) {
 
 	sinkName := "tf-test-sink-" + RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
-	billingAccount := acctest.GetTestMasterBillingAccountFromEnv(t)
+	billingAccount := envvar.GetTestMasterBillingAccountFromEnv(t)
 
 	var sink logging.LogSink
 
@@ -266,7 +267,7 @@ resource "google_storage_bucket" "log-bucket" {
   name     = "%s"
   location = "US"
 }
-`, name, billingAccount, acctest.GetTestProjectFromEnv(), bucketName)
+`, name, billingAccount, envvar.GetTestProjectFromEnv(), bucketName)
 }
 
 func testAccLoggingBillingAccountSink_described(name, bucketName, billingAccount string) string {
@@ -283,7 +284,7 @@ resource "google_storage_bucket" "log-bucket" {
   name     = "%s"
   location = "US"
 }
-`, name, billingAccount, acctest.GetTestProjectFromEnv(), bucketName)
+`, name, billingAccount, envvar.GetTestProjectFromEnv(), bucketName)
 }
 
 func testAccLoggingBillingAccountSink_disabled(name, bucketName, billingAccount string) string {
@@ -299,7 +300,7 @@ resource "google_storage_bucket" "log-bucket" {
   name     = "%s"
   location = "US"
 }
-`, name, billingAccount, acctest.GetTestProjectFromEnv(), bucketName)
+`, name, billingAccount, envvar.GetTestProjectFromEnv(), bucketName)
 }
 
 func testAccLoggingBillingAccountSink_update(name, bucketName, billingAccount string) string {
@@ -316,7 +317,7 @@ resource "google_storage_bucket" "log-bucket" {
   name     = "%s"
   location = "US"
 }
-`, name, billingAccount, acctest.GetTestProjectFromEnv(), bucketName)
+`, name, billingAccount, envvar.GetTestProjectFromEnv(), bucketName)
 }
 
 func testAccLoggingBillingAccountSink_heredoc(name, bucketName, billingAccount string) string {
@@ -339,7 +340,7 @@ resource "google_storage_bucket" "log-bucket" {
   name     = "%s"
   location = "US"
 }
-`, name, billingAccount, acctest.GetTestProjectFromEnv(), bucketName)
+`, name, billingAccount, envvar.GetTestProjectFromEnv(), bucketName)
 }
 
 func testAccLoggingBillingAccountSink_bigquery_before(sinkName, bqDatasetID, billingAccount string) string {
@@ -358,7 +359,7 @@ resource "google_logging_billing_account_sink" "bigquery" {
 resource "google_bigquery_dataset" "logging_sink" {
   dataset_id  = "%s"
   description = "Log sink (generated during acc test of terraform-provider-google(-beta))."
-}`, sinkName, billingAccount, acctest.GetTestProjectFromEnv(), acctest.GetTestProjectFromEnv(), bqDatasetID)
+}`, sinkName, billingAccount, envvar.GetTestProjectFromEnv(), envvar.GetTestProjectFromEnv(), bqDatasetID)
 }
 
 func testAccLoggingBillingAccountSink_bigquery_after(sinkName, bqDatasetID, billingAccount string) string {
@@ -373,5 +374,5 @@ resource "google_logging_billing_account_sink" "bigquery" {
 resource "google_bigquery_dataset" "logging_sink" {
   dataset_id  = "%s"
   description = "Log sink (generated during acc test of terraform-provider-google(-beta))."
-}`, sinkName, billingAccount, acctest.GetTestProjectFromEnv(), acctest.GetTestProjectFromEnv(), bqDatasetID)
+}`, sinkName, billingAccount, envvar.GetTestProjectFromEnv(), envvar.GetTestProjectFromEnv(), bqDatasetID)
 }

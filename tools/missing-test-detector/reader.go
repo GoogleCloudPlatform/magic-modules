@@ -7,6 +7,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -169,6 +170,7 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 	return test, nil
 }
 
+// Read the call expression in the public test function that returns the config.
 func readConfigCallExpr(configCallExpr *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (Step, error) {
 	if ident, ok := configCallExpr.Fun.(*ast.Ident); ok {
 		if configFunc, ok := funcDecls[ident.Name]; ok {
@@ -184,13 +186,7 @@ func readConfigFunc(configFunc *ast.FuncDecl) (Step, error) {
 		if returnStmt, ok := stmt.(*ast.ReturnStmt); ok {
 			for _, result := range returnStmt.Results {
 				if callExpr, ok := result.(*ast.CallExpr); ok {
-					if len(callExpr.Args) == 0 {
-						return nil, fmt.Errorf("no arguments found for call expression %v in %v", callExpr, result)
-					}
-					if basicLit, ok := callExpr.Args[0].(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
-						return readConfigBasicLit(basicLit)
-					}
-					return nil, fmt.Errorf("no string literal found in arguments to call expression %v", callExpr)
+					return readConfigFuncCallExpr(callExpr)
 				}
 			}
 			return nil, fmt.Errorf("failed to find a call expression in results %v", returnStmt.Results)
@@ -199,12 +195,30 @@ func readConfigFunc(configFunc *ast.FuncDecl) (Step, error) {
 	return nil, fmt.Errorf("failed to find a return statement in %v", configFunc.Body.List)
 }
 
+// Read the call expression in the config function that returns the config string.
+// The call expression can contain a nested call expression.
+func readConfigFuncCallExpr(configFuncCallExpr *ast.CallExpr) (Step, error) {
+	if len(configFuncCallExpr.Args) == 0 {
+		return nil, fmt.Errorf("no arguments found for call expression %v", configFuncCallExpr)
+	}
+	if basicLit, ok := configFuncCallExpr.Args[0].(*ast.BasicLit); ok {
+		if basicLit.Kind == token.STRING {
+			return readConfigBasicLit(basicLit)
+		}
+	} else if nestedCallExpr, ok := configFuncCallExpr.Args[0].(*ast.CallExpr); ok {
+		return readConfigFuncCallExpr(nestedCallExpr)
+	}
+	return nil, fmt.Errorf("no string literal found in arguments to call expression %v", configFuncCallExpr)
+}
+
 func readConfigBasicLit(configBasicLit *ast.BasicLit) (Step, error) {
 	if configStr, err := strconv.Unquote(configBasicLit.Value); err != nil {
 		return nil, err
 	} else {
 		// Remove template variables because they interfere with hcl parsing.
-		configStr = strings.ReplaceAll(configStr, "%", "")
+		pattern := regexp.MustCompile("%{[^{}]*}")
+		// Replace with a value that can be parsed outside quotation marks.
+		configStr = pattern.ReplaceAllString(configStr, "true")
 		parser := hclparse.NewParser()
 		file, diagnostics := parser.ParseHCL([]byte(configStr), "config.hcl")
 		if diagnostics.HasErrors() {

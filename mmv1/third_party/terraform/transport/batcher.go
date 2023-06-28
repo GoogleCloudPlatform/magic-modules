@@ -20,7 +20,7 @@ const DefaultBatchSendIntervalSec = 3
 type RequestBatcher struct {
 	sync.Mutex
 
-	*batchingConfig
+	*BatchingConfig
 	parentCtx context.Context
 	batches   map[string]*startedBatch
 	debugId   string
@@ -96,18 +96,18 @@ type batchSubscriber struct {
 	respCh chan batchResponse
 }
 
-// batchingConfig contains user configuration for controlling batch requests.
-type batchingConfig struct {
+// BatchingConfig contains user configuration for controlling batch requests.
+type BatchingConfig struct {
 	SendAfter      time.Duration
 	EnableBatching bool
 }
 
 // Initializes a new batcher.
-func NewRequestBatcher(debugId string, ctx context.Context, config *batchingConfig) *RequestBatcher {
+func NewRequestBatcher(debugId string, ctx context.Context, config *BatchingConfig) *RequestBatcher {
 	batcher := &RequestBatcher{
 		debugId:        debugId,
 		parentCtx:      ctx,
-		batchingConfig: config,
+		BatchingConfig: config,
 		batches:        make(map[string]*startedBatch),
 	}
 

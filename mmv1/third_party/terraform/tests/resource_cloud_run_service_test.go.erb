@@ -5,47 +5,15 @@ import (
 	"fmt"
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestCloudrunAnnotationDiffSuppress(t *testing.T) {
-	cases := map[string]struct {
-		K, Old, New        string
-		ExpectDiffSuppress bool
-	}{
-		"missing run.googleapis.com/operation-id": {
-			K:                  "metadata.0.annotations.run.googleapis.com/operation-id",
-			Old:                "12345abc",
-			New:                "",
-			ExpectDiffSuppress: true,
-		},
-		"missing run.googleapis.com/ingress": {
-			K:                  "metadata.0.annotations.run.googleapis.com/ingress",
-			Old:                "all",
-			New:                "",
-			ExpectDiffSuppress: true,
-		},
-		"explicit run.googleapis.com/ingress": {
-			K:                  "metadata.0.annotations.run.googleapis.com/ingress",
-			Old:                "all",
-			New:                "internal",
-			ExpectDiffSuppress: false,
-		},
-	}
-	for tn, tc := range cases {
-		t.Run(tn, func(t *testing.T) {
-			if got := cloudrunAnnotationDiffSuppress(tc.K, tc.Old, tc.New, nil); got != tc.ExpectDiffSuppress {
-				t.Errorf("got %t; want %t", got, tc.ExpectDiffSuppress)
-			}
-		})
-	}
-}
-
 func TestAccCloudRunService_cloudRunServiceUpdate(t *testing.T) {
 	t.Parallel()
 
-	project := acctest.GetTestProjectFromEnv()
+	project := envvar.GetTestProjectFromEnv()
 	name := "tftest-cloudrun-" + RandString(t, 6)
 
 	VcrTest(t, resource.TestCase{
@@ -78,7 +46,7 @@ func TestAccCloudRunService_cloudRunServiceUpdate(t *testing.T) {
 func TestAccCloudRunService_foregroundDeletion(t *testing.T) {
 	t.Parallel()
 
-	project := acctest.GetTestProjectFromEnv()
+	project := envvar.GetTestProjectFromEnv()
 	name := "tftest-cloudrun-" + RandString(t, 6)
 
 	VcrTest(t, resource.TestCase{
@@ -154,7 +122,7 @@ resource "google_cloud_run_service" "default" {
 func TestAccCloudRunService_secretVolume(t *testing.T) {
 	t.Parallel()
 
-	project := acctest.GetTestProjectFromEnv()
+	project := envvar.GetTestProjectFromEnv()
 	name := "tftest-cloudrun-" + RandString(t, 6)
 
 	VcrTest(t, resource.TestCase{
@@ -278,7 +246,7 @@ resource "google_cloud_run_service" "default" {
 func TestAccCloudRunService_secretEnvironmentVariable(t *testing.T) {
 	t.Parallel()
 
-	project := acctest.GetTestProjectFromEnv()
+	project := envvar.GetTestProjectFromEnv()
 	name := "tftest-cloudrun-" + RandString(t, 6)
 
 	VcrTest(t, resource.TestCase{
@@ -399,7 +367,7 @@ resource "google_cloud_run_service" "default" {
 func TestAccCloudRunService_probes(t *testing.T) {
 	t.Parallel()
 
-	project := acctest.GetTestProjectFromEnv()
+	project := envvar.GetTestProjectFromEnv()
 	name := "tftest-cloudrun-" + RandString(t, 6)
 
 	VcrTest(t, resource.TestCase{

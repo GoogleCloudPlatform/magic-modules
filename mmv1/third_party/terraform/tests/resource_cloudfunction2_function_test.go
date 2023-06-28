@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccCloudFunctions2Function_update(t *testing.T) {
@@ -121,9 +122,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   }
 
   service_config {
-    max_instance_count  = 1
-    available_memory    = "1536Mi"
-    timeout_seconds     = 30
+    min_instance_count = 1
   }
 }
 `, context)
@@ -179,7 +178,7 @@ func TestAccCloudFunctions2Function_fullUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 		"zip_path":      "./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip",
 		"random_suffix": RandString(t, 10),
 	}

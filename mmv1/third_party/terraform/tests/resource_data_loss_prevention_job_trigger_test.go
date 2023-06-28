@@ -5,13 +5,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -46,7 +47,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample2(t *testing.
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -59,7 +60,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample2(t *testing.
 				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerIdentifyingFields(context),
 			},
 			{
-				ResourceName:            "google_data_loss_prevention_job_trigger.identifying_fields",
+				ResourceName:            "google_data_loss_prevention_job_trigger.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent"},
@@ -68,7 +69,43 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample2(t *testing.
 				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerIdentifyingFieldsUpdate(context),
 			},
 			{
-				ResourceName:            "google_data_loss_prevention_job_trigger.identifying_fields_update",
+				ResourceName:            "google_data_loss_prevention_job_trigger.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
+			{
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerExcludedFields(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_job_trigger.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
+			{
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerExcludedFieldsUpdate(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_job_trigger.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
+			{
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerIncludedFields(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_job_trigger.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
+			{
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerIncludedFieldsUpdate(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_job_trigger.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent"},
@@ -81,7 +118,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerPubsub(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project": acctest.GetTestProjectFromEnv(),
+		"project": envvar.GetTestProjectFromEnv(),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -106,7 +143,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerDeidentifyUpdate(t *testin
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -141,7 +178,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerChangingActions(t *testing
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -185,7 +222,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerHybridUpdate(t *testing.T)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project": acctest.GetTestProjectFromEnv(),
+		"project": envvar.GetTestProjectFromEnv(),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -219,7 +256,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerInspect(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project": acctest.GetTestProjectFromEnv(),
+		"project": envvar.GetTestProjectFromEnv(),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -262,7 +299,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerInspectCustomInfoTypes(t *
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project": acctest.GetTestProjectFromEnv(),
+		"project": envvar.GetTestProjectFromEnv(),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -319,11 +356,11 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerInspectCustomInfoTypes(t *
 	})
 }
 
-func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample3(t *testing.T) {
+func TestAccDataLossPreventionJobTrigger_dlpJobTriggerActionsOptionalExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -333,19 +370,28 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample3(t *testing.
 		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerIncludedFields(context),
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerActionsOptionalBasic(context),
 			},
 			{
-				ResourceName:            "google_data_loss_prevention_job_trigger.included_fields",
+				ResourceName:            "google_data_loss_prevention_job_trigger.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent"},
 			},
 			{
-				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerIncludedFieldsUpdate(context),
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerBasic(context),
 			},
 			{
-				ResourceName:            "google_data_loss_prevention_job_trigger.included_fields_update",
+				ResourceName:            "google_data_loss_prevention_job_trigger.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
+			{
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerActionsOptionalBasic(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_job_trigger.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent"},
@@ -354,11 +400,11 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample3(t *testing.
 	})
 }
 
-func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample4(t *testing.T) {
+func TestAccDataLossPreventionJobTrigger_dlpJobTriggerInspectOptionalExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -368,19 +414,71 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample4(t *testing.
 		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerExcludedFields(context),
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerInspectOptionalBasic(context),
 			},
 			{
-				ResourceName:            "google_data_loss_prevention_job_trigger.excluded_fields",
+				ResourceName:            "google_data_loss_prevention_job_trigger.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent"},
 			},
 			{
-				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerExcludedFieldsUpdate(context),
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerBasic(context),
 			},
 			{
-				ResourceName:            "google_data_loss_prevention_job_trigger.excluded_fields_update",
+				ResourceName:            "google_data_loss_prevention_job_trigger.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
+			{
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerInspectOptionalBasic(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_job_trigger.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
+		},
+	})
+}
+
+func TestAccDataLossPreventionJobTrigger_dlpJobTrigger_withSensitivityScore(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project": envvar.GetTestProjectFromEnv(),
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTrigger_withSensitivityScoreBasic(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_job_trigger.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
+			{
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTrigger_withSensitivityScoreUpdate(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_job_trigger.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
+			{
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTrigger_withSensitivityScoreUpdate2(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_job_trigger.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent"},
@@ -419,6 +517,7 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 				file_set {
 					url = "gs://mybucket/directory/"
 				}
+				file_types = ["POWERPOINT", "EXCEL", "CSV", "TSV"]
 			}
 		}
 	}
@@ -428,7 +527,7 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerIdentifyingFields(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_data_loss_prevention_job_trigger" "identifying_fields" {
+resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
 	description = "Starting description"
 	display_name = "display"
@@ -472,7 +571,7 @@ resource "google_data_loss_prevention_job_trigger" "identifying_fields" {
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerIncludedFields(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_data_loss_prevention_job_trigger" "included_fields" {
+resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
 	description = "Starting description"
 	display_name = "display"
@@ -516,7 +615,7 @@ resource "google_data_loss_prevention_job_trigger" "included_fields" {
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerExcludedFields(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_data_loss_prevention_job_trigger" "excluded_fields" {
+resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
 	description = "Starting description"
 	display_name = "display"
@@ -597,7 +696,7 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerIdentifyingFieldsUpdate(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_data_loss_prevention_job_trigger" "identifying_fields_update" {
+resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
 	description = "An updated description"
 	display_name = "Different"
@@ -641,7 +740,7 @@ resource "google_data_loss_prevention_job_trigger" "identifying_fields_update" {
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerIncludedFieldsUpdate(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_data_loss_prevention_job_trigger" "included_fields_update" {
+resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
 	description = "An updated description"
 	display_name = "Different"
@@ -685,7 +784,7 @@ resource "google_data_loss_prevention_job_trigger" "included_fields_update" {
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerExcludedFieldsUpdate(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_data_loss_prevention_job_trigger" "excluded_fields_update" {
+resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
 	description = "An updated description"
 	display_name = "Different"
@@ -2192,6 +2291,459 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 					info_type {
 						name = "LAST_NAME"
 						version = "0.1"
+					}
+				}
+			}
+		}
+	}
+}
+`, context)
+}
+
+func testAccDataLossPreventionJobTrigger_dlpJobTriggerActionsOptionalBasic(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_job_trigger" "basic" {
+	parent = "projects/%{project}"
+	description = "Starting description"
+	display_name = "display"
+
+	triggers {
+		schedule {
+			recurrence_period_duration = "86400s"
+		}
+	}
+
+	inspect_job {
+		inspect_template_name = "fake"
+		storage_config {
+			cloud_storage_options {
+				file_set {
+					url = "gs://mybucket/directory/"
+				}
+			}
+		}
+	}
+}
+`, context)
+}
+
+func testAccDataLossPreventionJobTrigger_dlpJobTriggerInspectOptionalBasic(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_job_trigger" "basic" {
+	parent = "projects/%{project}"
+	description = "Starting description"
+	display_name = "display"
+
+	triggers {
+		schedule {
+			recurrence_period_duration = "86400s"
+		}
+	}
+
+	inspect_job {
+		actions {
+			save_findings {
+				output_config {
+					table {
+						project_id = "project"
+						dataset_id = "dataset123"
+					}
+				}
+			}
+		}
+		storage_config {
+			cloud_storage_options {
+				file_set {
+					url = "gs://mybucket/directory/"
+				}
+			}
+		}
+	}
+}
+`, context)
+}
+
+func testAccDataLossPreventionJobTrigger_dlpJobTrigger_withSensitivityScoreBasic(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_job_trigger" "basic" {
+	parent       = "projects/%{project}"
+	description  = "Starting description"
+	display_name = "display"
+	
+	triggers {
+		schedule {
+			recurrence_period_duration = "86400s"
+		}
+	}
+	
+	inspect_job {
+		inspect_template_name = "fake"
+		actions {
+			save_findings {
+				output_config {
+					table {
+						project_id = "project"
+						dataset_id = "dataset123"
+					}
+				}
+			}
+		}
+		storage_config {
+			cloud_storage_options {
+				file_set {
+					url = "gs://mybucket/directory/"
+				}
+			}
+		}
+		inspect_config {
+			custom_info_types {
+				info_type {
+					name = "MY_CUSTOM_TYPE"
+					sensitivity_score {
+						score = "SENSITIVITY_MODERATE"
+					}
+				}
+				sensitivity_score {
+					score = "SENSITIVITY_HIGH"
+				}
+			}
+			info_types {
+				name = "EMAIL_ADDRESS"
+				sensitivity_score {
+					score = "SENSITIVITY_LOW"
+				}
+			}
+			info_types {
+				name = "PERSON_NAME"
+			}
+			info_types {
+				name = "LAST_NAME"
+			}
+			info_types {
+				name = "DOMAIN_NAME"
+			}
+			info_types {
+				name = "PHONE_NUMBER"
+			}
+			info_types {
+				name = "FIRST_NAME"
+			}
+		
+			min_likelihood      = "UNLIKELY"
+			include_quote       = false
+			exclude_info_types  = false
+			rule_set {
+				info_types {
+					name = "EMAIL_ADDRESS"
+					sensitivity_score {
+						score = "SENSITIVITY_LOW"
+					}
+				}
+				rules {
+					exclusion_rule {
+						regex {
+							pattern = ".+@example.com"
+						}
+						matching_type = "MATCHING_TYPE_FULL_MATCH"
+					}
+				}
+			}
+			rule_set {
+				info_types {
+					name = "EMAIL_ADDRESS"
+				}
+				info_types {
+					name = "DOMAIN_NAME"
+				}
+				info_types {
+					name = "PHONE_NUMBER"
+				}
+				info_types {
+					name = "PERSON_NAME"
+				}
+				info_types {
+					name = "FIRST_NAME"
+				}
+				rules {
+					exclusion_rule {
+						exclude_info_types {
+							info_types {
+								name = "LAST_NAME"
+								sensitivity_score {
+									score = "SENSITIVITY_HIGH"
+								}
+							}
+						}
+						matching_type = "MATCHING_TYPE_PARTIAL_MATCH"
+					}
+				}
+			}
+		
+			limits {
+				max_findings_per_item	 = 10
+				max_findings_per_request = 50
+				max_findings_per_info_type {
+					max_findings = "75"
+					info_type {
+						name = "PERSON_NAME"
+						sensitivity_score {
+							score = "SENSITIVITY_MODERATE"
+						}
+					}
+				}
+			}
+		}
+	}
+}
+`, context)
+}
+
+func testAccDataLossPreventionJobTrigger_dlpJobTrigger_withSensitivityScoreUpdate(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_job_trigger" "basic" {
+	parent       = "projects/%{project}"
+	description  = "Starting description"
+	display_name = "display"
+	
+	triggers {
+		schedule {
+			recurrence_period_duration = "86400s"
+		}
+	}
+	
+	inspect_job {
+		inspect_template_name = "fake"
+		actions {
+			save_findings {
+				output_config {
+					table {
+						project_id = "project"
+						dataset_id = "dataset123"
+					}
+				}
+			}
+		}
+		storage_config {
+			cloud_storage_options {
+				file_set {
+					url = "gs://mybucket/directory/"
+				}
+			}
+		}
+		inspect_config {
+			custom_info_types {
+				info_type {
+					name = "MY_CUSTOM_TYPE"
+				}
+				sensitivity_score {
+					score = "SENSITIVITY_MODERATE"
+				}
+			}
+			info_types {
+				name = "EMAIL_ADDRESS"
+			}
+			info_types {
+				name = "PERSON_NAME"
+			}
+			info_types {
+				name = "LAST_NAME"
+			}
+			info_types {
+				name = "DOMAIN_NAME"
+			}
+			info_types {
+				name = "PHONE_NUMBER"
+			}
+			info_types {
+				name = "FIRST_NAME"
+			}
+		
+			min_likelihood      = "UNLIKELY"
+			include_quote       = false
+			exclude_info_types  = false
+			rule_set {
+				info_types {
+					name = "EMAIL_ADDRESS"
+					sensitivity_score {
+						score = "SENSITIVITY_HIGH"
+					}
+				}
+				rules {
+					exclusion_rule {
+						regex {
+							pattern = ".+@example.com"
+						}
+						matching_type = "MATCHING_TYPE_FULL_MATCH"
+					}
+				}
+			}
+			rule_set {
+				info_types {
+					name = "EMAIL_ADDRESS"
+				}
+				info_types {
+					name = "DOMAIN_NAME"
+				}
+				info_types {
+					name = "PHONE_NUMBER"
+				}
+				info_types {
+					name = "PERSON_NAME"
+				}
+				info_types {
+					name = "FIRST_NAME"
+				}
+				rules {
+					exclusion_rule {
+						exclude_info_types {
+							info_types {
+								name = "LAST_NAME"
+							}
+						}
+						matching_type = "MATCHING_TYPE_PARTIAL_MATCH"
+					}
+				}
+			}
+		
+			limits {
+				max_findings_per_item	 = 10
+				max_findings_per_request = 50
+				max_findings_per_info_type {
+					max_findings = "75"
+					info_type {
+						name = "PERSON_NAME"
+						sensitivity_score {
+							score = "SENSITIVITY_LOW"
+						}
+					}
+				}
+			}
+		}
+	}
+}
+`, context)
+}
+
+func testAccDataLossPreventionJobTrigger_dlpJobTrigger_withSensitivityScoreUpdate2(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_job_trigger" "basic" {
+	parent       = "projects/%{project}"
+	description  = "Starting description"
+	display_name = "display"
+	
+	triggers {
+		schedule {
+			recurrence_period_duration = "86400s"
+		}
+	}
+	
+	inspect_job {
+		inspect_template_name = "fake"
+		actions {
+			save_findings {
+				output_config {
+					table {
+						project_id = "project"
+						dataset_id = "dataset123"
+					}
+				}
+			}
+		}
+		storage_config {
+			cloud_storage_options {
+				file_set {
+					url = "gs://mybucket/directory/"
+				}
+			}
+		}
+		inspect_config {
+			custom_info_types {
+				info_type {
+					name = "MY_CUSTOM_TYPE"
+					sensitivity_score {
+						score = "SENSITIVITY_HIGH"
+					}
+				}
+			}
+			info_types {
+				name = "EMAIL_ADDRESS"
+				sensitivity_score {
+					score = "SENSITIVITY_MODERATE"
+				}
+			}
+			info_types {
+				name = "PERSON_NAME"
+			}
+			info_types {
+				name = "LAST_NAME"
+			}
+			info_types {
+				name = "DOMAIN_NAME"
+			}
+			info_types {
+				name = "PHONE_NUMBER"
+			}
+			info_types {
+				name = "FIRST_NAME"
+			}
+		
+			min_likelihood      = "UNLIKELY"
+			include_quote       = false
+			exclude_info_types  = false
+			rule_set {
+				info_types {
+					name = "EMAIL_ADDRESS"
+					sensitivity_score {
+						score = "SENSITIVITY_MODERATE"
+					}
+				}
+				rules {
+					exclusion_rule {
+						regex {
+							pattern = ".+@example.com"
+						}
+						matching_type = "MATCHING_TYPE_FULL_MATCH"
+					}
+				}
+			}
+			rule_set {
+				info_types {
+					name = "EMAIL_ADDRESS"
+				}
+				info_types {
+					name = "DOMAIN_NAME"
+				}
+				info_types {
+					name = "PHONE_NUMBER"
+				}
+				info_types {
+					name = "PERSON_NAME"
+				}
+				info_types {
+					name = "FIRST_NAME"
+				}
+				rules {
+					exclusion_rule {
+						exclude_info_types {
+							info_types {
+								name = "LAST_NAME"
+							}
+						}
+						matching_type = "MATCHING_TYPE_PARTIAL_MATCH"
+					}
+				}
+			}
+		
+			limits {
+				max_findings_per_item	 = 10
+				max_findings_per_request = 50
+				max_findings_per_info_type {
+					max_findings = "75"
+					info_type {
+						name = "PERSON_NAME"
+						sensitivity_score {
+							score = "SENSITIVITY_HIGH"
+						}
 					}
 				}
 			}

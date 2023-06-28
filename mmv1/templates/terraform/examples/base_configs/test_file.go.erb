@@ -21,6 +21,7 @@ import (
 <% end -%>
 
   "<%= import_path() -%>/acctest"
+  "<%= import_path() -%>/envvar"
   "<%= import_path() -%>/tpgresource"
   transport_tpg "<%= import_path() -%>/transport"
 )
@@ -146,6 +147,9 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 			UserAgent: config.UserAgent,
 			<% if object.error_retry_predicates -%>
 			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+			<% end -%>
+			<% if object.error_abort_predicates -%>
+			ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_abort_predicates.join(',') -%>},
 			<% end -%>
 		})
 		if err == nil {

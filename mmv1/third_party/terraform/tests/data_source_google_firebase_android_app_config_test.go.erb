@@ -5,16 +5,18 @@ import (
 	"fmt"
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDataSourceGoogleFirebaseAndroidAppConfig(t *testing.T) {
 	t.Parallel()
+	// Framework-based resources and datasources don't work with VCR yet
+	acctest.SkipIfVcr(t)
 
 	context := map[string]interface{}{
-		"project_id":   acctest.GetTestProjectFromEnv(),
+		"project_id":   envvar.GetTestProjectFromEnv(),
 		"package_name":    "android.app." + RandString(t, 5),
 		"display_name": "tf-test Display Name AndroidAppConfig DataSource",
 	}

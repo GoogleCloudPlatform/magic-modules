@@ -1,11 +1,11 @@
 package google
 
 import (
-	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"fmt"
 
@@ -26,15 +26,15 @@ func TestAccEndpointsService_basic(t *testing.T) {
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEndpointsService_basic(serviceId, acctest.GetTestProjectFromEnv(), "1"),
+				Config: testAccEndpointsService_basic(serviceId, envvar.GetTestProjectFromEnv(), "1"),
 				Check:  testAccCheckEndpointExistsByName(t, serviceId),
 			},
 			{
-				Config: testAccEndpointsService_basic(serviceId, acctest.GetTestProjectFromEnv(), "2"),
+				Config: testAccEndpointsService_basic(serviceId, envvar.GetTestProjectFromEnv(), "2"),
 				Check:  testAccCheckEndpointExistsByName(t, serviceId),
 			},
 			{
-				Config: testAccEndpointsService_basic(serviceId, acctest.GetTestProjectFromEnv(), "3"),
+				Config: testAccEndpointsService_basic(serviceId, envvar.GetTestProjectFromEnv(), "3"),
 				Check:  testAccCheckEndpointExistsByName(t, serviceId),
 			},
 		},
@@ -51,63 +51,11 @@ func TestAccEndpointsService_grpc(t *testing.T) {
 		CheckDestroy:             testAccCheckEndpointServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEndpointsService_grpc(serviceId, acctest.GetTestProjectFromEnv()),
+				Config: testAccEndpointsService_grpc(serviceId, envvar.GetTestProjectFromEnv()),
 				Check:  testAccCheckEndpointExistsByName(t, serviceId),
 			},
 		},
 	})
-}
-
-func TestEndpointsService_grpcMigrateState(t *testing.T) {
-	cases := map[string]struct {
-		StateVersion       int
-		Attributes         map[string]string
-		ExpectedAttributes map[string]string
-		Meta               interface{}
-	}{
-		"update from protoc_output to protoc_output_base64": {
-			StateVersion: 0,
-			Attributes: map[string]string{
-				"protoc_output": "123456789",
-				"name":          "testcase",
-			},
-			ExpectedAttributes: map[string]string{
-				"protoc_output_base64": "MTIzNDU2Nzg5",
-				"protoc_output":        "",
-				"name":                 "testcase",
-			},
-			Meta: &transport_tpg.Config{Project: "gcp-project", Region: "us-central1"},
-		},
-		"update from non-protoc_output": {
-			StateVersion: 0,
-			Attributes: map[string]string{
-				"openapi_config": "foo bar baz",
-				"name":           "testcase-2",
-			},
-			ExpectedAttributes: map[string]string{
-				"openapi_config": "foo bar baz",
-				"name":           "testcase-2",
-			},
-			Meta: &transport_tpg.Config{Project: "gcp-project", Region: "us-central1"},
-		},
-	}
-
-	for tn, tc := range cases {
-		is := &terraform.InstanceState{
-			ID:         tc.Attributes["name"],
-			Attributes: tc.Attributes,
-		}
-
-		is, err := migrateEndpointsService(tc.StateVersion, is, tc.Meta)
-
-		if err != nil {
-			t.Fatalf("bad: %s, err: %#v", tn, err)
-		}
-
-		if !reflect.DeepEqual(is.Attributes, tc.ExpectedAttributes) {
-			t.Fatalf("Attributes should be `%s` but are `%s`", tc.ExpectedAttributes, is.Attributes)
-		}
-	}
 }
 
 func testAccEndpointsService_basic(serviceId, project, rev string) string {

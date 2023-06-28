@@ -7,43 +7,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
-
-func TestCaseDiffDashSuppress(t *testing.T) {
-	cases := map[string]struct {
-		Old, New           string
-		ExpectDiffSuppress bool
-	}{
-		"PD_HDD": {
-			Old:                "PD_HDD",
-			New:                "pd-hdd",
-			ExpectDiffSuppress: true,
-		},
-		"PD_SSD": {
-			Old:                "PD_SSD",
-			New:                "pd-ssd",
-			ExpectDiffSuppress: true,
-		},
-		"pd-hdd": {
-			Old:                "pd-hdd",
-			New:                "PD_HDD",
-			ExpectDiffSuppress: false,
-		},
-		"pd-ssd": {
-			Old:                "pd-ssd",
-			New:                "PD_SSD",
-			ExpectDiffSuppress: false,
-		},
-	}
-
-	for tn, tc := range cases {
-		if caseDiffDashSuppress(tn, tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-			t.Errorf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-		}
-	}
-}
 
 func TestAccSqlDatabase_basic(t *testing.T) {
 	t.Parallel()
@@ -86,14 +53,14 @@ func TestAccSqlDatabase_basic(t *testing.T) {
 			},
 			{
 				ResourceName:            resourceName,
-				ImportStateId:           fmt.Sprintf("%s/%s/%s", acctest.GetTestProjectFromEnv(), instanceName, dbName),
+				ImportStateId:           fmt.Sprintf("%s/%s/%s", envvar.GetTestProjectFromEnv(), instanceName, dbName),
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				ResourceName:            resourceName,
-				ImportStateId:           fmt.Sprintf("projects/%s/instances/%s/databases/%s", acctest.GetTestProjectFromEnv(), instanceName, dbName),
+				ImportStateId:           fmt.Sprintf("projects/%s/instances/%s/databases/%s", envvar.GetTestProjectFromEnv(), instanceName, dbName),
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},

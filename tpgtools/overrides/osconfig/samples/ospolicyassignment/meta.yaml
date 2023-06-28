@@ -1,4 +1,0 @@
-ignore_read:
-- "rollout.0.min_wait_duration"
-test_hide:
-  - fixed_os_policy_assignment.yaml

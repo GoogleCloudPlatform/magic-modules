@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -178,7 +179,7 @@ func TestAccBigtableInstance_kms(t *testing.T) {
 
 	kms1 := BootstrapKMSKeyInLocation(t, "us-central1")
 	kms2 := BootstrapKMSKeyInLocation(t, "us-east1")
-	pid := acctest.GetTestProjectFromEnv()
+	pid := envvar.GetTestProjectFromEnv()
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
@@ -402,6 +403,64 @@ func testAccCheckBigtableInstanceDestroyProducer(t *testing.T) func(s *terraform
 
 		return nil
 	}
+}
+
+func TestAccBigtableInstance_MultipleClustersSameID(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccBigtableInstance_multipleClustersSameID(instanceName),
+				ExpectError: regexp.MustCompile(fmt.Sprintf("duplicated cluster_id: %q", instanceName)),
+			},
+			{
+				Config: testAccBigtableInstance(instanceName, 3),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
+			},
+			{
+				Config:      testAccBigtableInstance_multipleClustersSameID(instanceName),
+				ExpectError: regexp.MustCompile(fmt.Sprintf("duplicated cluster_id: %q", instanceName)),
+			},
+		},
+	})
+}
+
+func testAccBigtableInstance_multipleClustersSameID(instanceName string) string {
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+  cluster {
+    cluster_id   = "%s"
+    num_nodes    = 1
+    storage_type = "HDD"
+  }
+
+  cluster {
+    cluster_id   = "%s"
+    num_nodes    = 2
+    storage_type = "SSD"
+  }
+
+  deletion_protection = false
+
+  labels = {
+    env = "default"
+  }
+}
+`, instanceName, instanceName, instanceName)
 }
 
 func testAccBigtableInstance(instanceName string, numNodes int) string {

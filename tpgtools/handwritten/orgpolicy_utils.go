@@ -1,4 +1,4 @@
-package google
+package tpgdclresource
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 
 // OrgPolicyPolicy has a custom import method because the parent field needs to allow an additional forward slash
 // to represent the type of parent (e.g. projects/{project_id}).
-func resourceOrgPolicyPolicyCustomImport(d *schema.ResourceData, meta interface{}) error {
+func ResourceOrgPolicyPolicyCustomImport(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	if err := tpgresource.ParseImportId([]string{
 		"^(?P<parent>[^/]+/?[^/]*)/policies/(?P<name>[^/]+)",

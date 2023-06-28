@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/filestore"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -28,7 +29,7 @@ func testResourceFilestoreInstanceStateDataV1() map[string]interface{} {
 func TestFilestoreInstanceStateUpgradeV0(t *testing.T) {
 	expected := testResourceFilestoreInstanceStateDataV1()
 	// linter complains about nil context even in a test setting
-	actual, err := ResourceFilestoreInstanceUpgradeV0(context.Background(), testResourceFilestoreInstanceStateDataV0(), nil)
+	actual, err := filestore.ResourceFilestoreInstanceUpgradeV0(context.Background(), testResourceFilestoreInstanceStateDataV0(), nil)
 	if err != nil {
 		t.Fatalf("error migrating state: %s", err)
 	}
@@ -73,21 +74,24 @@ func TestAccFilestoreInstance_update(t *testing.T) {
 func testAccFilestoreInstance_update(name string) string {
 	return fmt.Sprintf(`
 resource "google_filestore_instance" "instance" {
-  name = "tf-instance-%s"
-  zone = "us-central1-b"
+  name        = "tf-instance-%s"
+  zone        = "us-central1-b"
+  tier        = "BASIC_HDD"
+  description = "An instance created during testing."
+
   file_shares {
-    capacity_gb = 2660
+    capacity_gb = 1024
     name        = "share"
   }
+
   networks {
     network = "default"
     modes   = ["MODE_IPV4"]
   }
+
   labels = {
     baz = "qux"
   }
-  tier        = "PREMIUM"
-  description = "An instance created during testing."
 }
 `, name)
 }
@@ -95,18 +99,20 @@ resource "google_filestore_instance" "instance" {
 func testAccFilestoreInstance_update2(name string) string {
 	return fmt.Sprintf(`
 resource "google_filestore_instance" "instance" {
-  name = "tf-instance-%s"
-  zone = "us-central1-b"
+  name        = "tf-instance-%s"
+  zone        = "us-central1-b"
+  tier        = "BASIC_HDD"
+  description = "A modified instance created during testing."
+
   file_shares {
-    capacity_gb = 2760
+    capacity_gb = 1536
     name        = "share"
   }
+
   networks {
     network = "default"
     modes   = ["MODE_IPV4"]
   }
-  tier        = "PREMIUM"
-  description = "A modified instance created during testing."
 }
 `, name)
 }
@@ -148,7 +154,7 @@ func testAccFilestoreInstance_reservedIpRange_update(name string) string {
 resource "google_filestore_instance" "instance" {
   name = "tf-instance-%s"
   zone = "us-central1-b"
-  tier    = "BASIC_HDD"
+  tier = "BASIC_HDD"
 
   file_shares {
     capacity_gb = 1024
@@ -169,7 +175,7 @@ func testAccFilestoreInstance_reservedIpRange_update2(name string) string {
 resource "google_filestore_instance" "instance" {
   name = "tf-instance-%s"
   zone = "us-central1-b"
-  tier    = "BASIC_HDD"
+  tier = "BASIC_HDD"
 
   file_shares {
     capacity_gb = 1024

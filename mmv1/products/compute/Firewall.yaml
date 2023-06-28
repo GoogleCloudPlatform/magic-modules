@@ -73,8 +73,13 @@ examples:
       project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/firewall.erb
-  resource_definition: templates/terraform/resource_definition/firewall.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/firewall.erb
+custom_diff: [
+  'resourceComputeFirewallEnableLoggingCustomizeDiff',
+  'resourceComputeFirewallSourceFieldsCustomizeDiff',
+]
+migrate_state: 'resourceComputeFirewallMigrateState'
+schema_version: 1
 properties:
   # TODO(nelsonjr): [nice to have] Make the format here simpler to use, in
   # the form of # 22/tcp, [12345-23456]/tcp. It requires a conversion
@@ -105,7 +110,7 @@ properties:
             icmp, esp, ah, sctp, ipip, all), or the IP protocol number.
           api_name: 'IPProtocol'
           required: true
-          diff_suppress_func: 'compareCaseInsensitive'
+          diff_suppress_func: 'tpgresource.CompareCaseInsensitive'
         - !ruby/object:Api::Type::Array
           item_type: Api::Type::String
           name: 'ports'
@@ -144,7 +149,7 @@ properties:
             one of the following well known protocol strings (tcp, udp,
             icmp, esp, ah, sctp, ipip, all), or the IP protocol number.
           api_name: 'IPProtocol'
-          diff_suppress_func: 'compareCaseInsensitive'
+          diff_suppress_func: 'tpgresource.CompareCaseInsensitive'
           required: true
         - !ruby/object:Api::Type::Array
           item_type: Api::Type::String

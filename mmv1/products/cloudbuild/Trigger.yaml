@@ -32,6 +32,7 @@ import_format:
 # For global triggers, the id format is changed to projects/{{project}}/triggers/{{trigger_id}} via code overrides.
 id_format: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
 schema_version: 2
+state_upgraders: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_filename'
@@ -63,8 +64,6 @@ examples:
     skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_repo'
-    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14390
-    skip_test: true
     min_version: beta
     primary_resource_id: 'repo-trigger'
     vars:
@@ -110,7 +109,9 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_import: templates/terraform/post_import/cloudbuild_trigger.go.erb
   pre_update: templates/terraform/pre_update/cloudbuild_trigger.go.erb
   constants: templates/terraform/constants/cloudbuild_trigger.erb
-  resource_definition: templates/terraform/resource_definition/cloudbuild_trigger.go.erb
+custom_diff: [
+  'stepTimeoutCustomizeDiff',
+]
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'

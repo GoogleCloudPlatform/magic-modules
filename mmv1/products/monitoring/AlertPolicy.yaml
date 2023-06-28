@@ -29,6 +29,7 @@ id_format: '{{name}}'
 import_format: ['{{name}}']
 mutex: alertPolicy/{{project}}
 error_retry_predicates: ['transport_tpg.IsMonitoringConcurrentEditError']
+error_abort_predicates: ['transport_tpg.Is429QuotaError']
 examples:
   # skipping tests because the API is full of race conditions
   - !ruby/object:Provider::Terraform::Examples

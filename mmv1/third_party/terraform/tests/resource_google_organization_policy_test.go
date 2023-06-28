@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -44,7 +46,7 @@ func TestAccOrganizationPolicy(t *testing.T) {
 }
 
 func testAccOrganizationPolicy_boolean(t *testing.T) {
-	org := acctest.GetTestOrgTargetFromEnv(t)
+	org := envvar.GetTestOrgTargetFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -85,7 +87,7 @@ func testAccOrganizationPolicy_boolean(t *testing.T) {
 }
 
 func testAccOrganizationPolicy_list_allowAll(t *testing.T) {
-	org := acctest.GetTestOrgTargetFromEnv(t)
+	org := envvar.GetTestOrgTargetFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -105,8 +107,8 @@ func testAccOrganizationPolicy_list_allowAll(t *testing.T) {
 }
 
 func testAccOrganizationPolicy_list_allowSome(t *testing.T) {
-	org := acctest.GetTestOrgTargetFromEnv(t)
-	project := acctest.GetTestProjectFromEnv()
+	org := envvar.GetTestOrgTargetFromEnv(t)
+	project := envvar.GetTestProjectFromEnv()
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -126,7 +128,7 @@ func testAccOrganizationPolicy_list_allowSome(t *testing.T) {
 }
 
 func testAccOrganizationPolicy_list_denySome(t *testing.T) {
-	org := acctest.GetTestOrgTargetFromEnv(t)
+	org := envvar.GetTestOrgTargetFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -146,7 +148,7 @@ func testAccOrganizationPolicy_list_denySome(t *testing.T) {
 }
 
 func testAccOrganizationPolicy_list_update(t *testing.T) {
-	org := acctest.GetTestOrgTargetFromEnv(t)
+	org := envvar.GetTestOrgTargetFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -170,7 +172,7 @@ func testAccOrganizationPolicy_list_update(t *testing.T) {
 }
 
 func testAccOrganizationPolicy_list_inheritFromParent(t *testing.T) {
-	org := acctest.GetTestOrgTargetFromEnv(t)
+	org := envvar.GetTestOrgTargetFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -189,7 +191,7 @@ func testAccOrganizationPolicy_list_inheritFromParent(t *testing.T) {
 }
 
 func testAccOrganizationPolicy_restore_defaultTrue(t *testing.T) {
-	org := acctest.GetTestOrgTargetFromEnv(t)
+	org := envvar.GetTestOrgTargetFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -218,7 +220,7 @@ func testAccCheckGoogleOrganizationPolicyDestroyProducer(t *testing.T) func(s *t
 			}
 
 			org := "organizations/" + rs.Primary.Attributes["org_id"]
-			constraint := canonicalOrgPolicyConstraint(rs.Primary.Attributes["constraint"])
+			constraint := resourcemanager.CanonicalOrgPolicyConstraint(rs.Primary.Attributes["constraint"])
 			policy, err := config.NewResourceManagerClient(config.UserAgent).Organizations.GetOrgPolicy(org, &cloudresourcemanager.GetOrgPolicyRequest{
 				Constraint: constraint,
 			}).Do()

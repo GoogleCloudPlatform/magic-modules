@@ -26,7 +26,7 @@ update_verb: :PATCH
 update_mask: true
 update_url: projects/{{project}}/subscriptions/{{name}}
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
   actions: ['create']
   suppress_error: true
 examples:
