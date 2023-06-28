@@ -45,7 +45,6 @@ examples:
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
 parameters:
-  # TODO: resourceref?
   - !ruby/object:Api::Type::String
     name: 'region'
     description: |
