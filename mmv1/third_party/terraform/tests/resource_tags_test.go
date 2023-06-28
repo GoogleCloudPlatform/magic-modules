@@ -66,7 +66,7 @@ func testAccTagsTagKey_tagKeyBasic(t *testing.T) {
 }
 
 func testAccTagsTagKey_tagKeyBasicExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -95,7 +95,7 @@ func testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewall(t *testing.T) {
 }
 
 func testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewallExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_network" "tag_network" {
 	name = "vpc-%{random_suffix}"
 	auto_create_subnetworks = false
@@ -146,7 +146,7 @@ func testAccTagsTagKey_tagKeyUpdate(t *testing.T) {
 }
 
 func testAccTagsTagKey_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -157,7 +157,7 @@ resource "google_tags_tag_key" "key" {
 }
 
 func testAccTagsTagKey_basicUpdated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -225,7 +225,7 @@ func testAccTagsTagValue_tagValueBasic(t *testing.T) {
 }
 
 func testAccTagsTagValue_tagValueBasicExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -274,7 +274,7 @@ func testAccTagsTagValue_tagValueUpdate(t *testing.T) {
 }
 
 func testAccTagsTagValue_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -292,7 +292,7 @@ resource "google_tags_tag_value" "value" {
 }
 
 func testAccTagsTagValue_basicUpdated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -373,7 +373,7 @@ func testAccTagsTagBinding_tagBindingBasic(t *testing.T) {
 }
 
 func testAccTagsTagBinding_tagBindingBasicExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "project" {
 	project_id = "%{project_id}"
 	name       = "%{project_id}"
@@ -513,7 +513,7 @@ func testAccTagsTagKeyIamPolicy(t *testing.T) {
 }
 
 func testAccTagsTagKeyIamMember_basicGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -530,7 +530,7 @@ resource "google_tags_tag_key_iam_member" "foo" {
 }
 
 func testAccTagsTagKeyIamPolicy_basicGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -553,7 +553,7 @@ resource "google_tags_tag_key_iam_policy" "foo" {
 }
 
 func testAccTagsTagKeyIamPolicy_emptyBinding(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -572,7 +572,7 @@ resource "google_tags_tag_key_iam_policy" "foo" {
 }
 
 func testAccTagsTagKeyIamBinding_basicGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -589,7 +589,7 @@ resource "google_tags_tag_key_iam_binding" "foo" {
 }
 
 func testAccTagsTagKeyIamBinding_updateGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -683,7 +683,7 @@ func testAccTagsTagValueIamPolicy(t *testing.T) {
 }
 
 func testAccTagsTagValueIamMember_basicGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 	parent = "organizations/%{org_id}"
 	short_name = "%{key_short_name}"
@@ -705,7 +705,7 @@ resource "google_tags_tag_value_iam_member" "foo" {
 }
 
 func testAccTagsTagValueIamPolicy_basicGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 	parent = "organizations/%{org_id}"
 	short_name = "%{key_short_name}"
@@ -733,7 +733,7 @@ resource "google_tags_tag_value_iam_policy" "foo" {
 }
 
 func testAccTagsTagValueIamPolicy_emptyBinding(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 	parent = "organizations/%{org_id}"
 	short_name = "%{key_short_name}"
@@ -757,7 +757,7 @@ resource "google_tags_tag_value_iam_policy" "foo" {
 }
 
 func testAccTagsTagValueIamBinding_basicGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 	parent = "organizations/%{org_id}"
 	short_name = "%{key_short_name}"
@@ -779,7 +779,7 @@ resource "google_tags_tag_value_iam_binding" "foo" {
 }
 
 func testAccTagsTagValueIamBinding_updateGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 	parent = "organizations/%{org_id}"
 	short_name = "%{key_short_name}"
@@ -830,7 +830,7 @@ func testAccTagsLocationTagBinding_locationTagBindingbasic(t *testing.T) {
 }
 
 func testAccTagsLocationTagBinding_locationTagBindingBasicExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {
 }
 
@@ -939,7 +939,7 @@ func TestAccTagsLocationTagBinding_locationTagBindingzonal(t *testing.T) {
 }
 
 func testAccTagsLocationTagBinding_locationTagBindingZonalExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {
 }
 resource "google_tags_tag_key" "key" {

@@ -96,7 +96,7 @@ func TestAccDataSourceGoogleBeyondcorpAppConnector_optionalProjectRegion(t *test
 }
 
 func testAccDataSourceGoogleBeyondcorpAppConnector_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_service_account" "service_account" {
 	account_id   = "tf-test-my-account%{random_suffix}"
 	display_name = "Test Service Account"
@@ -120,7 +120,7 @@ data "google_beyondcorp_app_connector" "foo" {
 }
 
 func testAccDataSourceGoogleBeyondcorpAppConnector_optionalProject(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_service_account" "service_account" {
 	account_id   = "tf-test-my-account%{random_suffix}"
 	display_name = "Test Service Account"
@@ -143,7 +143,7 @@ data "google_beyondcorp_app_connector" "foo" {
 }
 
 func testAccDataSourceGoogleBeyondcorpAppConnector_optionalRegion(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_service_account" "service_account" {
 	account_id   = "tf-test-my-account%{random_suffix}"
 	display_name = "Test Service Account"
@@ -166,7 +166,7 @@ data "google_beyondcorp_app_connector" "foo" {
 }
 
 func testAccDataSourceGoogleBeyondcorpAppConnector_optionalProjectRegion(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_service_account" "service_account" {
 	account_id   = "tf-test-my-account%{random_suffix}"
 	display_name = "Test Service Account"

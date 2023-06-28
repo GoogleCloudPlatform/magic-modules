@@ -72,7 +72,7 @@ func TestAccFirebaseWebApp_firebaseWebAppFull(t *testing.T) {
 
 func testAccFirebaseWebApp_firebaseWebAppFull(context map[string]interface{}, update string) string {
 	context["display_name"] = context["display_name"].(string) + update
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "default" {
 	provider = google-beta
 
@@ -132,7 +132,7 @@ func TestAccFirebaseWebApp_firebaseWebAppSkipDelete(t *testing.T) {
 }
 
 func testAccFirebaseWebApp_firebaseWebAppSkipDelete(context map[string]interface{}, update string) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_firebase_web_app" "skip_delete" {
 	provider = google-beta
 	project = "%{project_id}"

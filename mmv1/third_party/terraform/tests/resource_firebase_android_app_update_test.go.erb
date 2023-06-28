@@ -34,7 +34,7 @@ func TestAccFirebaseAndroidApp_update(t *testing.T) {
 
 func testAccFirebaseAndroidApp(context map[string]interface{}, update string) string {
 	context["display_name"] = context["display_name"].(string) + update
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_firebase_android_app" "update" {
         provider = google-beta
         project = "%{project_id}"

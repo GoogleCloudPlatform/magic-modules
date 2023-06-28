@@ -67,7 +67,7 @@ func testPrivateCloudUpdateConfig(context map[string]interface{}, description st
 	context["node_count"] = nodeCount
 	context["description"] = description
 
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_vmwareengine_network" "default-nw" {
    provider      	   = google-beta
    project           = google_project_service.acceptance.project

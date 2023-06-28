@@ -21,7 +21,7 @@ func TestAccCoveredResource(t *testing.T) {
 }
 
 func testAccCoveredResource() string {
-	return fmt.Sprintf(Nprintf(`
+	return fmt.Sprintf(acctest.Nprintf(`
 resource "covered_resource" "resource" {
   field_one = "value-one"
   field_four {
@@ -35,7 +35,7 @@ resource "covered_resource" "resource" {
 }
 
 func testAccCoveredResource_update() string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "covered_resource" "resource" {
   field_two {
     field_three = "value-two"

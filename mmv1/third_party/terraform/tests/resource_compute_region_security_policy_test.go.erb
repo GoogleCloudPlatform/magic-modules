@@ -42,7 +42,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyBasicUpdateExample(t
 }
 
 func testAccComputeRegionSecurityPolicy_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_region_security_policy" "regionSecPolicy" {
   name        = "tf-test%{random_suffix}"
   description = "basic region security policy"
@@ -56,7 +56,7 @@ resource "google_compute_region_security_policy" "regionSecPolicy" {
 }
 
 func testAccComputeRegionSecurityPolicy_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_region_security_policy" "regionSecPolicy" {
   name        = "tf-test%{random_suffix}"
   description = "basic update region security policy"

@@ -40,7 +40,7 @@ func TestAccDataSourceGoogleFirebaseWebApp(t *testing.T) {
 }
 
 func testAccDataSourceGoogleFirebaseWebApp(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_firebase_web_app" "my_app" {
   project = "%{project_id}"
   display_name = "%{display_name}"

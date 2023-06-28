@@ -53,7 +53,7 @@ func TestAccApiGatewayApiConfig_generatedPrefix(t *testing.T) {
 }
 
 func testAccApiGatewayApiConfig_apigatewayApiConfigBasicExampleUpdated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_api_gateway_api" "api_cfg" {
   provider = google-beta
   api_id = "tf-test-api-cfg%{random_suffix}"
@@ -79,7 +79,7 @@ resource "google_api_gateway_api_config" "api_cfg" {
 }
 
 func testAccApiGatewayApiConfig_generatedPrefix(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_api_gateway_api" "api_cfg" {
   provider = google-beta
   api_id = "tf-test-api-cfg%{random_suffix}"

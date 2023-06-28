@@ -44,7 +44,7 @@ func TestAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRule
 }
 
 func testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRulePreUpdateExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_folder" "security_policy_target" {
   display_name = "tf-test-secpol-%{random_suffix}"
   parent       = "organizations/%{org_id}"
@@ -78,7 +78,7 @@ resource "google_compute_organization_security_policy_rule" "policy" {
 }
 
 func testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRulePostUpdateExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_folder" "security_policy_target" {
   display_name = "tf-test-secpol-%{random_suffix}"
   parent       = "organizations/%{org_id}"

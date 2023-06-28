@@ -1741,7 +1741,7 @@ resource "google_bigquery_table" "test" {
 }
 
 func testAccBigQueryTableFromBigtable(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 	resource "google_bigtable_instance" "instance" {
 		name = "tf-test-bigtable-inst-%{random_suffix}"
 		cluster {
@@ -1788,7 +1788,7 @@ func testAccBigQueryTableFromBigtable(context map[string]interface{}) string {
 }
 
 func testAccBigQueryTableFromSheet(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
   resource "google_bigquery_table" "table" {
 	  deletion_protection = false
     dataset_id = google_bigquery_dataset.dataset.dataset_id
