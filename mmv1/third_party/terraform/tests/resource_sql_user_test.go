@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccSqlUser_mysql(t *testing.T) {
@@ -37,7 +38,7 @@ func TestAccSqlUser_mysql(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_sql_user.user2",
-				ImportStateId:           fmt.Sprintf("%s/%s/gmail.com/admin", acctest.GetTestProjectFromEnv(), instance),
+				ImportStateId:           fmt.Sprintf("%s/%s/gmail.com/admin", envvar.GetTestProjectFromEnv(), instance),
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password"},
@@ -65,7 +66,7 @@ func TestAccSqlUser_iamUser(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_sql_user.user1",
-				ImportStateId:     fmt.Sprintf("%s/%s/%%/%s@%s.iam.gserviceaccount.com", acctest.GetTestProjectFromEnv(), instance, instance, acctest.GetTestProjectFromEnv()),
+				ImportStateId:     fmt.Sprintf("%s/%s/%%/%s@%s.iam.gserviceaccount.com", envvar.GetTestProjectFromEnv(), instance, instance, envvar.GetTestProjectFromEnv()),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -97,7 +98,7 @@ func TestAccSqlUser_postgres(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_sql_user.user",
-				ImportStateId:           fmt.Sprintf("%s/%s/admin", acctest.GetTestProjectFromEnv(), instance),
+				ImportStateId:           fmt.Sprintf("%s/%s/admin", envvar.GetTestProjectFromEnv(), instance),
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password"},
@@ -126,7 +127,7 @@ func TestAccSqlUser_postgresIAM(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_sql_user.user",
-				ImportStateId:           fmt.Sprintf("%s/%s/admin", acctest.GetTestProjectFromEnv(), instance),
+				ImportStateId:           fmt.Sprintf("%s/%s/admin", envvar.GetTestProjectFromEnv(), instance),
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password"},
@@ -153,7 +154,7 @@ func TestAccSqlUser_postgresAbandon(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_sql_user.user",
-				ImportStateId:           fmt.Sprintf("%s/%s/admin", acctest.GetTestProjectFromEnv(), instance),
+				ImportStateId:           fmt.Sprintf("%s/%s/admin", envvar.GetTestProjectFromEnv(), instance),
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password", "deletion_policy"},
@@ -277,7 +278,7 @@ func TestAccSqlUser_mysqlPasswordPolicy(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_sql_user.user2",
-				ImportStateId:           fmt.Sprintf("%s/%s/gmail.com/admin", acctest.GetTestProjectFromEnv(), instance),
+				ImportStateId:           fmt.Sprintf("%s/%s/gmail.com/admin", envvar.GetTestProjectFromEnv(), instance),
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password"},
