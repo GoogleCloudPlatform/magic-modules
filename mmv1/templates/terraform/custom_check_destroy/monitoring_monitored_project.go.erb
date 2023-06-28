@@ -33,7 +33,7 @@ res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 	UserAgent: config.UserAgent,
 })
 
-rName := GetResourceNameFromSelfLink(rs.Primary.Attributes["name"])
+rName := tpgresource.GetResourceNameFromSelfLink(rs.Primary.Attributes["name"])
 project, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(rName).Do()
 rName = strconv.FormatInt(project.ProjectNumber, 10)
 

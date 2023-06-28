@@ -14,7 +14,7 @@
 -%>
 config := meta.(*transport_tpg.Config)
 name := res["name"].(string)
-name = GetResourceNameFromSelfLink(name)
+name = tpgresource.GetResourceNameFromSelfLink(name)
 if name != "" {
 	project, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(name).Do()
 	if err != nil {

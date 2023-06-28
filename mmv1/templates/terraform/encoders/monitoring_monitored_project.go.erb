@@ -13,8 +13,8 @@
         # limitations under the License.
 -%>
 name := d.Get("name").(string)
-name = GetResourceNameFromSelfLink(name)
+name = tpgresource.GetResourceNameFromSelfLink(name)
 metricsScope := d.Get("metrics_scope").(string)
-metricsScope = GetResourceNameFromSelfLink(metricsScope)
+metricsScope = tpgresource.GetResourceNameFromSelfLink(metricsScope)
 obj["name"] = fmt.Sprintf("locations/global/metricsScopes/%s/projects/%s", metricsScope, name)
 return obj, nil
