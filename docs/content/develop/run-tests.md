@@ -2,7 +2,13 @@
 title: "Run tests"
 weight: 26
 aliases:
+  - /docs/getting-started/run-provider-tests
+  - /docs/getting-started/use-built-provider
   - /docs/how-to/run-tests
+  - /get-started/run-provider-tests
+  - /get-started/use-built-provider
+  - /getting-started/run-provider-tests
+  - /getting-started/use-built-provider
   - /how-to/run-tests
 ---
 
