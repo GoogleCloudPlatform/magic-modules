@@ -105,14 +105,10 @@ resource "google_privateca_certificate_authority" "default" {
 }
 
 resource "google_project_service_identity" "ns_sa" {
-  provider = google-beta
-
   service = "networksecurity.googleapis.com"
 }
 
 resource "google_privateca_ca_pool_iam_member" "tls_inspection_permission" {
-  provider = google-beta
-
   ca_pool = google_privateca_ca_pool.default.id
   role = "roles/privateca.certificateManager"
   member = "serviceAccount:${google_project_service_identity.ns_sa.email}"
