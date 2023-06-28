@@ -134,6 +134,7 @@ properties:
         name: 'triggers'
         description: |
           Map of Trigger to event type. Key should be one of the supported event types: "beforeCreate", "beforeSignIn".
+        key_name: event_type
         value_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
