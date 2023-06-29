@@ -1,5 +1,5 @@
 ---
-title: "Understanding Breaking Changes"
+title: "Understanding breaking changes"
 summary: "This page discusses provider versioning, handling of breaking changes, and rare exceptions within Terraform development."
 weight: 12
 ---
