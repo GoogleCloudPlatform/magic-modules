@@ -18,7 +18,7 @@ func TestAccNetworkSecurityTlsInspectionPolicy_update(t *testing.T){
 	  certificateAuthorityName := fmt.Sprintf("tf-test-tls-certificate-authority-%s", acctest.RandString(t, 10))
 
     acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { AccTestPreCheck(t) },
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckNetworkSecurityTlsInspectionPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{

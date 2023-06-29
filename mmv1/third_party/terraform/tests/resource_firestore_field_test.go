@@ -34,7 +34,7 @@ func testAccFirestoreField_runUpdateTest(updateConfig string, t *testing.T, cont
 	resourceName := context["resource_name"].(string)
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckFirestoreFieldDestroyProducer(t),
 		Steps: []resource.TestStep{

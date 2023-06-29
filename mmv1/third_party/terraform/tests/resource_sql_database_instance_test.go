@@ -1380,7 +1380,7 @@ func TestAccSqlDatabaseInstance_Smt(t *testing.T) {
 	rootPassword := acctest.RandString(t, 15)
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{

@@ -27,7 +27,7 @@ func TestAccCertificateManagerCertificate_migration(t *testing.T) {
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { AccTestPreCheck(t) },
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		CheckDestroy: testAccCheckCertificateManagerCertificateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

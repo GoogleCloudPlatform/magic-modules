@@ -45,7 +45,7 @@ func TestAccComputeDiskAsyncReplication(t *testing.T) {
 	secondaryRegionalDisk := fmt.Sprintf("tf-test-disk-rsecondary-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreChesck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{

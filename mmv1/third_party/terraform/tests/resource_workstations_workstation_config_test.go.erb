@@ -314,7 +314,7 @@ func TestAccWorkstationsWorkstationConfig_updateHostDetails(t *testing.T) {
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -511,7 +511,7 @@ func TestAccWorkstationsWorkstationConfig_updateWorkingDir(t *testing.T) {
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -620,7 +620,7 @@ func TestAccWorkstationsWorkstationConfig_updatePersistentDirectorySourceSnapsho
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
