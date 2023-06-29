@@ -6,11 +6,15 @@ import (
 	"sort"
 )
 
+var docMode = flag.Bool("docs", false, "legacy flag to not break existing CI can be removed after 7/10")
+
 func main() {
 	flag.Parse()
-	breakages := compare()
-	sort.Strings(breakages)
-	for _, breakage := range breakages {
-		fmt.Println(breakage)
+	if !*docMode {
+		breakages := compare()
+		sort.Strings(breakages)
+		for _, breakage := range breakages {
+			fmt.Println(breakage)
+		}
 	}
 }
