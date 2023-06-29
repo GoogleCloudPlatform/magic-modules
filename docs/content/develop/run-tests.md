@@ -1,15 +1,13 @@
 ---
 title: "Run tests"
-weight: 26
+weight: 70
 aliases:
   - /docs/getting-started/run-provider-tests
   - /docs/getting-started/use-built-provider
-  - /docs/how-to/run-tests
   - /get-started/run-provider-tests
   - /get-started/use-built-provider
   - /getting-started/run-provider-tests
   - /getting-started/use-built-provider
-  - /how-to/run-tests
 ---
 
 # Run tests
@@ -20,11 +18,11 @@ aliases:
 **Note:** If you want to test changes you've made in Magic Modules, you need to first [generate](/magic-modules/docs/getting-started/generate-providers/) the provider you want to test.
 {{< /hint >}}
 
-### Setup
+## Before you begin
 
 Authentication is described in more detail [here](https://github.com/hashicorp/terraform-provider-google/wiki/Developer-Best-Practices#authentication).
 
-In order to run tests, set the following environment variables:
+1. Set the following environment variables:
 
 ```
 GOOGLE_PROJECT
