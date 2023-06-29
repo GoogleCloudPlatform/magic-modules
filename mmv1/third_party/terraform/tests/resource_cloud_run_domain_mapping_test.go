@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 // Destroy and recreate the mapping, testing that Terraform doesn't return a 409
@@ -12,7 +13,7 @@ func TestAccCloudRunDomainMapping_foregroundDeletion(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"namespace":     acctest.GetTestProjectFromEnv(),
+		"namespace":     envvar.GetTestProjectFromEnv(),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -44,7 +45,7 @@ func TestAccCloudRunDomainMapping_foregroundDeletion(t *testing.T) {
 }
 
 func testAccCloudRunDomainMapping_cloudRunDomainMappingUpdated1(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_run_service" "default" {
     name     = "tf-test-cloudrun-srv%{random_suffix}"
     location = "us-central1"
@@ -78,7 +79,7 @@ resource "google_cloud_run_domain_mapping" "default" {
 }
 
 func testAccCloudRunDomainMapping_cloudRunDomainMappingUpdated2(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_run_service" "default" {
   name     = "tf-test-cloudrun-srv%{random_suffix}"
   location = "us-central1"

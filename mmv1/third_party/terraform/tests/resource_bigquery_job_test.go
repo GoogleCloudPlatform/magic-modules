@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccBigQueryJob_withLocation(t *testing.T) {
@@ -17,7 +18,7 @@ func TestAccBigQueryJob_withLocation(t *testing.T) {
 	}
 
 	// Need to construct the import ID manually since the state ID will not contain the location
-	importID := fmt.Sprintf("projects/%s/jobs/tf_test_job_query%s/location/%s", acctest.GetTestProjectFromEnv(), context["random_suffix"], context["location"])
+	importID := fmt.Sprintf("projects/%s/jobs/tf_test_job_query%s/location/%s", envvar.GetTestProjectFromEnv(), context["random_suffix"], context["location"])
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -38,7 +39,7 @@ func TestAccBigQueryJob_withLocation(t *testing.T) {
 }
 
 func testAccBigQueryJob_withLocation(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_bigquery_table" "foo" {
   deletion_protection = false
   dataset_id = google_bigquery_dataset.bar.dataset_id

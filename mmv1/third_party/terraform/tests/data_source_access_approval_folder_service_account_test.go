@@ -5,13 +5,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDataSourceAccessApprovalFolderServiceAccount_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -35,7 +36,7 @@ func TestAccDataSourceAccessApprovalFolderServiceAccount_basic(t *testing.T) {
 }
 
 func testAccDataSourceAccessApprovalFolderServiceAccount_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_folder" "my_folder" {
   display_name = "tf-test-my-folder%{random_suffix}"
   parent       = "organizations/%{org_id}"

@@ -52,7 +52,7 @@ func TestAccDataSourceGooglePubsubTopic_optionalProject(t *testing.T) {
 }
 
 func testAccDataSourceGooglePubsubTopic_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_pubsub_topic" "foo" {
   name     = "tf-test-pubsub-%{random_suffix}"
 }
@@ -65,7 +65,7 @@ data "google_pubsub_topic" "foo" {
 }
 
 func testAccDataSourceGooglePubsubTopic_optionalProject(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_pubsub_topic" "foo" {
   name     = "tf-test-pubsub-%{random_suffix}"
 }

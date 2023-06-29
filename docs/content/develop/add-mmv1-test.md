@@ -131,7 +131,7 @@ func TestAccPubsubSubscription_pubsubSubscriptionDeadLetterExample(t *testing.T)
 }
 
 func testAccPubsubSubscription_pubsubSubscriptionDeadLetterExample(context map[string]interface{}) string {
-    return Nprintf(`
+    return acctest.Nprintf(`
 resource "google_pubsub_topic" "example" {
   name = "tf-test-example-topic%{random_suffix}"
 }

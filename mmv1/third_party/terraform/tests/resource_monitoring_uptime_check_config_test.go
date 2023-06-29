@@ -6,11 +6,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccMonitoringUptimeCheckConfig_update(t *testing.T) {
 	t.Parallel()
-	project := acctest.GetTestProjectFromEnv()
+	project := envvar.GetTestProjectFromEnv()
 	host := "192.168.1.1"
 
 	VcrTest(t, resource.TestCase{
@@ -44,7 +45,7 @@ func TestAccMonitoringUptimeCheckConfig_update(t *testing.T) {
 // updatable in place
 func TestAccMonitoringUptimeCheckConfig_changeNonUpdatableFields(t *testing.T) {
 	t.Parallel()
-	project := acctest.GetTestProjectFromEnv()
+	project := envvar.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -84,7 +85,7 @@ func TestAccMonitoringUptimeCheckConfig_changeNonUpdatableFields(t *testing.T) {
 
 func TestAccMonitoringUptimeCheckConfig_jsonPathUpdate(t *testing.T) {
 	t.Parallel()
-	project := acctest.GetTestProjectFromEnv()
+	project := envvar.GetTestProjectFromEnv()
 	host := "192.168.1.1"
 	suffix := RandString(t, 4)
 

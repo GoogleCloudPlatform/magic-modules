@@ -5,13 +5,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccLoggingLogView_loggingLogViewBasicExampleUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -43,7 +44,7 @@ func TestAccLoggingLogView_loggingLogViewBasicExampleUpdate(t *testing.T) {
 }
 
 func testAccLoggingLogView_loggingLogViewBasicExampleUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_logging_project_bucket_config" "logging_log_view" {
     project        = "%{project}"
     location       = "global"

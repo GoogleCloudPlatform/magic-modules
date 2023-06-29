@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -20,8 +21,8 @@ func TestAccVmwareengineCluster_vmwareEngineClusterUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
 		"region":        	 "southamerica-west1", // using region with low node utilization.
-		"org_id":          acctest.GetTestOrgFromEnv(t),
-		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 		"random_suffix":   RandString(t, 10),
 	}
 
@@ -67,7 +68,7 @@ func TestAccVmwareengineCluster_vmwareEngineClusterUpdate(t *testing.T) {
 
 func testVmwareEngineClusterConfig(context map[string]interface{}, nodeCount int) string {
 	context["node_count"] = nodeCount;
-	return Nprintf(`
+	return acctest.Nprintf(`
 
 resource "google_vmwareengine_cluster" "vmw-engine-ext-cluster" {
   provider = google-beta

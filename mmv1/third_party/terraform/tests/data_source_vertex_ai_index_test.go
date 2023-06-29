@@ -5,13 +5,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDataSourceVertexAIIndex_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -39,7 +40,7 @@ func TestAccDataSourceVertexAIIndex_basic(t *testing.T) {
 }
 
 func testAccDataSourceVertexAIIndex_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "tf-test-%{project}-vertex-ai-index-%{random_suffix}"  # Every bucket name must be globally unique
   location = "us-central1"

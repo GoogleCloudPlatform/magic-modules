@@ -47,7 +47,7 @@ func TestAccBigqueryConnectionConnection_bigqueryConnectionBasic(t *testing.T) {
 }
 
 func testAccBigqueryConnectionConnection_bigqueryConnectionBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
     name             = "tf-test-pg-database-instance%{random_suffix}"
     database_version = "POSTGRES_11"
@@ -94,7 +94,7 @@ resource "google_bigquery_connection" "connection" {
 }
 
 func testAccBigqueryConnectionConnection_bigqueryConnectionBasicUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
     name             = "tf-test-mysql-database-instance%{random_suffix}"
     database_version = "MYSQL_5_6"
@@ -179,7 +179,7 @@ func TestAccBigqueryConnectionConnection_bigqueryConnectionAwsUpdate(t *testing.
 }
 
 func testAccBigqueryConnectionConnection_bigqueryConnectionAws(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_bigquery_connection" "connection" {
    connection_id = "tf-test-my-connection%{random_suffix}"
    location      = "aws-us-east-1"
@@ -195,7 +195,7 @@ resource "google_bigquery_connection" "connection" {
 }
 
 func testAccBigqueryConnectionConnection_bigqueryConnectionAwsUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_bigquery_connection" "connection" {
    connection_id = "tf-test-my-connection%{random_suffix}"
    location      = "aws-us-east-1"

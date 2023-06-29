@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -41,7 +42,7 @@ func TestAccProjectOrganizationPolicy(t *testing.T) {
 }
 
 func testAccProjectOrganizationPolicy_boolean(t *testing.T) {
-	projectId := acctest.GetTestProjectFromEnv()
+	projectId := envvar.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -77,7 +78,7 @@ func testAccProjectOrganizationPolicy_boolean(t *testing.T) {
 }
 
 func testAccProjectOrganizationPolicy_list_allowAll(t *testing.T) {
-	projectId := acctest.GetTestProjectFromEnv()
+	projectId := envvar.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -98,7 +99,7 @@ func testAccProjectOrganizationPolicy_list_allowAll(t *testing.T) {
 }
 
 func testAccProjectOrganizationPolicy_list_allowSome(t *testing.T) {
-	project := acctest.GetTestProjectFromEnv()
+	project := envvar.GetTestProjectFromEnv()
 	canonicalProject := canonicalProjectId(project)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -119,7 +120,7 @@ func testAccProjectOrganizationPolicy_list_allowSome(t *testing.T) {
 }
 
 func testAccProjectOrganizationPolicy_list_denySome(t *testing.T) {
-	projectId := acctest.GetTestProjectFromEnv()
+	projectId := envvar.GetTestProjectFromEnv()
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -139,7 +140,7 @@ func testAccProjectOrganizationPolicy_list_denySome(t *testing.T) {
 }
 
 func testAccProjectOrganizationPolicy_list_update(t *testing.T) {
-	projectId := acctest.GetTestProjectFromEnv()
+	projectId := envvar.GetTestProjectFromEnv()
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -163,7 +164,7 @@ func testAccProjectOrganizationPolicy_list_update(t *testing.T) {
 }
 
 func testAccProjectOrganizationPolicy_restore_defaultTrue(t *testing.T) {
-	projectId := acctest.GetTestProjectFromEnv()
+	projectId := envvar.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -184,7 +185,7 @@ func testAccProjectOrganizationPolicy_restore_defaultTrue(t *testing.T) {
 }
 
 func testAccProjectOrganizationPolicy_none(t *testing.T) {
-	projectId := acctest.GetTestProjectFromEnv()
+	projectId := envvar.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

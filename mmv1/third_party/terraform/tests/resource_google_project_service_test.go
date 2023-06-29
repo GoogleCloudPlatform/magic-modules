@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -19,7 +20,7 @@ func TestAccProjectService_basic(t *testing.T) {
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
 	services := []string{"iam.googleapis.com", "cloudresourcemanager.googleapis.com"}
 	VcrTest(t, resource.TestCase{
@@ -74,8 +75,8 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
-	billingId := acctest.GetTestBillingAccountFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
+	billingId := envvar.GetTestBillingAccountFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
 	services := []string{"cloudbuild.googleapis.com", "containerregistry.googleapis.com"}
 
@@ -116,7 +117,7 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 func TestAccProjectService_handleNotFound(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
 	service := "iam.googleapis.com"
 	VcrTest(t, resource.TestCase{
@@ -150,7 +151,7 @@ func TestAccProjectService_renamedService(t *testing.T) {
 		newName = new
 	}
 
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

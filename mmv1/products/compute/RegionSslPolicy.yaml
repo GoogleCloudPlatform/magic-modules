@@ -46,7 +46,9 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/region_ssl_policy.erb'
-  resource_definition: 'templates/terraform/resource_definition/region_ssl_policy.erb'
+custom_diff: [
+  'regionSslPolicyCustomizeDiff',
+]
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
