@@ -20,7 +20,7 @@ func TestAccInstanceGroupManager_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckInstanceGroupManagerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -52,7 +52,7 @@ func TestAccInstanceGroupManager_self_link_unique(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckInstanceGroupManagerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -82,7 +82,7 @@ func TestAccInstanceGroupManager_targetSizeZero(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckInstanceGroupManagerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -111,7 +111,7 @@ func TestAccInstanceGroupManager_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckInstanceGroupManagerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -156,7 +156,7 @@ func TestAccInstanceGroupManager_updateLifecycle(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckInstanceGroupManagerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -190,7 +190,7 @@ func TestAccInstanceGroupManager_updatePolicy(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckInstanceGroupManagerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -253,7 +253,7 @@ func TestAccInstanceGroupManager_separateRegions(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckInstanceGroupManagerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -284,7 +284,7 @@ func TestAccInstanceGroupManager_versions(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckInstanceGroupManagerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -310,7 +310,7 @@ func TestAccInstanceGroupManager_autoHealingPolicies(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckInstanceGroupManagerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -346,7 +346,7 @@ func TestAccInstanceGroupManager_stateful(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckInstanceGroupManagerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -390,7 +390,7 @@ func TestAccInstanceGroupManager_waitForStatus(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckInstanceGroupManagerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

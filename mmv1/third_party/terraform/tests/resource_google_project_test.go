@@ -32,7 +32,7 @@ func TestAccProject_createWithoutOrg(t *testing.T) {
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// This step creates a new project
 			{
@@ -54,7 +54,7 @@ func TestAccProject_create(t *testing.T) {
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// This step creates a new project
 			{
@@ -80,7 +80,7 @@ func TestAccProject_billing(t *testing.T) {
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// This step creates a new project with a billing account
 			{
@@ -122,7 +122,7 @@ func TestAccProject_labels(t *testing.T) {
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProject_labels(pid, org, map[string]string{"test": "that"}),
@@ -165,7 +165,7 @@ func TestAccProject_deleteDefaultNetwork(t *testing.T) {
 	billingId := envvar.GetTestBillingAccountFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProject_deleteDefaultNetwork(pid, org, billingId),
@@ -182,7 +182,7 @@ func TestAccProject_parentFolder(t *testing.T) {
 	folderDisplayName := TestPrefix + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProject_parentFolder(pid, folderDisplayName, org),
@@ -199,7 +199,7 @@ func TestAccProject_migrateParent(t *testing.T) {
 	folderDisplayName := TestPrefix + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProject_migrateParentFolder(pid, folderDisplayName, org),

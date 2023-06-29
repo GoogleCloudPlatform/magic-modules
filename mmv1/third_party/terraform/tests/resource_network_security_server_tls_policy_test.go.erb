@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccNetworkSecurityServerTlsPolicy_update(t *testing.T) {
@@ -16,7 +17,7 @@ func TestAccNetworkSecurityServerTlsPolicy_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckNetworkSecurityServerTlsPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

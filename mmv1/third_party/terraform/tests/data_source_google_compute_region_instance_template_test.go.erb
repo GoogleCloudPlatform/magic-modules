@@ -17,7 +17,7 @@ func TestAccRegionInstanceTemplateDatasource_name(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRegionInstanceTemplate_name(envvar.GetTestProjectFromEnv(), RandString(t, 10)),
@@ -38,7 +38,7 @@ func TestAccRegionInstanceTemplateDatasource_filter(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRegionInstanceTemplate_filter(envvar.GetTestProjectFromEnv(), RandString(t, 10)),
@@ -59,7 +59,7 @@ func TestAccRegionInstanceTemplateDatasource_filter_mostRecent(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRegionInstanceTemplate_filter_mostRecent(envvar.GetTestProjectFromEnv(), RandString(t, 10)),

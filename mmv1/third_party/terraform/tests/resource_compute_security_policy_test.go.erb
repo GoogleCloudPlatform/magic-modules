@@ -19,7 +19,7 @@ func TestAccComputeSecurityPolicy_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -41,7 +41,7 @@ func TestAccComputeSecurityPolicy_withRule(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -63,7 +63,7 @@ func TestAccComputeSecurityPolicy_withRuleExpr(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -86,7 +86,7 @@ func TestAccComputeSecurityPolicy_withPreconfiguredWafConfig(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -125,7 +125,7 @@ func TestAccComputeSecurityPolicy_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -170,7 +170,7 @@ func TestAccComputeSecurityPolicy_withAdvancedOptionsConfig(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -209,7 +209,7 @@ func TestAccComputeSecurityPolicy_withAdaptiveProtection(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -240,7 +240,7 @@ func TestAccComputeSecurityPolicy_withAdaptiveProtectionAutoDeployConfig(t *test
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -271,7 +271,7 @@ func TestAccComputeSecurityPolicy_withRateLimitOptions(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -293,7 +293,7 @@ func TestAccComputeSecurityPolicy_withRateLimitWithRedirectOptions(t *testing.T)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -316,7 +316,7 @@ func TestAccComputeSecurityPolicy_withRateLimit_withEnforceOnKeyConfigs(t *testi
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -338,7 +338,7 @@ func TestAccComputeSecurityPolicy_withRateLimitOption_withMultipleEnforceOnKeyCo
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -361,7 +361,7 @@ func TestAccComputeSecurityPolicy_EnforceOnKeyUpdates(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -410,7 +410,7 @@ func TestAccComputeSecurityPolicy_withRecaptchaOptionsConfig(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -460,7 +460,7 @@ func TestAccComputeSecurityPolicy_withHeadAction(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1401,7 +1401,7 @@ func TestAccComputeSecurityPolicy_withRedirectOptionsRecaptcha(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1423,7 +1423,7 @@ func TestAccComputeSecurityPolicy_withRedirectOptionsUpdate(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1453,7 +1453,7 @@ func TestAccComputeSecurityPolicy_withRedirectOptionsExternal(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

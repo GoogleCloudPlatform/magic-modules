@@ -22,7 +22,7 @@ func TestAccComputeBackendServiceSignedUrlKey_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeBackendServiceSignedUrlKeyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

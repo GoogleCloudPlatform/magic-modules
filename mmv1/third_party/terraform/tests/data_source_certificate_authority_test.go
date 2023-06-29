@@ -18,7 +18,7 @@ func TestAccDataSourcePrivatecaCertificateAuthority_privatecaCertificateAuthorit
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPrivatecaCertificateAuthorityDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

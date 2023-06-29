@@ -21,7 +21,7 @@ func TestAccServiceDirectoryService_serviceDirectoryServiceUpdateExample(t *test
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckServiceDirectoryServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

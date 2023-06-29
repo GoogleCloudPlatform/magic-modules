@@ -23,7 +23,7 @@ func TestAccEndpointsService_basic(t *testing.T) {
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		CheckDestroy:             testAccCheckEndpointServiceDestroyProducer(t),
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEndpointsService_basic(serviceId, envvar.GetTestProjectFromEnv(), "1"),
@@ -47,7 +47,7 @@ func TestAccEndpointsService_grpc(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckEndpointServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

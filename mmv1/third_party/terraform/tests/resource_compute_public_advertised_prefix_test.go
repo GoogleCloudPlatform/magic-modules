@@ -42,7 +42,7 @@ func testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicTest(t *t
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputePublicAdvertisedPrefixDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -76,7 +76,7 @@ func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicTest(t *tes
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputePublicDelegatedPrefixDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

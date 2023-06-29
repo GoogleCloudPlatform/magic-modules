@@ -64,7 +64,7 @@ func TestAcc{{$.PathType}}_{{$s.TestSlug}}(t *testing.T) {
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 	{{ if $s.HasGAEquivalent -}}
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 	{{- else }}
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 	{{- end }}

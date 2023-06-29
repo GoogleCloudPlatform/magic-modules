@@ -23,7 +23,7 @@ func TestAccComputeNetwork_explicitAutoSubnet(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -51,7 +51,7 @@ func TestAccComputeNetwork_customSubnet(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -80,7 +80,7 @@ func TestAccComputeNetwork_routingModeAndUpdate(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -115,7 +115,7 @@ func TestAccComputeNetwork_default_routing_mode(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -138,7 +138,7 @@ func TestAccComputeNetwork_networkDeleteDefaultRoute(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -166,7 +166,7 @@ func TestAccComputeNetwork_networkFirewallPolicyEnforcementOrderAndUpdate(t *tes
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

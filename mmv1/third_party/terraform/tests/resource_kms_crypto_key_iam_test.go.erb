@@ -33,7 +33,7 @@ func TestAccKmsCryptoKeyIamBinding(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Binding creation
@@ -86,7 +86,7 @@ func TestAccKmsCryptoKeyIamBinding_withCondition(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKmsCryptoKeyIamBinding_withCondition(projectId, orgId, billingAccount, account, keyRingName, cryptoKeyName, roleId, conditionTitle),
@@ -120,7 +120,7 @@ func TestAccKmsCryptoKeyIamMember(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
@@ -159,7 +159,7 @@ func TestAccKmsCryptoKeyIamMember_withCondition(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKmsCryptoKeyIamMember_withCondition(projectId, orgId, billingAccount, account, keyRingName, cryptoKeyName, roleId, conditionTitle),
@@ -194,7 +194,7 @@ func TestAccKmsCryptoKeyIamPolicy(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKmsCryptoKeyIamPolicy_basic(projectId, orgId, billingAccount, account, keyRingName, cryptoKeyName, roleId),
@@ -236,7 +236,7 @@ func TestAccKmsCryptoKeyIamPolicy_withCondition(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKmsCryptoKeyIamPolicy_withCondition(projectId, orgId, billingAccount, account, keyRingName, cryptoKeyName, roleId, conditionTitle),

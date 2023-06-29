@@ -13,7 +13,7 @@ func TestAccSnapshotDatasource_name(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSnapshot_name(envvar.GetTestProjectFromEnv(), RandString(t, 10)),
@@ -34,7 +34,7 @@ func TestAccSnapshotDatasource_filter(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSnapshot_filter(envvar.GetTestProjectFromEnv(), RandString(t, 10)),
@@ -55,7 +55,7 @@ func TestAccSnapshotDatasource_filterMostRecent(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSnapshot_filter_mostRecent(envvar.GetTestProjectFromEnv(), RandString(t, 10)),

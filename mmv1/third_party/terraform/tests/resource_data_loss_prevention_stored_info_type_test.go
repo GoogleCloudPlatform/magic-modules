@@ -18,7 +18,7 @@ func TestAccDataLossPreventionStoredInfoType_dlpStoredInfoTypeUpdate(t *testing.
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionStoredInfoTypeDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -81,7 +81,7 @@ func TestAccDataLossPreventionStoredInfoType_dlpStoredInfoTypeGroupIndexUpdate(t
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionStoredInfoTypeDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -159,7 +159,7 @@ func TestAccDataLossPreventionStoredInfoType_dlpStoredInfoTypeStoredInfoTypeId(t
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionStoredInfoTypeDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

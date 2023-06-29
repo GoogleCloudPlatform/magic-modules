@@ -20,7 +20,7 @@ func TestAccComputeProjectMetadataItem_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -48,7 +48,7 @@ func TestAccComputeProjectMetadataItem_basicMultiple(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -76,7 +76,7 @@ func TestAccComputeProjectMetadataItem_basicWithEmptyVal(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -99,7 +99,7 @@ func TestAccComputeProjectMetadataItem_basicUpdate(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -131,7 +131,7 @@ func TestAccComputeProjectMetadataItem_exists(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

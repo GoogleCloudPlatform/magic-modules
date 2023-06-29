@@ -20,7 +20,7 @@ func TestAccComputeAttachedDisk_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		// Check destroy isn't a good test here, see comment on testCheckAttachedDiskIsNowDetached
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
@@ -52,7 +52,7 @@ func TestAccComputeAttachedDisk_full(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		// Check destroy isn't a good test here, see comment on testCheckAttachedDiskIsNowDetached
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
@@ -79,7 +79,7 @@ func TestAccComputeAttachedDisk_region(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		// Check destroy isn't a good test here, see comment on testCheckAttachedDiskIsNowDetached
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
@@ -106,7 +106,7 @@ func TestAccComputeAttachedDisk_count(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             nil,
 		Steps: []resource.TestStep{
 			{

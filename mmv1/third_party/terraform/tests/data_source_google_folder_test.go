@@ -20,7 +20,7 @@ func TestAccDataSourceGoogleFolder_byFullName(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleFolder_byFullNameConfig(parent, displayName),
@@ -40,7 +40,7 @@ func TestAccDataSourceGoogleFolder_byShortName(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleFolder_byShortNameConfig(parent, displayName),
@@ -60,7 +60,7 @@ func TestAccDataSourceGoogleFolder_lookupOrganization(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleFolder_lookupOrganizationConfig(parent, displayName),
@@ -78,7 +78,7 @@ func TestAccDataSourceGoogleFolder_byFullNameNotFound(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccCheckGoogleFolder_byFullNameNotFoundConfig(name),

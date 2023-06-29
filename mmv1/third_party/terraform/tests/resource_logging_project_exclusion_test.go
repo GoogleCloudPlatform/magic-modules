@@ -38,7 +38,7 @@ func testAccLoggingProjectExclusion_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingProjectExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -58,7 +58,7 @@ func testAccLoggingProjectExclusion_disablePreservesFilter(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingProjectExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -86,7 +86,7 @@ func testAccLoggingProjectExclusion_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingProjectExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -112,7 +112,7 @@ func testAccLoggingProjectExclusion_update(t *testing.T) {
 func testAccLoggingProjectExclusion_multiple(t *testing.T) {
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingProjectExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

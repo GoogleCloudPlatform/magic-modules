@@ -15,7 +15,7 @@ func TestAccPubsubLiteTopic_pubsubLiteTopic_count_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPubsubLiteTopicDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

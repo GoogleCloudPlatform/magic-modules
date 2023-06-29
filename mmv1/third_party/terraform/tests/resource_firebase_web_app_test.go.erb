@@ -54,11 +54,11 @@ func TestAccFirebaseWebApp_firebaseWebAppFull(t *testing.T) {
 				),
 			},
 			{
-				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, ""),
 			},
 			{
-				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, "2"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "api_key"),

@@ -19,7 +19,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -461,7 +461,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1053,7 +1053,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_imageTran
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1158,7 +1158,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1490,7 +1490,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1799,7 +1799,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1897,7 +1897,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -2044,7 +2044,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -2871,7 +2871,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -3335,7 +3335,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -3582,7 +3582,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -4094,7 +4094,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -4319,7 +4319,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -4559,7 +4559,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

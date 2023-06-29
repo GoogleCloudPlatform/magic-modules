@@ -23,7 +23,7 @@ func TestAccStorageTransferJob_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -87,7 +87,7 @@ func TestAccStorageTransferJob_omitScheduleEndDate(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -111,7 +111,7 @@ func TestAccStorageTransferJob_posixSource(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -134,7 +134,7 @@ func TestAccStorageTransferJob_posixSink(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -160,7 +160,7 @@ func TestAccStorageTransferJob_transferOptions(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -209,7 +209,7 @@ func TestAccStorageTransferJob_objectConditions(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -244,7 +244,7 @@ func TestAccStorageTransferJob_notificationConfig(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

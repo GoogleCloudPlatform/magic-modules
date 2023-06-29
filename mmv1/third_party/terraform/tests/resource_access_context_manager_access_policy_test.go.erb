@@ -51,7 +51,7 @@ func testAccAccessContextManagerAccessPolicy_basicTest(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAccessContextManagerAccessPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -117,7 +117,7 @@ func testAccAccessContextManagerAccessPolicy_scopedTest(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAccessContextManagerAccessPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

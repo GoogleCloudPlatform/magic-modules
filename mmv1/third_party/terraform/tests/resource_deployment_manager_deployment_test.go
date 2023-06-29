@@ -28,7 +28,7 @@ func TestAccDeploymentManagerDeployment_basicFile(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
 			testDeploymentManagerDeploymentVerifyServiceAccountMissing(t, accountId)),
@@ -55,7 +55,7 @@ func TestAccDeploymentManagerDeployment_deleteInvalidOnCreate(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDeploymentManagerDestroyInvalidDeployment(t, deploymentName),
 		Steps: []resource.TestStep{
 			{
@@ -75,7 +75,7 @@ func TestAccDeploymentManagerDeployment_createDeletePolicy(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -103,7 +103,7 @@ func TestAccDeploymentManagerDeployment_imports(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
 			testDeploymentManagerDeploymentVerifyServiceAccountMissing(t, accountId)),
@@ -132,7 +132,7 @@ func TestAccDeploymentManagerDeployment_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
 			testDeploymentManagerDeploymentVerifyServiceAccountMissing(t, accountId)),

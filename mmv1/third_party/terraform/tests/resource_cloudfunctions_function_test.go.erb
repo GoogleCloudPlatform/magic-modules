@@ -43,7 +43,7 @@ func TestAccCloudFunctionsFunction_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -105,7 +105,7 @@ func TestAccCloudFunctionsFunction_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudFunctionsFunction_basic(functionName, bucketName, zipFilePath),
@@ -176,7 +176,7 @@ func TestAccCloudFunctionsFunction_buildworkerpool(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -212,7 +212,7 @@ func TestAccCloudFunctionsFunction_pubsub(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -243,7 +243,7 @@ func TestAccCloudFunctionsFunction_bucket(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -280,7 +280,7 @@ func TestAccCloudFunctionsFunction_dockerRepository(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -310,7 +310,7 @@ func TestAccCloudFunctionsFunction_cmek(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -337,7 +337,7 @@ func TestAccCloudFunctionsFunction_firestore(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -362,7 +362,7 @@ func TestAccCloudFunctionsFunction_sourceRepo(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -389,7 +389,7 @@ func TestAccCloudFunctionsFunction_serviceAccountEmail(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -419,7 +419,7 @@ func TestAccCloudFunctionsFunction_vpcConnector(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -460,7 +460,7 @@ func TestAccCloudFunctionsFunction_secretEnvVar(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -502,7 +502,7 @@ func TestAccCloudFunctionsFunction_secretMount(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

@@ -17,7 +17,7 @@ func TestAccNetworkServicesGateway_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckNetworkServicesGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -84,7 +84,7 @@ resource "google_network_services_gateway" "foobar" {
 //
 //	VcrTest(t, resource.TestCase{
 //		PreCheck:     func() { acctest.AccTestPreCheck(t) },
-//		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+//		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 //		CheckDestroy: testAccCheckNetworkServicesGatewayDestroyProducer(t),
 //		Steps: []resource.TestStep{
 //			{
@@ -289,7 +289,7 @@ func TestAccNetworkServicesGateway_multipleSwpGatewaysDifferentSubnetwork(t *tes
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkServicesGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -505,7 +505,7 @@ func TestAccNetworkServicesGateway_multipleSwpGatewaysDifferentNetwork(t *testin
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkServicesGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

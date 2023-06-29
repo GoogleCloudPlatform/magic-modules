@@ -18,7 +18,7 @@ func TestAccSecurityCenterNotificationConfig_updateStreamingConfigFilter(t *test
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckSecurityCenterNotificationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

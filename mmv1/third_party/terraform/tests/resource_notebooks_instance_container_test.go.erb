@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccNotebooksInstance_create_container(t *testing.T) {
@@ -16,7 +17,7 @@ func TestAccNotebooksInstance_create_container(t *testing.T) {
 	name := fmt.Sprintf("tf-%s", prefix)
 
 	VcrTest(t, resource.TestCase{
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNotebooksInstance_create_container(name),

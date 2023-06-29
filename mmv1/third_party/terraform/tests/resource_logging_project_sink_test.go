@@ -18,7 +18,7 @@ func TestAccLoggingProjectSink_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -41,7 +41,7 @@ func TestAccLoggingProjectSink_described(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -64,7 +64,7 @@ func TestAccLoggingProjectSink_described_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -95,7 +95,7 @@ func TestAccLoggingProjectSink_disabled(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -119,7 +119,7 @@ func TestAccLoggingProjectSink_updatePreservesUniqueWriter(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -150,7 +150,7 @@ func TestAccLoggingProjectSink_updateBigquerySink(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -181,7 +181,7 @@ func TestAccLoggingProjectSink_heredoc(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -203,7 +203,7 @@ func TestAccLoggingProjectSink_loggingbucket(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -226,7 +226,7 @@ func TestAccLoggingProjectSink_disabled_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

@@ -187,7 +187,7 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -216,7 +216,7 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -254,7 +254,7 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_no_destination(t *testing.
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -275,7 +275,7 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_with_service_account(t *te
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -296,7 +296,7 @@ func testAccBigqueryDataTransferConfig_copy_booleanParam(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -317,7 +317,7 @@ func testAccBigqueryDataTransferConfig_force_new_update_params(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -390,7 +390,7 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_update_service_account(t *
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

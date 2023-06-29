@@ -24,7 +24,7 @@ func TestAccComputeImage_withLicense(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -48,7 +48,7 @@ func TestAccComputeImage_update(t *testing.T) {
 	// Only labels supports an update
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -87,7 +87,7 @@ func TestAccComputeImage_basedondisk(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -115,7 +115,7 @@ func TestAccComputeImage_sourceImage(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -146,7 +146,7 @@ func TestAccComputeImage_sourceSnapshot(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -205,7 +205,7 @@ func TestAccComputeImage_resolveImage(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckComputeImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -229,7 +229,7 @@ func TestAccComputeImage_imageEncryptionKey(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

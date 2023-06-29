@@ -19,7 +19,7 @@ func TestAccServiceNetworkingConnection_create(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testServiceNetworkingConnectionDestroy(t, service, network),
 		Steps: []resource.TestStep{
 			{
@@ -44,7 +44,7 @@ func TestAccServiceNetworkingConnection_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testServiceNetworkingConnectionDestroy(t, service, network),
 		Steps: []resource.TestStep{
 			{

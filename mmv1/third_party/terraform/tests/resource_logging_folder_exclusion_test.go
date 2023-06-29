@@ -42,7 +42,7 @@ func testAccLoggingFolderExclusion_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingFolderExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -79,7 +79,7 @@ func testAccLoggingFolderExclusion_folderAcceptsFullFolderPath(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingFolderExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -110,7 +110,7 @@ func testAccLoggingFolderExclusion_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingFolderExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -140,7 +140,7 @@ func testAccLoggingFolderExclusion_multiple(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingFolderExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

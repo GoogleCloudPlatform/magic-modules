@@ -20,7 +20,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceFullUpdate(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -217,7 +217,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceTCPProbesUpdate(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -251,7 +251,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceHTTPProbesUpdate(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -286,7 +286,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceGRPCProbesUpdate(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

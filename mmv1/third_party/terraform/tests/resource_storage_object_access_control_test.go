@@ -26,7 +26,7 @@ func TestAccStorageObjectAccessControl_update(t *testing.T) {
 			}
 			acctest.AccTestPreCheck(t)
 		},
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckStorageObjectAccessControlDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -65,7 +65,7 @@ func TestAccStorageObjectAccessControl_updateWithSlashes(t *testing.T) {
 			}
 			acctest.AccTestPreCheck(t)
 		},
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckStorageObjectAccessControlDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

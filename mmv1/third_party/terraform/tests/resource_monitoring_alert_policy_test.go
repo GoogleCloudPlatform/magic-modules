@@ -43,7 +43,7 @@ func testAccMonitoringAlertPolicy_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlertPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -69,7 +69,7 @@ func testAccMonitoringAlertPolicy_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlertPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -100,7 +100,7 @@ func testAccMonitoringAlertPolicy_full(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlertPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -122,7 +122,7 @@ func testAccMonitoringAlertPolicy_mql(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlertPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -144,7 +144,7 @@ func testAccMonitoringAlertPolicy_log(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlertPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -195,7 +195,7 @@ func testAccMonitoringAlertPolicy_forecast(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlertPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

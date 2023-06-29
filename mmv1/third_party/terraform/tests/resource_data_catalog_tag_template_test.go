@@ -18,7 +18,7 @@ func TestAccDataCatalogTagTemplate_dataCatalogTagTemplate_updateFields(t *testin
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataCatalogTagTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

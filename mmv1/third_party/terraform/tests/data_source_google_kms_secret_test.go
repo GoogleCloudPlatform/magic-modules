@@ -32,7 +32,7 @@ func TestAccKmsSecret_basic(t *testing.T) {
 	// The first test creates resources needed to encrypt plaintext and produce ciphertext
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -46,7 +46,7 @@ func TestAccKmsSecret_basic(t *testing.T) {
 					// The second test asserts that the data source has the correct plaintext, given the created ciphertext
 					VcrTest(t, resource.TestCase{
 						PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-						ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+						ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 						Steps: []resource.TestStep{
 							{
 								Config: testGoogleKmsSecret_datasource(cryptoKeyId.TerraformId(), ciphertext),
@@ -71,7 +71,7 @@ func TestAccKmsSecret_basic(t *testing.T) {
 					// The second test asserts that the data source has the correct plaintext, given the created ciphertext
 					VcrTest(t, resource.TestCase{
 						PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-						ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+						ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 						Steps: []resource.TestStep{
 							{
 								Config: testGoogleKmsSecret_aadDatasource(cryptoKeyId.TerraformId(), ciphertext, base64.StdEncoding.EncodeToString([]byte(aad))),

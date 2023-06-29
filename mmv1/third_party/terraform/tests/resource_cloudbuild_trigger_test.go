@@ -16,7 +16,7 @@ func TestAccCloudBuildTrigger_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudBuildTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -45,7 +45,7 @@ func TestAccCloudBuildTrigger_available_secrets_config(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudBuildTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -74,7 +74,7 @@ func TestAccCloudBuildTrigger_pubsub_config(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudBuildTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -103,7 +103,7 @@ func TestAccCloudBuildTrigger_webhook_config(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudBuildTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -133,7 +133,7 @@ func TestAccCloudBuildTrigger_customizeDiffTimeoutSum(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudBuildTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -151,7 +151,7 @@ func TestAccCloudBuildTrigger_customizeDiffTimeoutFormat(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudBuildTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -168,7 +168,7 @@ func TestAccCloudBuildTrigger_disable(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudBuildTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -196,7 +196,7 @@ func TestAccCloudBuildTrigger_fullStep(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudBuildTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -217,7 +217,7 @@ func TestAccCloudBuildTrigger_basic_bitbucket(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudBuildTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

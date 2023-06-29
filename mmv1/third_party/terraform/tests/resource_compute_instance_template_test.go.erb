@@ -35,7 +35,7 @@ func TestAccComputeInstanceTemplate_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -65,7 +65,7 @@ func TestAccComputeInstanceTemplate_imageShorthand(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -91,7 +91,7 @@ func TestAccComputeInstanceTemplate_preemptible(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -120,7 +120,7 @@ func TestAccComputeInstanceTemplate_maintenance_interval(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -156,7 +156,7 @@ func TestAccComputeInstanceTemplate_IP(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -183,7 +183,7 @@ func TestAccComputeInstanceTemplate_IPv6(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -207,7 +207,7 @@ func TestAccComputeInstanceTemplate_networkTier(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -230,7 +230,7 @@ func TestAccComputeInstanceTemplate_networkIP(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -260,7 +260,7 @@ func TestAccComputeInstanceTemplate_networkIPAddress(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -287,7 +287,7 @@ func TestAccComputeInstanceTemplate_disks(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -307,7 +307,7 @@ func TestAccComputeInstanceTemplate_disksInvalid(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -323,7 +323,7 @@ func TestAccComputeInstanceTemplate_regionDisks(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -346,7 +346,7 @@ func TestAccComputeInstanceTemplate_subnet_auto(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -373,7 +373,7 @@ func TestAccComputeInstanceTemplate_subnet_custom(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -405,7 +405,7 @@ func TestAccComputeInstanceTemplate_subnet_xpn(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -428,7 +428,7 @@ func TestAccComputeInstanceTemplate_metadata_startup_script(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -450,7 +450,7 @@ func TestAccComputeInstanceTemplate_primaryAliasIpRange(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -476,7 +476,7 @@ func TestAccComputeInstanceTemplate_secondaryAliasIpRange(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -502,7 +502,7 @@ func TestAccComputeInstanceTemplate_guestAccelerator(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -529,7 +529,7 @@ func TestAccComputeInstanceTemplate_guestAcceleratorSkip(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -551,7 +551,7 @@ func TestAccComputeInstanceTemplate_minCpuPlatform(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -578,7 +578,7 @@ func TestAccComputeInstanceTemplate_EncryptKMS(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -601,7 +601,7 @@ func TestAccComputeInstanceTemplate_soleTenantNodeAffinities(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -624,7 +624,7 @@ func TestAccComputeInstanceTemplate_instanceResourcePolicies(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 				{
@@ -651,7 +651,7 @@ func TestAccComputeInstanceTemplate_reservationAffinities(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -701,7 +701,7 @@ func TestAccComputeInstanceTemplate_shieldedVmConfig1(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -727,7 +727,7 @@ func TestAccComputeInstanceTemplate_shieldedVmConfig2(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -753,7 +753,7 @@ func TestAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -774,7 +774,7 @@ func TestAccComputeInstanceTemplate_AdvancedMachineFeatures(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -793,7 +793,7 @@ func TestAccComputeInstanceTemplate_enableDisplay(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -814,7 +814,7 @@ func TestAccComputeInstanceTemplate_invalidDiskType(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccComputeInstanceTemplate_invalidDiskType(RandString(t, 10)),
@@ -829,7 +829,7 @@ func TestAccComputeInstanceTemplate_withScratchDisk(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstanceTemplate_with375GbScratchDisk(RandString(t, 10)),
@@ -849,7 +849,7 @@ func TestAccComputeInstanceTemplate_with18TbScratchDisk(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstanceTemplate_with18TbScratchDisk(RandString(t, 10)),
@@ -875,7 +875,7 @@ func TestAccComputeInstanceTemplate_imageResourceTest(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -908,7 +908,7 @@ func TestAccComputeInstanceTemplate_diskResourcePolicies(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -935,7 +935,7 @@ func TestAccComputeInstanceTemplate_nictype_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -964,7 +964,7 @@ func TestAccComputeInstanceTemplate_queueCount(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -985,7 +985,7 @@ func TestAccComputeInstanceTemplate_managedEnvoy(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1010,7 +1010,7 @@ func TestAccComputeInstanceTemplate_spot(t *testing.T) {
 	var instanceTemplate compute.InstanceTemplate
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1044,7 +1044,7 @@ func TestAccComputeInstanceTemplate_spot_maxRunDuration(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1086,7 +1086,7 @@ func TestAccComputeInstanceTemplate_sourceSnapshotEncryptionKey(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1120,7 +1120,7 @@ func TestAccComputeInstanceTemplate_sourceImageEncryptionKey(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1161,7 +1161,7 @@ func TestAccComputeInstanceTemplate_NetworkAttachment(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

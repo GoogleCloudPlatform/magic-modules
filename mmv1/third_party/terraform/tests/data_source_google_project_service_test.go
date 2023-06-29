@@ -18,7 +18,7 @@ func TestAccDataSourceGoogleProjectService_basic(t *testing.T) {
 	services := []string{"iam.googleapis.com", "cloudresourcemanager.googleapis.com"}
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleProjectService_basic(services, pid, org),

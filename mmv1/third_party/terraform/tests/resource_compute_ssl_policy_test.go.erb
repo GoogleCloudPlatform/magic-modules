@@ -24,7 +24,7 @@ func TestAccComputeSslPolicy_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSslPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -71,7 +71,7 @@ func TestAccComputeSslPolicy_update_to_custom(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSslPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -118,7 +118,7 @@ func TestAccComputeSslPolicy_update_from_custom(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSslPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

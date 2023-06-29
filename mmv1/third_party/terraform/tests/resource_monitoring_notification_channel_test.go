@@ -13,7 +13,7 @@ func TestAccMonitoringNotificationChannel_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckMonitoringNotificationChannelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -43,7 +43,7 @@ func TestAccMonitoringNotificationChannel_updateLabels_slack(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckMonitoringNotificationChannelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -64,7 +64,7 @@ func TestAccMonitoringNotificationChannel_updateLabels(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckMonitoringNotificationChannelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -93,7 +93,7 @@ func TestAccMonitoringNotificationChannel_updateSensitiveLabels_slack(t *testing
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckMonitoringNotificationChannelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -115,7 +115,7 @@ func TestAccMonitoringNotificationChannel_updateSensitiveLabels(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckMonitoringNotificationChannelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

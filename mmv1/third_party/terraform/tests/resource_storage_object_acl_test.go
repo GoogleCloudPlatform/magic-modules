@@ -43,7 +43,7 @@ func TestAccStorageObjectAcl_basic(t *testing.T) {
 			}
 			acctest.AccTestPreCheck(t)
 		},
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleStorageObjectsAclBasic1(bucketName, objectName),
@@ -74,7 +74,7 @@ func TestAccStorageObjectAcl_upgrade(t *testing.T) {
 			}
 			acctest.AccTestPreCheck(t)
 		},
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -128,7 +128,7 @@ func TestAccStorageObjectAcl_downgrade(t *testing.T) {
 			}
 			acctest.AccTestPreCheck(t)
 		},
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -182,7 +182,7 @@ func TestAccStorageObjectAcl_predefined(t *testing.T) {
 			}
 			acctest.AccTestPreCheck(t)
 		},
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -208,7 +208,7 @@ func TestAccStorageObjectAcl_predefinedToExplicit(t *testing.T) {
 			}
 			acctest.AccTestPreCheck(t)
 		},
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -243,7 +243,7 @@ func TestAccStorageObjectAcl_explicitToPredefined(t *testing.T) {
 			}
 			acctest.AccTestPreCheck(t)
 		},
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -279,7 +279,7 @@ func TestAccStorageObjectAcl_unordered(t *testing.T) {
 			}
 			acctest.AccTestPreCheck(t)
 		},
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

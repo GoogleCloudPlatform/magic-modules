@@ -31,7 +31,7 @@ func TestAccStorageBucketAcl_basic(t *testing.T) {
 	acctest.SkipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageBucketAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -52,7 +52,7 @@ func TestAccStorageBucketAcl_upgrade(t *testing.T) {
 	acctest.SkipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageBucketAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -90,7 +90,7 @@ func TestAccStorageBucketAcl_upgradeSingleUser(t *testing.T) {
 	acctest.SkipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageBucketAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -128,7 +128,7 @@ func TestAccStorageBucketAcl_downgrade(t *testing.T) {
 	acctest.SkipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageBucketAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -165,7 +165,7 @@ func TestAccStorageBucketAcl_predefined(t *testing.T) {
 	bucketName := testBucketName(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageBucketAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -183,7 +183,7 @@ func TestAccStorageBucketAcl_unordered(t *testing.T) {
 	acctest.SkipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageBucketAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -200,7 +200,7 @@ func TestAccStorageBucketAcl_RemoveOwner(t *testing.T) {
 	bucketName := testBucketName(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageBucketAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

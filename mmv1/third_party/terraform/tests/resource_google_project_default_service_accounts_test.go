@@ -23,7 +23,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsBasic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleProjectDefaultServiceAccountsBasic(org, project, billingAccount),
@@ -65,7 +65,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDisable(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectDefaultServiceAccountsRevert(t, project, action),
 		Steps: []resource.TestStep{
 			{
@@ -94,7 +94,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDelete(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectDefaultServiceAccountsRevert(t, project, action),
 		Steps: []resource.TestStep{
 			{
@@ -123,7 +123,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDeleteRevertIgnoreFailure
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleProjectDefaultServiceAccountsAdvanced(org, project, billingAccount, action, restorePolicy),
@@ -151,7 +151,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDeprivilege(t *testing.T)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectDefaultServiceAccountsRevert(t, project, action),
 		Steps: []resource.TestStep{
 			{

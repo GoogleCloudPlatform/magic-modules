@@ -19,7 +19,7 @@ func TestAccComputeRegionBackendService_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -52,7 +52,7 @@ func TestAccComputeRegionBackendService_withBackendInternal(t *testing.T) {
   checkName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
   VcrTest(t, resource.TestCase{
     PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
     CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -90,7 +90,7 @@ func TestAccComputeRegionBackendService_withBackendInternalManaged(t *testing.T)
   hcName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
   VcrTest(t, resource.TestCase{
     PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
     CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -116,7 +116,7 @@ func TestAccComputeRegionBackendService_withBackendMultiNic(t *testing.T) {
         checkName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
         VcrTest(t, resource.TestCase{
                 PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-                ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
                 CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
                 Steps: []resource.TestStep{
                         resource.TestStep{
@@ -140,7 +140,7 @@ func TestAccComputeRegionBackendService_withConnectionDrainingAndUpdate(t *testi
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -171,7 +171,7 @@ func TestAccComputeRegionBackendService_ilbUpdateBasic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -207,7 +207,7 @@ func TestAccComputeRegionBackendService_ilbUpdateFull(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -237,7 +237,7 @@ func TestAccComputeRegionBackendService_withBackendAndIAP(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -269,7 +269,7 @@ func TestAccComputeRegionBackendService_UDPFailOverPolicyUpdate(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -311,7 +311,7 @@ func TestAccComputeRegionBackendService_subsettingUpdate(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

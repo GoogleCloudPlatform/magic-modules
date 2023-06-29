@@ -17,7 +17,7 @@ func TestAccRuntimeconfigVariableDatasource_basic(t *testing.T) {
 
 	google.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRuntimeconfigDatasourceVariable(google.RandString(t, 10), google.RandString(t, 10), google.RandString(t, 10)),

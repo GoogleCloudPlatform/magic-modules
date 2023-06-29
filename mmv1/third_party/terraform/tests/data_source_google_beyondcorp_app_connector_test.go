@@ -16,7 +16,7 @@ func TestAccDataSourceGoogleBeyondcorpAppConnector_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBeyondcorpAppConnectorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -38,7 +38,7 @@ func TestAccDataSourceGoogleBeyondcorpAppConnector_optionalProject(t *testing.T)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBeyondcorpAppConnectorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -60,7 +60,7 @@ func TestAccDataSourceGoogleBeyondcorpAppConnector_optionalRegion(t *testing.T) 
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBeyondcorpAppConnectorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -82,7 +82,7 @@ func TestAccDataSourceGoogleBeyondcorpAppConnector_optionalProjectRegion(t *test
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBeyondcorpAppConnectorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

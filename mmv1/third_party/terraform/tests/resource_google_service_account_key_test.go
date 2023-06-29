@@ -18,7 +18,7 @@ func TestAccServiceAccountKey_basic(t *testing.T) {
 	displayName := "Terraform Test"
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceAccountKey(accountID, displayName),
@@ -42,7 +42,7 @@ func TestAccServiceAccountKey_fromEmail(t *testing.T) {
 	displayName := "Terraform Test"
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceAccountKey_fromEmail(accountID, displayName),
@@ -66,7 +66,7 @@ func TestAccServiceAccountKey_fromCertificate(t *testing.T) {
 	displayName := "Terraform Test"
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceAccountKey_fromCertificate(accountID, displayName),

@@ -26,7 +26,7 @@ func TestAccRuntimeconfigVariable_basic(t *testing.T) {
 
 	google.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckRuntimeconfigVariableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -59,7 +59,7 @@ func TestAccRuntimeconfigVariable_basicUpdate(t *testing.T) {
 
 	google.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckRuntimeconfigVariableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -91,7 +91,7 @@ func TestAccRuntimeconfigVariable_basicValue(t *testing.T) {
 
 	google.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckRuntimeconfigVariableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

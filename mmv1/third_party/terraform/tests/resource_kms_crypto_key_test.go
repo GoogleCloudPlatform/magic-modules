@@ -146,7 +146,7 @@ func TestAccKmsCryptoKey_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -192,7 +192,7 @@ func TestAccKmsCryptoKey_rotation(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_rotation(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, rotationPeriod),
@@ -245,7 +245,7 @@ func TestAccKmsCryptoKey_template(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_template(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, algorithm),
@@ -288,7 +288,7 @@ func TestAccKmsCryptoKey_destroyDuration(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_destroyDuration(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -323,7 +323,7 @@ func TestAccKmsCryptoKey_importOnly(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_importOnly(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -420,7 +420,7 @@ func TestAccKmsCryptoKeyVersion_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKeyVersion_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -448,7 +448,7 @@ func TestAccKmsCryptoKeyVersion_skipInitialVersion(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKeyVersion_skipInitialVersion(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -474,7 +474,7 @@ func TestAccKmsCryptoKeyVersion_patch(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKeyVersion_patchInitialize(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),

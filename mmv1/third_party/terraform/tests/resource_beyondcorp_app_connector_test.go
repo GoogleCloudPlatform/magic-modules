@@ -16,7 +16,7 @@ func TestAccBeyondcorpAppConnector_beyondcorpAppConnectorUpdateExample(t *testin
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBeyondcorpAppConnectorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

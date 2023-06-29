@@ -16,7 +16,7 @@ func TestAccAlloydbCluster_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -81,7 +81,7 @@ func TestAccAlloydbCluster_addAutomatedBackupPolicyAndInitialUser(t *testing.T) 
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -121,7 +121,7 @@ func TestAccAlloydbCluster_deleteAutomatedBackupPolicyAndInitialUser(t *testing.
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -229,7 +229,7 @@ func TestAccAlloydbCluster_missingWeeklySchedule(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -279,7 +279,7 @@ func TestAccAlloydbCluster_mandatoryFields(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -299,7 +299,7 @@ func TestAccAlloydbCluster_maximumFields(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -319,7 +319,7 @@ func TestAccAlloydbCluster_deleteTimeBasedRetentionPolicy(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -433,7 +433,7 @@ func TestAccAlloydbCluster_usingCMEK(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -492,7 +492,7 @@ func TestAccAlloydbCluster_CMEKInAutomatedBackupIsUpdatable(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

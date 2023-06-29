@@ -16,7 +16,7 @@ func TestAccIdentityPlatformTenantOauthIdpConfig_identityPlatformTenantOauthIdpC
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckIdentityPlatformTenantOauthIdpConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

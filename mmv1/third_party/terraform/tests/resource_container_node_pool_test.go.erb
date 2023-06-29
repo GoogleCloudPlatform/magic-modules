@@ -20,7 +20,7 @@ func TestAccContainerNodePool_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -43,7 +43,7 @@ func TestAccContainerNodePool_basicWithClusterId(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -68,7 +68,7 @@ func TestAccContainerNodePool_nodeLocations(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -92,7 +92,7 @@ func TestAccContainerNodePool_maxPodsPerNode(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -116,7 +116,7 @@ func TestAccContainerNodePool_namePrefix(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -141,7 +141,7 @@ func TestAccContainerNodePool_noName(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -164,7 +164,7 @@ func TestAccContainerNodePool_withLoggingVariantUpdates(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -203,7 +203,7 @@ func TestAccContainerNodePool_withNodeConfig(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -240,7 +240,7 @@ func TestAccContainerNodePool_withReservationAffinity(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -270,7 +270,7 @@ func TestAccContainerNodePool_withReservationAffinitySpecific(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -306,7 +306,7 @@ func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -346,7 +346,7 @@ func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -400,7 +400,7 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -443,7 +443,7 @@ func TestAccContainerNodePool_withInvalidKubeletCpuManagerPolicy(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -462,7 +462,7 @@ func TestAccContainerNodePool_withLinuxNodeConfig(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -495,7 +495,7 @@ func TestAccContainerNodePool_withNetworkConfig(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -531,7 +531,7 @@ func TestAccContainerNodePool_withEnablePrivateNodesToggle(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -630,7 +630,7 @@ func TestAccContainerNodePool_withBootDiskKmsKey(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -654,7 +654,7 @@ func TestAccContainerNodePool_withUpgradeSettings(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -709,7 +709,7 @@ func TestAccContainerNodePool_withGPU(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -737,7 +737,7 @@ func TestAccContainerNodePool_withManagement(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -784,7 +784,7 @@ func TestAccContainerNodePool_withNodeConfigScopeAlias(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -808,7 +808,7 @@ func TestAccContainerNodePool_regionalAutoscaling(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -863,7 +863,7 @@ func TestAccContainerNodePool_totalSize(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -919,7 +919,7 @@ func TestAccContainerNodePool_autoscaling(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -973,7 +973,7 @@ func TestAccContainerNodePool_resize(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1010,7 +1010,7 @@ func TestAccContainerNodePool_version(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1049,7 +1049,7 @@ func TestAccContainerNodePool_regionalClusters(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -1072,7 +1072,7 @@ func TestAccContainerNodePool_012_ConfigModeAttr(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1103,7 +1103,7 @@ func TestAccContainerNodePool_EmptyGuestAccelerator(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1148,7 +1148,7 @@ func TestAccContainerNodePool_shieldedInstanceConfig(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -1173,7 +1173,7 @@ func TestAccContainerNodePool_concurrent(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1214,7 +1214,7 @@ func TestAccContainerNodePool_withSoleTenantConfig(t *testing.T) {
 
        VcrTest(t, resource.TestCase{
                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-               ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+               ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
                CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
                Steps: []resource.TestStep{
                        {
@@ -1238,7 +1238,7 @@ func TestAccContainerNodePool_ephemeralStorageConfig(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -1286,7 +1286,7 @@ func TestAccContainerNodePool_ephemeralStorageLocalSsdConfig(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1340,7 +1340,7 @@ func TestAccContainerNodePool_localNvmeSsdBlockConfig(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1394,7 +1394,7 @@ func TestAccContainerNodePool_gcfsConfig(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -1442,7 +1442,7 @@ func TestAccContainerNodePool_gvnic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1490,7 +1490,7 @@ func TestAccContainerNodePool_compactPlacement(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1537,7 +1537,7 @@ func TestAccContainerNodePool_threadsPerCore(t *testing.T) {
 
         VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

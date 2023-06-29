@@ -39,7 +39,7 @@ func TestAccDataSourceDnsRecordSet_basic(t *testing.T) {
 				),
 			},
 			{
-				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 				Config:                   testAccDataSourceDnsRecordSet_basic(managedZoneName, RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceState("data.google_dns_record_set.rs", "google_dns_record_set.rs"),

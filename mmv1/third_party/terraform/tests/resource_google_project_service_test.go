@@ -25,7 +25,7 @@ func TestAccProjectService_basic(t *testing.T) {
 	services := []string{"iam.googleapis.com", "cloudresourcemanager.googleapis.com"}
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectService_basic(services, pid, org),
@@ -82,7 +82,7 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectService_disableDependentServices(services, pid, org, billingId, "false"),
@@ -122,7 +122,7 @@ func TestAccProjectService_handleNotFound(t *testing.T) {
 	service := "iam.googleapis.com"
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectService_handleNotFound(service, pid, org),
@@ -155,7 +155,7 @@ func TestAccProjectService_renamedService(t *testing.T) {
 	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectService_single(newName, pid, org),

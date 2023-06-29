@@ -22,7 +22,7 @@ func TestAccLoggingBillingAccountSink_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingBillingAccountSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -52,7 +52,7 @@ func TestAccLoggingBillingAccountSink_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingBillingAccountSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -94,7 +94,7 @@ func TestAccLoggingBillingAccountSink_described(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingBillingAccountSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -117,7 +117,7 @@ func TestAccLoggingBillingAccountSink_disabled(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingBillingAccountSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -140,7 +140,7 @@ func TestAccLoggingBillingAccountSink_updateBigquerySink(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingBillingAccountSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -174,7 +174,7 @@ func TestAccLoggingBillingAccountSink_heredoc(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingBillingAccountSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

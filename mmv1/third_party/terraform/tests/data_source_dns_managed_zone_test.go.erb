@@ -50,7 +50,7 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 				),
 			},
 			{
-				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 				Config:                   testAccDataSourceDnsManagedZone_basic(RandString(t, 10)),
 				Check: acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 					"data.google_dns_managed_zone.qa",

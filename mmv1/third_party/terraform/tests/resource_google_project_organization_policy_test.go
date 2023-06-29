@@ -46,7 +46,7 @@ func testAccProjectOrganizationPolicy_boolean(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -82,7 +82,7 @@ func testAccProjectOrganizationPolicy_list_allowAll(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -103,7 +103,7 @@ func testAccProjectOrganizationPolicy_list_allowSome(t *testing.T) {
 	canonicalProject := canonicalProjectId(project)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -123,7 +123,7 @@ func testAccProjectOrganizationPolicy_list_denySome(t *testing.T) {
 	projectId := envvar.GetTestProjectFromEnv()
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -143,7 +143,7 @@ func testAccProjectOrganizationPolicy_list_update(t *testing.T) {
 	projectId := envvar.GetTestProjectFromEnv()
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -168,7 +168,7 @@ func testAccProjectOrganizationPolicy_restore_defaultTrue(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -189,7 +189,7 @@ func testAccProjectOrganizationPolicy_none(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

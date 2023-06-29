@@ -19,7 +19,7 @@ func TestAccAppEngineStandardAppVersion_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAppEngineStandardAppVersionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
