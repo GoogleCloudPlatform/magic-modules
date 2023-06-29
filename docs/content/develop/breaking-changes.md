@@ -1,3 +1,10 @@
+---
+title: "Understanding Breaking Changes"
+summary: "An example terraform configuration can be used to generate docs and tests for a resource."
+weight: 12
+---
+
+
 # Breaking Changes and Provider Development
 
 ## Provider Versioning
