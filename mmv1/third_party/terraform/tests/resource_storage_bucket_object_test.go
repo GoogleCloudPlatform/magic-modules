@@ -421,7 +421,7 @@ func testAccCheckGoogleStorageObject(t *testing.T, bucket, object, md5 string) r
 
 func testAccCheckGoogleStorageObjectWithEncryption(t *testing.T, bucket, object, md5 string, customerEncryptionKey string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		objectsService := storage.NewObjectsService(config.NewStorageClient(config.UserAgent))
 
@@ -450,7 +450,7 @@ func testAccCheckGoogleStorageObjectWithEncryption(t *testing.T, bucket, object,
 
 func testAccCheckGoogleStorageFolder(t *testing.T, bucket, folderName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		objectsService := storage.NewObjectsService(config.NewStorageClient(config.UserAgent))
 
@@ -471,7 +471,7 @@ func testAccCheckGoogleStorageFolder(t *testing.T, bucket, folderName string) re
 
 func testAccStorageObjectDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_storage_bucket_object" {

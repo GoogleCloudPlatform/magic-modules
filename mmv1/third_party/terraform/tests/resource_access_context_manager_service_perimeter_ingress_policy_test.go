@@ -50,7 +50,7 @@ func testAccCheckAccessContextManagerServicePerimeterIngressPolicyDestroyProduce
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{perimeter}}")
 			if err != nil {

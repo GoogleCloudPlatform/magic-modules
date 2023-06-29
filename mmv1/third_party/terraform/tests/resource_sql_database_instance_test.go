@@ -142,7 +142,7 @@ func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
 			{
 				PreConfig: func() {
 					// Add a root user
-					config := GoogleProviderConfig(t)
+					config := acctest.GoogleProviderConfig(t)
 					user := sqladmin.User{
 						Name:     "root",
 						Host:     "%",
@@ -195,7 +195,7 @@ func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *tes
 			{
 				PreConfig: func() {
 					// Add a root user
-					config := GoogleProviderConfig(t)
+					config := acctest.GoogleProviderConfig(t)
 					user := sqladmin.User{
 						Name:     "root",
 						Host:     "%",
@@ -1039,7 +1039,7 @@ func TestAccSqlDatabaseInstance_cloneWithDatabaseNames(t *testing.T) {
 func testAccSqlDatabaseInstanceDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 			if rs.Type != "google_sql_database_instance" {
 				continue
 			}
@@ -1057,7 +1057,7 @@ func testAccSqlDatabaseInstanceDestroyProducer(t *testing.T) func(s *terraform.S
 
 func testAccCheckGoogleSqlDatabaseRootUserDoesNotExist(t *testing.T, instance string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		users, err := config.NewSqlAdminClient(config.UserAgent).Users.List(config.Project, instance).Do()
 

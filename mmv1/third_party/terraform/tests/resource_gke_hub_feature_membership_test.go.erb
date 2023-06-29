@@ -1126,7 +1126,7 @@ resource "google_gke_hub_membership" "membership_acmoci" {
 
 func testAccCheckGkeHubFeatureMembershipPresent(t *testing.T, project, location, feature, membership string) resource.TestCheckFunc {
   return func(s *terraform.State) error {
-    config := GoogleProviderConfig(t)
+    config := acctest.GoogleProviderConfig(t)
     obj := &gkehub.FeatureMembership{
       Feature:    dcl.StringOrNil(feature),
       Location:   dcl.StringOrNil(location),
@@ -1144,7 +1144,7 @@ func testAccCheckGkeHubFeatureMembershipPresent(t *testing.T, project, location,
 
 func testAccCheckGkeHubFeatureMembershipNotPresent(t *testing.T, project, location, feature, membership string) resource.TestCheckFunc {
   return func(s *terraform.State) error {
-    config := GoogleProviderConfig(t)
+    config := acctest.GoogleProviderConfig(t)
     obj := &gkehub.FeatureMembership{
       Feature:    dcl.StringOrNil(feature),
       Location:   dcl.StringOrNil(location),

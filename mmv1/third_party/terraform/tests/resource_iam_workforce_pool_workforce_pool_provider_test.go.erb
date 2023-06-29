@@ -117,7 +117,7 @@ func testAccCheckIAMWorkforcePoolWorkforcePoolProviderAccess(t *testing.T, rando
 		if !ok {
 			return fmt.Errorf("Resource %s Not found", pool_resource_name)
 		}
-        config := GoogleProviderConfig(t)
+        config := acctest.GoogleProviderConfig(t)
 
         pool_url, err := tpgresource.ReplaceVarsForTest(config, pool_rs, "{{IAMWorkforcePoolBasePath}}locations/{{location}}/workforcePools/{{workforce_pool_id}}")
         if err != nil {

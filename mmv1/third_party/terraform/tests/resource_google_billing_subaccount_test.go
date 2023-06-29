@@ -100,7 +100,7 @@ func testAccCheckGoogleBillingSubaccountExists(t *testing.T, bindingResourceName
 			return fmt.Errorf("Not found: %s", bindingResourceName)
 		}
 
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		_, err := config.NewBillingClient(config.UserAgent).BillingAccounts.Get(subaccount.Primary.ID).Do()
 		if err != nil {
 			return err
@@ -120,7 +120,7 @@ func testAccCheckGoogleBillingSubaccountRenameOnDestroy(t *testing.T) func(s *te
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			res, err := config.NewBillingClient(config.UserAgent).BillingAccounts.Get(rs.Primary.ID).Do()
 			if err != nil {

@@ -59,7 +59,7 @@ func testAccCheckResourceManagerLienExists(t *testing.T, n, projectName string, 
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		found, err := config.NewResourceManagerClient(config.UserAgent).Liens.List().Parent(fmt.Sprintf("projects/%s", projectName)).Do()
 		if err != nil {
@@ -77,7 +77,7 @@ func testAccCheckResourceManagerLienExists(t *testing.T, n, projectName string, 
 
 func testAccCheckResourceManagerLienDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_resource_manager_lien" {

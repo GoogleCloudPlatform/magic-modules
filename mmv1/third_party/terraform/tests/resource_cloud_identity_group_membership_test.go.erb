@@ -217,7 +217,7 @@ func testAccCloudIdentityGroupMembership_membershipDoesNotExistTest(t *testing.T
 			},
 			{
 				PreConfig: func() {
-					config := GoogleProviderConfig(t)
+					config := acctest.GoogleProviderConfig(t)
 
 					_, err := config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.Delete(sa.Name).Do()
 					if err != nil {
@@ -531,7 +531,7 @@ func testAccCheckCloudIdentityGroupMembershipDestroyProducer(t *testing.T) func(
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{CloudIdentityBasePath}}{{name}}")
 			if err != nil {

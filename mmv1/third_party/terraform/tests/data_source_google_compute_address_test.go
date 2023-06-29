@@ -153,7 +153,7 @@ func testAccCheckDataSourceComputeAddressDestroy(t *testing.T, name string) reso
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			addressId, err := compute.ParseComputeAddressId(rs.Primary.ID, nil)
 			if err != nil {

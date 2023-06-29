@@ -46,7 +46,7 @@ func testAccCheckPrivatecaCaPoolIam(t *testing.T, capool, region, project, role 
 			},
 		}
 		u := &privateca.PrivatecaCaPoolIamUpdater{
-			Config: GoogleProviderConfig(t),
+			Config: acctest.GoogleProviderConfig(t),
 		}
 		u.SetProject(project)
 		u.SetLocation(region)

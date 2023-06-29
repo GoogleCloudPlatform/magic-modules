@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-provider-google/google"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -123,7 +122,7 @@ func testAccCheckRuntimeconfigVariableExists(t *testing.T, resourceName string, 
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := google.GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		found, err := config.NewRuntimeconfigClient(config.UserAgent).Projects.Configs.Variables.Get(rs.Primary.ID).Do()
 		if err != nil {
@@ -182,7 +181,7 @@ func testAccCheckRuntimeconfigVariableValue(variable *runtimeconfig.Variable, va
 
 func testAccCheckRuntimeconfigVariableDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := google.GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_runtimeconfig_variable" {

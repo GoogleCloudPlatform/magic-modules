@@ -199,7 +199,7 @@ func funcAccTestDataprocWorkflowTemplateCheckDestroy(t *testing.T) func(s *terra
         continue
       }
 
-      config := GoogleProviderConfig(t)
+      config := acctest.GoogleProviderConfig(t)
 
       url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{DataprocBasePath}}projects/{{project}}/locations/{{location}}/workflowTemplates/{{name}}")
       if err != nil {

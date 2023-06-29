@@ -357,7 +357,7 @@ EOF
 
 func testDeploymentManagerDeploymentVerifyServiceAccountMissing(t *testing.T, accountId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		exists, err := testCheckDeploymentServiceAccountExists(accountId, config)
 		if err != nil {
 			return err
@@ -371,7 +371,7 @@ func testDeploymentManagerDeploymentVerifyServiceAccountMissing(t *testing.T, ac
 
 func testDeploymentManagerDeploymentVerifyServiceAccountExists(t *testing.T, accountId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		exists, err := testCheckDeploymentServiceAccountExists(accountId, config)
 		if err != nil {
 			return err
@@ -403,7 +403,7 @@ func testAccCheckDeploymentManagerDestroyInvalidDeployment(t *testing.T, deploym
 			}
 		}
 
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		url := fmt.Sprintf("%sprojects/%s/global/deployments/%s", config.DeploymentManagerBasePath, envvar.GetTestProjectFromEnv(), deploymentName)
 		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
@@ -431,7 +431,7 @@ func testAccCheckDeploymentManagerDeploymentDestroyProducer(t *testing.T) func(s
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{DeploymentManagerBasePath}}projects/{{project}}/global/deployments/{{name}}")
 			if err != nil {

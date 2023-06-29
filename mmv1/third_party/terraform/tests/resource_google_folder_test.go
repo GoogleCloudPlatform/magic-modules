@@ -89,7 +89,7 @@ func TestAccFolder_moveParent(t *testing.T) {
 
 func testAccCheckGoogleFolderDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_folder" {
@@ -117,7 +117,7 @@ func testAccCheckGoogleFolderExists(t *testing.T, n string, folder *resourceMana
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		found, err := config.NewResourceManagerV3Client(config.UserAgent).Folders.Get(rs.Primary.ID).Do()
 		if err != nil {

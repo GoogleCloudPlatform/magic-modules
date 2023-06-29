@@ -131,7 +131,7 @@ func testAccCheckVmwareenginePrivateCloudDestroyProducer(t *testing.T) func(s *t
 			if strings.HasPrefix(name, "data.") {
 				continue
 			}
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{VmwareengineBasePath}}projects/{{project}}/locations/{{location}}/privateClouds/{{name}}")
 			if err != nil {
 				return err

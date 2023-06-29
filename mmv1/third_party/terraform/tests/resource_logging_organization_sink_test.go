@@ -196,7 +196,7 @@ func TestAccLoggingOrganizationSink_heredoc(t *testing.T) {
 
 func testAccCheckLoggingOrganizationSinkDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_logging_organization_sink" {
@@ -221,7 +221,7 @@ func testAccCheckLoggingOrganizationSinkExists(t *testing.T, n string, sink *log
 		if err != nil {
 			return err
 		}
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		si, err := config.NewLoggingClient(config.UserAgent).Organizations.Sinks.Get(attributes["id"]).Do()
 		if err != nil {

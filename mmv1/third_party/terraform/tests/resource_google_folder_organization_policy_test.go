@@ -177,7 +177,7 @@ func TestAccFolderOrganizationPolicy_restore_defaultTrue(t *testing.T) {
 
 func testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_folder_organization_policy" {
@@ -297,7 +297,7 @@ func getGoogleFolderOrganizationPolicyTestResource(t *testing.T, s *terraform.St
 		return nil, fmt.Errorf("No ID is set")
 	}
 
-	config := GoogleProviderConfig(t)
+	config := acctest.GoogleProviderConfig(t)
 	folder := resourcemanager.CanonicalFolderId(rs.Primary.Attributes["folder"])
 
 	return config.NewResourceManagerClient(config.UserAgent).Folders.GetOrgPolicy(folder, &cloudresourcemanager.GetOrgPolicyRequest{

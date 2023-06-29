@@ -135,7 +135,7 @@ func testAccCheckApigeeKeystoresAliasesPkcs12DestroyProducer(t *testing.T) func(
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ApigeeBasePath}}{{keystore_id}}/aliases/{{alias}}")
 			if err != nil {

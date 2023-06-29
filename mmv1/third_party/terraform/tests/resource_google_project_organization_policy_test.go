@@ -207,7 +207,7 @@ func testAccProjectOrganizationPolicy_none(t *testing.T) {
 
 func testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_project_organization_policy" {
@@ -331,7 +331,7 @@ func getGoogleProjectOrganizationPolicyTestResource(t *testing.T, s *terraform.S
 		return nil, fmt.Errorf("No ID is set")
 	}
 
-	config := GoogleProviderConfig(t)
+	config := acctest.GoogleProviderConfig(t)
 	projectId := canonicalProjectId(rs.Primary.Attributes["project"])
 
 	return config.NewResourceManagerClient(config.UserAgent).Projects.GetOrgPolicy(projectId, &cloudresourcemanager.GetOrgPolicyRequest{

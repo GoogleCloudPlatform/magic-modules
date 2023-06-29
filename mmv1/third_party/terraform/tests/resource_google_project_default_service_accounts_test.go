@@ -196,7 +196,7 @@ resource "google_project_default_service_accounts" "acceptance" {
 
 func testAccCheckGoogleProjectDefaultServiceAccountsChanges(t *testing.T, project, action string) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		response, err := config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.List(PrefixedProject(project)).Do()
 		if err != nil {
 			return fmt.Errorf("failed to list service accounts on project %q: %v", project, err)
@@ -233,7 +233,7 @@ func testAccCheckGoogleProjectDefaultServiceAccountsChanges(t *testing.T, projec
 // Test if actions were reverted properly
 func testAccCheckGoogleProjectDefaultServiceAccountsRevert(t *testing.T, project, action string) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		response, err := config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.List(PrefixedProject(project)).Do()
 		if err != nil {
 			return fmt.Errorf("failed to list service accounts on project %q: %v", project, err)
