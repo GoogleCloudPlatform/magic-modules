@@ -42,7 +42,7 @@ func TestAccNetworkServicesEdgeCacheKeyset_update(t *testing.T) {
 }
 
 func testAccNetworkServicesEdgeCacheKeyset_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 
 resource "google_network_services_edge_cache_keyset" "default" {
   name                 = "default%{random_suffix}"

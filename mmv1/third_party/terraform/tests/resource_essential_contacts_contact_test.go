@@ -50,7 +50,7 @@ func TestAccEssentialContactsContact_update(t *testing.T) {
 }
 
 func testAccEssentialContactsContact_v1(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {
 }
 
@@ -64,7 +64,7 @@ resource "google_essential_contacts_contact" "contact" {
 }
 
 func testAccEssentialContactsContact_v2(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {
 }
 

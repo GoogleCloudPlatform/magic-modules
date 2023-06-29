@@ -42,7 +42,7 @@ func TestAccDataLossPreventionInspectTemplate_dlpInspectTemplateUpdate(t *testin
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplateBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent = "projects/%{project}"
 	description = "Description"
@@ -152,7 +152,7 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplateUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent = "projects/%{project}"
 	description = "Updated"
@@ -276,7 +276,7 @@ func TestAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withInfoTypesVe
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withInfoTypesVersionBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent = "projects/%{project}"
 	description = "Description"
@@ -409,7 +409,7 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withInfoTypesVersionUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent = "projects/%{project}"
 	description = "Description"
@@ -572,7 +572,7 @@ func TestAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withExcludeByHo
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withExcludeByHotwordBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent = "projects/%{project}"
 	description = "Description"
@@ -717,7 +717,7 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withExcludeByHotwordUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent = "projects/%{project}"
 	description = "Description"
@@ -903,7 +903,7 @@ func TestAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withSensitivity
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withSensitivityScoreBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent       = "projects/%{project}"
 	description  = "Description"
@@ -1020,7 +1020,7 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withSensitivityScoreUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent       = "projects/%{project}"
 	description  = "Description"
@@ -1128,7 +1128,7 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withSensitivityScoreUpdate2(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent       = "projects/%{project}"
 	description  = "Description"

@@ -32,7 +32,7 @@ func TestAccApiGatewayApi_apigatewayApiBasicExampleUpdated(t *testing.T) {
 }
 
 func testAccApiGatewayApi_apigatewayApiBasicExampleUpdated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_api_gateway_api" "api" {
   provider = google-beta
   api_id = "api%{random_suffix}"

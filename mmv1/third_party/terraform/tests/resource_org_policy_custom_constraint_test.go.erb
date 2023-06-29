@@ -46,7 +46,7 @@ func TestAccOrgPolicyCustomConstraint_update(t *testing.T) {
 }
 
 func testAccOrgPolicyCustomConstraint_v1(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_org_policy_custom_constraint" "constraint" {
   name         = "custom.tfTest%{random_suffix}"
   parent       = "organizations/%{org_id}"
@@ -62,7 +62,7 @@ resource "google_org_policy_custom_constraint" "constraint" {
 }
 
 func testAccOrgPolicyCustomConstraint_v2(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_org_policy_custom_constraint" "constraint" {
   name         = "custom.tfTest%{random_suffix}"
   parent       = "organizations/%{org_id}"

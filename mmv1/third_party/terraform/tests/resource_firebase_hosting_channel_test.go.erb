@@ -100,7 +100,7 @@ func TestAccFirebaseHostingChannel_firebasehostingChannelUpdate(t *testing.T) {
 }
 
 func testAccFirebaseHostingChannel_firebasehostingChannelBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_firebase_hosting_site" "default" {
   provider = google-beta
   project  = "%{project_id}"
@@ -117,7 +117,7 @@ resource "google_firebase_hosting_channel" "update" {
 
 func testAccFirebaseHostingChannel_firebasehostingChannelTtl(context map[string]interface{}, ttl string) string {
 	context["ttl"] = ttl
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_firebase_hosting_site" "default" {
   provider = google-beta
   project  = "%{project_id}"
@@ -135,7 +135,7 @@ resource "google_firebase_hosting_channel" "update" {
 
 func testAccFirebaseHostingChannel_firebasehostingChannelRetainedReleaseCount(context map[string]interface{}, retainedReleaseCount int) string {
 	context["retained_release_count"] = retainedReleaseCount
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_firebase_hosting_site" "default" {
   provider = google-beta
   project  = "%{project_id}"
@@ -153,7 +153,7 @@ resource "google_firebase_hosting_channel" "update" {
 }
 
 func testAccFirebaseHostingChannel_firebasehostingChannelLabels(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_firebase_hosting_site" "default" {
   provider = google-beta
   project  = "%{project_id}"
@@ -174,7 +174,7 @@ resource "google_firebase_hosting_channel" "update" {
 }
 
 func testAccFirebaseHostingChannel_firebasehostingChannelMultipleFields(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_firebase_hosting_site" "default" {
   provider = google-beta
   project  = "%{project_id}"

@@ -17,7 +17,7 @@ func TestAccUncoveredResource(t *testing.T) {
 }
 
 func testAccUncoveredResource() string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "uncovered_resource" "resource" {
   field_two {
     field_three = "value-two"

@@ -53,7 +53,7 @@ func TestAccDataSourceGoogleBeyondcorpAppConnection_full(t *testing.T) {
 }
 
 func testAccDataSourceGoogleBeyondcorpAppConnection_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_service_account" "service_account" {
 	account_id   = "tf-test-my-account%{random_suffix}"
 	display_name = "Test Service Account"
@@ -85,7 +85,7 @@ data "google_beyondcorp_app_connection" "foo" {
 }
 
 func testAccDataSourceGoogleBeyondcorpAppConnection_full(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_service_account" "service_account" {
 	account_id   = "tf-test-my-account%{random_suffix}"
 	display_name = "Test Service Account"

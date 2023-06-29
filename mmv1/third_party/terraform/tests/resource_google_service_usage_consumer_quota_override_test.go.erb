@@ -34,7 +34,7 @@ func TestAccServiceUsageConsumerQuotaOverride_consumerQuotaOverrideCustomIncorre
 }
 
 func testAccServiceUsageConsumerQuotaOverride_consumerQuotaOverrideCustomIncorrectLimitFormat(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "my_project" {
   provider   = google-beta
   name       = "tf-test-project"

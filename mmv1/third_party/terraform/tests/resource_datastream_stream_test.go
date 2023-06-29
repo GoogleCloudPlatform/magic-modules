@@ -82,7 +82,7 @@ func testAccDatastreamStream_datastreamStreamBasicUpdate(context map[string]inte
         }`
 	}
 	context["desired_state"] = desiredState
-	return Nprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {
 }
 

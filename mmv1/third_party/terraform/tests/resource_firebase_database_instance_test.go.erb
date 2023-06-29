@@ -12,7 +12,7 @@ import (
 
 func testAccFirebaseDatabaseInstance_firebaseDatabaseInstanceInState(context map[string]interface{}, state string) string {
 	context["desired_state"] = state
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_firebase_database_instance" "updated" {
   provider = google-beta
   project  = "%{project_id}"
