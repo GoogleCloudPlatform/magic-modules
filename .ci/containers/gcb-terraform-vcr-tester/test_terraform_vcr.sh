@@ -276,8 +276,6 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
     elif [[ $test_exit_code -ne 0 ]]; then
       # check for any uncaught errors in RECORDING mode
       comment+="Errors occurred during RECORDING mode. Please fix them to complete your PR${NEWLINE}"
-    else
-      comment+="All tests passed during RECORDING mode.${NEWLINE}"
     fi
   fi
 
