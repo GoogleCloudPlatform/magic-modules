@@ -13,7 +13,7 @@ import (
 func TestAccSpannerDatabaseIamBinding(t *testing.T) {
 	t.Parallel()
 
-	account := fmt.Sprintf("tf-test-%d", RandInt(t))
+	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	role := "roles/spanner.databaseAdmin"
 	project := envvar.GetTestProjectFromEnv()
 	database := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
@@ -58,7 +58,7 @@ func TestAccSpannerDatabaseIamMember(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	account := fmt.Sprintf("tf-test-%d", RandInt(t))
+	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	role := "roles/spanner.databaseAdmin"
 	database := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	instance := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
@@ -90,7 +90,7 @@ func TestAccSpannerDatabaseIamPolicy(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	account := fmt.Sprintf("tf-test-%d", RandInt(t))
+	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	role := "roles/spanner.databaseAdmin"
 	database := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	instance := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))

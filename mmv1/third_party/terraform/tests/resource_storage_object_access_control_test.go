@@ -14,7 +14,7 @@ func TestAccStorageObjectAccessControl_update(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	objectName := fmt.Sprintf("%s-%d", "tf-test-acl-object", RandInt(t))
+	objectName := fmt.Sprintf("%s-%d", "tf-test-acl-object", acctest.RandInt(t))
 	objectData := []byte("data data data")
 	if err := ioutil.WriteFile(tfObjectAcl.Name(), objectData, 0644); err != nil {
 		t.Errorf("error writing file: %v", err)
@@ -53,7 +53,7 @@ func TestAccStorageObjectAccessControl_updateWithSlashes(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	objectName := fmt.Sprintf("%s-%d", "tf-test/acl/object", RandInt(t))
+	objectName := fmt.Sprintf("%s-%d", "tf-test/acl/object", acctest.RandInt(t))
 	objectData := []byte("data data data")
 	if err := ioutil.WriteFile(tfObjectAcl.Name(), objectData, 0644); err != nil {
 		t.Errorf("error writing file: %v", err)

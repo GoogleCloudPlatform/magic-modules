@@ -15,7 +15,7 @@ func TestAccSqlUser_mysql(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instance := fmt.Sprintf("tf-test-%d", RandInt(t))
+	instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -52,7 +52,7 @@ func TestAccSqlUser_iamUser(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instance := fmt.Sprintf("tf-test-%d", RandInt(t))
+	instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -77,7 +77,7 @@ func TestAccSqlUser_iamUser(t *testing.T) {
 func TestAccSqlUser_postgres(t *testing.T) {
 	t.Parallel()
 
-	instance := fmt.Sprintf("tf-test-%d", RandInt(t))
+	instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -110,7 +110,7 @@ func TestAccSqlUser_postgres(t *testing.T) {
 func TestAccSqlUser_postgresIAM(t *testing.T) {
 	t.Parallel()
 
-	instance := fmt.Sprintf("tf-test-%d", RandInt(t))
+	instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -139,7 +139,7 @@ func TestAccSqlUser_postgresIAM(t *testing.T) {
 func TestAccSqlUser_postgresAbandon(t *testing.T) {
 	t.Parallel()
 
-	instance := fmt.Sprintf("tf-test-%d", RandInt(t))
+	instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	userName := "admin"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -255,7 +255,7 @@ func TestAccSqlUser_mysqlPasswordPolicy(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instance := fmt.Sprintf("tf-test-i%d", RandInt(t))
+	instance := fmt.Sprintf("tf-test-i%d", acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),

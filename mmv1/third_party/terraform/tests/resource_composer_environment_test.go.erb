@@ -35,8 +35,8 @@ func allComposerServiceAgents() []string {
 func TestAccComposerEnvironment_basic(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:		          func() { acctest.AccTestPreCheck(t) },
@@ -81,8 +81,8 @@ func TestAccComposerEnvironment_basic(t *testing.T) {
 func TestAccComposerEnvironment_update(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -118,8 +118,8 @@ func TestAccComposerEnvironment_update(t *testing.T) {
 func TestAccComposerEnvironmentComposer1_private(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -157,8 +157,8 @@ func TestAccComposerEnvironmentComposer1_private(t *testing.T) {
 func TestAccComposerEnvironmentComposer2_private(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -197,8 +197,8 @@ func TestAccComposerEnvironmentComposer2_private(t *testing.T) {
 func TestAccComposerEnvironment_privateWithWebServerControl(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -243,8 +243,8 @@ func TestAccComposerEnvironment_privateWithWebServerControl(t *testing.T) {
 
 func TestAccComposerEnvironment_withDatabaseConfig(t *testing.T) {
 	t.Parallel()
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -278,8 +278,8 @@ func TestAccComposerEnvironment_withDatabaseConfig(t *testing.T) {
 
 func TestAccComposerEnvironment_withWebServerConfig(t *testing.T) {
 	t.Parallel()
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 
 
@@ -320,8 +320,8 @@ func TestAccComposerEnvironment_withEncryptionConfigComposer1(t *testing.T) {
 	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
 	pid := envvar.GetTestProjectFromEnv()
 	grantServiceAgentsRole(t, "service-", allComposerServiceAgents(), "roles/cloudkms.cryptoKeyEncrypterDecrypter")
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -356,8 +356,8 @@ func TestAccComposerEnvironment_withEncryptionConfigComposer2(t *testing.T) {
 	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
 	pid := envvar.GetTestProjectFromEnv()
 	grantServiceAgentsRole(t, "service-", allComposerServiceAgents(), "roles/cloudkms.cryptoKeyEncrypterDecrypter")
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -389,8 +389,8 @@ func TestAccComposerEnvironment_withEncryptionConfigComposer2(t *testing.T) {
 func TestAccComposerEnvironment_withMaintenanceWindow(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -422,8 +422,8 @@ func TestAccComposerEnvironment_withMaintenanceWindow(t *testing.T) {
 func TestAccComposerEnvironment_maintenanceWindowUpdate(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -458,8 +458,8 @@ func TestAccComposerEnvironment_maintenanceWindowUpdate(t *testing.T) {
 func TestAccComposerEnvironment_ComposerV2(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -492,8 +492,8 @@ func TestAccComposerEnvironment_ComposerV2(t *testing.T) {
 func TestAccComposerEnvironment_ComposerV2HighResilience(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -528,8 +528,8 @@ func TestAccComposerEnvironment_UpdateComposerV2WithTriggerer(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -565,8 +565,8 @@ func TestAccComposerEnvironment_UpdateComposerV2WithTriggerer(t *testing.T) {
 func TestAccComposerEnvironment_UpdateComposerV2(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -601,8 +601,8 @@ func TestAccComposerEnvironment_UpdateComposerV2(t *testing.T) {
 func TestAccComposerEnvironment_composerV2PrivateServiceConnect(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:		          func() { acctest.AccTestPreCheck(t) },
@@ -633,8 +633,8 @@ func TestAccComposerEnvironment_composerV2PrivateServiceConnect(t *testing.T) {
 func TestAccComposerEnvironment_composerV1MasterAuthNetworks(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:		          func() { acctest.AccTestPreCheck(t) },
@@ -665,8 +665,8 @@ func TestAccComposerEnvironment_composerV1MasterAuthNetworks(t *testing.T) {
 func TestAccComposerEnvironment_composerV2MasterAuthNetworks(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:		          func() { acctest.AccTestPreCheck(t) },
@@ -697,8 +697,8 @@ func TestAccComposerEnvironment_composerV2MasterAuthNetworks(t *testing.T) {
 func TestAccComposerEnvironment_composerV1MasterAuthNetworksUpdate(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:		          func() { acctest.AccTestPreCheck(t) },
@@ -732,8 +732,8 @@ func TestAccComposerEnvironment_composerV1MasterAuthNetworksUpdate(t *testing.T)
 func TestAccComposerEnvironment_composerV2MasterAuthNetworksUpdate(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:		          func() { acctest.AccTestPreCheck(t) },
@@ -767,10 +767,10 @@ func TestAccComposerEnvironment_composerV2MasterAuthNetworksUpdate(t *testing.T)
 func TestAccComposer1Environment_withNodeConfig(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
-	serviceAccount := fmt.Sprintf("tf-test-%d", RandInt(t))
+	serviceAccount := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:		          func() { acctest.AccTestPreCheck(t) },
@@ -801,10 +801,10 @@ func TestAccComposer1Environment_withNodeConfig(t *testing.T) {
 func TestAccComposer2Environment_withNodeConfig(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
-	serviceAccount := fmt.Sprintf("tf-test-%d", RandInt(t))
+	serviceAccount := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:		          func() { acctest.AccTestPreCheck(t) },
@@ -834,8 +834,8 @@ func TestAccComposer2Environment_withNodeConfig(t *testing.T) {
 
 func TestAccComposerEnvironmentAirflow2_withRecoveryConfig(t *testing.T) {
 	t.Parallel()
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -874,8 +874,8 @@ func TestAccComposerEnvironmentAirflow2_withRecoveryConfig(t *testing.T) {
 
 func TestAccComposerEnvironment_withSoftwareConfig(t *testing.T) {
 	t.Parallel()
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -906,8 +906,8 @@ func TestAccComposerEnvironment_withSoftwareConfig(t *testing.T) {
 
 func TestAccComposerEnvironmentAirflow2_withSoftwareConfig(t *testing.T) {
 	t.Parallel()
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -949,8 +949,8 @@ func TestAccComposerEnvironmentAirflow2_withSoftwareConfig(t *testing.T) {
 func TestAccComposerEnvironment_withUpdateOnCreate(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -982,10 +982,10 @@ func TestAccComposerEnvironment_withUpdateOnCreate(t *testing.T) {
 func TestAccComposerEnvironment_fixPyPiPackages(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
-	serviceAccount := fmt.Sprintf("tf-test-%d", RandInt(t))
+	serviceAccount := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

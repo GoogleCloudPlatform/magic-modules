@@ -12,7 +12,7 @@ import (
 func TestAccFirestoreDocument_update(t *testing.T) {
 	t.Parallel()
 
-	name := fmt.Sprintf("tf-test-%d", RandInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	project := envvar.GetTestFirestoreProjectFromEnv(t)
 
 	acctest.VcrTest(t, resource.TestCase{

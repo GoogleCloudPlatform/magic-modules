@@ -20,7 +20,7 @@ func TestAccHealthcareDatasetIamBinding(t *testing.T) {
 	t.Parallel()
 
 	projectId := envvar.GetTestProjectFromEnv()
-	account := fmt.Sprintf("tf-test-%d", RandInt(t))
+	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	roleId := "roles/healthcare.datasetAdmin"
 	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
@@ -69,7 +69,7 @@ func TestAccHealthcareDatasetIamMember(t *testing.T) {
 	t.Parallel()
 
 	projectId := envvar.GetTestProjectFromEnv()
-	account := fmt.Sprintf("tf-test-%d", RandInt(t))
+	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	roleId := "roles/healthcare.datasetViewer"
 	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
@@ -104,7 +104,7 @@ func TestAccHealthcareDatasetIamPolicy(t *testing.T) {
 	t.Parallel()
 
 	projectId := envvar.GetTestProjectFromEnv()
-	account := fmt.Sprintf("tf-test-%d", RandInt(t))
+	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	roleId := "roles/healthcare.datasetAdmin"
 	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 

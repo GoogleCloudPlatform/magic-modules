@@ -14,10 +14,10 @@ func TestAccDatasourceGoogleServiceNetworkingPeeredDnsDomain_basic(t *testing.T)
 	org := envvar.GetTestOrgFromEnv(t)
 	billingId := envvar.GetTestBillingAccountFromEnv(t)
 
-	project := fmt.Sprintf("tf-test-%d", RandInt(t))
+	project := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	resourceName := "data.google_service_networking_peered_dns_domain.acceptance"
-	name := fmt.Sprintf("test-name-%d", RandInt(t))
+	name := fmt.Sprintf("test-name-%d", acctest.RandInt(t))
 	network := "test-network"
 	service := "servicenetworking.googleapis.com"
 

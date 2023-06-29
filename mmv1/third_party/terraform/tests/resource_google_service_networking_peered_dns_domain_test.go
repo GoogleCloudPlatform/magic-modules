@@ -14,8 +14,8 @@ func TestAccServiceNetworkingPeeredDNSDomain_basic(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	billingId := envvar.GetTestBillingAccountFromEnv(t)
 
-	project := fmt.Sprintf("tf-test-%d", RandInt(t))
-	name := fmt.Sprintf("test-name-%d", RandInt(t))
+	project := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	name := fmt.Sprintf("test-name-%d", acctest.RandInt(t))
 	service := "servicenetworking.googleapis.com"
 
 	acctest.VcrTest(t, resource.TestCase{

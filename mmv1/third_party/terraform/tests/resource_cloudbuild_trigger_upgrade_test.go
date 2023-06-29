@@ -14,7 +14,7 @@ import (
 func TestAccCloudBuildTrigger_migration(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
-	name := fmt.Sprintf("tf-test-%d", RandInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	oldVersion := map[string]resource.ExternalProvider{
 		"google": {

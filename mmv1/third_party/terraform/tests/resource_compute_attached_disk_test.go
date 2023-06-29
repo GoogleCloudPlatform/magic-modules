@@ -14,8 +14,8 @@ import (
 func TestAccComputeAttachedDisk_basic(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-disk-%d", RandInt(t))
-	instanceName := fmt.Sprintf("tf-test-inst-%d", RandInt(t))
+	diskName := fmt.Sprintf("tf-test-disk-%d", acctest.RandInt(t))
+	instanceName := fmt.Sprintf("tf-test-inst-%d", acctest.RandInt(t))
 	importID := fmt.Sprintf("%s/us-central1-a/%s/%s", envvar.GetTestProjectFromEnv(), instanceName, diskName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -46,8 +46,8 @@ func TestAccComputeAttachedDisk_basic(t *testing.T) {
 func TestAccComputeAttachedDisk_full(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%d", RandInt(t))
-	instanceName := fmt.Sprintf("tf-test-%d", RandInt(t))
+	diskName := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	instanceName := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	importID := fmt.Sprintf("%s/us-central1-a/%s/%s", envvar.GetTestProjectFromEnv(), instanceName, diskName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -73,8 +73,8 @@ func TestAccComputeAttachedDisk_full(t *testing.T) {
 func TestAccComputeAttachedDisk_region(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%d", RandInt(t))
-	instanceName := fmt.Sprintf("tf-test-%d", RandInt(t))
+	diskName := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	instanceName := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	importID := fmt.Sprintf("%s/us-central1-a/%s/%s", envvar.GetTestProjectFromEnv(), instanceName, diskName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -100,8 +100,8 @@ func TestAccComputeAttachedDisk_region(t *testing.T) {
 func TestAccComputeAttachedDisk_count(t *testing.T) {
 	t.Parallel()
 
-	diskPrefix := fmt.Sprintf("tf-test-%d", RandInt(t))
-	instanceName := fmt.Sprintf("tf-test-%d", RandInt(t))
+	diskPrefix := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	instanceName := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	count := 2
 
 	acctest.VcrTest(t, resource.TestCase{

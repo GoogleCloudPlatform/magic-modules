@@ -35,7 +35,7 @@ func TestAccStorageSignedUrl_accTest(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
+	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
 
 	headers := map[string]string{
 		"x-goog-test":                    "foo",

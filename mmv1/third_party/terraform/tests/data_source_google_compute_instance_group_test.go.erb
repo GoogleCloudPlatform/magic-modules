@@ -57,7 +57,7 @@ func TestAccDataSourceGoogleComputeInstanceGroup_fromIGM(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckDataSourceGoogleComputeInstanceGroup_fromIGM(fmt.Sprintf("tf-test-igm-%d", RandInt(t)), fmt.Sprintf("tf-test-igm-%d", RandInt(t))),
+				Config: testAccCheckDataSourceGoogleComputeInstanceGroup_fromIGM(fmt.Sprintf("tf-test-igm-%d", acctest.RandInt(t)), fmt.Sprintf("tf-test-igm-%d", acctest.RandInt(t))),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_compute_instance_group.test", "instances.#", "10"),
 				),

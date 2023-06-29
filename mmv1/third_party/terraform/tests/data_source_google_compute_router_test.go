@@ -11,7 +11,7 @@ import (
 
 func TestAccDataSourceComputeRouter(t *testing.T) {
 	t.Parallel()
-	name := fmt.Sprintf("tf-test-router-%d", RandInt(t))
+	name := fmt.Sprintf("tf-test-router-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

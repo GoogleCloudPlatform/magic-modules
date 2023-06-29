@@ -416,7 +416,7 @@ func TestAccSqlDatabaseInstance_settings_checkServiceNetworking(t *testing.T) {
 func TestAccSqlDatabaseInstance_replica(t *testing.T) {
 	t.Parallel()
 
-	databaseID := RandInt(t)
+	databaseID := acctest.RandInt(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -457,8 +457,8 @@ func TestAccSqlDatabaseInstance_replica(t *testing.T) {
 func TestAccSqlDatabaseInstance_slave(t *testing.T) {
 	t.Parallel()
 
-	masterID := RandInt(t)
-	slaveID := RandInt(t)
+	masterID := acctest.RandInt(t)
+	slaveID := acctest.RandInt(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -488,7 +488,7 @@ func TestAccSqlDatabaseInstance_slave(t *testing.T) {
 func TestAccSqlDatabaseInstance_highAvailability(t *testing.T) {
 	t.Parallel()
 
-	instanceID := RandInt(t)
+	instanceID := acctest.RandInt(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -512,7 +512,7 @@ func TestAccSqlDatabaseInstance_highAvailability(t *testing.T) {
 func TestAccSqlDatabaseInstance_diskspecs(t *testing.T) {
 	t.Parallel()
 
-	masterID := RandInt(t)
+	masterID := acctest.RandInt(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -536,7 +536,7 @@ func TestAccSqlDatabaseInstance_diskspecs(t *testing.T) {
 func TestAccSqlDatabaseInstance_maintenance(t *testing.T) {
 	t.Parallel()
 
-	masterID := RandInt(t)
+	masterID := acctest.RandInt(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -629,7 +629,7 @@ func TestAccSqlDatabaseInstance_settingsDowngrade(t *testing.T) {
 func TestAccSqlDatabaseInstance_authNets(t *testing.T) {
 	t.Parallel()
 
-	databaseID := RandInt(t)
+	databaseID := acctest.RandInt(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1078,7 +1078,7 @@ func testAccCheckGoogleSqlDatabaseRootUserDoesNotExist(t *testing.T, instance st
 func TestAccSqlDatabaseInstance_BackupRetention(t *testing.T) {
 	t.Parallel()
 
-	masterID := RandInt(t)
+	masterID := acctest.RandInt(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1101,7 +1101,7 @@ func TestAccSqlDatabaseInstance_BackupRetention(t *testing.T) {
 func TestAccSqlDatabaseInstance_PointInTimeRecoveryEnabled(t *testing.T) {
 	t.Parallel()
 
-	masterID := RandInt(t)
+	masterID := acctest.RandInt(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1133,7 +1133,7 @@ func TestAccSqlDatabaseInstance_PointInTimeRecoveryEnabled(t *testing.T) {
 func TestAccSqlDatabaseInstance_PointInTimeRecoveryEnabledForSqlServer(t *testing.T) {
 	t.Parallel()
 
-	masterID := RandInt(t)
+	masterID := acctest.RandInt(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1165,7 +1165,7 @@ func TestAccSqlDatabaseInstance_PointInTimeRecoveryEnabledForSqlServer(t *testin
 func TestAccSqlDatabaseInstance_insights(t *testing.T) {
 	t.Parallel()
 
-	masterID := RandInt(t)
+	masterID := acctest.RandInt(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1314,10 +1314,10 @@ func TestAccSqlDatabaseInstance_SqlServerAuditConfig(t *testing.T) {
 	t.Parallel()
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	rootPassword := acctest.RandString(t, 15)
-	bucketName := fmt.Sprintf("%s-%d", "tf-test-bucket", RandInt(t))
+	bucketName := fmt.Sprintf("%s-%d", "tf-test-bucket", acctest.RandInt(t))
 	uploadInterval := "900s"
 	retentionInterval := "86400s"
-	bucketNameUpdate := fmt.Sprintf("%s-%d", "tf-test-bucket", RandInt(t)) + "update"
+	bucketNameUpdate := fmt.Sprintf("%s-%d", "tf-test-bucket", acctest.RandInt(t)) + "update"
 	uploadIntervalUpdate := "1200s"
 	retentionIntervalUpdate := "172800s"
 

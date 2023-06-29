@@ -25,7 +25,7 @@ func TestAccProjectIamAuditConfig_basic(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	service := "cloudkms.googleapis.com"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -52,7 +52,7 @@ func TestAccProjectIamAuditConfig_multiple(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
 
@@ -88,7 +88,7 @@ func TestAccProjectIamAuditConfig_multipleAtOnce(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
 
@@ -118,7 +118,7 @@ func TestAccProjectIamAuditConfig_update(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	service := "cloudkms.googleapis.com"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -160,7 +160,7 @@ func TestAccProjectIamAuditConfig_remove(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
 
@@ -198,7 +198,7 @@ func TestAccProjectIamAuditConfig_addFirstExemptMember(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	service := "cloudkms.googleapis.com"
 	members := []string{}
 	members2 := []string{"user:gterraformtest1@gmail.com"}
@@ -234,7 +234,7 @@ func TestAccProjectIamAuditConfig_removeLastExemptMember(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	service := "cloudkms.googleapis.com"
 	members2 := []string{}
 	members := []string{"user:gterraformtest1@gmail.com"}
@@ -270,7 +270,7 @@ func TestAccProjectIamAuditConfig_updateNoExemptMembers(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	logType := "DATA_READ"
 	logType2 := "DATA_WRITE"
 	service := "cloudkms.googleapis.com"

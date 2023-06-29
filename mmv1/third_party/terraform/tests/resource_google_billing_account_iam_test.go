@@ -19,7 +19,7 @@ func TestAccBillingAccountIam(t *testing.T) {
 	t.Parallel()
 
 	billing := envvar.GetTestMasterBillingAccountFromEnv(t)
-	account := fmt.Sprintf("tf-test-%d", RandInt(t))
+	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	role := "roles/billing.viewer"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

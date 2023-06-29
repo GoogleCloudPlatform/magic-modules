@@ -13,8 +13,8 @@ import (
 func TestAccComputeNetworkPeering_basic(t *testing.T) {
 	t.Parallel()
 
-	primaryNetworkName := fmt.Sprintf("tf-test-network-peering-1-%d", RandInt(t))
-	peeringName := fmt.Sprintf("peering-test-1-%d", RandInt(t))
+	primaryNetworkName := fmt.Sprintf("tf-test-network-peering-1-%d", acctest.RandInt(t))
+	peeringName := fmt.Sprintf("peering-test-1-%d", acctest.RandInt(t))
 	importId := fmt.Sprintf("%s/%s/%s", envvar.GetTestProjectFromEnv(), primaryNetworkName, peeringName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,8 +39,8 @@ func TestAccComputeNetworkPeering_basic(t *testing.T) {
 func TestAccComputeNetworkPeering_subnetRoutes(t *testing.T) {
 	t.Parallel()
 
-	primaryNetworkName := fmt.Sprintf("tf-test-network-peering-1-%d", RandInt(t))
-	peeringName := fmt.Sprintf("peering-test-%d", RandInt(t))
+	primaryNetworkName := fmt.Sprintf("tf-test-network-peering-1-%d", acctest.RandInt(t))
+	peeringName := fmt.Sprintf("peering-test-%d", acctest.RandInt(t))
 	importId := fmt.Sprintf("%s/%s/%s", envvar.GetTestProjectFromEnv(), primaryNetworkName, peeringName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -64,8 +64,8 @@ func TestAccComputeNetworkPeering_subnetRoutes(t *testing.T) {
 func TestAccComputeNetworkPeering_customRoutesUpdate(t *testing.T) {
 	t.Parallel()
 
-	primaryNetworkName := fmt.Sprintf("tf-test-network-peering-1-%d", RandInt(t))
-	peeringName := fmt.Sprintf("peering-test-%d", RandInt(t))
+	primaryNetworkName := fmt.Sprintf("tf-test-network-peering-1-%d", acctest.RandInt(t))
+	peeringName := fmt.Sprintf("peering-test-%d", acctest.RandInt(t))
 	importId := fmt.Sprintf("%s/%s/%s", envvar.GetTestProjectFromEnv(), primaryNetworkName, peeringName)
 	suffix := acctest.RandString(t, 10)
 
@@ -108,9 +108,9 @@ func TestAccComputeNetworkPeering_customRoutesUpdate(t *testing.T) {
 func TestAccComputeNetworkPeering_stackType(t *testing.T) {
 	t.Parallel()
 
-	primaryNetworkName := fmt.Sprintf("tf-test-network-1-%d", RandInt(t))
-	peeringNetworkName := fmt.Sprintf("tf-test-network-2-%d", RandInt(t))
-	peeringName := fmt.Sprintf("tf-test-peering-%d", RandInt(t))
+	primaryNetworkName := fmt.Sprintf("tf-test-network-1-%d", acctest.RandInt(t))
+	peeringNetworkName := fmt.Sprintf("tf-test-network-2-%d", acctest.RandInt(t))
+	peeringName := fmt.Sprintf("tf-test-peering-%d", acctest.RandInt(t))
 	importId := fmt.Sprintf("%s/%s/%s", GetTestProjectFromEnv(), primaryNetworkName, peeringName)
 
 	acctest.VcrTest(t, resource.TestCase{

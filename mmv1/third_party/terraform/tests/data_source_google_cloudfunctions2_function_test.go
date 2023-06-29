@@ -13,7 +13,7 @@ func TestAccDataSourceGoogleCloudFunctions2Function_basic(t *testing.T) {
 
 	funcDataNameHttp := "data.google_cloudfunctions2_function.function_http_v2"
 	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
+	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
 	zipFilePath := "./test-fixtures/cloudfunctions2/function-source.zip"
 
 	acctest.VcrTest(t, resource.TestCase{

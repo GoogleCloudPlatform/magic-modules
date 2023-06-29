@@ -18,7 +18,7 @@ func TestAccHealthcareDicomStoreIamBinding(t *testing.T) {
 	t.Parallel()
 
 	projectId := envvar.GetTestProjectFromEnv()
-	account := fmt.Sprintf("tf-test-%d", RandInt(t))
+	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	roleId := "roles/healthcare.dicomStoreAdmin"
 	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	datasetId := &healthcare.HealthcareDatasetId{
@@ -67,7 +67,7 @@ func TestAccHealthcareDicomStoreIamMember(t *testing.T) {
 	t.Parallel()
 
 	projectId := envvar.GetTestProjectFromEnv()
-	account := fmt.Sprintf("tf-test-%d", RandInt(t))
+	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	roleId := "roles/healthcare.dicomEditor"
 	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	datasetId := &healthcare.HealthcareDatasetId{
@@ -102,7 +102,7 @@ func TestAccHealthcareDicomStoreIamPolicy(t *testing.T) {
 	t.Parallel()
 
 	projectId := envvar.GetTestProjectFromEnv()
-	account := fmt.Sprintf("tf-test-%d", RandInt(t))
+	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	roleId := "roles/healthcare.dicomViewer"
 	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	datasetId := &healthcare.HealthcareDatasetId{

@@ -13,8 +13,8 @@ import (
 func TestAccDataSourceComputeImage(t *testing.T) {
 	t.Parallel()
 
-	family := fmt.Sprintf("tf-test-%d", RandInt(t))
-	name := fmt.Sprintf("tf-test-%d", RandInt(t))
+	family := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -45,8 +45,8 @@ func TestAccDataSourceComputeImage(t *testing.T) {
 func TestAccDataSourceComputeImageFilter(t *testing.T) {
 	t.Parallel()
 
-	family := fmt.Sprintf("tf-test-%d", RandInt(t))
-	name := fmt.Sprintf("tf-test-%d", RandInt(t))
+	family := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

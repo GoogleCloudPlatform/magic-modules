@@ -14,8 +14,8 @@ func TestAccComputeSharedVpc_basic(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	billingId := envvar.GetTestBillingAccountFromEnv(t)
 
-	hostProject := fmt.Sprintf("tf-test-h-%d", RandInt(t))
-	serviceProject := fmt.Sprintf("tf-test-s-%d", RandInt(t))
+	hostProject := fmt.Sprintf("tf-test-h-%d", acctest.RandInt(t))
+	serviceProject := fmt.Sprintf("tf-test-s-%d", acctest.RandInt(t))
 
 	hostProjectResourceName := "google_compute_shared_vpc_host_project.host"
 	serviceProjectResourceName := "google_compute_shared_vpc_service_project.service"

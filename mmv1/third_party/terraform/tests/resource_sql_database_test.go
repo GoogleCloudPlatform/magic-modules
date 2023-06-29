@@ -18,8 +18,8 @@ func TestAccSqlDatabase_basic(t *testing.T) {
 	var database sqladmin.Database
 
 	resourceName := "google_sql_database.database"
-	instanceName := fmt.Sprintf("tf-test-%d", RandInt(t))
-	dbName := fmt.Sprintf("tf-test-%d", RandInt(t))
+	instanceName := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	dbName := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,8 +74,8 @@ func TestAccSqlDatabase_update(t *testing.T) {
 
 	var database sqladmin.Database
 
-	instance_name := fmt.Sprintf("tf-test-%d", RandInt(t))
-	database_name := fmt.Sprintf("tf-test-%d", RandInt(t))
+	instance_name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	database_name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

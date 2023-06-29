@@ -13,8 +13,8 @@ func TestAccStorageBucketIamPolicy(t *testing.T) {
 	t.Parallel()
 
 	serviceAcct := envvar.GetTestServiceAccountFromEnv(t)
-	bucket := fmt.Sprintf("tf-test-%d", RandInt(t))
-	account := fmt.Sprintf("tf-test-%d", RandInt(t))
+	bucket := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

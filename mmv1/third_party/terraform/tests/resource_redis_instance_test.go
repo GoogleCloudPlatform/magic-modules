@@ -12,7 +12,7 @@ import (
 func TestAccRedisInstance_update(t *testing.T) {
 	t.Parallel()
 
-	name := fmt.Sprintf("tf-test-%d", RandInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -46,7 +46,7 @@ func TestAccRedisInstance_update(t *testing.T) {
 func TestAccRedisInstance_updateReadReplicasMode(t *testing.T) {
 	t.Parallel()
 
-	name := fmt.Sprintf("tf-test-%d", RandInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -81,7 +81,7 @@ func TestAccRedisInstance_updateReadReplicasMode(t *testing.T) {
 func TestAccRedisInstance_updateReadReplicasModeWithAutoSecondaryIp(t *testing.T) {
 	t.Parallel()
 
-	name := fmt.Sprintf("tf-test-%d", RandInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -190,7 +190,7 @@ resource "google_redis_instance" "test" {
 func TestAccRedisInstance_regionFromLocation(t *testing.T) {
 	t.Parallel()
 
-	name := fmt.Sprintf("tf-test-%d", RandInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	// Pick a zone that isn't in the provider-specified region so we know we
 	// didn't fall back to that one.
@@ -256,7 +256,7 @@ func TestAccRedisInstance_redisInstanceAuthEnabled(t *testing.T) {
 func TestAccRedisInstance_downgradeRedisVersion(t *testing.T) {
 	t.Parallel()
 
-	name := fmt.Sprintf("tf-test-%d", RandInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

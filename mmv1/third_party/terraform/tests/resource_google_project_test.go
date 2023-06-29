@@ -29,7 +29,7 @@ func TestAccProject_createWithoutOrg(t *testing.T) {
 		t.Skip("Service accounts cannot create projects without a parent. Requires user credentials.")
 	}
 
-	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -51,7 +51,7 @@ func TestAccProject_create(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -77,7 +77,7 @@ func TestAccProject_billing(t *testing.T) {
 	acctest.SkipIfEnvNotSet(t, "GOOGLE_BILLING_ACCOUNT_2")
 	billingId2 := os.Getenv("GOOGLE_BILLING_ACCOUNT_2")
 	billingId := envvar.GetTestBillingAccountFromEnv(t)
-	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -119,7 +119,7 @@ func TestAccProject_labels(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -161,7 +161,7 @@ func TestAccProject_deleteDefaultNetwork(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
 	billingId := envvar.GetTestBillingAccountFromEnv(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -178,7 +178,7 @@ func TestAccProject_parentFolder(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
 	folderDisplayName := TestPrefix + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -195,7 +195,7 @@ func TestAccProject_migrateParent(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
 	folderDisplayName := TestPrefix + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

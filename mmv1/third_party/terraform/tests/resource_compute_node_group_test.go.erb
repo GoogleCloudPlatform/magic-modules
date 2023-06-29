@@ -16,8 +16,8 @@ import (
 func TestAccComputeNodeGroup_updateNodeTemplate(t *testing.T) {
 	t.Parallel()
 
-	groupName := fmt.Sprintf("group--%d", RandInt(t))
-	tmplPrefix := fmt.Sprintf("tmpl--%d", RandInt(t))
+	groupName := fmt.Sprintf("group--%d", acctest.RandInt(t))
+	tmplPrefix := fmt.Sprintf("tmpl--%d", acctest.RandInt(t))
 
 	var timeCreated time.Time
 	acctest.VcrTest(t, resource.TestCase{

@@ -18,7 +18,7 @@ import (
 func TestAccFolderOrganizationPolicy_boolean(t *testing.T) {
 	t.Parallel()
 
-	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
+	folder := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	org := envvar.GetTestOrgFromEnv(t)
 	acctest.VcrTest(t, resource.TestCase{
@@ -57,7 +57,7 @@ func TestAccFolderOrganizationPolicy_boolean(t *testing.T) {
 func TestAccFolderOrganizationPolicy_list_allowAll(t *testing.T) {
 	t.Parallel()
 
-	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
+	folder := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	org := envvar.GetTestOrgFromEnv(t)
 	acctest.VcrTest(t, resource.TestCase{
@@ -81,7 +81,7 @@ func TestAccFolderOrganizationPolicy_list_allowAll(t *testing.T) {
 func TestAccFolderOrganizationPolicy_list_allowSome(t *testing.T) {
 	t.Parallel()
 
-	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
+	folder := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	org := envvar.GetTestOrgFromEnv(t)
 	project := envvar.GetTestProjectFromEnv()
 	acctest.VcrTest(t, resource.TestCase{
@@ -105,7 +105,7 @@ func TestAccFolderOrganizationPolicy_list_allowSome(t *testing.T) {
 func TestAccFolderOrganizationPolicy_list_denySome(t *testing.T) {
 	t.Parallel()
 
-	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
+	folder := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	org := envvar.GetTestOrgFromEnv(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -128,7 +128,7 @@ func TestAccFolderOrganizationPolicy_list_denySome(t *testing.T) {
 func TestAccFolderOrganizationPolicy_list_update(t *testing.T) {
 	t.Parallel()
 
-	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
+	folder := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	org := envvar.GetTestOrgFromEnv(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -155,7 +155,7 @@ func TestAccFolderOrganizationPolicy_list_update(t *testing.T) {
 func TestAccFolderOrganizationPolicy_restore_defaultTrue(t *testing.T) {
 	t.Parallel()
 
-	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
+	folder := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	org := envvar.GetTestOrgFromEnv(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

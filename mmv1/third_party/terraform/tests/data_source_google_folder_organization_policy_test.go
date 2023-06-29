@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccDataSourceGoogleFolderOrganizationPolicy_basic(t *testing.T) {
-	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
+	folder := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	org := envvar.GetTestOrgFromEnv(t)
 
 	acctest.VcrTest(t, resource.TestCase{
