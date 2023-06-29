@@ -130,7 +130,7 @@ func TestAccHealthcareHl7V2Store_updateSchema(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckHealthcareHl7V2StoreDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

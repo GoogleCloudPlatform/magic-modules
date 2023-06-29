@@ -20,7 +20,7 @@ func TestAccFirebaseAppleApp_update(t *testing.T) {
 	}
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirebaseAppleApp(context, 12345, "1"),

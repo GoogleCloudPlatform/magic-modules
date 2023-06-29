@@ -66,7 +66,7 @@ func TestAcc{{$.PathType}}_{{$s.TestSlug}}(t *testing.T) {
 	{{ if $s.HasGAEquivalent -}}
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 	{{- else }}
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 	{{- end }}
 	{{ if true -}}
 		CheckDestroy: testAccCheck{{$.PathType}}DestroyProducer(t),

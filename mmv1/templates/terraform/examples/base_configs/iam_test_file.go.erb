@@ -67,7 +67,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		<% if example.pull_external -%>
@@ -113,7 +113,7 @@ func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
@@ -155,7 +155,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
@@ -202,7 +202,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
@@ -238,7 +238,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
@@ -284,7 +284,7 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-	ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+	ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
@@ -320,7 +320,7 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *t
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
@@ -382,7 +382,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>

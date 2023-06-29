@@ -15,7 +15,7 @@ func TestAccGkeonpremVmwareNodePool_vmwareNodePoolUpdate(t *testing.T) {
 
   VcrTest(t, resource.TestCase{
     PreCheck:                 func() { AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
     CheckDestroy:             testAccCheckGkeonpremVmwareNodePoolDestroyProducer(t),
     Steps: []resource.TestStep{
       {

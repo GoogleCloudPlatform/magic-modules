@@ -78,7 +78,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 		<% unless versioned_provider -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		<% else -%>
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		<% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
