@@ -2,7 +2,7 @@ resource "google_gkeonprem_vmware_cluster" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   name = "cluster-<%= ctx[:vars]['name'] %>"
   location = "us-west1"
-  admin_cluster_membership = "projects/<%= ctx[:test_env_vars]['project'] %>/locations/global/memberships/gkeonprem-terraform-test"
+  admin_cluster_membership = "projects/870316890899/locations/global/memberships/gkeonprem-terraform-test"
   description = "test cluster"
   on_prem_version = "1.13.1-gke.35"
   annotations = {}
