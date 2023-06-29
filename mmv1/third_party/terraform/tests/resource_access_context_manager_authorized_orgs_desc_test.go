@@ -9,13 +9,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func testAccAccessContextManagerAuthorizedOrgsDesc_basicTest(t *testing.T) {
 	context := map[string]interface{}{
-		"org_id": acctest.GetTestOrgFromEnv(t),
+		"org_id": envvar.GetTestOrgFromEnv(t),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -37,7 +38,7 @@ func testAccAccessContextManagerAuthorizedOrgsDesc_basicTest(t *testing.T) {
 }
 
 func testAccAccessContextManagerAuthorizedOrgsDesc_accessContextManagerAuthorizedOrgsDescBasicExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_access_context_manager_authorized_orgs_desc" "authorized-orgs-desc" {
   parent = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
   name   = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/authorizedOrgsDescs/fakeDescName"

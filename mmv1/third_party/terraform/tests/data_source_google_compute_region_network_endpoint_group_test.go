@@ -5,12 +5,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDataSourceRegionNetworkEndpointGroup_basic(t *testing.T) {
 	t.Parallel()
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 		"region":        "us-central1",
 		"random_suffix": RandString(t, 10),
 	}
@@ -28,7 +29,7 @@ func TestAccDataSourceRegionNetworkEndpointGroup_basic(t *testing.T) {
 }
 
 func testAccDataSourceRegionNetworkEndpointGroup_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
   resource "google_compute_region_network_endpoint_group" "cloudrun_neg" {
     name                  = "cloud-run-rneg-%{random_suffix}"
     network_endpoint_type = "SERVERLESS"

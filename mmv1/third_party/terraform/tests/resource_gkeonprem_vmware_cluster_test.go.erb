@@ -2,22 +2,13 @@
 package google
 <% unless version == 'ga' -%>
 import (
-  "fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccGkeonpremVmwareCluster_vmwareClusterUpdateBasic(t *testing.T) {
-  // TODO: https://github.com/hashicorp/terraform-provider-google/issues/14417
-  t.Skip()
-
   t.Parallel()
 
   context := map[string]interface{}{}
@@ -48,9 +39,6 @@ func TestAccGkeonpremVmwareCluster_vmwareClusterUpdateBasic(t *testing.T) {
 }
 
 func TestAccGkeonpremVmwareCluster_vmwareClusterUpdateF5Lb(t *testing.T) {
-  // TODO: https://github.com/hashicorp/terraform-provider-google/issues/14417
-  t.Skip()
-
   t.Parallel()
 
   context := map[string]interface{}{}
@@ -81,9 +69,6 @@ func TestAccGkeonpremVmwareCluster_vmwareClusterUpdateF5Lb(t *testing.T) {
 }
 
 func TestAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLb(t *testing.T) {
-  // TODO: https://github.com/hashicorp/terraform-provider-google/issues/14417
-  t.Skip()
-
   // VCR fails to handle batched project services
   acctest.SkipIfVcr(t)
   t.Parallel()
@@ -116,7 +101,7 @@ func TestAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLb(t *testing.T) {
 }
 
 func testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLbStart(context map[string]interface{}) string {
-  return Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "cluster"
@@ -165,7 +150,7 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLbStart(context map[s
 }
 
 func testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLb(context map[string]interface{}) string {
-  return Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "cluster"
@@ -214,7 +199,7 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLb(context map[string
 }
 
 func testAccGkeonpremVmwareCluster_vmwareClusterUpdateF5LbStart(context map[string]interface{}) string {
-  return Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "cluster"
@@ -264,7 +249,7 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateF5LbStart(context map[stri
 }
 
 func testAccGkeonpremVmwareCluster_vmwareClusterUpdateF5lb(context map[string]interface{}) string {
-  return Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "cluster"
@@ -314,7 +299,7 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateF5lb(context map[string]in
 }
 
 func testAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLbStart(context map[string]interface{}) string {
-  return Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "cluster"
@@ -397,7 +382,7 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLbStart(context map[
 }
 
 func testAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLb(context map[string]interface{}) string {
-  return Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "cluster"
@@ -478,44 +463,4 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLb(context map[strin
   }
 `, context)
 }
-
-func testAccCheckGkeonpremVmwareClusterDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		for name, rs := range s.RootModule().Resources {
-			if rs.Type != "google_gkeonprem_vmware_cluster" {
-				continue
-			}
-			if strings.HasPrefix(name, "data.") {
-				continue
-			}
-
-			config := GoogleProviderConfig(t)
-
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{GkeonpremBasePath}}projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}")
-			if err != nil {
-				return err
-			}
-
-			billingProject := ""
-
-			if config.BillingProject != "" {
-				billingProject = config.BillingProject
-			}
-
-			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    config,
-				Method:    "GET",
-				Project:   billingProject,
-				RawURL:    url,
-				UserAgent: config.UserAgent,
-			})
-			if err == nil {
-				return fmt.Errorf("GkeonpremVmwareCluster still exists at %s", url)
-			}
-		}
-
-		return nil
-	}
-}
-
 <% end -%>

@@ -1,6 +1,7 @@
 package google
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -20,7 +21,7 @@ func TestAccCoveredResource(t *testing.T) {
 }
 
 func testAccCoveredResource() string {
-	return Nprintf(`
+	return fmt.Sprintf(acctest.Nprintf(`
 resource "covered_resource" "resource" {
   field_one = "value-one"
   field_four {
@@ -30,11 +31,11 @@ resource "covered_resource" "resource" {
   }
   field_seven = %{bool}
 }
-`, context)
+`, context))
 }
 
 func testAccCoveredResource_update() string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "covered_resource" "resource" {
   field_two {
     field_three = "value-two"

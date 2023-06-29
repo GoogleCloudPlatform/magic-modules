@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -1189,7 +1190,7 @@ func TestAccSqlDatabaseInstance_encryptionKey(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    acctest.GetTestProjectFromEnv(),
+		"project_id":    envvar.GetTestProjectFromEnv(),
 		"key_name":      "tf-test-key-" + RandString(t, 10),
 		"instance_name": "tf-test-sql-" + RandString(t, 10),
 	}
@@ -1200,7 +1201,7 @@ func TestAccSqlDatabaseInstance_encryptionKey(t *testing.T) {
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: Nprintf(
+				Config: acctest.Nprintf(
 					testGoogleSqlDatabaseInstance_encryptionKey, context),
 			},
 			{
@@ -1223,7 +1224,7 @@ func TestAccSqlDatabaseInstance_encryptionKey_replicaInDifferentRegion(t *testin
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    acctest.GetTestProjectFromEnv(),
+		"project_id":    envvar.GetTestProjectFromEnv(),
 		"key_name":      "tf-test-key-" + RandString(t, 10),
 		"instance_name": "tf-test-sql-" + RandString(t, 10),
 	}
@@ -1234,7 +1235,7 @@ func TestAccSqlDatabaseInstance_encryptionKey_replicaInDifferentRegion(t *testin
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: Nprintf(
+				Config: acctest.Nprintf(
 					testGoogleSqlDatabaseInstance_encryptionKey_replicaInDifferentRegion, context),
 			},
 			{
@@ -1821,7 +1822,7 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteSkippedWithNoMasterInstanceNameAnd
 }
 
 func testAccSqlDatabaseInstance_sqlMysqlInstancePvpExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_sql_database_instance" "mysql_pvp_instance_name" {
   name             = "tf-test-mysql-pvp-instance-name%{random_suffix}"
   region           = "asia-northeast1"
@@ -3162,7 +3163,7 @@ resource "google_sql_database_instance" "instance" {
 }
 
 func testAccSqlDatabaseInstance_beforeBackup(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
   database_version = "POSTGRES_11"
@@ -3181,7 +3182,7 @@ resource "google_sql_database_instance" "instance" {
 }
 
 func testAccSqlDatabaseInstance_restoreFromBackup(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
   database_version = "POSTGRES_11"
@@ -3215,7 +3216,7 @@ data "google_sql_backup_run" "backup" {
 }
 
 func testAccSqlDatabaseInstance_basicClone(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
   database_version = "POSTGRES_11"
@@ -3242,7 +3243,7 @@ data "google_sql_backup_run" "backup" {
 }
 
 func testAccSqlDatabaseInstance_cloneWithSettings(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
   database_version = "POSTGRES_11"
@@ -3276,7 +3277,7 @@ data "google_sql_backup_run" "backup" {
 }
 
 func testAccSqlDatabaseInstance_cloneWithDatabaseNames(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
   database_version = "POSTGRES_11"

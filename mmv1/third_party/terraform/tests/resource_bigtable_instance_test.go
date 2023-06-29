@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -178,7 +179,7 @@ func TestAccBigtableInstance_kms(t *testing.T) {
 
 	kms1 := BootstrapKMSKeyInLocation(t, "us-central1")
 	kms2 := BootstrapKMSKeyInLocation(t, "us-east1")
-	pid := acctest.GetTestProjectFromEnv()
+	pid := envvar.GetTestProjectFromEnv()
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{

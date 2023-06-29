@@ -44,7 +44,7 @@ func TestAccWorkstationsWorkstationCluster_update(t *testing.T) {
 }
 
 func testAccWorkstationsWorkstationCluster_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_workstations_workstation_cluster" "default" {
   provider   		      	 = google-beta
   workstation_cluster_id = "tf-test-workstation-cluster%{random_suffix}"

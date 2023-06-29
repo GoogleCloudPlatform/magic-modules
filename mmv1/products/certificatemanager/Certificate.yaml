@@ -42,6 +42,7 @@ import_format:
   ['projects/{{project}}/locations/{{location}}/certificates/{{name}}']
 id_format: 'projects/{{project}}/locations/{{location}}/certificates/{{name}}'
 schema_version: 1
+state_upgraders: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'certificate_manager_google_managed_certificate'

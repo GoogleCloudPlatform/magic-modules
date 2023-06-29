@@ -6,6 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/spanner"
 )
 
 func TestAccSpannerDatabaseIamBinding(t *testing.T) {
@@ -13,7 +15,7 @@ func TestAccSpannerDatabaseIamBinding(t *testing.T) {
 
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	role := "roles/spanner.databaseAdmin"
-	project := acctest.GetTestProjectFromEnv()
+	project := envvar.GetTestProjectFromEnv()
 	database := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	instance := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
@@ -26,7 +28,7 @@ func TestAccSpannerDatabaseIamBinding(t *testing.T) {
 			},
 			{
 				ResourceName: "google_spanner_database_iam_binding.foo",
-				ImportStateId: fmt.Sprintf("%s %s", spannerDatabaseId{
+				ImportStateId: fmt.Sprintf("%s %s", spanner.SpannerDatabaseId{
 					Project:  project,
 					Instance: instance,
 					Database: database,
@@ -40,7 +42,7 @@ func TestAccSpannerDatabaseIamBinding(t *testing.T) {
 			},
 			{
 				ResourceName: "google_spanner_database_iam_binding.foo",
-				ImportStateId: fmt.Sprintf("%s %s", spannerDatabaseId{
+				ImportStateId: fmt.Sprintf("%s %s", spanner.SpannerDatabaseId{
 					Project:  project,
 					Instance: instance,
 					Database: database,
@@ -55,7 +57,7 @@ func TestAccSpannerDatabaseIamBinding(t *testing.T) {
 func TestAccSpannerDatabaseIamMember(t *testing.T) {
 	t.Parallel()
 
-	project := acctest.GetTestProjectFromEnv()
+	project := envvar.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	role := "roles/spanner.databaseAdmin"
 	database := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -72,7 +74,7 @@ func TestAccSpannerDatabaseIamMember(t *testing.T) {
 			},
 			{
 				ResourceName: "google_spanner_database_iam_member.foo",
-				ImportStateId: fmt.Sprintf("%s %s serviceAccount:%s@%s.iam.gserviceaccount.com %s", spannerDatabaseId{
+				ImportStateId: fmt.Sprintf("%s %s serviceAccount:%s@%s.iam.gserviceaccount.com %s", spanner.SpannerDatabaseId{
 					Instance: instance,
 					Database: database,
 					Project:  project,
@@ -87,7 +89,7 @@ func TestAccSpannerDatabaseIamMember(t *testing.T) {
 func TestAccSpannerDatabaseIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	project := acctest.GetTestProjectFromEnv()
+	project := envvar.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	role := "roles/spanner.databaseAdmin"
 	database := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -104,7 +106,7 @@ func TestAccSpannerDatabaseIamPolicy(t *testing.T) {
 			// Test a few import formats
 			{
 				ResourceName: "google_spanner_database_iam_policy.foo",
-				ImportStateId: spannerDatabaseId{
+				ImportStateId: spanner.SpannerDatabaseId{
 					Instance: instance,
 					Database: database,
 					Project:  project,

@@ -125,7 +125,9 @@ examples:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/health_check_type.erb
   constants: templates/terraform/constants/health_check.erb
-  resource_definition: templates/terraform/resource_definition/health_check.erb
+custom_diff: [
+  'healthCheckCustomizeDiff',
+]
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'checkIntervalSec'

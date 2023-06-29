@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
@@ -14,7 +15,7 @@ func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": RandString(t, 10),
 		"folder_name":   "tf-test-" + RandString(t, 10),
-		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -49,7 +50,7 @@ func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": RandString(t, 10),
 		"project_name":  "tf-test-" + RandString(t, 10),
-		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -93,7 +94,7 @@ func TestAccLoggingBucketConfigProject_analyticsEnabled(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": RandString(t, 10),
 		"project_name":  "tf-test-" + RandString(t, 10),
-		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -122,13 +123,49 @@ func TestAccLoggingBucketConfigProject_analyticsEnabled(t *testing.T) {
 	})
 }
 
+func TestAccLoggingBucketConfigProject_locked(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix":   RandString(t, 10),
+		"project_name":    "tf-test-" + RandString(t, 10),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingBucketConfigProject_locked(context, false),
+			},
+			{
+				ResourceName:            "google_logging_project_bucket_config.variable_locked",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
+			},
+			{
+				Config: testAccLoggingBucketConfigProject_locked(context, true),
+			},
+			{
+				ResourceName:            "google_logging_project_bucket_config.variable_locked",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
+			},
+		},
+	})
+}
+
 func TestAccLoggingBucketConfigProject_cmekSettings(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
 		"project_name":    "tf-test-" + RandString(t, 10),
-		"org_id":          acctest.GetTestOrgFromEnv(t),
-		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
 
 	bucketId := fmt.Sprintf("tf-test-bucket-%s", RandString(t, 10))
@@ -167,8 +204,8 @@ func TestAccLoggingBucketConfigBillingAccount_basic(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":        RandString(t, 10),
-		"billing_account_name": "billingAccounts/" + acctest.GetTestMasterBillingAccountFromEnv(t),
-		"org_id":               acctest.GetTestOrgFromEnv(t),
+		"billing_account_name": "billingAccounts/" + envvar.GetTestMasterBillingAccountFromEnv(t),
+		"org_id":               envvar.GetTestOrgFromEnv(t),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -202,7 +239,7 @@ func TestAccLoggingBucketConfigOrganization_basic(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": RandString(t, 10),
-		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -232,7 +269,7 @@ func TestAccLoggingBucketConfigOrganization_basic(t *testing.T) {
 }
 
 func testAccLoggingBucketConfigFolder_basic(context map[string]interface{}, retention int) string {
-	return fmt.Sprintf(Nprintf(`
+	return fmt.Sprintf(acctest.Nprintf(`
 resource "google_folder" "default" {
 	display_name = "%{folder_name}"
 	parent       = "organizations/%{org_id}"
@@ -249,7 +286,7 @@ resource "google_logging_folder_bucket_config" "basic" {
 }
 
 func testAccLoggingBucketConfigProject_basic(context map[string]interface{}, retention int) string {
-	return fmt.Sprintf(Nprintf(`
+	return fmt.Sprintf(acctest.Nprintf(`
 resource "google_project" "default" {
 	project_id = "%{project_name}"
 	name       = "%{project_name}"
@@ -267,7 +304,7 @@ resource "google_logging_project_bucket_config" "basic" {
 }
 
 func testAccLoggingBucketConfigProject_analyticsEnabled(context map[string]interface{}, analytics bool) string {
-	return fmt.Sprintf(Nprintf(`
+	return fmt.Sprintf(acctest.Nprintf(`
 resource "google_project" "default" {
 	project_id = "%{project_name}"
 	name       = "%{project_name}"
@@ -283,8 +320,34 @@ resource "google_logging_project_bucket_config" "basic" {
 `, context), analytics)
 }
 
+func testAccLoggingBucketConfigProject_locked(context map[string]interface{}, locked bool) string {
+	return fmt.Sprintf(acctest.Nprintf(`
+resource "google_project" "default" {
+	project_id = "%{project_name}"
+	name       = "%{project_name}"
+	org_id     = "%{org_id}"
+	billing_account = "%{billing_account}"
+}
+
+resource "google_logging_project_bucket_config" "fixed_locked" {
+	project    = google_project.default.name
+	location  = "global"
+	locked = true
+	bucket_id = "fixed-locked"
+}
+
+resource "google_logging_project_bucket_config" "variable_locked" {
+	project    = google_project.default.name
+	location  = "global"
+	description = "lock status is %v" # test simultaneous update
+	locked = %t
+	bucket_id = "variable-locked"
+}
+`, context), locked, locked)
+}
+
 func testAccLoggingBucketConfigProject_preCmekSettings(context map[string]interface{}, keyRingName, cryptoKeyName, cryptoKeyNameUpdate string) string {
-	return fmt.Sprintf(Nprintf(`
+	return fmt.Sprintf(acctest.Nprintf(`
 resource "google_project" "default" {
 	project_id      = "%{project_name}"
 	name            = "%{project_name}"
@@ -381,8 +444,8 @@ func TestAccLoggingBucketConfig_CreateBuckets_withCustomId(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":        RandString(t, 10),
-		"billing_account_name": acctest.GetTestBillingAccountFromEnv(t),
-		"org_id":               acctest.GetTestOrgFromEnv(t),
+		"billing_account_name": envvar.GetTestBillingAccountFromEnv(t),
+		"org_id":               envvar.GetTestOrgFromEnv(t),
 		"project_name":         "tf-test-" + RandString(t, 10),
 		"bucket_id":            "tf-test-bucket-" + RandString(t, 10),
 	}
@@ -409,7 +472,7 @@ func TestAccLoggingBucketConfig_CreateBuckets_withCustomId(t *testing.T) {
 }
 
 func testAccLoggingBucketConfigBillingAccount_basic(context map[string]interface{}, retention int) string {
-	return fmt.Sprintf(Nprintf(`
+	return fmt.Sprintf(acctest.Nprintf(`
 
 data "google_billing_account" "default" {
 	billing_account = "%{billing_account_name}"
@@ -426,7 +489,7 @@ resource "google_logging_billing_account_bucket_config" "basic" {
 }
 
 func testAccLoggingBucketConfigOrganization_basic(context map[string]interface{}, retention int) string {
-	return fmt.Sprintf(Nprintf(`
+	return fmt.Sprintf(acctest.Nprintf(`
 data "google_organization" "default" {
 	organization = "%{org_id}"
 }
@@ -442,9 +505,8 @@ resource "google_logging_organization_bucket_config" "basic" {
 }
 
 func getLoggingBucketConfigs(context map[string]interface{}) map[string]string {
-
 	return map[string]string{
-		"project": Nprintf(`resource "google_project" "default" {
+		"project": acctest.Nprintf(`resource "google_project" "default" {
 				project_id = "%{project_name}"
 				name       = "%{project_name}"
 				org_id     = "%{org_id}"

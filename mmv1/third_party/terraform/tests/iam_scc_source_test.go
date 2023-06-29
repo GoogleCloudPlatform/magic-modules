@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccSecurityCenterSourceIamBinding(t *testing.T) {
@@ -15,7 +16,7 @@ func TestAccSecurityCenterSourceIamBinding(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": RandString(t, 10),
 		"role":          "roles/securitycenter.sourcesViewer",
-		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -65,7 +66,7 @@ func TestAccSecurityCenterSourceIamMember(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": RandString(t, 10),
 		"role":          "roles/securitycenter.sourcesViewer",
-		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -99,7 +100,7 @@ func TestAccSecurityCenterSourceIamPolicy(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": RandString(t, 10),
 		"role":          "roles/securitycenter.sourcesViewer",
-		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -127,7 +128,7 @@ func TestAccSecurityCenterSourceIamPolicy(t *testing.T) {
 }
 
 func testAccSecurityCenterSourceIamMember_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_scc_source" "custom_source" {
   display_name = "tf-test-source%{random_suffix}"
   organization = "%{org_id}"
@@ -144,7 +145,7 @@ resource "google_scc_source_iam_member" "foo" {
 }
 
 func testAccSecurityCenterSourceIamPolicy_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_scc_source" "custom_source" {
   display_name = "tf-test-source%{random_suffix}"
   organization = "%{org_id}"
@@ -167,7 +168,7 @@ resource "google_scc_source_iam_policy" "foo" {
 }
 
 func testAccSecurityCenterSourceIamPolicy_emptyBinding(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_scc_source" "custom_source" {
   display_name = "tf-test-source%{random_suffix}"
   organization = "%{org_id}"
@@ -186,7 +187,7 @@ resource "google_scc_source_iam_policy" "foo" {
 }
 
 func testAccSecurityCenterSourceIamBinding_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_scc_source" "custom_source" {
   display_name = "tf-test-source%{random_suffix}"
   organization = "%{org_id}"
@@ -203,7 +204,7 @@ resource "google_scc_source_iam_binding" "foo" {
 }
 
 func testAccSecurityCenterSourceIamBinding_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_scc_source" "custom_source" {
   display_name = "tf-test-source%{random_suffix}"
   organization = "%{org_id}"

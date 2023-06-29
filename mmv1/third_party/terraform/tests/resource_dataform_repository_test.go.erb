@@ -45,7 +45,7 @@ func TestAccDataformRepository_updated(t *testing.T) {
 }
 
 func testAccDataformRepository_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_sourcerepo_repository" "git_repository" {
   provider = google-beta
   name = "my/repository%{random_suffix}"
@@ -87,7 +87,7 @@ resource "google_dataform_repository" "dataform_respository" {
 }
 
 func testAccDataformRepository_updated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_sourcerepo_repository" "git_repository" {
   provider = google-beta
   name = "my/repository%{random_suffix}"

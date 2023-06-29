@@ -1,4 +1,4 @@
-package google
+package spanner
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
-func resourceConverterSpannerDatabaseIamPolicy() tpgresource.ResourceConverter {
+func ResourceConverterSpannerDatabaseIamPolicy() tpgresource.ResourceConverter {
 	return tpgresource.ResourceConverter{
 		AssetType:         "spanner.googleapis.com/Database",
 		Convert:           GetSpannerDatabaseIamPolicyCaiObject,
@@ -16,7 +16,7 @@ func resourceConverterSpannerDatabaseIamPolicy() tpgresource.ResourceConverter {
 	}
 }
 
-func resourceConverterSpannerDatabaseIamBinding() tpgresource.ResourceConverter {
+func ResourceConverterSpannerDatabaseIamBinding() tpgresource.ResourceConverter {
 	return tpgresource.ResourceConverter{
 		AssetType:         "spanner.googleapis.com/Database",
 		Convert:           GetSpannerDatabaseIamBindingCaiObject,
@@ -26,7 +26,7 @@ func resourceConverterSpannerDatabaseIamBinding() tpgresource.ResourceConverter 
 	}
 }
 
-func resourceConverterSpannerDatabaseIamMember() tpgresource.ResourceConverter {
+func ResourceConverterSpannerDatabaseIamMember() tpgresource.ResourceConverter {
 	return tpgresource.ResourceConverter{
 		AssetType:         "spanner.googleapis.com/Database",
 		Convert:           GetSpannerDatabaseIamMemberCaiObject,

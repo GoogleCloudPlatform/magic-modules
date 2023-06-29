@@ -9,11 +9,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccComputeNetworkEndpoints_networkEndpointsBasic(t *testing.T) {
 	t.Parallel()
+
+	// detachNetworkEndpoints call ordering is not guaranteed, causing VCR to rerecord
+	acctest.SkipIfVcr(t)
 
 	context := map[string]interface{}{
 		"random_suffix": RandString(t, 10),
@@ -26,7 +30,7 @@ func TestAccComputeNetworkEndpoints_networkEndpointsBasic(t *testing.T) {
 		"add5_port":     105,
 	}
 	negId := fmt.Sprintf("projects/%s/zones/%s/networkEndpointGroups/tf-test-neg-%s",
-		acctest.GetTestProjectFromEnv(), acctest.GetTestZoneFromEnv(), context["random_suffix"])
+		envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), context["random_suffix"])
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -92,7 +96,7 @@ func TestAccComputeNetworkEndpoints_networkEndpointsBasic(t *testing.T) {
 }
 
 func testAccComputeNetworkEndpoints_networkEndpointsBase(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_network_endpoints" "default" {
   zone                   = "us-central1-a"
   network_endpoint_group = google_compute_network_endpoint_group.neg.id
@@ -107,7 +111,7 @@ resource "google_compute_network_endpoints" "default" {
 }
 
 func testAccComputeNetworkEndpoints_networkEndpointsModified(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_network_endpoints" "default" {
   zone                   = "us-central1-a"
   network_endpoint_group = google_compute_network_endpoint_group.neg.name
@@ -122,7 +126,7 @@ resource "google_compute_network_endpoints" "default" {
 }
 
 func testAccComputeNetworkEndpoints_networkEndpointsAdditional(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_network_endpoints" "default" {
   zone                   = "us-central1-a"
   network_endpoint_group = google_compute_network_endpoint_group.neg.id
@@ -163,7 +167,7 @@ resource "google_compute_network_endpoints" "default" {
 
 func testAccComputeNetworkEndpoints_networkEndpointsPaginated(context map[string]interface{}, lower, upper int) string {
 	context["for_each"] = networkEndpointsGenerateRanges(lower, upper)
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_network_endpoints" "default" {
   zone                   = "us-central1-a"
   network_endpoint_group = google_compute_network_endpoint_group.neg.name
@@ -197,7 +201,7 @@ func networkEndpointsGenerateRanges(lower, upper int) string {
 }
 
 func testAccComputeNetworkEndpoints_noNetworkEndpoints(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_network_endpoint_group" "neg" {
   name         = "tf-test-neg-%{random_suffix}"
   zone         = "us-central1-a"
