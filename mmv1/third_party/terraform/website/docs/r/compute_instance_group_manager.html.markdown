@@ -177,7 +177,7 @@ update_policy {
   max_surge_fixed                = 0
   max_unavailable_fixed          = 2
   min_ready_sec                  = 50
-  replacement_method             = "SUBSTITUTE"
+  replacement_method             = "RECREATE"
 }
 ```
 
