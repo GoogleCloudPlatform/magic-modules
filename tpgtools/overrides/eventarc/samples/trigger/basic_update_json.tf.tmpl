@@ -10,7 +10,7 @@ resource "google_eventarc_trigger" "primary" {
 			service = google_cloud_run_service.default.name
 			region = "europe-west1"
 		}
-	}s
+	}
     event_data_content_type = "application/json"
 }
 
