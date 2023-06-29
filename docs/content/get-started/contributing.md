@@ -48,5 +48,5 @@ aliases:
 
    Where possible, take a look at the logs and see if you can figure out what needs to be fixed related to your change.
    The false positive rate on these tests is extremely high between changes in the API, Cloud Build bugs, and eventual consistency issues in test recordings so we don't expect contributors to wholly interpret the results — that's the responsibility of your reviewer.
-1. If your assigned reviewer does not reply / review within two US business days, ping them on the pull request.
+1. If your assigned reviewer does not respond to changes on a pull request within two US business days, ping them on the pull request.
 1. After your PR is merged, it will be released to customers in around one to two weeks.
