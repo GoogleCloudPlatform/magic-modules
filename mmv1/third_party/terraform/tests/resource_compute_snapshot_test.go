@@ -11,8 +11,8 @@ import (
 func TestAccComputeSnapshot_encryption(t *testing.T) {
 	t.Parallel()
 
-	snapshotName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	snapshotName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -37,8 +37,8 @@ func TestAccComputeSnapshot_encryptionCMEK(t *testing.T) {
 	// KMS causes errors due to rotation
 	acctest.SkipIfVcr(t)
 
-	snapshotName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	snapshotName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

@@ -14,9 +14,9 @@ func TestAccBigtableInstanceIamBinding(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instance := "tf-bigtable-iam-" + RandString(t, 10)
-	cluster := "c-" + RandString(t, 10)
-	account := "tf-bigtable-iam-" + RandString(t, 10)
+	instance := "tf-bigtable-iam-" + acctest.RandString(t, 10)
+	cluster := "c-" + acctest.RandString(t, 10)
+	account := "tf-bigtable-iam-" + acctest.RandString(t, 10)
 	role := "roles/bigtable.user"
 
 	importId := fmt.Sprintf("projects/%s/instances/%s %s",
@@ -59,9 +59,9 @@ func TestAccBigtableInstanceIamMember(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instance := "tf-bigtable-iam-" + RandString(t, 10)
-	cluster := "c-" + RandString(t, 10)
-	account := "tf-bigtable-iam-" + RandString(t, 10)
+	instance := "tf-bigtable-iam-" + acctest.RandString(t, 10)
+	cluster := "c-" + acctest.RandString(t, 10)
+	account := "tf-bigtable-iam-" + acctest.RandString(t, 10)
 	role := "roles/bigtable.user"
 
 	importId := fmt.Sprintf("projects/%s/instances/%s %s serviceAccount:%s",
@@ -99,9 +99,9 @@ func TestAccBigtableInstanceIamPolicy(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instance := "tf-bigtable-iam-" + RandString(t, 10)
-	cluster := "c-" + RandString(t, 10)
-	account := "tf-bigtable-iam-" + RandString(t, 10)
+	instance := "tf-bigtable-iam-" + acctest.RandString(t, 10)
+	cluster := "c-" + acctest.RandString(t, 10)
+	account := "tf-bigtable-iam-" + acctest.RandString(t, 10)
 	role := "roles/bigtable.user"
 
 	importId := fmt.Sprintf("projects/%s/instances/%s",

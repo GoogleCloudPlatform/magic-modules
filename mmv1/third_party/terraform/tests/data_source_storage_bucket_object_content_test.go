@@ -10,7 +10,7 @@ import (
 
 func TestAccDataSourceStorageBucketObjectContent_Basic(t *testing.T) {
 
-	bucket := "tf-bucket-object-content-" + RandString(t, 10)
+	bucket := "tf-bucket-object-content-" + acctest.RandString(t, 10)
 	content := "qwertyuioasdfghjk1234567!!@#$*"
 
 	acctest.VcrTest(t, resource.TestCase{

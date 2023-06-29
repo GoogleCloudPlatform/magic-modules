@@ -16,7 +16,7 @@ func TestAccSnapshotDatasource_name(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSnapshot_name(envvar.GetTestProjectFromEnv(), RandString(t, 10)),
+				Config: testAccSnapshot_name(envvar.GetTestProjectFromEnv(), acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_snapshot.default",
@@ -37,7 +37,7 @@ func TestAccSnapshotDatasource_filter(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSnapshot_filter(envvar.GetTestProjectFromEnv(), RandString(t, 10)),
+				Config: testAccSnapshot_filter(envvar.GetTestProjectFromEnv(), acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_snapshot.default",
@@ -58,7 +58,7 @@ func TestAccSnapshotDatasource_filterMostRecent(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSnapshot_filter_mostRecent(envvar.GetTestProjectFromEnv(), RandString(t, 10)),
+				Config: testAccSnapshot_filter_mostRecent(envvar.GetTestProjectFromEnv(), acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_snapshot.default",

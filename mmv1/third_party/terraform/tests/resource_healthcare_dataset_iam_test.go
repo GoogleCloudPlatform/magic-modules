@@ -22,7 +22,7 @@ func TestAccHealthcareDatasetIamBinding(t *testing.T) {
 	projectId := envvar.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.datasetAdmin"
-	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	datasetId := &healthcare.HealthcareDatasetId{
 		Project:  projectId,
@@ -71,7 +71,7 @@ func TestAccHealthcareDatasetIamMember(t *testing.T) {
 	projectId := envvar.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.datasetViewer"
-	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	datasetId := &healthcare.HealthcareDatasetId{
 		Project:  projectId,
@@ -106,7 +106,7 @@ func TestAccHealthcareDatasetIamPolicy(t *testing.T) {
 	projectId := envvar.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.datasetAdmin"
-	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	datasetId := &healthcare.HealthcareDatasetId{
 		Project:  projectId,

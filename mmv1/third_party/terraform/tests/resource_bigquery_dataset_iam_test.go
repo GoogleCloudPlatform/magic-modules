@@ -12,8 +12,8 @@ import (
 func TestAccBigqueryDatasetIamBinding(t *testing.T) {
 	t.Parallel()
 
-	dataset := "tf_test_dataset_iam_" + RandString(t, 10)
-	account := "tf-test-bq-iam-" + RandString(t, 10)
+	dataset := "tf_test_dataset_iam_" + acctest.RandString(t, 10)
+	account := "tf-test-bq-iam-" + acctest.RandString(t, 10)
 	role := "roles/bigquery.dataViewer"
 
 	importId := fmt.Sprintf("projects/%s/datasets/%s %s",
@@ -54,8 +54,8 @@ func TestAccBigqueryDatasetIamBinding(t *testing.T) {
 func TestAccBigqueryDatasetIamMember(t *testing.T) {
 	t.Parallel()
 
-	dataset := "tf_test_dataset_iam_" + RandString(t, 10)
-	account := "tf-test-bq-iam-" + RandString(t, 10)
+	dataset := "tf_test_dataset_iam_" + acctest.RandString(t, 10)
+	account := "tf-test-bq-iam-" + acctest.RandString(t, 10)
 	role := "roles/editor"
 
 	importId := fmt.Sprintf("projects/%s/datasets/%s %s serviceAccount:%s",
@@ -91,8 +91,8 @@ func TestAccBigqueryDatasetIamMember(t *testing.T) {
 func TestAccBigqueryDatasetIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	dataset := "tf_test_dataset_iam_" + RandString(t, 10)
-	account := "tf-test-bq-iam-" + RandString(t, 10)
+	dataset := "tf_test_dataset_iam_" + acctest.RandString(t, 10)
+	account := "tf-test-bq-iam-" + acctest.RandString(t, 10)
 	role := "roles/bigquery.dataOwner"
 
 	importId := fmt.Sprintf("projects/%s/datasets/%s",

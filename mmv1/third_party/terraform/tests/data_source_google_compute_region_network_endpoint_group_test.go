@@ -13,7 +13,7 @@ func TestAccDataSourceRegionNetworkEndpointGroup_basic(t *testing.T) {
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
 		"region":        "us-central1",
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

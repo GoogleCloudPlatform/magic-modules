@@ -15,8 +15,8 @@ import (
 func TestAccFolder_rename(t *testing.T) {
 	t.Parallel()
 
-	folderDisplayName := "tf-test-" + RandString(t, 10)
-	newFolderDisplayName := "tf-test-renamed-" + RandString(t, 10)
+	folderDisplayName := "tf-test-" + acctest.RandString(t, 10)
+	newFolderDisplayName := "tf-test-renamed-" + acctest.RandString(t, 10)
 	org := envvar.GetTestOrgFromEnv(t)
 	parent := "organizations/" + org
 	folder := resourceManagerV3.Folder{}
@@ -53,8 +53,8 @@ func TestAccFolder_rename(t *testing.T) {
 func TestAccFolder_moveParent(t *testing.T) {
 	t.Parallel()
 
-	folder1DisplayName := "tf-test-" + RandString(t, 10)
-	folder2DisplayName := "tf-test-" + RandString(t, 10)
+	folder1DisplayName := "tf-test-" + acctest.RandString(t, 10)
+	folder2DisplayName := "tf-test-" + acctest.RandString(t, 10)
 	org := envvar.GetTestOrgFromEnv(t)
 	parent := "organizations/" + org
 	folder1 := resourceManagerV3.Folder{}

@@ -17,9 +17,9 @@ import (
 func TestAccStorageTransferAgentPool_agentPoolUpdate(t *testing.T) {
 	t.Parallel()
 
-	agentPoolName := fmt.Sprintf("tf-test-agent-pool-%s", RandString(t, 10))
-	displayName := fmt.Sprintf("tf-test-display-name-%s", RandString(t, 10))
-	displayNameUpdate := fmt.Sprintf("tf-test-display-name-%s", RandString(t, 10))
+	agentPoolName := fmt.Sprintf("tf-test-agent-pool-%s", acctest.RandString(t, 10))
+	displayName := fmt.Sprintf("tf-test-display-name-%s", acctest.RandString(t, 10))
+	displayNameUpdate := fmt.Sprintf("tf-test-display-name-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

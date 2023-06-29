@@ -13,9 +13,9 @@ import (
 func TestAccNetworkServicesTlsRoute_update(t *testing.T) {
 	t.Parallel()
 
-  tlsServiceName := fmt.Sprintf("tf-test-tls-service-%s", RandString(t, 10))
-  tlsHealthCheckName := fmt.Sprintf("tf-test-tls-healthcheck-%s", RandString(t, 10))
-	tlsRouteName := fmt.Sprintf("tf-test-tls-route-%s", RandString(t, 10))
+  tlsServiceName := fmt.Sprintf("tf-test-tls-service-%s", acctest.RandString(t, 10))
+  tlsHealthCheckName := fmt.Sprintf("tf-test-tls-healthcheck-%s", acctest.RandString(t, 10))
+	tlsRouteName := fmt.Sprintf("tf-test-tls-route-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },

@@ -16,7 +16,7 @@ func TestAccDataSourceComputeSslCertificate(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceComputeSslCertificateConfig(RandString(t, 10)),
+				Config: testAccDataSourceComputeSslCertificateConfig(acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_ssl_certificate.cert",

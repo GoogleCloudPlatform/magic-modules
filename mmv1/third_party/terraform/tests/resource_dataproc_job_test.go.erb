@@ -46,7 +46,7 @@ func TestAccDataprocJob_updatable(t *testing.T) {
 	t.Parallel()
 
 	var job dataproc.Job
-	rnd := RandString(t, 10)
+	rnd := acctest.RandString(t, 10)
 	jobId := fmt.Sprintf("dproc-update-job-id-%s", rnd)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -75,7 +75,7 @@ func TestAccDataprocJob_PySpark(t *testing.T) {
 	t.Parallel()
 
 	var job dataproc.Job
-	rnd := RandString(t, 10)
+	rnd := acctest.RandString(t, 10)
 	jobId := fmt.Sprintf("dproc-custom-job-id-%s", rnd)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -114,7 +114,7 @@ func TestAccDataprocJob_Spark(t *testing.T) {
 	t.Parallel()
 
 	var job dataproc.Job
-	rnd := RandString(t, 10)
+	rnd := acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -146,7 +146,7 @@ func TestAccDataprocJob_Hadoop(t *testing.T) {
 	t.Parallel()
 
 	var job dataproc.Job
-	rnd := RandString(t, 10)
+	rnd := acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -178,7 +178,7 @@ func TestAccDataprocJob_Hive(t *testing.T) {
 	t.Parallel()
 
 	var job dataproc.Job
-	rnd := RandString(t, 10)
+	rnd := acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -210,7 +210,7 @@ func TestAccDataprocJob_Pig(t *testing.T) {
 	t.Parallel()
 
 	var job dataproc.Job
-	rnd := RandString(t, 10)
+	rnd := acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -242,7 +242,7 @@ func TestAccDataprocJob_SparkSql(t *testing.T) {
 	t.Parallel()
 
 	var job dataproc.Job
-	rnd := RandString(t, 10)
+	rnd := acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -274,7 +274,7 @@ func TestAccDataprocJob_Presto(t *testing.T) {
 	t.Parallel()
 
 	var job dataproc.Job
-	rnd := RandString(t, 10)
+	rnd := acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),

@@ -13,7 +13,7 @@ func TestAccDataSourceRegionInstanceGroup(t *testing.T) {
 	// Randomness in instance template
 	acctest.SkipIfVcr(t)
 	t.Parallel()
-	name := "tf-test-" + RandString(t, 6)
+	name := "tf-test-" + acctest.RandString(t, 6)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),

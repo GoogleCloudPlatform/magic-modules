@@ -23,13 +23,13 @@ func TestAccKmsCryptoKeyIamBinding(t *testing.T) {
 	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/cloudkms.cryptoKeyDecrypter"
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	keyRingId := &kms.KmsKeyRingId{
 		Project:  projectId,
 		Location: DEFAULT_KMS_TEST_LOCATION,
 		Name:     keyRingName,
 	}
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -75,13 +75,13 @@ func TestAccKmsCryptoKeyIamBinding_withCondition(t *testing.T) {
 	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/cloudkms.cryptoKeyDecrypter"
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	keyRingId := &kms.KmsKeyRingId{
 		Project:  projectId,
 		Location: DEFAULT_KMS_TEST_LOCATION,
 		Name:     keyRingName,
 	}
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	conditionTitle := "expires_after_2019_12_31"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -110,13 +110,13 @@ func TestAccKmsCryptoKeyIamMember(t *testing.T) {
 	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/cloudkms.cryptoKeyEncrypter"
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	keyRingId := &kms.KmsKeyRingId{
 		Project:  projectId,
 		Location: DEFAULT_KMS_TEST_LOCATION,
 		Name:     keyRingName,
 	}
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -148,13 +148,13 @@ func TestAccKmsCryptoKeyIamMember_withCondition(t *testing.T) {
 	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/cloudkms.cryptoKeyEncrypter"
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	keyRingId := &kms.KmsKeyRingId{
 		Project:  projectId,
 		Location: DEFAULT_KMS_TEST_LOCATION,
 		Name:     keyRingName,
 	}
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	conditionTitle := "expires_after_2019_12_31"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -183,14 +183,14 @@ func TestAccKmsCryptoKeyIamPolicy(t *testing.T) {
 	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/cloudkms.cryptoKeyEncrypter"
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	keyRingId := &kms.KmsKeyRingId{
 		Project:  projectId,
 		Location: DEFAULT_KMS_TEST_LOCATION,
 		Name:     keyRingName,
 	}
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -224,14 +224,14 @@ func TestAccKmsCryptoKeyIamPolicy_withCondition(t *testing.T) {
 	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/cloudkms.cryptoKeyEncrypter"
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	keyRingId := &kms.KmsKeyRingId{
 		Project:  projectId,
 		Location: DEFAULT_KMS_TEST_LOCATION,
 		Name:     keyRingName,
 	}
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	conditionTitle := "expires_after_2019_12_31"
 
 	acctest.VcrTest(t, resource.TestCase{

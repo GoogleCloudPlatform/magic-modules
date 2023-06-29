@@ -13,7 +13,7 @@ func TestAccLoggingProjectCmekSettings_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":    "tf-test-" + RandString(t, 10),
+		"project_name":    "tf-test-" + acctest.RandString(t, 10),
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}

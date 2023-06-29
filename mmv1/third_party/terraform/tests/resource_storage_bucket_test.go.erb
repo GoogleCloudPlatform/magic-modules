@@ -890,7 +890,7 @@ func TestAccStorageBucket_encryption(t *testing.T) {
 	context := map[string]interface{}{
 		"organization":    envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
-		"random_suffix":   RandString(t, 10),
+		"random_suffix":   acctest.RandString(t, 10),
 		"random_int":      RandInt(t),
 	}
 

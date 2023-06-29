@@ -13,8 +13,8 @@ func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
-		"folder_name":   "tf-test-" + RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
+		"folder_name":   "tf-test-" + acctest.RandString(t, 10),
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 	}
 
@@ -48,8 +48,8 @@ func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
-		"project_name":  "tf-test-" + RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
+		"project_name":  "tf-test-" + acctest.RandString(t, 10),
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 	}
 
@@ -92,8 +92,8 @@ func TestAccLoggingBucketConfigProject_analyticsEnabled(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
-		"project_name":  "tf-test-" + RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
+		"project_name":  "tf-test-" + acctest.RandString(t, 10),
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 	}
 
@@ -127,8 +127,8 @@ func TestAccLoggingBucketConfigProject_locked(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":   RandString(t, 10),
-		"project_name":    "tf-test-" + RandString(t, 10),
+		"random_suffix":   acctest.RandString(t, 10),
+		"project_name":    "tf-test-" + acctest.RandString(t, 10),
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
@@ -163,15 +163,15 @@ func TestAccLoggingBucketConfigProject_cmekSettings(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":    "tf-test-" + RandString(t, 10),
+		"project_name":    "tf-test-" + acctest.RandString(t, 10),
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
 
-	bucketId := fmt.Sprintf("tf-test-bucket-%s", RandString(t, 10))
-	keyRingName := fmt.Sprintf("tf-test-key-ring-%s", RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-crypto-key-%s", RandString(t, 10))
-	cryptoKeyNameUpdate := fmt.Sprintf("tf-test-crypto-key-%s", RandString(t, 10))
+	bucketId := fmt.Sprintf("tf-test-bucket-%s", acctest.RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-key-ring-%s", acctest.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-crypto-key-%s", acctest.RandString(t, 10))
+	cryptoKeyNameUpdate := fmt.Sprintf("tf-test-crypto-key-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -203,7 +203,7 @@ func TestAccLoggingBucketConfigBillingAccount_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":        RandString(t, 10),
+		"random_suffix":        acctest.RandString(t, 10),
 		"billing_account_name": "billingAccounts/" + envvar.GetTestMasterBillingAccountFromEnv(t),
 		"org_id":               envvar.GetTestOrgFromEnv(t),
 	}
@@ -238,7 +238,7 @@ func TestAccLoggingBucketConfigOrganization_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 	}
 
@@ -443,11 +443,11 @@ func TestAccLoggingBucketConfig_CreateBuckets_withCustomId(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":        RandString(t, 10),
+		"random_suffix":        acctest.RandString(t, 10),
 		"billing_account_name": envvar.GetTestBillingAccountFromEnv(t),
 		"org_id":               envvar.GetTestOrgFromEnv(t),
-		"project_name":         "tf-test-" + RandString(t, 10),
-		"bucket_id":            "tf-test-bucket-" + RandString(t, 10),
+		"project_name":         "tf-test-" + acctest.RandString(t, 10),
+		"bucket_id":            "tf-test-bucket-" + acctest.RandString(t, 10),
 	}
 
 	configList := getLoggingBucketConfigs(context)

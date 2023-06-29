@@ -16,7 +16,7 @@ import (
 func TestAccResourceManagerLien_basic(t *testing.T) {
 	t.Parallel()
 
-	projectName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	projectName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	org := envvar.GetTestOrgFromEnv(t)
 	var lien resourceManager.Lien
 

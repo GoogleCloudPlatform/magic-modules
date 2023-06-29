@@ -14,7 +14,7 @@ func TestAccDataSourceGoogleActiveFolder_default(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "tf-test-" + RandString(t, 10)
+	displayName := "tf-test-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -34,7 +34,7 @@ func TestAccDataSourceGoogleActiveFolder_space(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "terraform test " + RandString(t, 10)
+	displayName := "terraform test " + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -54,7 +54,7 @@ func TestAccDataSourceGoogleActiveFolder_dash(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "terraform - test " + RandString(t, 10)
+	displayName := "terraform - test " + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

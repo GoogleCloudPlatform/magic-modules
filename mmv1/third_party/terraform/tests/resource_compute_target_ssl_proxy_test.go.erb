@@ -19,15 +19,15 @@ import (
 )
 
 func TestAccComputeTargetSslProxy_update(t *testing.T) {
-	target := fmt.Sprintf("tf-test-tssl-%s", RandString(t, 10))
-	sslPolicy := fmt.Sprintf("tf-test-tssl-%s", RandString(t, 10))
-	cert1 := fmt.Sprintf("tf-test-tssl-%s", RandString(t, 10))
-	cert2 := fmt.Sprintf("tf-test-tssl-%s", RandString(t, 10))
-	backend1 := fmt.Sprintf("tf-test-tssl-%s", RandString(t, 10))
-	backend2 := fmt.Sprintf("tf-test-tssl-%s", RandString(t, 10))
-	hc := fmt.Sprintf("tf-test-tssl-%s", RandString(t, 10))
+	target := fmt.Sprintf("tf-test-tssl-%s", acctest.RandString(t, 10))
+	sslPolicy := fmt.Sprintf("tf-test-tssl-%s", acctest.RandString(t, 10))
+	cert1 := fmt.Sprintf("tf-test-tssl-%s", acctest.RandString(t, 10))
+	cert2 := fmt.Sprintf("tf-test-tssl-%s", acctest.RandString(t, 10))
+	backend1 := fmt.Sprintf("tf-test-tssl-%s", acctest.RandString(t, 10))
+	backend2 := fmt.Sprintf("tf-test-tssl-%s", acctest.RandString(t, 10))
+	hc := fmt.Sprintf("tf-test-tssl-%s", acctest.RandString(t, 10))
 
-	resourceSuffix := RandString(t, 10)
+	resourceSuffix := acctest.RandString(t, 10)
 	var proxy compute.TargetSslProxy
 
 	acctest.VcrTest(t, resource.TestCase{

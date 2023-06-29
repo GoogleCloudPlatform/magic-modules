@@ -19,7 +19,7 @@ import (
 func TestAccDeploymentManagerDeployment_basicFile(t *testing.T) {
 	t.Parallel()
 
-	randSuffix := RandString(t, 10)
+	randSuffix := acctest.RandString(t, 10)
 	deploymentId := "tf-dm-" + randSuffix
 	accountId := "tf-dm-account-" + randSuffix
 	yamlPath := createYamlConfigFileForTest(t, "test-fixtures/deploymentmanager/service_account.yml.tmpl", map[string]interface{}{
@@ -49,7 +49,7 @@ func TestAccDeploymentManagerDeployment_basicFile(t *testing.T) {
 func TestAccDeploymentManagerDeployment_deleteInvalidOnCreate(t *testing.T) {
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := acctest.RandString(t, 10)
 	deploymentName := "tf-dm-" + randStr
 	accountId := "tf-dm-" + randStr
 
@@ -69,7 +69,7 @@ func TestAccDeploymentManagerDeployment_deleteInvalidOnCreate(t *testing.T) {
 func TestAccDeploymentManagerDeployment_createDeletePolicy(t *testing.T) {
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := acctest.RandString(t, 10)
 	deploymentName := "tf-dm-" + randStr
 	accountId := "tf-dm-" + randStr
 
@@ -94,7 +94,7 @@ func TestAccDeploymentManagerDeployment_createDeletePolicy(t *testing.T) {
 func TestAccDeploymentManagerDeployment_imports(t *testing.T) {
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := acctest.RandString(t, 10)
 	deploymentName := "tf-dm-" + randStr
 	accountId := "tf-dm-" + randStr
 	importFilepath := createYamlConfigFileForTest(t, "test-fixtures/deploymentmanager/service_account.yml.tmpl", map[string]interface{}{
@@ -125,7 +125,7 @@ func TestAccDeploymentManagerDeployment_imports(t *testing.T) {
 func TestAccDeploymentManagerDeployment_update(t *testing.T) {
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := acctest.RandString(t, 10)
 	deploymentName := "tf-dm-" + randStr
 	accountId := "tf-dm-first" + randStr
 	accountId2 := "tf-dm-second" + randStr

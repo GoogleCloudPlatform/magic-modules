@@ -26,7 +26,7 @@ func TestAccComputeTargetHttpsProxy_update(t *testing.T) {
 	t.Parallel()
 
 	var proxy compute.TargetHttpsProxy
-	resourceSuffix := RandString(t, 10)
+	resourceSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -61,7 +61,7 @@ func TestAccComputeTargetHttpsProxy_certificateMap(t *testing.T) {
 	t.Parallel()
 
 	var proxy compute.TargetHttpsProxy
-	resourceSuffix := RandString(t, 10)
+	resourceSuffix := acctest.RandString(t, 10)
 
     acctest.VcrTest(t, resource.TestCase{
         PreCheck:                 func() { acctest.AccTestPreCheck(t) },

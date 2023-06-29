@@ -13,7 +13,7 @@ func TestAccFirestoreField_firestoreFieldUpdateAddIndexExample(t *testing.T) {
 
 	context := map[string]interface{}{
 		"project_id":    GetTestFirestoreProjectFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"resource_name": "add_index",
 	}
 	testAccFirestoreField_runUpdateTest(testAccFirestoreField_firestoreFieldUpdateAddIndexExample(context), t, context)
@@ -24,7 +24,7 @@ func TestAccFirestoreField_firestoreFieldUpdateAddTTLExample(t *testing.T) {
 
 	context := map[string]interface{}{
 		"project_id":    GetTestFirestoreProjectFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"resource_name": "add_ttl",
 	}
 	testAccFirestoreField_runUpdateTest(testAccFirestoreField_firestoreFieldUpdateAddTTLExample(context), t, context)

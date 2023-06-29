@@ -17,9 +17,9 @@ func TestAccGKEHub2FeatureIamBindingGenerated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":   RandString(t, 10),
+		"random_suffix":   acctest.RandString(t, 10),
 		"role":            "roles/viewer",
-		"project_id":      fmt.Sprintf("tf-test-gkehub-%s", RandString(t, 10)),
+		"project_id":      fmt.Sprintf("tf-test-gkehub-%s", acctest.RandString(t, 10)),
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
@@ -57,9 +57,9 @@ func TestAccGKEHub2FeatureIamMemberGenerated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":   RandString(t, 10),
+		"random_suffix":   acctest.RandString(t, 10),
 		"role":            "roles/viewer",
-		"project_id":      fmt.Sprintf("tf-test-gkehub-%s", RandString(t, 10)),
+		"project_id":      fmt.Sprintf("tf-test-gkehub-%s", acctest.RandString(t, 10)),
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
@@ -88,9 +88,9 @@ func TestAccGKEHub2FeatureIamPolicyGenerated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":   RandString(t, 10),
+		"random_suffix":   acctest.RandString(t, 10),
 		"role":            "roles/viewer",
-		"project_id":      fmt.Sprintf("tf-test-gkehub-%s", RandString(t, 10)),
+		"project_id":      fmt.Sprintf("tf-test-gkehub-%s", acctest.RandString(t, 10)),
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}

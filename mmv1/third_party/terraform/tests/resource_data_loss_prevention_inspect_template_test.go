@@ -13,7 +13,7 @@ func TestAccDataLossPreventionInspectTemplate_dlpInspectTemplateUpdate(t *testin
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -247,7 +247,7 @@ func TestAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withInfoTypesVe
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -543,7 +543,7 @@ func TestAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withExcludeByHo
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

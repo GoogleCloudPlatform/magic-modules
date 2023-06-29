@@ -59,7 +59,7 @@ func TestAccSqlDatabaseInstance_basicInferredName(t *testing.T) {
 func TestAccSqlDatabaseInstance_basicSecondGen(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -84,8 +84,8 @@ func TestAccSqlDatabaseInstance_basicSecondGen(t *testing.T) {
 func TestAccSqlDatabaseInstance_basicMSSQL(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
-	rootPassword := RandString(t, 15)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	rootPassword := acctest.RandString(t, 15)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -119,8 +119,8 @@ func TestAccSqlDatabaseInstance_basicMSSQL(t *testing.T) {
 func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "sql-instance-test-" + RandString(t, 10)
-	failoverName := "sql-instance-test-failover-" + RandString(t, 10)
+	databaseName := "sql-instance-test-" + acctest.RandString(t, 10)
+	failoverName := "sql-instance-test-failover-" + acctest.RandString(t, 10)
 	// 1. Create an instance.
 	// 2. Add a root@'%' user.
 	// 3. Create a replica and assert it succeeds (it'll fail if we try to delete the root user thinking it's a
@@ -146,7 +146,7 @@ func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
 					user := sqladmin.User{
 						Name:     "root",
 						Host:     "%",
-						Password: RandString(t, 26),
+						Password: acctest.RandString(t, 26),
 					}
 					op, err := config.NewSqlAdminClient(config.UserAgent).Users.Insert(config.Project, databaseName, &user).Do()
 					if err != nil {
@@ -176,8 +176,8 @@ func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *tes
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
-	addressName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	addressName := "tf-test-" + acctest.RandString(t, 10)
 	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-clone-2")
 
 	// 1. Create an instance.
@@ -199,7 +199,7 @@ func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *tes
 					user := sqladmin.User{
 						Name:     "root",
 						Host:     "%",
-						Password: RandString(t, 26),
+						Password: acctest.RandString(t, 26),
 					}
 					op, err := config.NewSqlAdminClient(config.UserAgent).Users.Insert(config.Project, databaseName, &user).Do()
 					if err != nil {
@@ -235,7 +235,7 @@ func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *tes
 func TestAccSqlDatabaseInstance_settings_basic(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -259,7 +259,7 @@ func TestAccSqlDatabaseInstance_settings_basic(t *testing.T) {
 func TestAccSqlDatabaseInstance_settings_secondary(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -283,7 +283,7 @@ func TestAccSqlDatabaseInstance_settings_secondary(t *testing.T) {
 func TestAccSqlDatabaseInstance_settings_deletionProtection(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -317,7 +317,7 @@ func TestAccSqlDatabaseInstance_settings_deletionProtection(t *testing.T) {
 func TestAccSqlDatabaseInstance_maintenanceVersion(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -357,7 +357,7 @@ func TestAccSqlDatabaseInstance_maintenanceVersion(t *testing.T) {
 func TestAccSqlDatabaseInstance_settings_deletionProtectionEnabled(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -397,7 +397,7 @@ func TestAccSqlDatabaseInstance_settings_deletionProtectionEnabled(t *testing.T)
 func TestAccSqlDatabaseInstance_settings_checkServiceNetworking(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -560,7 +560,7 @@ func TestAccSqlDatabaseInstance_maintenance(t *testing.T) {
 func TestAccSqlDatabaseInstance_settings_upgrade(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -594,7 +594,7 @@ func TestAccSqlDatabaseInstance_settings_upgrade(t *testing.T) {
 func TestAccSqlDatabaseInstance_settingsDowngrade(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -675,7 +675,7 @@ func TestAccSqlDatabaseInstance_authNets(t *testing.T) {
 func TestAccSqlDatabaseInstance_multipleOperations(t *testing.T) {
 	t.Parallel()
 
-	databaseID, instanceID, userID := RandString(t, 8), RandString(t, 8), RandString(t, 8)
+	databaseID, instanceID, userID := acctest.RandString(t, 8), acctest.RandString(t, 8), acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -699,7 +699,7 @@ func TestAccSqlDatabaseInstance_multipleOperations(t *testing.T) {
 func TestAccSqlDatabaseInstance_basic_with_user_labels(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -734,8 +734,8 @@ func TestAccSqlDatabaseInstance_basic_with_user_labels(t *testing.T) {
 func TestAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
-	addressName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	addressName := "tf-test-" + acctest.RandString(t, 10)
 	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private")
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -788,10 +788,10 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(t *testi
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
-	addressName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	addressName := "tf-test-" + acctest.RandString(t, 10)
 	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-allocated-ip-range")
-	addressName_update := "tf-test-" + RandString(t, 10) + "update"
+	addressName_update := "tf-test-" + acctest.RandString(t, 10) + "update"
 	networkName_update := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-allocated-ip-range-update")
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -826,8 +826,8 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(t
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
-	addressName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	addressName := "tf-test-" + acctest.RandString(t, 10)
 	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-replica")
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -859,8 +859,8 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(t *
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
-	addressName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	addressName := "tf-test-" + acctest.RandString(t, 10)
 	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-clone")
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -893,7 +893,7 @@ func TestAccSqlDatabaseInstance_createFromBackup(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":    RandString(t, 10),
+		"random_suffix":    acctest.RandString(t, 10),
 		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
@@ -921,7 +921,7 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":    RandString(t, 10),
+		"random_suffix":    acctest.RandString(t, 10),
 		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
@@ -958,7 +958,7 @@ func TestAccSqlDatabaseInstance_basicClone(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":    RandString(t, 10),
+		"random_suffix":    acctest.RandString(t, 10),
 		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
@@ -986,7 +986,7 @@ func TestAccSqlDatabaseInstance_cloneWithSettings(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":    RandString(t, 10),
+		"random_suffix":    acctest.RandString(t, 10),
 		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
@@ -1014,7 +1014,7 @@ func TestAccSqlDatabaseInstance_cloneWithDatabaseNames(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":    RandString(t, 10),
+		"random_suffix":    acctest.RandString(t, 10),
 		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
@@ -1191,8 +1191,8 @@ func TestAccSqlDatabaseInstance_encryptionKey(t *testing.T) {
 
 	context := map[string]interface{}{
 		"project_id":    envvar.GetTestProjectFromEnv(),
-		"key_name":      "tf-test-key-" + RandString(t, 10),
-		"instance_name": "tf-test-sql-" + RandString(t, 10),
+		"key_name":      "tf-test-key-" + acctest.RandString(t, 10),
+		"instance_name": "tf-test-sql-" + acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1225,8 +1225,8 @@ func TestAccSqlDatabaseInstance_encryptionKey_replicaInDifferentRegion(t *testin
 
 	context := map[string]interface{}{
 		"project_id":    envvar.GetTestProjectFromEnv(),
-		"key_name":      "tf-test-key-" + RandString(t, 10),
-		"instance_name": "tf-test-sql-" + RandString(t, 10),
+		"key_name":      "tf-test-key-" + acctest.RandString(t, 10),
+		"instance_name": "tf-test-sql-" + acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1260,10 +1260,10 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 	t.Skip()
 
 	t.Parallel()
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-test-ad")
-	addressName := "tf-test-" + RandString(t, 10)
-	rootPassword := RandString(t, 15)
+	addressName := "tf-test-" + acctest.RandString(t, 10)
+	rootPassword := acctest.RandString(t, 15)
 	adDomainName := acctest.BootstrapSharedTestADDomain(t, "test-domain", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1286,7 +1286,7 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 
 func TestAccSQLDatabaseInstance_DenyMaintenancePeriod(t *testing.T) {
 	t.Parallel()
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	endDate := "2022-12-5"
 	startDate := "2022-10-5"
 	time := "00:00:00"
@@ -1312,8 +1312,8 @@ func TestAccSqlDatabaseInstance_SqlServerAuditConfig(t *testing.T) {
 	// Service Networking
 	acctest.SkipIfVcr(t)
 	t.Parallel()
-	databaseName := "tf-test-" + RandString(t, 10)
-	rootPassword := RandString(t, 15)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	rootPassword := acctest.RandString(t, 15)
 	bucketName := fmt.Sprintf("%s-%d", "tf-test-bucket", RandInt(t))
 	uploadInterval := "900s"
 	retentionInterval := "86400s"
@@ -1350,8 +1350,8 @@ func TestAccSqlDatabaseInstance_SqlServerAuditConfig(t *testing.T) {
 
 func TestAccSqlDatabaseInstance_SqlServerAuditOptionalBucket(t *testing.T) {
 	t.Parallel()
-	databaseName := "tf-test-" + RandString(t, 10)
-	rootPassword := RandString(t, 15)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	rootPassword := acctest.RandString(t, 15)
 	uploadInterval := "900s"
 	retentionInterval := "86400s"
 
@@ -1376,8 +1376,8 @@ func TestAccSqlDatabaseInstance_SqlServerAuditOptionalBucket(t *testing.T) {
 func TestAccSqlDatabaseInstance_Smt(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
-	rootPassword := RandString(t, 15)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	rootPassword := acctest.RandString(t, 15)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { AccTestPreCheck(t) },
@@ -1418,8 +1418,8 @@ func TestAccSqlDatabaseInstance_Smt(t *testing.T) {
 func TestAccSqlDatabaseInstance_Timezone(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
-	rootPassword := RandString(t, 15)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	rootPassword := acctest.RandString(t, 15)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1444,7 +1444,7 @@ func TestAccSqlDatabaseInstance_sqlMysqlInstancePvpExample(t *testing.T) {
 
 	context := map[string]interface{}{
 		"deletion_protection": false,
-		"random_suffix":       RandString(t, 10),
+		"random_suffix":       acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1467,7 +1467,7 @@ func TestAccSqlDatabaseInstance_sqlMysqlInstancePvpExample(t *testing.T) {
 func TestAccSqlDatabaseInstance_updateReadReplicaWithBinaryLogEnabled(t *testing.T) {
 	t.Parallel()
 
-	instance := "tf-test-" + RandString(t, 10)
+	instance := "tf-test-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1499,9 +1499,9 @@ func TestAccSqlDatabaseInstance_updateReadReplicaWithBinaryLogEnabled(t *testing
 func TestAccSqlDatabaseInstance_rootPasswordShouldBeUpdatable(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
-	rootPwd := "rootPassword-1-" + RandString(t, 10)
-	newRootPwd := "rootPassword-2-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	rootPwd := "rootPassword-1-" + acctest.RandString(t, 10)
+	newRootPwd := "rootPassword-2-" + acctest.RandString(t, 10)
 	databaseVersion := "SQLSERVER_2017_STANDARD"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1539,7 +1539,7 @@ func TestAccSqlDatabaseInstance_rootPasswordShouldBeUpdatable(t *testing.T) {
 func TestAccSqlDatabaseInstance_activationPolicy(t *testing.T) {
 	t.Parallel()
 
-	instanceName := "tf-test-" + RandString(t, 10)
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1598,8 +1598,8 @@ func TestAccSqlDatabaseInstance_activationPolicy(t *testing.T) {
 func TestAccSqlDatabaseInstance_ReplicaPromoteSuccessful(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "sql-instance-test-" + RandString(t, 10)
-	failoverName := "sql-instance-test-failover-" + RandString(t, 10)
+	databaseName := "sql-instance-test-" + acctest.RandString(t, 10)
+	failoverName := "sql-instance-test-failover-" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -1642,8 +1642,8 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteSuccessful(t *testing.T) {
 
 func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithMasterInstanceNamePresent(t *testing.T) {
 	t.Parallel()
-	databaseName := "sql-instance-test-" + RandString(t, 10)
-	failoverName := "sql-instance-test-failover-" + RandString(t, 10)
+	databaseName := "sql-instance-test-" + acctest.RandString(t, 10)
+	failoverName := "sql-instance-test-failover-" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -1688,8 +1688,8 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithMasterInstanceNamePresen
 func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithReplicaConfigurationPresent(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "sql-instance-test-" + RandString(t, 10)
-	failoverName := "sql-instance-test-failover-" + RandString(t, 10)
+	databaseName := "sql-instance-test-" + acctest.RandString(t, 10)
+	failoverName := "sql-instance-test-failover-" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -1734,8 +1734,8 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithReplicaConfigurationPres
 func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithMasterInstanceNameAndReplicaConfigurationPresent(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "sql-instance-test-" + RandString(t, 10)
-	failoverName := "sql-instance-test-failover-" + RandString(t, 10)
+	databaseName := "sql-instance-test-" + acctest.RandString(t, 10)
+	failoverName := "sql-instance-test-failover-" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -1779,8 +1779,8 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithMasterInstanceNameAndRep
 func TestAccSqlDatabaseInstance_ReplicaPromoteSkippedWithNoMasterInstanceNameAndNoReplicaConfigurationPresent(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "sql-instance-test-" + RandString(t, 10)
-	failoverName := "sql-instance-test-failover-" + RandString(t, 10)
+	databaseName := "sql-instance-test-" + acctest.RandString(t, 10)
+	failoverName := "sql-instance-test-failover-" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),

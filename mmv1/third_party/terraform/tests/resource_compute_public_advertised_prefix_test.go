@@ -37,7 +37,7 @@ func testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicTest(t *t
 
 	context := map[string]interface{}{
 		"description":   envvar.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -71,7 +71,7 @@ resource "google_compute_public_advertised_prefix" "prefix" {
 func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicTest(t *testing.T) {
 	context := map[string]interface{}{
 		"description":   envvar.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

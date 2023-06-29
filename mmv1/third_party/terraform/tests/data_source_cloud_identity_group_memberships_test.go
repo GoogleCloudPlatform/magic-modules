@@ -14,7 +14,7 @@ func testAccDataSourceCloudIdentityGroupMemberships_basicTest(t *testing.T) {
 		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
 		"cust_id":       envvar.GetTestCustIdFromEnv(t),
 		"identity_user": envvar.GetTestIdentityUserFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	memberId := acctest.Nprintf("%{identity_user}@%{org_domain}", context)

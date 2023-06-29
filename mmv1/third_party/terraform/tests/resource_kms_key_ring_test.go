@@ -14,7 +14,7 @@ func TestAccKmsKeyRing_basic(t *testing.T) {
 	projectId := fmt.Sprintf("tf-test-%d", RandInt(t))
 	projectOrg := envvar.GetTestOrgFromEnv(t)
 	projectBillingAccount := envvar.GetTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

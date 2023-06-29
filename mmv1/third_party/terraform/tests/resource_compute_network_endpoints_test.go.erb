@@ -20,7 +20,7 @@ func TestAccComputeNetworkEndpoints_networkEndpointsBasic(t *testing.T) {
 	acctest.SkipIfVcr(t)
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"default_port":  90,
 		"modified_port": 100,
 		"add1_port":     101,

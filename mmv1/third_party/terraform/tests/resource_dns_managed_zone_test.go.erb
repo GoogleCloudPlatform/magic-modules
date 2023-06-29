@@ -18,7 +18,7 @@ import (
 func TestAccDNSManagedZone_update(t *testing.T) {
 	t.Parallel()
 
-	zoneSuffix := RandString(t, 10)
+	zoneSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -48,7 +48,7 @@ func TestAccDNSManagedZone_update(t *testing.T) {
 func TestAccDNSManagedZone_privateUpdate(t *testing.T) {
 	t.Parallel()
 
-	zoneSuffix := RandString(t, 10)
+	zoneSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -78,7 +78,7 @@ func TestAccDNSManagedZone_privateUpdate(t *testing.T) {
 func TestAccDNSManagedZone_dnssec_update(t *testing.T) {
 	t.Parallel()
 
-	zoneSuffix := RandString(t, 10)
+	zoneSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -108,7 +108,7 @@ func TestAccDNSManagedZone_dnssec_update(t *testing.T) {
 func TestAccDNSManagedZone_dnssec_empty(t *testing.T) {
 	t.Parallel()
 
-	zoneSuffix := RandString(t, 10)
+	zoneSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -130,7 +130,7 @@ func TestAccDNSManagedZone_dnssec_empty(t *testing.T) {
 func TestAccDNSManagedZone_privateForwardingUpdate(t *testing.T) {
 	t.Parallel()
 
-	zoneSuffix := RandString(t, 10)
+	zoneSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -160,7 +160,7 @@ func TestAccDNSManagedZone_privateForwardingUpdate(t *testing.T) {
 func TestAccDNSManagedZone_cloudLoggingConfigUpdate(t *testing.T) {
 	t.Parallel()
 
-	zoneSuffix := RandString(t, 10)
+	zoneSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -199,7 +199,7 @@ func TestAccDNSManagedZone_cloudLoggingConfigUpdate(t *testing.T) {
 func TestAccDNSManagedZone_reverseLookup(t *testing.T) {
 	t.Parallel()
 
-	zoneSuffix := RandString(t, 10)
+	zoneSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -222,7 +222,7 @@ func TestAccDNSManagedZone_reverseLookup(t *testing.T) {
 func TestAccDNSManagedZone_forceDestroy(t *testing.T) {
 	//t.Parallel()
 
-	zoneSuffix := RandString(t, 10)
+	zoneSuffix := acctest.RandString(t, 10)
 	project := envvar.GetTestProjectFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -626,7 +626,7 @@ func TestDnsManagedZoneImport_parseImportId(t *testing.T) {
 func TestAccDNSManagedZone_importWithProject(t *testing.T) {
 	t.Parallel()
 
-	zoneSuffix := RandString(t, 10)
+	zoneSuffix := acctest.RandString(t, 10)
 	project := envvar.GetTestProjectFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{

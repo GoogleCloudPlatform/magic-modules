@@ -20,7 +20,7 @@ func testAccCloudIdentityGroupMembership_updateTest(t *testing.T) {
 		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
 		"cust_id":       envvar.GetTestCustIdFromEnv(t),
 		"identity_user": envvar.GetTestIdentityUserFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -126,7 +126,7 @@ func testAccCloudIdentityGroupMembership_importTest(t *testing.T) {
 		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
 		"cust_id":       envvar.GetTestCustIdFromEnv(t),
 		"identity_user": envvar.GetTestIdentityUserFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -188,10 +188,10 @@ func testAccCloudIdentityGroupMembership_membershipDoesNotExistTest(t *testing.T
 	context := map[string]interface{}{
 		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
 		"cust_id":       envvar.GetTestCustIdFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	saId := "tf-test-sa-" + RandString(t, 10)
+	saId := "tf-test-sa-" + acctest.RandString(t, 10)
 	project := envvar.GetTestProjectFromEnv()
 	config := acctest.BootstrapConfig(t)
 
@@ -268,7 +268,7 @@ func testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipWithMemberK
 	context := map[string]interface{}{
 		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
 		"cust_id":       envvar.GetTestCustIdFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -337,7 +337,7 @@ func testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipUserWithMem
 		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
 		"cust_id":       envvar.GetTestCustIdFromEnv(t),
 		"identity_user": envvar.GetTestIdentityUserFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -396,7 +396,7 @@ func testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipExampleTest
 	context := map[string]interface{}{
 		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
 		"cust_id":       envvar.GetTestCustIdFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -466,7 +466,7 @@ func testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipUserExample
 		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
 		"cust_id":       envvar.GetTestCustIdFromEnv(t),
 		"identity_user": envvar.GetTestIdentityUserFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

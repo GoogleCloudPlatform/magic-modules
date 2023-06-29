@@ -17,7 +17,7 @@ func TestAccComputeAddress_networkTier(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeAddress_networkTier(RandString(t, 10)),
+				Config: testAccComputeAddress_networkTier(acctest.RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_address.foobar",
@@ -35,7 +35,7 @@ func TestAccComputeAddress_internal(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeAddress_internal(RandString(t, 10)),
+				Config: testAccComputeAddress_internal(acctest.RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_address.internal",

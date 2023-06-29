@@ -11,7 +11,7 @@ import (
 func TestAccPubsubTopic_update(t *testing.T) {
 	t.Parallel()
 
-	topic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -44,7 +44,7 @@ func TestAccPubsubTopic_cmek(t *testing.T) {
 	t.Parallel()
 
 	kms := acctest.BootstrapKMSKey(t)
-	topicName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	topicName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	if acctest.BootstrapPSARole(t, "service-", "gcp-sa-pubsub", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
 		t.Fatal("Stopping the test because a role was added to the policy.")
@@ -70,9 +70,9 @@ func TestAccPubsubTopic_cmek(t *testing.T) {
 func TestAccPubsubTopic_schema(t *testing.T) {
 	t.Parallel()
 
-	schema1 := fmt.Sprintf("tf-test-schema-%s", RandString(t, 10))
-	schema2 := fmt.Sprintf("tf-test-schema-%s", RandString(t, 10))
-	topic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
+	schema1 := fmt.Sprintf("tf-test-schema-%s", acctest.RandString(t, 10))
+	schema2 := fmt.Sprintf("tf-test-schema-%s", acctest.RandString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

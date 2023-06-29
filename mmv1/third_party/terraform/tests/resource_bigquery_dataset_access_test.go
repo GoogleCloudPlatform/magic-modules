@@ -17,8 +17,8 @@ import (
 func TestAccBigQueryDatasetAccess_basic(t *testing.T) {
 	t.Parallel()
 
-	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
-	saID := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	saID := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	expected := map[string]interface{}{
 		"role":        "OWNER",
@@ -45,9 +45,9 @@ func TestAccBigQueryDatasetAccess_basic(t *testing.T) {
 func TestAccBigQueryDatasetAccess_view(t *testing.T) {
 	t.Parallel()
 
-	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
-	datasetID2 := fmt.Sprintf("tf_test_%s", RandString(t, 10))
-	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	datasetID2 := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 
 	expected := map[string]interface{}{
 		"view": map[string]interface{}{
@@ -76,8 +76,8 @@ func TestAccBigQueryDatasetAccess_view(t *testing.T) {
 func TestAccBigQueryDatasetAccess_authorizedDataset(t *testing.T) {
 	t.Parallel()
 
-	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
-	datasetID2 := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	datasetID2 := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 
 	expected := map[string]interface{}{
 		"dataset": map[string]interface{}{
@@ -111,9 +111,9 @@ func TestAccBigQueryDatasetAccess_authorizedRoutine(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"public_dataset":  fmt.Sprintf("tf_test_public_dataset_%s", RandString(t, 10)),
-		"public_routine":  fmt.Sprintf("tf_test_public_routine_%s", RandString(t, 10)),
-		"private_dataset": fmt.Sprintf("tf_test_private_dataset_%s", RandString(t, 10)),
+		"public_dataset":  fmt.Sprintf("tf_test_public_dataset_%s", acctest.RandString(t, 10)),
+		"public_routine":  fmt.Sprintf("tf_test_public_routine_%s", acctest.RandString(t, 10)),
+		"private_dataset": fmt.Sprintf("tf_test_private_dataset_%s", acctest.RandString(t, 10)),
 	}
 
 	expected := map[string]interface{}{
@@ -146,7 +146,7 @@ func TestAccBigQueryDatasetAccess_multiple(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 
 	expected1 := map[string]interface{}{
 		"role":   "WRITER",
@@ -184,7 +184,7 @@ func TestAccBigQueryDatasetAccess_multiple(t *testing.T) {
 func TestAccBigQueryDatasetAccess_predefinedRole(t *testing.T) {
 	t.Parallel()
 
-	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 
 	expected1 := map[string]interface{}{
 		"role":   "WRITER",
@@ -227,8 +227,8 @@ func TestAccBigQueryDatasetAccess_predefinedRole(t *testing.T) {
 func TestAccBigQueryDatasetAccess_iamMember(t *testing.T) {
 	t.Parallel()
 
-	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
-	sinkName := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	sinkName := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -244,7 +244,7 @@ func TestAccBigQueryDatasetAccess_iamMember(t *testing.T) {
 func TestAccBigQueryDatasetAccess_allUsers(t *testing.T) {
 	t.Parallel()
 
-	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -263,7 +263,7 @@ func TestAccBigQueryDatasetAccess_allUsers(t *testing.T) {
 func TestAccBigQueryDatasetAccess_allAuthenticatedUsers(t *testing.T) {
 	t.Parallel()
 
-	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

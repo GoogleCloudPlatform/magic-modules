@@ -13,8 +13,8 @@ import (
 func TestAccComputeNetworkEdgeSecurityService_update(t *testing.T) {
 	t.Parallel()
 
-	pName := fmt.Sprintf("tf-test-security-policy-%s", RandString(t, 10))
-	nesName := fmt.Sprintf("tf-test-edge-security-services-%s", RandString(t, 10))
+	pName := fmt.Sprintf("tf-test-security-policy-%s", acctest.RandString(t, 10))
+	nesName := fmt.Sprintf("tf-test-edge-security-services-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { AccTestPreCheck(t) },

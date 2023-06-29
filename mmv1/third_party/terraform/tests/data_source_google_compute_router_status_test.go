@@ -11,7 +11,7 @@ func TestAccDataSourceComputeRouterStatus(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"suffix": RandString(t, 10),
+		"suffix": acctest.RandString(t, 10),
 		"region": "us-central1",
 	}
 

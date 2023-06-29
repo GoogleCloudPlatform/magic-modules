@@ -13,9 +13,9 @@ import (
 func TestAccNetworkServicesTcpRoute_update(t *testing.T) {
 	t.Parallel()
 
-  tcpServiceName := fmt.Sprintf("tf-test-tcp-service-%s", RandString(t, 10))
-  tcpHealthCheckName := fmt.Sprintf("tf-test-tcp-healthcheck-%s", RandString(t, 10))
-	tcpRouteName := fmt.Sprintf("tf-test-tcp-route-%s", RandString(t, 10))
+  tcpServiceName := fmt.Sprintf("tf-test-tcp-service-%s", acctest.RandString(t, 10))
+  tcpHealthCheckName := fmt.Sprintf("tf-test-tcp-healthcheck-%s", acctest.RandString(t, 10))
+	tcpRouteName := fmt.Sprintf("tf-test-tcp-route-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },

@@ -13,7 +13,7 @@ import (
 func TestAccNetworkSecurityAddressGroups_update(t *testing.T){
     t.Parallel()
 
-    addressGroupsName := fmt.Sprintf("tf-test-address-group-%s", RandString(t, 10))
+    addressGroupsName := fmt.Sprintf("tf-test-address-group-%s", acctest.RandString(t, 10))
 	projectName := GetTestProjectFromEnv()
 
     acctest.VcrTest(t, resource.TestCase{

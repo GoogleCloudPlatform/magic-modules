@@ -18,7 +18,7 @@ func TestAccVertexAIMetadataStore_vertexAiMetadataStoreExample(t *testing.T) {
 	t.Parallel()
 
 	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
-	name := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	name := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

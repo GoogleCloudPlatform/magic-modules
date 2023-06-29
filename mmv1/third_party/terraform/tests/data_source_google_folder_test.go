@@ -16,7 +16,7 @@ func TestAccDataSourceGoogleFolder_byFullName(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "tf-test-" + RandString(t, 10)
+	displayName := "tf-test-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -36,7 +36,7 @@ func TestAccDataSourceGoogleFolder_byShortName(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "tf-test-" + RandString(t, 10)
+	displayName := "tf-test-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -56,7 +56,7 @@ func TestAccDataSourceGoogleFolder_lookupOrganization(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "tf-test-" + RandString(t, 10)
+	displayName := "tf-test-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,7 +74,7 @@ func TestAccDataSourceGoogleFolder_lookupOrganization(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleFolder_byFullNameNotFound(t *testing.T) {
-	name := "folders/" + RandString(t, 16)
+	name := "folders/" + acctest.RandString(t, 16)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

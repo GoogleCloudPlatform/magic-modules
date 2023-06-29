@@ -16,7 +16,7 @@ func TestAccComputeHealthCheckDatasource_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeHealthCheckDatasourceConfig(RandString(t, 10)),
+				Config: testAccComputeHealthCheckDatasourceConfig(acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceState("data.google_compute_health_check.hc", "google_compute_health_check.hc"),
 				),

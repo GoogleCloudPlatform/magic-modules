@@ -11,7 +11,7 @@ func TestAccDatabaseMigrationServiceConnectionProfile_update(t *testing.T) {
 	t.Parallel()
 
 	suffix := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

@@ -11,7 +11,7 @@ func TestAccIdentityPlatformInboundSamlConfig_inboundSamlConfigUpdate(t *testing
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

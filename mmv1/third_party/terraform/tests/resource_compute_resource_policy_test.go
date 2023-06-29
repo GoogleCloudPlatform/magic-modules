@@ -17,7 +17,7 @@ func TestAccComputeResourcePolicy_attached(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeResourcePolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeResourcePolicy_attached(RandString(t, 10)),
+				Config: testAccComputeResourcePolicy_attached(acctest.RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_resource_policy.foo",

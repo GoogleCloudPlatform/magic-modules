@@ -20,7 +20,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 	t.Parallel()
 	context := map[string]interface{}{
 		"region":        "southamerica-west1", // using region with low node utilization.
-		"random_suffix": 	RandString(t, 10),
+		"random_suffix": 	acctest.RandString(t, 10),
 		"organization":    envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}

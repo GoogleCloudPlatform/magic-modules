@@ -17,7 +17,7 @@ func TestAccOrganizationIamCustomRole_basic(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	roleId := "tfIamCustomRole" + RandString(t, 10)
+	roleId := "tfIamCustomRole" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -57,7 +57,7 @@ func TestAccOrganizationIamCustomRole_undelete(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	roleId := "tfIamCustomRole" + RandString(t, 10)
+	roleId := "tfIamCustomRole" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -87,7 +87,7 @@ func TestAccOrganizationIamCustomRole_createAfterDestroy(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	roleId := "tfIamCustomRole" + RandString(t, 10)
+	roleId := "tfIamCustomRole" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

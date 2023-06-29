@@ -179,7 +179,7 @@ func TestAccProject_parentFolder(t *testing.T) {
 
 	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
-	folderDisplayName := TestPrefix + RandString(t, 10)
+	folderDisplayName := TestPrefix + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -196,7 +196,7 @@ func TestAccProject_migrateParent(t *testing.T) {
 
 	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
-	folderDisplayName := TestPrefix + RandString(t, 10)
+	folderDisplayName := TestPrefix + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),

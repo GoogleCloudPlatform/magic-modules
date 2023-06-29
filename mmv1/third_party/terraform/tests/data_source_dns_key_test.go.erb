@@ -15,7 +15,7 @@ func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	dnsZoneName := fmt.Sprintf("tf-test-dnskey-test-%s", RandString(t, 10))
+	dnsZoneName := fmt.Sprintf("tf-test-dnskey-test-%s", acctest.RandString(t, 10))
 
 	var kskDigest1, kskDigest2, zskPubKey1, zskPubKey2, kskAlg1, kskAlg2 string
 
@@ -66,7 +66,7 @@ func TestAccDataSourceDNSKeys_noDnsSec(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	dnsZoneName := fmt.Sprintf("tf-test-dnskey-test-%s", RandString(t, 10))
+	dnsZoneName := fmt.Sprintf("tf-test-dnskey-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },

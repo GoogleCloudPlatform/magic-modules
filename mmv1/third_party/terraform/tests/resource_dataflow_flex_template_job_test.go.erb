@@ -24,7 +24,7 @@ func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := acctest.RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 	bucket := "tf-test-dataflow-bucket-" + randStr
 	topic := "tf-test-topic" + randStr
@@ -56,7 +56,7 @@ func TestAccDataflowFlexTemplateJob_streamUpdate(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := acctest.RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 	bucket := "tf-test-dataflow-bucket-" + randStr
 	topic := "tf-test-topic" + randStr
@@ -95,7 +95,7 @@ func TestAccDataflowFlexTemplateJob_streamFailUpdate(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := acctest.RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 	bucket := "tf-test-dataflow-bucket-" + randStr
 	topic := "tf-test-topic" + randStr
@@ -128,7 +128,7 @@ func TestAccDataflowFlexTemplateJob_FullUpdate(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := acctest.RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 	bucket := "tf-test-dataflow-bucket-" + randStr
 	topic := "tf-test-topic" + randStr
@@ -166,7 +166,7 @@ func TestAccDataflowFlexTemplateJob_withNetwork(t *testing.T) {
 	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := acctest.RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 	network1 := "tf-test-dataflow-net" + randStr
 	network2 := "tf-test-dataflow-net2" + randStr
@@ -214,7 +214,7 @@ func TestAccDataflowFlexTemplateJob_withSubNetwork(t *testing.T) {
 	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := acctest.RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 	network := "tf-test-dataflow-net" + randStr
 	subnetwork1 := "tf-test-dataflow-subnetwork" + randStr
@@ -263,7 +263,7 @@ func TestAccDataflowFlexTemplateJob_withIpConfig(t *testing.T) {
 	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := acctest.RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 	bucket := "tf-test-dataflow-bucket-" + randStr
 	topic := "tf-test-topic" + randStr
@@ -297,7 +297,7 @@ func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := acctest.RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 	key_ring := "tf-test-dataflow-kms-ring-" + randStr
 	crypto_key := "tf-test-dataflow-kms-key-" + randStr
@@ -331,7 +331,7 @@ func TestAccDataflowFlexTemplateJob_withAdditionalExperiments(t *testing.T) {
 	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := acctest.RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 	additionalExperiments := []string{"enable_stackdriver_agent_metrics", "use_runner_v2"}
 	bucket := "tf-test-dataflow-bucket-" + randStr

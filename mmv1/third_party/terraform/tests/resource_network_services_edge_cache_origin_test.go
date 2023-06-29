@@ -10,7 +10,7 @@ import (
 
 func TestAccNetworkServicesEdgeCacheOrigin_updateAndImport(t *testing.T) {
 	t.Parallel()
-	name := "tf-test-origin-" + RandString(t, 10)
+	name := "tf-test-origin-" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),

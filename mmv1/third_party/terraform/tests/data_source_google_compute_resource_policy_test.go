@@ -14,7 +14,7 @@ import (
 func TestAccDataSourceComputeResourcePolicy(t *testing.T) {
 	t.Parallel()
 
-	randomSuffix := RandString(t, 10)
+	randomSuffix := acctest.RandString(t, 10)
 
 	rsName := "foo_" + randomSuffix
 	rsFullName := fmt.Sprintf("google_compute_resource_policy.%s", rsName)

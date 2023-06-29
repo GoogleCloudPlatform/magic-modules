@@ -13,7 +13,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 
 	context := map[string]interface{}{
 		"organization":  envvar.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
@@ -455,7 +455,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 
 	context := map[string]interface{}{
 		"organization":  envvar.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
@@ -1047,7 +1047,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_imageTran
 
 	context := map[string]interface{}{
 		"organization":  envvar.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
@@ -1152,7 +1152,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 
 	context := map[string]interface{}{
 		"organization":  envvar.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
@@ -1484,7 +1484,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 
 	context := map[string]interface{}{
 		"organization":  envvar.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
@@ -1793,7 +1793,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 
 	context := map[string]interface{}{
 		"organization":  envvar.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
@@ -1891,7 +1891,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 
 	context := map[string]interface{}{
 		"organization":  envvar.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 

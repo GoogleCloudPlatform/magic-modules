@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccDataSourceComputeInstanceSerialPort_basic(t *testing.T) {
-	instanceName := fmt.Sprintf("tf-test-serial-data-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-serial-data-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),

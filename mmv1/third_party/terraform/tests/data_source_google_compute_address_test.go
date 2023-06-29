@@ -77,7 +77,7 @@ func TestComputeAddressIdParsing(t *testing.T) {
 func TestAccDataSourceComputeAddress(t *testing.T) {
 	t.Parallel()
 
-	addressName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	addressName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	rsName := "foobar"
 	rsFullName := fmt.Sprintf("google_compute_address.%s", rsName)

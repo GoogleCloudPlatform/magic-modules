@@ -11,7 +11,7 @@ import (
 func TestAccDataSourceGoogleSourceRepoRepository_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-repository-" + RandString(t, 10)
+	name := "tf-repository-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

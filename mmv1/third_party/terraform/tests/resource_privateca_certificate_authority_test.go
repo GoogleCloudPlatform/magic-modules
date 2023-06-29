@@ -14,7 +14,7 @@ func TestAccPrivatecaCertificateAuthority_privatecaCertificateAuthorityUpdate(t 
 		"pool_name":           acctest.BootstrapSharedCaPoolInLocation(t, "us-central1"),
 		"pool_location":       "us-central1",
 		"deletion_protection": false,
-		"random_suffix":       RandString(t, 10),
+		"random_suffix":       acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -61,7 +61,7 @@ func TestAccPrivatecaCertificateAuthority_privatecaCertificateAuthorityUpdate(t 
 func TestAccPrivatecaCertificateAuthority_rootCaManageDesiredState(t *testing.T) {
 	t.Parallel()
 
-	random_suffix := RandString(t, 10)
+	random_suffix := acctest.RandString(t, 10)
 	context_staged := map[string]interface{}{
 		"pool_name":           acctest.BootstrapSharedCaPoolInLocation(t, "us-central1"),
 		"pool_location":       "us-central1",

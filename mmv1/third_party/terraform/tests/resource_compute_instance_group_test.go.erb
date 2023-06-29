@@ -22,7 +22,7 @@ func TestAccComputeInstanceGroup_basic(t *testing.T) {
 
 	var instanceGroup compute.InstanceGroup
 	var resourceName = "google_compute_instance_group.basic"
-	var instanceName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	var zone = "us-central1-c"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -57,10 +57,10 @@ func TestAccComputeInstanceGroup_basic(t *testing.T) {
 func TestAccComputeInstanceGroup_rename(t *testing.T) {
 	t.Parallel()
 
-	var instanceName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	var instanceGroupName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	var backendName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	var healthName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	var instanceGroupName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	var backendName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	var healthName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -91,7 +91,7 @@ func TestAccComputeInstanceGroup_update(t *testing.T) {
 	t.Parallel()
 
 	var instanceGroup compute.InstanceGroup
-	var instanceName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -132,7 +132,7 @@ func TestAccComputeInstanceGroup_outOfOrderInstances(t *testing.T) {
 	t.Parallel()
 
 	var instanceGroup compute.InstanceGroup
-	var instanceName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -154,7 +154,7 @@ func TestAccComputeInstanceGroup_network(t *testing.T) {
 	t.Parallel()
 
 	var instanceGroup compute.InstanceGroup
-	var instanceName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

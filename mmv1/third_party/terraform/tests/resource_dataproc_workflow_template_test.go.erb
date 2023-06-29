@@ -18,7 +18,7 @@ func TestAccDataprocWorkflowTemplate_basic(t *testing.T) {
   t.Parallel()
 
   context := map[string]interface{}{
-    "random_suffix": RandString(t, 10),
+    "random_suffix": acctest.RandString(t, 10),
     "project": envvar.GetTestProjectFromEnv(),
     "version": "2.0.35-debian10",
   }
@@ -47,7 +47,7 @@ func TestAccDataprocWorkflowTemplate_withShieldedVMs(t *testing.T) {
   t.Parallel()
 
   context := map[string]interface{}{
-    "random_suffix": RandString(t, 10),
+    "random_suffix": acctest.RandString(t, 10),
     "project": envvar.GetTestProjectFromEnv(),
     "version": "2.0.35-debian10",
   }

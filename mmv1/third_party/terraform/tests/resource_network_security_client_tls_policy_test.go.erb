@@ -13,7 +13,7 @@ import (
 func TestAccNetworkSecurityClientTlsPolicy_update(t *testing.T) {
 	t.Parallel()
 
-	clientTlsPolicyName := fmt.Sprintf("tf-test-client-tls-policy-%s", RandString(t, 10))
+	clientTlsPolicyName := fmt.Sprintf("tf-test-client-tls-policy-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { AccTestPreCheck(t) },

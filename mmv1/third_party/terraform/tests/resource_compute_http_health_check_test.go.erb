@@ -21,7 +21,7 @@ func TestAccComputeHttpHealthCheck_update(t *testing.T) {
 
 	var healthCheck compute.HttpHealthCheck
 
-	hhckName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	hhckName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

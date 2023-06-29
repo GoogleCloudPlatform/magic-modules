@@ -18,7 +18,7 @@ func TestAccKmsSecretCiphertext_basic(t *testing.T) {
 
 	kms := acctest.BootstrapKMSKey(t)
 
-	plaintext := fmt.Sprintf("secret-%s", RandString(t, 10))
+	plaintext := fmt.Sprintf("secret-%s", acctest.RandString(t, 10))
 	aad := "plainaad"
 
 	acctest.VcrTest(t, resource.TestCase{

@@ -18,9 +18,9 @@ func TestAccLoggingFolderSink_basic(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
-	folderName := "tf-test-folder-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
 
 	var sink logging.LogSink
 
@@ -48,9 +48,9 @@ func TestAccLoggingFolderSink_described(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
-	folderName := "tf-test-folder-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -72,9 +72,9 @@ func TestAccLoggingFolderSink_disabled(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
-	folderName := "tf-test-folder-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -96,9 +96,9 @@ func TestAccLoggingFolderSink_removeOptionals(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
-	folderName := "tf-test-folder-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -129,9 +129,9 @@ func TestAccLoggingFolderSink_folderAcceptsFullFolderPath(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
-	folderName := "tf-test-folder-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
 
 	var sink logging.LogSink
 
@@ -159,10 +159,10 @@ func TestAccLoggingFolderSink_update(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
-	updatedBucketName := "tf-test-sink-bucket-" + RandString(t, 10)
-	folderName := "tf-test-folder-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
+	updatedBucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
 	parent := "organizations/" + org
 
 	var sinkBefore, sinkAfter logging.LogSink
@@ -206,9 +206,9 @@ func TestAccLoggingFolderSink_updateBigquerySink(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bqDatasetID := "tf_test_sink_" + RandString(t, 10)
-	folderName := "tf-test-folder-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
+	bqDatasetID := "tf_test_sink_" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -239,9 +239,9 @@ func TestAccLoggingFolderSink_heredoc(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
-	folderName := "tf-test-folder-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
 
 	var sink logging.LogSink
 

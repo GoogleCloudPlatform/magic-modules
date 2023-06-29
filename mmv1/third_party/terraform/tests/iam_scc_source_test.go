@@ -14,7 +14,7 @@ func TestAccSecurityCenterSourceIamBinding(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"role":          "roles/securitycenter.sourcesViewer",
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 	}
@@ -64,7 +64,7 @@ func TestAccSecurityCenterSourceIamMember(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"role":          "roles/securitycenter.sourcesViewer",
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 	}
@@ -98,7 +98,7 @@ func TestAccSecurityCenterSourceIamPolicy(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"role":          "roles/securitycenter.sourcesViewer",
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 	}

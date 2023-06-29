@@ -23,7 +23,7 @@ func TestAccVmwareengineCluster_vmwareEngineClusterUpdate(t *testing.T) {
 		"region":        	 "southamerica-west1", // using region with low node utilization.
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
-		"random_suffix":   RandString(t, 10),
+		"random_suffix":   acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

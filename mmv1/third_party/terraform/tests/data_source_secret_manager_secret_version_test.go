@@ -14,7 +14,7 @@ import (
 func TestAccDatasourceSecretManagerSecretVersion_basic(t *testing.T) {
 	t.Parallel()
 
-	randomString := RandString(t, 10)
+	randomString := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -34,7 +34,7 @@ func TestAccDatasourceSecretManagerSecretVersion_basic(t *testing.T) {
 func TestAccDatasourceSecretManagerSecretVersion_latest(t *testing.T) {
 	t.Parallel()
 
-	randomString := RandString(t, 10)
+	randomString := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

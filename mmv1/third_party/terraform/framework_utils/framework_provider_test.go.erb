@@ -16,7 +16,7 @@ func TestAccFrameworkProviderMeta_setModuleName(t *testing.T) {
 	t.Parallel()
 
 	moduleName := "my-module"
-	managedZoneName := fmt.Sprintf("tf-test-zone-%s", RandString(t, 10))
+	managedZoneName := fmt.Sprintf("tf-test-zone-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -24,7 +24,7 @@ func TestAccFrameworkProviderMeta_setModuleName(t *testing.T) {
 		CheckDestroy:             testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFrameworkProviderMeta_setModuleName(moduleName, managedZoneName, RandString(t, 10)),
+				Config: testAccFrameworkProviderMeta_setModuleName(moduleName, managedZoneName, acctest.RandString(t, 10)),
 			},
 		},
 	})
@@ -44,12 +44,12 @@ func TestAccFrameworkProviderBasePath_setInvalidBasePath(t *testing.T) {
 						Source:            "hashicorp/google<%= "-" + version unless version == 'ga'  -%>",
 					},
 				},
-				Config:      testAccProviderBasePath_setBasePath("https://www.example.com/compute/beta/", RandString(t, 10)),
+				Config:      testAccProviderBasePath_setBasePath("https://www.example.com/compute/beta/", acctest.RandString(t, 10)),
 				ExpectError: regexp.MustCompile("got HTTP response code 404 with body"),
 			},
 			{
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-				Config:                   testAccProviderBasePath_setBasePath("https://www.example.com/compute/beta/", RandString(t, 10)),
+				Config:                   testAccProviderBasePath_setBasePath("https://www.example.com/compute/beta/", acctest.RandString(t, 10)),
 				ExpectError:              regexp.MustCompile("got HTTP response code 404 with body"),
 			},
 		},
@@ -72,7 +72,7 @@ func TestAccFrameworkProviderBasePath_setBasePath(t *testing.T) {
 						Source:            "hashicorp/google<%= "-" + version unless version == 'ga'  -%>",
 					},
 				},
-				Config: testAccFrameworkProviderBasePath_setBasePath("https://www.googleapis.com/dns/v1beta2/", RandString(t, 10)),
+				Config: testAccFrameworkProviderBasePath_setBasePath("https://www.googleapis.com/dns/v1beta2/", acctest.RandString(t, 10)),
 			},
 			{
 				ExternalProviders: map[string]resource.ExternalProvider{
@@ -87,7 +87,7 @@ func TestAccFrameworkProviderBasePath_setBasePath(t *testing.T) {
 			},
 			{
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-				Config:                   testAccFrameworkProviderBasePath_setBasePath("https://www.googleapis.com/dns/v1beta2/", RandString(t, 10)),
+				Config:                   testAccFrameworkProviderBasePath_setBasePath("https://www.googleapis.com/dns/v1beta2/", acctest.RandString(t, 10)),
 			},
 			{
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -97,7 +97,7 @@ func TestAccFrameworkProviderBasePath_setBasePath(t *testing.T) {
 			},
 			{
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-				Config:                   testAccFrameworkProviderBasePath_setBasePathstep3("https://www.googleapis.com/dns/v1beta2/", RandString(t, 10)),
+				Config:                   testAccFrameworkProviderBasePath_setBasePathstep3("https://www.googleapis.com/dns/v1beta2/", acctest.RandString(t, 10)),
 			},
 		},
 	})

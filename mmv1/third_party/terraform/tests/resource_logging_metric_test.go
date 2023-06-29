@@ -12,7 +12,7 @@ import (
 func TestAccLoggingMetric_update(t *testing.T) {
 	t.Parallel()
 
-	suffix := RandString(t, 10)
+	suffix := acctest.RandString(t, 10)
 	filter := "resource.type=gae_app AND severity>=ERROR"
 	updatedFilter := "resource.type=gae_app AND severity=ERROR"
 
@@ -44,7 +44,7 @@ func TestAccLoggingMetric_update(t *testing.T) {
 func TestAccLoggingMetric_explicitBucket(t *testing.T) {
 	t.Parallel()
 
-	suffix := RandString(t, 10)
+	suffix := acctest.RandString(t, 10)
 	filter := "resource.type=gae_app AND severity>=ERROR"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -69,7 +69,7 @@ func TestAccLoggingMetric_loggingBucket(t *testing.T) {
 
 	filter := "resource.type=gae_app AND severity>=ERROR"
 	project_id := envvar.GetTestProjectFromEnv()
-	suffix := RandString(t, 10)
+	suffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -107,7 +107,7 @@ func TestAccLoggingMetric_loggingBucket(t *testing.T) {
 func TestAccLoggingMetric_descriptionUpdated(t *testing.T) {
 	t.Parallel()
 
-	suffix := RandString(t, 10)
+	suffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

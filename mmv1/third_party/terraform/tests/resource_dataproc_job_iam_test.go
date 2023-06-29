@@ -12,9 +12,9 @@ import (
 func TestAccDataprocJobIamBinding(t *testing.T) {
 	t.Parallel()
 
-	cluster := "tf-dataproc-iam-cluster" + RandString(t, 10)
-	job := "tf-dataproc-iam-job-" + RandString(t, 10)
-	account := "tf-dataproc-iam-" + RandString(t, 10)
+	cluster := "tf-dataproc-iam-cluster" + acctest.RandString(t, 10)
+	job := "tf-dataproc-iam-job-" + acctest.RandString(t, 10)
+	account := "tf-dataproc-iam-" + acctest.RandString(t, 10)
 	role := "roles/editor"
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/jobs/%s %s",
@@ -51,9 +51,9 @@ func TestAccDataprocJobIamBinding(t *testing.T) {
 func TestAccDataprocJobIamMember(t *testing.T) {
 	t.Parallel()
 
-	cluster := "tf-dataproc-iam-cluster" + RandString(t, 10)
-	job := "tf-dataproc-iam-jobid-" + RandString(t, 10)
-	account := "tf-dataproc-iam-" + RandString(t, 10)
+	cluster := "tf-dataproc-iam-cluster" + acctest.RandString(t, 10)
+	job := "tf-dataproc-iam-jobid-" + acctest.RandString(t, 10)
+	account := "tf-dataproc-iam-" + acctest.RandString(t, 10)
 	role := "roles/editor"
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/jobs/%s %s serviceAccount:%s",
@@ -84,9 +84,9 @@ func TestAccDataprocJobIamMember(t *testing.T) {
 func TestAccDataprocJobIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	cluster := "tf-dataproc-iam-cluster" + RandString(t, 10)
-	job := "tf-dataproc-iam-jobid-" + RandString(t, 10)
-	account := "tf-dataproc-iam-" + RandString(t, 10)
+	cluster := "tf-dataproc-iam-cluster" + acctest.RandString(t, 10)
+	job := "tf-dataproc-iam-jobid-" + acctest.RandString(t, 10)
+	account := "tf-dataproc-iam-" + acctest.RandString(t, 10)
 	role := "roles/editor"
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/jobs/%s",

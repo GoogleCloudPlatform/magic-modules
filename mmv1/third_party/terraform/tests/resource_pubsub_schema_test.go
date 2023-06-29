@@ -11,7 +11,7 @@ import (
 func TestAccPubsubSchema_update(t *testing.T) {
 	t.Parallel()
 
-	schema := fmt.Sprintf("tf-test-schema-%s", RandString(t, 10))
+	schema := fmt.Sprintf("tf-test-schema-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

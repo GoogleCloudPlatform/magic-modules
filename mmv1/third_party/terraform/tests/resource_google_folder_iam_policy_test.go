@@ -14,7 +14,7 @@ import (
 func TestAccFolderIamPolicy_basic(t *testing.T) {
 	t.Parallel()
 
-	folderDisplayName := "tf-test-" + RandString(t, 10)
+	folderDisplayName := "tf-test-" + acctest.RandString(t, 10)
 	org := envvar.GetTestOrgFromEnv(t)
 	parent := "organizations/" + org
 
@@ -47,7 +47,7 @@ func TestAccFolderIamPolicy_basic(t *testing.T) {
 func TestAccFolderIamPolicy_auditConfigs(t *testing.T) {
 	t.Parallel()
 
-	folderDisplayName := "tf-test-" + RandString(t, 10)
+	folderDisplayName := "tf-test-" + acctest.RandString(t, 10)
 	org := envvar.GetTestOrgFromEnv(t)
 	parent := "organizations/" + org
 

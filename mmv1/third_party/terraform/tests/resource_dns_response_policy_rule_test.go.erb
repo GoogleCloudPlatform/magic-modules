@@ -13,7 +13,7 @@ import (
 func TestAccDNSResponsePolicyRule_update(t *testing.T) {
 	t.Parallel()
 
-	responsePolicyRuleSuffix := RandString(t, 10)
+	responsePolicyRuleSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -43,7 +43,7 @@ func TestAccDNSResponsePolicyRule_update(t *testing.T) {
 func TestAccDNSResponsePolicyRuleBehavior_update(t *testing.T) {
 	t.Parallel()
 
-	responsePolicyRuleSuffix := RandString(t, 10)
+	responsePolicyRuleSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

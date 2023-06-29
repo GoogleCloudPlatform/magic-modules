@@ -16,8 +16,8 @@ func TestAccSpannerDatabaseIamBinding(t *testing.T) {
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	role := "roles/spanner.databaseAdmin"
 	project := envvar.GetTestProjectFromEnv()
-	database := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	instance := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	database := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	instance := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -60,8 +60,8 @@ func TestAccSpannerDatabaseIamMember(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	role := "roles/spanner.databaseAdmin"
-	database := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	instance := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	database := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	instance := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	conditionTitle := "Access only database one"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -92,8 +92,8 @@ func TestAccSpannerDatabaseIamPolicy(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	role := "roles/spanner.databaseAdmin"
-	database := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	instance := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	database := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	instance := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

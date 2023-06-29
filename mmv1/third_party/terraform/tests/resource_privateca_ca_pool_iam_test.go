@@ -17,7 +17,7 @@ import (
 func TestAccPrivatecaCaPoolIamMemberAllAuthenticatedUsersCasing(t *testing.T) {
 	t.Parallel()
 
-	capool := "tf-test-pool-iam-" + RandString(t, 10)
+	capool := "tf-test-pool-iam-" + acctest.RandString(t, 10)
 	project := envvar.GetTestProjectFromEnv()
 	region := envvar.GetTestRegionFromEnv()
 

@@ -13,7 +13,7 @@ func TestAccSecurityCenterSource_basic(t *testing.T) {
 	t.Parallel()
 
 	orgId := envvar.GetTestOrgFromEnv(t)
-	suffix := RandString(t, 10)
+	suffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

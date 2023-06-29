@@ -38,7 +38,7 @@ func testAccAccessApprovalOrganizationSettings(t *testing.T) {
 		"project":       envvar.GetTestProjectFromEnv(),
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"location":      envvar.GetTestRegionFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

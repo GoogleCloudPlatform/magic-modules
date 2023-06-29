@@ -24,7 +24,7 @@ func TestAccContainerRegistry_basic(t *testing.T) {
 
 func TestAccContainerRegistry_iam(t *testing.T) {
 	t.Parallel()
-	account := RandString(t, 10)
+	account := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

@@ -36,9 +36,9 @@ func TestAccLoggingFolderExclusion(t *testing.T) {
 
 func testAccLoggingFolderExclusion_basic(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
-	exclusionName := "tf-test-exclusion-" + RandString(t, 10)
-	folderName := "tf-test-folder-" + RandString(t, 10)
-	description := "Description " + RandString(t, 10)
+	exclusionName := "tf-test-exclusion-" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
+	description := "Description " + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -59,9 +59,9 @@ func testAccLoggingFolderExclusion_basic(t *testing.T) {
 
 func testAccLoggingFolderExclusion_folderAcceptsFullFolderPath(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
-	exclusionName := "tf-test-exclusion-" + RandString(t, 10)
-	folderName := "tf-test-folder-" + RandString(t, 10)
-	description := "Description " + RandString(t, 10)
+	exclusionName := "tf-test-exclusion-" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
+	description := "Description " + acctest.RandString(t, 10)
 
 	checkFn := func(s []*terraform.InstanceState) error {
 		loggingExclusionId, err := logging.ParseLoggingExclusionId(s[0].ID)
@@ -102,11 +102,11 @@ func testAccLoggingFolderExclusion_folderAcceptsFullFolderPath(t *testing.T) {
 
 func testAccLoggingFolderExclusion_update(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
-	exclusionName := "tf-test-exclusion-" + RandString(t, 10)
-	folderName := "tf-test-folder-" + RandString(t, 10)
+	exclusionName := "tf-test-exclusion-" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
 	parent := "organizations/" + org
-	descriptionBefore := "Basic Folder Logging Exclusion" + RandString(t, 10)
-	descriptionAfter := "Updated Basic Folder Logging Exclusion" + RandString(t, 10)
+	descriptionBefore := "Basic Folder Logging Exclusion" + acctest.RandString(t, 10)
+	descriptionAfter := "Updated Basic Folder Logging Exclusion" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -135,7 +135,7 @@ func testAccLoggingFolderExclusion_update(t *testing.T) {
 
 func testAccLoggingFolderExclusion_multiple(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
-	folderName := "tf-test-folder-" + RandString(t, 10)
+	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
 	parent := "organizations/" + org
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -144,7 +144,7 @@ func testAccLoggingFolderExclusion_multiple(t *testing.T) {
 		CheckDestroy:             testAccCheckLoggingFolderExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingFolderExclusion_multipleCfg(folderName, parent, "tf-test-exclusion-"+RandString(t, 10)),
+				Config: testAccLoggingFolderExclusion_multipleCfg(folderName, parent, "tf-test-exclusion-"+acctest.RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_logging_folder_exclusion.basic0",

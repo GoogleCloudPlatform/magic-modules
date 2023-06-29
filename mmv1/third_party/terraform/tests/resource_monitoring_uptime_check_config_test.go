@@ -20,7 +20,7 @@ func TestAccMonitoringUptimeCheckConfig_update(t *testing.T) {
 		CheckDestroy:             testAccCheckMonitoringUptimeCheckConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMonitoringUptimeCheckConfig_update(RandString(t, 4), "mypath", "password1", project, host),
+				Config: testAccMonitoringUptimeCheckConfig_update(acctest.RandString(t, 4), "mypath", "password1", project, host),
 			},
 			{
 				ResourceName:            "google_monitoring_uptime_check_config.http",
@@ -29,7 +29,7 @@ func TestAccMonitoringUptimeCheckConfig_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"http_check.0.auth_info.0.password"},
 			},
 			{
-				Config: testAccMonitoringUptimeCheckConfig_update(RandString(t, 4), "", "password2", project, host),
+				Config: testAccMonitoringUptimeCheckConfig_update(acctest.RandString(t, 4), "", "password2", project, host),
 			},
 			{
 				ResourceName:            "google_monitoring_uptime_check_config.http",
@@ -53,7 +53,7 @@ func TestAccMonitoringUptimeCheckConfig_changeNonUpdatableFields(t *testing.T) {
 		CheckDestroy:             testAccCheckMonitoringUptimeCheckConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMonitoringUptimeCheckConfig_update(RandString(t, 4), "mypath", "password1", project, "192.168.1.1"),
+				Config: testAccMonitoringUptimeCheckConfig_update(acctest.RandString(t, 4), "mypath", "password1", project, "192.168.1.1"),
 			},
 			{
 				ResourceName:            "google_monitoring_uptime_check_config.http",
@@ -62,7 +62,7 @@ func TestAccMonitoringUptimeCheckConfig_changeNonUpdatableFields(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"http_check.0.auth_info.0.password"},
 			},
 			{
-				Config: testAccMonitoringUptimeCheckConfig_update(RandString(t, 4), "mypath", "password1", project, "192.168.1.2"),
+				Config: testAccMonitoringUptimeCheckConfig_update(acctest.RandString(t, 4), "mypath", "password1", project, "192.168.1.2"),
 			},
 			{
 				ResourceName:            "google_monitoring_uptime_check_config.http",
@@ -71,7 +71,7 @@ func TestAccMonitoringUptimeCheckConfig_changeNonUpdatableFields(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"http_check.0.auth_info.0.password"},
 			},
 			{
-				Config: testAccMonitoringUptimeCheckConfig_update(RandString(t, 4), "mypath", "password2", project, "192.168.1.2"),
+				Config: testAccMonitoringUptimeCheckConfig_update(acctest.RandString(t, 4), "mypath", "password2", project, "192.168.1.2"),
 			},
 			{
 				ResourceName:            "google_monitoring_uptime_check_config.http",
@@ -87,7 +87,7 @@ func TestAccMonitoringUptimeCheckConfig_jsonPathUpdate(t *testing.T) {
 	t.Parallel()
 	project := envvar.GetTestProjectFromEnv()
 	host := "192.168.1.1"
-	suffix := RandString(t, 4)
+	suffix := acctest.RandString(t, 4)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

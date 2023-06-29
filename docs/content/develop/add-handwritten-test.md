@@ -63,8 +63,8 @@ For example, the following test case is a good reference:
 func TestAccComputeFirewall_noSource(t *testing.T) {
     t.Parallel()
 
-    networkName := fmt.Sprintf("tf-test-firewall-%s", RandString(t, 10))
-    firewallName := fmt.Sprintf("tf-test-firewall-%s", RandString(t, 10))
+    networkName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
+    firewallName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
 
     acctest.VcrTest(t, resource.TestCase{
         PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -127,8 +127,8 @@ For example:
 func TestAccComputeFirewall_disabled(t *testing.T) {
     t.Parallel()
 
-    networkName := fmt.Sprintf("tf-test-firewall-%s", RandString(t, 10))
-    firewallName := fmt.Sprintf("tf-test-firewall-%s", RandString(t, 10))
+    networkName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
+    firewallName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
 
     acctest.VcrTest(t, resource.TestCase{
         PreCheck:                 func() { acctest.AccTestPreCheck(t) },

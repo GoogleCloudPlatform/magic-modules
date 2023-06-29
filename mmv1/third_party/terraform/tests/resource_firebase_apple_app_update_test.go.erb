@@ -15,7 +15,7 @@ func TestAccFirebaseAppleApp_update(t *testing.T) {
         context := map[string]interface{}{
                 "project_id": envvar.GetTestProjectFromEnv(),
                 "bundle_id":  "apple.app.12345",
-                "random_suffix": RandString(t, 10),
+                "random_suffix": acctest.RandString(t, 10),
                 "display_name":  "tf-test Display Name N",
 	}
 	acctest.VcrTest(t, resource.TestCase{

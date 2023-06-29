@@ -14,7 +14,7 @@ func TestAccServiceAccountKey_basic(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "google_service_account_key.acceptance"
-	accountID := "a" + RandString(t, 10)
+	accountID := "a" + acctest.RandString(t, 10)
 	displayName := "Terraform Test"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -38,7 +38,7 @@ func TestAccServiceAccountKey_fromEmail(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "google_service_account_key.acceptance"
-	accountID := "a" + RandString(t, 10)
+	accountID := "a" + acctest.RandString(t, 10)
 	displayName := "Terraform Test"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -62,7 +62,7 @@ func TestAccServiceAccountKey_fromCertificate(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "google_service_account_key.acceptance"
-	accountID := "a" + RandString(t, 10)
+	accountID := "a" + acctest.RandString(t, 10)
 	displayName := "Terraform Test"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

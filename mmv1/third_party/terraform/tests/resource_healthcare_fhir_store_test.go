@@ -77,9 +77,9 @@ func TestAccHealthcareFhirStoreIdParsing(t *testing.T) {
 func TestAccHealthcareFhirStore_basic(t *testing.T) {
 	t.Parallel()
 
-	datasetName := fmt.Sprintf("tf-test-dataset-%s", RandString(t, 10))
-	fhirStoreName := fmt.Sprintf("tf-test-fhir-store-%s", RandString(t, 10))
-	pubsubTopic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
+	datasetName := fmt.Sprintf("tf-test-dataset-%s", acctest.RandString(t, 10))
+	fhirStoreName := fmt.Sprintf("tf-test-fhir-store-%s", acctest.RandString(t, 10))
+	pubsubTopic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	resourceName := "google_healthcare_fhir_store.default"
 
 	acctest.VcrTest(t, resource.TestCase{

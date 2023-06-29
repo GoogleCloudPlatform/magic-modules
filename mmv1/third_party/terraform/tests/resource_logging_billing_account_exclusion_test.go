@@ -34,8 +34,8 @@ func TestAccLoggingBillingAccountExclusion(t *testing.T) {
 
 func testAccLoggingBillingAccountExclusion_basic(t *testing.T) {
 	billingAccount := envvar.GetTestMasterBillingAccountFromEnv(t)
-	exclusionName := "tf-test-exclusion-" + RandString(t, 10)
-	description := "Description " + RandString(t, 10)
+	exclusionName := "tf-test-exclusion-" + acctest.RandString(t, 10)
+	description := "Description " + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -56,9 +56,9 @@ func testAccLoggingBillingAccountExclusion_basic(t *testing.T) {
 
 func testAccLoggingBillingAccountExclusion_update(t *testing.T) {
 	billingAccount := envvar.GetTestMasterBillingAccountFromEnv(t)
-	exclusionName := "tf-test-exclusion-" + RandString(t, 10)
-	descriptionBefore := "Basic BillingAccount Logging Exclusion" + RandString(t, 10)
-	descriptionAfter := "Updated Basic BillingAccount Logging Exclusion" + RandString(t, 10)
+	exclusionName := "tf-test-exclusion-" + acctest.RandString(t, 10)
+	descriptionBefore := "Basic BillingAccount Logging Exclusion" + acctest.RandString(t, 10)
+	descriptionAfter := "Updated Basic BillingAccount Logging Exclusion" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -94,7 +94,7 @@ func testAccLoggingBillingAccountExclusion_multiple(t *testing.T) {
 		CheckDestroy:             testAccCheckLoggingBillingAccountExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingBillingAccountExclusion_multipleCfg("tf-test-exclusion-"+RandString(t, 10), billingAccount),
+				Config: testAccLoggingBillingAccountExclusion_multipleCfg("tf-test-exclusion-"+acctest.RandString(t, 10), billingAccount),
 			},
 			{
 				ResourceName:      "google_logging_billing_account_exclusion.basic0",

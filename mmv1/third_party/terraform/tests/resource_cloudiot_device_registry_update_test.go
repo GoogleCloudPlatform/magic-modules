@@ -11,11 +11,11 @@ import (
 func TestAccCloudIoTRegistry_update(t *testing.T) {
 	t.Parallel()
 
-	registryName := fmt.Sprintf("psregistry-test-%s", RandString(t, 10))
+	registryName := fmt.Sprintf("psregistry-test-%s", acctest.RandString(t, 10))
 	resourceName := fmt.Sprintf("google_cloudiot_registry.%s", registryName)
-	deviceStatus := fmt.Sprintf("psregistry-test-devicestatus-%s", RandString(t, 10))
-	defaultTelemetry := fmt.Sprintf("psregistry-test-telemetry-%s", RandString(t, 10))
-	additionalTelemetry := fmt.Sprintf("psregistry-additional-test-telemetry-%s", RandString(t, 10))
+	deviceStatus := fmt.Sprintf("psregistry-test-devicestatus-%s", acctest.RandString(t, 10))
+	defaultTelemetry := fmt.Sprintf("psregistry-test-telemetry-%s", acctest.RandString(t, 10))
+	additionalTelemetry := fmt.Sprintf("psregistry-additional-test-telemetry-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

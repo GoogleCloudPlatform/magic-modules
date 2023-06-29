@@ -13,7 +13,7 @@ import (
 func TestAccNetworkServicesMesh_update(t *testing.T) {
 	t.Parallel()
 
-	meshName := fmt.Sprintf("tf-test-mesh-%s", RandString(t, 10))
+	meshName := fmt.Sprintf("tf-test-mesh-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },

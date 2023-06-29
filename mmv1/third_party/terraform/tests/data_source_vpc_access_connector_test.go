@@ -16,7 +16,7 @@ func TestAccVPCAccessConnectorDatasource_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVPCAccessConnectorDatasourceConfig(RandString(t, 10)),
+				Config: testAccVPCAccessConnectorDatasourceConfig(acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_vpc_access_connector.connector",

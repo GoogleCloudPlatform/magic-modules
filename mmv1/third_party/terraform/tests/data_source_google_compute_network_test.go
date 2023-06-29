@@ -13,7 +13,7 @@ import (
 func TestAccDataSourceGoogleNetwork(t *testing.T) {
 	t.Parallel()
 
-	networkName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	networkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),

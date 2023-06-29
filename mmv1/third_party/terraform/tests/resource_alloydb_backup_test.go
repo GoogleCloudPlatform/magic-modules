@@ -12,7 +12,7 @@ func TestAccAlloydbBackup_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"network_name":  acctest.BootstrapSharedTestNetwork(t, "alloydb-update"),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -97,7 +97,7 @@ func TestAccAlloydbBackup_createBackupWithMandatoryFields(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -172,8 +172,8 @@ func TestAccAlloydbBackup_usingCMEK(t *testing.T) {
 
 	context := map[string]interface{}{
 		"network_name":  acctest.BootstrapSharedTestNetwork(t, "alloydb-cmek"),
-		"random_suffix": RandString(t, 10),
-		"key_name":      "tf-test-key-" + RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
+		"key_name":      "tf-test-key-" + acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

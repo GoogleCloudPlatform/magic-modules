@@ -69,7 +69,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 			"<%= var_name %>": <%= override %>,
 	<% end -%>
 	<% end -%>
-			"random_suffix": RandString(t, 10),
+			"random_suffix": acctest.RandString(t, 10),
 	}
 
 <% versioned_provider = !example_version.nil? && example_version != 'ga' -%>

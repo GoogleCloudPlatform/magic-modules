@@ -12,8 +12,8 @@ import (
 func TestAccSecurityScannerScanConfig_scanConfigUpdate(t *testing.T) {
 	t.Parallel()
 
-	firstAddressSuffix := RandString(t, 10)
-	secondAddressSuffix := RandString(t, 10)
+	firstAddressSuffix := acctest.RandString(t, 10)
+	secondAddressSuffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"random_suffix":       firstAddressSuffix,
 		"random_suffix2":      secondAddressSuffix,

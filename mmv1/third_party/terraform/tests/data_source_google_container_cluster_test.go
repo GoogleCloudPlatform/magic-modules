@@ -16,7 +16,7 @@ func TestAccContainerClusterDatasource_zonal(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerClusterDatasource_zonal(RandString(t, 10)),
+				Config: testAccContainerClusterDatasource_zonal(acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_container_cluster.kubes",
@@ -42,7 +42,7 @@ func TestAccContainerClusterDatasource_regional(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerClusterDatasource_regional(RandString(t, 10)),
+				Config: testAccContainerClusterDatasource_regional(acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_container_cluster.kubes",

@@ -14,7 +14,7 @@ func TestAccIapBrand_iapBrandExample(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

@@ -17,8 +17,8 @@ import (
 func TestAccPubsubTopicIamBinding(t *testing.T) {
 	t.Parallel()
 
-	topic := "tf-test-topic-iam-" + RandString(t, 10)
-	account := "tf-test-topic-iam-" + RandString(t, 10)
+	topic := "tf-test-topic-iam-" + acctest.RandString(t, 10)
+	account := "tf-test-topic-iam-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -58,8 +58,8 @@ func TestAccPubsubTopicIamBinding(t *testing.T) {
 func TestAccPubsubTopicIamBinding_topicName(t *testing.T) {
 	t.Parallel()
 
-	topic := "tf-test-topic-iam-" + RandString(t, 10)
-	account := "tf-test-topic-iam-" + RandString(t, 10)
+	topic := "tf-test-topic-iam-" + acctest.RandString(t, 10)
+	account := "tf-test-topic-iam-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -80,8 +80,8 @@ func TestAccPubsubTopicIamBinding_topicName(t *testing.T) {
 func TestAccPubsubTopicIamMember(t *testing.T) {
 	t.Parallel()
 
-	topic := "tf-test-topic-iam-" + RandString(t, 10)
-	account := "tf-test-topic-iam-" + RandString(t, 10)
+	topic := "tf-test-topic-iam-" + acctest.RandString(t, 10)
+	account := "tf-test-topic-iam-" + acctest.RandString(t, 10)
 	accountEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", account, envvar.GetTestProjectFromEnv())
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -108,8 +108,8 @@ func TestAccPubsubTopicIamMember(t *testing.T) {
 func TestAccPubsubTopicIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	topic := "tf-test-topic-iam-" + RandString(t, 10)
-	account := "tf-test-topic-iam-" + RandString(t, 10)
+	topic := "tf-test-topic-iam-" + acctest.RandString(t, 10)
+	account := "tf-test-topic-iam-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

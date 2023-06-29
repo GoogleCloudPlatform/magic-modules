@@ -13,7 +13,7 @@ func TestAccDataSourcePrivatecaCertificateAuthority_privatecaCertificateAuthorit
 	context := map[string]interface{}{
 		"pool_name":     acctest.BootstrapSharedCaPoolInLocation(t, "us-central1"),
 		"pool_location": "us-central1",
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

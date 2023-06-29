@@ -14,7 +14,7 @@ func testAccDataSourceCloudIdentityGroups_basicTest(t *testing.T) {
 	context := map[string]interface{}{
 		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
 		"cust_id":       envvar.GetTestCustIdFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

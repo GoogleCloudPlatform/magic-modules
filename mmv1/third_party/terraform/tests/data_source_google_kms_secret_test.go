@@ -22,11 +22,11 @@ func TestAccKmsSecret_basic(t *testing.T) {
 	projectOrg := envvar.GetTestOrgFromEnv(t)
 	projectBillingAccount := envvar.GetTestBillingAccountFromEnv(t)
 
-	projectId := "tf-test-" + RandString(t, 10)
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	projectId := "tf-test-" + acctest.RandString(t, 10)
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	plaintext := fmt.Sprintf("secret-%s", RandString(t, 10))
+	plaintext := fmt.Sprintf("secret-%s", acctest.RandString(t, 10))
 	aad := "plainaad"
 
 	// The first test creates resources needed to encrypt plaintext and produce ciphertext

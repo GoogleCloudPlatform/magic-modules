@@ -55,7 +55,7 @@ func getSignedTestOccurrenceAttestationPayload(
 
 func TestAccContainerAnalysisOccurrence_basic(t *testing.T) {
 	t.Parallel()
-	randSuffix := RandString(t, 10)
+	randSuffix := acctest.RandString(t, 10)
 
 	config := acctest.BootstrapConfig(t)
 	if config == nil {
@@ -93,7 +93,7 @@ func TestAccContainerAnalysisOccurrence_basic(t *testing.T) {
 
 func TestAccContainerAnalysisOccurrence_multipleSignatures(t *testing.T) {
 	t.Parallel()
-	randSuffix := RandString(t, 10)
+	randSuffix := acctest.RandString(t, 10)
 
 	config := acctest.BootstrapConfig(t)
 	if config == nil {
