@@ -896,7 +896,7 @@ linux_node_config {
 
 * `sole_tenant_config` (Optional)  Allows specifying multiple [node affinities](https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes#node_affinity_and_anti-affinity) useful for running workloads on [sole tenant nodes](https://cloud.google.com/kubernetes-engine/docs/how-to/sole-tenancy). `node_affinity` structure is [documented below](#nested_node_affinity).
 
-```hcl
+```
 sole_tenant_config {
   node_affinity {
     key = "compute.googleapis.com/node-group-name"
@@ -964,7 +964,7 @@ sole_tenant_config {
 
 * `workload_pool` (Optional) - The workload pool to attach all Kubernetes service accounts to.
 
-```hcl
+```
 workload_identity_config {
   workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
 }
@@ -978,7 +978,7 @@ The `network_tags` block supports:
 
 * `tags` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - List of network tags applied to auto-provisioned node pools.
 
-```hcl
+```
 node_pool_auto_config {
   network_tags {
     tags = ["foo", "bar"]
@@ -1007,7 +1007,7 @@ The `pubsub` block supports:
 
 * `filter` (Optional) - Choose what type of notifications you want to receive. If no filters are applied, you'll receive all notification types. Structure is [documented below](#nested_notification_filter).
 
-```hcl
+```
 notification_config {
   pubsub {
     enabled = true
@@ -1120,7 +1120,7 @@ billing export. Defaults to `true`.
 
 * `bigquery_destination.dataset_id` (Required) - The ID of a BigQuery Dataset. For Example:
 
-```hcl
+```
 resource_usage_export_config {
   enable_network_egress_metering = false
   enable_resource_consumption_metering = true
