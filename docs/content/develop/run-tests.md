@@ -18,16 +18,20 @@ aliases:
 
 We reccomend using using "application default credentials" and running tests as your GCP user account.
 
+1. Log in with gcloud:
+
+    ```bash
+    gcloud auth application-default login
+    ```
+
 1. Set the following environment variables:
 
-```
-GOOGLE_PROJECT
-GOOGLE_CREDENTIALS|GOOGLE_CLOUD_KEYFILE_JSON|GCLOUD_KEYFILE_JSON|GOOGLE_USE_DEFAULT_CREDENTIALS
-GOOGLE_REGION
-GOOGLE_ZONE
-```
-
-Note that the credentials you provide must be granted wide permissions on the specified project. These tests provision real resources, and require permission in order to do so. Most developers on the team grant their test service account `roles/editor` or `roles/owner` on their project. Additionally, to ensure that your tests are performed in a region and zone with wide support for GCP features, `GOOGLE_REGION` should be set to `us-central1` and `GOOGLE_ZONE` to `us-central1-a`.
+    ```bash
+    export GOOGLE_USE_DEFAULT_CREDENTIALS=TRUE
+    export GOOGLE_PROJECT=PROJECT_ID
+    export GOOGLE_REGION=us-central1
+    export GOOGLE_ZONE=us-central1-a
+    ```
 
 Additional variables may be required for other tests, and should get flagged when running them by Go skipping the test and flagging in the output it was skipped, with a skip message explaining why. The most typical extra values required are those required for project creation:
 
@@ -36,7 +40,7 @@ GOOGLE_ORG
 GOOGLE_BILLING_ACCOUNT
 ```
 
-### Run unit tests
+## Run unit tests
 
 Unit tests (that is, tests that do not interact with the GCP API) are very fast and you can generally run them all if you have changed any of them:
 
@@ -52,7 +56,7 @@ make test
 make lint
 ```
 
-### Run acceptance tests
+## Run acceptance tests
 
 You can run tests against the provider you generated in the `OUTPUT_PATH` location. When running tests, specify which to run using `TESTARGS`, such as:
 
@@ -72,7 +76,7 @@ TESTARGS allows you to pass [testing flags](https://pkg.go.dev/cmd/go#hdr-Testin
 
 ### Debugging tests
 
-You can [increase your test verbosity](https://www.terraform.io/docs/internals/debugging.html)  and redirect the output to a log file for analysis. This is often helpful in debugging issues.
+You can [increase your test verbosity](https://www.terraform.io/docs/internals/debugging.html) and redirect the output to a log file for analysis. This is often helpful in debugging issues.
 
 ```bash
 ## for ga provider
@@ -93,24 +97,6 @@ cd $GOPATH/src/github.com/terraform-providers/terraform-provider-google/google
 ## Execute the dlv command to launch the test.
 ## Note that the --test.run flag uses the same regexp matching as go test --run.
 TF_ACC=1 dlv test -- --test.v --test.run TestAccComputeRegionBackendService_withCdnPolicy
-Type 'help' for list of commands.
-(dlv) b google.TestAccComputeRegionBackendService_withCdnPolicy
-Breakpoint 1 set at 0x1de072b for github.com/terraform-providers/terraform-provider-google/google.TestAccComputeRegionBackendService_withCdnPolicy() ./resource_compute_region_backend_service_test.go:540
-(dlv) c
-=== RUN   TestAccComputeRegionBackendService_withCdnPolicy
-> github.com/terraform-providers/terraform-provider-google/google.TestAccComputeRegionBackendService_withCdnPolicy() ./resource_compute_region_backend_service_test.go:540 (hits goroutine(7):1 total:1) (PC: 0x1de072b)
-   535:                         },
-   536:                 },
-   537:         })
-   538: }
-   539:
-=> 540: func TestAccComputeRegionBackendService_withCdnPolicy(t *testing.T) {
-   541:         t.Parallel()
-   542:
-   543:         var svc compute.BackendService
-   544:         resource.Test(t, resource.TestCase{
-   545:                 PreCheck:     func() { acctest.AccTestPreCheck(t) },
-(dlv)
 ```
 
 ### Testing with different `terraform` versions
@@ -121,7 +107,21 @@ Tests will use whatever version of the `terraform` binary is found on your path.
 
 Sometimes, for example for manual testing, you may want to build the provider from source and use it with `terraform`.
 
-### Developer Overrides
+### Build provider
+
+```bash
+## ga provider
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+make build
+
+## beta provider
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+make build
+```
+
+{{< tabs "built-provider" >}}
+
+{{< tab "Developer overrides" >}}
 
 {{< hint info >}}
 **Note:** Developer overrides are only available in Terraform v0.14 and later.
@@ -133,7 +133,9 @@ In the sections below we describe how to create a Terraform CLI configuration fi
 
 Choose your architecture below.
 
-{{< details "Mac (ARM64 and AMD64), Linux AMD64" >}}
+{{< tabs "setup" >}}
+
+{{< tab "Mac (ARM64 and AMD64), Linux AMD64" >}}
 
 First, you need to find the location where built provider binaries are created. To do this, run this command and make a note of the path value:
 
@@ -179,9 +181,9 @@ Edit the file to replace `<REPLACE-ME>` with the path you saved from the first s
 
 Finally, save the file.
 
-{{< /details >}}
+{{< /tab >}}
 
-{{< details "Windows (Vista and above)" >}}
+{{< tab "Windows (Vista and above)" >}}
 
 First, you need to find the location where built provider binaries are created. To do this, run this command and make a note of the path value:
 
@@ -226,21 +228,11 @@ Edit the file to replace `<REPLACE-ME>` with the output you saved from the first
 
 Finally, save the file.
 
-{{< /details >}}
+{{< /tab >}}
+
+{{< /tabs >}}
 
 This CLI configuration file you created in the steps above will allow Terraform to automatically use the binaries generated by the `make build` commands in the `terraform-provider-google` and `terraform-provider-google-beta` repositories instead of downloading the latest versions. All other providers will continue to be downloaded from the public Registry as normal.
-
-### Build provider
-
-```bash
-## ga provider
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-make build
-
-## beta provider
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-make build
-```
 
 ### Using Terraform CLI developer overrides
 
@@ -285,6 +277,19 @@ If you do not want to use the `TF_CLI_CONFIG_FILE` environment variable, as desc
 
 In this scenario you will need to remember to edit this file to swap between using developer overrides and using the production provider versions.
 
+{{< /tab >}}
+
+{{< tab "Filesystem mirrors" >}}
+
+Filesystem mirrors can used explicitly or implicitly by Terraform. Explicit filesystem mirrors can be [defined via the CLI configuration file](https://developer.hashicorp.com/terraform/cli/config/config-file#filesystem_mirror). In contrast, once [implicit filesystem mirrors](https://developer.hashicorp.com/terraform/cli/config/config-file#implied-local-mirror-directories) are created by a user they are discovered and used by Terraform automatically.
+
+Filesystem mirrors require providers' files to be saved with specific paths for them to work correctly. To help with this, you can use the [`terraform providers mirror` command](https://developer.hashicorp.com/terraform/cli/commands/providers/mirror) to download a published provider to your local filesystem with the required file path.
+
+Implied filesystem mirrors require manual cleanup if you want to revert back to using providers downloaded from the public Registry, and if an implied filesystem mirror is in place that a user is unaware of it can lead to confusing behaviour that is hard to debug. Other disadvantages compared to developer overrides include:
+- No warning in terminal output letting you know when your local files are in use.
+- Need to set a version number for your local version of the provider which is compatible with your Terraform configuration's version constraints
+- Setup and cleanup required each time you swap to and from using them
+
 ### Possible problems
 
 Filesystem mirrors (particularly "[_implicit_ filesystem mirrors](https://developer.hashicorp.com/terraform/cli/config/config-file#implied-local-mirror-directories)") are used automatically by Terraform, so can interfere with the expected behaviour of Terraform if you're not aware they're present.
@@ -300,3 +305,7 @@ Another way to debug this is to run a Terraform command with the `TF_LOG` enviro
 ```bash
 [TRACE] getproviders.SearchLocalDirectory: found registry.terraform.io/hashicorp/google vX.X.X for darwin_arm64 at /Users/MyUserName/.terraform.d/plugins/registry.terraform.io/hashicorp/google/xxx
 ```
+
+{{< /tab >}}
+
+{{< /tabs >}}
