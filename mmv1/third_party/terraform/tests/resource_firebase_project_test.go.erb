@@ -41,7 +41,7 @@ func TestAccFirebaseProject_destroyAndReapply(t *testing.T) {
 }
 
 func testAccFirebaseProject_firebaseProjectBasicExampleDestroyed(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "default" {
   provider = google-beta
 

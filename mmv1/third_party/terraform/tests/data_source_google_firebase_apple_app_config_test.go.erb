@@ -50,7 +50,7 @@ func TestAccDataSourceGoogleFirebaseAppleAppConfig(t *testing.T) {
 }
 
 func testAccDataSourceGoogleFirebaseAppleAppConfig(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_firebase_apple_app" "my_app_config" {
   project = "%{project_id}"
   bundle_id = "%{bundle_id}"

@@ -54,7 +54,7 @@ func TestAccVmwareengineNetwork_vmwareEngineNetworkUpdate(t *testing.T) {
 }
 
 func vmwareEngineNetworkConfigTemplate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_vmwareengine_network" "default-nw" {
   provider    = google-beta
   project     = google_project_service.acceptance.project

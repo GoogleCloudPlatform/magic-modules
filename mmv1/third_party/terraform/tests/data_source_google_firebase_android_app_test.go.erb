@@ -41,7 +41,7 @@ func TestAccDataSourceGoogleFirebaseAndroidApp(t *testing.T) {
 }
 
 func testAccDataSourceGoogleFirebaseAndroidApp(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_firebase_android_app" "my_app" {
   project = "%{project_id}"
   package_name = "%{package_name}"

@@ -52,7 +52,7 @@ func TestAccPrivatecaCertificate_privatecaCertificateUpdate(t *testing.T) {
 }
 
 func testAccPrivatecaCertificate_privatecaCertificateStart(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_privateca_ca_pool" "default" {
   location = "us-central1"
   name = "my-pool-%{random_suffix}"
@@ -137,7 +137,7 @@ resource "google_privateca_certificate" "default" {
 }
 
 func testAccPrivatecaCertificate_privatecaCertificateEnd(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_privateca_ca_pool" "default" {
   location = "us-central1"
   name = "my-pool-%{random_suffix}"

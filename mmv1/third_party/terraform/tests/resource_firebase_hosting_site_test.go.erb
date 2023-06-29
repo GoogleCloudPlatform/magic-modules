@@ -47,7 +47,7 @@ func TestAccFirebaseHostingSite_firebasehostingSiteUpdate(t *testing.T) {
 }
 
 func testAccFirebaseHostingSite_firebasehostingSiteBeforeUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_firebase_web_app" "before" {
   provider = google-beta
   project  = "%{project_id}"
@@ -65,7 +65,7 @@ resource "google_firebase_hosting_site" "update" {
 }
 
 func testAccFirebaseHostingSite_firebasehostingSiteAfterUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_firebase_web_app" "after" {
   provider = google-beta
   project  = "%{project_id}"

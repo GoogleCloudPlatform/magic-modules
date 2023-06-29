@@ -39,7 +39,7 @@ func TestAccDataSourceVmwareEngineNetwork_basic(t *testing.T) {
 }
 
 func testAccDataSourceVmwareEngineNetworkConfig(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
  # there can be only 1 Legacy network per region for a given project, so creating new project to isolate tests.
 resource "google_project" "acceptance" {
   name            = "tf-test-%{random_suffix}"

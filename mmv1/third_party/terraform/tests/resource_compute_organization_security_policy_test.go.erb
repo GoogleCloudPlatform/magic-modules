@@ -44,7 +44,7 @@ func TestAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyUpdateEx
 }
 
 func testAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyPreUpdateExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_organization_security_policy" "policy" {
   display_name = "tf-test%{random_suffix}"
   parent       = "organizations/%{org_id}"
@@ -53,7 +53,7 @@ resource "google_compute_organization_security_policy" "policy" {
 }
 
 func testAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyPostUpdateExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_organization_security_policy" "policy" {
   display_name = "tf-test%{random_suffix}"
   parent       = "organizations/%{org_id}"

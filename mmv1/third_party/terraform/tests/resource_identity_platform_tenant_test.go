@@ -40,7 +40,7 @@ func TestAccIdentityPlatformTenant_identityPlatformTenantUpdate(t *testing.T) {
 }
 
 func testAccIdentityPlatformTenant_identityPlatformTenantBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_identity_platform_tenant" "tenant" {
   display_name          = "tenant"
   allow_password_signup = true
@@ -49,7 +49,7 @@ resource "google_identity_platform_tenant" "tenant" {
 }
 
 func testAccIdentityPlatformTenant_identityPlatformTenantUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_identity_platform_tenant" "tenant" {
   display_name             = "my-tenant"
   allow_password_signup    = false

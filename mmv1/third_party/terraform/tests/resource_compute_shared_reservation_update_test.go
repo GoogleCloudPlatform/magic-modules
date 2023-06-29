@@ -56,7 +56,7 @@ func TestAccComputeSharedReservation_update(t *testing.T) {
 }
 
 func testAccComputeReservation_sharedReservation_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "owner_project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
@@ -145,7 +145,7 @@ resource "google_compute_reservation" "gce_reservation" {
 }
 
 func testAccComputeReservation_sharedReservation_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "owner_project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
