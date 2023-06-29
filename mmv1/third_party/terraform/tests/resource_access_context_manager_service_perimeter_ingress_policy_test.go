@@ -23,7 +23,7 @@ func testAccAccessContextManagerServicePerimeterIngressPolicy_basicTest(t *testi
 	policyTitle := RandString(t, 10)
 	perimeterTitle := "perimeter"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{

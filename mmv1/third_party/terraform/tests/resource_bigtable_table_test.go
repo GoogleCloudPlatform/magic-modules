@@ -21,7 +21,7 @@ func TestAccBigtableTable_basic(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
@@ -46,7 +46,7 @@ func TestAccBigtableTable_splitKeys(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
@@ -73,7 +73,7 @@ func TestAccBigtableTable_family(t *testing.T) {
 	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	family := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
@@ -99,7 +99,7 @@ func TestAccBigtableTable_deletion_protection_protected(t *testing.T) {
 	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	family := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
@@ -159,7 +159,7 @@ func TestAccBigtableTable_deletion_protection_unprotected(t *testing.T) {
 	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	family := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
@@ -218,7 +218,7 @@ func TestAccBigtableTable_familyMany(t *testing.T) {
 	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	family := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
@@ -244,7 +244,7 @@ func TestAccBigtableTable_familyUpdate(t *testing.T) {
 	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	family := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),

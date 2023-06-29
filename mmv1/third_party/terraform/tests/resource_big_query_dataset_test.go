@@ -16,7 +16,7 @@ func TestAccBigQueryDataset_basic(t *testing.T) {
 
 	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
@@ -55,7 +55,7 @@ func TestAccBigQueryDataset_datasetWithContents(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
@@ -81,7 +81,7 @@ func TestAccBigQueryDataset_access(t *testing.T) {
 	otherDatasetID := fmt.Sprintf("tf_test_other_%s", RandString(t, 10))
 	otherTableID := fmt.Sprintf("tf_test_other_%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
@@ -127,7 +127,7 @@ func TestAccBigQueryDataset_regionalLocation(t *testing.T) {
 
 	datasetID1 := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
@@ -151,7 +151,7 @@ func TestAccBigQueryDataset_cmek(t *testing.T) {
 	pid := envvar.GetTestProjectFromEnv()
 	datasetID1 := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{

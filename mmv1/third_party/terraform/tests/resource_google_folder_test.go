@@ -21,7 +21,7 @@ func TestAccFolder_rename(t *testing.T) {
 	parent := "organizations/" + org
 	folder := resourceManagerV3.Folder{}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleFolderDestroyProducer(t),
@@ -60,7 +60,7 @@ func TestAccFolder_moveParent(t *testing.T) {
 	folder1 := resourceManagerV3.Folder{}
 	folder2 := resourceManagerV3.Folder{}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleFolderDestroyProducer(t),

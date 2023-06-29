@@ -16,7 +16,7 @@ func TestAccDataSourceComputeImage(t *testing.T) {
 	family := fmt.Sprintf("tf-test-%d", RandInt(t))
 	name := fmt.Sprintf("tf-test-%d", RandInt(t))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeImageDestroyProducer(t),
@@ -48,7 +48,7 @@ func TestAccDataSourceComputeImageFilter(t *testing.T) {
 	family := fmt.Sprintf("tf-test-%d", RandInt(t))
 	name := fmt.Sprintf("tf-test-%d", RandInt(t))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeImageDestroyProducer(t),

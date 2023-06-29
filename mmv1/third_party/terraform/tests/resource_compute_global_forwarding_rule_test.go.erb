@@ -20,7 +20,7 @@ func TestAccComputeGlobalForwardingRule_updateTarget(t *testing.T) {
 	hc := fmt.Sprintf("forwardrule-test-%s", RandString(t, 10))
 	urlmap := fmt.Sprintf("forwardrule-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
@@ -64,7 +64,7 @@ func TestAccComputeGlobalForwardingRule_ipv6(t *testing.T) {
 	hc := fmt.Sprintf("forwardrule-test-%s", RandString(t, 10))
 	urlmap := fmt.Sprintf("forwardrule-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
@@ -96,7 +96,7 @@ func TestAccComputeGlobalForwardingRule_labels(t *testing.T) {
 	hc := fmt.Sprintf("forwardrule-test-%s", RandString(t, 10))
 	urlmap := fmt.Sprintf("forwardrule-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
@@ -136,7 +136,7 @@ func TestAccComputeGlobalForwardingRule_internalLoadBalancing(t *testing.T) {
 	igm := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	it := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),

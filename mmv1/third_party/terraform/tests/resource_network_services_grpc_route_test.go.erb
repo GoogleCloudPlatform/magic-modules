@@ -15,7 +15,7 @@ func TestAccNetworkServicesGrpcRoute_update(t *testing.T) {
 
 	grpcRouteName := fmt.Sprintf("tf-test-grpc-route-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckNetworkServicesGrpcRouteDestroyProducer(t),

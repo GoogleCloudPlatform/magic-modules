@@ -17,7 +17,7 @@ func TestAccNetworkServicesTcpRoute_update(t *testing.T) {
   tcpHealthCheckName := fmt.Sprintf("tf-test-tcp-healthcheck-%s", RandString(t, 10))
 	tcpRouteName := fmt.Sprintf("tf-test-tcp-route-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckNetworkServicesTcpRouteDestroyProducer(t),

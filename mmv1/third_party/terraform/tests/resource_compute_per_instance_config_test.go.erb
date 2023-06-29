@@ -30,7 +30,7 @@ func TestAccComputePerInstanceConfig_statefulBasic(t *testing.T) {
 	igmId := fmt.Sprintf("projects/%s/zones/%s/instanceGroupManagers/%s",
 		envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), igmName)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -101,7 +101,7 @@ func TestAccComputePerInstanceConfig_update(t *testing.T) {
 		"config_name":   fmt.Sprintf("instance-%s", RandString(t, 10)),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -143,7 +143,7 @@ func TestAccComputePerInstanceConfig_statefulIps(t *testing.T) {
 		"address2":      fmt.Sprintf("tf-test-igm-address%s", RandString(t, 10)),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{

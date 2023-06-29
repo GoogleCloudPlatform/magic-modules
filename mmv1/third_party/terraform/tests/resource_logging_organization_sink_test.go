@@ -22,7 +22,7 @@ func TestAccLoggingOrganizationSink_basic(t *testing.T) {
 
 	var sink logging.LogSink
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingOrganizationSinkDestroyProducer(t),
@@ -52,7 +52,7 @@ func TestAccLoggingOrganizationSink_update(t *testing.T) {
 
 	var sinkBefore, sinkAfter logging.LogSink
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingOrganizationSinkDestroyProducer(t),
@@ -94,7 +94,7 @@ func TestAccLoggingOrganizationSink_described(t *testing.T) {
 	sinkName := "tf-test-sink-" + RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingOrganizationSinkDestroyProducer(t),
@@ -117,7 +117,7 @@ func TestAccLoggingOrganizationSink_disabled(t *testing.T) {
 	sinkName := "tf-test-sink-" + RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingOrganizationSinkDestroyProducer(t),
@@ -140,7 +140,7 @@ func TestAccLoggingOrganizationSink_updateBigquerySink(t *testing.T) {
 	sinkName := "tf-test-sink-" + RandString(t, 10)
 	bqDatasetID := "tf_test_sink_" + RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingOrganizationSinkDestroyProducer(t),
@@ -174,7 +174,7 @@ func TestAccLoggingOrganizationSink_heredoc(t *testing.T) {
 
 	var sink logging.LogSink
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckLoggingOrganizationSinkDestroyProducer(t),

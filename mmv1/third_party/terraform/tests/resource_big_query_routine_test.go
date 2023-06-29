@@ -14,7 +14,7 @@ func TestAccBigQueryRoutine_bigQueryRoutine_Update(t *testing.T) {
 	dataset := fmt.Sprintf("tfmanualdataset%s", RandString(t, 10))
 	routine := fmt.Sprintf("tfmanualroutine%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigQueryRoutineDestroyProducer(t),

@@ -16,7 +16,7 @@ func TestAccDataSourceGoogleTagsTagKey_default(t *testing.T) {
 	parent := fmt.Sprintf("organizations/%s", org)
 	shortName := "tf-test-" + RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -36,7 +36,7 @@ func TestAccDataSourceGoogleTagsTagKey_dot(t *testing.T) {
 	parent := fmt.Sprintf("organizations/%s", org)
 	shortName := "terraform.test." + RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{

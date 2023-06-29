@@ -18,7 +18,7 @@ func TestAccComputeProjectMetadataItem_basic(t *testing.T) {
 	// Key must be unique to avoid concurrent tests interfering with each other
 	key := "myKey" + RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
@@ -46,7 +46,7 @@ func TestAccComputeProjectMetadataItem_basicMultiple(t *testing.T) {
 	config := testAccProjectMetadataItem_basic("foobar", key1, "myValue") +
 		testAccProjectMetadataItem_basic("foobar2", key2, "myOtherValue")
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
@@ -74,7 +74,7 @@ func TestAccComputeProjectMetadataItem_basicWithEmptyVal(t *testing.T) {
 	// Key must be unique to avoid concurrent tests interfering with each other
 	key := "myKey" + RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
@@ -97,7 +97,7 @@ func TestAccComputeProjectMetadataItem_basicUpdate(t *testing.T) {
 	// Key must be unique to avoid concurrent tests interfering with each other
 	key := "myKey" + RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
@@ -129,7 +129,7 @@ func TestAccComputeProjectMetadataItem_exists(t *testing.T) {
 	key := "myKey" + RandString(t, 10)
 	originalConfig := testAccProjectMetadataItem_basic("foobar", key, "myValue")
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),

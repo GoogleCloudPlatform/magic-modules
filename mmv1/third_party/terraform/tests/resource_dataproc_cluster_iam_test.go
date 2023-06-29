@@ -19,7 +19,7 @@ func TestAccDataprocClusterIamBinding(t *testing.T) {
 	importId := fmt.Sprintf("projects/%s/regions/%s/clusters/%s %s",
 		envvar.GetTestProjectFromEnv(), "us-central1", cluster, role)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -65,7 +65,7 @@ func TestAccDataprocClusterIamMember(t *testing.T) {
 		role,
 		serviceAccountCanonicalEmail(account))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -99,7 +99,7 @@ func TestAccDataprocClusterIamPolicy(t *testing.T) {
 	importId := fmt.Sprintf("projects/%s/regions/%s/clusters/%s",
 		envvar.GetTestProjectFromEnv(), "us-central1", cluster)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{

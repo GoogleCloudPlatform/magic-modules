@@ -21,7 +21,7 @@ func TestAccBinaryAuthorizationPolicy_basic(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	pid := "tf-test-" + RandString(t, 10)
 	billingId := envvar.GetTestBillingAccountFromEnv(t)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -52,7 +52,7 @@ func TestAccBinaryAuthorizationPolicy_full(t *testing.T) {
 	note := RandString(t, 10)
 	attestor := RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -84,7 +84,7 @@ func TestAccBinaryAuthorizationPolicy_separateProject(t *testing.T) {
 	note := RandString(t, 10)
 	attestor := RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -115,7 +115,7 @@ func TestAccBinaryAuthorizationPolicy_update(t *testing.T) {
 	note := RandString(t, 10)
 	attestor := RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{

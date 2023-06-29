@@ -18,7 +18,7 @@ func TestAccPubsubSubscription_emptyTTL(t *testing.T) {
 	topic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
 	subscription := fmt.Sprintf("tf-test-sub-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
@@ -42,7 +42,7 @@ func TestAccPubsubSubscription_basic(t *testing.T) {
 	topic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
 	subscription := fmt.Sprintf("tf-test-sub-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
@@ -66,7 +66,7 @@ func TestAccPubsubSubscription_update(t *testing.T) {
 	topic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
 	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
@@ -100,7 +100,7 @@ func TestAccPubsubSubscription_push(t *testing.T) {
 	subscription := fmt.Sprintf("tf-test-sub-foo-%s", RandString(t, 10))
 	saAccount := fmt.Sprintf("tf-test-pubsub-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
@@ -128,7 +128,7 @@ func TestAccPubsubSubscription_pollOnCreate(t *testing.T) {
 	topic := fmt.Sprintf("tf-test-topic-foo-%s", RandString(t, 10))
 	subscription := fmt.Sprintf("tf-test-topic-foo-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),

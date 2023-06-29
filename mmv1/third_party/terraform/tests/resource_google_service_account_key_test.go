@@ -16,7 +16,7 @@ func TestAccServiceAccountKey_basic(t *testing.T) {
 	resourceName := "google_service_account_key.acceptance"
 	accountID := "a" + RandString(t, 10)
 	displayName := "Terraform Test"
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -40,7 +40,7 @@ func TestAccServiceAccountKey_fromEmail(t *testing.T) {
 	resourceName := "google_service_account_key.acceptance"
 	accountID := "a" + RandString(t, 10)
 	displayName := "Terraform Test"
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -64,7 +64,7 @@ func TestAccServiceAccountKey_fromCertificate(t *testing.T) {
 	resourceName := "google_service_account_key.acceptance"
 	accountID := "a" + RandString(t, 10)
 	displayName := "Terraform Test"
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{

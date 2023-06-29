@@ -18,7 +18,7 @@ func TestAccServiceNetworkingPeeredDNSDomain_basic(t *testing.T) {
 	name := fmt.Sprintf("test-name-%d", RandInt(t))
 	service := "servicenetworking.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{

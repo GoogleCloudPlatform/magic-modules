@@ -16,7 +16,7 @@ func TestAccComputeTargetTcpProxy_update(t *testing.T) {
 	backend := fmt.Sprintf("ttcp-test-%s", RandString(t, 10))
 	hc := fmt.Sprintf("ttcp-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeTargetTcpProxyDestroyProducer(t),

@@ -14,7 +14,7 @@ func TestAccDataSourceGoogleBillingAccount_byFullName(t *testing.T) {
 	billingId := envvar.GetTestMasterBillingAccountFromEnv(t)
 	name := "billingAccounts/" + billingId
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -34,7 +34,7 @@ func TestAccDataSourceGoogleBillingAccount_byShortName(t *testing.T) {
 	billingId := envvar.GetTestMasterBillingAccountFromEnv(t)
 	name := "billingAccounts/" + billingId
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -54,7 +54,7 @@ func TestAccDataSourceGoogleBillingAccount_byFullNameClosed(t *testing.T) {
 	billingId := envvar.GetTestMasterBillingAccountFromEnv(t)
 	name := "billingAccounts/" + billingId
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -69,7 +69,7 @@ func TestAccDataSourceGoogleBillingAccount_byFullNameClosed(t *testing.T) {
 func TestAccDataSourceGoogleBillingAccount_byDisplayName(t *testing.T) {
 	name := RandString(t, 16)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{

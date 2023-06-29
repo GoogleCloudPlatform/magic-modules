@@ -51,7 +51,7 @@ func testAccOrganizationIamBinding_basic(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "tfIamTest" + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -91,7 +91,7 @@ func testAccOrganizationIamBinding_condition(t *testing.T) {
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "tfIamTest" + RandString(t, 10)
 	conditionTitle := "expires_after_2019_12_31"
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -115,7 +115,7 @@ func testAccOrganizationIamBinding_condition(t *testing.T) {
 func testAccOrganizationIamMember_basic(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -140,7 +140,7 @@ func testAccOrganizationIamMember_condition(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	conditionTitle := "expires_after_2019_12_31"
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{

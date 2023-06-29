@@ -17,7 +17,7 @@ func TestAccComputeRegionBackendService_basic(t *testing.T) {
 	checkName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	extraCheckName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
@@ -50,7 +50,7 @@ func TestAccComputeRegionBackendService_withBackendInternal(t *testing.T) {
   igName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
   itName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
   checkName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-  VcrTest(t, resource.TestCase{
+  acctest.VcrTest(t, resource.TestCase{
     PreCheck:                 func() { acctest.AccTestPreCheck(t) },
     ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
     CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
@@ -88,7 +88,7 @@ func TestAccComputeRegionBackendService_withBackendInternalManaged(t *testing.T)
   serviceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
   igmName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
   hcName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-  VcrTest(t, resource.TestCase{
+  acctest.VcrTest(t, resource.TestCase{
     PreCheck:                 func() { acctest.AccTestPreCheck(t) },
     ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
     CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
@@ -114,7 +114,7 @@ func TestAccComputeRegionBackendService_withBackendMultiNic(t *testing.T) {
         igName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
         itName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
         checkName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-        VcrTest(t, resource.TestCase{
+        acctest.VcrTest(t, resource.TestCase{
                 PreCheck:                 func() { acctest.AccTestPreCheck(t) },
                 ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
                 CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
@@ -138,7 +138,7 @@ func TestAccComputeRegionBackendService_withConnectionDrainingAndUpdate(t *testi
 	serviceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
@@ -169,7 +169,7 @@ func TestAccComputeRegionBackendService_ilbUpdateBasic(t *testing.T) {
 	backendName := fmt.Sprintf("foo-%s", RandString(t, 10))
 	checkName := fmt.Sprintf("bar-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
@@ -205,7 +205,7 @@ func TestAccComputeRegionBackendService_ilbUpdateFull(t *testing.T) {
   igName := fmt.Sprintf("tf-test-%s", randString)
   instanceName := fmt.Sprintf("tf-test-%s", randString)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
@@ -235,7 +235,7 @@ func TestAccComputeRegionBackendService_withBackendAndIAP(t *testing.T) {
 	backendName := fmt.Sprintf("foo-%s", RandString(t, 10))
 	checkName := fmt.Sprintf("bar-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
@@ -267,7 +267,7 @@ func TestAccComputeRegionBackendService_UDPFailOverPolicyUpdate(t *testing.T) {
 	serviceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
@@ -309,7 +309,7 @@ func TestAccComputeRegionBackendService_subsettingUpdate(t *testing.T) {
 	backendName := fmt.Sprintf("foo-%s", randString)
 	checkName := fmt.Sprintf("bar-%s", randString)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),

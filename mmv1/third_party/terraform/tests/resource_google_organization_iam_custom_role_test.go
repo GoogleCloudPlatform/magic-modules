@@ -19,7 +19,7 @@ func TestAccOrganizationIamCustomRole_basic(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	roleId := "tfIamCustomRole" + RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleOrganizationIamCustomRoleDestroyProducer(t),
@@ -59,7 +59,7 @@ func TestAccOrganizationIamCustomRole_undelete(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	roleId := "tfIamCustomRole" + RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleOrganizationIamCustomRoleDestroyProducer(t),
@@ -89,7 +89,7 @@ func TestAccOrganizationIamCustomRole_createAfterDestroy(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	roleId := "tfIamCustomRole" + RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleOrganizationIamCustomRoleDestroyProducer(t),

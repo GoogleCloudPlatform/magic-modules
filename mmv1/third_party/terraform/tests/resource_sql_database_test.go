@@ -21,7 +21,7 @@ func TestAccSqlDatabase_basic(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%d", RandInt(t))
 	dbName := fmt.Sprintf("tf-test-%d", RandInt(t))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseDestroyProducer(t),
@@ -77,7 +77,7 @@ func TestAccSqlDatabase_update(t *testing.T) {
 	instance_name := fmt.Sprintf("tf-test-%d", RandInt(t))
 	database_name := fmt.Sprintf("tf-test-%d", RandInt(t))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseDestroyProducer(t),

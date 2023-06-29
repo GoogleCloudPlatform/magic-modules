@@ -16,7 +16,7 @@ func TestAccProjectIamCustomRole_basic(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
 	roleId := "tfIamCustomRole" + RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectIamCustomRoleDestroyProducer(t),
@@ -59,7 +59,7 @@ func TestAccProjectIamCustomRole_undelete(t *testing.T) {
 
 	roleId := "tfIamCustomRole" + RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectIamCustomRoleDestroyProducer(t),
@@ -98,7 +98,7 @@ func TestAccProjectIamCustomRole_createAfterDestroy(t *testing.T) {
 	t.Parallel()
 
 	roleId := "tfIamCustomRole" + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectIamCustomRoleDestroyProducer(t),

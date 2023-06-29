@@ -16,7 +16,7 @@ func TestAccSqlUser_mysql(t *testing.T) {
 	t.Parallel()
 
 	instance := fmt.Sprintf("tf-test-%d", RandInt(t))
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlUserDestroyProducer(t),
@@ -53,7 +53,7 @@ func TestAccSqlUser_iamUser(t *testing.T) {
 	t.Parallel()
 
 	instance := fmt.Sprintf("tf-test-%d", RandInt(t))
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlUserDestroyProducer(t),
@@ -78,7 +78,7 @@ func TestAccSqlUser_postgres(t *testing.T) {
 	t.Parallel()
 
 	instance := fmt.Sprintf("tf-test-%d", RandInt(t))
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlUserDestroyProducer(t),
@@ -111,7 +111,7 @@ func TestAccSqlUser_postgresIAM(t *testing.T) {
 	t.Parallel()
 
 	instance := fmt.Sprintf("tf-test-%d", RandInt(t))
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -141,7 +141,7 @@ func TestAccSqlUser_postgresAbandon(t *testing.T) {
 
 	instance := fmt.Sprintf("tf-test-%d", RandInt(t))
 	userName := "admin"
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlUserDestroyProducer(t),
@@ -256,7 +256,7 @@ func TestAccSqlUser_mysqlPasswordPolicy(t *testing.T) {
 	t.Parallel()
 
 	instance := fmt.Sprintf("tf-test-i%d", RandInt(t))
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlUserDestroyProducer(t),

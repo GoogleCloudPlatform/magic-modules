@@ -18,7 +18,7 @@ func TestAccFolderIamAuditConfig_basic(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	service := "cloudkms.googleapis.com"
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -48,7 +48,7 @@ func TestAccFolderIamAuditConfig_multiple(t *testing.T) {
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -82,7 +82,7 @@ func TestAccFolderIamAuditConfig_multipleAtOnce(t *testing.T) {
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -109,7 +109,7 @@ func TestAccFolderIamAuditConfig_update(t *testing.T) {
 	fname := "tf-test-" + RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -147,7 +147,7 @@ func TestAccFolderIamAuditConfig_remove(t *testing.T) {
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -183,7 +183,7 @@ func TestAccFolderIamAuditConfig_addFirstExemptMember(t *testing.T) {
 	members := []string{}
 	members2 := []string{"user:gterraformtest1@gmail.com"}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -216,7 +216,7 @@ func TestAccFolderIamAuditConfig_removeLastExemptMember(t *testing.T) {
 	members2 := []string{}
 	members := []string{"user:gterraformtest1@gmail.com"}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -249,7 +249,7 @@ func TestAccFolderIamAuditConfig_updateNoExemptMembers(t *testing.T) {
 	logType2 := "DATA_WRITE"
 	service := "cloudkms.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{

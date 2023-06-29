@@ -21,7 +21,7 @@ func TestAccFolderOrganizationPolicy_boolean(t *testing.T) {
 	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
 
 	org := envvar.GetTestOrgFromEnv(t)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t),
@@ -60,7 +60,7 @@ func TestAccFolderOrganizationPolicy_list_allowAll(t *testing.T) {
 	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
 
 	org := envvar.GetTestOrgFromEnv(t)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t),
@@ -84,7 +84,7 @@ func TestAccFolderOrganizationPolicy_list_allowSome(t *testing.T) {
 	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
 	org := envvar.GetTestOrgFromEnv(t)
 	project := envvar.GetTestProjectFromEnv()
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t),
@@ -107,7 +107,7 @@ func TestAccFolderOrganizationPolicy_list_denySome(t *testing.T) {
 
 	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
 	org := envvar.GetTestOrgFromEnv(t)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t),
@@ -130,7 +130,7 @@ func TestAccFolderOrganizationPolicy_list_update(t *testing.T) {
 
 	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
 	org := envvar.GetTestOrgFromEnv(t)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t),
@@ -157,7 +157,7 @@ func TestAccFolderOrganizationPolicy_restore_defaultTrue(t *testing.T) {
 
 	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
 	org := envvar.GetTestOrgFromEnv(t)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleOrganizationPolicyDestroyProducer(t),

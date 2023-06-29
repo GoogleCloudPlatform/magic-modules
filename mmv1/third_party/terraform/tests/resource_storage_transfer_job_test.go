@@ -21,7 +21,7 @@ func TestAccStorageTransferJob_basic(t *testing.T) {
 	testUpdatedTransferJobDescription := RandString(t, 10)
 	testPubSubTopicName := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
@@ -85,7 +85,7 @@ func TestAccStorageTransferJob_omitScheduleEndDate(t *testing.T) {
 	testDataSinkName := RandString(t, 10)
 	testTransferJobDescription := RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
@@ -109,7 +109,7 @@ func TestAccStorageTransferJob_posixSource(t *testing.T) {
 	testTransferJobDescription := RandString(t, 10)
 	testSourceAgentPoolName := fmt.Sprintf("tf-test-source-agent-pool-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
@@ -132,7 +132,7 @@ func TestAccStorageTransferJob_posixSink(t *testing.T) {
 	testTransferJobDescription := RandString(t, 10)
 	testSinkAgentPoolName := fmt.Sprintf("tf-test-sink-agent-pool-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
@@ -158,7 +158,7 @@ func TestAccStorageTransferJob_transferOptions(t *testing.T) {
 	testOverwriteWhen := []string{"ALWAYS", "NEVER", "DIFFERENT"}
 	testPubSubTopicName := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
@@ -207,7 +207,7 @@ func TestAccStorageTransferJob_objectConditions(t *testing.T) {
 	testTransferJobDescription := RandString(t, 10)
 	testPubSubTopicName := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
@@ -242,7 +242,7 @@ func TestAccStorageTransferJob_notificationConfig(t *testing.T) {
 	testPubSubTopicName := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
 	testPubSubTopicNameUpdate := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),

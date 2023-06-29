@@ -15,7 +15,7 @@ func TestAccSecurityCenterSource_basic(t *testing.T) {
 	orgId := envvar.GetTestOrgFromEnv(t)
 	suffix := RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{

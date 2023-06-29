@@ -26,7 +26,7 @@ func TestAccCloudBuildTrigger_migration(t *testing.T) {
 		"mynewprovider": func() (*schema.Provider, error) { return acctest.TestAccProviders["google"], nil },
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		CheckDestroy: testAccCheckCloudBuildTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{

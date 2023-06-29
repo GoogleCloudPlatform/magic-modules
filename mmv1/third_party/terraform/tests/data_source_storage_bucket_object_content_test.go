@@ -13,7 +13,7 @@ func TestAccDataSourceStorageBucketObjectContent_Basic(t *testing.T) {
 	bucket := "tf-bucket-object-content-" + RandString(t, 10)
 	content := "qwertyuioasdfghjk1234567!!@#$*"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{

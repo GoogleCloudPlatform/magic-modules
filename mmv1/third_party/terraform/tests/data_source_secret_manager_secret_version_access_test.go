@@ -16,7 +16,7 @@ func TestAccDatasourceSecretManagerSecretVersionAccess_basic(t *testing.T) {
 
 	randomString := RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckSecretManagerSecretVersionDestroyProducer(t),
@@ -36,7 +36,7 @@ func TestAccDatasourceSecretManagerSecretVersionAccess_latest(t *testing.T) {
 
 	randomString := RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckSecretManagerSecretVersionDestroyProducer(t),

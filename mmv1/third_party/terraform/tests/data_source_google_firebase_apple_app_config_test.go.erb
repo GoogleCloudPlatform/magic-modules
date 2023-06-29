@@ -23,7 +23,7 @@ func TestAccDataSourceGoogleFirebaseAppleAppConfig(t *testing.T) {
 		"team_id":      1234567890,
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck: func() { acctest.AccTestPreCheck(t) },
 		Steps: []resource.TestStep{
 			{

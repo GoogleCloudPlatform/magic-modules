@@ -23,7 +23,7 @@ func TestAccBigtableGCPolicy_basic(t *testing.T) {
 	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	familyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableGCPolicyDestroyProducer(t),
@@ -48,7 +48,7 @@ func TestAccBigtableGCPolicy_abandoned(t *testing.T) {
 	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	familyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableGCPolicyDestroyProducer(t),
@@ -81,7 +81,7 @@ func TestAccBigtableGCPolicy_swapOffDeprecated(t *testing.T) {
 	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	familyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableGCPolicyDestroyProducer(t),
@@ -119,7 +119,7 @@ func TestAccBigtableGCPolicy_union(t *testing.T) {
 	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	familyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableGCPolicyDestroyProducer(t),
@@ -145,7 +145,7 @@ func TestAccBigtableGCPolicy_multiplePolicies(t *testing.T) {
 	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	familyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableGCPolicyDestroyProducer(t),
@@ -176,7 +176,7 @@ func TestAccBigtableGCPolicy_gcRulesPolicy(t *testing.T) {
 	gcRulesOriginal := "{\"mode\":\"intersection\",\"rules\":[{\"max_age\":\"10h\"},{\"max_version\":2}]}"
 	gcRulesUpdate := "{\"mode\":\"intersection\",\"rules\":[{\"max_age\":\"16h\"},{\"max_version\":1}]}"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableGCPolicyDestroyProducer(t),

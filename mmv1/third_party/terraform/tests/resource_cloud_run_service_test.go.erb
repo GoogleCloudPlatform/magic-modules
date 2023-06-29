@@ -16,7 +16,7 @@ func TestAccCloudRunService_cloudRunServiceUpdate(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
 	name := "tftest-cloudrun-" + RandString(t, 6)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -49,7 +49,7 @@ func TestAccCloudRunService_foregroundDeletion(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
 	name := "tftest-cloudrun-" + RandString(t, 6)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -125,7 +125,7 @@ func TestAccCloudRunService_secretVolume(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
 	name := "tftest-cloudrun-" + RandString(t, 6)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -249,7 +249,7 @@ func TestAccCloudRunService_secretEnvironmentVariable(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
 	name := "tftest-cloudrun-" + RandString(t, 6)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -370,7 +370,7 @@ func TestAccCloudRunService_probes(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
 	name := "tftest-cloudrun-" + RandString(t, 6)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{

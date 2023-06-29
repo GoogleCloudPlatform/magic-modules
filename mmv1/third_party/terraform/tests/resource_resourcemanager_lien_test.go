@@ -20,7 +20,7 @@ func TestAccResourceManagerLien_basic(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	var lien resourceManager.Lien
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckResourceManagerLienDestroyProducer(t),

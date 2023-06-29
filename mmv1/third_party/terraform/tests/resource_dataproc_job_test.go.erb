@@ -29,7 +29,7 @@ type jobTestField struct {
 // func TestAccDataprocJob_failForMissingJobConfig(t *testing.T) {
 // 	t.Parallel()
 
-// 	VcrTest(t, resource.TestCase{
+// 	acctest.VcrTest(t, resource.TestCase{
 // 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 // 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 // 		CheckDestroy:             testAccCheckDataprocJobDestroyProducer(t),
@@ -48,7 +48,7 @@ func TestAccDataprocJob_updatable(t *testing.T) {
 	var job dataproc.Job
 	rnd := RandString(t, 10)
 	jobId := fmt.Sprintf("dproc-update-job-id-%s", rnd)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataprocJobDestroyProducer(t),
@@ -77,7 +77,7 @@ func TestAccDataprocJob_PySpark(t *testing.T) {
 	var job dataproc.Job
 	rnd := RandString(t, 10)
 	jobId := fmt.Sprintf("dproc-custom-job-id-%s", rnd)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataprocJobDestroyProducer(t),
@@ -115,7 +115,7 @@ func TestAccDataprocJob_Spark(t *testing.T) {
 
 	var job dataproc.Job
 	rnd := RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataprocJobDestroyProducer(t),
@@ -147,7 +147,7 @@ func TestAccDataprocJob_Hadoop(t *testing.T) {
 
 	var job dataproc.Job
 	rnd := RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataprocJobDestroyProducer(t),
@@ -179,7 +179,7 @@ func TestAccDataprocJob_Hive(t *testing.T) {
 
 	var job dataproc.Job
 	rnd := RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataprocJobDestroyProducer(t),
@@ -211,7 +211,7 @@ func TestAccDataprocJob_Pig(t *testing.T) {
 
 	var job dataproc.Job
 	rnd := RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataprocJobDestroyProducer(t),
@@ -243,7 +243,7 @@ func TestAccDataprocJob_SparkSql(t *testing.T) {
 
 	var job dataproc.Job
 	rnd := RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataprocJobDestroyProducer(t),
@@ -275,7 +275,7 @@ func TestAccDataprocJob_Presto(t *testing.T) {
 
 	var job dataproc.Job
 	rnd := RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataprocJobDestroyProducer(t),

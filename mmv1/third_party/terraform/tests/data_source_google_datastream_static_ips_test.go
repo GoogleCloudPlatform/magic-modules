@@ -9,7 +9,7 @@ import (
 )
 
 func TestAccDataSourceGoogleDatastreamStaticIps_basic(t *testing.T) {
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{

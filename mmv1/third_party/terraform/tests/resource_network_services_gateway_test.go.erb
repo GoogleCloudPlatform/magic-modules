@@ -15,7 +15,7 @@ func TestAccNetworkServicesGateway_update(t *testing.T) {
 
 	gatewayName := fmt.Sprintf("tf-test-gateway-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckNetworkServicesGatewayDestroyProducer(t),
@@ -82,7 +82,7 @@ resource "google_network_services_gateway" "foobar" {
 //	newPolicyName := fmt.Sprintf("tf-test-gateway-swp-newpolicy-%s", RandString(t, 10))
 //	newRuleName := fmt.Sprintf("tf-test-gateway-swp-newrule-%s", RandString(t, 10))
 //
-//	VcrTest(t, resource.TestCase{
+//	acctest.VcrTest(t, resource.TestCase{
 //		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 //		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 //		CheckDestroy: testAccCheckNetworkServicesGatewayDestroyProducer(t),
@@ -287,7 +287,7 @@ func TestAccNetworkServicesGateway_multipleSwpGatewaysDifferentSubnetwork(t *tes
 	gateway2Name := fmt.Sprintf("tf-test-gateway-multiswp2-%s", RandString(t, 10))
 	gateway2Scope := fmt.Sprintf("tf-test-gateway-multiswp-scope2-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkServicesGatewayDestroyProducer(t),
@@ -503,7 +503,7 @@ func TestAccNetworkServicesGateway_multipleSwpGatewaysDifferentNetwork(t *testin
 	gateway2Name := fmt.Sprintf("tf-test-gateway-diffswp2-%s", RandString(t, 10))
 	gateway2Scope := fmt.Sprintf("tf-test-gateway-diffswp-scope2-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkServicesGatewayDestroyProducer(t),

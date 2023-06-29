@@ -15,7 +15,7 @@ func TestAccCloudIoTDevice_update(t *testing.T) {
 	deviceName := fmt.Sprintf("psdevice-test-%s", RandString(t, 10))
 	resourceName := fmt.Sprintf("google_cloudiot_device.%s", deviceName)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudIotDeviceDestroyProducer(t),

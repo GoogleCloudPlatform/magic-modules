@@ -26,7 +26,7 @@ func TestAccCertificateManagerCertificate_migration(t *testing.T) {
 		"mynewprovider": func() (*schema.Provider, error) { return acctest.TestAccProviders["google"], nil },
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { AccTestPreCheck(t) },
 		CheckDestroy: testAccCheckCertificateManagerCertificateDestroyProducer(t),
 		Steps: []resource.TestStep{

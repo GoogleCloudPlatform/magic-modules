@@ -27,7 +27,7 @@ func TestAccActiveDirectoryDomain_update(t *testing.T) {
 
 	resourceName := acctest.Nprintf("google_active_directory_domain.%{resource_name}", context)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckActiveDirectoryDomainDestroyProducer(t),

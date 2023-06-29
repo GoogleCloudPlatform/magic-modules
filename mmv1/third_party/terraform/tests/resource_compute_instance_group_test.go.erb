@@ -25,7 +25,7 @@ func TestAccComputeInstanceGroup_basic(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	var zone = "us-central1-c"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccComputeInstanceGroup_destroyProducer(t),
@@ -62,7 +62,7 @@ func TestAccComputeInstanceGroup_rename(t *testing.T) {
 	var backendName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	var healthName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccComputeInstanceGroup_destroyProducer(t),
@@ -93,7 +93,7 @@ func TestAccComputeInstanceGroup_update(t *testing.T) {
 	var instanceGroup compute.InstanceGroup
 	var instanceName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccComputeInstanceGroup_destroyProducer(t),
@@ -134,7 +134,7 @@ func TestAccComputeInstanceGroup_outOfOrderInstances(t *testing.T) {
 	var instanceGroup compute.InstanceGroup
 	var instanceName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccComputeInstanceGroup_destroyProducer(t),
@@ -156,7 +156,7 @@ func TestAccComputeInstanceGroup_network(t *testing.T) {
 	var instanceGroup compute.InstanceGroup
 	var instanceName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccComputeInstanceGroup_destroyProducer(t),

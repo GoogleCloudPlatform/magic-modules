@@ -17,7 +17,7 @@ func TestAccCloudIoTRegistry_update(t *testing.T) {
 	defaultTelemetry := fmt.Sprintf("psregistry-test-telemetry-%s", RandString(t, 10))
 	additionalTelemetry := fmt.Sprintf("psregistry-additional-test-telemetry-%s", RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudIotDeviceRegistryDestroyProducer(t),

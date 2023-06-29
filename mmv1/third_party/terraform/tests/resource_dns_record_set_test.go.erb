@@ -65,7 +65,7 @@ func TestAccDNSRecordSet_basic(t *testing.T) {
 	t.Parallel()
 
 	zoneName := fmt.Sprintf("dnszone-test-%s", RandString(t, 10))
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
@@ -94,7 +94,7 @@ func TestAccDNSRecordSet_Update(t *testing.T) {
 	t.Parallel()
 
 	zoneName := fmt.Sprintf("dnszone-test-%s", RandString(t, 10))
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
@@ -134,7 +134,7 @@ func TestAccDNSRecordSet_changeType(t *testing.T) {
 	t.Parallel()
 
 	zoneName := fmt.Sprintf("dnszone-test-%s", RandString(t, 10))
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
@@ -166,7 +166,7 @@ func TestAccDNSRecordSet_nestedNS(t *testing.T) {
 
 	zoneName := fmt.Sprintf("dnszone-test-ns-%s", RandString(t, 10))
 	recordSetName := fmt.Sprintf("\"nested.%s.hashicorptest.com.\"", zoneName)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
@@ -189,7 +189,7 @@ func TestAccDNSRecordSet_secondaryNS(t *testing.T) {
 
 	zoneName := fmt.Sprintf("dnszone-test-ns-%s", RandString(t, 10))
 	recordSetName := "google_dns_managed_zone.parent-zone.dns_name"
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
@@ -211,7 +211,7 @@ func TestAccDNSRecordSet_quotedTXT(t *testing.T) {
 	t.Parallel()
 
 	zoneName := fmt.Sprintf("dnszone-test-txt-%s", RandString(t, 10))
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),
@@ -233,7 +233,7 @@ func TestAccDNSRecordSet_uppercaseMX(t *testing.T) {
 	t.Parallel()
 
 	zoneName := fmt.Sprintf("dnszone-test-txt-%s", RandString(t, 10))
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
@@ -262,7 +262,7 @@ func TestAccDNSRecordSet_routingPolicy(t *testing.T) {
 	httpProxyName := fmt.Sprintf("tf-test-http-proxy-%s", RandString(t, 10))
 	forwardingRuleName := fmt.Sprintf("tf-test-forwarding-rule-%s", RandString(t, 10))
 	zoneName := fmt.Sprintf("dnszone-test-%s", RandString(t, 10))
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
@@ -311,7 +311,7 @@ func TestAccDNSRecordSet_changeRouting(t *testing.T) {
 	t.Parallel()
 
 	zoneName := fmt.Sprintf("dnszone-test-%s", RandString(t, 10))
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
@@ -343,7 +343,7 @@ func TestAccDNSRecordSet_interpolated(t *testing.T) {
 	t.Parallel()
 
 	zoneName := fmt.Sprintf("dnszone-test-%s", RandString(t, 10))
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
