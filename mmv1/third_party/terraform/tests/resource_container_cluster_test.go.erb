@@ -3076,7 +3076,7 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaultsBootDiskKmsKey(t *testi
 				ResourceName:            "google_container_cluster.nap_boot_disk_kms_key",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"min_master_version"},
+				ImportStateVerifyIgnore: []string{"min_master_version", "node_pools" // cluster_autoscaling (node auto-provisioning) creates new node pools automatically },
 			},
 		},
 	})
