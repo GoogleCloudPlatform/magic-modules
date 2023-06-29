@@ -119,7 +119,7 @@ func resourceAttachedDiskCreate(d *schema.ResourceData, meta interface{}) error 
 		Source:     diskSrc,
 		Mode:       d.Get("mode").(string),
 		DeviceName: d.Get("device_name").(string),
-    DiskSizeGb: d.Get("disk_size_gb").(int),
+    DiskSizeGb: int64(d.Get("disk_size_gb").(int)),
 	}
 
 	op, err := config.NewComputeClient(userAgent).Instances.AttachDisk(zv.Project, zv.Zone, zv.Name, &attachedDisk).Do()
