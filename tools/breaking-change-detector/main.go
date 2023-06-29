@@ -7,6 +7,7 @@ import (
 )
 
 var docMode = flag.Bool("docs", false, "legacy flag to not break existing CI can be removed after 7/10")
+var providerFolder = flag.String("providerFolder", "", "legacy flag to not break existing CI can be removed after 7/10")
 
 func main() {
 	flag.Parse()
