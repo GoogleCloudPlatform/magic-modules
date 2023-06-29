@@ -12,15 +12,11 @@ aliases:
 
 # Run tests
 
-## Run provider tests locally
-
-{{< hint info >}}
-**Note:** If you want to test changes you've made in Magic Modules, you need to first [generate](/magic-modules/docs/getting-started/generate-providers/) the provider you want to test.
-{{< /hint >}}
-
 ## Before you begin
 
-Authentication is described in more detail [here](https://github.com/hashicorp/terraform-provider-google/wiki/Developer-Best-Practices#authentication).
+[Generate](/magic-modules/docs/getting-started/generate-providers/) the provider you want to test.
+
+We reccomend using using "application default credentials" and running tests as your GCP user account.
 
 1. Set the following environment variables:
 
