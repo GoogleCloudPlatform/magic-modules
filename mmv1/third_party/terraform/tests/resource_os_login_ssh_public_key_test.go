@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccOSLoginSSHPublicKey_osLoginSshKeyExpiry(t *testing.T) {
@@ -14,8 +15,8 @@ func TestAccOSLoginSSHPublicKey_osLoginSshKeyExpiry(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":   RandString(t, 10),
-		"org_id":          acctest.GetTestOrgFromEnv(t),
-		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -40,7 +41,7 @@ func TestAccOSLoginSSHPublicKey_osLoginSshKeyExpiry(t *testing.T) {
 }
 
 func testAccOSLoginSSHPublicKey_osLoginSshKeyExpiry(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"

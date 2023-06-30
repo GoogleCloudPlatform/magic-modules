@@ -5,13 +5,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccSecurityCenterNotificationConfig_updateStreamingConfigFilter(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -43,7 +44,7 @@ func TestAccSecurityCenterNotificationConfig_updateStreamingConfigFilter(t *test
 }
 
 func testAccSecurityCenterNotificationConfig_updateStreamingConfigFilter(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_pubsub_topic" "scc_notification" {
   name = "tf-test-my-topic%{random_suffix}"
 }

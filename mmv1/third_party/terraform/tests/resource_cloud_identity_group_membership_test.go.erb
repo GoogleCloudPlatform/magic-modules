@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	"google.golang.org/api/iam/v1"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -16,9 +17,9 @@ import (
 
 func testAccCloudIdentityGroupMembership_updateTest(t *testing.T) {
 	context := map[string]interface{}{
-		"org_domain":    acctest.GetTestOrgDomainFromEnv(t),
-		"cust_id":       acctest.GetTestCustIdFromEnv(t),
-		"identity_user": acctest.GetTestIdentityUserFromEnv(t),
+		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
+		"cust_id":       envvar.GetTestCustIdFromEnv(t),
+		"identity_user": envvar.GetTestIdentityUserFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -56,7 +57,7 @@ func testAccCloudIdentityGroupMembership_updateTest(t *testing.T) {
 }
 
 func testAccCloudIdentityGroupMembership_update1(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_identity_group" "group" {
   display_name = "tf-test-my-identity-group%{random_suffix}"
 
@@ -87,7 +88,7 @@ resource "google_cloud_identity_group_membership" "basic" {
 }
 
 func testAccCloudIdentityGroupMembership_update2(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_identity_group" "group" {
   display_name = "tf-test-my-identity-group%{random_suffix}"
 
@@ -122,9 +123,9 @@ resource "google_cloud_identity_group_membership" "basic" {
 
 func testAccCloudIdentityGroupMembership_importTest(t *testing.T) {
 	context := map[string]interface{}{
-		"org_domain":    acctest.GetTestOrgDomainFromEnv(t),
-		"cust_id":       acctest.GetTestCustIdFromEnv(t),
-		"identity_user": acctest.GetTestIdentityUserFromEnv(t),
+		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
+		"cust_id":       envvar.GetTestCustIdFromEnv(t),
+		"identity_user": envvar.GetTestIdentityUserFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -146,7 +147,7 @@ func testAccCloudIdentityGroupMembership_importTest(t *testing.T) {
 }
 
 func testAccCloudIdentityGroupMembership_import(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_identity_group" "group" {
   display_name = "tf-test-my-identity-group%{random_suffix}"
 
@@ -185,13 +186,13 @@ func testAccCloudIdentityGroupMembership_membershipDoesNotExistTest(t *testing.T
 	acctest.SkipIfVcr(t)
 
 	context := map[string]interface{}{
-		"org_domain":    acctest.GetTestOrgDomainFromEnv(t),
-		"cust_id":       acctest.GetTestCustIdFromEnv(t),
+		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
+		"cust_id":       envvar.GetTestCustIdFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 
 	saId := "tf-test-sa-" + RandString(t, 10)
-	project := acctest.GetTestProjectFromEnv()
+	project := envvar.GetTestProjectFromEnv()
 	config := BootstrapConfig(t)
 
 	r := &iam.CreateServiceAccountRequest{
@@ -233,7 +234,7 @@ func testAccCloudIdentityGroupMembership_membershipDoesNotExistTest(t *testing.T
 }
 
 func testAccCloudIdentityGroupMembership_dne(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_identity_group" "group" {
   display_name = "tf-test-my-identity-group-%{random_suffix}"
 
@@ -265,8 +266,8 @@ resource "google_cloud_identity_group_membership" "basic" {
 <% unless version == 'ga' -%>
 func testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipWithMemberKeyTest(t *testing.T) {
 	context := map[string]interface{}{
-		"org_domain":    acctest.GetTestOrgDomainFromEnv(t),
-		"cust_id":       acctest.GetTestCustIdFromEnv(t),
+		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
+		"cust_id":       envvar.GetTestCustIdFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -288,7 +289,7 @@ func testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipWithMemberK
 }
 
 func testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipWithMemberKey(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_identity_group" "group" {
   display_name = "tf-test-my-identity-group%{random_suffix}"
 
@@ -333,9 +334,9 @@ resource "google_cloud_identity_group_membership" "cloud_identity_group_membersh
 
 func testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipUserWithMemberKeyTest(t *testing.T) {
 	context := map[string]interface{}{
-		"org_domain":    acctest.GetTestOrgDomainFromEnv(t),
-		"cust_id":       acctest.GetTestCustIdFromEnv(t),
-		"identity_user": acctest.GetTestIdentityUserFromEnv(t),
+		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
+		"cust_id":       envvar.GetTestCustIdFromEnv(t),
+		"identity_user": envvar.GetTestIdentityUserFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -357,7 +358,7 @@ func testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipUserWithMem
 }
 
 func testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipUserWithMemberKey(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_identity_group" "group" {
   display_name = "tf-test-my-identity-group%{random_suffix}"
 
@@ -393,8 +394,8 @@ resource "google_cloud_identity_group_membership" "cloud_identity_group_membersh
 
 func testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipExampleTest(t *testing.T) {
 	context := map[string]interface{}{
-		"org_domain":    acctest.GetTestOrgDomainFromEnv(t),
-		"cust_id":       acctest.GetTestCustIdFromEnv(t),
+		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
+		"cust_id":       envvar.GetTestCustIdFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -417,7 +418,7 @@ func testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipExampleTest
 }
 
 func testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_identity_group" "group" {
   display_name = "tf-test-my-identity-group%{random_suffix}"
 
@@ -462,9 +463,9 @@ resource "google_cloud_identity_group_membership" "cloud_identity_group_membersh
 
 func testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipUserExampleTest(t *testing.T) {
 	context := map[string]interface{}{
-		"org_domain":    acctest.GetTestOrgDomainFromEnv(t),
-		"cust_id":       acctest.GetTestCustIdFromEnv(t),
-		"identity_user": acctest.GetTestIdentityUserFromEnv(t),
+		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
+		"cust_id":       envvar.GetTestCustIdFromEnv(t),
+		"identity_user": envvar.GetTestIdentityUserFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -487,7 +488,7 @@ func testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipUserExample
 }
 
 func testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipUserExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_identity_group" "group" {
   display_name = "tf-test-my-identity-group%{random_suffix}"
 

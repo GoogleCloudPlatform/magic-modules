@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccRedisInstance_update(t *testing.T) {
@@ -195,7 +196,7 @@ func TestAccRedisInstance_regionFromLocation(t *testing.T) {
 	// didn't fall back to that one.
 	region := "us-west1"
 	zone := "us-west1-a"
-	if acctest.GetTestRegionFromEnv() == "us-west1" {
+	if envvar.GetTestRegionFromEnv() == "us-west1" {
 		region = "us-central1"
 		zone = "us-central1-a"
 	}
@@ -352,7 +353,7 @@ resource "google_redis_instance" "test" {
 }
 
 func testAccRedisInstance_redisInstanceAuthEnabled(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_redis_instance" "cache" {
   name           = "tf-test-memory-cache%{random_suffix}"
   memory_size_gb = 1
@@ -362,7 +363,7 @@ resource "google_redis_instance" "cache" {
 }
 
 func testAccRedisInstance_redisInstanceAuthDisabled(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_redis_instance" "cache" {
   name           = "tf-test-memory-cache%{random_suffix}"
   memory_size_gb = 1

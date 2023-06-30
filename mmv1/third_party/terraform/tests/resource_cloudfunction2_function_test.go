@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccCloudFunctions2Function_update(t *testing.T) {
@@ -52,7 +53,7 @@ func TestAccCloudFunctions2Function_update(t *testing.T) {
 }
 
 func testAccCloudfunctions2function_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "tf-test-cloudfunctions2-function-bucket%{random_suffix}"
   location = "US"
@@ -91,7 +92,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
 }
 
 func testAccCloudFunctions2Function_test_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "tf-test-cloudfunctions2-function-bucket%{random_suffix}"
   location = "US"
@@ -128,7 +129,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
 }
 
 func testAccCloudFunctions2Function_test_redeploy(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "tf-test-cloudfunctions2-function-bucket%{random_suffix}"
   location = "US"
@@ -177,7 +178,7 @@ func TestAccCloudFunctions2Function_fullUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 		"zip_path":      "./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip",
 		"random_suffix": RandString(t, 10),
 	}
@@ -203,7 +204,7 @@ func TestAccCloudFunctions2Function_fullUpdate(t *testing.T) {
 }
 
 func testAccCloudfunctions2function_cloudfunctions2BasicAuditlogsExample_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 # [START functions_v2_basic_auditlogs]
 # This example follows the examples shown in this Google Cloud Community blog post
 # https://medium.com/google-cloud/applying-a-path-pattern-when-filtering-in-eventarc-f06b937b4c34

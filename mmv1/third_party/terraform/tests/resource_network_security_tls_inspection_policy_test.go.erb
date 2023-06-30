@@ -104,11 +104,21 @@ resource "google_privateca_certificate_authority" "default" {
   }
 }
 
+resource "google_project_service_identity" "ns_sa" {
+  service = "networksecurity.googleapis.com"
+}
+
+resource "google_privateca_ca_pool_iam_member" "tls_inspection_permission" {
+  ca_pool = google_privateca_ca_pool.default.id
+  role = "roles/privateca.certificateManager"
+  member = "serviceAccount:${google_project_service_identity.ns_sa.email}"
+}
+
 resource "google_network_security_tls_inspection_policy" "foobar" {
   name     = "%s"
   location = "us-central1"
   ca_pool    = google_privateca_ca_pool.default.id
-  depends_on = [google_privateca_ca_pool.default, google_privateca_certificate_authority.default]
+  depends_on = [google_privateca_ca_pool.default, google_privateca_certificate_authority.default, google_privateca_ca_pool_iam_member.tls_inspection_permission]
 }
 `, caPoolName, certificateAuthorityName, tlsInspectionPolicyName)
 }
@@ -176,12 +186,22 @@ resource "google_privateca_certificate_authority" "default" {
   }
 }
 
+resource "google_project_service_identity" "ns_sa" {
+  service = "networksecurity.googleapis.com"
+}
+
+resource "google_privateca_ca_pool_iam_member" "tls_inspection_permission" {
+  ca_pool = google_privateca_ca_pool.default.id
+  role = "roles/privateca.certificateManager"
+  member = "serviceAccount:${google_project_service_identity.ns_sa.email}"
+}
+
 resource "google_network_security_tls_inspection_policy" "foobar" {
   name        = "%s"
   location    = "us-central1"
   description = "my tls inspection policy updated"
   ca_pool     = google_privateca_ca_pool.default.id
-  depends_on = [google_privateca_ca_pool.default, google_privateca_certificate_authority.default]
+  depends_on = [google_privateca_ca_pool.default, google_privateca_certificate_authority.default, google_privateca_ca_pool_iam_member.tls_inspection_permission]
 }
 `, caPoolName, certificateAuthorityName, tlsInspectionPolicyName)
 }

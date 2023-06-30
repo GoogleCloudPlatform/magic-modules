@@ -5,13 +5,13 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDataSourceGoogleBillingAccount_byFullName(t *testing.T) {
-	billingId := acctest.GetTestMasterBillingAccountFromEnv(t)
+	billingId := envvar.GetTestMasterBillingAccountFromEnv(t)
 	name := "billingAccounts/" + billingId
 
 	VcrTest(t, resource.TestCase{
@@ -31,7 +31,7 @@ func TestAccDataSourceGoogleBillingAccount_byFullName(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleBillingAccount_byShortName(t *testing.T) {
-	billingId := acctest.GetTestMasterBillingAccountFromEnv(t)
+	billingId := envvar.GetTestMasterBillingAccountFromEnv(t)
 	name := "billingAccounts/" + billingId
 
 	VcrTest(t, resource.TestCase{
@@ -51,7 +51,7 @@ func TestAccDataSourceGoogleBillingAccount_byShortName(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleBillingAccount_byFullNameClosed(t *testing.T) {
-	billingId := acctest.GetTestMasterBillingAccountFromEnv(t)
+	billingId := envvar.GetTestMasterBillingAccountFromEnv(t)
 	name := "billingAccounts/" + billingId
 
 	VcrTest(t, resource.TestCase{

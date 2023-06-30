@@ -52,7 +52,7 @@ func TestAccSecurityScannerScanConfig_scanConfigUpdate(t *testing.T) {
 }
 
 func testAccSecurityScannerScanConfig(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_address" "scanner_static_ip" {
   name     = "scan-static-ip-%{random_suffix}"
 }

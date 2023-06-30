@@ -86,6 +86,13 @@
 <% end -%>
 
 <%
+  Dir["third_party/terraform/fwprovider/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/fwprovider/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/fwprovider/<%= fname -%>'
+<% end -%>
+
+<%
   Dir["third_party/terraform/fwtransport/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>

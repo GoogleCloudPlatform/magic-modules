@@ -42,7 +42,7 @@ func TestAccIdentityPlatformTenantDefaultSupportedIdpConfig_identityPlatformTena
 }
 
 func testAccIdentityPlatformTenantDefaultSupportedIdpConfig_identityPlatformTenantDefaultSupportedIdpConfigBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_identity_platform_tenant" "tenant" {
   display_name  = "tenant"
 }
@@ -58,7 +58,7 @@ resource "google_identity_platform_tenant_default_supported_idp_config" "idp_con
 }
 
 func testAccIdentityPlatformTenantDefaultSupportedIdpConfig_identityPlatformTenantDefaultSupportedIdpConfigUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_identity_platform_tenant" "tenant" {
   display_name  = "tenant"
 }

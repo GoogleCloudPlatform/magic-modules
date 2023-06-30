@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccContainerCluster_basic(t *testing.T) {
@@ -37,7 +38,7 @@ func TestAccContainerCluster_basic(t *testing.T) {
 			},
 			{
 				ResourceName:	     "google_container_cluster.primary",
-				ImportStateId:     fmt.Sprintf("%s/us-central1-a/%s", acctest.GetTestProjectFromEnv(), clusterName),
+				ImportStateId:     fmt.Sprintf("%s/us-central1-a/%s", envvar.GetTestProjectFromEnv(), clusterName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -110,7 +111,7 @@ func TestAccContainerCluster_withAddons(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	pid := acctest.GetTestProjectFromEnv()
+	pid := envvar.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -344,7 +345,7 @@ func TestAccContainerCluster_withMasterAuthConfig_NoCert(t *testing.T) {
 func TestAccContainerCluster_withAuthenticatorGroupsConfig(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	orgDomain := acctest.GetTestOrgDomainFromEnv(t)
+	orgDomain := envvar.GetTestOrgDomainFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -2373,7 +2374,7 @@ func TestAccContainerCluster_withShieldedNodes(t *testing.T) {
 func TestAccContainerCluster_withAutopilot(t *testing.T) {
 	t.Parallel()
 
-	pid := acctest.GetTestProjectFromEnv()
+	pid := envvar.GetTestProjectFromEnv()
 	containerNetName := fmt.Sprintf("tf-test-container-net-%s", RandString(t, 10))
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
 
@@ -2398,7 +2399,7 @@ func TestAccContainerCluster_withAutopilot(t *testing.T) {
 func TestAccContainerClusterCustomServiceAccount_withAutopilot(t *testing.T) {
 	t.Parallel()
 
-	pid := acctest.GetTestProjectFromEnv()
+	pid := envvar.GetTestProjectFromEnv()
 	containerNetName := fmt.Sprintf("tf-test-container-net-%s", RandString(t, 10))
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
 	serviceAccountName := fmt.Sprintf("tf-test-sa-%s", RandString(t, 10))
@@ -2433,7 +2434,7 @@ func TestAccContainerClusterCustomServiceAccount_withAutopilot(t *testing.T) {
 func TestAccContainerCluster_errorAutopilotLocation(t *testing.T) {
 	t.Parallel()
 
-	pid := acctest.GetTestProjectFromEnv()
+	pid := envvar.GetTestProjectFromEnv()
 	containerNetName := fmt.Sprintf("tf-test-container-net-%s", RandString(t, 10))
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
 
@@ -2454,7 +2455,7 @@ func TestAccContainerCluster_errorAutopilotLocation(t *testing.T) {
 func TestAccContainerCluster_withAutopilotNetworkTags(t *testing.T) {
 	t.Parallel()
 
-	pid := acctest.GetTestProjectFromEnv()
+	pid := envvar.GetTestProjectFromEnv()
 	containerNetName := fmt.Sprintf("tf-test-container-net-%s", RandString(t, 10))
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
 
@@ -2481,7 +2482,7 @@ func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	pid := acctest.GetTestProjectFromEnv()
+	pid := envvar.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -2629,7 +2630,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_basic_1_23_16(clusterName),
+				Config: testAccContainerCluster_basic(clusterName),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -2655,7 +2656,6 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
-			<% if version == "beta" -%>
 			{
 				Config: testAccContainerCluster_withMonitoringConfigUpdated(clusterName),
 			},
@@ -2665,7 +2665,6 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
-			<% end -%>
 			{
 				Config: testAccContainerCluster_withMonitoringConfigPrometheusUpdated(clusterName),
 			},
@@ -2677,7 +2676,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 			},
 			// Back to basic settings to test setting Prometheus on its own
 			{
-				Config: testAccContainerCluster_basic_1_23_16(clusterName),
+				Config: testAccContainerCluster_basic(clusterName),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -2695,7 +2694,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 			{
-				Config: testAccContainerCluster_basic_1_23_16(clusterName),
+				Config: testAccContainerCluster_basic(clusterName),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -2786,8 +2785,8 @@ func TestAccContainerCluster_sharedVpc(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	org := acctest.GetTestOrgFromEnv(t)
-	billingId := acctest.GetTestBillingAccountFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
+	billingId := envvar.GetTestBillingAccountFromEnv(t)
 	projectName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	suffix := RandString(t, 10)
 
@@ -3196,7 +3195,7 @@ func TestAccContainerCluster_withExternalIpsConfig(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	pid := acctest.GetTestProjectFromEnv()
+	pid := envvar.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -3227,7 +3226,7 @@ func TestAccContainerCluster_withMeshCertificatesConfig(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	pid := acctest.GetTestProjectFromEnv()
+	pid := envvar.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -3269,7 +3268,7 @@ func TestAccContainerCluster_withCostManagementConfig(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	pid := acctest.GetTestProjectFromEnv()
+	pid := envvar.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -4595,7 +4594,7 @@ func TestAccContainerCluster_failedCreation(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
 
-	project := BootstrapProject(t, "tf-fail-cluster-", acctest.GetTestBillingAccountFromEnv(t), []string{"container.googleapis.com"})
+	project := BootstrapProject(t, "tf-fail-cluster-", envvar.GetTestBillingAccountFromEnv(t), []string{"container.googleapis.com"})
 	RemoveContainerServiceAgentRoleFromContainerEngineRobot(t, project)
 
 	VcrTest(t, resource.TestCase{
@@ -6472,7 +6471,7 @@ resource "google_container_cluster" "with_pco_disabled" {
     network    = google_compute_network.container_network.name
     subnetwork = google_compute_subnetwork.container_subnetwork.name
 
-    min_master_version = "1.23"
+    min_master_version = "1.27"
     initial_node_count = 1
     datapath_provider = "ADVANCED_DATAPATH"
 
@@ -7374,17 +7373,6 @@ resource "google_container_cluster" "primary" {
 `, name)
 }
 
-func testAccContainerCluster_basic_1_23_16(name string) string {
-	return fmt.Sprintf(`
-resource "google_container_cluster" "primary" {
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 1
-  min_master_version = "1.23.16-gke.200"
-}
-`, name)
-}
-
 func testAccContainerCluster_withMonitoringConfigEnabled(name string) string {
        return fmt.Sprintf(`
 data "google_container_engine_versions" "uscentral1a" {
@@ -7395,7 +7383,6 @@ resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = "1.23.16-gke.200"
   monitoring_config {
       enable_components = [ "SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER" ]
   }
@@ -7416,21 +7403,18 @@ resource "google_container_cluster" "primary" {
 `, name)
 }
 
-<% if version == "beta" -%>
 func testAccContainerCluster_withMonitoringConfigUpdated(name string) string {
        return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = "1.23.16-gke.200"
   monitoring_config {
-         enable_components = [ "SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER", "WORKLOADS" ]
+         enable_components = [ "SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER" ]
   }
 }
 `, name)
 }
-<% end -%>
 
 func testAccContainerCluster_withMonitoringConfigPrometheusUpdated(name string) string {
        return fmt.Sprintf(`
@@ -7438,7 +7422,6 @@ resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = "1.23.16-gke.200"
   monitoring_config {
          enable_components = [ "SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER" ]
          managed_prometheus {
@@ -7455,7 +7438,6 @@ resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = "1.23.16-gke.200"
   monitoring_config {
 	     enable_components = []
          managed_prometheus {
@@ -7497,7 +7479,6 @@ resource "google_container_cluster" "primary" {
 }
 `, name, name, name)
 }
-
 
 <% unless version == 'ga' -%>
 func testAccContainerCluster_withTPUConfig(network, cluster string) string {

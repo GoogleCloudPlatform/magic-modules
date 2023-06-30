@@ -5,13 +5,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDataSourceAccessApprovalProjectServiceAccount_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id": acctest.GetTestProjectFromEnv(),
+		"project_id": envvar.GetTestProjectFromEnv(),
 	}
 
 	resourceName := "data.google_access_approval_project_service_account.aa_account"
@@ -31,7 +32,7 @@ func TestAccDataSourceAccessApprovalProjectServiceAccount_basic(t *testing.T) {
 }
 
 func testAccDataSourceAccessApprovalProjectServiceAccount_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 data "google_access_approval_project_service_account" "aa_account" {
   project_id = "%{project_id}"
 }

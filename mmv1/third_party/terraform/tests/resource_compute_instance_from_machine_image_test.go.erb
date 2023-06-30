@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 <% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
@@ -77,8 +78,8 @@ func TestAccComputeInstanceFromMachineImage_diffProject(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
-	org := acctest.GetTestOrgFromEnv(t)
-	billingId := acctest.GetTestBillingAccountFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
+	billingId := envvar.GetTestBillingAccountFromEnv(t)
 	projectID := fmt.Sprintf("tf-test-%d", RandInt(t))
 
 	VcrTest(t, resource.TestCase{

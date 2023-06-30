@@ -62,7 +62,7 @@ examples:
     primary_resource_id: 'entity'
     primary_resource_name:
       "fmt.Sprintf(\"projects/%s/locations/%s/featurestores/%s\"\
-      , acctest.GetTestProjectFromEnv(), acctest.GetTestRegionFromEnv(),
+      , envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(),
       fmt.Sprintf(\"terraform%s\"\
       , context[\"random_suffix\"])), fmt.Sprintf(\"terraform%s\",
       context[\"random_suffix\"\

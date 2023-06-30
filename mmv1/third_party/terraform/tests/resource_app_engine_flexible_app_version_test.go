@@ -5,14 +5,15 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccAppEngineFlexibleAppVersion_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":          acctest.GetTestOrgFromEnv(t),
-		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 		"random_suffix":   RandString(t, 10),
 	}
 
@@ -44,7 +45,7 @@ func TestAccAppEngineFlexibleAppVersion_update(t *testing.T) {
 }
 
 func testAccAppEngineFlexibleAppVersion_python(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "my_project" {
   name = "tf-test-appeng-flex%{random_suffix}"
   project_id = "tf-test-appeng-flex%{random_suffix}"
@@ -157,7 +158,7 @@ resource "google_storage_bucket_object" "main" {
 }
 
 func testAccAppEngineFlexibleAppVersion_pythonUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "my_project" {
   name = "tf-test-appeng-flex%{random_suffix}"
   project_id = "tf-test-appeng-flex%{random_suffix}"

@@ -5,6 +5,7 @@ package google
 import (
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -13,7 +14,7 @@ func TestAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyUpdateEx
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -43,7 +44,7 @@ func TestAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyUpdateEx
 }
 
 func testAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyPreUpdateExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_organization_security_policy" "policy" {
   display_name = "tf-test%{random_suffix}"
   parent       = "organizations/%{org_id}"
@@ -52,7 +53,7 @@ resource "google_compute_organization_security_policy" "policy" {
 }
 
 func testAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyPostUpdateExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_organization_security_policy" "policy" {
   display_name = "tf-test%{random_suffix}"
   parent       = "organizations/%{org_id}"

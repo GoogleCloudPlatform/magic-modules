@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -14,10 +15,10 @@ import (
 func TestAccVmwareengineNetwork_vmwareEngineNetworkUpdate(t *testing.T) {
 	t.Parallel()
 	context := map[string]interface{}{
-		"region":          acctest.GetTestRegionFromEnv(),
+		"region":          envvar.GetTestRegionFromEnv(),
 		"random_suffix":   RandString(t, 10),
-		"organization":    acctest.GetTestOrgFromEnv(t),
-		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
+		"organization":    envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
 
 	configTemplate := vmwareEngineNetworkConfigTemplate(context)
@@ -53,7 +54,7 @@ func TestAccVmwareengineNetwork_vmwareEngineNetworkUpdate(t *testing.T) {
 }
 
 func vmwareEngineNetworkConfigTemplate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_vmwareengine_network" "default-nw" {
   provider    = google-beta
   project     = google_project_service.acceptance.project

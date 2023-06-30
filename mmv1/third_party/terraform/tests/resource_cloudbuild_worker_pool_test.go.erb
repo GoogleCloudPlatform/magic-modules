@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -18,7 +19,7 @@ func TestAccCloudbuildWorkerPool_basic(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": RandString(t, 10),
-		"project":       acctest.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -55,7 +56,7 @@ func TestAccCloudbuildWorkerPool_basic(t *testing.T) {
 }
 
 func testAccCloudbuildWorkerPool_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloudbuild_worker_pool" "pool" {
 	name = "pool%{random_suffix}"
 	location = "europe-west1"
@@ -69,7 +70,7 @@ resource "google_cloudbuild_worker_pool" "pool" {
 }
 
 func testAccCloudbuildWorkerPool_updated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloudbuild_worker_pool" "pool" {
 	name = "pool%{random_suffix}"
 	location = "europe-west1"
@@ -83,7 +84,7 @@ resource "google_cloudbuild_worker_pool" "pool" {
 }
 
 func testAccCloudbuildWorkerPool_noWorkerConfig(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloudbuild_worker_pool" "pool" {
 	name = "pool%{random_suffix}"
 	location = "europe-west1"
@@ -96,7 +97,7 @@ func TestAccCloudbuildWorkerPool_withNetwork(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": RandString(t, 10),
-		"project":       acctest.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -117,7 +118,7 @@ func TestAccCloudbuildWorkerPool_withNetwork(t *testing.T) {
 }
 
 func testAccCloudbuildWorkerPool_withNetwork(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project_service" "servicenetworking" {
   service = "servicenetworking.googleapis.com"
   disable_on_destroy = false
