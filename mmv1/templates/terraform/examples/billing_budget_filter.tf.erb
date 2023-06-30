@@ -5,6 +5,9 @@ data "google_billing_account" "account" {
 data "google_project" "project" {
 }
 
+data "google_organization" "org" {
+}
+
 resource "google_billing_budget" "<%= ctx[:primary_resource_id] %>" {
   billing_account = data.google_billing_account.account.id
   display_name = "<%= ctx[:vars]['display_name'] %>"
@@ -14,6 +17,7 @@ resource "google_billing_budget" "<%= ctx[:primary_resource_id] %>" {
     credit_types_treatment = "INCLUDE_SPECIFIED_CREDITS"
     services               = ["services/24E6-581D-38E5"] # Bigquery
     credit_types           = ["PROMOTION", "FREE_TIER"]
+    resource_ancestors     = [data.google_organization.org.name]
   }
 
   amount {

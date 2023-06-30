@@ -112,6 +112,7 @@ properties:
     default_from_api: true
     update_mask_fields:
       - 'budgetFilter.projects'
+      - 'budgetFilter.resourceAncestors'
       - 'budgetFilter.labels'
       - 'budgetFilter.calendarPeriod'
       - 'budgetFilter.customPeriod'
@@ -124,6 +125,7 @@ properties:
         name: projects
         at_least_one_of:
           - budget_filter.0.projects
+          - budget_filter.0.resource_ancestors
           - budget_filter.0.credit_types_treatment
           - budget_filter.0.services
           - budget_filter.0.subaccounts
@@ -138,6 +140,24 @@ properties:
           the usage occurred on.
         is_set: true
         item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: resourceAncestors
+        at_least_one_of:
+          - budget_filter.0.projects
+          - budget_filter.0.resource_ancestors
+          - budget_filter.0.credit_types_treatment
+          - budget_filter.0.services
+          - budget_filter.0.subaccounts
+          - budget_filter.0.labels
+          - budget_filter.0.calendarPeriod
+          - budget_filter.0.customPeriod
+        description: |
+          A set of folder and organization names of the form folders/{folderId} or organizations/{organizationId},
+          specifying that usage from only this set of folders and organizations should be included in the budget.
+          If omitted, the budget includes all usage that the billing account pays for. If the folder or organization
+          contains projects that are paid for by a different Cloud Billing account, the budget doesn't apply to those projects.
+        is_set: true
+        item_type: Api::Type::String
       - !ruby/object:Api::Type::Enum
         name: creditTypesTreatment
         description: |
@@ -150,6 +170,7 @@ properties:
           - :INCLUDE_SPECIFIED_CREDITS
         at_least_one_of:
           - budget_filter.0.projects
+          - budget_filter.0.resource_ancestors
           - budget_filter.0.credit_types_treatment
           - budget_filter.0.services
           - budget_filter.0.subaccounts
@@ -167,6 +188,7 @@ properties:
           https://cloud.google.com/billing/v1/how-tos/catalog-api.
         at_least_one_of:
           - budget_filter.0.projects
+          - budget_filter.0.resource_ancestors
           - budget_filter.0.credit_types_treatment
           - budget_filter.0.services
           - budget_filter.0.subaccounts
@@ -185,6 +207,7 @@ properties:
           **Note:** If the field has a value in the config and needs to be removed, the field has to be an emtpy array in the config.
         at_least_one_of:
           - budget_filter.0.projects
+          - budget_filter.0.resource_ancestors
           - budget_filter.0.credit_types_treatment
           - budget_filter.0.services
           - budget_filter.0.subaccounts
@@ -206,6 +229,7 @@ properties:
           **Note:** If the field has a value in the config and needs to be removed, the field has to be an emtpy array in the config.
         at_least_one_of:
           - budget_filter.0.projects
+          - budget_filter.0.resource_ancestors
           - budget_filter.0.credit_types_treatment
           - budget_filter.0.services
           - budget_filter.0.subaccounts
@@ -221,6 +245,7 @@ properties:
           this set of labeled resources should be included in the budget.
         at_least_one_of:
           - budget_filter.0.projects
+          - budget_filter.0.resource_ancestors
           - budget_filter.0.credit_types_treatment
           - budget_filter.0.services
           - budget_filter.0.subaccounts
@@ -234,6 +259,7 @@ properties:
         name: calendarPeriod
         at_least_one_of:
           - budget_filter.0.projects
+          - budget_filter.0.resource_ancestors
           - budget_filter.0.credit_types_treatment
           - budget_filter.0.services
           - budget_filter.0.subaccounts
@@ -258,6 +284,7 @@ properties:
         name: customPeriod
         at_least_one_of:
           - budget_filter.0.projects
+          - budget_filter.0.resource_ancestors
           - budget_filter.0.credit_types_treatment
           - budget_filter.0.services
           - budget_filter.0.subaccounts
