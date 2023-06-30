@@ -269,4 +269,4 @@ properties:
     name: stateReason
     output: True
     description: |
-      Detailed description of why BackupPlan is in its current state. 
+      Detailed description of why BackupPlan is in its current state.
