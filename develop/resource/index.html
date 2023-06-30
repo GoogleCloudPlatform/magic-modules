@@ -1,0 +1,317 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Add or modify a resource # This page describes how to add a new resource to the google or google-beta Terraform provider using MMv1 and/or handwritten code.
+For more information about types of resources and the generation process overall, see How Magic Modules works.
+Before you begin # Complete the Generate the providers quickstart to set up your environment and your Google Cloud project. Ensure that your magic-modules, terraform-provider-google, and terraform-provider-google-beta repositories are up to date."><meta name=theme-color content="#FFFFFF"><meta name=color-scheme content="light dark"><meta property="og:title" content="Add or modify a resource"><meta property="og:description" content="Add or modify a resource # This page describes how to add a new resource to the google or google-beta Terraform provider using MMv1 and/or handwritten code.
+For more information about types of resources and the generation process overall, see How Magic Modules works.
+Before you begin # Complete the Generate the providers quickstart to set up your environment and your Google Cloud project. Ensure that your magic-modules, terraform-provider-google, and terraform-provider-google-beta repositories are up to date."><meta property="og:type" content="article"><meta property="og:url" content="https://googlecloudplatform.github.io/magic-modules/develop/resource/"><meta property="article:section" content="develop"><meta property="article:modified_time" content="2023-06-30T09:07:15-07:00"><title>Add or modify a resource | Magic Modules</title><link rel=manifest href=/magic-modules/manifest.json><link rel=icon href=/magic-modules/favicon.png type=image/x-icon><link rel=stylesheet href=/magic-modules/book.min.c58292d36b18b675680ab9baea2029204537b839ea72f258746ec0f32ce8d6c8.css integrity="sha256-xYKS02sYtnVoCrm66iApIEU3uDnqcvJYdG7A8yzo1sg=" crossorigin=anonymous><script defer src=/magic-modules/flexsearch.min.js></script>
+<script defer src=/magic-modules/en.search.min.2f653af129452131d2b57b9c0e9fa9ec37004674da72f2dff61bdc033552be6e.js integrity="sha256-L2U68SlFITHStXucDp+p7DcARnTacvLf9hvcAzVSvm4=" crossorigin=anonymous></script></head><body dir=ltr><input type=checkbox class="hidden toggle" id=menu-control>
+<input type=checkbox class="hidden toggle" id=toc-control><main class="container flex"><aside class=book-menu><div class=book-menu-content><nav><h2 class=book-brand><a class="flex align-center" href=/magic-modules/><img src=/magic-modules/magic-modules.svg alt=Logo><span>Magic Modules</span></a></h2><div class=book-search><input type=text id=book-search-input placeholder=Search aria-label=Search maxlength=64 data-hotkeys=s/><div class="book-search-spinner hidden"></div><ul id=book-search-results></ul></div><ul><li><a href=/magic-modules/>Overview</a></li></ul><ul><li><span>Get started</span><ul><li><a href=/magic-modules/get-started/generate-providers/>Generate the providers</a></li><li><a href=/magic-modules/get-started/how-magic-modules-works/>How Magic Modules works</a></li><li><a href=/magic-modules/get-started/run-provider-tests/>Run provider tests</a></li><li><a href=/magic-modules/get-started/use-built-provider/>Use built provider</a></li><li><a href=/magic-modules/get-started/contributing/>Contributing</a></li><li><a href=/magic-modules/get-started/provider-documentation/>Provider documentation</a></li></ul></li><li><span>Develop</span><ul><li><a href=/magic-modules/develop/resource/ class=active>Add or modify a resource</a></li><li><a href=/magic-modules/develop/add-mmv1-test/>Add an MMv1 test</a></li><li><a href=/magic-modules/develop/add-handwritten-test/>Add a handwritten test</a></li><li><a href=/magic-modules/develop/add-handwritten-datasource/>Add a datasource</a></li><li><a href=/magic-modules/develop/add-handwritten-datasource-documentation/>Add datasource documentation</a></li><li><a href=/magic-modules/develop/promote-to-ga/>Promote to GA</a></li></ul></li><li><a href=/magic-modules/best-practices/>Best practices</a><ul></ul></li><li><span>Contribute</span><ul><li><a href=/magic-modules/contribute/release-notes/>Write release notes</a></li></ul></li><li><span>Reference</span><ul><li><a href=/magic-modules/reference/make-commands/>make commands</a></li><li><a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource.rb target=_blank rel=noopener>Resource YAML reference ↗</a></li><li><a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/type.rb target=_blank rel=noopener>Field YAML reference ↗</a></li><li><a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/iam_policy.rb target=_blank rel=noopener>IAM policy YAML reference ↗</a></li></ul></li></ul></nav><script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script></div></aside><div class=book-page><header class=book-header><div class="flex align-center justify-between"><label for=menu-control><img src=/magic-modules/svg/menu.svg class=book-icon alt=Menu></label>
+<strong>Add or modify a resource</strong>
+<label for=toc-control><img src=/magic-modules/svg/toc.svg class=book-icon alt="Table of Contents"></label></div><aside class="hidden clearfix"><nav id=TableOfContents><ul><li><a href=#before-you-begin>Before you begin</a></li><li><a href=#add-a-resource>Add a resource</a></li><li><a href=#add-fields>Add fields</a></li><li><a href=#add-iam-support>Add IAM support</a></li><li><a href=#add-documentation>Add documentation</a></li><li><a href=#whats-next>What&rsquo;s next?</a></li></ul></nav></aside></header><article class=markdown><h1 id=add-or-modify-a-resource>Add or modify a resource
+<a class=anchor href=#add-or-modify-a-resource>#</a></h1><p>This page describes how to add a new resource to the <code>google</code> or <code>google-beta</code> Terraform provider using MMv1 and/or handwritten code.</p><p>For more information about types of resources and the generation process overall, see <a href=https://googlecloudplatform.github.io/magic-modules/get-started/how-magic-modules-works/>How Magic Modules works</a>.</p><h2 id=before-you-begin>Before you begin
+<a class=anchor href=#before-you-begin>#</a></h2><ol><li>Complete the <a href=https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/>Generate the providers</a> quickstart to set up your environment and your Google Cloud project.</li><li>Ensure that your <code>magic-modules</code>, <code>terraform-provider-google</code>, and <code>terraform-provider-google-beta</code> repositories are up to date.<pre tabindex=0><code>cd ~/magic-modules
+git checkout main &amp;&amp; git clean -f . &amp;&amp; git checkout -- . &amp;&amp; git pull
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+git checkout main &amp;&amp; git clean -f . &amp;&amp; git checkout -- . &amp;&amp; git pull
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+git checkout main &amp;&amp; git clean -f . &amp;&amp; git checkout -- . &amp;&amp; git pull
+</code></pre></li></ol><h2 id=add-a-resource>Add a resource
+<a class=anchor href=#add-a-resource>#</a></h2><div class=book-tabs><input type=radio class=toggle name=tabs-resource id=tabs-resource-0 checked>
+<label for=tabs-resource-0>MMv1</label><div class="book-tabs-content markdown-inner"><ol><li><p>Using an editor of your choice, in the appropriate <a href=https://googlecloudplatform.github.io/magic-modules/get-started/how-magic-modules-works/#mmv1>product folder</a>, create a file called <code>RESOURCE_NAME.yaml</code>. Replace <code>RESOURCE_NAME</code> with the name of the API resource you are adding support for. For example, a configuration file for <a href=https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses>NatAddress</a> would be called <code>NatAddress.yaml</code>.</p></li><li><p>Copy the following template into the new file:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># Copyright 2023 Google Inc.</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Licensed under the Apache License, Version 2.0 (the &#34;License&#34;);</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># you may not use this file except in compliance with the License.</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># You may obtain a copy of the License at</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#     http://www.apache.org/licenses/LICENSE-2.0</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Unless required by applicable law or agreed to in writing, software</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># distributed under the License is distributed on an &#34;AS IS&#34; BASIS,</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># See the License for the specific language governing permissions and</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># limitations under the License.</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>--- !<span style=color:#ae81ff>ruby/object:Api::Resource</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># API resource name</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>name</span>: <span style=color:#e6db74>&#39;ResourceName&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Resource description for the provider documentation.</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>description</span>: |<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  RESOURCE_DESCRIPTION</span>  
+</span></span><span style=display:flex><span><span style=color:#f92672>references</span>: !<span style=color:#ae81ff>ruby/object:Api::Resource::ReferenceLinks</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>guides</span>:
+</span></span><span style=display:flex><span>   <span style=color:#75715e># Link to quickstart in the API&#39;s Guides section. For example:</span>
+</span></span><span style=display:flex><span>   <span style=color:#75715e># &#39;Create and connect to a database&#39;: &#39;https://cloud.google.com/alloydb/docs/quickstart/create-and-connect&#39;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#39;QUICKSTART_TITLE&#39;</span>: <span style=color:#e6db74>&#39;QUICKSTART_URL&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Link to the REST API reference for the resource. For example,</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>api</span>: <span style=color:#e6db74>&#39;API_REFERENCE_URL&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Marks the resource as beta-only. Ensure a beta version block is present in</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># provider.yaml.</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># min_version: beta</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Inserts styled markdown into the header of the resource&#39;s page in the</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># provider documentation.</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># docs:</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#   warning: |</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#     MULTILINE_WARNING_MARKDOWN</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#   note: |</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#     MULTILINE_NOTE_MARKDOWN</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># URL for the resource&#39;s standard List method. https://google.aip.dev/132</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Terraform field names enclosed in double curly braces are replaced with</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># the field values from the resource at runtime.</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>base_url</span>: <span style=color:#e6db74>&#39;projects/{{project}}/locations/{{location}}/resourcenames&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># URL for the resource&#39;s standard Get method. https://google.aip.dev/131</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Terraform field names enclosed in double curly braces are replaced with</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># the field values from the resource at runtime.</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>self_link</span>: <span style=color:#e6db74>&#39;projects/{{project}}/locations/{{location}}/resourcenames/{{name}}&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># If true, the resource and all its fields are considered immutable - that is,</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># only creatable, not updatable. Individual fields can override this if they</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># have a custom update method in the API.</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># immutable: true</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Overrides one or more timeouts, in minutes. All timeouts default to 20.</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># timeouts: !ruby/object:Api::Timeouts</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#   insert_minutes: 20 </span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#   update_minutes: 20 </span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#   delete_minutes: 20 </span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># URL for the resource&#39;s standard Create method, including query parameters.</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># https://google.aip.dev/133</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Terraform field names enclosed in double curly braces are replaced with</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># the field values from the resource at runtime.</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>create_url</span>: <span style=color:#e6db74>&#39;projects/{{project}}/locations/{{location}}/resourcenames?resourceId={{name}}&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Overrides the HTTP verb used to create a new resource.</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Allowed values: :POST, :PUT, :PATCH. Default: :POST</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># create_verb: :POST</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Overrides the URL for the resource&#39;s standard Update method. (If unset, the</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># self_link URL is used by default.) https://google.aip.dev/134</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Terraform field names enclosed in double curly braces are replaced with</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># the field values from the resource at runtime.</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># update_url: &#39;projects/{{project}}/locations/{{location}}/resourcenames/{{name}}&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>update_verb</span>: :<span style=color:#ae81ff>PATCH</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># If true, the resource sets an `updateMask` query parameter listing modified</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># fields when updating the resource. If false, it does not.</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>update_mask</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Overrides the URL for the resource&#39;s standard Delete method. (If unset, the</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># self_link URL is used by default.) https://google.aip.dev/135</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Terraform field names enclosed in double curly braces are replaced with</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># the field values from the resource at runtime.</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># delete_url: &#39;projects/{{project}}/locations/{{location}}/resourcenames/{{name}}&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Overrides the HTTP verb used to delete a resource.</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Allowed values: :POST, :PUT, :PATCH, :DELETE. Default: :DELETE</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># delete_verb: :DELETE</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># If true, code for handling long-running operations is generated along with</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># the resource. If false, that code is not generated.</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>autogen_async</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Sets parameters for handling operations returned by the API.</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>async</span>: !<span style=color:#ae81ff>ruby/object:Api::OpAsync</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Overrides which API calls return operations. Default: [&#39;create&#39;,</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># &#39;update&#39;, &#39;delete&#39;]</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># actions: [&#39;create&#39;, &#39;update&#39;, &#39;delete&#39;]</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>operation</span>: !<span style=color:#ae81ff>ruby/object:Api::OpAsync::Operation</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>base_url</span>: <span style=color:#e6db74>&#39;{{op_id}}&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># If true, the completed operation&#39;s returned JSON is expected to</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># contain a full resource in the &#34;response&#34; field</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># result: !ruby/object:Api::OpAsync::Result</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>#   resource_inside_response: true</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># The following are all required but unused.</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>path</span>: <span style=color:#e6db74>&#39;unused&#39;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>wait_ms</span>: <span style=color:#ae81ff>0</span>  <span style=color:#75715e># unused</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>result</span>: !<span style=color:#ae81ff>ruby/object:Api::OpAsync::Result</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>path</span>: <span style=color:#e6db74>&#39;unused&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>status</span>: !<span style=color:#ae81ff>ruby/object:Api::OpAsync::Status</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>path</span>: <span style=color:#e6db74>&#39;unused&#39;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>allowed</span>: []
+</span></span><span style=display:flex><span>  <span style=color:#f92672>error</span>: !<span style=color:#ae81ff>ruby/object:Api::OpAsync::Error</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>path</span>: <span style=color:#e6db74>&#39;unused&#39;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>message</span>: <span style=color:#e6db74>&#39;unused&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># All resources (of all kinds) that share a mutex value block rather than</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># executing concurrent API requests.</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Terraform field names enclosed in double curly braces are replaced with</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># the field values from the resource at runtime.</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># mutex: RESOURCE_NAME/{{name}}</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>parameters</span>:
+</span></span><span style=display:flex><span>  - !<span style=color:#ae81ff>ruby/object:Api::Type::String</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#39;location&#39;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>required</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>immutable</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>url_param_only</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>description</span>: |<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>      LOCATION_DESCRIPTION</span>      
+</span></span><span style=display:flex><span>  - !<span style=color:#ae81ff>ruby/object:Api::Type::String</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#39;name&#39;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>required</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>immutable</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>url_param_only</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>description</span>: |<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>      NAME_DESCRIPTION</span>      
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>properties</span>:
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Fields go here</span>
+</span></span></code></pre></div></li><li><p>Modify the template as needed to match the API resource&rsquo;s documented behavior.</p></li><li><p>Delete all remaining comments in the resource configuration (including attribute descriptions) that were copied from the above template.</p></li></ol><blockquote><p><strong>Note:</strong> The template includes the most commonly-used fields. For a comprehensive reference, see <a href=https://googlecloudplatform.github.io/magic-modules/reference/resource-reference/>ResourceName.yaml reference ↗</a>.</p></blockquote></div><input type=radio class=toggle name=tabs-resource id=tabs-resource-1>
+<label for=tabs-resource-1>Handwritten</label><div class="book-tabs-content markdown-inner"><blockquote><p><strong>Warning:</strong> Handwritten resources are more difficult to develop and maintain. New handwritten resources will only be accepted if implementing the resource in MMv1 would require entirely overriding two or more CRUD methods.</p></blockquote><ol><li>Add the resource in MMv1.</li><li><a href=https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/>Generate the beta provider</a></li><li>From the beta provider, copy the files generated for the resource to the following locations:<ul><li>Resource: Copy to the appropriate service folder inside <a href=https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services><code>magic-modules/mmv1/third_party/terraform/services</code></a></li><li>Documentation: <a href=https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r><code>magic-modules/mmv1/third_party/terraform/website/docs/r</code></a></li><li>Tests: <a href=https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests><code>magic-modules/mmv1/third_party/terraform/tests</code></a></li><li>Sweepers: <a href=https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/utils><code>magic-modules/mmv1/third_party/terraform/utils</code></a></li></ul></li><li>Modify the Go code as needed.<ul><li>Replace the comments at the top of the file with the following:<pre tabindex=0><code>&lt;% autogen_exception -%&gt;
+</code></pre></li><li>If any of the added Go code (including any imports) is beta-only, change the file suffix to <code>.go.erb</code> and wrap the beta-only code in a version guard: <code>&lt;% unless version = 'ga' -%>...&lt;% else -%>...&lt;% end -%></code>.</li></ul></li><li>Register the resource in <a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/utils/provider.go.erb><code>magic-modules/mmv1/third_party/terraform/utils/provider.go.erb</code></a> under &ldquo;START handwritten resources&rdquo;<ul><li>Add a version guard for any beta-only resources.</li></ul></li></ol></div></div><h2 id=add-fields>Add fields
+<a class=anchor href=#add-fields>#</a></h2><div class=book-tabs><input type=radio class=toggle name=tabs-fields id=tabs-fields-0 checked>
+<label for=tabs-fields-0>MMv1</label><div class="book-tabs-content markdown-inner"><ol><li>For each API field, copy the following template into the resource&rsquo;s <code>properties</code> attribute. Be sure to indent appropriately.</li></ol><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># Supported types: String, Integer, Boolean, Double, Enum,</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># ResourceRef (link to a GCP resource), KeyValuePairs (string -&gt; string map),</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Array, and NestedObject</span>
+</span></span><span style=display:flex><span>- !<span style=color:#ae81ff>ruby/object:Api::Type::String</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#39;API_FIELD_NAME&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>description</span>: |<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    MULTILINE_FIELD_DESCRIPTION</span>    
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Marks the field (and any subfields) as beta-only. Ensure a beta version block</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># is present in provider.yaml. Do not use if an ancestor field (or the overall</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># resource) is already marked as beta-only.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># min_version: beta</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># If true, the field (and any subfields) are considered immutable - that is,</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># only settable on create. If unset or false, the field is still considered</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># immutable if any ancestor field (or the overall resource) is immutable,</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># unless `update_url` is set.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># immutable: true</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># If set, changes to the field&#39;s value trigger a separate call to a specific</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># API method for updating the field&#39;s value. The field is not considered</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># immutable even if an ancestor field (or the overall resource) is immutable.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Terraform field names enclosed in double curly braces are replaced with the</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># field values from the resource at runtime.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># update_url: &#39;projects/{{project}}/locations/{{location}}/resourcenames/{{name}}/setFieldName&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># If update_url is also set, overrides the verb used to update this specific</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># field. Allowed values: :POST, :PUT, :PATCH. Default: Resource&#39;s update_verb</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># (which defaults to :PUT if unset).</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># update_verb: :POST</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># If true, the field is required. If unset or false, the field is optional.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># required: true</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># If true, the field is output-only - that is, it cannot be configured by the</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># user. If unset or false, the field is configurable.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># output: true</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># If true, the provider sets the field&#39;s value in the resource state based only</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># on the user&#39;s configuration. If false or unset, the provider sets the field&#39;s</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># value in the resource state based on the API response. Only use this attribute</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># if the field cannot be read from GCP due to either API or provider constraints.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># ignore_read: true</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Sets a client-side default value for the field. This should be used if the</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># API has a default value that applies in all cases and is stable. Removing</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># or changing a default value is a breaking change. If unset, the field defaults</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># to an &#34;empty&#34; value (such as zero, false, or an empty string).</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># default_value: DEFAULT_VALUE</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># If true, and the field is either not set or set to an &#34;empty&#34; value (such as</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># zero, false, or empty strings), the provider accepts any value returned from</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># the API as the value for the field. If false, and the field is either not set</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># or set to an &#34;empty&#34; value, the provider treats the field&#39;s `default_value`</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># as the value for the field and shows a diff if the API returns any other</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># value for the field. This attribute is useful for complex or</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># frequently-changed API-side defaults, but provides less useful information at</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># plan time than `default_value` and causes the provider to ignore user</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># configurations that explicitly set the field to an &#34;empty&#34; value.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># `default_from_api` and `send_empty_value` cannot both be true on the same field.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># default_from_api: true</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># If true, the provider sends &#34;empty&#34; values (such as zero, false, or empty</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># strings) to the API if set explicitly in the user&#39;s configuration. If false,</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># &#34;empty&#34; values cause the field to be omitted entirely from the API request.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># This attribute is useful for fields where the API would behave differently</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># for an &#34;empty&#34; value vs no value for a particular field - for example,</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># boolean fields that have an API-side default of true.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># `send_empty_value` and `default_from_api` cannot both be true on the same field.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># send_empty_value: true</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Specifies a list of fields (excluding the current field) that cannot be</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># specified at the same time as the current field. Must be set separately on</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># all listed fields.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># conflicts:</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>#   - field_one</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>#   - nested_object.0.nested_field</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Specifies a list of fields (including the current field) that cannot be</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># specified at the same time (but at least one of which must be set). Must be</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># set separately on all listed fields.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># exactly_one_of:</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>#   - field_one</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>#   - nested_object.0.nested_field</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Enum only. Sets allowed values as ruby &#34;literal constants&#34; (prefixed with a</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># colon). If the allowed values change frequently, use a String field instead</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># to allow better forwards-compatibility, and link to API documentation</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># stating the current allowed values in the String field&#39;s description. Do not</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># include UNSPECIFIED values in this list.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># values:</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>#   - :VALUE_ONE</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>#   - :VALUE_TWO</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Array only. Sets the expected type of the items in the array. Primitives</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># should use the name of the primitive class as a string; other types should</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># define the attributes of the nested type.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># item_type: Api::Type::String</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># item_type: !ruby/object:Api::Type::Enum</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>#   name: &#39;required but unused&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>#   description: &#39;required but unused&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>#   values:</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>#     - :VALUE_ONE</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>#     - :VALUE_TWO</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># NestedObject only. Defines fields nested inside the current field.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># properties:</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>#   - !ruby/object:Api::Type::String</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>#     name: &#39;FIELD_NAME&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>#     description: |</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>#       MULTI_LINE_FIELD_DESCRIPTION</span>
+</span></span></code></pre></div><ol start=2><li>Modify the field configuration according to the API documentation and behavior.</li><li>Delete all remaining comments in the field configuration (including attribute descriptions) that were copied from the above template.</li></ol><blockquote><p><strong>Note:</strong> The template includes the most commonly-used fields. For a comprehensive reference, see <a href=https://googlecloudplatform.github.io/magic-modules/reference/field-reference/>Field reference ↗</a>.</p></blockquote></div><input type=radio class=toggle name=tabs-fields id=tabs-fields-1>
+<label for=tabs-fields-1>Handwritten</label><div class="book-tabs-content markdown-inner"><ol><li>Add the field to the handwritten resource&rsquo;s schema.<ul><li>The new field(s) should mirror the API&rsquo;s structure to ease predictability and maintenance. However, if there is an existing related / similar field in the resource that uses a different convention, follow that convention instead.</li><li>Enum fields in the API should be represented as <code>TypeString</code> in Terraform for forwards-compatibility. Link to the API documentation of allowed values in the field description.</li><li>Terraform field names should always use <a href=https://en.wikipedia.org/wiki/Snake_case>snake case ↗</a>.</li><li>See <a href=https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-types>Schema Types ↗</a> and <a href=https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors>Schema Behaviors ↗</a> for more information about field schemas.</li></ul></li><li>Add handling for the new field in the resource&rsquo;s Create method and Update methods.<ul><li>&ldquo;Expanders&rdquo; convert Terraform resource data to API request data.</li><li>For top level fields, add an expander. If the field is set or has changed, call the expander and add the resulting value to the API request.</li><li>For other fields, add logic to the parent field&rsquo;s expander to add the field to the API request. Use a nested expander for complex logic.</li></ul></li><li>Add handling for the new field in the resource&rsquo;s Read method.<ul><li>&ldquo;Flatteners&rdquo; convert API response data to Terraform resource data.</li><li>For top level fields, add a flattener. Call <code>d.Set()</code> on the flattened API response value to store it in Terraform state.</li><li>For other fields, add logic to the parent field&rsquo;s flattener to convert the value from the API response to the Terraform state value. Use a nested flattener for complex logic.</li></ul></li><li>If any of the added Go code (including any imports) is beta-only, change the file suffix to <code>.go.erb</code> and wrap the beta-only code in a version guard: <code>&lt;% unless version = 'ga' -%>...&lt;% else -%>...&lt;% end -%></code>.<ul><li>Add a new guard rather than adding the field to an existing guard; it is easier to read.</li></ul></li></ol></div></div><h2 id=add-iam-support>Add IAM support
+<a class=anchor href=#add-iam-support>#</a></h2><p>This section covers how to add IAM resources in Terraform if they are supported by a particular API resource (indicated by <code>setIamPolicy</code> and <code>getIamPolicy</code> methods in the API documentation for the resource).</p><div class=book-tabs><input type=radio class=toggle name=tabs-IAM id=tabs-IAM-0 checked>
+<label for=tabs-IAM-0>MMv1</label><div class="book-tabs-content markdown-inner"><ol><li>Add the following top-level block to <code>ResourceName.yaml</code> directly above <code>parameters</code>.</li></ol><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#f92672>iam_policy</span>: !<span style=color:#ae81ff>ruby/object:Api::Resource::IamPolicy</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Name of the field on the terraform IAM resources which references</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># the parent resource. Update to match the parent resource&#39;s name.</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>parent_resource_attribute</span>: <span style=color:#e6db74>&#39;resource_name&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Character preceding setIamPolicy in the full URL for the API method.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Usually `:`</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>method_name_separator</span>: <span style=color:#e6db74>&#39;:&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># HTTP method for getIamPolicy. Usually :POST.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Allowed values: :GET, :POST. Default: :GET</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>fetch_iam_policy_verb</span>: :<span style=color:#ae81ff>POST</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Overrides the HTTP method for setIamPolicy.</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Allowed values: :POST, :PUT. Default: :POST</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># set_iam_policy_verb: :POST</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Must match the parent resource&#39;s import_format, but with the</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># parent_resource_attribute value substituted for the final field.</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>import_format</span>: [
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;projects/{{project}}/locations/{{location}}/resourcenames/{{resource_name}}&#39;</span>
+</span></span><span style=display:flex><span>  ]
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Valid IAM role that can be set by generated tests. Default: &#39;roles/viewer&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># allowed_iam_role: &#39;roles/viewer&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># If IAM conditions are supported, set this attribute to indicate how the</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># conditions should be passed to the API. Allowed values: :QUERY_PARAM,</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># :REQUEST_BODY, :QUERY_PARAM_NESTED. Note: :QUERY_PARAM_NESTED should</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># only be used if the query param field contains a `.`</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># iam_conditions_request_type: :REQUEST_BODY</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Marks IAM support as beta-only</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># min_version: beta</span>
+</span></span></code></pre></div><ol start=2><li>Modify the template as needed to match the API resource&rsquo;s documented behavior. These are the most commonly-used fields. For a comprehensive reference, see <a href=https://googlecloudplatform.github.io/magic-modules/reference/iam-policy-reference/>IAM policy YAML reference ↗</a>.</li><li>Delete all remaining comments in the IAM configuration (including attribute descriptions) that were copied from the above template.</li></ol></div><input type=radio class=toggle name=tabs-IAM id=tabs-IAM-1>
+<label for=tabs-IAM-1>Handwritten</label><div class="book-tabs-content markdown-inner"><blockquote><p><strong>Warning:</strong> IAM support for handwritten resources should be implemented using MMv1. New handwritten IAM resources will only be accepted if they cannot be implemented using MMv1.</p></blockquote><h3 id=add-support-in-mmv1>Add support in MMv1
+<a class=anchor href=#add-support-in-mmv1>#</a></h3><ol><li>Follow the MMv1 directions in <a href=#add-the-resource>Add the resource</a> to create a skeleton ResourceName.yaml file for the handwritten resource, but set only the following top-level fields: <code>name</code>, <code>base_url</code> (set to URL of IAM parent resource), <code>self_link</code> (set to same value as <code>base_url</code>) <code>description</code> (required but unused), <code>id_format</code>, <code>import_format</code>, and <code>properties</code>.</li><li>Follow the MMv1 directions in <a href=#add-fields>Add fields</a> to add only the fields used by base_url.</li><li>Follow the MMv1 directions in this section to add IAM support.</li></ol><h3 id=convert-to-handwritten-not-usually-necessary>Convert to handwritten (not usually necessary)
+<a class=anchor href=#convert-to-handwritten-not-usually-necessary>#</a></h3><ol><li><a href=https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/>Generate the beta provider</a></li><li>From the beta provider, copy the files generated for the IAM resources to the following locations:<ul><li>Resource: Copy to the appropriate service folder inside <a href=https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services><code>magic-modules/mmv1/third_party/terraform/services</code></a></li><li>Documentation: <a href=https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r><code>magic-modules/mmv1/third_party/terraform/website/docs/r</code></a></li><li>Tests: <a href=https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests><code>magic-modules/mmv1/third_party/terraform/tests</code></a></li></ul></li><li>Modify the Go code as needed.<ul><li>Replace the comments at the top of the file with the following:<pre tabindex=0><code>&lt;% autogen_exception -%&gt;
+</code></pre></li><li>If any of the added Go code (including any imports) is beta-only, change the file suffix to <code>.go.erb</code> and wrap the beta-only code in a version guard: <code>&lt;% unless version = 'ga' -%>...&lt;% else -%>...&lt;% end -%></code>.</li></ul></li><li>Register the binding, member, and policy resources in <a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/utils/provider.go.erb><code>magic-modules/mmv1/third_party/terraform/utils/provider.go.erb</code></a> under &ldquo;START non-generated IAM resources&rdquo;<ul><li>Add a version guard for any beta-only resources.</li></ul></li></ol></div></div><h2 id=add-documentation>Add documentation
+<a class=anchor href=#add-documentation>#</a></h2><div class=book-tabs><input type=radio class=toggle name=tabs-docs id=tabs-docs-0 checked>
+<label for=tabs-docs-0>MMv1</label><div class="book-tabs-content markdown-inner"><p>Documentation is autogenerated based on the resource and field configurations. To preview the documentation:</p><ol><li><a href=https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/>Generate the providers</a></li><li>Copy and paste the generated documentation into the Hashicorp Registry&rsquo;s <a href=https://registry.terraform.io/tools/doc-preview>Doc Preview Tool</a> to see how it is rendered.</li></ol></div><input type=radio class=toggle name=tabs-docs id=tabs-docs-1>
+<label for=tabs-docs-1>Handwritten</label><div class="book-tabs-content markdown-inner"><ol><li><p>Open the resource documentation in <a href=https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r><code>magic-modules/third_party/terraform/website/docs/r/</code></a> using an editor of your choice.</p><ul><li>The name of the file is the name of the resource without a <code>google_</code> prefix. For example, for <code>google_compute_instance</code>, the file is called <code>compute_instance.html.markdown</code></li></ul></li><li><p>For beta-only resources, add the following snippet directly above the first example:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-markdown data-lang=markdown><span style=display:flex><span>~&gt; <span style=font-weight:700>**Warning:**</span> This resource is in beta, and should be used with the terraform-provider-google-beta provider.
+</span></span><span style=display:flex><span>See [<span style=color:#f92672>Provider Versions</span>](<span style=color:#a6e22e>https://terraform.io/docs/providers/google/guides/provider_versions.html</span>) for more details on beta resources.
+</span></span></code></pre></div></li><li><p>For resources that are in the <code>google</code> provider but have beta-only fields, make sure that all beta-only fields are clearly marked. For example:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-markdown data-lang=markdown><span style=display:flex><span><span style=color:#66d9ef>*</span> <span style=color:#e6db74>`FIELD_NAME`</span> - (Optional, [<span style=color:#f92672>Beta</span>](<span style=color:#a6e22e>https://terraform.io/docs/providers/google/guides/provider_versions.html</span>)) FIELD_DESCRIPTION
+</span></span></code></pre></div><p>Replace <code>FIELD_NAME</code> and <code>FIELD_DESCRIPTION</code> with the field&rsquo;s name and description.</p></li><li><p><a href=https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/>Generate the providers</a></p></li><li><p>Copy and paste the generated documentation into the Hashicorp Registry&rsquo;s <a href=https://registry.terraform.io/tools/doc-preview>Doc Preview Tool</a> to see how it is rendered.</p></li></ol></div></div><h2 id=whats-next>What&rsquo;s next?
+<a class=anchor href=#whats-next>#</a></h2><ul><li><a href=https://googlecloudplatform.github.io/magic-modules/develop/add-mmv1-test/>Add MMv1 tests</a></li><li><a href=https://googlecloudplatform.github.io/magic-modules/develop/add-handwritten-test/>Add handwritten tests</a></li><li><a href=https://googlecloudplatform.github.io/magic-modules/get-started/run-provider-tests/>Test your changes</a></li></ul></article><footer class=book-footer><div class="flex flex-wrap justify-between"><div><a class="flex align-center" href=https://github.com/GoogleCloudPlatform/magic-modules/commit/8fbb9b51445d42d179863b911f18854afacff523 title='Last modified by Stephen Lewis (Burrows) | June 30, 2023' target=_blank rel=noopener><img src=/magic-modules/svg/calendar.svg class=book-icon alt=Calendar>
+<span>June 30, 2023</span></a></div><div><a class="flex align-center" href=https://github.com/GoogleCloudPlatform/magic-modules/edit/main/docs/content/develop/resource.md target=_blank rel=noopener><img src=/magic-modules/svg/edit.svg class=book-icon alt=Edit>
+<span>Edit this page</span></a></div></div><script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script></footer><label for=menu-control class="hidden book-menu-overlay"></label></div><aside class=book-toc><div class=book-toc-content><nav id=TableOfContents><ul><li><a href=#before-you-begin>Before you begin</a></li><li><a href=#add-a-resource>Add a resource</a></li><li><a href=#add-fields>Add fields</a></li><li><a href=#add-iam-support>Add IAM support</a></li><li><a href=#add-documentation>Add documentation</a></li><li><a href=#whats-next>What&rsquo;s next?</a></li></ul></nav></div></aside></main></body></html>
