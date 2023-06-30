@@ -167,10 +167,6 @@ For more information about types of resources and the generation process overall
    # with the field values from the resource at runtime.
    # mutex: RESOURCE_NAME/{{name}}
 
-   # IAM_GOES_HERE
-
-   # EXAMPLES_GO_HERE
-
    parameters:
      - !ruby/object:Api::Type::String
        name: 'location'
@@ -192,6 +188,7 @@ For more information about types of resources and the generation process overall
    ```
 
 3. Modify the template as needed to match the API resource's documented behavior.
+4. Delete all remaining comments in the resource configuration (including attribute descriptions) that were copied from the above template.
 
 > **Note:** The template includes the most commonly-used fields. For a comprehensive reference, see [ResourceName.yaml reference ↗]({{<ref "/reference/resource-reference.md" >}}).
 {{< /tab >}}
@@ -334,6 +331,7 @@ For more information about types of resources and the generation process overall
   #       MULTI_LINE_FIELD_DESCRIPTION
 ```
 2. Modify the field configuration according to the API documentation and behavior.
+3. Delete all remaining comments in the field configuration (including attribute descriptions) that were copied from the above template.
 
 > **Note:** The template includes the most commonly-used fields. For a comprehensive reference, see [Field reference ↗]({{<ref "/reference/field-reference.md" >}}).
 {{< /tab >}}
@@ -363,7 +361,7 @@ This section covers how to add IAM resources in Terraform if they are supported 
 
 {{< tabs "IAM" >}}
 {{< tab "MMv1" >}}
-1. Add the following top-level block to `ResourceName.yaml`, replacing `IAM_GOES_HERE`.
+1. Add the following top-level block to `ResourceName.yaml` directly above `parameters`.
 
 ```yaml
 iam_policy: !ruby/object:Api::Resource::IamPolicy
@@ -399,6 +397,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 ```
 
 2. Modify the template as needed to match the API resource's documented behavior. These are the most commonly-used fields. For a comprehensive reference, see [IAM policy YAML reference ↗]({{<ref "/reference/iam-policy-reference.md" >}}).
+3. Delete all remaining comments in the IAM configuration (including attribute descriptions) that were copied from the above template.
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 > **Warning:** IAM support for handwritten resources should be implemented using MMv1. New handwritten IAM resources will only be accepted if they cannot be implemented using MMv1.
