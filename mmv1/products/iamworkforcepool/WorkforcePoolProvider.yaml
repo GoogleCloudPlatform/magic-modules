@@ -277,6 +277,8 @@ properties:
                   The plain text of the client secret value.
                 sensitive: true
                 required: true
+                validation: !ruby/object:Provider::Terraform::Validation
+                  function: 'validation.StringIsNotEmpty'
               - !ruby/object:Api::Type::String
                 name: 'thumbprint'
                 description: |
