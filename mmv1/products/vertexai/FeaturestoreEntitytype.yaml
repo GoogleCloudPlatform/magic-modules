@@ -75,7 +75,7 @@ examples:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
     test_vars_overrides:
-      kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
   - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_featurestore_entitytype_with_beta_fields'
     primary_resource_id: 'entity'
@@ -87,7 +87,7 @@ examples:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
     test_vars_overrides:
-      kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     min_version: beta
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_create: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb

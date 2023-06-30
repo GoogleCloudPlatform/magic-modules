@@ -178,7 +178,7 @@ func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *tes
 
 	databaseName := "tf-test-" + RandString(t, 10)
 	addressName := "tf-test-" + RandString(t, 10)
-	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private-clone-2")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-clone-2")
 
 	// 1. Create an instance.
 	// 2. Add a root@'%' user.
@@ -736,7 +736,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(t *te
 
 	databaseName := "tf-test-" + RandString(t, 10)
 	addressName := "tf-test-" + RandString(t, 10)
-	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private")
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -790,9 +790,9 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(t *testi
 
 	databaseName := "tf-test-" + RandString(t, 10)
 	addressName := "tf-test-" + RandString(t, 10)
-	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private-allocated-ip-range")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-allocated-ip-range")
 	addressName_update := "tf-test-" + RandString(t, 10) + "update"
-	networkName_update := BootstrapSharedTestNetwork(t, "sql-instance-private-allocated-ip-range-update")
+	networkName_update := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-allocated-ip-range-update")
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -828,7 +828,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(t
 
 	databaseName := "tf-test-" + RandString(t, 10)
 	addressName := "tf-test-" + RandString(t, 10)
-	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private-replica")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-replica")
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -861,7 +861,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(t *
 
 	databaseName := "tf-test-" + RandString(t, 10)
 	addressName := "tf-test-" + RandString(t, 10)
-	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private-clone")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-clone")
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -894,7 +894,7 @@ func TestAccSqlDatabaseInstance_createFromBackup(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":    RandString(t, 10),
-		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
+		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -922,7 +922,7 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":    RandString(t, 10),
-		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
+		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -959,7 +959,7 @@ func TestAccSqlDatabaseInstance_basicClone(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":    RandString(t, 10),
-		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
+		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -987,7 +987,7 @@ func TestAccSqlDatabaseInstance_cloneWithSettings(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":    RandString(t, 10),
-		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
+		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -1015,7 +1015,7 @@ func TestAccSqlDatabaseInstance_cloneWithDatabaseNames(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":    RandString(t, 10),
-		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
+		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -1261,10 +1261,10 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 
 	t.Parallel()
 	databaseName := "tf-test-" + RandString(t, 10)
-	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private-test-ad")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-test-ad")
 	addressName := "tf-test-" + RandString(t, 10)
 	rootPassword := RandString(t, 15)
-	adDomainName := BootstrapSharedTestADDomain(t, "test-domain", networkName)
+	adDomainName := acctest.BootstrapSharedTestADDomain(t, "test-domain", networkName)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
