@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: Looker
-display_name: Looker (Goocgle Cloud core)
+display_name: Looker (Google Cloud core)
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
