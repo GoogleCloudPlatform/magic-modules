@@ -1,7 +1,7 @@
 {
   "project": "{{project}}",
   "location": "us-west1",
-  "connection": "projects/{{project}}/locations/us-west1/connections/{{ref:gitlab.connection.json:name}}",
+  "connection": "{{ref:gitlab.connection.json:name}}",
   "name": "{{repository}}",
   "remoteUri": "https://gitlab.com/proctor-eng-team/terraform-testing.git",
   "annotations": {
