@@ -87,17 +87,17 @@ For more information about types of resources and the generation process overall
    #     MULTILINE_NOTE_MARKDOWN
 
    # URL for the resource's standard List method. https://google.aip.dev/132
-   # Terraform field names enclosed in double curly braces will be replaced
-   # with the field values from the resource at runtime.
+   # Terraform field names enclosed in double curly braces are replaced with
+   # the field values from the resource at runtime.
    base_url: 'projects/{{project}}/locations/{{location}}/resourcenames'
    # URL for the resource's standard Get method. https://google.aip.dev/131
-   # Terraform field names enclosed in double curly braces will be replaced
-   # with the field values from the resource at runtime.
+   # Terraform field names enclosed in double curly braces are replaced with
+   # the field values from the resource at runtime.
    self_link: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
 
-   # If true, the resource and all its fields will be considered immutable - that
-   # is, only creatable, not updatable. Individual fields can override this if
-   # they have a custom update method in the API.
+   # If true, the resource and all its fields are considered immutable - that is,
+   # only creatable, not updatable. Individual fields can override this if they
+   # have a custom update method in the API.
    # immutable: true
 
    # Overrides one or more timeouts, in minutes. All timeouts default to 20.
@@ -108,17 +108,17 @@ For more information about types of resources and the generation process overall
 
    # URL for the resource's standard Create method, including query parameters.
    # https://google.aip.dev/133
-   # Terraform field names enclosed in double curly braces will be replaced
-   # with the field values from the resource at runtime.
+   # Terraform field names enclosed in double curly braces are replaced with
+   # the field values from the resource at runtime.
    create_url: 'projects/{{project}}/locations/{{location}}/resourcenames?resourceId={{name}}'
    # Overrides the HTTP verb used to create a new resource.
    # Allowed values: :POST, :PUT, :PATCH. Default: :POST
    # create_verb: :POST
 
    # Overrides the URL for the resource's standard Update method. (If unset, the
-   # self_link URL will be used by default.) https://google.aip.dev/134
-   # Terraform field names enclosed in double curly braces will be replaced
-   # with the field values from the resource at runtime.
+   # self_link URL is used by default.) https://google.aip.dev/134
+   # Terraform field names enclosed in double curly braces are replaced with
+   # the field values from the resource at runtime.
    # update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
    # The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
    update_verb: :PATCH
@@ -127,9 +127,9 @@ For more information about types of resources and the generation process overall
    update_mask: true
 
    # Overrides the URL for the resource's standard Delete method. (If unset, the
-   # self_link URL will be used by default.) https://google.aip.dev/135
-   # Terraform field names enclosed in double curly braces will be replaced
-   # with the field values from the resource at runtime.
+   # self_link URL is used by default.) https://google.aip.dev/135
+   # Terraform field names enclosed in double curly braces are replaced with
+   # the field values from the resource at runtime.
    # delete_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
    # Overrides the HTTP verb used to delete a resource.
    # Allowed values: :POST, :PUT, :PATCH, :DELETE. Default: :DELETE
@@ -145,7 +145,7 @@ For more information about types of resources and the generation process overall
      # actions: ['create', 'update', 'delete']
      operation: !ruby/object:Api::OpAsync::Operation
        base_url: '{{op_id}}'
-     # If true, the completed operation's returned JSON will be expected to
+     # If true, the completed operation's returned JSON is expected to
      # contain a full resource in the "response" field
      # result: !ruby/object:Api::OpAsync::Result
      #   resource_inside_response: true
@@ -161,10 +161,10 @@ For more information about types of resources and the generation process overall
        path: 'unused'
        message: 'unused'
 
-   # All resources (of all kinds) that share a mutex value will block rather
-   # than executing concurrent API requests.
-   # Terraform field names enclosed in double curly braces will be replaced
-   # with the field values from the resource at runtime.
+   # All resources (of all kinds) that share a mutex value block rather than
+   # executing concurrent API requests.
+   # Terraform field names enclosed in double curly braces are replaced with
+   # the field values from the resource at runtime.
    # mutex: RESOURCE_NAME/{{name}}
 
    parameters:
@@ -232,18 +232,17 @@ For more information about types of resources and the generation process overall
   # resource) is already marked as beta-only.
   # min_version: beta
 
-  # If true, the field (and any subfields) will be considered immutable - that
-  # is, only settable on create. If unset or false, the field will still be
-  # considered immutable if any ancestor field (or the overall resource) is
-  # immutable, unless `update_url` is set.
+  # If true, the field (and any subfields) are considered immutable - that is,
+  # only settable on create. If unset or false, the field is still considered
+  # immutable if any ancestor field (or the overall resource) is immutable,
+  # unless `update_url` is set.
   # immutable: true
 
-  # If set, changes to the field's value will trigger a separate call to a
-  # specific API method for updating the field's value. The field will not be
-  # considered immutable even if an ancestor field (or the overall resource) is
-  # immutable.
-  # Terraform field names enclosed in double curly braces will be replaced
-  # with the field values from the resource.
+  # If set, changes to the field's value trigger a separate call to a specific
+  # API method for updating the field's value. The field is not considered
+  # immutable even if an ancestor field (or the overall resource) is immutable.
+  # Terraform field names enclosed in double curly braces are replaced with the
+  # field values from the resource at runtime.
   # update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}/setFieldName'
 
   # If update_url is also set, overrides the verb used to update this specific
@@ -258,35 +257,37 @@ For more information about types of resources and the generation process overall
   # user. If unset or false, the field is configurable.
   # output: true
 
-  # If true, the provider will set the field's value in the resource state based
-  # only on the user's configuration. If false or unset, the provider will set
-  # the field's value in the resource state based on the API response. This
-  # should only be used if the field cannot be read from GCP due to either API or
-  # provider constraints.
+  # If true, the provider sets the field's value in the resource state based only
+  # on the user's configuration. If false or unset, the provider sets the field's
+  # value in the resource state based on the API response. Only use this attribute
+  # if the field cannot be read from GCP due to either API or provider constraints.
   # ignore_read: true
 
   # Sets a client-side default value for the field. This should be used if the
   # API has a default value that applies in all cases and is stable. Removing
-  # or changing a default value is a breaking change.
+  # or changing a default value is a breaking change. If unset, the field defaults
+  # to an "empty" value (such as zero, false, or an empty string).
   # default_value: DEFAULT_VALUE
 
-  # If true, and the field is either not set or set to a value that Terraform
-  # considers "empty" (such as zero, false, or empty strings), the resource will
-  # accept any value returned from the API as the value for the field. If false,
-  # and the field is either not set or set to an "empty" value, the provider will
-  # show a diff if the API returns a non-empty value for the field. This is
-  # useful for complex or frequently-changed API-side defaults, but provides
-  # less useful information at plan time than default_value and prevents users
-  # from setting the field to an "empty" value.
+  # If true, and the field is either not set or set to an "empty" value (such as
+  # zero, false, or empty strings), the provider accepts any value returned from
+  # the API as the value for the field. If false, and the field is either not set
+  # or set to an "empty" value, the provider treats the field's `default_value`
+  # as the value for the field and shows a diff if the API returns any other
+  # value for the field. This attribute is useful for complex or
+  # frequently-changed API-side defaults, but provides less useful information at
+  # plan time than `default_value` and causes the provider to ignore user
+  # configurations that explicitly set the field to an "empty" value.
+  # `default_from_api` and `send_empty_value` cannot both be true on the same field.
   # default_from_api: true
 
-  # If true, the resource will send values that Terraform considers "empty"
-  # (such as zero, false, or empty strings) to the API if set explicitly in the
-  # user's config. If false, values that Terraform core considers "empty" will
-  # cause the field to be omitted entirely from the API request. This is useful
-  # for fields where the API would behave differently when receiving an "empty"
-  # value vs no value for a particular field - for example, boolean fields that
-  # have an API-side default of true.
+  # If true, the provider sends "empty" values (such as zero, false, or empty
+  # strings) to the API if set explicitly in the user's configuration. If false,
+  # "empty" values cause the field to be omitted entirely from the API request.
+  # This attribute is useful for fields where the API would behave differently
+  # for an "empty" value vs no value for a particular field - for example,
+  # boolean fields that have an API-side default of true.
+  # `send_empty_value` and `default_from_api` cannot both be true on the same field.
   # send_empty_value: true
 
   # Specifies a list of fields (excluding the current field) that cannot be
@@ -365,7 +366,7 @@ This section covers how to add IAM resources in Terraform if they are supported 
 
 ```yaml
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  # Name of the field on the terraform IAM resources which will reference
+  # Name of the field on the terraform IAM resources which references
   # the parent resource. Update to match the parent resource's name.
   parent_resource_attribute: 'resource_name'
   # Character preceding setIamPolicy in the full URL for the API method.
@@ -433,11 +434,11 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 Documentation is autogenerated based on the resource and field configurations. To preview the documentation:
 
 1. [Generate the providers]({{< ref "/get-started/generate-providers.md" >}})
-2. Copy and paste the generated documentation into the Hashicorp Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it will be rendered.
+2. Copy and paste the generated documentation into the Hashicorp Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it is rendered.
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 1. Open the resource documentation in [`magic-modules/third_party/terraform/website/docs/r/`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r) using an editor of your choice.
-   - The name of the file will be the name of the resource without a `google_` prefix. For example, for `google_compute_instance`, the file is called `compute_instance.html.markdown`
+   - The name of the file is the name of the resource without a `google_` prefix. For example, for `google_compute_instance`, the file is called `compute_instance.html.markdown`
 2. For beta-only resources, add the following snippet directly above the first example: 
 
    ```markdown
@@ -451,7 +452,7 @@ Documentation is autogenerated based on the resource and field configurations. T
 
    Replace `FIELD_NAME` and `FIELD_DESCRIPTION` with the field's name and description.
 4. [Generate the providers]({{< ref "/get-started/generate-providers.md" >}})
-5. Copy and paste the generated documentation into the Hashicorp Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it will be rendered.
+5. Copy and paste the generated documentation into the Hashicorp Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it is rendered.
 {{< /tab >}}
 {{< /tabs >}}
 
