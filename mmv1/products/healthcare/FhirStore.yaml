@@ -56,7 +56,6 @@ examples:
       pubsub_topic: "fhir-notifications"
   - !ruby/object:Provider::Terraform::Examples
     name: "healthcare_fhir_store_notification_configs"
-    min_version: beta
     primary_resource_id: "default"
     vars:
       dataset_name: "example-dataset"
@@ -286,3 +285,11 @@ properties:
             full FHIR resource. When a resource change is too large or during heavy traffic, only the resource name will be
             sent. Clients should always check the "payloadType" label from a Pub/Sub message to determine whether 
             it needs to fetch the full resource as a separate operation.
+	- !ruby/object:Api::Type::Boolean
+          name: sendPreviousResourceOnDelete
+          description: |
+            Whether to send full pervious FHIR resource to this Pub/Sub topic for Delete operation.
+            Note that setting this to true does not guarantee that all resources will be sent in the format of
+            full FHIR resource. When a resource change is too large or during heavy traffic, only the resource name will be
+            sent. Clients should always check the "payloadType" label from a Pub/Sub message to determine whether
+            it needs to fetch the full pervious resource as a separate operation.
