@@ -1,5 +1,5 @@
 createdClientSecret := d.Get("oidc.0.client_secret.0.value.0.plain_text")
-if createdClientSecret != "" {
+if createdClientSecret != nil && createdClientSecret != "" {
 	// After the create, reading from the API returns a new thumbprint
 	// for the client secret value, which clears the plain_text. We set the plain_text since
 	// this case should not warrant a diff.
