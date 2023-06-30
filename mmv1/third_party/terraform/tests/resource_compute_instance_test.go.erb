@@ -5314,6 +5314,7 @@ resource "google_compute_instance" "foobar" {
   }
 
   min_cpu_platform = "Intel Haswell"
+  allow_stopping_for_update = true
 }
 `, instance)
 }
@@ -5341,6 +5342,7 @@ resource "google_compute_instance" "foobar" {
   }
 
   min_cpu_platform = "AUTOMATIC"
+  allow_stopping_for_update = true
 }
 `, instance)
 }
