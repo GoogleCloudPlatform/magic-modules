@@ -23,7 +23,7 @@ func TestAccMultipleResources(t *testing.T) {
 }
 
 func testAccMultipleResources() string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "resource_one" "instance_one" {
   field_one = "value-one"
 }
@@ -42,7 +42,7 @@ resource "resource_two" "instace_two" {
 }
 
 func testAccMultipleResources_update() string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "resource_one" "instance_one" {
   field_one = "value-two"
 }

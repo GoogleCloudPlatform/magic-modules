@@ -3,12 +3,14 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -21,8 +23,8 @@ func TestAccGKEHubFeature_gkehubFeatureFleetObservability(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":   RandString(t, 10),
-		"org_id":          acctest.GetTestOrgFromEnv(t),
-		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -62,7 +64,7 @@ func TestAccGKEHubFeature_gkehubFeatureFleetObservability(t *testing.T) {
 }
 
 func testAccGKEHubFeature_gkehubFeatureFleetObservability(context map[string]interface{}) string {
-	return gkeHubFeatureProjectSetup(context) + Nprintf(`
+	return gkeHubFeatureProjectSetup(context) + acctest.Nprintf(`
 resource "time_sleep" "wait_for_gkehub_enablement" {
   create_duration = "150s"
   depends_on = [google_project_service.gkehub]
@@ -91,7 +93,7 @@ resource "google_gke_hub_feature" "feature" {
 }
 
 func testAccGKEHubFeature_gkehubFeatureFleetObservabilityUpdate1(context map[string]interface{}) string {
-	return gkeHubFeatureProjectSetup(context) + Nprintf(`
+	return gkeHubFeatureProjectSetup(context) + acctest.Nprintf(`
 resource "time_sleep" "wait_for_gkehub_enablement" {
   create_duration = "150s"
   depends_on = [google_project_service.gkehub]
@@ -117,7 +119,7 @@ resource "google_gke_hub_feature" "feature" {
 }
 
 func testAccGKEHubFeature_gkehubFeatureFleetObservabilityUpdate2(context map[string]interface{}) string {
-	return gkeHubFeatureProjectSetup(context) + Nprintf(`
+	return gkeHubFeatureProjectSetup(context) + acctest.Nprintf(`
 resource "time_sleep" "wait_for_gkehub_enablement" {
   create_duration = "150s"
   depends_on = [google_project_service.gkehub]
@@ -143,7 +145,7 @@ resource "google_gke_hub_feature" "feature" {
 }
 
 func gkeHubFeatureProjectSetup(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "project" {
   name            = "tf-test-gkehub%{random_suffix}"
   project_id      = "tf-test-gkehub%{random_suffix}"
@@ -207,8 +209,8 @@ func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":   RandString(t, 10),
-		"org_id":          acctest.GetTestOrgFromEnv(t),
-		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -239,7 +241,7 @@ func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
 }
 
 func testAccGKEHubFeature_gkehubFeatureMciUpdateStart(context map[string]interface{}) string {
-	return gkeHubFeatureProjectSetupForGA(context) + Nprintf(`
+	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
 
 resource "google_container_cluster" "primary" {
   name               = "tf-test%{random_suffix}"
@@ -291,7 +293,7 @@ resource "google_gke_hub_feature" "feature" {
 }
 
 func testAccGKEHubFeature_gkehubFeatureMciChangeMembership(context map[string]interface{}) string {
-	return gkeHubFeatureProjectSetupForGA(context) + Nprintf(`
+	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_container_cluster" "primary" {
   name               = "tf-test%{random_suffix}"
   location           = "us-central1-a"
@@ -351,8 +353,8 @@ func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":   RandString(t, 10),
-		"org_id":          acctest.GetTestOrgFromEnv(t),
-		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -382,7 +384,7 @@ func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
 }
 
 func testAccGKEHubFeature_gkehubFeatureMcsd(context map[string]interface{}) string {
-	return gkeHubFeatureProjectSetupForGA(context) + Nprintf(`
+	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   name = "multiclusterservicediscovery"
   location = "global"
@@ -396,7 +398,7 @@ resource "google_gke_hub_feature" "feature" {
 }
 
 func testAccGKEHubFeature_gkehubFeatureMcsdUpdate(context map[string]interface{}) string {
-	return gkeHubFeatureProjectSetupForGA(context) + Nprintf(`
+	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   name = "multiclusterservicediscovery"
   location = "global"
@@ -411,7 +413,7 @@ resource "google_gke_hub_feature" "feature" {
 }
 
 func gkeHubFeatureProjectSetupForGA(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "project" {
   name            = "tf-test-gkehub%{random_suffix}"
   project_id      = "tf-test-gkehub%{random_suffix}"

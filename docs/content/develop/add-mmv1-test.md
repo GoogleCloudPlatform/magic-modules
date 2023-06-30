@@ -1,7 +1,7 @@
 ---
 title: "Add an MMv1 test"
 summary: "An example terraform configuration can be used to generate docs and tests for a resource."
-weight: 12
+weight: 40
 aliases:
   - /docs/how-to/add-mmv1-test
   - /how-to/add-mmv1-test
@@ -131,7 +131,7 @@ func TestAccPubsubSubscription_pubsubSubscriptionDeadLetterExample(t *testing.T)
 }
 
 func testAccPubsubSubscription_pubsubSubscriptionDeadLetterExample(context map[string]interface{}) string {
-    return Nprintf(`
+    return acctest.Nprintf(`
 resource "google_pubsub_topic" "example" {
   name = "tf-test-example-topic%{random_suffix}"
 }

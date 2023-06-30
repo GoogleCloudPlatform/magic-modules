@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -35,7 +36,7 @@ func testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicTest(t *t
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"description":   acctest.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
+		"description":   envvar.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -57,7 +58,7 @@ func testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicTest(t *t
 }
 
 func testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_public_advertised_prefix" "prefix" {
   name = "tf-test-my-prefix%{random_suffix}"
   description = "%{description}"
@@ -69,7 +70,7 @@ resource "google_compute_public_advertised_prefix" "prefix" {
 
 func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicTest(t *testing.T) {
 	context := map[string]interface{}{
-		"description":   acctest.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
+		"description":   envvar.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -92,7 +93,7 @@ func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicTest(t *tes
 }
 
 func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_public_advertised_prefix" "advertised" {
   name = "tf-test-my-prefix%{random_suffix}"
   description = "%{description}"

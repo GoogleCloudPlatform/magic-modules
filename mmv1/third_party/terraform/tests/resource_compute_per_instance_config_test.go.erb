@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -27,7 +28,7 @@ func TestAccComputePerInstanceConfig_statefulBasic(t *testing.T) {
 		"config_name4":  fmt.Sprintf("instance-%s", RandString(t, 10)),
 	}
 	igmId := fmt.Sprintf("projects/%s/zones/%s/instanceGroupManagers/%s",
-		acctest.GetTestProjectFromEnv(), acctest.GetTestZoneFromEnv(), igmName)
+		envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), igmName)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -172,7 +173,7 @@ func TestAccComputePerInstanceConfig_statefulIps(t *testing.T) {
 <% end -%>
 
 func testAccComputePerInstanceConfig_statefulBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_per_instance_config" "default" {
 	instance_group_manager = google_compute_instance_group_manager.igm.name
 	name = "%{config_name}"
@@ -187,7 +188,7 @@ resource "google_compute_per_instance_config" "default" {
 }
 
 func testAccComputePerInstanceConfig_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_per_instance_config" "default" {
 	instance_group_manager = google_compute_instance_group_manager.igm.name
 	name = "%{config_name}"
@@ -203,7 +204,7 @@ resource "google_compute_per_instance_config" "default" {
 }
 
 func testAccComputePerInstanceConfig_statefulModified(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_per_instance_config" "default" {
 	zone = google_compute_instance_group_manager.igm.zone
 	instance_group_manager = google_compute_instance_group_manager.igm.name
@@ -219,7 +220,7 @@ resource "google_compute_per_instance_config" "default" {
 }
 
 func testAccComputePerInstanceConfig_statefulAdditional(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_per_instance_config" "default" {
 	zone = google_compute_instance_group_manager.igm.zone
 	instance_group_manager = google_compute_instance_group_manager.igm.name
@@ -299,7 +300,7 @@ resource "google_compute_disk" "disk2" {
 }
 
 func testAccComputePerInstanceConfig_igm(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"
   project = "debian-cloud"
@@ -343,7 +344,7 @@ resource "google_compute_instance_group_manager" "igm" {
 
 <% unless version == 'ga' -%>
 func testAccComputePerInstanceConfig_statefulIpsBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
   name = "%{network}"
 }
@@ -418,7 +419,7 @@ resource "google_compute_disk" "disk1" {
 }
 
 func testAccComputePerInstanceConfig_statefulIpsUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
   name = "%{network}"
 }

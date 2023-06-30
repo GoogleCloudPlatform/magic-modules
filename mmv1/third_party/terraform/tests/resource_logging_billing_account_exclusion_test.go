@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 // Logging exclusions don't always work when making parallel requests, so run tests serially
@@ -32,7 +33,7 @@ func TestAccLoggingBillingAccountExclusion(t *testing.T) {
 }
 
 func testAccLoggingBillingAccountExclusion_basic(t *testing.T) {
-	billingAccount := acctest.GetTestMasterBillingAccountFromEnv(t)
+	billingAccount := envvar.GetTestMasterBillingAccountFromEnv(t)
 	exclusionName := "tf-test-exclusion-" + RandString(t, 10)
 	description := "Description " + RandString(t, 10)
 
@@ -54,7 +55,7 @@ func testAccLoggingBillingAccountExclusion_basic(t *testing.T) {
 }
 
 func testAccLoggingBillingAccountExclusion_update(t *testing.T) {
-	billingAccount := acctest.GetTestMasterBillingAccountFromEnv(t)
+	billingAccount := envvar.GetTestMasterBillingAccountFromEnv(t)
 	exclusionName := "tf-test-exclusion-" + RandString(t, 10)
 	descriptionBefore := "Basic BillingAccount Logging Exclusion" + RandString(t, 10)
 	descriptionAfter := "Updated Basic BillingAccount Logging Exclusion" + RandString(t, 10)
@@ -85,7 +86,7 @@ func testAccLoggingBillingAccountExclusion_update(t *testing.T) {
 }
 
 func testAccLoggingBillingAccountExclusion_multiple(t *testing.T) {
-	billingAccount := acctest.GetTestMasterBillingAccountFromEnv(t)
+	billingAccount := envvar.GetTestMasterBillingAccountFromEnv(t)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -143,7 +144,7 @@ resource "google_logging_billing_account_exclusion" "basic" {
   description     = "%s"
   filter          = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 }
-`, exclusionName, billingAccount, description, acctest.GetTestProjectFromEnv())
+`, exclusionName, billingAccount, description, envvar.GetTestProjectFromEnv())
 }
 
 func testAccLoggingBillingAccountExclusion_multipleCfg(exclusionName, billingAccount string) string {
@@ -156,7 +157,7 @@ resource "google_logging_billing_account_exclusion" "basic%d" {
 	description      = "Basic BillingAccount Logging Exclusion"
 	filter           = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 }
-`, i, exclusionName, i, billingAccount, acctest.GetTestProjectFromEnv())
+`, i, exclusionName, i, billingAccount, envvar.GetTestProjectFromEnv())
 	}
 	return s
 }

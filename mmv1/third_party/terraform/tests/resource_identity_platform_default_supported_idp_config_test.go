@@ -78,7 +78,7 @@ func testAccCheckIdentityPlatformDefaultSupportedIdpConfigDestroyProducer(t *tes
 }
 
 func testAccIdentityPlatformDefaultSupportedIdpConfig_defaultSupportedIdpConfigBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_identity_platform_default_supported_idp_config" "idp_config" {
   enabled = true
   idp_id  = "playgames.google.com"
@@ -89,7 +89,7 @@ resource "google_identity_platform_default_supported_idp_config" "idp_config" {
 }
 
 func testAccIdentityPlatformDefaultSupportedIdpConfig_defaultSupportedIdpConfigUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_identity_platform_default_supported_idp_config" "idp_config" {
   enabled = false
   idp_id  = "playgames.google.com"

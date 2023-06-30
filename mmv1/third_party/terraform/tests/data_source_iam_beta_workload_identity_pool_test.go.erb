@@ -32,7 +32,7 @@ func TestAccDataSourceIAMBetaWorkloadIdentityPool_basic(t *testing.T) {
 }
 
 func testAccDataSourceIAMBetaWorkloadIdentityPoolBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_iam_workload_identity_pool" "bar" {
 	workload_identity_pool_id = "bar-pool-%{random_suffix}"
 	display_name              = "Name of pool"

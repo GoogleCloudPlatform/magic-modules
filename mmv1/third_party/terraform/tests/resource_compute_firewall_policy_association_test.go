@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccComputeFirewallPolicyAssociation_basic(t *testing.T) {
@@ -13,7 +14,7 @@ func TestAccComputeFirewallPolicyAssociation_basic(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": RandString(t, 10),
-		"org_name":      fmt.Sprintf("organizations/%s", acctest.GetTestOrgFromEnv(t)),
+		"org_name":      fmt.Sprintf("organizations/%s", envvar.GetTestOrgFromEnv(t)),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -35,7 +36,7 @@ func TestAccComputeFirewallPolicyAssociation_basic(t *testing.T) {
 }
 
 func testAccComputeFirewallPolicyAssociation_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_folder" "folder" {
   display_name = "tf-test-folder-%{random_suffix}"
   parent       = "%{org_name}"

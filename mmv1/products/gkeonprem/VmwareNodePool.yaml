@@ -31,8 +31,6 @@ timeouts: !ruby/object:Api::Timeouts
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "gkeonprem_vmware_node_pool_basic"
-    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14417
-    skip_test: true
     min_version: beta
     primary_resource_id: "nodepool-basic"
     vars:
@@ -41,8 +39,6 @@ examples:
       project: "fake-backend-360322"
   - !ruby/object:Provider::Terraform::Examples
     name: "gkeonprem_vmware_node_pool_full"
-    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14417
-    skip_test: true
     min_version: beta
     primary_resource_id: "nodepool-full"
     vars:

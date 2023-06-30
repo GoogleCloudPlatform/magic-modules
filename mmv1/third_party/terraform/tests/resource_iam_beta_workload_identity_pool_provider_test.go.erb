@@ -90,7 +90,7 @@ func TestAccIAMBetaWorkloadIdentityPoolProvider_oidc(t *testing.T) {
 }
 
 func testAccIAMBetaWorkloadIdentityPoolProvider_aws_full(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_iam_workload_identity_pool" "my_pool" {
   workload_identity_pool_id = "my-pool-%{random_suffix}"
 }
@@ -115,7 +115,7 @@ resource "google_iam_workload_identity_pool_provider" "my_provider" {
 }
 
 func testAccIAMBetaWorkloadIdentityPoolProvider_aws_enabled(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_iam_workload_identity_pool" "my_pool" {
   workload_identity_pool_id = "my-pool-%{random_suffix}"
 }
@@ -140,7 +140,7 @@ resource "google_iam_workload_identity_pool_provider" "my_provider" {
 }
 
 func testAccIAMBetaWorkloadIdentityPoolProvider_oidc_full(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_iam_workload_identity_pool" "my_pool" {
   workload_identity_pool_id = "my-pool-%{random_suffix}"
 }
@@ -172,7 +172,7 @@ EOT
 }
 
 func testAccIAMBetaWorkloadIdentityPoolProvider_oidc_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_iam_workload_identity_pool" "my_pool" {
   workload_identity_pool_id = "my-pool-%{random_suffix}"
 }
@@ -205,7 +205,7 @@ EOT
 }
 
 func testAccIAMBetaWorkloadIdentityPoolProvider_aws_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_iam_workload_identity_pool" "my_pool" {
   workload_identity_pool_id = "my-pool-%{random_suffix}"
 }
@@ -221,7 +221,7 @@ resource "google_iam_workload_identity_pool_provider" "my_provider" {
 }
 
 func testAccIAMBetaWorkloadIdentityPoolProvider_oidc_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_iam_workload_identity_pool" "my_pool" {
   workload_identity_pool_id = "my-pool-%{random_suffix}"
 }

@@ -34,8 +34,6 @@ timeouts: !ruby/object:Api::Timeouts
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_vmware_cluster_basic'
-    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14417
-    skip_test: true
     min_version: beta
     primary_resource_id: 'cluster-basic'
     vars:
@@ -44,8 +42,6 @@ examples:
       project: 'fake-backend-360322'
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_vmware_cluster_f5lb'
-    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14417
-    skip_test: true
     min_version: beta
     primary_resource_id: 'cluster-f5lb'
     vars:
@@ -54,8 +50,6 @@ examples:
       project: 'fake-backend-360322'
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_vmware_cluster_manuallb'
-    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14417
-    skip_test: true
     min_version: beta
     primary_resource_id: 'cluster-manuallb'
     vars:

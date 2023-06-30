@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccBigQueryTable_Basic(t *testing.T) {
@@ -515,7 +516,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchemaAndConnectionID_UpdateNoConn
 	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 	connectionID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 
-	projectID := acctest.GetTestProjectFromEnv()
+	projectID := envvar.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -554,7 +555,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateToConnectionID(t *tes
 	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 	connectionID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 
-	projectID := acctest.GetTestProjectFromEnv()
+	projectID := envvar.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -633,7 +634,7 @@ func TestAccBigQueryDataTable_bigtable(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": RandString(t, 8),
-		"project":       acctest.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -1740,7 +1741,7 @@ resource "google_bigquery_table" "test" {
 }
 
 func testAccBigQueryTableFromBigtable(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 	resource "google_bigtable_instance" "instance" {
 		name = "tf-test-bigtable-inst-%{random_suffix}"
 		cluster {
@@ -1787,7 +1788,7 @@ func testAccBigQueryTableFromBigtable(context map[string]interface{}) string {
 }
 
 func testAccBigQueryTableFromSheet(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
   resource "google_bigquery_table" "table" {
 	  deletion_protection = false
     dataset_id = google_bigquery_dataset.dataset.dataset_id
