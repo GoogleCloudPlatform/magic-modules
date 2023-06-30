@@ -6,15 +6,31 @@ class ClientConfiguration(var custId: String,
                           val billingAccount : String,
                           val billingAccount2: String,
                           val masterBillingAccount: String,
-                          val credentials : String,) {
+                          val credentials : String,
+                          val project : String,
+                          val orgDomain : String,
+                          val projectNumber : String,
+                          val region : String,
+                          val serviceAccount : String,
+                          val zone : String,
+                          val firestoreProject : String,
+                          val identityUser : String ) {
 }
 
-fun ParametrizedWithType.ConfigureGoogleSpecificTestParameters(environment: String, config: ClientConfiguration) {
-    hiddenVariable("env.GOOGLE_CUST_ID", config.custId, "The ID of the Google Identity Customer")
-    hiddenVariable("env.GOOGLE_ORG", config.org, "The Google Organization Id")
-    hiddenVariable("env.GOOGLE_ORG_2", config.org2, "The second Google Organization Id")
-    hiddenVariable("env.GOOGLE_BILLING_ACCOUNT", config.billingAccount, "The billing account associated with the first google organization")
-    hiddenVariable("env.GOOGLE_BILLING_ACCOUNT_2", config.billingAccount2, "The billing account associated with the second google organization")
-    hiddenVariable("env.GOOGLE_MASTER_BILLING_ACCOUNT", config.masterBillingAccount, "The master billing account")
+fun ParametrizedWithType.ConfigureGoogleSpecificTestParameters(config: ClientConfiguration) {
+    hiddenPasswordVariable("env.GOOGLE_CUST_ID", config.custId, "The ID of the Google Identity Customer")
+    hiddenPasswordVariable("env.GOOGLE_ORG", config.org, "The Google Organization Id")
+    hiddenPasswordVariable("env.GOOGLE_ORG_2", config.org2, "The second Google Organization Id")
+    hiddenPasswordVariable("env.GOOGLE_BILLING_ACCOUNT", config.billingAccount, "The billing account associated with the first google organization")
+    hiddenPasswordVariable("env.GOOGLE_BILLING_ACCOUNT_2", config.billingAccount2, "The billing account associated with the second google organization")
+    hiddenPasswordVariable("env.GOOGLE_MASTER_BILLING_ACCOUNT", config.masterBillingAccount, "The master billing account")
+    hiddenVariable("env.GOOGLE_PROJECT", config.project, "The google project for this build")
+    hiddenVariable("env.GOOGLE_ORG_DOMAIN", config.orgDomain, "The org domain")
+    hiddenVariable("env.GOOGLE_PROJECT_NUMBER", config.projectNumber, "The project number associated with the project")
+    hiddenVariable("env.GOOGLE_REGION", config.region, "The google region to use")
+    hiddenVariable("env.GOOGLE_SERVICE_ACCOUNT", config.serviceAccount, "The service account")
+    hiddenVariable("env.GOOGLE_ZONE", config.zone, "The google zone to use")
+    hiddenVariable("env.GOOGLE_FIRESTORE_PROJECT", config.firestoreProject, "The project to use for firestore")
+    hiddenVariable("env.GOOGLE_IDENTITY_USER", config.identityUser, "The user for the identity platform")
     hiddenPasswordVariable("env.GOOGLE_CREDENTIALS", config.credentials, "The Google credentials for this test runner")
 }
