@@ -126,7 +126,7 @@ examples:
       zip_path: '"./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip"'
       primary_resource_id: '"terraform-test"'
       policyChanged:
-        "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
+        "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
         \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
         )"
         # ignore these fields during import step
@@ -148,7 +148,7 @@ examples:
       zip_path: '"./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip"'
       primary_resource_id: '"terraform-test"'
       policyChanged:
-        "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
+        "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
         \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
         )"
         # ignore these fields during import step
@@ -169,7 +169,7 @@ examples:
       zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
       location: '"us-central1"'
       policyChanged:
-        "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
+        "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
         \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
         )"
         # ignore these fields during import step
@@ -190,7 +190,7 @@ examples:
       zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
       location: '"us-central1"'
       policyChanged:
-        "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
+        "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
         \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
         )"
         # ignore these fields during import step
