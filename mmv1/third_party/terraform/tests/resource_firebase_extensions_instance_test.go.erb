@@ -16,12 +16,12 @@ func TestAccFirebaseExtensionsInstance_firebaseExtentionsInstanceResizeImageUpda
 	context := map[string]interface{}{
 		"project_id":    acctest.GetTestProjectFromEnv(),
 		"location":      "us-central1",
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckFirebaseExtensionsInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
