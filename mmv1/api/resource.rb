@@ -329,7 +329,7 @@ module Api
     end
 
     # ====================
-    # Custom Getters
+    # Custom Getters and Setters
     # ====================
 
     # Returns all properties and parameters including the ones that are
@@ -342,17 +342,13 @@ module Api
       (@properties || []).reject(&:exclude)
     end
 
-    def properties=(props)
-      @properties = props
-    end
+    attr_writer :properties
 
     def parameters
       (@parameters || []).reject(&:exclude)
     end
 
-    def parameters=(params)
-      @parameters = params
-    end
+    attr_writer :parameters
 
     # Return the user-facing properties in client tools; this ends up meaning
     # both properties and parameters but without any that are excluded due to
@@ -414,9 +410,7 @@ module Api
       @async
     end
 
-    def async=(async)
-      @async = async
-    end
+    attr_writer :async
 
     # Return the resource-specific identity properties, or a best guess of the
     # `name` value for the resource.

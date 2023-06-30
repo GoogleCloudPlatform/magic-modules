@@ -74,11 +74,13 @@ module Api
     attr_reader :actions
 
     def initialize(operation, result, status, error)
+      super()
       @operation = operation
       @result = result
       @status = status
       @error = error
     end
+
     def validate
       super
 
@@ -103,6 +105,7 @@ module Api
       attr_reader :full_url
 
       def initialize(path, base_url, wait_ms, timeouts)
+        super()
         @path = path
         @base_url = base_url
         @wait_ms = wait_ms
@@ -128,6 +131,7 @@ module Api
       attr_reader :path
 
       def initialize(path, resource_inside_response)
+        super()
         @path = path
         @resource_inside_response = resource_inside_response
       end
@@ -147,6 +151,7 @@ module Api
       attr_reader :allowed
 
       def initialize(path, complete, allowed)
+        super()
         @path = path
         @complete = complete
         @allowed = allowed
@@ -165,6 +170,7 @@ module Api
       attr_reader :message
 
       def initialize(path, message)
+        super()
         @path = path
         @message = message
       end
