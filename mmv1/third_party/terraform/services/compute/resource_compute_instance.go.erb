@@ -2020,24 +2020,6 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			}
 		}
 
-		if d.HasChange("machine_type") {
-			mt, err := tpgresource.ParseMachineTypesFieldValue(d.Get("machine_type").(string), d, config)
-			if err != nil {
-				return err
-			}
-			req := &compute.InstancesSetMachineTypeRequest{
-				MachineType: mt.RelativeLink(),
-			}
-			op, err := config.NewComputeClient(userAgent).Instances.SetMachineType(project, zone, instance.Name, req).Do()
-			if err != nil {
-				return err
-			}
-			opErr := ComputeOperationWaitTime(config, op, project, "updating machinetype", userAgent, d.Timeout(schema.TimeoutUpdate))
-			if opErr != nil {
-				return opErr
-			}
-		}
-
 		if d.HasChange("min_cpu_platform") {
 			minCpuPlatform, ok := d.GetOk("min_cpu_platform")
 			// Even though you don't have to set minCpuPlatform on create, you do have to set it to an
@@ -2054,6 +2036,24 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				return err
 			}
 			opErr := ComputeOperationWaitTime(config, op, project, "updating min cpu platform", userAgent, d.Timeout(schema.TimeoutUpdate))
+			if opErr != nil {
+				return opErr
+			}
+		}
+
+		if d.HasChange("machine_type") {
+			mt, err := tpgresource.ParseMachineTypesFieldValue(d.Get("machine_type").(string), d, config)
+			if err != nil {
+				return err
+			}
+			req := &compute.InstancesSetMachineTypeRequest{
+				MachineType: mt.RelativeLink(),
+			}
+			op, err := config.NewComputeClient(userAgent).Instances.SetMachineType(project, zone, instance.Name, req).Do()
+			if err != nil {
+				return err
+			}
+			opErr := ComputeOperationWaitTime(config, op, project, "updating machinetype", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
 				return opErr
 			}
