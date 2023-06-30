@@ -34,7 +34,7 @@ class packageDetails(name: String, displayName: String, environment: String) {
             }
 
             params {
-                TerraformAcceptanceTestParameters(parallelism, "TestAcc", "12")
+                TerraformAcceptanceTestParameters(parallelism, "TestAcc", "12", "us-central1", "")
                 TerraformAcceptanceTestsFlag()
                 TerraformCoreBinaryTesting()
                 TerraformShouldPanicForSchemaErrors()
