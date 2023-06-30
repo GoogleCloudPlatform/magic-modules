@@ -23,7 +23,7 @@ ENV['TZ'] = 'UTC'
 
 require 'active_support/inflector'
 require 'api/compiler'
-require 'compile/openapi_parser'
+require 'open_api_parser/parser'
 require 'google/logger'
 require 'optparse'
 require 'pathname'
@@ -105,9 +105,7 @@ raise 'Option -e/--engine is a required parameter' if provider_name.nil?
 
 if openapi_generate
   # Test write OpenAPI --> YAML
-  Dir['openapi/*'].each do |openapi_file|
-    write_yaml(openapi_file)
-  end
+  OpenApiParser::Parser.new('open_api_parser/specs/*', 'products/demo').run
 end
 
 all_product_files = []
