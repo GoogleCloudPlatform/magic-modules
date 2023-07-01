@@ -14,7 +14,7 @@ This page provides guidelines for reviewing Magic Modules pull requests
    1. features are added in the correct version 
       * features only available in beta are not appear in the GA google provider
       * features added to the GA provider also appear in the beta provider -- beta should be a strict superset of GA 
-   1. no [breaking changes]({{< ref "/develop/add-mmv1-resource" >}}) are introduced unless for major release PRs
+   1. no [breaking changes]({{< ref "/develop/breaking-changes" >}}) are introduced unless for major release PRs
 1. Check the tests to ensure
    1. all fields added/updated in the PR appear in at least one test 
    1. mutable features are tested in at least one update test
