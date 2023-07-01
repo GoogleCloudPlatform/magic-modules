@@ -163,7 +163,7 @@ func TestAccDataflowFlexTemplateJob_FullUpdate(t *testing.T) {
 func TestAccDataflowFlexTemplateJob_withNetwork(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := acctest.RandString(t, 10)
@@ -211,7 +211,7 @@ func TestAccDataflowFlexTemplateJob_withNetwork(t *testing.T) {
 func TestAccDataflowFlexTemplateJob_withSubNetwork(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := acctest.RandString(t, 10)
@@ -260,7 +260,7 @@ func TestAccDataflowFlexTemplateJob_withSubNetwork(t *testing.T) {
 func TestAccDataflowFlexTemplateJob_withIpConfig(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := acctest.RandString(t, 10)
@@ -294,7 +294,7 @@ func TestAccDataflowFlexTemplateJob_withIpConfig(t *testing.T) {
 func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := acctest.RandString(t, 10)
@@ -328,7 +328,7 @@ func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 func TestAccDataflowFlexTemplateJob_withAdditionalExperiments(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := acctest.RandString(t, 10)

@@ -12,7 +12,7 @@ import (
 // Tests schema version migration by creating a certificate with an old version of the provider (4.59.0)
 // and then updating it with the current version the provider.
 func TestAccCertificateManagerCertificate_migration(t *testing.T) {
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
