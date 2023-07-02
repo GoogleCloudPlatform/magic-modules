@@ -21,12 +21,33 @@ resource "google_dataplex_task" "<%= ctx[:primary_resource_id] %>" {
     
     execution_spec {
         service_account = "${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+        args = {
+            TASK_ARGS  = "--output_location,gs://spark-job-jars-anrajitha/task-result, --output_format, json"
+        }
     }
-    
-    spark {
-        python_script_file = "gs://dataproc-examples/pyspark/hello-world/hello-world.py"
+    notebook {
+        notebook = "gs://ssmadhavik-test4/Demo/CarPricePrediction_OLS_ML.ipynb"
+        infrastructure_spec  {
+            batch {
+                executors_count = 2
+                max_executors_count = 100
+            }
+            container_image {
+                image = "test-image"
+                java_jars = ["test-java-jars.jar"]
+                python_packages = ["gs://bucket-name/my/path/to/lib.tar.gz"]
+                properties = { "name": "wrench", "mass": "1.3kg", "count": "3" }
+            }
+            vpc_network  {
+                    network_tags = ["test-network-tag"]
+                    network = "test-network"
+                }
+        }
+        file_uris = ["gs://ssmadhavik-test4/Demo/CarPrice.csv"]
+        archive_uris = ["gs://ssmadhavik-test4/Demo/CarPrice.csv"]
+
     }
-    
     project = "<%= ctx[:test_env_vars]['project_name'] %>"
+    
     
 }

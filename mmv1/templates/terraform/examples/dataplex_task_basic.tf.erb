@@ -15,11 +15,18 @@ resource "google_dataplex_task" "<%= ctx[:primary_resource_id] %>" {
     location     = "us-central1"
     lake         = google_dataplex_lake.<%= ctx[:primary_resource_id] %>.name
     trigger_spec  {
-        type = "ON_DEMAND"
+        type = "RECURRING"
+        disabled = false
+        max_retries = 3
+        start_time = "2023-10-02T15:01:23Z"
+        schedule = "1 * * * *"
     }
     
     execution_spec {
         service_account = "${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+        project = "<%= ctx[:test_env_vars]['project_name'] %>"
+        max_job_execution_lifetime = "100s"
+        kms_key = "234jn2kjn42k3n423"
     }
     
     spark {
