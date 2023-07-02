@@ -14,6 +14,13 @@ resource "google_dataplex_task" "<%= ctx[:primary_resource_id] %>" {
     task_id      = "tf-test-task%{random_suffix}"
     location     = "us-central1"
     lake         = google_dataplex_lake.<%= ctx[:primary_resource_id] %>.name
+    
+    description = "Test Task Basic"
+    
+    display_name = "task-basic"
+
+    labels = { "count": "3" }
+
     trigger_spec  {
         type = "RECURRING"
         disabled = false
