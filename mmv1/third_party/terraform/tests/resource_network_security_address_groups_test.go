@@ -1,6 +1,4 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -74,5 +72,3 @@ resource "google_network_security_address_group" "foobar" {
 }
 `, addressGroupsName, projectName)
 }
-
-<% end -%>
