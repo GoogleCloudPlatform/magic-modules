@@ -1,7 +1,7 @@
 resource "google_network_security_address_group" "basic_global_networksecurity_address_group" {
   name        = "{{policy}}"
   parent      = "projects/{{project}}"
-  description = "Sample global networksecurity_address_group. Update FELIPE ALOHA"
+  description = "Sample global networksecurity_address_group. Update"
   location    = "global"
   items       = ["208.80.154.224/32"]
   type        = "IPV4"
