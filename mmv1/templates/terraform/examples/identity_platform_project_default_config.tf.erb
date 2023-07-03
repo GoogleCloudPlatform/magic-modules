@@ -18,4 +18,20 @@ resource "google_identity_platform_project_default_config" "<%= ctx[:primary_res
             }
         }
     }
+
+    blocking_functions {
+        triggers {
+            "beforeSignIn" = {
+                function_uri = "new_uri-before-sign-in"
+            }
+        }
+    }
+
+    quota {
+        sign_up_quota_config {
+            quota = 1000
+        }
+    }
+
+    authorized_domains = ["domain1", "domain2]
 }
