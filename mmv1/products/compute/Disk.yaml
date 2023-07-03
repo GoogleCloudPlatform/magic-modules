@@ -81,7 +81,6 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-test-disk%s\",
       context[\"random_suffix\"\
       ])"
-    min_version: beta
     vars:
       disk_name: 'async-test-disk'
       secondary_disk_name: 'async-secondary-test-disk'
@@ -450,7 +449,6 @@ properties:
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}?paths=provisionedThroughput'
   - !ruby/object:Api::Type::NestedObject
     name: 'asyncPrimaryDisk'
-    min_version: 'beta'
     properties:
       - !ruby/object:Api::Type::String
         name: 'disk'

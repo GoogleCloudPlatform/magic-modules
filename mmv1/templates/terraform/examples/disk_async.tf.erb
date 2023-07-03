@@ -1,6 +1,4 @@
 resource "google_compute_disk" "primary" {
-  provider = google-beta
-
   name  = "<%= ctx[:vars]['disk_name'] %>"
   type  = "pd-ssd"
   zone  = "us-central1-a"
@@ -9,8 +7,6 @@ resource "google_compute_disk" "primary" {
 }
 
 resource "google_compute_disk" "secondary" {
-  provider = google-beta
-
   name  = "<%= ctx[:vars]['secondary_disk_name'] %>"
   type  = "pd-ssd"
   zone  = "us-east1-c"

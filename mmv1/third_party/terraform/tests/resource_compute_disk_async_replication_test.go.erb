@@ -45,7 +45,7 @@ func TestAccComputeDiskAsyncReplication(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDiskAsyncReplication_basicZonal(region, secondaryRegion, primaryDisk, secondaryDisk),
@@ -76,8 +76,6 @@ func TestAccComputeDiskAsyncReplication(t *testing.T) {
 func testAccComputeDiskAsyncReplication_basicZonal(region, secondaryRegion, primaryDisk, secondaryDisk string) string {
 	return fmt.Sprintf(`
 resource "google_compute_disk" "primary" {
-	provider = google-beta
-
 	zone = "%s-a"
 	name = "%s"
 	type = "pd-ssd"
@@ -86,8 +84,6 @@ resource "google_compute_disk" "primary" {
 }
 	
 resource "google_compute_disk" "secondary" {
-	provider = google-beta
-	
 	name = "%s"
 	type = "pd-ssd"
 	zone = "%s-b"
@@ -100,8 +96,6 @@ resource "google_compute_disk" "secondary" {
 }
 	
 resource "google_compute_disk_async_replication" "replication" {
-	provider = google-beta
-	
 	primary_disk = google_compute_disk.primary.id
 
 	secondary_disk {
@@ -114,8 +108,6 @@ resource "google_compute_disk_async_replication" "replication" {
 func testAccComputeDiskAsyncReplication_basicRegional(region, secondaryRegion, primaryDisk, secondaryDisk string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_disk" "primary" {
-	provider = google-beta
-	
 	region = "%s"
 	name   = "%s"
 	type   = "pd-ssd"
@@ -129,8 +121,6 @@ resource "google_compute_region_disk" "primary" {
 }
 	
 resource "google_compute_region_disk" "secondary" {
-    provider = google-beta
-	
 	region = "%s"
 	name   = "%s"
 	type   = "pd-ssd"
@@ -148,8 +138,6 @@ resource "google_compute_region_disk" "secondary" {
 }
 	
 resource "google_compute_disk_async_replication" "replication" {
-	provider = google-beta
-	
 	primary_disk = google_compute_region_disk.primary.id
 
 	secondary_disk {
