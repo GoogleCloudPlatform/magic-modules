@@ -336,6 +336,7 @@ properties:
                     function: 'validation.IntBetween(0,999999999)'
   - !ruby/object:Api::Type::NestedObject
     name: maintenanceSchedule
+    output: true
     description: Upcoming maintenance schedule.
     properties:
       - !ruby/object:Api::Type::String
