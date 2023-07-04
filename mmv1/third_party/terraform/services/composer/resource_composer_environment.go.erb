@@ -817,7 +817,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 							Computed:     true,
 							ForceNew:     false,
 							AtLeastOneOf: composerConfigKeys,
-							ValidateFunc: validation.StringInSlice([]string{"HIGH_RESILIENCE"}, false),
+							ValidateFunc: validation.StringInSlice([]string{"RESILIENCE_MODE_UNSPECIFIED", "HIGH_RESILIENCE"}, false),
 							Description:  `Whether high resilience is enabled or not. This field is supported for Cloud Composer environments in versions composer-2.1.15-airflow-*.*.* and newer.`,
 						},
 						"master_authorized_networks_config": {
