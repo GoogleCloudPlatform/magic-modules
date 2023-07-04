@@ -522,6 +522,24 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 				},
+				"windows_node_config": {
+					Type:        schema.TypeList,
+					Optional:    true,
+					MaxItems:    1,
+					Description: `Parameters that can be configured on Windows nodes.`,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"osversion": {
+								Type:         schema.TypeString,
+								Optional:     true,
+								ForceNew:     true,
+								Default:      "OS_VERSION_UNSPECIFIED",
+								Description:  `The OS Version of the windows nodepool.Values are OS_VERSION_UNSPECIFIED,OS_VERSION_LTSC2019 and OS_VERSION_LTSC2022`,
+								ValidateFunc: validation.StringInSlice([]string{"OS_VERSION_UNSPECIFIED", "OS_VERSION_LTSC2019", "OS_VERSION_LTSC2022"}, false),
+							},
+						},
+					},
+				},
 				"node_group": {
 					Type:     schema.TypeString,
 					Optional: true,
@@ -843,6 +861,10 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.LinuxNodeConfig = expandLinuxNodeConfig(v)
 	}
 
+	if v, ok := nodeConfig["windows_node_config"]; ok {
+		nc.WindowsNodeConfig = expandWindowsNodeConfig(v)
+	}
+
 	if v, ok := nodeConfig["node_group"]; ok {
 		nc.NodeGroup = v.(string)
 	}
@@ -925,6 +947,24 @@ func expandLinuxNodeConfig(v interface{}) *container.LinuxNodeConfig {
 	}
 	return &container.LinuxNodeConfig{
 		Sysctls: m,
+	}
+}
+
+func expandWindowsNodeConfig(v interface{}) *container.WindowsNodeConfig {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	cfg := ls[0].(map[string]interface{})
+	osversionRaw, ok := cfg["osversion"]
+	if !ok {
+		return nil
+	}
+	return &container.WindowsNodeConfig{
+		OsVersion: osversionRaw.(string),
 	}
 }
 
@@ -1013,6 +1053,7 @@ func flattenNodeConfig(c *container.NodeConfig) []map[string]interface{} {
 		"boot_disk_kms_key": 		c.BootDiskKmsKey,
 		"kubelet_config":            flattenKubeletConfig(c.KubeletConfig),
 		"linux_node_config":         flattenLinuxNodeConfig(c.LinuxNodeConfig),
+		"windows_node_config":       flattenWindowsNodeConfig(c.WindowsNodeConfig),
                 "node_group":                c.NodeGroup,
 		"advanced_machine_features": flattenAdvancedMachineFeaturesConfig(c.AdvancedMachineFeatures),
 		"sole_tenant_config":                 flattenSoleTenantConfig(c.SoleTenantConfig),
@@ -1306,6 +1347,16 @@ func flattenLinuxNodeConfig(c *container.LinuxNodeConfig) []map[string]interface
 	if c != nil {
 		result = append(result, map[string]interface{}{
 			"sysctls": c.Sysctls,
+		})
+	}
+	return result
+}
+
+func flattenWindowsNodeConfig(c *container.WindowsNodeConfig) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"osversion": c.OsVersion,
 		})
 	}
 	return result
