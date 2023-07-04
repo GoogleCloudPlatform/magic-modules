@@ -285,19 +285,6 @@ properties:
             - !ruby/object:Api::Type::String
               name: domainName
               description: The domain name the record set pertains to.
-            - !ruby/object:Api::Type::NestedObject
-              name: checkError
-              description: |
-                An error Hosting services encountered when querying your domain name's
-                DNS records. Note: Hosting ignores `NXDOMAIN` errors, as those generally
-                just mean that a domain name hasn't been set up yet.
-              properties:
-                - !ruby/object:Api::Type::Integer
-                  name: code
-                  description: The status code, which should be an enum value of `google.rpc.Code`
-                - !ruby/object:Api::Type::String
-                  name: message
-                  description: Error message
             - !ruby/object:Api::Type::Array
               name: records
               description: Records on the domain
@@ -334,19 +321,6 @@ properties:
             - !ruby/object:Api::Type::String
               name: domainName
               description: The domain name the record set pertains to.
-            - !ruby/object:Api::Type::NestedObject
-              name: checkError
-              description: |
-                An error Hosting services encountered when querying your domain name's
-                DNS records. Note: Hosting ignores `NXDOMAIN` errors, as those generally
-                just mean that a domain name hasn't been set up yet.
-              properties:
-                - !ruby/object:Api::Type::Integer
-                  name: code
-                  description: The status code, which should be an enum value of `google.rpc.Code`
-                - !ruby/object:Api::Type::String
-                  name: message
-                  description: Error message
             - !ruby/object:Api::Type::Array
               name: records
               description: Records on the domain
@@ -390,6 +364,11 @@ properties:
         - !ruby/object:Api::Type::String
           name: message
           description: Error message
+        - !ruby/object:Api::Type::Array
+          name: 'details'
+          description: |
+            A list of messages that carry the error details.
+          item_type: Api::Type::KeyValuePairs
   - !ruby/object:Api::Type::NestedObject
     name: cert
     output: true
@@ -439,19 +418,6 @@ properties:
                     - !ruby/object:Api::Type::String
                       name: domainName
                       description: The domain name the record set pertains to.
-                    - !ruby/object:Api::Type::NestedObject
-                      name: checkError
-                      description: |
-                        An error Hosting services encountered when querying your domain name's
-                        DNS records. Note: Hosting ignores `NXDOMAIN` errors, as those generally
-                        just mean that a domain name hasn't been set up yet.
-                      properties:
-                        - !ruby/object:Api::Type::Integer
-                          name: code
-                          description: The status code, which should be an enum value of `google.rpc.Code`
-                        - !ruby/object:Api::Type::String
-                          name: message
-                          description: Error message
                     - !ruby/object:Api::Type::Array
                       name: records
                       description: Records on the domain
@@ -488,19 +454,6 @@ properties:
                     - !ruby/object:Api::Type::String
                       name: domainName
                       description: The domain name the record set pertains to.
-                    - !ruby/object:Api::Type::NestedObject
-                      name: checkError
-                      description: |
-                        An error Hosting services encountered when querying your domain name's
-                        DNS records. Note: Hosting ignores `NXDOMAIN` errors, as those generally
-                        just mean that a domain name hasn't been set up yet.
-                      properties:
-                        - !ruby/object:Api::Type::Integer
-                          name: code
-                          description: The status code, which should be an enum value of `google.rpc.Code`
-                        - !ruby/object:Api::Type::String
-                          name: message
-                          description: Error message
                     - !ruby/object:Api::Type::Array
                       name: records
                       description: Records on the domain
@@ -548,18 +501,6 @@ properties:
                 name: lastCheckTime
                 description: |
                   The last time Hosting systems checked for the file contents.
-              - !ruby/object:Api::Type::NestedObject
-                name: checkError
-                description: |
-                  An error encountered during the last contents check. If null, the check
-                  completed successfully.
-                properties:
-                  - !ruby/object:Api::Type::Integer
-                    name: code
-                    description: The status code, which should be an enum value of `google.rpc.Code`
-                  - !ruby/object:Api::Type::String
-                    name: message
-                    description: Error message
   - !ruby/object:Api::Type::Boolean
     name: reconciling
     output: true
