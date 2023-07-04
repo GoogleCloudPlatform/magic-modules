@@ -72,7 +72,7 @@ examples:
       # Don't add random suffix
       custom_domain: '"custom.domain.com"'
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebasehosting_customdomain_redirect"
+    name: "firebasehosting_customdomain_full"
     min_version: "beta"
     primary_resource_id: "default"
     vars:
