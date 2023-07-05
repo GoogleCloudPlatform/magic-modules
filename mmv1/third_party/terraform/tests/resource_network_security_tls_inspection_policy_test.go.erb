@@ -7,18 +7,19 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccNetworkSecurityTlsInspectionPolicy_update(t *testing.T){
     t.Parallel()
 
-    tlsInspectionPolicyName := fmt.Sprintf("tf-test-tls-inspection-policy-%s", RandString(t, 10))
-    caPoolName := fmt.Sprintf("tf-test-tls-ca-pool-%s", RandString(t, 10))
-	  certificateAuthorityName := fmt.Sprintf("tf-test-tls-certificate-authority-%s", RandString(t, 10))
+    tlsInspectionPolicyName := fmt.Sprintf("tf-test-tls-inspection-policy-%s", acctest.RandString(t, 10))
+    caPoolName := fmt.Sprintf("tf-test-tls-ca-pool-%s", acctest.RandString(t, 10))
+	  certificateAuthorityName := fmt.Sprintf("tf-test-tls-certificate-authority-%s", acctest.RandString(t, 10))
 
-    VcrTest(t, resource.TestCase{
-		PreCheck:     func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+    acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckNetworkSecurityTlsInspectionPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

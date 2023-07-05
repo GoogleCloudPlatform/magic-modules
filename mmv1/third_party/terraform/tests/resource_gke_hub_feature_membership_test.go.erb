@@ -23,14 +23,14 @@ func TestAccGKEHubFeatureMembership_gkehubFeatureAcmUpdate(t *testing.T) {
   t.Parallel()
 
   context := map[string]interface{}{
-    "random_suffix":   RandString(t, 10),
+    "random_suffix":   acctest.RandString(t, 10),
     "org_id":          envvar.GetTestOrgFromEnv(t),
     "billing_account": envvar.GetTestBillingAccountFromEnv(t),
   }
 
-  VcrTest(t, resource.TestCase{
+  acctest.VcrTest(t, resource.TestCase{
     PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
     CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -333,14 +333,14 @@ func TestAccGKEHubFeatureMembership_gkehubFeatureAcmAllFields(t *testing.T) {
   t.Parallel()
 
   context := map[string]interface{}{
-    "random_suffix":   RandString(t, 10),
+    "random_suffix":   acctest.RandString(t, 10),
     "org_id":          envvar.GetTestOrgFromEnv(t),
     "billing_account": envvar.GetTestBillingAccountFromEnv(t),
   }
 
-  VcrTest(t, resource.TestCase{
+  acctest.VcrTest(t, resource.TestCase{
     PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
     CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -592,14 +592,14 @@ func TestAccGKEHubFeatureMembership_gkehubFeatureAcmOci(t *testing.T) {
   t.Parallel()
 
   context := map[string]interface{}{
-    "random_suffix":   RandString(t, 10),
+    "random_suffix":   acctest.RandString(t, 10),
     "org_id":          envvar.GetTestOrgFromEnv(t),
     "billing_account": envvar.GetTestBillingAccountFromEnv(t),
   }
 
-  VcrTest(t, resource.TestCase{
+  acctest.VcrTest(t, resource.TestCase{
     PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
     CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -790,14 +790,14 @@ func TestAccGKEHubFeatureMembership_gkehubFeatureMesh(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":   RandString(t, 10),
+		"random_suffix":   acctest.RandString(t, 10),
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1126,7 +1126,7 @@ resource "google_gke_hub_membership" "membership_acmoci" {
 
 func testAccCheckGkeHubFeatureMembershipPresent(t *testing.T, project, location, feature, membership string) resource.TestCheckFunc {
   return func(s *terraform.State) error {
-    config := GoogleProviderConfig(t)
+    config := acctest.GoogleProviderConfig(t)
     obj := &gkehub.FeatureMembership{
       Feature:    dcl.StringOrNil(feature),
       Location:   dcl.StringOrNil(location),
@@ -1144,7 +1144,7 @@ func testAccCheckGkeHubFeatureMembershipPresent(t *testing.T, project, location,
 
 func testAccCheckGkeHubFeatureMembershipNotPresent(t *testing.T, project, location, feature, membership string) resource.TestCheckFunc {
   return func(s *terraform.State) error {
-    config := GoogleProviderConfig(t)
+    config := acctest.GoogleProviderConfig(t)
     obj := &gkehub.FeatureMembership{
       Feature:    dcl.StringOrNil(feature),
       Location:   dcl.StringOrNil(location),
