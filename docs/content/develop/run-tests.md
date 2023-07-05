@@ -40,9 +40,9 @@ GOOGLE_ORG
 GOOGLE_BILLING_ACCOUNT
 ```
 
-## Run unit tests
+## Run automated tests
 
-Unit tests (that is, tests that do not interact with the GCP API) are very fast and you can generally run them all if you have changed any of them:
+1. Run unit tests and linters
 
 ```bash
 ## for ga provider
