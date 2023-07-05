@@ -23,7 +23,7 @@ ENV['TZ'] = 'UTC'
 
 require 'active_support/inflector'
 require 'api/compiler'
-require 'open_api_parser/parser'
+require 'openapi_generate/parser'
 require 'google/logger'
 require 'optparse'
 require 'pathname'
@@ -90,7 +90,7 @@ OptionParser.new do |opt|
   opt.on('-g', '--no-docs', 'Do not generate documentation') do
     generate_docs = false
   end
-  opt.on('--openapi-generate', 'Generate MMv1 YAML from openapi directory') do
+  opt.on('--openapi-generate', 'Generate MMv1 YAML from openapi directory (Experimental)') do
     openapi_generate = true
   end
 end.parse!
@@ -105,7 +105,7 @@ raise 'Option -e/--engine is a required parameter' if provider_name.nil?
 
 if openapi_generate
   # Test write OpenAPI --> YAML
-  OpenApiParser::Parser.new('open_api_parser/specs/*', 'products/demo').run
+  OpenAPIGenerate::Parser.new('open_api_parser/specs/*', 'products/demo').run
 end
 
 all_product_files = []

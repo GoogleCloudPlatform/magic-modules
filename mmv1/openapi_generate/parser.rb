@@ -13,7 +13,7 @@
 
 require 'openapi_parser'
 
-module OpenApiParser
+module OpenAPIGenerate
   # Parser to convert from OpenAPI spec to MMv1 YAML
   class Parser
     attr_reader :folder
