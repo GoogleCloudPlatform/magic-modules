@@ -241,7 +241,7 @@ cluster.
   Specifying COMPACT placement policy type places node pool's nodes in a closer
   physical proximity in order to reduce network latency between nodes.
 
-* `tpu_topology` - (Optional) The [TPU placement topology](https://cloud.google.com/tpu/docs/types-topologies#tpu_topologies) for pod slice node pool.
+* `tpu_topology` - (Optional, Beta) The [TPU placement topology](https://cloud.google.com/tpu/docs/types-topologies#tpu_topologies) for pod slice node pool.
 
 ## Attributes Reference
 
