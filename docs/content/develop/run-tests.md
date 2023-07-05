@@ -58,7 +58,7 @@ make lint
 
 ## Run acceptance tests
 
-You can run tests against the provider you generated in the `OUTPUT_PATH` location. When running tests, specify which to run using `TESTARGS`, such as:
+1. Run acceptance tests
 
 ```bash
 ## for ga provider
@@ -76,12 +76,13 @@ TESTARGS allows you to pass [testing flags](https://pkg.go.dev/cmd/go#hdr-Testin
 
 ### Debugging tests
 
-You can [increase your test verbosity](https://www.terraform.io/docs/internals/debugging.html) and redirect the output to a log file for analysis. This is often helpful in debugging issues.
+1. Optional: Save verbose test output to a file for analysis.
 
 ```bash
 ## for ga provider
 cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
 TF_LOG=TRACE make testacc TEST=./google TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
+less output.log
 
 ## for beta provider
 cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
@@ -103,7 +104,7 @@ TF_ACC=1 dlv test -- --test.v --test.run TestAccComputeRegionBackendService_with
 
 Tests will use whatever version of the `terraform` binary is found on your path. To test with multiple versions of `terraform` core, you must run the tests multiple times with different versions. You can use [`tfenv`](https://github.com/tfutils/tfenv) to manage your system `terraform` versions.
 
-## Use built provider locally
+## Test manually
 
 Sometimes, for example for manual testing, you may want to build the provider from source and use it with `terraform`.
 
