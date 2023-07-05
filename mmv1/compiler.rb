@@ -105,6 +105,8 @@ raise 'Option -e/--engine is a required parameter' if provider_name.nil?
 
 if openapi_generate
   # Test write OpenAPI --> YAML
+  # This writes to a fake demo product currently. In the future this should
+  # produce the entire product folder including product.yaml for a single OpenAPI spec
   OpenAPIGenerate::Parser.new('open_api_parser/specs/*', 'products/demo').run
 end
 
