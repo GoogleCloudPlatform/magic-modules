@@ -48,6 +48,7 @@ examples:
     name: 'looker_instance_enterprise_full'
     primary_resource_id: 'looker-instance'
     vars:
+      address_name: 'looker-range'
       instance_name: 'my-instance'
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
@@ -193,6 +194,31 @@ properties:
     description: |
       Public Egress IP (IPv4).
     output: true
+  # Encryption Config Object
+  - !ruby/object:Api::Type::NestedObject
+    name: encryptionConfig
+    default_from_api: true
+    description: |
+      Looker instance encryption settings.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeyName'
+        description: |
+          Name of the customer managed encryption key (CMEK) in KMS.
+      - !ruby/object:Api::Type::Enum
+        name: 'kmsKeyState'
+        output: true
+        description: |
+          Status of the customer managed encryption key (CMEK) in KMS.
+        values:
+          - :VALID
+          - :REVOKED
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeyNameVersion'
+        output: true
+        description: |
+          Full name and version of the CMEK key currently in use to encrypt Looker data.
+  # Encryption Config  Object - End
   - !ruby/object:Api::Type::String
     name: ingressPrivateIp
     description: |
@@ -348,6 +374,8 @@ properties:
     name: userMetadata
     description: |
       Metadata about users for a Looker instance.
+
+      These settings are only available when platform edition LOOKER_CORE_STANDARD is set.
 
       There are ten Standard and two Developer users included in the cost of the product.
       You can allocate additional Standard, Viewer, and Developer users for this instance.

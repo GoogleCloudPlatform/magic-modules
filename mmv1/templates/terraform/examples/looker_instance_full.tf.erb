@@ -2,13 +2,11 @@ resource "google_looker_instance" "<%= ctx[:primary_resource_id] %>" {
   name               = "<%= ctx[:vars]["instance_name"] %>"
   platform_edition   = "LOOKER_CORE_STANDARD"
   region             = "us-central1"
-  private_ip_enabled = false
   public_ip_enabled  = true
-  reserved_range     = ""
-  consumer_network   = ""
   admin_settings {
     allowed_email_domains = ["google.com"]
   }
+  // User metadata config is only available when platform edition is LOOKER_CORE_STANDARD.
   user_metadata {
     additional_developer_user_count = 10 
     additional_standard_user_count  = 10
