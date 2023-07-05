@@ -14,14 +14,14 @@ aliases:
 
 ## Before you begin
 
-[Generate](/magic-modules/docs/getting-started/generate-providers/) the provider you want to test.
+1. [Generate the modified provider(s)](/magic-modules/docs/getting-started/generate-providers/)
 
-We reccomend using using "application default credentials" and running tests as your GCP user account.
 
-1. Log in with gcloud:
+1. Set up application default credentials for Terraform
 
     ```bash
     gcloud auth application-default login
+    export GOOGLE_USE_DEFAULT_CREDENTIALS=TRUE
     ```
 
 1. Set the following environment variables:
