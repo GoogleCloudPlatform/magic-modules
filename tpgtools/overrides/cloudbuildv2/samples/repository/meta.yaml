@@ -10,3 +10,5 @@ doc_hide:
 # to show them in the docs.
 - ghe_repository.yaml
 - github_repository.yaml
+- gitlab_repository.yaml
+- gle_repository.yaml
