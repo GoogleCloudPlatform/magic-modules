@@ -150,14 +150,6 @@ func ResourceComputeInstanceTemplate() *schema.Resource {
 							Description: `The size of the image in gigabytes. If not specified, it will inherit the size of its base image. For SCRATCH disks, the size must be one of 375 or 3000 GB, with a default of 375 GB.`,
 						},
 
-            "disk_size_gb2": {
-              Type:         schema.TypeInt,
-              Optional:     true,
-              ForceNew:     true,
-              Computed:     true,
-              Description: `The size of the image in gigabytes. If not specified, it will inherit the size of its base image. For SCRATCH disks, the size must be one of 375 or 3000 GB, with a default of 375 GB.`,
-            },
-
 						"disk_type": {
 							Type:        schema.TypeString,
 							Optional:    true,
@@ -1069,7 +1061,8 @@ func buildDisks(d *schema.ResourceData, config *transport_tpg.Config) ([]*comput
 				disk.DiskEncryptionKey.KmsKeyName = v.(string)
 			}
 		}
-    if v, ok := d.GetOk(prefix + ".disk_size_gb2"); ok {
+    // Assign disk.DiskSizeGb and disk.InitializeParams.DiskSizeGb the same value
+    if v, ok := d.GetOk(prefix + ".disk_size_gb"); ok {
       disk.DiskSizeGb = int64(v.(int))
     }
 		if v, ok := d.GetOk(prefix + ".source"); ok {
@@ -1086,6 +1079,7 @@ func buildDisks(d *schema.ResourceData, config *transport_tpg.Config) ([]*comput
 			if v, ok := d.GetOk(prefix + ".disk_name"); ok {
 				disk.InitializeParams.DiskName = v.(string)
 			}
+      // Assign disk.DiskSizeGb and disk.InitializeParams.DiskSizeGb the same value
 			if v, ok := d.GetOk(prefix + ".disk_size_gb"); ok {
 				disk.InitializeParams.DiskSizeGb = int64(v.(int))
 			}
@@ -1296,7 +1290,6 @@ type diskCharacteristics struct {
 	mode        string
 	diskType    string
 	diskSizeGb  string
-  diskSizeGb2 string 
 	autoDelete  bool
 	sourceImage string
 }
@@ -1319,12 +1312,6 @@ func diskCharacteristicsFromMap(m map[string]interface{}) diskCharacteristics {
 		// use strings to compare for simplicity.
 		dc.diskSizeGb = fmt.Sprintf("%v", v)
 	}
-
-  if v := m["disk_size_gb2"]; v != nil {
-    // Terraform and GCP return ints as different types (int vs int64), so just
-    // use strings to compare them for simplicity.
-    dc.diskSizeGb2 = fmt.Sprintf("%v", v)
-  }
 
 	if v := m["auto_delete"]; v != nil {
 		dc.autoDelete = v.(bool)
@@ -1359,12 +1346,14 @@ func flattenDisk(disk *compute.AttachedDisk, configDisk map[string]any, defaultP
 		diskMap["disk_name"] = disk.InitializeParams.DiskName
 		diskMap["labels"] = disk.InitializeParams.Labels
 		// The API does not return a disk size value for scratch disks. They are largely only one size,
-		// so we can assume that size here.
-    if disk.InitializeParams.DiskSizeGb == 0 && disk.Type == "SCRATCH" {
+		// so we can assume that size here. Prefer
+    if disk.DiskSizeGb == 0 && disk.InitializeParams.DiskSizeGb == 0 && disk.Type == "SCRATCH" {
       diskMap["disk_size_gb"] = DEFAULT_SCRATCH_DISK_SIZE_GB
-		} else {
+		} else if disk.DiskSizeGb != 0 {
 			diskMap["disk_size_gb"] = disk.InitializeParams.DiskSizeGb
-		}
+		} else {
+      diskMap["disk_size_gb"] = disk.DiskSizeGb
+    }
 
 		diskMap["resource_policies"] = disk.InitializeParams.ResourcePolicies
 	}
@@ -1379,17 +1368,6 @@ func flattenDisk(disk *compute.AttachedDisk, configDisk map[string]any, defaultP
 	diskMap["auto_delete"] = disk.AutoDelete
 	diskMap["boot"] = disk.Boot
 	diskMap["device_name"] = disk.DeviceName
-
-  // The API does not return a disk size value for scratch disks. They are largely only one size,
-  // so we can assume that size here.
-  // Prefer disk.DiskSizeGb over disk.InitializeParams.DiskSizeGb
-  if disk.DiskSizeGb == 0 && disk.Type == "SCRATCH" {
-    diskMap["disk_size_gb2"] = DEFAULT_SCRATCH_DISK_SIZE_GB
-  } else {
-    diskMap["disk_size_gb2"] = disk.DiskSizeGb
-  }
-
-  diskMap["disk_size_gb2"] = disk.DiskSizeGb
 
 	diskMap["interface"] = disk.Interface
 	diskMap["source"] = tpgresource.ConvertSelfLinkToV1(disk.Source)
