@@ -57,7 +57,11 @@ examples:
       bucket_name: 'cloudfunctions-function-example-bucket'
       zip_path: 'path/to/index.zip'
     test_vars_overrides:
+<<<<<<< HEAD
       zip_path: 'createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
+=======
+      zip_path: 'acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
+>>>>>>> 36b2b60ce (Copy test-fixtures in service packages)
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'

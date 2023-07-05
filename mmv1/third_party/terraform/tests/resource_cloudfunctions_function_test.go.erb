@@ -22,13 +22,13 @@ const (
 	FUNCTION_TRIGGER_HTTP = iota
 )
 
-const testHTTPTriggerPath = "./test-fixtures/cloudfunctions/http_trigger.js"
-const testHTTPTriggerUpdatePath = "./test-fixtures/cloudfunctions/http_trigger_update.js"
-const testPubSubTriggerPath = "./test-fixtures/cloudfunctions/pubsub_trigger.js"
-const testBucketTriggerPath = "./test-fixtures/cloudfunctions/bucket_trigger.js"
-const testFirestoreTriggerPath = "./test-fixtures/cloudfunctions/firestore_trigger.js"
-const testSecretEnvVarFunctionPath = "./test-fixtures/cloudfunctions/secret_environment_variables.js"
-const testSecretVolumesMountFunctionPath = "./test-fixtures/cloudfunctions/secret_volumes_mount.js"
+const testHTTPTriggerPath = "./test-fixtures/http_trigger.js"
+const testHTTPTriggerUpdatePath = "./test-fixtures/http_trigger_update.js"
+const testPubSubTriggerPath = "./test-fixtures/pubsub_trigger.js"
+const testBucketTriggerPath = "./test-fixtures/bucket_trigger.js"
+const testFirestoreTriggerPath = "./test-fixtures/firestore_trigger.js"
+const testSecretEnvVarFunctionPath = "./test-fixtures/secret_environment_variables.js"
+const testSecretVolumesMountFunctionPath = "./test-fixtures/secret_volumes_mount.js"
 
 func TestAccCloudFunctionsFunction_basic(t *testing.T) {
 	t.Parallel()
@@ -169,7 +169,7 @@ func TestAccCloudFunctionsFunction_buildworkerpool(t *testing.T) {
 	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
 	location := "us-central1"
-	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
+	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	proj := envvar.GetTestProjectFromEnv()
 
 	defer os.Remove(zipFilePath) // clean up
