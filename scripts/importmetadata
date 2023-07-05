@@ -1,0 +1,45 @@
+#!/bin/bash
+# Generates an import format metadata file
+#echo /mmv1/products/accessapproval/FolderSettings.yaml
+
+shopt -s nullglob
+
+echo $file
+echo "# $resource_type: [list-of-acceptable-import-templates]"
+echo "{"
+
+for file in $(find $GOPATH/src/github.com/hashicorp/terraform-provider-google/google/services/**/resource_*.go -type f -print); do
+	importable=$(ggrep -Pzo 'Importer:' $file)
+	shortfile="$(basename $file .go)"
+	resource=${shortfile/resource/google}
+    if [ -z "$importable"  ]
+    then
+#		echo \	\"$resource\"\:
+#		echo \	not importable
+		importable=""
+    else
+		importformat=$(ggrep -Pzo 'tpgresource\.ParseImportId\(\n*?[ \t]*?\[]string{\n*?([ \t]*".*?",\n)*.*?}' $file)
+	    if [ -z "$importformat"  ]
+	    then
+			imppassthrough=$(ggrep -Pzo 'Importer: &schema\.ResourceImporter{.*\n.*State: schema\.ImportStatePassthrough,\n[ \t]*}' $file)
+			if [ -z "$imppassthrough"  ]
+			then
+				echo \	\"$resource\"\:
+				echo \	NON STANDARD
+		    else
+				echo \	\"$resource\"\:
+				echo \	\	\"{{these want id via importstatepassthrough}}\"\:
+			fi
+#	    else
+#			echo \	\"$resource\"\:
+#			importformat=${importformat/tpgresource.ParseImportId\(\[\]string\{/\[}
+#			importformat=${importformat/\}/]}
+#			importformat=${importformat//(?P</\{}
+#			importformat=${importformat//\>\[\^\/\]\+\)/\}}
+#			importformat=${importformat//\>\[\^\/\]\+\)/\}}
+
+#	    	echo \	"$importformat"
+	    fi
+	fi
+done
+echo "}"
