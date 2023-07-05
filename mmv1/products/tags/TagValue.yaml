@@ -42,8 +42,8 @@ examples:
       key_short_name: 'keyname'
       value_short_name: 'valuename'
     test_vars_overrides:
-      key_short_name: '"tf-test-key-" + RandString(t, 10)'
-      value_short_name: '"tf-test-value-" + RandString(t, 10)'
+      key_short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
+      value_short_name: '"tf-test-value-" + acctest.RandString(t, 10)'
     test_env_vars:
       org_id: :ORG_ID
 properties:

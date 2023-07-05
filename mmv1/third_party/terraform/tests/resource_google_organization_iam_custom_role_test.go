@@ -17,11 +17,11 @@ func TestAccOrganizationIamCustomRole_basic(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	roleId := "tfIamCustomRole" + RandString(t, 10)
+	roleId := "tfIamCustomRole" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleOrganizationIamCustomRoleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -57,11 +57,11 @@ func TestAccOrganizationIamCustomRole_undelete(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	roleId := "tfIamCustomRole" + RandString(t, 10)
+	roleId := "tfIamCustomRole" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleOrganizationIamCustomRoleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -87,11 +87,11 @@ func TestAccOrganizationIamCustomRole_createAfterDestroy(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	roleId := "tfIamCustomRole" + RandString(t, 10)
+	roleId := "tfIamCustomRole" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleOrganizationIamCustomRoleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -126,7 +126,7 @@ func TestAccOrganizationIamCustomRole_createAfterDestroy(t *testing.T) {
 
 func testAccCheckGoogleOrganizationIamCustomRoleDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_organization_iam_custom_role" {
@@ -160,7 +160,7 @@ func testAccCheckGoogleOrganizationIamCustomRole(t *testing.T, n, title, descrip
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		role, err := config.NewIamClient(config.UserAgent).Organizations.Roles.Get(rs.Primary.ID).Do()
 
 		if err != nil {
@@ -200,7 +200,7 @@ func testAccCheckGoogleOrganizationIamCustomRoleDeletionStatus(t *testing.T, n s
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		role, err := config.NewIamClient(config.UserAgent).Organizations.Roles.Get(rs.Primary.ID).Do()
 
 		if err != nil {

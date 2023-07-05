@@ -11,15 +11,15 @@ func TestAccPrivatecaCertificateAuthority_privatecaCertificateAuthorityUpdate(t 
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"pool_name":           BootstrapSharedCaPoolInLocation(t, "us-central1"),
+		"pool_name":           acctest.BootstrapSharedCaPoolInLocation(t, "us-central1"),
 		"pool_location":       "us-central1",
 		"deletion_protection": false,
-		"random_suffix":       RandString(t, 10),
+		"random_suffix":       acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPrivatecaCertificateAuthorityDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -61,9 +61,9 @@ func TestAccPrivatecaCertificateAuthority_privatecaCertificateAuthorityUpdate(t 
 func TestAccPrivatecaCertificateAuthority_rootCaManageDesiredState(t *testing.T) {
 	t.Parallel()
 
-	random_suffix := RandString(t, 10)
+	random_suffix := acctest.RandString(t, 10)
 	context_staged := map[string]interface{}{
-		"pool_name":           BootstrapSharedCaPoolInLocation(t, "us-central1"),
+		"pool_name":           acctest.BootstrapSharedCaPoolInLocation(t, "us-central1"),
 		"pool_location":       "us-central1",
 		"deletion_protection": false,
 		"random_suffix":       random_suffix,
@@ -71,7 +71,7 @@ func TestAccPrivatecaCertificateAuthority_rootCaManageDesiredState(t *testing.T)
 	}
 
 	context_enabled := map[string]interface{}{
-		"pool_name":           BootstrapSharedCaPoolInLocation(t, "us-central1"),
+		"pool_name":           acctest.BootstrapSharedCaPoolInLocation(t, "us-central1"),
 		"pool_location":       "us-central1",
 		"deletion_protection": false,
 		"random_suffix":       random_suffix,
@@ -79,7 +79,7 @@ func TestAccPrivatecaCertificateAuthority_rootCaManageDesiredState(t *testing.T)
 	}
 
 	context_disabled := map[string]interface{}{
-		"pool_name":           BootstrapSharedCaPoolInLocation(t, "us-central1"),
+		"pool_name":           acctest.BootstrapSharedCaPoolInLocation(t, "us-central1"),
 		"pool_location":       "us-central1",
 		"deletion_protection": false,
 		"random_suffix":       random_suffix,
@@ -87,9 +87,9 @@ func TestAccPrivatecaCertificateAuthority_rootCaManageDesiredState(t *testing.T)
 	}
 
 	resourceName := "google_privateca_certificate_authority.default"
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPrivatecaCertificateAuthorityDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

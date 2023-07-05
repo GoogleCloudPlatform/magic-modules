@@ -19,13 +19,13 @@ func TestAccBigtableGCPolicy_basic(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	familyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	familyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableGCPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -44,13 +44,13 @@ func TestAccBigtableGCPolicy_abandoned(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	familyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	familyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableGCPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -77,13 +77,13 @@ func TestAccBigtableGCPolicy_swapOffDeprecated(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	familyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	familyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableGCPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -115,13 +115,13 @@ func TestAccBigtableGCPolicy_union(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	familyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	familyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableGCPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -141,13 +141,13 @@ func TestAccBigtableGCPolicy_multiplePolicies(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	familyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	familyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableGCPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -169,16 +169,16 @@ func TestAccBigtableGCPolicy_gcRulesPolicy(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	familyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	familyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	gcRulesOriginal := "{\"mode\":\"intersection\",\"rules\":[{\"max_age\":\"10h\"},{\"max_version\":2}]}"
 	gcRulesUpdate := "{\"mode\":\"intersection\",\"rules\":[{\"max_age\":\"16h\"},{\"max_version\":1}]}"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableGCPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -299,7 +299,7 @@ func testAccCheckBigtableGCPolicyDestroyProducer(t *testing.T) func(s *terraform
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 			c, err := config.BigTableClientFactory(config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
 			if err != nil {
 				// The instance is already gone
@@ -338,7 +338,7 @@ func testAccBigtableGCPolicyExists(t *testing.T, n string, compareGcRules bool) 
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No ID is set")
 		}
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		c, err := config.BigTableClientFactory(config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
 		if err != nil {
 			return fmt.Errorf("Error starting admin client. %s", err)
@@ -384,7 +384,7 @@ func testAccBigtableRemoteGCPolicyExists(t *testing.T, table_name_space string) 
 			return fmt.Errorf("Table not found: %s", table_name_space)
 		}
 
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		c, err := config.BigTableClientFactory(config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
 		if err != nil {
 			return fmt.Errorf("Error starting admin client. %s", err)
@@ -427,7 +427,7 @@ func testAccBigtableCanWriteData(t *testing.T, n string, numberOfRows int) resou
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No ID is set")
 		}
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		c, err := config.BigTableClientFactory(config.UserAgent).NewClient(config.Project, rs.Primary.Attributes["instance_name"])
 		if err != nil {
 			return fmt.Errorf("Error starting client. %s", err)
@@ -467,7 +467,7 @@ func testAccBigtableCanReadData(t *testing.T, n string, numberOfRows int) resour
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No ID is set")
 		}
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		c, err := config.BigTableClientFactory(config.UserAgent).NewClient(config.Project, rs.Primary.Attributes["instance_name"])
 		if err != nil {
 			return fmt.Errorf("Error starting client. %s", err)
