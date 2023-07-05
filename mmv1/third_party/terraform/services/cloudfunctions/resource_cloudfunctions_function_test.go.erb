@@ -18,12 +18,12 @@ const (
 	FUNCTION_TRIGGER_HTTP = iota
 )
 
-const testHTTPTriggerUpdatePath = acctest.TestFixturesPath + "/test-fixtures/cloudfunctions/http_trigger_update.js"
-const testPubSubTriggerPath = acctest.TestFixturesPath + "/test-fixtures/cloudfunctions/pubsub_trigger.js"
-const testBucketTriggerPath = acctest.TestFixturesPath + "/test-fixtures/cloudfunctions/bucket_trigger.js"
-const testFirestoreTriggerPath = acctest.TestFixturesPath + "/test-fixtures/cloudfunctions/firestore_trigger.js"
-const testSecretEnvVarFunctionPath = acctest.TestFixturesPath + "/test-fixtures/cloudfunctions/secret_environment_variables.js"
-const testSecretVolumesMountFunctionPath = acctest.TestFixturesPath + "/test-fixtures/cloudfunctions/secret_volumes_mount.js"
+const testHTTPTriggerUpdatePath = acctest.TestFixturesPath + "/cloudfunctions/http_trigger_update.js"
+const testPubSubTriggerPath = acctest.TestFixturesPath + "/cloudfunctions/pubsub_trigger.js"
+const testBucketTriggerPath = acctest.TestFixturesPath + "/cloudfunctions/bucket_trigger.js"
+const testFirestoreTriggerPath = acctest.TestFixturesPath + "/cloudfunctions/firestore_trigger.js"
+const testSecretEnvVarFunctionPath = acctest.TestFixturesPath + "/cloudfunctions/secret_environment_variables.js"
+const testSecretVolumesMountFunctionPath = acctest.TestFixturesPath + "/cloudfunctions/secret_volumes_mount.js"
 
 func TestAccCloudFunctionsFunction_basic(t *testing.T) {
 	t.Parallel()
