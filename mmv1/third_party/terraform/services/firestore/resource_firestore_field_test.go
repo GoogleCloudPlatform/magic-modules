@@ -13,17 +13,8 @@ func TestAccFirestoreField_firestoreFieldUpdateAddIndexExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_firestore_field_test.go
-		"project_id":    GetTestFirestoreProjectFromEnv(t),
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_firestore_field_test.go
-		"random_suffix": acctest.RandString(t, 10),
-=======
-		"random_suffix": RandString(t, 10),
-=======
 		"project_id":    envvar.GetTestFirestoreProjectFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/firestore/resource_firestore_field_test.go
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/firestore/resource_firestore_field_test.go
 		"resource_name": "add_index",
 	}
 	testAccFirestoreField_runUpdateTest(testAccFirestoreField_firestoreFieldUpdateAddIndexExample(context), t, context)
@@ -33,17 +24,8 @@ func TestAccFirestoreField_firestoreFieldUpdateAddTTLExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_firestore_field_test.go
-		"project_id":    GetTestFirestoreProjectFromEnv(t),
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_firestore_field_test.go
-		"random_suffix": acctest.RandString(t, 10),
-=======
-		"random_suffix": RandString(t, 10),
-=======
 		"project_id":    envvar.GetTestFirestoreProjectFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/firestore/resource_firestore_field_test.go
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/firestore/resource_firestore_field_test.go
 		"resource_name": "add_ttl",
 	}
 	testAccFirestoreField_runUpdateTest(testAccFirestoreField_firestoreFieldUpdateAddTTLExample(context), t, context)

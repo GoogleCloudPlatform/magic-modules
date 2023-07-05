@@ -16,16 +16,8 @@ func TestAccDataSourceComputeInstance_basic(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/data_source_google_compute_instance_test.go
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-=======
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/data_source_google_compute_instance_test.go
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/compute/data_source_google_compute_instance_test.go
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
-=======
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/compute/data_source_google_compute_instance_test.go
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeInstanceConfig(instanceName),

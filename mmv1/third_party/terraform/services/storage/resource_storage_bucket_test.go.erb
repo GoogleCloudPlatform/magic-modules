@@ -19,13 +19,6 @@ import (
 	"google.golang.org/api/storage/v1"
 )
 
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_storage_bucket_test.go.erb
-func testBucketName(t *testing.T) string {
-	return fmt.Sprintf("%s-%d", "tf-test-bucket", acctest.RandInt(t))
-}
-
-=======
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/storage/resource_storage_bucket_test.go.erb
 func TestAccStorageBucket_basic(t *testing.T) {
 	t.Parallel()
 

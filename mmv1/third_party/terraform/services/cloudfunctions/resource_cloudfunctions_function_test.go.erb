@@ -18,12 +18,13 @@ const (
 	FUNCTION_TRIGGER_HTTP = iota
 )
 
-const testHTTPTriggerUpdatePath = acctest.TestFixturesPath + "/cloudfunctions/http_trigger_update.js"
-const testPubSubTriggerPath = acctest.TestFixturesPath + "/cloudfunctions/pubsub_trigger.js"
-const testBucketTriggerPath = acctest.TestFixturesPath + "/cloudfunctions/bucket_trigger.js"
-const testFirestoreTriggerPath = acctest.TestFixturesPath + "/cloudfunctions/firestore_trigger.js"
-const testSecretEnvVarFunctionPath = acctest.TestFixturesPath + "/cloudfunctions/secret_environment_variables.js"
-const testSecretVolumesMountFunctionPath = acctest.TestFixturesPath + "/cloudfunctions/secret_volumes_mount.js"
+const testHTTPTriggerPath = "./test-fixtures/http_trigger.js"
+const testHTTPTriggerUpdatePath = "./test-fixtures/http_trigger_update.js"
+const testPubSubTriggerPath = "./test-fixtures/pubsub_trigger.js"
+const testBucketTriggerPath = "./test-fixtures/bucket_trigger.js"
+const testFirestoreTriggerPath = "./test-fixtures/firestore_trigger.js"
+const testSecretEnvVarFunctionPath = "./test-fixtures/secret_environment_variables.js"
+const testSecretVolumesMountFunctionPath = "./test-fixtures/secret_volumes_mount.js"
 
 func TestAccCloudFunctionsFunction_basic(t *testing.T) {
 	t.Parallel()
@@ -31,20 +32,9 @@ func TestAccCloudFunctionsFunction_basic(t *testing.T) {
 	var function cloudfunctions.CloudFunction
 
 	funcResourceName := "google_cloudfunctions_function.function"
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_cloudfunctions_function_test.go.erb
 	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
-=======
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_cloudfunctions_function_test.go.erb
-	functionName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/resource_cloudfunctions_function_test.go.erb
-	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
-=======
-	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
-	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, acctest.TestHTTPTriggerPath)
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/resource_cloudfunctions_function_test.go.erb
+	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -102,27 +92,11 @@ func TestAccCloudFunctionsFunction_update(t *testing.T) {
 	var function cloudfunctions.CloudFunction
 
 	funcResourceName := "google_cloudfunctions_function.function"
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_cloudfunctions_function_test.go.erb
 	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
-	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
-	zipFileUpdatePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerUpdatePath)
-	random_suffix := acctest.RandString(t, 10)
-=======
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_cloudfunctions_function_test.go.erb
-	functionName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
-	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
-	zipFileUpdatePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerUpdatePath)
-	random_suffix := RandString(t, 10)
-=======
-	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
-	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, acctest.TestHTTPTriggerPath)
+	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	zipFileUpdatePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerUpdatePath)
 	random_suffix := acctest.RandString(t, 10)
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/resource_cloudfunctions_function_test.go.erb
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/resource_cloudfunctions_function_test.go.erb
 	defer os.Remove(zipFilePath) // clean up
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -191,7 +165,7 @@ func TestAccCloudFunctionsFunction_buildworkerpool(t *testing.T) {
 	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
 	location := "us-central1"
-	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, acctest.TestHTTPTriggerPath)
+	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	proj := envvar.GetTestProjectFromEnv()
 
 	defer os.Remove(zipFilePath) // clean up
@@ -226,23 +200,10 @@ func TestAccCloudFunctionsFunction_pubsub(t *testing.T) {
 	t.Parallel()
 
 	funcResourceName := "google_cloudfunctions_function.function"
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_cloudfunctions_function_test.go.erb
-	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
-	topicName := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
-=======
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_cloudfunctions_function_test.go.erb
-	functionName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
-	topicName := fmt.Sprintf("tf-test-sub-%s", RandString(t, 10))
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/resource_cloudfunctions_function_test.go.erb
-	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testPubSubTriggerPath)
-=======
 	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
 	topicName := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
 	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, testPubSubTriggerPath)
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/resource_cloudfunctions_function_test.go.erb
 	defer os.Remove(zipFilePath) // clean up
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -271,20 +232,9 @@ func TestAccCloudFunctionsFunction_pubsub(t *testing.T) {
 func TestAccCloudFunctionsFunction_bucket(t *testing.T) {
 	t.Parallel()
 	funcResourceName := "google_cloudfunctions_function.function"
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_cloudfunctions_function_test.go.erb
-	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
-=======
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_cloudfunctions_function_test.go.erb
-	functionName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/resource_cloudfunctions_function_test.go.erb
-	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testBucketTriggerPath)
-=======
 	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
 	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, testBucketTriggerPath)
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/resource_cloudfunctions_function_test.go.erb
 	defer os.Remove(zipFilePath) // clean up
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -318,23 +268,10 @@ func TestAccCloudFunctionsFunction_bucket(t *testing.T) {
 func TestAccCloudFunctionsFunction_dockerRepository(t *testing.T) {
 	t.Parallel()
 	funcResourceName := "google_cloudfunctions_function.function"
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_cloudfunctions_function_test.go.erb
 	arRepoName := fmt.Sprintf("tf-ar-test-docker-repository-%s", acctest.RandString(t, 10))
 	functionName := fmt.Sprintf("tf-ar-test-%s", acctest.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-ar-test-bucket-%d", acctest.RandInt(t))
-=======
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_cloudfunctions_function_test.go.erb
-	arRepoName := fmt.Sprintf("tf-ar-test-docker-repository-%s", RandString(t, 10))
-	functionName := fmt.Sprintf("tf-ar-test-%s", RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-ar-test-bucket-%d", RandInt(t))
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/resource_cloudfunctions_function_test.go.erb
-	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
-=======
-	arRepoName := fmt.Sprintf("tf-ar-test-docker-repository-%s", acctest.RandString(t, 10))
-	functionName := fmt.Sprintf("tf-ar-test-%s", acctest.RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-ar-test-bucket-%d", acctest.RandInt(t))
-	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, acctest.TestHTTPTriggerPath)
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/resource_cloudfunctions_function_test.go.erb
+	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -361,23 +298,10 @@ func TestAccCloudFunctionsFunction_cmek(t *testing.T) {
 	t.Parallel()
 	kmsKey := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
 	funcResourceName := "google_cloudfunctions_function.function"
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_cloudfunctions_function_test.go.erb
 	arRepoName := fmt.Sprintf("tf-cmek-test-docker-repository-%s", acctest.RandString(t, 10))
 	functionName := fmt.Sprintf("tf-cmek-test-%s", acctest.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-cmek-test-bucket-%d", acctest.RandInt(t))
-=======
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_cloudfunctions_function_test.go.erb
-	arRepoName := fmt.Sprintf("tf-cmek-test-docker-repository-%s", RandString(t, 10))
-	functionName := fmt.Sprintf("tf-cmek-test-%s", RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-cmek-test-bucket-%d", RandInt(t))
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/resource_cloudfunctions_function_test.go.erb
-	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
-=======
-	arRepoName := fmt.Sprintf("tf-cmek-test-docker-repository-%s", acctest.RandString(t, 10))
-	functionName := fmt.Sprintf("tf-cmek-test-%s", acctest.RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-cmek-test-bucket-%d", acctest.RandInt(t))
-	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, acctest.TestHTTPTriggerPath)
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/resource_cloudfunctions_function_test.go.erb
+	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -402,20 +326,9 @@ func TestAccCloudFunctionsFunction_cmek(t *testing.T) {
 func TestAccCloudFunctionsFunction_firestore(t *testing.T) {
 	t.Parallel()
 	funcResourceName := "google_cloudfunctions_function.function"
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_cloudfunctions_function_test.go.erb
-	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
-=======
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_cloudfunctions_function_test.go.erb
-	functionName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/resource_cloudfunctions_function_test.go.erb
-	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testFirestoreTriggerPath)
-=======
 	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
 	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, testFirestoreTriggerPath)
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/resource_cloudfunctions_function_test.go.erb
 	defer os.Remove(zipFilePath) // clean up
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -465,20 +378,9 @@ func TestAccCloudFunctionsFunction_serviceAccountEmail(t *testing.T) {
 	t.Parallel()
 
 	funcResourceName := "google_cloudfunctions_function.function"
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_cloudfunctions_function_test.go.erb
 	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
-=======
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_cloudfunctions_function_test.go.erb
-	functionName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/resource_cloudfunctions_function_test.go.erb
-	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
-=======
-	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
-	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, acctest.TestHTTPTriggerPath)
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/resource_cloudfunctions_function_test.go.erb
+	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -503,26 +405,11 @@ func TestAccCloudFunctionsFunction_vpcConnector(t *testing.T) {
 	t.Parallel()
 
 	funcResourceName := "google_cloudfunctions_function.function"
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_cloudfunctions_function_test.go.erb
 	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
 	networkName := fmt.Sprintf("tf-test-net-%d", acctest.RandInt(t))
 	vpcConnectorName := fmt.Sprintf("tf-test-conn-%s", acctest.RandString(t, 5))
-=======
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_cloudfunctions_function_test.go.erb
-	functionName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
-	networkName := fmt.Sprintf("tf-test-net-%d", RandInt(t))
-	vpcConnectorName := fmt.Sprintf("tf-test-conn-%s", RandString(t, 5))
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/resource_cloudfunctions_function_test.go.erb
-	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
-=======
-	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
-	networkName := fmt.Sprintf("tf-test-net-%d", acctest.RandInt(t))
-	vpcConnectorName := fmt.Sprintf("tf-test-conn-%s", acctest.RandString(t, 5))
-	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, acctest.TestHTTPTriggerPath)
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/resource_cloudfunctions_function_test.go.erb
+	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	projectNumber := os.Getenv("GOOGLE_PROJECT_NUMBER")
 	defer os.Remove(zipFilePath) // clean up
 

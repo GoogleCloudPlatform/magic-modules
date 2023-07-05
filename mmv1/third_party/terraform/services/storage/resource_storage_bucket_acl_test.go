@@ -162,17 +162,8 @@ func TestAccStorageBucketAcl_downgrade(t *testing.T) {
 func TestAccStorageBucketAcl_predefined(t *testing.T) {
 	t.Parallel()
 
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_storage_bucket_acl_test.go
-	bucketName := testBucketName(t)
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_storage_bucket_acl_test.go
-	acctest.VcrTest(t, resource.TestCase{
-=======
-	VcrTest(t, resource.TestCase{
-=======
 	bucketName := acctest.TestBucketName(t)
 	acctest.VcrTest(t, resource.TestCase{
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/storage/resource_storage_bucket_acl_test.go
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/storage/resource_storage_bucket_acl_test.go
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageBucketAclDestroyProducer(t),
@@ -206,17 +197,8 @@ func TestAccStorageBucketAcl_unordered(t *testing.T) {
 func TestAccStorageBucketAcl_RemoveOwner(t *testing.T) {
 	t.Parallel()
 
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_storage_bucket_acl_test.go
-	bucketName := testBucketName(t)
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_storage_bucket_acl_test.go
-	acctest.VcrTest(t, resource.TestCase{
-=======
-	VcrTest(t, resource.TestCase{
-=======
 	bucketName := acctest.TestBucketName(t)
 	acctest.VcrTest(t, resource.TestCase{
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/storage/resource_storage_bucket_acl_test.go
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/storage/resource_storage_bucket_acl_test.go
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageBucketAclDestroyProducer(t),

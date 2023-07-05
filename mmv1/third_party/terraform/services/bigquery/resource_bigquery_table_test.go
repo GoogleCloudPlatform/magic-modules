@@ -462,11 +462,7 @@ func TestAccBigQueryTable_MaterializedView_DailyTimePartioning_Update(t *testing
 func TestAccBigQueryExternalDataTable_parquet(t *testing.T) {
 	t.Parallel()
 
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_bigquery_table_test.go
-	bucketName := testBucketName(t)
-=======
 	bucketName := acctest.TestBucketName(t)
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/bigquery/resource_bigquery_table_test.go
 	objectName := fmt.Sprintf("tf_test_%s.gz.parquet", acctest.RandString(t, 10))
 
 	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
@@ -487,11 +483,7 @@ func TestAccBigQueryExternalDataTable_parquet(t *testing.T) {
 func TestAccBigQueryExternalDataTable_CSV(t *testing.T) {
 	t.Parallel()
 
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_bigquery_table_test.go
-	bucketName := testBucketName(t)
-=======
 	bucketName := acctest.TestBucketName(t)
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/bigquery/resource_bigquery_table_test.go
 	objectName := fmt.Sprintf("tf_test_%s.csv", acctest.RandString(t, 10))
 
 	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
@@ -517,11 +509,7 @@ func TestAccBigQueryExternalDataTable_CSV(t *testing.T) {
 func TestAccBigQueryExternalDataTable_CSV_WithSchemaAndConnectionID_UpdateNoConnectionID(t *testing.T) {
 	t.Parallel()
 
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_bigquery_table_test.go
-	bucketName := testBucketName(t)
-=======
 	bucketName := acctest.TestBucketName(t)
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/bigquery/resource_bigquery_table_test.go
 	objectName := fmt.Sprintf("tf_test_%s.csv", acctest.RandString(t, 10))
 
 	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
@@ -560,11 +548,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchemaAndConnectionID_UpdateNoConn
 func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateToConnectionID(t *testing.T) {
 	t.Parallel()
 
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_bigquery_table_test.go
-	bucketName := testBucketName(t)
-=======
 	bucketName := acctest.TestBucketName(t)
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/bigquery/resource_bigquery_table_test.go
 	objectName := fmt.Sprintf("tf_test_%s.csv", acctest.RandString(t, 10))
 
 	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
@@ -612,11 +596,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateToConnectionID(t *tes
 func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateAllowQuotedNewlines(t *testing.T) {
 	t.Parallel()
 
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_bigquery_table_test.go
-	bucketName := testBucketName(t)
-=======
 	bucketName := acctest.TestBucketName(t)
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/bigquery/resource_bigquery_table_test.go
 	objectName := fmt.Sprintf("tf_test_%s.csv", acctest.RandString(t, 10))
 
 	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))

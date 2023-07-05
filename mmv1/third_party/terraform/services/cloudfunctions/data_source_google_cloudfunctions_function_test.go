@@ -16,11 +16,7 @@ func TestAccDataSourceGoogleCloudFunctionsFunction_basic(t *testing.T) {
 	funcDataNameHttp := "data.google_cloudfunctions_function.function_http"
 	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/data_source_google_cloudfunctions_function_test.go
-	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
-=======
-	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, acctest.TestHTTPTriggerPath)
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/cloudfunctions/data_source_google_cloudfunctions_function_test.go
+	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
 
 	acctest.VcrTest(t, resource.TestCase{

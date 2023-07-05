@@ -16,16 +16,7 @@ func TestAccDataSourceGoogleSQLCaCerts_basic(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-<<<<<<< HEAD
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-=======
-<<<<<<< HEAD
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages)
-		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
-=======
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages)
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleSQLCaCertsConfig(instanceName),

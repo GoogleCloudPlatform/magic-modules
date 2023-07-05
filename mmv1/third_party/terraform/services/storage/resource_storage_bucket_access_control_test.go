@@ -11,17 +11,8 @@ import (
 func TestAccStorageBucketAccessControl_update(t *testing.T) {
 	t.Parallel()
 
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_storage_bucket_access_control_test.go
-	bucketName := testBucketName(t)
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_storage_bucket_access_control_test.go
-	acctest.VcrTest(t, resource.TestCase{
-=======
-	VcrTest(t, resource.TestCase{
-=======
 	bucketName := acctest.TestBucketName(t)
 	acctest.VcrTest(t, resource.TestCase{
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/storage/resource_storage_bucket_access_control_test.go
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/storage/resource_storage_bucket_access_control_test.go
 		PreCheck: func() {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)

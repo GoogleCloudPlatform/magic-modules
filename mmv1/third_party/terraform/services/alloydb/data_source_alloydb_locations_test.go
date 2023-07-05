@@ -21,10 +21,6 @@ func TestAccDataSourceAlloydbLocations_basic(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/data_source_alloydb_locations_test.go
-		CheckDestroy:             testAccSqlDatabaseDestroyProducer(t),
-=======
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/alloydb/data_source_alloydb_locations_test.go
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceAlloydbLocations_basic(context),

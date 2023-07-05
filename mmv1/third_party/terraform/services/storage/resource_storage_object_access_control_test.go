@@ -13,17 +13,8 @@ import (
 func TestAccStorageObjectAccessControl_update(t *testing.T) {
 	t.Parallel()
 
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_storage_object_access_control_test.go
-	bucketName := testBucketName(t)
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_storage_object_access_control_test.go
-	objectName := fmt.Sprintf("%s-%d", "tf-test-acl-object", acctest.RandInt(t))
-=======
-	objectName := fmt.Sprintf("%s-%d", "tf-test-acl-object", RandInt(t))
-=======
 	bucketName := acctest.TestBucketName(t)
 	objectName := fmt.Sprintf("%s-%d", "tf-test-acl-object", acctest.RandInt(t))
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/storage/resource_storage_object_access_control_test.go
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/storage/resource_storage_object_access_control_test.go
 	objectData := []byte("data data data")
 	if err := ioutil.WriteFile(tfObjectAcl.Name(), objectData, 0644); err != nil {
 		t.Errorf("error writing file: %v", err)
@@ -61,17 +52,8 @@ func TestAccStorageObjectAccessControl_update(t *testing.T) {
 func TestAccStorageObjectAccessControl_updateWithSlashes(t *testing.T) {
 	t.Parallel()
 
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_storage_object_access_control_test.go
-	bucketName := testBucketName(t)
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_storage_object_access_control_test.go
-	objectName := fmt.Sprintf("%s-%d", "tf-test/acl/object", acctest.RandInt(t))
-=======
-	objectName := fmt.Sprintf("%s-%d", "tf-test/acl/object", RandInt(t))
-=======
 	bucketName := acctest.TestBucketName(t)
 	objectName := fmt.Sprintf("%s-%d", "tf-test/acl/object", acctest.RandInt(t))
->>>>>>> 12945f953 (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/storage/resource_storage_object_access_control_test.go
->>>>>>> c13a90bef (Generate Mmv1 test files to the service packages):mmv1/third_party/terraform/services/storage/resource_storage_object_access_control_test.go
 	objectData := []byte("data data data")
 	if err := ioutil.WriteFile(tfObjectAcl.Name(), objectData, 0644); err != nil {
 		t.Errorf("error writing file: %v", err)
