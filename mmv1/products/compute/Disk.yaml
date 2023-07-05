@@ -440,6 +440,7 @@ properties:
     description: |
       Indicates how many IOPS must be provisioned for the disk.
       Note: Update currently only supported by hyperdisk skus, allowing for an update of IOPS every 4 hours
+    min_version: beta
     required: false
     default_from_api: true
   - !ruby/object:Api::Type::NestedObject
