@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,18 +12,18 @@
 # limitations under the License.
 
 require 'spec_helper'
-require 'open_api_parser/parser'
+require 'openapi_generate/parser'
 require 'active_support/inflector'
 
-describe OpenApiParser::Parser do
+describe OpenAPIGenerate::Parser do
   context 'should run on sample file for Post' do
-    subject { OpenApiParser::Parser.new('fake', 'fake').build_resource('spec/data/test-openapi-spec.json', '/v1alpha5/projects/{projectsId}/locations/{locationsId}/posts', 'Post') }
+    subject { OpenAPIGenerate::Parser.new('fake', 'fake').build_resource('spec/data/test-openapi-spec.json', '/v1alpha5/projects/{projectsId}/locations/{locationsId}/posts', 'Post') }
     it { is_expected.to have_attributes(name: 'Post') }
     it { is_expected.to have_attribute_of_length(properties: 12) }
   end
 
   context 'should run on sample file for Comment' do
-    subject { OpenApiParser::Parser.new('fake', 'fake').build_resource('spec/data/test-openapi-spec.json', '/v1alpha5/projects/{projectsId}/locations/{locationsId}/posts/{postsId}/comments', 'Comment') }
+    subject { OpenAPIGenerate::Parser.new('fake', 'fake').build_resource('spec/data/test-openapi-spec.json', '/v1alpha5/projects/{projectsId}/locations/{locationsId}/posts/{postsId}/comments', 'Comment') }
     it { is_expected.to have_attributes(name: 'Comment') }
     it { is_expected.to have_attribute_of_length(properties: 9) }
   end
