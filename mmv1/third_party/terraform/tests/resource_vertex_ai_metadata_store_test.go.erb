@@ -17,7 +17,7 @@ import (
 func TestAccVertexAIMetadataStore_vertexAiMetadataStoreExample(t *testing.T) {
 	t.Parallel()
 
-	kms := BootstrapKMSKeyInLocation(t, "us-central1")
+	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
 	name := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{

@@ -481,8 +481,8 @@ end     # products.each do
 				"google_composer_environment":                  composer.ResourceComposerEnvironment(),
 				"google_compute_attached_disk":                 compute.ResourceComputeAttachedDisk(),
 				"google_compute_instance":                      compute.ResourceComputeInstance(),
-				<% unless version == 'ga' -%>
 				"google_compute_disk_async_replication":        compute.ResourceComputeDiskAsyncReplication(),
+				<% unless version == 'ga' -%>
 				"google_compute_instance_from_machine_image":   compute.ResourceComputeInstanceFromMachineImage(),
 				<% end -%>
 				"google_compute_instance_from_template":        compute.ResourceComputeInstanceFromTemplate(),

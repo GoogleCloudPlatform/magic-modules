@@ -2,7 +2,7 @@
 title: "Add a handwritten test"
 summary: "For handwritten resources and generated resources that need to test update,
 handwritten tests must be added."
-weight: 21
+weight: 41
 aliases:
   - /docs/how-to/add-handwritten-test
   - /how-to/add-handwritten-test

@@ -56,7 +56,7 @@ examples:
       display_name: 'terraform'
       kms_key_name: 'kms-name'
     test_vars_overrides:
-      kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
       - 'project'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
