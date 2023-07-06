@@ -157,6 +157,13 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 							Required:    true,
 							Description: `The machine type to use. See tiers for more details and supported versions. Postgres supports only shared-core machine types, and custom machine types such as db-custom-2-13312. See the Custom Machine Type Documentation to learn about specifying custom machine types.`,
 						},
+						"edition": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Default:      "ENTERPRISE",
+							ValidateFunc: validation.StringInSlice([]string{"ENTERPRISE", "ENTERPRISE_PLUS"}, false),
+							Description:  `The edition of the instance, can be ENTERPRISE or ENTERPRISE_PLUS.`,
+						},
 						"advanced_machine_features": {
 							Type:     schema.TypeList,
 							Optional: true,
@@ -1187,6 +1194,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		// Version is unset in Create but is set during update
 		SettingsVersion:            int64(_settings["version"].(int)),
 		Tier:                       _settings["tier"].(string),
+		Edition:                    _settings["edition"].(string),
 		AdvancedMachineFeatures:    expandSqlServerAdvancedMachineFeatures(_settings["advanced_machine_features"].([]interface{})),
 		ForceSendFields:            []string{"StorageAutoResize"},
 		ActivationPolicy:           _settings["activation_policy"].(string),
@@ -1907,6 +1915,7 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 	data := map[string]interface{}{
 		"version":                      settings.SettingsVersion,
 		"tier":                         settings.Tier,
+		"edition":                      settings.Edition,
 		"activation_policy":            settings.ActivationPolicy,
 		"availability_type":            settings.AvailabilityType,
 		"collation":                    settings.Collation,
