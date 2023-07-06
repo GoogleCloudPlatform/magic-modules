@@ -172,13 +172,15 @@ steps:
         - TEST_FOLDER_ID=$_VALIDATOR_TEST_FOLDER
         - TEST_ANCESTRY=$_VALIDATOR_TEST_ANCESTRY
         - TEST_ORG_ID=$_VALIDATOR_TEST_ORG
+        - COMMIT_SHA=$COMMIT_SHA
+        - PR_NUMBER=$_PR_NUMBER
       args:
-          - $_PR_NUMBER
-          - $COMMIT_SHA
-          - $BUILD_ID
-          - $PROJECT_ID
-          - "17"  # Build step
-          - terraform-google-conversion
+          - $_PR_NUMBER                 # remove after 08/2023
+          - $COMMIT_SHA                 # remove after 08/2023
+          - $BUILD_ID                   # remove after 08/2023
+          - $PROJECT_ID                 # remove after 08/2023
+          - "17" # Build step           # remove after 08/2023
+          - terraform-google-conversion # remove after 08/2023
 
     - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
       id: tgc-test-integration-0.12.31
