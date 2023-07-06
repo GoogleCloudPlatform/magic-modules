@@ -159,8 +159,8 @@ resource "google_compute_ssl_policy" "foo" {
 
 resource "google_compute_ssl_certificate" "foo" {
   name        = "%s"
-  private_key = file("test-fixtures/ssl_cert/test.key")
-  certificate = file("test-fixtures/ssl_cert/test.crt")
+  private_key = file("test-fixtures/test.key")
+  certificate = file("test-fixtures/test.crt")
 }
 
 resource "google_compute_backend_service" "foo" {
@@ -199,14 +199,14 @@ resource "google_compute_ssl_policy" "foo" {
 
 resource "google_compute_ssl_certificate" "foo" {
   name        = "%s"
-  private_key = file("test-fixtures/ssl_cert/test.key")
-  certificate = file("test-fixtures/ssl_cert/test.crt")
+  private_key = file("test-fixtures/test.key")
+  certificate = file("test-fixtures/test.crt")
 }
 
 resource "google_compute_ssl_certificate" "bar" {
   name        = "%s"
-  private_key = file("test-fixtures/ssl_cert/test.key")
-  certificate = file("test-fixtures/ssl_cert/test.crt")
+  private_key = file("test-fixtures/test.key")
+  certificate = file("test-fixtures/test.crt")
 }
 
 resource "google_compute_backend_service" "foo" {

@@ -130,13 +130,13 @@ resource "google_storage_bucket" "bucket" {
 resource "google_storage_bucket_object" "requirements" {
   name   = "requirements.txt"
   bucket = google_storage_bucket.bucket.name
-  source = "./test-fixtures/appengine/hello-world-flask/requirements.txt"
+  source = "./test-fixtures/hello-world-flask/requirements.txt"
 }
 
 resource "google_storage_bucket_object" "main" {
   name   = "main.py"
   bucket = google_storage_bucket.bucket.name
-  source = "./test-fixtures/appengine/hello-world-flask/main.py"
+  source = "./test-fixtures/hello-world-flask/main.py"
 }`, context)
 }
 
@@ -240,13 +240,13 @@ resource "google_storage_bucket" "bucket" {
 resource "google_storage_bucket_object" "requirements" {
   name   = "requirements.txt"
   bucket = google_storage_bucket.bucket.name
-  source = "./test-fixtures/appengine/hello-world-flask/requirements.txt"
+  source = "./test-fixtures/hello-world-flask/requirements.txt"
 }
 
 resource "google_storage_bucket_object" "main" {
   name   = "main.py"
   bucket = google_storage_bucket.bucket.name
-  source = "./test-fixtures/appengine/hello-world-flask/main.py"
+  source = "./test-fixtures/hello-world-flask/main.py"
 }`, context)
 }
 
@@ -317,12 +317,12 @@ resource "google_storage_bucket" "bucket" {
 resource "google_storage_bucket_object" "requirements" {
   name   = "requirements.txt"
   bucket = google_storage_bucket.bucket.name
-  source = "./test-fixtures/appengine/hello-world-flask/requirements.txt"
+  source = "./test-fixtures/hello-world-flask/requirements.txt"
 }
 
 resource "google_storage_bucket_object" "main" {
   name   = "main.py"
   bucket = google_storage_bucket.bucket.name
-  source = "./test-fixtures/appengine/hello-world-flask/main.py"
+  source = "./test-fixtures/hello-world-flask/main.py"
 }`, context)
 }

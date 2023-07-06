@@ -12,7 +12,7 @@ func TestAccCloudFunctions2Function_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"zip_path":      "./test-fixtures/cloudfunctions2/function-source.zip",
+		"zip_path":      "./test-fixtures/function-source.zip",
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -179,7 +179,7 @@ func TestAccCloudFunctions2Function_fullUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
-		"zip_path":      "./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip",
+		"zip_path":      "./test-fixtures/function-source-eventarc-gcs.zip",
 		"random_suffix": acctest.RandString(t, 10),
 	}
 

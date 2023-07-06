@@ -118,8 +118,8 @@ resource "google_apigee_keystores_aliases_pkcs12" "apigee_environment_keystore_a
   org_id				= google_apigee_organization.apigee_org.name
   keystore				= google_apigee_env_keystore.apigee_environment_keystore_alias.name
   alias                 = "tf-test%{random_suffix}"
-  file                  = "./test-fixtures/apigee/keyStore.p12"
-  filehash				= filemd5("./test-fixtures/apigee/keyStore.p12")
+  file                  = "./test-fixtures/keyStore.p12"
+  filehash				= filemd5("./test-fixtures/keyStore.p12")
   password              = sensitive("abcd")
 }
 `, context)

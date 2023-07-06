@@ -22,7 +22,7 @@ func TestAccDeploymentManagerDeployment_basicFile(t *testing.T) {
 	randSuffix := acctest.RandString(t, 10)
 	deploymentId := "tf-dm-" + randSuffix
 	accountId := "tf-dm-account-" + randSuffix
-	yamlPath := createYamlConfigFileForTest(t, "test-fixtures/deploymentmanager/service_account.yml.tmpl", map[string]interface{}{
+	yamlPath := createYamlConfigFileForTest(t, "test-fixtures/service_account.yml.tmpl", map[string]interface{}{
 		"account_id": accountId,
 	})
 
@@ -97,7 +97,7 @@ func TestAccDeploymentManagerDeployment_imports(t *testing.T) {
 	randStr := acctest.RandString(t, 10)
 	deploymentName := "tf-dm-" + randStr
 	accountId := "tf-dm-" + randStr
-	importFilepath := createYamlConfigFileForTest(t, "test-fixtures/deploymentmanager/service_account.yml.tmpl", map[string]interface{}{
+	importFilepath := createYamlConfigFileForTest(t, "test-fixtures/service_account.yml.tmpl", map[string]interface{}{
 		"account_id": "{{ env['name'] }}",
 	})
 

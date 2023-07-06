@@ -141,7 +141,7 @@ resource "google_service_account" "acceptance" {
 
 resource "google_service_account_key" "acceptance" {
   service_account_id = google_service_account.acceptance.email
-  public_key_data    = filebase64("test-fixtures/serviceaccount/public_key.pem")
+  public_key_data    = filebase64("test-fixtures/public_key.pem")
 }
 `, account, name)
 }
