@@ -682,11 +682,12 @@ module Api
 
       def check_resource_ref_property_exists
         return unless defined?(resource_ref.all_user_properties)
-          exported_props = resource_ref.all_user_properties
-          exported_props << Api::Type::String.new('selfLink') \
-            if resource_ref.has_self_link
-          raise "'#{@imports}' does not exist on '#{@resource}'" \
-            if exported_props.none? { |p| p.name == @imports }
+        
+        exported_props = resource_ref.all_user_properties
+        exported_props << Api::Type::String.new('selfLink') \
+          if resource_ref.has_self_link
+        raise "'#{@imports}' does not exist on '#{@resource}'" \
+          if exported_props.none? { |p| p.name == @imports }
       end
     end
 
