@@ -60,8 +60,8 @@ func configWithDescritption(name string) string {
 		name        = "%s"
 		description = "Global cert"
 		self_managed {
-		  pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
-		  pem_private_key = file("test-fixtures/certificatemanager/private-key.pem")
+		  pem_certificate = file("test-fixtures/cert.pem")
+		  pem_private_key = file("test-fixtures/private-key.pem")
 		}
 	}
 	`, name)
@@ -76,8 +76,8 @@ func newConfigWithDescription(name string) string {
 		name        = "%s"
 		description = "Migrated Global cert"
 		self_managed {
-		  pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
-		  pem_private_key = file("test-fixtures/certificatemanager/private-key.pem")
+		  pem_certificate = file("test-fixtures/cert.pem")
+		  pem_private_key = file("test-fixtures/private-key.pem")
 		}
 	}
 	`, name)

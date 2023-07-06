@@ -66,5 +66,5 @@ resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
 resource "google_storage_bucket_object" "<%= ctx[:primary_resource_id] %>" {
   name   = "hello-world.zip"
   bucket = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
-  source = "./test-fixtures/appengine/hello-world.zip"
+  source = "./test-fixtures/hello-world.zip"
 }
