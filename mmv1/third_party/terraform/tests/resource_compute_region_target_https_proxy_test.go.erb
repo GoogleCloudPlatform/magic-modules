@@ -133,15 +133,15 @@ resource "google_compute_region_url_map" "foobar2" {
 resource "google_compute_region_ssl_certificate" "foobar1" {
   name        = "httpsproxy-test-cert1-%s"
   description = "very descriptive"
-  private_key = file("test-fixtures/ssl_cert/test.key")
-  certificate = file("test-fixtures/ssl_cert/test.crt")
+  private_key = file("test-fixtures/test.key")
+  certificate = file("test-fixtures/test.crt")
 }
 
 resource "google_compute_region_ssl_certificate" "foobar2" {
   name        = "httpsproxy-test-cert2-%s"
   description = "very descriptive"
-  private_key = file("test-fixtures/ssl_cert/test.key")
-  certificate = file("test-fixtures/ssl_cert/test.crt")
+  private_key = file("test-fixtures/test.key")
+  certificate = file("test-fixtures/test.crt")
 }
 `, id, id, id, id, id, id, id, id, id)
 }
@@ -233,15 +233,15 @@ resource "google_compute_region_url_map" "foobar2" {
 resource "google_compute_region_ssl_certificate" "foobar1" {
   name        = "httpsproxy-test-cert1-%s"
   description = "very descriptive"
-  private_key = file("test-fixtures/ssl_cert/test.key")
-  certificate = file("test-fixtures/ssl_cert/test.crt")
+  private_key = file("test-fixtures/test.key")
+  certificate = file("test-fixtures/test.crt")
 }
 
 resource "google_compute_region_ssl_certificate" "foobar2" {
   name        = "httpsproxy-test-cert2-%s"
   description = "very descriptive"
-  private_key = file("test-fixtures/ssl_cert/test.key")
-  certificate = file("test-fixtures/ssl_cert/test.crt")
+  private_key = file("test-fixtures/test.key")
+  certificate = file("test-fixtures/test.crt")
 }
 `, id, id, id, id, id, id, id, id, id)
 }
@@ -340,15 +340,15 @@ resource "google_compute_region_ssl_policy" "foobar" {
 resource "google_compute_region_ssl_certificate" "foobar1" {
   name        = "httpsproxy-test-cert1-%s"
   description = "very descriptive"
-  private_key = file("test-fixtures/ssl_cert/test.key")
-  certificate = file("test-fixtures/ssl_cert/test.crt")
+  private_key = file("test-fixtures/test.key")
+  certificate = file("test-fixtures/test.crt")
 }
 
 resource "google_compute_region_ssl_certificate" "foobar2" {
   name        = "httpsproxy-test-cert2-%s"
   description = "very descriptive"
-  private_key = file("test-fixtures/ssl_cert/test.key")
-  certificate = file("test-fixtures/ssl_cert/test.crt")
+  private_key = file("test-fixtures/test.key")
+  certificate = file("test-fixtures/test.crt")
 }
 `, id, id, id, id, id, id, id, id, id, id)
 }

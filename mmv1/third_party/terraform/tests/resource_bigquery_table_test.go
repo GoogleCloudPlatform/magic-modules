@@ -226,7 +226,7 @@ func TestAccBigQueryTable_AvroPartitioning(t *testing.T) {
 	resourceName := "google_bigquery_table.test"
 	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	avroFilePath := "./test-fixtures/bigquerytable/avro-generated.avro"
+	avroFilePath := "./test-fixtures/avro-generated.avro"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1612,7 +1612,7 @@ resource "google_storage_bucket" "test" {
 
 resource "google_storage_bucket_object" "test" {
   name    = "%s"
-  source = "./test-fixtures/bigquerytable/test.parquet.gzip"
+  source = "./test-fixtures/test.parquet.gzip"
   bucket = google_storage_bucket.test.name
 }
 

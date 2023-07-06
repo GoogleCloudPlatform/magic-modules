@@ -36,8 +36,8 @@ func testAccDataSourceComputeSslCertificateConfig(certName string) string {
 resource "google_compute_ssl_certificate" "foobar" {
   name        = "cert-test-%s"
   description = "really descriptive"
-  private_key = file("test-fixtures/ssl_cert/test.key")
-  certificate = file("test-fixtures/ssl_cert/test.crt")
+  private_key = file("test-fixtures/test.key")
+  certificate = file("test-fixtures/test.crt")
 }
 
 data "google_compute_ssl_certificate" "cert" {
