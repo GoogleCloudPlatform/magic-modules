@@ -1,3 +1,5 @@
+// this file is copied from mmv1, any changes made here will be overwritten
+
 package tests
 
 import ClientConfiguration
