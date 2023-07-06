@@ -15,12 +15,12 @@ func TestAccFirebaseAppleApp_update(t *testing.T) {
         context := map[string]interface{}{
                 "project_id": envvar.GetTestProjectFromEnv(),
                 "bundle_id":  "apple.app.12345",
-                "random_suffix": RandString(t, 10),
+                "random_suffix": acctest.RandString(t, 10),
                 "display_name":  "tf-test Display Name N",
 	}
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirebaseAppleApp(context, 12345, "1"),

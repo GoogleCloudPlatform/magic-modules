@@ -2,7 +2,7 @@
 title: "Add a handwritten test"
 summary: "For handwritten resources and generated resources that need to test update,
 handwritten tests must be added."
-weight: 21
+weight: 41
 aliases:
   - /docs/how-to/add-handwritten-test
   - /how-to/add-handwritten-test
@@ -63,12 +63,12 @@ For example, the following test case is a good reference:
 func TestAccComputeFirewall_noSource(t *testing.T) {
     t.Parallel()
 
-    networkName := fmt.Sprintf("tf-test-firewall-%s", RandString(t, 10))
-    firewallName := fmt.Sprintf("tf-test-firewall-%s", RandString(t, 10))
+    networkName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
+    firewallName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
 
-    VcrTest(t, resource.TestCase{
+    acctest.VcrTest(t, resource.TestCase{
         PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-        ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
         CheckDestroy:             testAccCheckComputeFirewallDestroyProducer(t),
         Steps: []resource.TestStep{
             {
@@ -127,12 +127,12 @@ For example:
 func TestAccComputeFirewall_disabled(t *testing.T) {
     t.Parallel()
 
-    networkName := fmt.Sprintf("tf-test-firewall-%s", RandString(t, 10))
-    firewallName := fmt.Sprintf("tf-test-firewall-%s", RandString(t, 10))
+    networkName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
+    firewallName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
 
-    VcrTest(t, resource.TestCase{
+    acctest.VcrTest(t, resource.TestCase{
         PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-        ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
         CheckDestroy:             testAccCheckComputeFirewallDestroyProducer(t),
         Steps: []resource.TestStep{
             {

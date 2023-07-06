@@ -19,9 +19,9 @@ func testAccAccessContextManagerAuthorizedOrgsDesc_basicTest(t *testing.T) {
 		"org_id": envvar.GetTestOrgFromEnv(t),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAccessContextManagerAuthorizedOrgsDescDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -65,7 +65,7 @@ func testAccCheckAccessContextManagerAuthorizedOrgsDescDestroyProducer(t *testin
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{name}}")
 			if err != nil {
