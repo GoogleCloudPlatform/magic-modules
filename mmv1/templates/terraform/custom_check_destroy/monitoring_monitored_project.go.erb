@@ -12,7 +12,7 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-config := GoogleProviderConfig(t)
+config := acctest.GoogleProviderConfig(t)
 
 url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{MonitoringBasePath}}v1/locations/global/metricsScopes/{{metrics_scope}}")
 if err != nil {

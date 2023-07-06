@@ -13,7 +13,7 @@ func TestAccFirestoreField_firestoreFieldUpdateAddIndexExample(t *testing.T) {
 
 	context := map[string]interface{}{
 		"project_id":    GetTestFirestoreProjectFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"resource_name": "add_index",
 	}
 	testAccFirestoreField_runUpdateTest(testAccFirestoreField_firestoreFieldUpdateAddIndexExample(context), t, context)
@@ -24,7 +24,7 @@ func TestAccFirestoreField_firestoreFieldUpdateAddTTLExample(t *testing.T) {
 
 	context := map[string]interface{}{
 		"project_id":    GetTestFirestoreProjectFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"resource_name": "add_ttl",
 	}
 	testAccFirestoreField_runUpdateTest(testAccFirestoreField_firestoreFieldUpdateAddTTLExample(context), t, context)
@@ -33,9 +33,9 @@ func TestAccFirestoreField_firestoreFieldUpdateAddTTLExample(t *testing.T) {
 func testAccFirestoreField_runUpdateTest(updateConfig string, t *testing.T, context map[string]interface{}) {
 	resourceName := context["resource_name"].(string)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckFirestoreFieldDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
