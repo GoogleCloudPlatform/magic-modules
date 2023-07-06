@@ -10,7 +10,7 @@ resource "google_looker_instance" "<%= ctx[:primary_resource_id] %>" {
     allowed_email_domains = ["google.com"]
   }
   encryption_config {
-    kms_key_name = "projects/${data.google_project.project.number}/locations/${google_kms_key_ring.looker_key_ring.location}/keyRings/${google_kms_key_ring.looker_key_ring.name}/cryptoKeys/${google_kms_crypto_key.looker_crypto_key.name}"
+    kms_key_name = google_kms_crypto_key.looker_crypto_key.id
   }
   maintenance_window {
     day_of_week = "THURSDAY"
