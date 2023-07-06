@@ -637,7 +637,6 @@ module Api
       # The fields which can be overridden in provider.yaml.
       module Fields
         attr_reader :resource
-        attr_reader :resourceproduct
         attr_reader :imports
       end
       include Fields
@@ -651,7 +650,6 @@ module Api
         return if @__resource.nil? || @__resource.exclude || @exclude
 
         check :resource, type: ::String, required: true
-        check :resourceproduct, type: ::String
         check :imports, type: ::String, required: TrueClass
 
         # TODO: (camthornton) product reference may not exist yet
