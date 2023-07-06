@@ -79,7 +79,7 @@ jobs:
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
         cd tgc
-        go build
+        make build
     - name: Run Unit Tests
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
