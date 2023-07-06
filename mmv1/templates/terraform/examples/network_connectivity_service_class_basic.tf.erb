@@ -1,0 +1,8 @@
+resource "google_network_connectivity_service_class" "default"{
+  name        = "<%= ctx[:vars]['resource_name'] %>"
+  location    = "us-central1"
+  description = "my-basic serviceClass"
+  labels      = {
+      foo = "bar"
+    }
+}
