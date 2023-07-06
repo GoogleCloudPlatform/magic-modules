@@ -1,3 +1,5 @@
+// this file is copied from mmv1, any changes made here will be overwritten
+
 import jetbrains.buildServer.configs.kotlin.ParametrizedWithType
 
 class ClientConfiguration(var custId: String,
