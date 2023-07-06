@@ -49,7 +49,7 @@ func testAccCloudRunV2Service_cloudrunv2ServiceFull(context map[string]interface
 	return acctest.Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
-  description = "description creating"
+  description = "description creating test"
   location = "us-central1"
   annotations = {
     generated-by = "magic-modules"
