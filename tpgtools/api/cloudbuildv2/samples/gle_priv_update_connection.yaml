@@ -15,7 +15,7 @@ name: gle_priv_update_connection
 description: Creates and updates a connection to a private server using Service Directory.
 type: connection
 versions:
-- beta
+- ga
 resource: samples/gle.connection.json
 updates:
 - resource: samples/gle_priv.connection.json
