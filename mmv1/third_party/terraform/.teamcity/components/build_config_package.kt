@@ -22,6 +22,12 @@ class packageDetails(name: String, displayName: String, environment: String) {
             steps {
                 ConfigureGoEnv()
                 DownloadTerraformBinary()
+                // Adds steps:
+                // - Determine Working Directory for this Package
+                // - Pre-Sweeper
+                // - Compile Test Binary
+                // - Run via jen20/teamcity-go-test
+                // - Post-Sweeper
                 RunAcceptanceTests(path, packageName)
             }
 
