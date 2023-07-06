@@ -85,6 +85,8 @@ examples:
       - 'alloydb.0.settings.0.initial_user.0.password'
     vars:
       profile: 'my-profileid'
+      global_address_name: 'private-ip-alloc'
+      network_name: 'vpc-network'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'connectionProfileId'
