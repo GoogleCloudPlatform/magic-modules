@@ -2011,8 +2011,8 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 	}
 
 	if settings.DataCacheConfig != nil {
-        data["data_cache_config"] = flattenDataCacheConfig(settings.DataCacheConfig)
-    }
+        	data["data_cache_config"] = flattenDataCacheConfig(settings.DataCacheConfig)
+    	}
 
 	if settings.AdvancedMachineFeatures != nil {
 		data["advanced_machine_features"] = flattenSqlServerAdvancedMachineFeatures(settings.AdvancedMachineFeatures)
@@ -2022,14 +2022,14 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 }
 
 func flattenDataCacheConfig(d *sqladmin.DataCacheConfig) []map[string]interface{} {
-    if d == nil {
-        return nil
-    }
-    return []map[string]interface{}{
-        {
-            "data_cache_enabled": d.DataCacheEnabled,
-        },
-    }
+	if d == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+	            "data_cache_enabled": d.DataCacheEnabled,
+	        },
+	}
 }
 
 func flattenBackupConfiguration(backupConfiguration *sqladmin.BackupConfiguration) []map[string]interface{} {
