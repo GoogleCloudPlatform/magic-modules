@@ -12,13 +12,13 @@ func TestAccVertexAIIndexEndpoint_updated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  BootstrapSharedTestNetwork(t, "vertex-ai-index-endpoint-update"),
-		"random_suffix": RandString(t, 10),
+		"network_name":  acctest.BootstrapSharedTestNetwork(t, "vertex-ai-index-endpoint-update"),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckVertexAIIndexEndpointDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -44,7 +44,7 @@ func TestAccVertexAIIndexEndpoint_updated(t *testing.T) {
 }
 
 func testAccVertexAIIndexEndpoint_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_vertex_ai_index_endpoint" "index_endpoint" {
   display_name = "sample-endpoint"
   description  = "A sample vertex endpoint"
@@ -77,7 +77,7 @@ data "google_project" "project" {}
 }
 
 func testAccVertexAIIndexEndpoint_updated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_vertex_ai_index_endpoint" "index_endpoint" {
   display_name = "sample-endpoint-updated"
   description  = "A sample vertex endpoint (updated)"

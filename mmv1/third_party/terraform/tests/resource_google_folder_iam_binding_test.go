@@ -21,10 +21,10 @@ func TestAccFolderIamBinding_basic(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	fname := "tf-test-" + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	fname := "tf-test-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -54,10 +54,10 @@ func TestAccFolderIamBinding_multiple(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	fname := "tf-test-" + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	fname := "tf-test-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -101,10 +101,10 @@ func TestAccFolderIamBinding_multipleAtOnce(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	fname := "tf-test-" + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	fname := "tf-test-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -136,10 +136,10 @@ func TestAccFolderIamBinding_update(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	fname := "tf-test-" + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	fname := "tf-test-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -189,10 +189,10 @@ func TestAccFolderIamBinding_remove(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	fname := "tf-test-" + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	fname := "tf-test-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -228,7 +228,7 @@ func TestAccFolderIamBinding_remove(t *testing.T) {
 
 func testAccCheckGoogleFolderIamBindingExists(t *testing.T, expected *cloudresourcemanager.Binding, org, fname string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		folderPolicy, err := getFolderIamPolicyByParentAndDisplayName("organizations/"+org, fname, config)
 		if err != nil {
 			return fmt.Errorf("Failed to retrieve IAM policy for folder %q: %s", fname, err)

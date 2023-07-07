@@ -20,12 +20,12 @@ func testAccAccessApprovalFolderSettings(t *testing.T) {
 		"project":       envvar.GetTestProjectFromEnv(),
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"location":      envvar.GetTestRegionFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
@@ -63,7 +63,7 @@ func testAccAccessApprovalFolderSettings(t *testing.T) {
 }
 
 func testAccAccessApprovalFolderSettings_full(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_folder" "my_folder" {
   display_name = "tf-test-my-folder%{random_suffix}"
   parent       = "organizations/%{org_id}"
@@ -90,7 +90,7 @@ resource "google_folder_access_approval_settings" "folder_access_approval" {
 }
 
 func testAccAccessApprovalFolderSettings_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_folder" "my_folder" {
   display_name = "tf-test-my-folder%{random_suffix}"
   parent       = "organizations/%{org_id}"
@@ -117,7 +117,7 @@ resource "google_folder_access_approval_settings" "folder_access_approval" {
 }
 
 func testAccAccessApprovalFolderSettings_activeKeyVersion(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_folder" "my_folder" {
   display_name = "tf-test-my-folder%{random_suffix}"
   parent       = "organizations/%{org_id}"

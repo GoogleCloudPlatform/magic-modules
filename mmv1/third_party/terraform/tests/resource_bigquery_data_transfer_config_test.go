@@ -180,14 +180,14 @@ func TestAccBigqueryDataTransferConfig(t *testing.T) {
 func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
 	// Uses time.Now
 	acctest.SkipIfVcr(t)
-	random_suffix := RandString(t, 10)
+	random_suffix := acctest.RandString(t, 10)
 	now := time.Now().UTC()
 	start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
 	end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -206,17 +206,17 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
 func testAccBigqueryDataTransferConfig_scheduledQuery_update(t *testing.T) {
 	// Uses time.Now
 	acctest.SkipIfVcr(t)
-	random_suffix := RandString(t, 10)
+	random_suffix := acctest.RandString(t, 10)
 	now := time.Now().UTC()
 	first_start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
 	first_end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
 	second_start_time := now.Add(2 * time.Hour).Format(time.RFC3339)
 	second_end_time := now.AddDate(0, 2, 0).Format(time.RFC3339)
-	random_suffix2 := RandString(t, 10)
+	random_suffix2 := acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -247,14 +247,14 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_update(t *testing.T) {
 func testAccBigqueryDataTransferConfig_scheduledQuery_no_destination(t *testing.T) {
 	// Uses time.Now
 	acctest.SkipIfVcr(t)
-	random_suffix := RandString(t, 10)
+	random_suffix := acctest.RandString(t, 10)
 	now := time.Now().UTC()
 	start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
 	end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -271,11 +271,11 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_no_destination(t *testing.
 }
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_with_service_account(t *testing.T) {
-	random_suffix := RandString(t, 10)
+	random_suffix := acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -292,11 +292,11 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_with_service_account(t *te
 }
 
 func testAccBigqueryDataTransferConfig_copy_booleanParam(t *testing.T) {
-	random_suffix := RandString(t, 10)
+	random_suffix := acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -313,11 +313,11 @@ func testAccBigqueryDataTransferConfig_copy_booleanParam(t *testing.T) {
 }
 
 func testAccBigqueryDataTransferConfig_force_new_update_params(t *testing.T) {
-	random_suffix := RandString(t, 10)
+	random_suffix := acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -361,7 +361,7 @@ func testAccCheckBigqueryDataTransferConfigDestroyProducer(t *testing.T) func(s 
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{BigqueryDataTransferBasePath}}{{name}}")
 			if err != nil {
@@ -384,13 +384,13 @@ func testAccCheckBigqueryDataTransferConfigDestroyProducer(t *testing.T) func(s 
 }
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_update_service_account(t *testing.T) {
-	random_suffix1 := RandString(t, 10)
-	random_suffix2 := RandString(t, 10)
+	random_suffix1 := acctest.RandString(t, 10)
+	random_suffix2 := acctest.RandString(t, 10)
 	transferConfigID := ""
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccGkeonpremVmwareNodePool_vmwareNodePoolUpdate(t *testing.T) {
@@ -12,9 +13,9 @@ func TestAccGkeonpremVmwareNodePool_vmwareNodePoolUpdate(t *testing.T) {
 
   context := map[string]interface{}{}
 
-  VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
     CheckDestroy:             testAccCheckGkeonpremVmwareNodePoolDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -38,7 +39,7 @@ func TestAccGkeonpremVmwareNodePool_vmwareNodePoolUpdate(t *testing.T) {
 }
 
 func testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdateStart(context map[string]interface{}) string {
-  return Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     provider = google-beta  
@@ -111,7 +112,7 @@ func testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdateStart(context map[string
 }
 
 func testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdate(context map[string]interface{}) string {
-  return Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     provider = google-beta  

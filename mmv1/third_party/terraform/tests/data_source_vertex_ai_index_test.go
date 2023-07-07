@@ -13,12 +13,12 @@ func TestAccDataSourceVertexAIIndex_basic(t *testing.T) {
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckVertexAIIndexDestroyProducer_basic(t),
 		Steps: []resource.TestStep{
 			{
@@ -40,7 +40,7 @@ func TestAccDataSourceVertexAIIndex_basic(t *testing.T) {
 }
 
 func testAccDataSourceVertexAIIndex_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "tf-test-%{project}-vertex-ai-index-%{random_suffix}"  # Every bucket name must be globally unique
   location = "us-central1"

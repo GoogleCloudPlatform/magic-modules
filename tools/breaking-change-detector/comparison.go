@@ -24,7 +24,7 @@ func compareResourceMaps(old, new map[string]*schema.Resource) []string {
 		violatingResources := rule.IsRuleBreak(old, new)
 		if len(violatingResources) > 0 {
 			for _, resourceName := range violatingResources {
-				newMessage := rule.Message(*providerVersion, resourceName)
+				newMessage := rule.Message(resourceName)
 				messages = append(messages, newMessage)
 			}
 		}
@@ -51,7 +51,7 @@ func compareResourceSchema(resourceName string, old, new map[string]*schema.Sche
 		violatingFields := rule.IsRuleBreak(oldCompressed, newCompressed)
 		if len(violatingFields) > 0 {
 			for _, fieldName := range violatingFields {
-				newMessage := rule.Message(*providerVersion, resourceName, fieldName)
+				newMessage := rule.Message(resourceName, fieldName)
 				messages = append(messages, newMessage)
 			}
 		}
@@ -79,7 +79,6 @@ func compareField(resourceName, fieldName string, old, new *schema.Schema) []str
 			rules.MessageContext{
 				Resource: resourceName,
 				Field:    fieldName,
-				Version:  *providerVersion,
 			},
 		)
 		if breakageMessage != "" {

@@ -13,16 +13,16 @@ func TestAccBigQueryJob_withLocation(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"location":      "asia-northeast1",
 	}
 
 	// Need to construct the import ID manually since the state ID will not contain the location
 	importID := fmt.Sprintf("projects/%s/jobs/tf_test_job_query%s/location/%s", envvar.GetTestProjectFromEnv(), context["random_suffix"], context["location"])
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryJob_withLocation(context),
@@ -39,7 +39,7 @@ func TestAccBigQueryJob_withLocation(t *testing.T) {
 }
 
 func testAccBigQueryJob_withLocation(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_bigquery_table" "foo" {
   deletion_protection = false
   dataset_id = google_bigquery_dataset.bar.dataset_id

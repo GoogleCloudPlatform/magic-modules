@@ -13,12 +13,12 @@ func TestAccDataLossPreventionStoredInfoType_dlpStoredInfoTypeUpdate(t *testing.
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionStoredInfoTypeDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -42,7 +42,7 @@ func TestAccDataLossPreventionStoredInfoType_dlpStoredInfoTypeUpdate(t *testing.
 }
 
 func testAccDataLossPreventionStoredInfoType_dlpStoredInfoTypeStart(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_stored_info_type" "basic" {
 	parent = "projects/%{project}"
 	description = "Description"
@@ -57,7 +57,7 @@ resource "google_data_loss_prevention_stored_info_type" "basic" {
 }
 
 func testAccDataLossPreventionStoredInfoType_dlpStoredInfoTypeUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_stored_info_type" "basic" {
 	parent = "projects/%{project}"
 	description = "Updated Description"
@@ -79,9 +79,9 @@ func TestAccDataLossPreventionStoredInfoType_dlpStoredInfoTypeGroupIndexUpdate(t
 		"project": envvar.GetTestProjectFromEnv(),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionStoredInfoTypeDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -121,7 +121,7 @@ func TestAccDataLossPreventionStoredInfoType_dlpStoredInfoTypeGroupIndexUpdate(t
 }
 
 func testAccDataLossPreventionStoredInfoType_dlpStoredInfoTypeWithoutGroupIndex(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_stored_info_type" "basic" {
 	parent = "projects/%{project}"
 	description = "Description"
@@ -135,7 +135,7 @@ resource "google_data_loss_prevention_stored_info_type" "basic" {
 }
 
 func testAccDataLossPreventionStoredInfoType_dlpStoredInfoTypeGroupIndexUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_stored_info_type" "basic" {
 	parent = "projects/%{project}"
 	description = "Description"
@@ -154,12 +154,12 @@ func TestAccDataLossPreventionStoredInfoType_dlpStoredInfoTypeStoredInfoTypeId(t
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionStoredInfoTypeDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -183,7 +183,7 @@ func TestAccDataLossPreventionStoredInfoType_dlpStoredInfoTypeStoredInfoTypeId(t
 }
 
 func testAccDataLossPreventionStoredInfoType_dlpStoredInfoTypeStoredInfoTypeId(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_stored_info_type" "basic" {
 	parent = "projects/%{project}"
 	description = "Description"
@@ -199,7 +199,7 @@ resource "google_data_loss_prevention_stored_info_type" "basic" {
 }
 
 func testAccDataLossPreventionStoredInfoType_dlpStoredInfoTypeStoredInfoTypeIdUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_stored_info_type" "basic" {
 	parent = "projects/%{project}"
 	description = "Description"

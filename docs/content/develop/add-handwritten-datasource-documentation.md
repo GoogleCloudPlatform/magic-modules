@@ -1,13 +1,13 @@
 ---
-title: "Add documentation for a handwritten data source"
+title: "Add datasource documentation"
 summary: "New handwritten datasources require new handwritten documentation to be created."
-weight: 25
+weight: 61
 aliases:
   - /docs/how-to/add-handwritten-datasource-documentation
   - /how-to/add-handwritten-datasource-documentation
 ---
 
-# Add documentation for a handwritten data source
+# Add data source documentation
 
 {{< hint info >}}
 **Note:** If you want to find information about documentation for a generated resource, look at the [MMv1 resource documentation](/magic-modules/docs/how-to/mmv1-resource-documentation) page instead. The information on this page will not be relevant for resources that have generated documentation.

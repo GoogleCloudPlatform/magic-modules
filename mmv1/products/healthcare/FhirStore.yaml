@@ -46,7 +46,7 @@ examples:
       bq_dataset_name: 'bq_example_dataset'
     test_vars_overrides:
       policyChanged:
-        ' BootstrapPSARoles(t, "service-", "gcp-sa-healthcare",
+        ' acctest.BootstrapPSARoles(t, "service-", "gcp-sa-healthcare",
         []string{"roles/bigquery.dataEditor", "roles/bigquery.jobUser"})'
   - !ruby/object:Provider::Terraform::Examples
     name: 'healthcare_fhir_store_notification_config'

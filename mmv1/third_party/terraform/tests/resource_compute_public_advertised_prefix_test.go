@@ -37,12 +37,12 @@ func testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicTest(t *t
 
 	context := map[string]interface{}{
 		"description":   envvar.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputePublicAdvertisedPrefixDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -58,7 +58,7 @@ func testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicTest(t *t
 }
 
 func testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_public_advertised_prefix" "prefix" {
   name = "tf-test-my-prefix%{random_suffix}"
   description = "%{description}"
@@ -71,12 +71,12 @@ resource "google_compute_public_advertised_prefix" "prefix" {
 func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicTest(t *testing.T) {
 	context := map[string]interface{}{
 		"description":   envvar.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputePublicDelegatedPrefixDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -93,7 +93,7 @@ func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicTest(t *tes
 }
 
 func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_public_advertised_prefix" "advertised" {
   name = "tf-test-my-prefix%{random_suffix}"
   description = "%{description}"
@@ -129,7 +129,7 @@ func testAccCheckComputePublicDelegatedPrefixDestroyProducer(t *testing.T) func(
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/publicDelegatedPrefixes/{{name}}")
 			if err != nil {
@@ -168,7 +168,7 @@ func testAccCheckComputePublicAdvertisedPrefixDestroyProducer(t *testing.T) func
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/global/publicAdvertisedPrefixes/{{name}}")
 			if err != nil {

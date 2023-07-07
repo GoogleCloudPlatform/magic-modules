@@ -13,9 +13,9 @@ func TestAccGkeonpremVmwareCluster_vmwareClusterUpdateBasic(t *testing.T) {
 
   context := map[string]interface{}{}
 
-  VcrTest(t, resource.TestCase{
+  acctest.VcrTest(t, resource.TestCase{
     PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
     CheckDestroy:             testAccCheckGkeonpremVmwareClusterDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -43,9 +43,9 @@ func TestAccGkeonpremVmwareCluster_vmwareClusterUpdateF5Lb(t *testing.T) {
 
   context := map[string]interface{}{}
 
-  VcrTest(t, resource.TestCase{
+  acctest.VcrTest(t, resource.TestCase{
     PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
     CheckDestroy:             testAccCheckGkeonpremVmwareClusterDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -75,9 +75,9 @@ func TestAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLb(t *testing.T) {
 
   context := map[string]interface{}{}
 
-  VcrTest(t, resource.TestCase{
+  acctest.VcrTest(t, resource.TestCase{
     PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
     CheckDestroy:             testAccCheckGkeonpremVmwareClusterDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -101,7 +101,7 @@ func TestAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLb(t *testing.T) {
 }
 
 func testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLbStart(context map[string]interface{}) string {
-  return Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "cluster"
@@ -150,7 +150,7 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLbStart(context map[s
 }
 
 func testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLb(context map[string]interface{}) string {
-  return Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "cluster"
@@ -199,7 +199,7 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLb(context map[string
 }
 
 func testAccGkeonpremVmwareCluster_vmwareClusterUpdateF5LbStart(context map[string]interface{}) string {
-  return Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "cluster"
@@ -249,7 +249,7 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateF5LbStart(context map[stri
 }
 
 func testAccGkeonpremVmwareCluster_vmwareClusterUpdateF5lb(context map[string]interface{}) string {
-  return Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "cluster"
@@ -299,7 +299,7 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateF5lb(context map[string]in
 }
 
 func testAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLbStart(context map[string]interface{}) string {
-  return Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "cluster"
@@ -382,7 +382,7 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLbStart(context map[
 }
 
 func testAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLb(context map[string]interface{}) string {
-  return Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "cluster"
