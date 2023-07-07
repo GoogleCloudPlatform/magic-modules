@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
- 
 --- !ruby/object:Api::Resource
 name: 'Task'
 base_url: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}'
@@ -466,7 +465,7 @@ properties:
                   The Cloud VPC sub-network in which the job is run.
                 exactly_one_of:
                   - network
-                  - subNetwork 
+                  - subNetwork
       - !ruby/object:Api::Type::Array
         name: 'fileUris'
         description: |
@@ -502,3 +501,4 @@ examples:
       fmt.Sprintf("tf-test-task%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
+      
