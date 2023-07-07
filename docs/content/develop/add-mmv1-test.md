@@ -1,7 +1,7 @@
 ---
 title: "Add an MMv1 test"
 summary: "An example terraform configuration can be used to generate docs and tests for a resource."
-weight: 12
+weight: 40
 aliases:
   - /docs/how-to/add-mmv1-test
   - /how-to/add-mmv1-test
@@ -109,12 +109,12 @@ func TestAccPubsubSubscription_pubsubSubscriptionDeadLetterExample(t *testing.T)
     t.Parallel()
 
     context := map[string]interface{}{
-        "random_suffix": RandString(t, 10),
+        "random_suffix": acctest.RandString(t, 10),
     }
 
-    VcrTest(t, resource.TestCase{
+    acctest.VcrTest(t, resource.TestCase{
         PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-        ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
         CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
         Steps: []resource.TestStep{
             {

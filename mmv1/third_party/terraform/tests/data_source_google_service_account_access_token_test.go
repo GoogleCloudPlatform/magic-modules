@@ -34,11 +34,11 @@ func TestAccDataSourceGoogleServiceAccountAccessToken_basic(t *testing.T) {
 
 	resourceName := "data.google_service_account_access_token.default"
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
-	targetServiceAccountEmail := BootstrapServiceAccount(t, envvar.GetTestProjectFromEnv(), serviceAccount)
+	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, envvar.GetTestProjectFromEnv(), serviceAccount)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config:  testAccCheckGoogleServiceAccountAccessToken_datasource(targetServiceAccountEmail),

@@ -18,11 +18,11 @@ func TestAccBigtableInstance_basic(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -56,11 +56,11 @@ func TestAccBigtableInstance_cluster(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -119,11 +119,11 @@ func TestAccBigtableInstance_development(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -144,11 +144,11 @@ func TestAccBigtableInstance_allowDestroy(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -177,14 +177,14 @@ func TestAccBigtableInstance_kms(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	kms1 := BootstrapKMSKeyInLocation(t, "us-central1")
-	kms2 := BootstrapKMSKeyInLocation(t, "us-east1")
+	kms1 := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+	kms2 := acctest.BootstrapKMSKeyInLocation(t, "us-east1")
 	pid := envvar.GetTestProjectFromEnv()
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -211,11 +211,11 @@ func TestAccBigtableInstance_createWithAutoscalingAndUpdate(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -254,11 +254,11 @@ func TestAccBigtableInstance_createWithAutoscalingAndUpdateWithStorageTarget(t *
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -297,11 +297,11 @@ func TestAccBigtableInstance_enableAndDisableAutoscaling(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -344,11 +344,11 @@ func TestAccBigtableInstance_enableAndDisableAutoscalingWithoutNumNodes(t *testi
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -387,7 +387,7 @@ func testAccCheckBigtableInstanceDestroyProducer(t *testing.T) func(s *terraform
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 			c, err := config.BigTableClientFactory(config.UserAgent).NewInstanceAdminClient(config.Project)
 			if err != nil {
 				return fmt.Errorf("Error starting instance admin client. %s", err)
@@ -410,11 +410,11 @@ func TestAccBigtableInstance_MultipleClustersSameID(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

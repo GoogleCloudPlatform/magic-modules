@@ -86,7 +86,7 @@ examples:
       stream_cmek: 'kms-name'
     test_vars_overrides:
       deletion_protection: 'false'
-      stream_cmek: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      stream_cmek: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_stream_postgresql'
     primary_resource_id: 'default'
@@ -135,7 +135,7 @@ examples:
     test_vars_overrides:
       deletion_protection: 'false'
       bigquery_destination_table_kms_key_name:
-        'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+        'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 
 parameters:
   - !ruby/object:Api::Type::String
