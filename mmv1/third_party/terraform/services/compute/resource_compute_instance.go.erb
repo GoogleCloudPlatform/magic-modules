@@ -137,7 +137,7 @@ func ResourceComputeInstance() *schema.Resource {
 							Type:         schema.TypeBool,
 							Optional:     true,
 							AtLeastOneOf: bootDiskKeys,
-							Default:      true,
+							Default:      false,
 							ForceNew:     true,
 							Description:  `Whether the disk will be auto-deleted when the instance is deleted.`,
 						},
