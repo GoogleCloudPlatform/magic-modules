@@ -179,21 +179,21 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 							},
 						},
 						"data_cache_config": {
-                            Type:        schema.TypeList,
-                            Optional:    true,
-                            MaxItems:    1,
-                            Description: `Data cache configurations.`,
-                            Elem: &schema.Resource{
-                                Schema: map[string]*schema.Schema{
-                                    "data_cache_enabled": {
-                                        Type:        schema.TypeBool,
-                                        Optional:    true,
-                                        Default:     false,
-                                        Description: `Whether data cache is enabled for the instance.`,
-                                    },
-                                },
-                            },
-                        },
+				                        Type:        schema.TypeList,
+				                        Optional:    true,
+				                        MaxItems:    1,
+				                        Description: `Data cache configurations.`,
+				                        Elem: &schema.Resource{
+				                        	Schema: map[string]*schema.Schema{
+				                                    "data_cache_enabled": {
+				                                        Type:        schema.TypeBool,
+				                                        Optional:    true,
+				                                        Default:     false,
+				                                        Description: `Whether data cache is enabled for the instance.`,
+				                                    },
+				                        	},
+				                        },
+				                },
 						"activation_policy": {
 							Type:     schema.TypeString,
 							Optional: true,
