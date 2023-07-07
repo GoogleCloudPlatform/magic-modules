@@ -228,6 +228,8 @@ The `settings` block supports:
     for more details and supported versions. Postgres supports only shared-core machine types,
     and custom machine types such as `db-custom-2-13312`. See the [Custom Machine Type Documentation](https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#create) to learn about specifying custom machine types.
 
+* `edition` - (Optional) The edition of the instance, can be `ENTERPRISE` or `ENTERPRISE_PLUS`. Defaults to `ENTERPRISE`
+
 The optional `settings.advanced_machine_features` subblock supports:
 
 * `threads_per_core` - (Optional) The number of threads per core. The value of this flag can be 1 or 2. To disable SMT, set this flag to 1. Only available in Cloud SQL for SQL Server instances. See [smt](https://cloud.google.com/sql/docs/sqlserver/create-instance#smt-create-instance) for more details.
@@ -272,6 +274,11 @@ The optional `settings.active_directory_config` subblock supports:
 
 * `domain` - (Required) The domain name for the active directory (e.g., mydomain.com).
     Can only be used with SQL Server.
+
+The optional `settings.data_cache_config` subblock supports:
+
+* `data_cache_enabled` - (Optional) Whether data cache is enabled for the instance. Defaults to `false`
+    Can only be used with MYSQL.
 
 The optional `settings.deny_maintenance_period` subblock supports:
 
@@ -431,6 +438,8 @@ The optional `clone` block supports:
 * `point_in_time` -  (Optional) The timestamp of the point in time that should be restored.
 
     A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+
+* `preferred_zone` - (Optional) (Point-in-time recovery for PostgreSQL only) Clone to an instance in the specified zone. If no zone is specified, clone to the same zone as the source instance.
 
 * `database_names` - (Optional) (SQL Server only, use with `point_in_time`) Clone only the specified databases from the source instance. Clone all databases if empty.
 

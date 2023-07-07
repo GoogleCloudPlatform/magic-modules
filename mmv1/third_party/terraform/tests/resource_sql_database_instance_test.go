@@ -1036,6 +1036,34 @@ func TestAccSqlDatabaseInstance_cloneWithDatabaseNames(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_cloneWithPreferredZone(t *testing.T) {
+	// Sqladmin client
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix":    acctest.RandString(t, 10),
+		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_cloneWithPreferredZone(context),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "clone"},
+			},
+		},
+	})
+}
+
 func testAccSqlDatabaseInstanceDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
@@ -1308,19 +1336,17 @@ func TestAccSQLDatabaseInstance_DenyMaintenancePeriod(t *testing.T) {
 	})
 }
 
-func TestAccSQLDatabaseInstance_basicEdition(t *testing.T) {
+func TestAccSqlDatabaseInstance_EnterprisePlusEdition(t *testing.T) {
 	t.Parallel()
 	enterprisePlusName := "tf-test-enterprise-plus" + acctest.RandString(t, 10)
-	enterpriseName := "tf-test-enterprise-" + acctest.RandString(t, 10)
 	enterprisePlusTier := "db-perf-optimized-N-2"
-	enterpriseTier := "db-custom-2-13312"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_basicEditionConfig(enterprisePlusName, enterprisePlusTier, "ENTERPRISE_PLUS"),
+				Config: testGoogleSqlDatabaseInstance_EditionConfig(enterprisePlusName, enterprisePlusTier, "ENTERPRISE_PLUS"),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -1328,8 +1354,42 @@ func TestAccSQLDatabaseInstance_basicEdition(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_EnterpriseEdition(t *testing.T) {
+	t.Parallel()
+	enterpriseName := "tf-test-enterprise-" + acctest.RandString(t, 10)
+	enterpriseTier := "db-custom-2-13312"
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_basicEditionConfig(enterpriseName, enterpriseTier, "ENTERPRISE"),
+				Config: testGoogleSqlDatabaseInstance_EditionConfig(enterpriseName, enterpriseTier, "ENTERPRISE"),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSQLDatabaseInstance_sqlMysqlDataCacheConfig(t *testing.T) {
+	t.Parallel()
+	instanceName := "tf-test-enterprise-plus" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(instanceName),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -2001,7 +2061,7 @@ resource "google_sql_database_instance" "instance" {
 }`, databaseName, endDate, startDate, time)
 }
 
-func testGoogleSqlDatabaseInstance_basicEditionConfig(databaseName, tier, edition string) string {
+func testGoogleSqlDatabaseInstance_EditionConfig(databaseName, tier, edition string) string {
 	return fmt.Sprintf(`
 
 resource "google_sql_database_instance" "instance" {
@@ -2016,6 +2076,20 @@ resource "google_sql_database_instance" "instance" {
 }`, databaseName, tier, edition)
 }
 
+func testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(instanceName string) string {
+	return fmt.Sprintf(`
+
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  region           = "us-east1"
+  database_version    = "MYSQL_8_0_31"
+  deletion_protection = false
+  settings {
+    tier = "db-perf-optimized-N-2"
+    edition = "ENTERPRISE_PLUS"
+  }
+}`, instanceName)
+}
 
 func testGoogleSqlDatabaseInstance_SqlServerAuditConfig(databaseName, rootPassword, bucketName, uploadInterval, retentionInterval string) string {
 	return fmt.Sprintf(`
@@ -3336,6 +3410,34 @@ resource "google_sql_database_instance" "instance" {
     source_instance_name = data.google_sql_backup_run.backup.instance
     point_in_time = data.google_sql_backup_run.backup.start_time
     database_names = ["userdb1"]
+  }
+
+  deletion_protection = false
+
+  // Ignore changes, since the most recent backup may change during the test
+  lifecycle{
+	ignore_changes = [clone[0].point_in_time]
+  }
+}
+
+data "google_sql_backup_run" "backup" {
+	instance = "%{original_db_name}"
+	most_recent = true
+}
+`, context)
+}
+
+func testAccSqlDatabaseInstance_cloneWithPreferredZone(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_sql_database_instance" "instance" {
+  name             = "tf-test-%{random_suffix}"
+  database_version = "POSTGRES_14"
+  region           = "us-central1"
+
+  clone {
+    source_instance_name = data.google_sql_backup_run.backup.instance
+    point_in_time = data.google_sql_backup_run.backup.start_time
+    preferred_zone = "us-central1-a"
   }
 
   deletion_protection = false

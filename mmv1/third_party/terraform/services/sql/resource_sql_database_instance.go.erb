@@ -178,6 +178,22 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 								},
 							},
 						},
+						"data_cache_config": {
+                            Type:        schema.TypeList,
+                            Optional:    true,
+                            MaxItems:    1,
+                            Description: `Data cache configurations.`,
+                            Elem: &schema.Resource{
+                                Schema: map[string]*schema.Schema{
+                                    "data_cache_enabled": {
+                                        Type:        schema.TypeBool,
+                                        Optional:    true,
+                                        Default:     false,
+                                        Description: `Whether data cache is enabled for the instance.`,
+                                    },
+                                },
+                            },
+                        },
 						"activation_policy": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -897,6 +913,11 @@ is set to true. Defaults to ZONAL.`,
 							DiffSuppressFunc: tpgresource.TimestampDiffSuppress(time.RFC3339Nano),
 							Description:      `The timestamp of the point in time that should be restored.`,
 						},
+						"preferred_zone": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `Optional. (Point-in-time recovery for PostgreSQL only) Clone to an instance in the specified zone. If no zone is specified, clone to the same zone as the source instance.`,
+						},
 						"database_names": {
 							Type:             schema.TypeList,
 							Optional:         true,
@@ -1193,6 +1214,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 	settings := &sqladmin.Settings{
 		// Version is unset in Create but is set during update
 		SettingsVersion:            int64(_settings["version"].(int)),
+		DataCacheConfig:            expandDataCacheConfig(_settings["data_cache_config"].([]interface{})),
 		Tier:                       _settings["tier"].(string),
 		Edition:                    _settings["edition"].(string),
 		AdvancedMachineFeatures:    expandSqlServerAdvancedMachineFeatures(_settings["advanced_machine_features"].([]interface{})),
@@ -1267,6 +1289,7 @@ func expandCloneContext(configured []interface{}) (*sqladmin.CloneContext, strin
 
 	return &sqladmin.CloneContext{
 		PointInTime: _cloneConfiguration["point_in_time"].(string),
+		PreferredZone: _cloneConfiguration["preferred_zone"].(string),
 		DatabaseNames: databaseNames,
 		AllocatedIpRange: _cloneConfiguration["allocated_ip_range"].(string),
 	}, _cloneConfiguration["source_instance_name"].(string)
@@ -1351,6 +1374,17 @@ func expandDatabaseFlags(configured []interface{}) []*sqladmin.DatabaseFlags {
 		})
 	}
 	return databaseFlags
+}
+
+func expandDataCacheConfig(configured interface{}) *sqladmin.DataCacheConfig {
+    l := configured.([]interface{})
+    if len(l) == 0 {
+        return nil
+    }
+    config := l[0].(map[string]interface{})
+    return &sqladmin.DataCacheConfig{
+        DataCacheEnabled: config["data_cache_enabled"].(bool),
+    }
 }
 
 func expandBackupConfiguration(configured []interface{}) *sqladmin.BackupConfiguration {
@@ -1976,11 +2010,26 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 		data["password_validation_policy"] = flattenPasswordValidationPolicy(settings.PasswordValidationPolicy)
 	}
 
+	if settings.DataCacheConfig != nil {
+        data["data_cache_config"] = flattenDataCacheConfig(settings.DataCacheConfig)
+    }
+
 	if settings.AdvancedMachineFeatures != nil {
 		data["advanced_machine_features"] = flattenSqlServerAdvancedMachineFeatures(settings.AdvancedMachineFeatures)
 	}
 
 	return []map[string]interface{}{data}
+}
+
+func flattenDataCacheConfig(d *sqladmin.DataCacheConfig) []map[string]interface{} {
+    if d == nil {
+        return nil
+    }
+    return []map[string]interface{}{
+        {
+            "data_cache_enabled": d.DataCacheEnabled,
+        },
+    }
 }
 
 func flattenBackupConfiguration(backupConfiguration *sqladmin.BackupConfiguration) []map[string]interface{} {
