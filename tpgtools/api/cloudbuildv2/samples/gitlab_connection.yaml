@@ -15,7 +15,7 @@ name: gitlab_connection
 description: Creates a gitlab.com connection.
 type: connection
 versions:
-- beta
+- ga
 resource: samples/gitlab.connection.json
 variables:
 - name: connection
