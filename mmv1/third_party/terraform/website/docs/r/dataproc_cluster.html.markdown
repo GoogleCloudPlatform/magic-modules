@@ -129,8 +129,9 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 * `region` - (Optional) The region in which the cluster and associated nodes will be created in.
    Defaults to `global`.
 
-* `labels` - (Optional) The list of labels (key/value pairs) configured on the resource and to be applied to
+* `labels` - (Optional) The list of labels (key/value pairs) configured on the resource through Terraform and to be applied to
    instances in the cluster.
+  **Note**: This field does not list all labels present on the resource in GCP. Please refer to the field `effective_labels` for all of the labels present on the resource.
 
 * `effective_labels` - (Computed) The list of labels (key/value pairs) to be applied to
    instances in the cluster. GCP generates some itself including `goog-dataproc-cluster-name`
