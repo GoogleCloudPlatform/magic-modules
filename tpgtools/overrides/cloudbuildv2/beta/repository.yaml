@@ -3,16 +3,3 @@
   field: connection
   details:
     name: parent_connection
-# TODO: remove once DCL is updpated to not have these fields required.
-- type: CUSTOM_SCHEMA_VALUES
-  field: project
-  details:
-    required: false
-    optional: true
-    computed: true
-- type: CUSTOM_SCHEMA_VALUES
-  field: location
-  details:
-    required: false
-    optional: true
-    computed: true
