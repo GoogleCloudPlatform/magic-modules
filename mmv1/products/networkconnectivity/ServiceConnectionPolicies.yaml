@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'ServiceConnectionPolicy'
 base_url: 'projects/{{project}}/locations/{{location}}/serviceConnectionPolicies'
-create_url: 'projects/{{project}}/locations/{{location}}/serviceConnectionPolicies?serviceConnectionPoliciesId={{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/serviceConnectionPolicies?serviceConnectionPolicyId={{name}}'
 self_link: 'projects/{{project}}/locations/{{location}}/serviceConnectionPolicies/{{name}}'
 min_version: ga
 update_verb: :PATCH
@@ -55,17 +55,10 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-network-connectivity-policy'
-      service_class_name: 'my-basic-service-class-name'
-      forwarding_rule_name: 'psc-endpoint'
       consumer_network_name: 'consumer-net'
       consumer_subnetwork_name: 'consumer-subnet'
-      ip_name: 'website-ip'
       producer_network_name: 'producer-net'
       producer_subnetwork_name: 'producer-subnet'
-      producer_psc_network_name: 'producer-psc-net'
-      service_attachment_name: 'producer-service'
-      producer_backend_name: 'producer-service-backend'
-      producer_healthcheck_name: 'producer-service-health-check'
       service_class_name: 'my-service-class'
 parameters:
   - !ruby/object:Api::Type::String
@@ -96,7 +89,6 @@ properties:
     description: |
       The service class identifier for which this ServiceConnectionPolicy is for. The service class identifier is a unique, symbolic representation of a ServiceClass.
       It is provided by the Service Producer. Google services have a prefix of gcp. For example, gcp-cloud-sql. 3rd party services do not. For example, test-service-a3dfcx.
-    output: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -105,8 +97,24 @@ properties:
     name: 'network'
     description: |
       The resource path of the consumer network. Example: - projects/{projectNumOrId}/global/networks/{resourceId}.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'pscConfig'
+    description: |
+      Configuration used for Private Service Connect connections. Used when Infrastructure is PSC.
+    properties: 
+      - !ruby/object:Api::Type::Array
+        name: 'subnetworks'
+        required: true
+        item_type: Api::Type::String
+        description: |
+          IDs of the subnetworks or fully qualified identifiers for the subnetworks
+      - !ruby/object:Api::Type::String
+        name: 'limit'
+        description: |
+          Max number of PSC connections for this policy.
   - !ruby/object:Api::Type::String
     name: 'etag'
+    ignore_read: true
     description: |
       The etag is computed by the server, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
   - !ruby/object:Api::Type::Array
@@ -115,18 +123,11 @@ properties:
     item_type: Api::Type::String
     description: |
       Information about each Private Service Connect connection.
-  - !ruby/object:Api::Type::NestedObject
+  - !ruby/object:Api::Type::String
     name: 'infrastructure'
     output: true
     description: |
       The type of underlying resources used to create the connection.
-    properties:
-      - !ruby/object:Api::Type::Enum
-        name: enumDescriptions
-        description: 'An invalid infrastructure as the default case. Private Service Connect is used for connections.'
-        values:
-          - :INFRASTRUCTURE_UNSPECIFIED
-          - :PSC
   - !ruby/object:Api::Type::KeyValuePairs
     name: "labels"
     description: |

@@ -84,7 +84,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
-      A description of this resource
+      A description of this resource.
   - !ruby/object:Api::Type::String
     name: 'serviceClass'
     description: |
