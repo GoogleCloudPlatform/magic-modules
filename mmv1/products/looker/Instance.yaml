@@ -48,6 +48,7 @@ examples:
     name: 'looker_instance_enterprise_full'
     primary_resource_id: 'looker-instance'
     vars:
+      network_name: 'looker-network'
       kms_key_ring_name: 'looker-kms-ring'
       kms_key_name: 'looker-kms-key'
       address_name: 'looker-range'
