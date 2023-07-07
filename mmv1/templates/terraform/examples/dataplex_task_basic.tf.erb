@@ -39,10 +39,6 @@ resource "google_dataplex_task" "<%= ctx[:primary_resource_id] %>" {
     spark {
         python_script_file = "gs://dataproc-examples/pyspark/hello-world/hello-world.py"
 
-        vpc_network  {
-                    network_tags = ["test-network-tag"]
-                    sub_network = "test-network"
-                }
     }
     
     project = "<%= ctx[:test_env_vars]['project_name'] %>"
