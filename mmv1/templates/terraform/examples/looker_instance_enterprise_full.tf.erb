@@ -10,7 +10,7 @@ resource "google_looker_instance" "<%= ctx[:primary_resource_id] %>" {
     allowed_email_domains = ["google.com"]
   }
   encryption_config {
-    kms_key_name = google_kms_crypto_key.looker_crypto_key.id
+    kms_key_name = "<%= ctx[:vars]["kms_key_name"] %>"
   }
   maintenance_window {
     day_of_week = "THURSDAY"
@@ -44,8 +44,7 @@ resource "google_looker_instance" "<%= ctx[:primary_resource_id] %>" {
     client_secret = "<%= ctx[:vars]["client_secret"] %>"
   }
   depends_on   = [
-    google_service_networking_connection.looker_vpc_connection,
-    google_kms_crypto_key.looker_crypto_key
+    google_service_networking_connection.looker_vpc_connection
   ]
 }
 
@@ -70,18 +69,8 @@ resource "google_compute_network" "looker_network" {
   auto_create_subnetworks = false
 }
 
-resource "google_kms_key_ring" "looker_key_ring" {
-  name     = "<%= ctx[:vars]["kms_key_ring_name"] %>"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "looker_crypto_key" {
-  name     = "<%= ctx[:vars]["kms_key_name"] %>"
-  key_ring = google_kms_key_ring.looker_key_ring.id
-}
-
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
-  crypto_key_id = google_kms_crypto_key.looker_crypto_key.id
+  crypto_key_id = "<%= ctx[:vars]["kms_key_name"] %>"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-looker.iam.gserviceaccount.com"
 }
