@@ -483,16 +483,16 @@ func TestAccBigQueryExternalDataTable_parquet(t *testing.T) {
 func TestAccBigQueryExternalDataTable_objectTable(t *testing.T) {
 	t.Parallel()
 
-	bucketName := testBucketName(t)
-	objectName := fmt.Sprintf("tf_test_%s.csv", RandString(t, 10))
+	bucketName := acctest.TestBucketName(t)
+	objectName := fmt.Sprintf("tf_test_%s.csv", acctest.RandString(t, 10))
 
-	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
-	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
-	connectionID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	connectionID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
