@@ -15,7 +15,7 @@ name: gle_old_connection
 description: Creates a GLE connection on an old version then update to a newer version.
 type: connection
 versions:
-- beta
+- ga
 resource: samples/gle_old.connection.json
 updates:
 - resource: samples/gle.connection.json
