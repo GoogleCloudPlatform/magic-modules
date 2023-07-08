@@ -1336,10 +1336,12 @@ func TestAccSQLDatabaseInstance_DenyMaintenancePeriod(t *testing.T) {
 	})
 }
 
-func TestAccSqlDatabaseInstance_EnterprisePlusEdition(t *testing.T) {
+func TestAccSqlDatabaseInstance_Edition(t *testing.T) {
 	t.Parallel()
 	enterprisePlusName := "tf-test-enterprise-plus" + acctest.RandString(t, 10)
 	enterprisePlusTier := "db-perf-optimized-N-2"
+	enterpriseName := "tf-test-enterprise-" + acctest.RandString(t, 10)
+	enterpriseTier := "db-custom-2-13312"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -1354,19 +1356,6 @@ func TestAccSqlDatabaseInstance_EnterprisePlusEdition(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
-		},
-	})
-}
-
-func TestAccSqlDatabaseInstance_EnterpriseEdition(t *testing.T) {
-	t.Parallel()
-	enterpriseName := "tf-test-enterprise-" + acctest.RandString(t, 10)
-	enterpriseTier := "db-custom-2-13312"
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
 			{
 				Config: testGoogleSqlDatabaseInstance_EditionConfig(enterpriseName, enterpriseTier, "ENTERPRISE"),
 			},
@@ -2087,6 +2076,9 @@ resource "google_sql_database_instance" "instance" {
   settings {
     tier = "db-perf-optimized-N-2"
     edition = "ENTERPRISE_PLUS"
+    data_cache_config {
+        data_cache_enabled = true
+    }
   }
 }`, instanceName)
 }
