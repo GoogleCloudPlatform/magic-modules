@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	tpgstorage "github.com/hashicorp/terraform-provider-google/google/services/storage"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -24,12 +25,12 @@ func TestAccStorageNotification_basic(t *testing.T) {
 
 	var notification storage.Notification
 	bucketName := testBucketName(t)
-	topicName := fmt.Sprintf("tf-pstopic-test-%d", RandInt(t))
+	topicName := fmt.Sprintf("tf-pstopic-test-%d", acctest.RandInt(t))
 	topic := fmt.Sprintf("//pubsub.googleapis.com/projects/%s/topics/%s", os.Getenv("GOOGLE_PROJECT"), topicName)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageNotificationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -68,14 +69,14 @@ func TestAccStorageNotification_withEventsAndAttributes(t *testing.T) {
 
 	var notification storage.Notification
 	bucketName := testBucketName(t)
-	topicName := fmt.Sprintf("tf-pstopic-test-%d", RandInt(t))
+	topicName := fmt.Sprintf("tf-pstopic-test-%d", acctest.RandInt(t))
 	topic := fmt.Sprintf("//pubsub.googleapis.com/projects/%s/topics/%s", os.Getenv("GOOGLE_PROJECT"), topicName)
 	eventType1 := "OBJECT_FINALIZE"
 	eventType2 := "OBJECT_ARCHIVE"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageNotificationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -106,14 +107,14 @@ func TestAccStorageNotification_withEventsAndAttributes(t *testing.T) {
 
 func testAccStorageNotificationDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_storage_notification" {
 				continue
 			}
 
-			bucket, notificationID := resourceStorageNotificationParseID(rs.Primary.ID)
+			bucket, notificationID := tpgstorage.ResourceStorageNotificationParseID(rs.Primary.ID)
 
 			_, err := config.NewStorageClient(config.UserAgent).Notifications.Get(bucket, notificationID).Do()
 			if err == nil {
@@ -136,9 +137,9 @@ func testAccCheckStorageNotificationExists(t *testing.T, resource string, notifi
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
-		bucket, notificationID := resourceStorageNotificationParseID(rs.Primary.ID)
+		bucket, notificationID := tpgstorage.ResourceStorageNotificationParseID(rs.Primary.ID)
 
 		found, err := config.NewStorageClient(config.UserAgent).Notifications.Get(bucket, notificationID).Do()
 		if err != nil {

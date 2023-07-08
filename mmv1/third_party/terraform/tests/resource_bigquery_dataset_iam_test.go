@@ -6,21 +6,22 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccBigqueryDatasetIamBinding(t *testing.T) {
 	t.Parallel()
 
-	dataset := "tf_test_dataset_iam_" + RandString(t, 10)
-	account := "tf-test-bq-iam-" + RandString(t, 10)
+	dataset := "tf_test_dataset_iam_" + acctest.RandString(t, 10)
+	account := "tf-test-bq-iam-" + acctest.RandString(t, 10)
 	role := "roles/bigquery.dataViewer"
 
 	importId := fmt.Sprintf("projects/%s/datasets/%s %s",
-		acctest.GetTestProjectFromEnv(), dataset, role)
+		envvar.GetTestProjectFromEnv(), dataset, role)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -53,19 +54,19 @@ func TestAccBigqueryDatasetIamBinding(t *testing.T) {
 func TestAccBigqueryDatasetIamMember(t *testing.T) {
 	t.Parallel()
 
-	dataset := "tf_test_dataset_iam_" + RandString(t, 10)
-	account := "tf-test-bq-iam-" + RandString(t, 10)
+	dataset := "tf_test_dataset_iam_" + acctest.RandString(t, 10)
+	account := "tf-test-bq-iam-" + acctest.RandString(t, 10)
 	role := "roles/editor"
 
 	importId := fmt.Sprintf("projects/%s/datasets/%s %s serviceAccount:%s",
-		acctest.GetTestProjectFromEnv(),
+		envvar.GetTestProjectFromEnv(),
 		dataset,
 		role,
 		serviceAccountCanonicalEmail(account))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -90,16 +91,16 @@ func TestAccBigqueryDatasetIamMember(t *testing.T) {
 func TestAccBigqueryDatasetIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	dataset := "tf_test_dataset_iam_" + RandString(t, 10)
-	account := "tf-test-bq-iam-" + RandString(t, 10)
+	dataset := "tf_test_dataset_iam_" + acctest.RandString(t, 10)
+	account := "tf-test-bq-iam-" + acctest.RandString(t, 10)
 	role := "roles/bigquery.dataOwner"
 
 	importId := fmt.Sprintf("projects/%s/datasets/%s",
-		acctest.GetTestProjectFromEnv(), dataset)
+		envvar.GetTestProjectFromEnv(), dataset)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation

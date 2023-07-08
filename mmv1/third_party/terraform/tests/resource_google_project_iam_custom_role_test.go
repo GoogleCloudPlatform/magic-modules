@@ -7,17 +7,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccProjectIamCustomRole_basic(t *testing.T) {
 	t.Parallel()
 
-	project := acctest.GetTestProjectFromEnv()
-	roleId := "tfIamCustomRole" + RandString(t, 10)
+	project := envvar.GetTestProjectFromEnv()
+	roleId := "tfIamCustomRole" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectIamCustomRoleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -56,11 +57,11 @@ func TestAccProjectIamCustomRole_basic(t *testing.T) {
 func TestAccProjectIamCustomRole_undelete(t *testing.T) {
 	t.Parallel()
 
-	roleId := "tfIamCustomRole" + RandString(t, 10)
+	roleId := "tfIamCustomRole" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectIamCustomRoleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -96,10 +97,10 @@ func TestAccProjectIamCustomRole_undelete(t *testing.T) {
 func TestAccProjectIamCustomRole_createAfterDestroy(t *testing.T) {
 	t.Parallel()
 
-	roleId := "tfIamCustomRole" + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	roleId := "tfIamCustomRole" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectIamCustomRoleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -130,7 +131,7 @@ func TestAccProjectIamCustomRole_createAfterDestroy(t *testing.T) {
 
 func testAccCheckGoogleProjectIamCustomRoleDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_project_iam_custom_role" {
@@ -164,7 +165,7 @@ func testAccCheckGoogleProjectIamCustomRoleDeletionStatus(t *testing.T, n string
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		role, err := config.NewIamClient(config.UserAgent).Projects.Roles.Get(rs.Primary.ID).Do()
 
 		if err != nil {

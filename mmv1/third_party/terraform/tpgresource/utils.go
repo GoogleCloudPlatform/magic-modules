@@ -1,8 +1,12 @@
 package tpgresource
 
 import (
+	"crypto/md5"
+	"encoding/base64"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/url"
 	"reflect"
 	"regexp"
@@ -16,6 +20,7 @@ import (
 	"github.com/hashicorp/errwrap"
 	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/googleapi"
@@ -284,17 +289,6 @@ func ExtractFirstMapConfig(m []interface{}) map[string]interface{} {
 	return m[0].(map[string]interface{})
 }
 
-// This is a Printf sibling (Nprintf; Named Printf), which handles strings like
-// Nprintf("Hello %{target}!", map[string]interface{}{"target":"world"}) == "Hello world!".
-// This is particularly useful for generated tests, where we don't want to use Printf,
-// since that would require us to generate a very particular ordering of arguments.
-func Nprintf(format string, params map[string]interface{}) string {
-	for key, val := range params {
-		format = strings.Replace(format, "%{"+key+"}", fmt.Sprintf("%v", val), -1)
-	}
-	return format
-}
-
 //	ServiceAccountFQN will attempt to generate the fully qualified name in the format of:
 //
 // "projects/(-|<project>)/serviceAccounts/<service_account_id>@<project>.iam.gserviceaccount.com"
@@ -507,6 +501,22 @@ func CheckGoogleIamPolicy(value string) error {
 	return nil
 }
 
+// Retries an operation while the canonical error code is FAILED_PRECONDTION
+// which indicates there is an incompatible operation already running on the
+// cluster. This error can be safely retried until the incompatible operation
+// completes, and the newly requested operation can begin.
+func RetryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f func() error) error {
+	return resource.Retry(timeout, func() *resource.RetryError {
+		if err := transport_tpg.LockedCall(lockKey, f); err != nil {
+			if IsFailedPreconditionError(err) {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+}
+
 func FrameworkDiagsToSdkDiags(fwD fwDiags.Diagnostics) *diag.Diagnostics {
 	var diags diag.Diagnostics
 	for _, e := range fwD.Errors() {
@@ -674,4 +684,21 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 	}
 
 	return f, nil
+}
+
+func GetFileMd5Hash(filename string) string {
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		log.Printf("[WARN] Failed to read source file %q. Cannot compute md5 hash for it.", filename)
+		return ""
+	}
+	return GetContentMd5Hash(data)
+}
+
+func GetContentMd5Hash(content []byte) string {
+	h := md5.New()
+	if _, err := h.Write(content); err != nil {
+		log.Printf("[WARN] Failed to compute md5 hash for content: %v", err)
+	}
+	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }

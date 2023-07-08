@@ -23,26 +23,23 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'AlloyDB': 'https://cloud.google.com/alloydb/docs/'
   api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups/create'
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 10
+  update_minutes: 10
+  delete_minutes: 10
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
     base_url: '{{op_id}}'
-    wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 10
-      update_minutes: 10
-      delete_minutes: 10
+    path: 'unused'
+    wait_ms: 0  # unused
   result: !ruby/object:Api::OpAsync::Result
-    path: 'response'
+    path: 'unused'
   status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
+    path: 'unused'
+    allowed: []
   error: !ruby/object:Api::OpAsync::Error
-    path: 'error'
-    message: 'message'
+    path: 'unused'
+    message: 'unused'
 import_format:
   ['projects/{{project}}/locations/{{location}}/backups/{{backup_id}}']
 autogen_async: true
@@ -56,7 +53,7 @@ examples:
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      network_name: 'BootstrapSharedTestNetwork(t, "alloydb-basic")'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "alloydb-basic")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
@@ -69,7 +66,7 @@ examples:
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      network_name: 'BootstrapSharedTestNetwork(t, "alloydb-full")'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "alloydb-full")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
