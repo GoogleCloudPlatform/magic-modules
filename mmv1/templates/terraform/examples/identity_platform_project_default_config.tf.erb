@@ -25,6 +25,12 @@ resource "google_identity_platform_project_default_config" "<%= ctx[:primary_res
                 function_uri = "new_uri-before-sign-in"
             }
         }
+
+        forward_inbound_credentials {
+            refresh_token = true
+            access_token = true
+            id_token = true
+        }
     }
 
     quota {
