@@ -337,15 +337,15 @@ properties:
                   - network
                   - subNetwork
       - !ruby/object:Api::Type::String
-          name: 'mainJarFileUri'
-          description: |
-            The Cloud Storage URI of the jar file that contains the main class. The execution args are passed in as a sequence of named process arguments (--key=value).
-          exactly_one_of:
-            - mainJarFileUri
-            - mainClass
-            - pythonScriptFile
-            - sqlScriptFile
-            - sqlScript
+        name: 'mainJarFileUri'
+        description: |
+          The Cloud Storage URI of the jar file that contains the main class. The execution args are passed in as a sequence of named process arguments (--key=value).
+        exactly_one_of:
+          - mainJarFileUri
+          - mainClass
+          - pythonScriptFile
+          - sqlScriptFile
+          - sqlScript
       - !ruby/object:Api::Type::String
         name: 'mainClass'
         description: |
@@ -501,4 +501,3 @@ examples:
       fmt.Sprintf("tf-test-task%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
-      
