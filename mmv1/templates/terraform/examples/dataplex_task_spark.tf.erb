@@ -1,3 +1,9 @@
+# VPC network
+resource "google_compute_network" "default" {
+    name                    = "tf-test-workstation-cluster%{random_suffix}"
+    auto_create_subnetworks = true
+}
+
 data "google_project" "project" {
 
 }
@@ -42,7 +48,7 @@ resource "google_dataplex_task" "<%= ctx[:primary_resource_id] %>" {
             }
             vpc_network  {
                     network_tags = ["test-network-tag"]
-                    sub_network = "test-network"
+                    sub_network = google_compute_network.default.id
                 }
         }
         file_uris = ["gs://ssmadhavik-test4/Demo/CarPrice.csv"]

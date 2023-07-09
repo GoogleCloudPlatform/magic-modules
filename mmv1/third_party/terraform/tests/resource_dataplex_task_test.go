@@ -132,4 +132,3 @@ resource "google_dataplex_task" "example" {
 }
 `, context)
 }
-
