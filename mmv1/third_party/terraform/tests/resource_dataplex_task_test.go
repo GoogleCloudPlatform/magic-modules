@@ -23,7 +23,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
 func TestAccDataplexTaskDataplexTask_update(t *testing.T) {
@@ -62,7 +61,7 @@ func TestAccDataplexTaskDataplexTask_update(t *testing.T) {
 }
 
 func testAccDataplexTask_dataplexTaskPrimary(context map[string]interface{}) string {
-	return tpgresource.Nprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {
 
 }
@@ -98,7 +97,7 @@ resource "google_dataplex_task" "example" {
 }
 
 func testAccDataplexTask_dataplexTaskPrimaryUpdate(context map[string]interface{}) string {
-	return tpgresource.Nprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {
 
 }
