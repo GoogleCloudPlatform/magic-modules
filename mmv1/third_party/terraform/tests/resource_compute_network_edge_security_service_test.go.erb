@@ -7,17 +7,18 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccComputeNetworkEdgeSecurityService_update(t *testing.T) {
 	t.Parallel()
 
-	pName := fmt.Sprintf("tf-test-security-policy-%s", RandString(t, 10))
-	nesName := fmt.Sprintf("tf-test-edge-security-services-%s", RandString(t, 10))
+	pName := fmt.Sprintf("tf-test-security-policy-%s", acctest.RandString(t, 10))
+	nesName := fmt.Sprintf("tf-test-edge-security-services-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeNetworkEdgeSecurityServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

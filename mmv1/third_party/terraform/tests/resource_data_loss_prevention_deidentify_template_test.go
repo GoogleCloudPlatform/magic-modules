@@ -5,20 +5,21 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformationsUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"organization":  acctest.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
-		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"organization":  envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -42,7 +43,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformationsStart(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -270,7 +271,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformationsUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -453,14 +454,14 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"organization":  acctest.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
-		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"organization":  envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -484,7 +485,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_start(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -753,7 +754,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -1045,14 +1046,14 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_imageTran
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"organization":  acctest.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
-		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"organization":  envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1076,7 +1077,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_imageTran
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_imageTransformationsBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -1115,7 +1116,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_imageTransformationsUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -1150,14 +1151,14 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"organization":  acctest.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
-		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"organization":  envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1181,7 +1182,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformationsStart(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "config" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -1327,7 +1328,7 @@ resource "google_data_loss_prevention_deidentify_template" "config" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformationsUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "config" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -1482,14 +1483,14 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"organization":  acctest.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
-		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"organization":  envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1545,7 +1546,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_bucketingConfig_integerValue(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "config" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -1581,7 +1582,7 @@ resource "google_data_loss_prevention_deidentify_template" "config" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_bucketingConfig_floatValue(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "config" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -1617,7 +1618,7 @@ resource "google_data_loss_prevention_deidentify_template" "config" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_bucketingConfig_timestampValue(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "config" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -1653,7 +1654,7 @@ resource "google_data_loss_prevention_deidentify_template" "config" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_bucketingConfig_timeValue(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "config" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -1704,7 +1705,7 @@ resource "google_data_loss_prevention_deidentify_template" "config" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_bucketingConfig_dateValue(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "config" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -1752,7 +1753,7 @@ resource "google_data_loss_prevention_deidentify_template" "config" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_bucketingConfig_dayOfWeekValue(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "config" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -1791,14 +1792,14 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"organization":  acctest.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
-		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"organization":  envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1822,7 +1823,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_fixedSizeBucketingConfig_integerValue(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "config" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -1854,7 +1855,7 @@ resource "google_data_loss_prevention_deidentify_template" "config" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_fixedSizeBucketingConfig_floatValue(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "config" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -1889,14 +1890,14 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"organization":  acctest.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
-		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"organization":  envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1928,7 +1929,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_dateShiftConfig_transient(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "config" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -1963,7 +1964,7 @@ resource "google_data_loss_prevention_deidentify_template" "config" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_dateShiftConfig_unwrapped(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "config" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -1998,7 +1999,7 @@ resource "google_data_loss_prevention_deidentify_template" "config" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformations_primitiveTransformations_dateShiftConfig_kmsWrapped(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "config" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -2037,13 +2038,13 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"organization": acctest.GetTestOrgFromEnv(t),
-		"kms_key_name": BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"organization": envvar.GetTestOrgFromEnv(t),
+		"kms_key_name": acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -2067,7 +2068,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_start(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -2438,7 +2439,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -2865,12 +2866,12 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project": acctest.GetTestProjectFromEnv(),
+		"project": envvar.GetTestProjectFromEnv(),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -2926,7 +2927,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_replaceConfigString(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "projects/%{project}"
   description = "Description"
@@ -2991,7 +2992,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_replaceConfigBoolean(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "projects/%{project}"
   description = "Description"
@@ -3056,7 +3057,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_replaceConfigTimestamp(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "projects/%{project}"
   description = "Description"
@@ -3121,7 +3122,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_replaceConfigTimevalue(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "projects/%{project}"
   description = "Description"
@@ -3191,7 +3192,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_replaceConfigDatevalue(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "projects/%{project}"
   description = "Description"
@@ -3260,7 +3261,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_replaceConfigDayOfWeek(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "projects/%{project}"
   description = "Description"
@@ -3328,13 +3329,13 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"organization": acctest.GetTestOrgFromEnv(t),
-		"kms_key_name": BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"organization": envvar.GetTestOrgFromEnv(t),
+		"kms_key_name": acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -3366,7 +3367,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_cryptoReplaceFfxFpeConfigTransient(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -3434,7 +3435,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_cryptoReplaceFfxFpeConfigUnwrapped(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -3503,7 +3504,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_cryptoReplaceFfxFpeConfigKmswrapped(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -3576,12 +3577,12 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project": acctest.GetTestProjectFromEnv(),
+		"project": envvar.GetTestProjectFromEnv(),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -3637,7 +3638,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_bucketingConfigInteger(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "projects/%{project}"
   description = "Description"
@@ -3707,7 +3708,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_bucketingConfigFloat(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "projects/%{project}"
   description = "Description"
@@ -3777,7 +3778,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_bucketingConfigTimestamp(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "projects/%{project}"
   description = "Description"
@@ -3847,7 +3848,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_bucketingConfigTimeValue(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "projects/%{project}"
   description = "Description"
@@ -3932,7 +3933,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_bucketingConfigDateValue(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "projects/%{project}"
   description = "Description"
@@ -4014,7 +4015,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_bucketingConfigDayOfTheWeek(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "projects/%{project}"
   description = "Description"
@@ -4087,13 +4088,13 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"organization": acctest.GetTestOrgFromEnv(t),
-		"kms_key_name": BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"organization": envvar.GetTestOrgFromEnv(t),
+		"kms_key_name": acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -4125,7 +4126,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_cryptoHashConfigTransient(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -4186,7 +4187,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_cryptoHashConfigUnwrapped(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -4247,7 +4248,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_cryptoHashConfigKmswrapped(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -4312,13 +4313,13 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"organization": acctest.GetTestOrgFromEnv(t),
-		"kms_key_name": BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"organization": envvar.GetTestOrgFromEnv(t),
+		"kms_key_name": acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -4350,7 +4351,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_dateShiftConfigTransient(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -4416,7 +4417,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_dateShiftConfigUnwrapped(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -4482,7 +4483,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_dateShiftConfigKmswrapped(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -4552,13 +4553,13 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"organization": acctest.GetTestOrgFromEnv(t),
-		"kms_key_name": BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"organization": envvar.GetTestOrgFromEnv(t),
+		"kms_key_name": acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -4590,7 +4591,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_cryptoDeterministicConfigTransient(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -4654,7 +4655,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_cryptoDeterministicConfigUnwrapped(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -4722,7 +4723,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_with_infoTypeTransformations_cryptoDeterministicConfigKmswrapped(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"

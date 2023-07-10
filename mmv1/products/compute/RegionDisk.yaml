@@ -81,7 +81,6 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-my-region-disk%s\",
       context[\"random_suffix\"\
       ])"
-    min_version: beta
     vars:
       region_disk_name: 'primary-region-disk'
       secondary_region_disk_name: 'secondary-region-disk'
@@ -327,7 +326,6 @@ properties:
     output: true
   - !ruby/object:Api::Type::NestedObject
     name: 'asyncPrimaryDisk'
-    min_version: 'beta'
     properties:
       - !ruby/object:Api::Type::String
         name: 'disk'

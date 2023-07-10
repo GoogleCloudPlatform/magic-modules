@@ -365,6 +365,8 @@ module Provider
                         'third_party/terraform/services/privateca/privateca_utils.go'],
                        ['converters/google/resources/utils.go',
                         'third_party/terraform/utils/utils.go'],
+                       ['converters/google/resources/acctest/test_utils.go',
+                        'third_party/validator/test_utils.go'],
                        ['converters/google/resources/tpgresource/utils.go',
                         'third_party/terraform/tpgresource/utils.go'],
                        ['converters/google/resources/iam_bigquery_dataset.go',

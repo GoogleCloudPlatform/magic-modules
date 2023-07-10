@@ -6,15 +6,16 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDataSourceGoogleFolderOrganizationPolicy_basic(t *testing.T) {
-	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
-	org := acctest.GetTestOrgFromEnv(t)
+	folder := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	org := envvar.GetTestOrgFromEnv(t)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleFolderOrganizationPolicy_basic(org, folder),
