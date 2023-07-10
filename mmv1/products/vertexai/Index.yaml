@@ -139,6 +139,7 @@ properties:
               * SHARD_SIZE_SMALL: Small (2GB)
               * SHARD_SIZE_MEDIUM: Medium (20GB)
               * SHARD_SIZE_LARGE: Large (50GB)
+            immutable: true
             default_from_api: true
           - !ruby/object:Api::Type::String
             name: 'distanceMeasureType'
