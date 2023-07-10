@@ -32,6 +32,7 @@ aliases:
     export GOOGLE_REGION=us-central1
     export GOOGLE_ZONE=us-central1-a
     ```
+    Replace `PROJECT_ID` with the ID of the Google Cloud project you are using for testing.
 
 1. Optional: Some tests may require additional variables to be set, such as:
 
@@ -40,13 +41,14 @@ aliases:
     GOOGLE_BILLING_ACCOUNT
     ```
 
+## Run automated tests
+
 {{< tabs "version" >}}
 
 {{< tab "GA Provider" >}}
 
-## Run automated tests
 
-Run unit tests and linters
+1. Run unit tests and linters
 
 ```bash
 cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
@@ -54,12 +56,11 @@ make test
 make lint
 ```
 
-## Run acceptance tests
 
-Run acceptance tests
+2. Run acceptance tests for only modified resources. (Full test runs can take over 9 hours.) See Go's documentation for more information about `-run`.
 
 ```bash
-make testacc TEST=./google TESTARGS='-run=TestAccContainerNodePool_basic'
+make testacc TEST=./google TESTARGS='-run=TestAccContainerNodePool'
 ```
 
 TESTARGS allows you to pass [testing flags](https://pkg.go.dev/cmd/go#hdr-Testing_flags) to `go test`. The most important is `-run`, which allows you to limit the tests that get run. There are 2000+ tests, and running all of them takes over 9 hours and requires a lot of GCP quota.
