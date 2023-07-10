@@ -920,7 +920,7 @@ func ResourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"enable_components": {
 							Type:        schema.TypeList,
-							Optional:    true,
+							Required:    true,
 							Description: `GKE components exposing logs. Valid values include SYSTEM_COMPONENTS, APISERVER, CONTROLLER_MANAGER, SCHEDULER, and WORKLOADS.`,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
