@@ -54,7 +54,6 @@ examples:
       http_health_check_name: 'http-health-check'
   - !ruby/object:Provider::Terraform::Examples
     name: 'target_http_proxy_http_keep_alive_timeout'
-    min_version: beta
     primary_resource_id: 'default'
     vars:
       target_http_proxy_name: 'test-http-keep-alive-timeout-proxy'
@@ -109,7 +108,6 @@ properties:
     default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: 'httpKeepAliveTimeoutSec'
-    min_version: beta
     description: |
       Specifies how long to keep a connection open, after completing a response,
       while there is no matching traffic (in seconds). If an HTTP keepalive is
