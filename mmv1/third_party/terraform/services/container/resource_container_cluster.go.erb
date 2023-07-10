@@ -4117,11 +4117,11 @@ func expandPodCidrOverprovisionConfig(configured interface{}) *container.PodCIDR
 	}
 }
 
-func expandIPAllocationPolicy(configured interface{}, networkingMode string, enable_autopilot bool) (*container.IPAllocationPolicy, error) {
+func expandIPAllocationPolicy(configured interface{}, networkingMode string, autopilot bool) (*container.IPAllocationPolicy, error) {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		if networkingMode == "VPC_NATIVE" {
-			if enable_autopilot {
+			if autopilot {
 				return nil, nil
 			}
 			return nil, fmt.Errorf("`ip_allocation_policy` block is required for VPC_NATIVE clusters.")
