@@ -1,6 +1,4 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -17,9 +15,9 @@ func TestAccNetworkSecurityGatewaySecurityPolicyRule_update(t *testing.T) {
 	gatewaySecurityPolicyRuleName := fmt.Sprintf("tf-test-gateway-sp-rule-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckNetworkSecurityGatewaySecurityPolicyRuleDestroyProducer(t),
+		CheckDestroy:             testAccCheckNetworkSecurityGatewaySecurityPolicyRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkSecurityGatewaySecurityPolicyRule_basic(gatewaySecurityPolicyName, gatewaySecurityPolicyRuleName),
@@ -93,5 +91,3 @@ resource "google_network_security_gateway_security_policy_rule" "foobar" {
 }
 `, gatewaySecurityPolicyName, gatewaySecurityPolicyRuleName)
 }
-
-<% end -%>
