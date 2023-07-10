@@ -1,6 +1,4 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -16,9 +14,9 @@ func TestAccNetworkServicesGateway_update(t *testing.T) {
 	gatewayName := fmt.Sprintf("tf-test-gateway-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckNetworkServicesGatewayDestroyProducer(t),
+		CheckDestroy:             testAccCheckNetworkServicesGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkServicesGateway_basic(gatewayName),
@@ -153,12 +151,12 @@ resource "google_network_services_gateway" "foobar" {
 //  name                    = "%s"
 //  location                = "us-east1"
 //  gateway_security_policy = google_network_security_gateway_security_policy.default.name
-//  enabled                 = true  
+//  enabled                 = true
 //  priority                = 1
 //  session_matcher         = "host() == 'example.com'"
 //  basic_profile           = "ALLOW"
 //}
-//	  
+//
 //resource "google_network_services_gateway" "foobar" {
 //  name                                 = "%s"
 //  location                             = "us-east1"
@@ -231,7 +229,7 @@ resource "google_network_services_gateway" "foobar" {
 //  name                    = "%s"
 //  location                = "us-east1"
 //  gateway_security_policy = google_network_security_gateway_security_policy.default.name
-//  enabled                 = true  
+//  enabled                 = true
 //  priority                = 1
 //  session_matcher         = "host() == 'example.com'"
 //  basic_profile           = "ALLOW"
@@ -247,12 +245,12 @@ resource "google_network_services_gateway" "foobar" {
 //#   name                    = "%s"
 //#   location                = "us-east1"
 //#   gateway_security_policy = google_network_security_gateway_security_policy.newpolicy.name
-//#   enabled                 = true  
+//#   enabled                 = true
 //#   priority                = 1
 //#   session_matcher         = "host() == 'example.com'"
 //#   basic_profile           = "ALLOW"
 //# }
-//	  
+//
 //resource "google_network_services_gateway" "foobar" {
 //  name                                 = "%s"
 //  location                             = "us-east1"
@@ -733,5 +731,3 @@ resource "google_compute_subnetwork" "proxyonlysubnet2" {
 
 `, cmName, netName, subnetName, pSubnetName, policyName, ruleName, gatewayName, gatewayScope, net2Name, subnet2Name, pSubnet2Name)
 }
-
-<% end -%>
