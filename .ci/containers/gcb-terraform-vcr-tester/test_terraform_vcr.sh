@@ -57,8 +57,20 @@ update_status "pending"
 set +e
 # cassette retrieval
 mkdir fixtures
-gsutil -m -q cp gs://ci-vcr-cassettes/beta/fixtures/* fixtures/
-# copy branch specific cassettes over master. This might fail but that's ok if the folder doesnt exist
+# # the check of existence of BASE_BRANCH is for backwards-compatability
+if [ -n "$BASE_BRANCH" ]; then
+  if [ "$BASE_BRANCH" != "FEATURE-BRANCH-major-release-5.0.0" ]; then
+    # pull main cassettes (major release uses branch specific casssettes as primary ones)
+    gsutil -m -q cp gs://ci-vcr-cassettes/beta/fixtures/* fixtures/
+  fi
+  if [ "$BASE_BRANCH" != "main" ]; then
+    # copy feature branch specific cassettes over main. This might fail but that's ok if the folder doesnt exist
+    gsutil -m -q cp gs://ci-vcr-cassettes/beta/refs/branches/$BASE_BRANCH/fixtures/* fixtures/
+  fi
+else
+  gsutil -m -q cp gs://ci-vcr-cassettes/beta/fixtures/* fixtures/
+fi
+# copy PR branch specific cassettes over main. This might fail but that's ok if the folder doesnt exist
 gsutil -m -q cp gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-$pr_number/fixtures/* fixtures/
 
 echo $SA_KEY > sa_key.json

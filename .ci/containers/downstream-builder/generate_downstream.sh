@@ -42,6 +42,12 @@ function clone_repo() {
         exit 1
     fi
 
+    # the check of existence of BASE_BRANCH is for backwards-compatability
+    if [ -n "$BASE_BRANCH" ]; then
+        echo "BASE_BRANCH: $BASE_BRANCH"
+        git -C $LOCAL_PATH checkout $BASE_BRANCH
+    fi
+
     GITHUB_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
     SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/$SCRATCH_OWNER/$GH_REPO
     mkdir -p "$(dirname $LOCAL_PATH)"
