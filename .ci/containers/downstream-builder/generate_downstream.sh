@@ -5,6 +5,10 @@ set -e
 function clone_repo() {
     SCRATCH_OWNER=modular-magician
     UPSTREAM_BRANCH=main
+    if [ -n "$BASE_BRANCH" ]; then
+        echo "BASE_BRANCH: $BASE_BRANCH"
+        UPSTREAM_BRANCH=$BASE_BRANCH
+    fi
     if [ "$REPO" == "terraform" ]; then
         if [ "$VERSION" == "ga" ]; then
             UPSTREAM_OWNER=hashicorp
@@ -26,10 +30,20 @@ function clone_repo() {
     elif [ "$REPO" == "terraform-google-conversion" ]; then
         UPSTREAM_OWNER=GoogleCloudPlatform
         UPSTREAM_BRANCH=main
+        if [ -n "$BASE_BRANCH" ]; then
+            if [ "$BASE_BRANCH" != "main" ]; then
+                UPSTREAM_BRANCH=$BASE_BRANCH
+            fi
+        fi
         GH_REPO=terraform-google-conversion
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
     elif [ "$REPO" == "tf-oics" ]; then
         UPSTREAM_BRANCH=master
+        if [ -n "$BASE_BRANCH" ]; then
+            if [ "$BASE_BRANCH" != "main" ]; then
+                UPSTREAM_BRANCH=$BASE_BRANCH
+            fi
+        fi
         UPSTREAM_OWNER=terraform-google-modules
         GH_REPO=docs-examples
         LOCAL_PATH=$GOPATH/src/github.com/terraform-google-modules/docs-examples
