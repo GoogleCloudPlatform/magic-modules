@@ -66,6 +66,8 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: 'Labels for the external VPN gateway resource.'
+    update_verb: :POST
+    update_url: 'projects/{{project}}/global/externalVpnGateways/{{name}}/setLabels'
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
