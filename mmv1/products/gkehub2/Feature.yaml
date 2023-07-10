@@ -143,7 +143,6 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: fleetobservability
         description: Fleet Observability feature spec.
-        min_version: beta
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: loggingConfig
