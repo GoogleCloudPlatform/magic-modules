@@ -134,13 +134,21 @@ if [ "$REPO" == "terraform-google-conversion" ]; then
 
     if [ "$VERSION" == "ga" ]; then
       if [ "$COMMAND" == "downstream" ]; then
-        go get -d github.com/hashicorp/terraform-provider-google@main
+        if [ -n "$BASE_BRANCH" ]; then
+            go get -d github.com/hashicorp/terraform-provider-google@$BASE_BRANCH
+        else
+            go get -d github.com/hashicorp/terraform-provider-google@main
+        fi
       else
         go mod edit -replace github.com/hashicorp/terraform-provider-google=github.com/$SCRATCH_OWNER/terraform-provider-google@$BRANCH
       fi
     elif [ "$VERSION" == "beta" ]; then
       if [ "$COMMAND" == "downstream" ]; then
-        go get -d github.com/hashicorp/terraform-provider-google-beta@main
+        if [ -n "$BASE_BRANCH" ]; then
+            go get -d github.com/hashicorp/terraform-provider-google-beta@$BASE_BRANCH
+        else
+            go get -d github.com/hashicorp/terraform-provider-google-beta@main
+        fi
       else
         go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/$SCRATCH_OWNER/terraform-provider-google-beta@$BRANCH
       fi
