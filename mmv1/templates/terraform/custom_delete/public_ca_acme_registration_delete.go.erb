@@ -1,0 +1,16 @@
+email, ok := d.GetOk("email")
+if !ok {
+return fmt.Errorf("error deactivating ACME account, email address is required")
+}
+privateKeyPem, _ := d.GetOk("private_key_pem")
+accountUri, ok := d.GetOk("account_uri")
+if !ok {
+return fmt.Errorf("error deactivating ACME account, account URI is required.")
+}
+log.Printf("[DEBUG] Deactivating ACME account: %s userAgent: %s", accountUri, userAgent)
+err = deactivateAccount(accountUri.(string), email.(string), privateKeyPem.(string))
+if err != nil {
+return fmt.Errorf("error occurred deactivating the account: %s", err)
+}
+d.Set("account_uri", "")
+return nil
