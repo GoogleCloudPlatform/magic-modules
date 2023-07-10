@@ -7656,6 +7656,6 @@ resource "google_container_cluster" "primary" {
   name             = "%s"
   location         = "us-central1"
   enable_autopilot = true
-  allow_net_admin  = enabled
-}`, name)
+  allow_net_admin  = "%t"
+}`, name, enabled)
 }
