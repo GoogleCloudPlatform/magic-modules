@@ -9,11 +9,8 @@ test_hide:
 doc_hide_conditional:
   - location: global
     file_name: basic_fir_sec_rule.tf.tmpl
-  - location: global
-    file_name: basic_fir_sec_rule_addr_groups.tf.tmpl
 
 test_hide_conditional:
   - location: global
     file_name: basic_fir_sec_rule.tf.tmpl
-  - location: global
-    file_name: basic_fir_sec_rule_addr_groups.tf.tmpl
+
