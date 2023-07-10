@@ -235,8 +235,6 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
     count=3
     parallel --jobs 16 TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying_after_recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test {1} -parallel 1 -count=$count -v -run="{2}$" -timeout 120m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" ">>" testlog/replaying_build_after_recording/{2}_replaying_test.log ::: $GOOGLE_TEST_DIRECTORY ::: $RECORDING_PASSED_TEST_LIST
 
-    # parallel --jobs 16 TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test {1} -parallel 1 -v -run="{2}$" -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" ">>" testlog/recording_build/{2}_recording_test.log ::: $GOOGLE_TEST_DIRECTORY ::: $FAILED_TESTS
-
     test_exit_code=$(($test_exit_code || $?))
 
     # Concatenate recording build logs to one file
@@ -255,9 +253,9 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
     if [[ -n $REPLAYING_FAILED_TESTS ]]; then
       comment+="$\textcolor{red}{\textsf{Tests failed when rerunning REPLAYING mode:}}$ ${NEWLINE} $REPLAYING_FAILED_TESTS ${NEWLINE}${NEWLINE}"
       comment+="Tests failed due to non-determinism or randomness when the VCR replayed the response after the HTTP request was made.${NEWLINE}${NEWLINE}"
-      comment+="Please fix these to complete your PR. If you do not know how VCR tests work, please work with the code reviewer to figure out the reason why the tests failed and fix the tests.${NEWLINE}"
+      comment+="Please fix these to complete your PR. If you believe these test failures to be incorrect or unrelated to your change, or if you have any questions, please raise the concern with your reviewer.${NEWLINE}"
     else
-      comment+="$\textcolor{green}{\textsf{No issues found for passed tests after rerunning tests in REPLAYING mode.}}$ ${NEWLINE}"
+      comment+="$\textcolor{green}{\textsf{No issues found for passed tests after REPLAYING rerun.}}$ ${NEWLINE}"
     fi
     comment+="${NEWLINE}---${NEWLINE}"
 
