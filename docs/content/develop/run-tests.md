@@ -50,79 +50,82 @@ aliases:
 
 1. Run unit tests and linters
 
-```bash
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-make test
-make lint
-```
+    ```bash
+    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+    make test
+    make lint
+    ```
 
 
-2. Run acceptance tests for only modified resources. (Full test runs can take over 9 hours.) See Go's documentation for more information about `-run`.
+1. Run acceptance tests for only modified resources. (Full test runs can take over 9 hours.) See Go's documentation for more information about `-run`.
 
-```bash
-make testacc TEST=./google TESTARGS='-run=TestAccContainerNodePool'
-```
+    ```bash
+    make testacc TEST=./google TESTARGS='-run=TestAccContainerNodePool'
+    ```
 
-TESTARGS allows you to pass [testing flags](https://pkg.go.dev/cmd/go#hdr-Testing_flags) to `go test`. The most important is `-run`, which allows you to limit the tests that get run. There are 2000+ tests, and running all of them takes over 9 hours and requires a lot of GCP quota.
+    TESTARGS allows you to pass [testing flags](https://pkg.go.dev/cmd/go#hdr-Testing_flags) to `go test`. The most important is `-run`, which allows you to limit the tests that get run. There are 2000+ tests, and running all of them takes over 9 hours and requires a lot of GCP quota.
 
-`-run` is regexp-like, so multiple tests can be run in parallel by specifying a common substring of those tests (for example, `TestAccContainerNodePool` to run all node pool tests).
+    `-run` is regexp-like, so multiple tests can be run in parallel by specifying a common substring of those tests (for example, `TestAccContainerNodePool` to run all node pool tests).
 
-### Debugging tests
+1. Optional: Save verbose test output to a file for analysis.
 
-Optional: Save verbose test output to a file for analysis.
+    ```bash
+    TF_LOG=TRACE make testacc TEST=./google TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
+    ```
 
-```bash
-TF_LOG=TRACE make testacc TEST=./google TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
-```
+1. Optional: debug tests with [Delve](https://github.com/go-delve/delve):
+
+    ```bash
+    ## Navigate to the google package within your local GCP Terraform provider Git clone.
+    cd $GOPATH/src/github.com/terraform-providers/terraform-provider-google/google
+
+    ## Execute the dlv command to launch the test.
+    ## Note that the --test.run flag uses the same regexp matching as go test --run.
+    TF_ACC=1 dlv test -- --test.v --test.run TestAccComputeRegionBackendService_withCdnPolicy
+    ```
 
 {{< /tab >}}
 
 {{< tab "Beta Provider" >}}
 
-## Run automated tests
+1. Run unit tests and linters
 
-Run unit tests and linters
+    ```bash
+    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+    make test
+    make lint
+    ```
 
-```bash
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-make test
-make lint
-```
+1. Run acceptance tests
 
-## Run acceptance tests
+    ```bash
+    make testacc TEST=./google-beta TESTARGS='-run=TestAccContainerNodePool_basic'
+    ```
 
-Run acceptance tests
+    TESTARGS allows you to pass [testing flags](https://pkg.go.dev/cmd/go#hdr-Testing_flags) to `go test`. The most important is `-run`, which allows you to limit the tests that get run. There are 2000+ tests, and running all of them takes over 9 hours and requires a lot of GCP quota.
 
-```bash
-make testacc TEST=./google-beta TESTARGS='-run=TestAccContainerNodePool_basic'
-```
+    `-run` is regexp-like, so multiple tests can be run in parallel by specifying a common substring of those tests (for example, `TestAccContainerNodePool` to run all node pool tests).
 
-TESTARGS allows you to pass [testing flags](https://pkg.go.dev/cmd/go#hdr-Testing_flags) to `go test`. The most important is `-run`, which allows you to limit the tests that get run. There are 2000+ tests, and running all of them takes over 9 hours and requires a lot of GCP quota.
+1. Optional: Save verbose test output to a file for analysis.
 
-`-run` is regexp-like, so multiple tests can be run in parallel by specifying a common substring of those tests (for example, `TestAccContainerNodePool` to run all node pool tests).
+    ```bash
+    TF_LOG=TRACE make testacc TEST=./google-beta TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
+    ```
 
-### Debugging tests
+1. Optional: debug tests with [Delve](https://github.com/go-delve/delve):
 
-Optional: Save verbose test output to a file for analysis.
+    ```bash
+    ## Navigate to the google package within your local GCP Terraform provider Git clone.
+    cd $GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta/google-beta
 
-```bash
-TF_LOG=TRACE make testacc TEST=./google-beta TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
-```
+    ## Execute the dlv command to launch the test.
+    ## Note that the --test.run flag uses the same regexp matching as go test --run.
+    TF_ACC=1 dlv test -- --test.v --test.run TestAccComputeRegionBackendService_withCdnPolicy
+    ```
 
 {{< /tab >}}
 
 {{< /tabs >}}
-
-You can also debug tests with [Delve](https://github.com/go-delve/delve):
-
-```bash
-## Navigate to the google package within your local GCP Terraform provider Git clone.
-cd $GOPATH/src/github.com/terraform-providers/terraform-provider-google/google
-
-## Execute the dlv command to launch the test.
-## Note that the --test.run flag uses the same regexp matching as go test --run.
-TF_ACC=1 dlv test -- --test.v --test.run TestAccComputeRegionBackendService_withCdnPolicy
-```
 
 ### Testing with different `terraform` versions
 
