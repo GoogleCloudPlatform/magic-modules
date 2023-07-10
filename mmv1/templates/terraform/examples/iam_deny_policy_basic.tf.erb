@@ -1,6 +1,6 @@
 resource "google_project" "project" {
   provider        = google-beta
-  roject_id      = "<%= ctx[:vars]["project_name"] %>"
+  project_id      = "<%= ctx[:vars]["project_name"] %>"
   name            = "<%= ctx[:vars]["project_name"] %>"
   org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
   billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
