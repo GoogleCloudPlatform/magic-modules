@@ -15,7 +15,7 @@ name: ghe_connection
 description: Creates and updates a GitHub Enterprise connection.
 type: connection
 versions:
-- beta
+- ga
 resource: samples/ghe_initial.connection.json
 updates:
 - resource: samples/ghe_complete.connection.json
