@@ -2,7 +2,7 @@
 // 1) the index configuration has no overrides and matches the ancestor configuration.
 // 2) the ttl configuration is unset.
 
-config := GoogleProviderConfig(t)
+config := acctest.GoogleProviderConfig(t)
 
 url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{FirestoreBasePath}}projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/fields/{{field}}")
 if err != nil {

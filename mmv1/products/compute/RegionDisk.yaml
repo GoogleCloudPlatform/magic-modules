@@ -60,7 +60,10 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/detach_disk.erb
   encoder: templates/terraform/encoders/disk.erb
   decoder: templates/terraform/decoders/disk.erb
-  resource_definition: templates/terraform/resource_definition/disk.erb
+custom_diff: [
+  'customdiff.ForceNewIfChange("size", IsDiskShrinkage)',
+  'hyperDiskIopsUpdateDiffSupress',
+]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_disk_basic'
@@ -78,7 +81,6 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-my-region-disk%s\",
       context[\"random_suffix\"\
       ])"
-    min_version: beta
     vars:
       region_disk_name: 'primary-region-disk'
       secondary_region_disk_name: 'secondary-region-disk'
@@ -324,7 +326,6 @@ properties:
     output: true
   - !ruby/object:Api::Type::NestedObject
     name: 'asyncPrimaryDisk'
-    min_version: 'beta'
     properties:
       - !ruby/object:Api::Type::String
         name: 'disk'

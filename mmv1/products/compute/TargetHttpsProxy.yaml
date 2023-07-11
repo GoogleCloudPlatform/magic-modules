@@ -53,6 +53,15 @@ examples:
       url_map_name: 'url-map'
       backend_service_name: 'backend-service'
       http_health_check_name: 'http-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'target_https_proxy_http_keep_alive_timeout'
+    primary_resource_id: 'default'
+    vars:
+      target_https_proxy_name: 'test-http-keep-alive-timeout-proxy'
+      ssl_certificate_name: 'my-certificate'
+      url_map_name: 'url-map'
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'http-health-check'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -141,3 +150,12 @@ properties:
       This field only applies when the forwarding rule that references
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
     default_from_api: true
+  - !ruby/object:Api::Type::Integer
+    name: 'httpKeepAliveTimeoutSec'
+    description: |
+      Specifies how long to keep a connection open, after completing a response,
+      while there is no matching traffic (in seconds). If an HTTP keepalive is
+      not specified, a default value (610 seconds) will be used. For Global
+      external HTTP(S) load balancer, the minimum allowed value is 5 seconds and
+      the maximum allowed value is 1200 seconds. For Global external HTTP(S)
+      load balancer (classic), this option is not available publicly.

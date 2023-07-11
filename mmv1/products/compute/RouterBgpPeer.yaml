@@ -142,8 +142,8 @@ properties:
     name: 'peerIpAddress'
     description: |
       IP address of the BGP interface outside Google Cloud Platform.
-      Only IPv4 is supported.
-    required: true
+      Only IPv4 is supported. Required if `ip_address` is set.
+    default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: 'peerAsn'
     description: |

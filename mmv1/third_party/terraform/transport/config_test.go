@@ -8,8 +8,9 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	google_tpg "github.com/hashicorp/terraform-provider-google/google"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/provider"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"golang.org/x/oauth2/google"
 )
@@ -48,7 +49,7 @@ func TestHandleSDKDefaults_BillingProject(t *testing.T) {
 			// Arrange
 			// Create empty schema.ResourceData using the SDK Provider schema
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, google_tpg.Provider().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, provider.Provider().Schema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.ConfigValue != "" {
@@ -145,7 +146,7 @@ func TestHandleSDKDefaults_Region(t *testing.T) {
 			// Arrange
 			// Create empty schema.ResourceData using the SDK Provider schema
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, google_tpg.Provider().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, provider.Provider().Schema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.ConfigValue != "" {
@@ -242,7 +243,7 @@ func TestHandleSDKDefaults_Zone(t *testing.T) {
 			// Arrange
 			// Create empty schema.ResourceData using the SDK Provider schema
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, google_tpg.Provider().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, provider.Provider().Schema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.ConfigValue != "" {
@@ -342,7 +343,7 @@ func TestHandleSDKDefaults_UserProjectOverride(t *testing.T) {
 			// Arrange
 			// Create empty schema.ResourceData using the SDK Provider schema
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, google_tpg.Provider().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, provider.Provider().Schema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.SetViaConfig {
@@ -414,7 +415,7 @@ func TestHandleSDKDefaults_RequestReason(t *testing.T) {
 			// Arrange
 			// Create empty schema.ResourceData using the SDK Provider schema
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, google_tpg.Provider().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, provider.Provider().Schema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.ConfigValue != "" {
@@ -504,13 +505,13 @@ func TestConfigLoadAndValidate_accountFileJSONInvalid(t *testing.T) {
 }
 
 func TestAccConfigLoadValidate_credentials(t *testing.T) {
-	if os.Getenv(acctest.TestEnvVar) == "" {
-		t.Skipf("Network access not allowed; use %s=1 to enable", acctest.TestEnvVar)
+	if os.Getenv(envvar.TestEnvVar) == "" {
+		t.Skipf("Network access not allowed; use %s=1 to enable", envvar.TestEnvVar)
 	}
 	acctest.AccTestPreCheck(t)
 
-	creds := acctest.GetTestCredsFromEnv()
-	proj := acctest.GetTestProjectFromEnv()
+	creds := envvar.GetTestCredsFromEnv()
+	proj := envvar.GetTestProjectFromEnv()
 
 	config := &transport_tpg.Config{
 		Credentials: creds,
@@ -532,14 +533,14 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 }
 
 func TestAccConfigLoadValidate_impersonated(t *testing.T) {
-	if os.Getenv(acctest.TestEnvVar) == "" {
-		t.Skipf("Network access not allowed; use %s=1 to enable", acctest.TestEnvVar)
+	if os.Getenv(envvar.TestEnvVar) == "" {
+		t.Skipf("Network access not allowed; use %s=1 to enable", envvar.TestEnvVar)
 	}
 	acctest.AccTestPreCheck(t)
 
 	serviceaccount := transport_tpg.MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
-	creds := acctest.GetTestCredsFromEnv()
-	proj := acctest.GetTestProjectFromEnv()
+	creds := envvar.GetTestCredsFromEnv()
+	proj := envvar.GetTestProjectFromEnv()
 
 	config := &transport_tpg.Config{
 		Credentials:               creds,
@@ -562,13 +563,13 @@ func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 }
 
 func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
-	if os.Getenv(acctest.TestEnvVar) == "" {
-		t.Skipf("Network access not allowed; use %s=1 to enable", acctest.TestEnvVar)
+	if os.Getenv(envvar.TestEnvVar) == "" {
+		t.Skipf("Network access not allowed; use %s=1 to enable", envvar.TestEnvVar)
 	}
 	acctest.AccTestPreCheck(t)
 
-	creds := acctest.GetTestCredsFromEnv()
-	proj := acctest.GetTestProjectFromEnv()
+	creds := envvar.GetTestCredsFromEnv()
+	proj := envvar.GetTestProjectFromEnv()
 	serviceaccount := transport_tpg.MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
 
 	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), transport_tpg.DefaultClientScopes...)
@@ -602,13 +603,13 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 }
 
 func TestAccConfigLoadValidate_accessToken(t *testing.T) {
-	if os.Getenv(acctest.TestEnvVar) == "" {
-		t.Skipf("Network access not allowed; use %s=1 to enable", acctest.TestEnvVar)
+	if os.Getenv(envvar.TestEnvVar) == "" {
+		t.Skipf("Network access not allowed; use %s=1 to enable", envvar.TestEnvVar)
 	}
 	acctest.AccTestPreCheck(t)
 
-	creds := acctest.GetTestCredsFromEnv()
-	proj := acctest.GetTestProjectFromEnv()
+	creds := envvar.GetTestCredsFromEnv()
+	proj := envvar.GetTestProjectFromEnv()
 
 	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), testOauthScope)
 	if err != nil {

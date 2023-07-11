@@ -32,6 +32,7 @@ import_format:
 # For global triggers, the id format is changed to projects/{{project}}/triggers/{{trigger_id}} via code overrides.
 id_format: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
 schema_version: 2
+state_upgraders: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_filename'
@@ -63,9 +64,6 @@ examples:
     skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_repo'
-    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14390
-    skip_test: true
-    min_version: beta
     primary_resource_id: 'repo-trigger'
     vars:
       installation_id: '123123'
@@ -93,9 +91,6 @@ examples:
     primary_resource_id: 'allow-exit-codes-trigger'
   - !ruby/object:Provider::Terraform::Examples
     name: "cloudbuild_trigger_pubsub_with_repo"
-    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14390
-    skip_test: true
-    min_version: beta
     primary_resource_id: "pubsub-with-repo-trigger"
     vars:
       installation_id: "123123"
@@ -112,7 +107,9 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_import: templates/terraform/post_import/cloudbuild_trigger.go.erb
   pre_update: templates/terraform/pre_update/cloudbuild_trigger.go.erb
   constants: templates/terraform/constants/cloudbuild_trigger.erb
-  resource_definition: templates/terraform/resource_definition/cloudbuild_trigger.go.erb
+custom_diff: [
+  'stepTimeoutCustomizeDiff',
+]
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -210,7 +207,6 @@ properties:
           invocation originated is assumed to be the repo from which to read the specified path.
       - !ruby/object:Api::Type::String
         name: 'repository'
-        min_version: beta
         description: |
           The fully qualified resource name of the Repo API repository. The fully qualified resource name of the Repo API repository.
           If unspecified, the repo from which the trigger invocation originated is assumed to be the repo from which to read the specified path.
@@ -238,7 +234,6 @@ properties:
           Format: projects/{project}/locations/{location}/githubEnterpriseConfigs/{id}. projects/{project}/githubEnterpriseConfigs/{id}.
   - !ruby/object:Api::Type::NestedObject
     name: 'repositoryEventConfig'
-    min_version: beta
     description: |
       The configuration of a trigger that creates a build whenever an event from Repo API is received.
     at_least_one_of:
@@ -339,7 +334,6 @@ properties:
           The URI of the repo.
       - !ruby/object:Api::Type::String
         name: 'repository'
-        min_version: beta
         description: |
           The qualified resource name of the Repo API repository.
           Either uri or repository can be specified and is required.
