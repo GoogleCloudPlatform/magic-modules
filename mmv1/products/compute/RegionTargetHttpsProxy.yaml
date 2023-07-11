@@ -63,6 +63,7 @@ parameters:
       If it is not provided, the provider region is used.
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -122,6 +123,7 @@ properties:
       resource: 'RegionSslCertificate'
       imports: 'selfLink'
       description: 'The SSL certificates used by this TargetHttpsProxy'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'sslPolicy'
     resource: 'RegionSslPolicy'
@@ -136,6 +138,7 @@ properties:
   #  update_verb: :POST
   #  update_url:
   #    'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslPolicy'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'urlMap'
     resource: 'RegionUrlMap'
@@ -145,4 +148,5 @@ properties:
       to the RegionBackendService.
     required: true
     update_verb: :POST
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
     update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setUrlMap'
