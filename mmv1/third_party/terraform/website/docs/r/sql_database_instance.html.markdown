@@ -157,6 +157,22 @@ provider "google-beta" {
 }
 ```
 
+### ENTERPRISE_PLUS Instance with data_cache_config
+
+```hcl
+resource "google_sql_database_instance" "main" {
+  name             = "enterprise-plus-main-instance"
+  database_version = "MYSQL_8_0_31"
+  settings {
+    tier    = "db-perf-optimized-N-2"
+    edition = "ENTERPRISE_PLUS"
+    data_cache_config {
+        data_cache_enabled = true
+    }
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -228,7 +244,7 @@ The `settings` block supports:
     for more details and supported versions. Postgres supports only shared-core machine types,
     and custom machine types such as `db-custom-2-13312`. See the [Custom Machine Type Documentation](https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#create) to learn about specifying custom machine types.
 
-* `edition` - (Optional) The edition of the instance, can be `ENTERPRISE` or `ENTERPRISE_PLUS`. Defaults to `ENTERPRISE`
+* `edition` - (Optional) The edition of the instance, can be `ENTERPRISE` or `ENTERPRISE_PLUS`.
 
 The optional `settings.advanced_machine_features` subblock supports:
 
@@ -438,8 +454,6 @@ The optional `clone` block supports:
 * `point_in_time` -  (Optional) The timestamp of the point in time that should be restored.
 
     A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-
-* `preferred_zone` - (Optional) (Point-in-time recovery for PostgreSQL only) Clone to an instance in the specified zone. If no zone is specified, clone to the same zone as the source instance.
 
 * `database_names` - (Optional) (SQL Server only, use with `point_in_time`) Clone only the specified databases from the source instance. Clone all databases if empty.
 
