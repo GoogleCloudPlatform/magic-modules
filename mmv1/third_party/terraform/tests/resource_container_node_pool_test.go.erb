@@ -3082,7 +3082,6 @@ func TestAccContainerNodePool_tpuTopology(t *testing.T) {
 	t.Parallel()
 	acctest.SkipIfVcr(t)
 
-
 	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
 	np1 := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
 	np2 := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
