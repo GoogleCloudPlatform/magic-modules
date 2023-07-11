@@ -27,6 +27,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 nested_query: !ruby/object:Api::Resource::NestedQuery
   keys:
     - monitoredProjects
+legacy_long_form_project: true
 description: "A [project being monitored](https://cloud.google.com/monitoring/settings/multiple-projects#create-multi) by a Metrics Scope."
 immutable: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
