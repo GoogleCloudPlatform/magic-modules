@@ -128,7 +128,7 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
 1. Set up application default credentials for Terraform
    ```bash
    gcloud auth application-default login
-   export GOOGLE_USE_DEFAULT_CREDENTIALS=TRUE
+   export GOOGLE_USE_DEFAULT_CREDENTIALS=true
    ```
 1. Set required environment variables
    ```bash
