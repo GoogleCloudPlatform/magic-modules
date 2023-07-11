@@ -143,14 +143,14 @@ make build
 
 To make Terraform use the configuration file you created, you need to set the `TF_CLI_CONFIG_FILE` environment variable to be a string containing the path to the configuration file ([see the documentation here](https://developer.hashicorp.com/terraform/cli/config/environment-variables#tf_cli_config_file)). The path can be either a relative or absolute path.
 
-Assuming that a configuration file was created at `~/tf-dev-override.tfrc`, you can either export the environment variable or set it explicitly for each `terraform` command:
+Assuming that a configuration file was created at `~/tf-dev-override.tfrc`, you can either export the environment variable or set it explicitly for each `terraform` command. Note that you need to use the full path:
 
 ```bash
 # either export the environment variable for your session
-export TF_CLI_CONFIG_FILE="~/tf-dev-override.tfrc"
+export TF_CLI_CONFIG_FILE="/Users/MyUserName/tf-dev-override.tfrc"
 
 # OR, set the environment variable value per command
-TF_CLI_CONFIG_FILE="~/tf-dev-override.tfrc" terraform plan
+TF_CLI_CONFIG_FILE="/Users/MyUserName/tf-dev-override.tfrc" terraform plan
 ```
 
 To check that the developer override is working, run a `terraform plan` command and look for a warning near the start of the terminal output that looks like the example below. It is not necessary to run the terraform init command to use development overrides.

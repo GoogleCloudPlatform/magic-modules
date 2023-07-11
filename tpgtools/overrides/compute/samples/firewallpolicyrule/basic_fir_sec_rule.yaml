@@ -1,5 +1,3 @@
-versions:
-- ga
 updates:
 - resource: ./basic_fir_sec_rule_update.tf.tmpl
 variables:

@@ -16,7 +16,6 @@ name: 'Gateway'
 base_url: 'projects/{{project}}/locations/{{location}}/gateways'
 create_url: 'projects/{{project}}/locations/{{location}}/gateways?gatewayId={{name}}'
 self_link: 'projects/{{project}}/locations/{{location}}/gateways/{{name}}'
-min_version: beta
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -25,7 +24,7 @@ description: |
   along with any policy configurations. Routes have reference to to Gateways
   to dictate how requests should be routed by this Gateway.
 references: !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.gateways'
+  api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1/projects.locations.gateways'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -50,19 +49,16 @@ autogen_async: true
 import_format: ['projects/{{project}}/locations/{{location}}/gateways/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_services_gateway_basic'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-gateway'
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_services_gateway_advanced'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-gateway'
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_services_gateway_secure_web_proxy'
     primary_resource_id: 'default'
     vars:
@@ -77,7 +73,6 @@ examples:
     ignore_read_extra:
       - 'delete_swg_autogen_router_on_destroy'
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_services_gateway_multiple_swp_same_network'
     primary_resource_id: 'default'
     vars:
