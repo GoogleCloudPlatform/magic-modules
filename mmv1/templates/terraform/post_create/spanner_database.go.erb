@@ -88,14 +88,15 @@ if enableDropProtectionOk && dropProtection {
 	if err != nil {
 		return err
 	}
-	res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config: config,
-		Method: "PATCH",
-		Project: billingProject,
-		RawURL: url,
+	obj := map[string]interface{}{"enableDropProtection": expandSpannerDatabaseEnableDropProtection(d.Get("enable_drop_protection"), d, config)}
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "PATCH",
+		Project:   billingProject,
+		RawURL:    url,
 		UserAgent: userAgent,
-		Body: obj,
-		Timeout: d.Timeout(schema.TimeoutUpdate),
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutUpdate),
 	})
 	if err != nil {
 		return fmt.Errorf("Error updating enableDropDatabaseProtection on Database: %s", err)
