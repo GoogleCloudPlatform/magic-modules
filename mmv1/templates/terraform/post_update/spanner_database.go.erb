@@ -10,7 +10,7 @@ if d.HasChange("enable_drop_protection") {
 	if err != nil {
 		return err
 	}
-	obj := map[string]interface{}{"enableDropProtection": expandSpannerDatabaseEnableDropProtection(d.Get("enable_drop_protection"), d, config)}
+	obj := map[string]interface{}{"enableDropProtection": d.Get("enable_drop_protection")}
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "PATCH",
