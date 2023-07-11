@@ -3080,6 +3080,8 @@ resource "google_container_node_pool" "with_sole_tenant_config" {
 <% unless version == 'ga' -%>
 func TestAccContainerNodePool_tpuTopology(t *testing.T) {
 	t.Parallel()
+	acctest.SkipIfVcr(t)
+
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
 	np1 := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
