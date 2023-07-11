@@ -57,15 +57,13 @@ aliases:
     ```
 
 
-1. Run acceptance tests for only modified resources. (Full test runs can take over 9 hours.) See Go's documentation for more information about `-run`.
+1. Run acceptance tests for only modified resources. (Full test runs can take over 9 hours.) See [Go's documentation](https://pkg.go.dev/cmd/go#hdr-Testing_flags) for more information about `-run` and other flags.
 
     ```bash
     make testacc TEST=./google TESTARGS='-run=TestAccContainerNodePool'
     ```
 
-    TESTARGS allows you to pass [testing flags](https://pkg.go.dev/cmd/go#hdr-Testing_flags) to `go test`. The most important is `-run`, which allows you to limit the tests that get run. There are 2000+ tests, and running all of them takes over 9 hours and requires a lot of GCP quota.
 
-    `-run` is regexp-like, so multiple tests can be run in parallel by specifying a common substring of those tests (for example, `TestAccContainerNodePool` to run all node pool tests).
 
 1. Optional: Save verbose test output to a file for analysis.
 
@@ -73,11 +71,10 @@ aliases:
     TF_LOG=TRACE make testacc TEST=./google TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
     ```
 
-1. Optional: debug tests with [Delve](https://github.com/go-delve/delve):
+1. Optional: Debug tests with [Delve](https://github.com/go-delve/delve). See [`dlv test` documentation](https://github.com/go-delve/delve/blob/master/Documentation/usage/dlv_test.md) for information about available flags.
 
     ```bash
     ## Navigate to the google package within your local GCP Terraform provider Git clone.
-    cd $GOPATH/src/github.com/terraform-providers/terraform-provider-google/google
 
     ## Execute the dlv command to launch the test.
     ## Note that the --test.run flag uses the same regexp matching as go test --run.
@@ -127,9 +124,18 @@ aliases:
 
 {{< /tabs >}}
 
-### Testing with different `terraform` versions
+## Test with different `terraform` versions
 
-Tests will use whatever version of the `terraform` binary is found on your path. To test with multiple versions of `terraform` core, you must run the tests multiple times with different versions. You can use [`tfenv`](https://github.com/tfutils/tfenv) to manage your system `terraform` versions.
+Tests will use whatever version of the `terraform` binary is found on your `PATH`. If you are testing a change that you know only impacts certain `terraform` versions, follow these steps:
+
+1. Install [`tfenv`](https://github.com/tfutils/tfenv).
+2. Install the version of `terraform` you want to test.
+   \`\`\`bash
+   tfenv install VERSION
+   \`\`\`
+   Replace `VERSION` with the version you want to test.
+3. Run automated tests following the earlier section.
+4. Run manual tests following the earlier section.
 
 ## Test manually
 
@@ -157,7 +163,7 @@ make build
 
 In the sections below we describe how to create a Terraform CLI configuration file, and how to make the CLI use the file via an environment variable.
 
-### Setup
+### Create developer overrides file
 
 Choose your architecture below.
 
@@ -307,7 +313,7 @@ In this scenario you will need to remember to edit this file to swap between usi
 
 {{< /tab >}}
 
-{{< tab "Filesystem mirrors" >}}
+{{< tab "Filesystem mirrors (Terraform 0.13 and earlier)" >}}
 
 Filesystem mirrors can used explicitly or implicitly by Terraform. Explicit filesystem mirrors can be [defined via the CLI configuration file](https://developer.hashicorp.com/terraform/cli/config/config-file#filesystem_mirror). In contrast, once [implicit filesystem mirrors](https://developer.hashicorp.com/terraform/cli/config/config-file#implied-local-mirror-directories) are created by a user they are discovered and used by Terraform automatically.
 
