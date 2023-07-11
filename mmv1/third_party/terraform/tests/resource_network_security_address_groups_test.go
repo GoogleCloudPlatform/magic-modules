@@ -1,25 +1,24 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccNetworkSecurityAddressGroups_update(t *testing.T){
-    t.Parallel()
+func TestAccNetworkSecurityAddressGroups_update(t *testing.T) {
+	t.Parallel()
 
-    addressGroupsName := fmt.Sprintf("tf-test-address-group-%s", acctest.RandString(t, 10))
+	addressGroupsName := fmt.Sprintf("tf-test-address-group-%s", acctest.RandString(t, 10))
 	projectName := GetTestProjectFromEnv()
 
-    acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckNetworkSecurityAddressGroupDestroyProducer(t),
+		CheckDestroy:             testAccCheckNetworkSecurityAddressGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkSecurityAddressGroups_basic(addressGroupsName, projectName),
@@ -42,7 +41,7 @@ func TestAccNetworkSecurityAddressGroups_update(t *testing.T){
 }
 
 func testAccNetworkSecurityAddressGroups_basic(addressGroupsName, projectName string) string {
-    return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_network_security_address_group" "foobar" {
     name        = "%s"
     parent 		= "projects/%s"
@@ -59,7 +58,7 @@ resource "google_network_security_address_group" "foobar" {
 }
 
 func testAccNetworkSecurityAddressGroups_update(addressGroupsName, projectName string) string {
-    return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_network_security_address_group" "foobar" {
     name        = "%s"
 	parent 		= "projects/%s"
@@ -74,5 +73,3 @@ resource "google_network_security_address_group" "foobar" {
 }
 `, addressGroupsName, projectName)
 }
-
-<% end -%>
