@@ -23,6 +23,7 @@ func labels(issueBody string, enrolledTeams map[string][]string) string {
 	}
 
 	if len(labels) > 0 {
+		labels = append(labels, "\"forward/review\"")
 		sort.Strings(labels)
 		return "[" + strings.Join(labels, ", ") + "]"
 	}
