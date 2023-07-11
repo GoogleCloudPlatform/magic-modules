@@ -2771,8 +2771,8 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		    Update: &container.ClusterUpdate{
 		        DesiredAutopilotWorkloadPolicyConfig: &container.WorkloadPolicyConfig{
 		        	AllowNetAdmin: allowed,
-		        }
-		    }
+		        },
+		    },
 		}
 		
 	    updateF := updateFunc(req, "updating net admin for GKE autopilot workload policy config")
