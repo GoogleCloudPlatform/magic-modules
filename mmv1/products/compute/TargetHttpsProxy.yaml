@@ -116,6 +116,7 @@ properties:
       resource: 'SslCertificate'
       imports: 'selfLink'
       description: 'The SSL certificates used by this TargetHttpsProxy'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'certificateMap'
     description: |
@@ -134,6 +135,7 @@ properties:
       resource will not have any SSL policy configured.
     update_verb: :POST
     update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}/setSslPolicy'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'urlMap'
     resource: 'UrlMap'
@@ -144,6 +146,7 @@ properties:
     required: true
     update_verb: :POST
     update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setUrlMap'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Boolean
     name: 'proxyBind'
     description: |
