@@ -233,6 +233,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
         return err
     }
 <%    if object.legacy_long_form_project -%>
+    url = strings.ReplaceAll(url, "metricsScopes/projects/", "metricsScopes/")
     url = strings.ReplaceAll(url, "projects/projects/", "projects/")
 <%    end -%>
 
@@ -314,6 +315,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
         return fmt.Errorf("Error constructing id: %s", err)
     }
 <%    if object.legacy_long_form_project -%>
+    id = strings.ReplaceAll(id, "metricsScopes/projects/", "metricsScopes/")
     id = strings.ReplaceAll(id, "projects/projects/", "projects/")
 <%    end -%>
     d.SetId(id)
@@ -375,6 +377,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
         return fmt.Errorf("Error constructing id: %s", err)
     }
 <%          if object.legacy_long_form_project -%>
+    id = strings.ReplaceAll(id, "metricsScopes/projects/", "metricsScopes/")
     id = strings.ReplaceAll(id, "projects/projects/", "projects/")
 <%          end -%>
     d.SetId(id)
@@ -437,6 +440,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
             return nil, err
         }
 <%      if object.legacy_long_form_project -%>
+        url = strings.ReplaceAll(url, "metricsScopes/projects/", "metricsScopes/")
         url = strings.ReplaceAll(url, "projects/projects/", "projects/")
 <%      end -%>
 
@@ -529,6 +533,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         return err
     }
 <%  if object.legacy_long_form_project -%>
+    url = strings.ReplaceAll(url, "metricsScopes/projects/", "metricsScopes/")
     url = strings.ReplaceAll(url, "projects/projects/", "projects/")
 <%  end -%>
 
@@ -744,6 +749,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
         return err
     }
 <%      if object.legacy_long_form_project -%>
+    url = strings.ReplaceAll(url, "metricsScopes/projects/", "metricsScopes/")
     url = strings.ReplaceAll(url, "projects/projects/", "projects/")
 <%      end -%>
 
@@ -921,6 +927,7 @@ if len(updateMask) > 0 {
             return err
         }
 <%        if object.legacy_long_form_project -%>
+    url = strings.ReplaceAll(url, "metricsScopes/projects/", "metricsScopes/")
     url = strings.ReplaceAll(url, "projects/projects/", "projects/")
 <%        end -%>
 
@@ -1038,6 +1045,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
         return err
     }
 <%      if object.legacy_long_form_project -%>
+    url = strings.ReplaceAll(url, "metricsScopes/projects/", "metricsScopes/")
     url = strings.ReplaceAll(url, "projects/projects/", "projects/")
 <%      end -%>
 
@@ -1138,6 +1146,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
         return nil, fmt.Errorf("Error constructing id: %s", err)
     }
 <%      if object.legacy_long_form_project -%>
+    id = strings.ReplaceAll(id, "metricsScopes/projects/", "metricsScopes/")
     id = strings.ReplaceAll(id, "projects/projects/", "projects/")
 <%      end -%>
     d.SetId(id)
