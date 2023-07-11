@@ -2507,8 +2507,8 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		if err := d.Set("enable_autopilot", autopilot.Enabled); err != nil {
 			return fmt.Errorf("Error setting enable_autopilot: %s", err)
 		}
-		if autopilot.WorkloadConfig != nil {
-            if err := d.Set("allow_net_admin", autopilot.WorkloadConfig.AllowNetAdmin); err != nil {
+		if autopilot.WorkloadPolicyConfig != nil {
+            if err := d.Set("allow_net_admin", autopilot.WorkloadPolicyConfig.AllowNetAdmin); err != nil {
                 return fmt.Errorf("Error setting allow_net_admin: %s", err)
             }
         }
