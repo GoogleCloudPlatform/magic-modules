@@ -4,12 +4,17 @@ package google
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/spanner"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccSpannerDatabase_basic(t *testing.T) {
@@ -408,7 +413,10 @@ func TestAccSpannerDatabase_enableDropProtection(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_spanner_database.basic", "state"),
 					resource.TestCheckResourceAttr("google_spanner_database.basic", "enable_drop_protection", "true"),
+          // reset enable_drop_protection value to false for cleanup
+          testAccResetEnableDropDatabaseProtection(t),
 				),
+        ExpectNonEmptyPlan: true,
 			},
 			{
 				// Test removing `enable_drop_protection` and setting enableDropProtection to false
@@ -435,6 +443,7 @@ resource "google_spanner_database" "basic" {
   instance = google_spanner_instance.basic.name
   name     = "%s"
   enable_drop_protection = true
+  deletion_protection = false
   ddl = [
      "CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
   ]
@@ -454,13 +463,13 @@ resource "google_spanner_instance" "basic" {
 resource "google_spanner_database" "basic" {
   instance = google_spanner_instance.basic.name
   name     = "%s"
-  // Change 1/2 : deleted version_retention_period argument
   ddl = [
     "CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
   ]
 	enable_drop_protection = false
+  deletion_protection = false
 }
-`, instanceName, instanceName, databaseName, databaseName)
+`, instanceName, instanceName, databaseName)
 }
 
 // Unit Tests for validation of retention period argument
@@ -585,6 +594,46 @@ resource "google_spanner_database" "database" {
   ]
 }
 `, context)
+}
+
+func testAccResetEnableDropDatabaseProtection(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_spanner_database" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			updateMask := []string{"enableDropProtection"}
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{SpannerBasePath}}projects/{{project}}/instances/{{instance}}/databases/{{name}}")
+			if err != nil {
+				return err
+			}
+			// updateMask is a URL parameter but not present in the schema, so ReplaceVars
+			// won't set it
+			url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+			if err != nil {
+				return err
+			}
+			obj := map[string]interface{}{"enableDropProtection": false}
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "PATCH",
+				Project:   config.BillingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+				Body:      obj,
+			})
+			if err != nil {
+				return fmt.Errorf("Error resetting enableDropDatabaseProtection on Database: %s", err)
+			}
+		}
+		return nil
+	}
 }
 
 <% unless version == 'ga' -%>
