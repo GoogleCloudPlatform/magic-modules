@@ -10,6 +10,11 @@ resource "google_public_ca_external_account_key" "account_key" {
 data "google_client_openid_userinfo" "user" {}
 
 resource "google_public_ca_acme_registration" "<%= ctx[:primary_resource_id] %>" {
+  depends_on = [
+    tls_private_key.default,
+    data.google_client_openid_userinfo.user,
+    google_public_ca_external_account_key.account_key
+  ]
   name            = "<%= ctx[:primary_resource_id] %>"
   email           = data.google_client_openid_userinfo.user.email
   private_key_pem = tls_private_key.default.private_key_pem_pkcs8
