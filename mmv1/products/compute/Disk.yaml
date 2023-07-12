@@ -422,6 +422,14 @@ properties:
         'A resource policy applied to this disk for automatic snapshot
         creations.'
   - !ruby/object:Api::Type::Boolean
+    name: 'enableConfidentialCompute'
+    description: |
+      Whether this disk is using confidential compute mode.
+      Note: Only supported on hyperdisk skus, disk_encryption_key is required when setting to true
+    min_version: beta
+    required: false
+    default_from_api: true
+  - !ruby/object:Api::Type::Boolean
     name: 'multiWriter'
     description: |
       Indicates whether or not the disk can be read/write attached to more than one instance.
@@ -435,14 +443,6 @@ properties:
     default_from_api: true
     update_verb: :PATCH
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}?paths=provisionedIops'
-  - !ruby/object:Api::Type::Boolean
-    name: 'enableConfidentialCompute'
-    description: |
-      Indicates how many IOPS must be provisioned for the disk.
-      Note: Update currently only supported by hyperdisk skus, allowing for an update of IOPS every 4 hours
-    min_version: beta
-    required: false
-    default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'asyncPrimaryDisk'
     min_version: 'beta'
