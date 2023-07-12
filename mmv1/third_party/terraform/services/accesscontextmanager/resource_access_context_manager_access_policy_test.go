@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package accesscontextmanager_test
 
 import (
@@ -89,9 +88,9 @@ func testAccCheckAccessContextManagerAccessPolicyDestroyProducer(t *testing.T) f
 			}
 
 			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config: config,
-				Method: "GET",
-				RawURL: url,
+				Config:    config,
+				Method:    "GET",
+				RawURL:    url,
 				UserAgent: config.UserAgent,
 			})
 			if err == nil {

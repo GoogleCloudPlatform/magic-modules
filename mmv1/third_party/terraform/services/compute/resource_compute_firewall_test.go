@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute_test
 
 import (
@@ -123,7 +122,7 @@ func TestAccComputeFirewall_noSource(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeFirewallDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeFirewall_noSource(networkName, firewallName),
+				Config:      testAccComputeFirewall_noSource(networkName, firewallName),
 				ExpectError: regexp.MustCompile("one of source_tags, source_ranges, or source_service_accounts must be defined"),
 			},
 		},
@@ -345,7 +344,6 @@ resource "google_compute_firewall" "foobar" {
 }
 `, network, firewall)
 }
-
 
 func testAccComputeFirewall_localRangesUpdate(network, firewall string) string {
 	return fmt.Sprintf(`

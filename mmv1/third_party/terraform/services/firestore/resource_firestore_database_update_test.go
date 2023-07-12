@@ -1,9 +1,9 @@
-<% autogen_exception -%>
 package firestore_test
 
 import (
 	"fmt"
 	"testing"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
@@ -27,18 +27,18 @@ func TestAccFirestoreDatabase_update(t *testing.T) {
 				Config: testAccFirestoreDatabase_concurrencyMode(orgId, randomSuffix, "OPTIMISTIC"),
 			},
 			{
-				ResourceName:      "google_firestore_database.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_firestore_database.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "project"},
 			},
 			{
 				Config: testAccFirestoreDatabase_concurrencyMode(orgId, randomSuffix, "PESSIMISTIC"),
 			},
 			{
-				ResourceName:      "google_firestore_database.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_firestore_database.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "project"},
 			},
 		},
