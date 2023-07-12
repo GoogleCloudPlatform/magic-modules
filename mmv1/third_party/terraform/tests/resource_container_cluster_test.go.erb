@@ -3680,8 +3680,6 @@ func TestAccContainerCluster_autopilot_minimal(t *testing.T) {
 func TestAccContainerCluster_autopilot_net_admin(t *testing.T) {
 	t.Parallel()
 
-	// Test that allow_net_admin can be enabled for a new autopilot cluster,
-	// updated to false, then re-enabled.
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
