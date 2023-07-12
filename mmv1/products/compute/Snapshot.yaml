@@ -93,6 +93,7 @@ parameters:
     required: true
     # ignore_read in providers - this is only used in Create
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
     resource: 'Zone'
@@ -102,6 +103,7 @@ parameters:
     ignore_read: true
     default_from_api: true
     required: false
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'snapshotEncryptionKey'
     description: |
@@ -233,6 +235,7 @@ properties:
       resource: 'License'
       imports: 'selfLink'
       description: 'A reference to a license associated with this snapshot'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: Labels to apply to this Snapshot.

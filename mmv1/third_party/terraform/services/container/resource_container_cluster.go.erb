@@ -1127,12 +1127,11 @@ func ResourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"enable_components": {
 							Type:        schema.TypeList,
-<% if version == "ga" -%>
-							Required:    true,
-							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, CONTROLLER_MANAGER, and SCHEDULER.`,
-<% else -%>
 							Optional:    true,
 							Computed:    true,
+<% if version == "ga" -%>
+							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, CONTROLLER_MANAGER, and SCHEDULER.`,
+<% else -%>
 							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, CONTROLLER_MANAGER, SCHEDULER, and WORKLOADS.`,
 <% end -%>
 							Elem: &schema.Schema{

@@ -16,17 +16,16 @@ name: 'UrlLists'
 base_url: 'projects/{{project}}/locations/{{location}}/urlLists'
 create_url: 'projects/{{project}}/locations/{{location}}/urlLists?urlListId={{name}}'
 self_link: 'projects/{{project}}/locations/{{location}}/urlLists/{{name}}'
-min_version: beta
 update_verb: :PATCH
 update_mask: true
 description: |
   UrlList proto helps users to set reusable, independently manageable lists of hosts, host patterns, URLs, URL patterns.
 references:
-  !ruby/object:Api::Resource::ReferenceLinks  # TODO(diogoesteves): change the url to beta once it is available.
+  !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Use UrlLists':
       ' https://cloud.google.com/secure-web-proxy/docs/use-url-list'
-  api: 'https://cloud.google.com/secure-web-proxy/docs/reference/network-security/rest/v1alpha1/projects.locations.urlLists'
+  api: 'https://cloud.google.com/secure-web-proxy/docs/reference/network-security/rest/v1/projects.locations.urlLists'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -51,13 +50,11 @@ autogen_async: true
 import_format: ['projects/{{project}}/locations/{{location}}/urlLists/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_security_url_lists_basic'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-url-lists'
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_security_url_lists_advanced'
     primary_resource_id: 'default'
     vars:

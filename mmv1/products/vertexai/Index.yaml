@@ -132,6 +132,16 @@ properties:
               approximate search algorithm are reordered via a more expensive distance computation.
               Required if tree-AH algorithm is used.
           - !ruby/object:Api::Type::String
+            name: 'shardSize'
+            description: |-
+              Index data is split into equal parts to be processed. These are called "shards".
+              The shard size must be specified when creating an index. The value must be one of the followings:
+              * SHARD_SIZE_SMALL: Small (2GB)
+              * SHARD_SIZE_MEDIUM: Medium (20GB)
+              * SHARD_SIZE_LARGE: Large (50GB)
+            immutable: true
+            default_from_api: true
+          - !ruby/object:Api::Type::String
             name: 'distanceMeasureType'
             description: |-
               The distance measure used in nearest neighbor search. The value must be one of the followings:
@@ -147,6 +157,7 @@ properties:
               * UNIT_L2_NORM: Unit L2 normalization type
               * NONE: No normalization type is specified.
             default_value: 'NONE'
+            ignore_read: true
           - !ruby/object:Api::Type::NestedObject
             name: 'algorithmConfig'
             description:

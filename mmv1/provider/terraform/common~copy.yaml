@@ -161,5 +161,13 @@
 'website/<%= fname -%>': 'third_party/terraform/website/<%= fname -%>'
 <% end -%>
 <% end -%>
+<%
+  Dir["third_party/terraform/.teamcity/*/*.kt"].each do |file_path|
+    fname = file_path.delete_prefix("third_party/terraform/")
+-%>
+'<%= fname -%>': '<%= file_path -%>'
+<% end -%>
+'.teamcity/.gitignore': 'third_party/terraform/.teamcity/.gitignore'
+'.teamcity/Makefile': 'third_party/terraform/.teamcity/Makefile'
 'version/version.go': 'third_party/terraform/version/version.go'
 'go.sum': 'third_party/terraform/go.sum'
