@@ -33,6 +33,7 @@ error_retry_predicates: ['transport_tpg.IsMonitoringMetricsScopeLinkPermissionEr
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/monitoring_monitored_project.go.erb
   decoder: templates/terraform/decoders/monitoring_monitored_project.go.erb
+  pre_read: templates/terraform/pre_read/monitoring_monitored_project.go.erb
   test_check_destroy: templates/terraform/custom_check_destroy/monitoring_monitored_project.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
