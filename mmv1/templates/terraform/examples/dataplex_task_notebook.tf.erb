@@ -33,7 +33,7 @@ resource "google_dataplex_task" "<%= ctx[:primary_resource_id] %>" {
         }
     }
     notebook {
-        notebook = "gs://ssmadhavik-test4/Demo/CarPricePrediction_OLS_ML.ipynb"
+        notebook = "gs://terraform-test4/test-notebook.ipynb"
         infrastructure_spec  {
             batch {
                 executors_count = 2
@@ -50,8 +50,8 @@ resource "google_dataplex_task" "<%= ctx[:primary_resource_id] %>" {
                     network = google_compute_network.default.id
                 }
         }
-        file_uris = ["gs://ssmadhavik-test4/Demo/CarPrice.csv"]
-        archive_uris = ["gs://ssmadhavik-test4/Demo/CarPrice.csv"]
+        file_uris = ["gs://terraform-test/test.csv"]
+        archive_uris = ["gs://terraform-test/test.csv"]
 
     }
     project = "<%= ctx[:test_env_vars]['project_name'] %>"

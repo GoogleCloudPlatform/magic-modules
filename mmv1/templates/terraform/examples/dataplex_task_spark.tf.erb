@@ -29,7 +29,7 @@ resource "google_dataplex_task" "<%= ctx[:primary_resource_id] %>" {
     execution_spec {
         service_account = "${data.google_project.project.number}-compute@developer.gserviceaccount.com"
         args = {
-            TASK_ARGS  = "--output_location,gs://spark-job-jars-anrajitha/task-result, --output_format, json"
+            TASK_ARGS  = "--output_location,gs://spark-job/task-result, --output_format, json"
         }
 
     }
@@ -51,8 +51,8 @@ resource "google_dataplex_task" "<%= ctx[:primary_resource_id] %>" {
                     sub_network = google_compute_network.default.id
                 }
         }
-        file_uris = ["gs://ssmadhavik-test4/Demo/CarPrice.csv"]
-        archive_uris = ["gs://ssmadhavik-test4/Demo/CarPrice.csv"]
+        file_uris = ["gs://terrafrom-test/test.csv"]
+        archive_uris = ["gs://terraform-test/test.csv"]
         sql_script = "show databases"
     }
     
