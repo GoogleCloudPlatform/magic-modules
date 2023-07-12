@@ -1,6 +1,4 @@
-<% autogen_exception -%>
 package networksecurity_test
-<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -14,7 +12,7 @@ import (
 func TestAccNetworkSecurityAddressGroups_update(t *testing.T) {
 	t.Parallel()
 
-    addressGroupsName := fmt.Sprintf("tf-test-address-group-%s", acctest.RandString(t, 10))
+	addressGroupsName := fmt.Sprintf("tf-test-address-group-%s", acctest.RandString(t, 10))
 	projectName := envvar.GetTestProjectFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -75,4 +73,3 @@ resource "google_network_security_address_group" "foobar" {
 }
 `, addressGroupsName, projectName)
 }
-<% end -%>

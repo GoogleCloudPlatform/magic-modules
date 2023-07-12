@@ -1,9 +1,8 @@
-<% autogen_exception -%>
-package google
+package compute_test
 
 import (
 	"fmt"
-	"testing"
+	"testing"s
 
 	"strings"
 	"time"
