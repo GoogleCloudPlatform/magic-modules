@@ -29,6 +29,7 @@ nested_query: !ruby/object:Api::Resource::NestedQuery
     - monitoredProjects
 description: "A [project being monitored](https://cloud.google.com/monitoring/settings/multiple-projects#create-multi) by a Metrics Scope."
 immutable: true
+error_retry_predicates: ['transport_tpg.IsMonitoringMetricsScopeLinkPermissionError']
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/monitoring_monitored_project.go.erb
   decoder: templates/terraform/decoders/monitoring_monitored_project.go.erb
@@ -48,6 +49,7 @@ parameters:
     description: 'Required. The resource name of the existing Metrics Scope that will monitor this project. Example: locations/global/metricsScopes/{SCOPING_PROJECT_ID_OR_NUMBER}'
     url_param_only: true
     required: true
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
     ignore_read: true
 properties:
   - !ruby/object:Api::Type::String

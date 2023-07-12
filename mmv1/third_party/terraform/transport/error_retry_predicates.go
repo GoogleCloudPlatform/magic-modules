@@ -271,6 +271,30 @@ func IsMonitoringConcurrentEditError(err error) (bool, string) {
 	return false, ""
 }
 
+// Retry if Monitoring operation returns a 403 with a detail about linking
+// a metrics scope.
+func IsMonitoringMetricsScopeLinkPermissionError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 403 {
+			if len(gerr.Details) == 0 {
+				return false, ""
+			}
+			detail, ok := gerr.Details[0].(map[string]any)
+			if !ok {
+				return false, ""
+			}
+			detailStr, ok := detail["detail"].(string)
+			if !ok {
+				return false, ""
+			}
+			if strings.Contains(detailStr, "Permission '[monitoring.metricsScopes.link]' denied for project(s)") {
+				return true, "Waiting for project to be ready for metrics scope"
+			}
+		}
+	}
+	return false, ""
+}
+
 // Retry if KMS CryptoKeyVersions returns a 400 for PENDING_GENERATION
 func IsCryptoKeyVersionsPendingGeneration(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 400 {
