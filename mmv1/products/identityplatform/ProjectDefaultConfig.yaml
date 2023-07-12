@@ -132,6 +132,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::Map
         name: 'triggers'
+        required: true
         description: |
           Map of Trigger to event type. Key should be one of the supported event types: "beforeCreate", "beforeSignIn".
         key_name: event_type
@@ -139,6 +140,7 @@ properties:
           properties:
             - !ruby/object:Api::Type::String
               name: 'functionUri'
+              required: true
               description: |
                 HTTP URI trigger for the Cloud Function.
             - !ruby/object:Api::Type::Time
