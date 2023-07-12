@@ -252,6 +252,36 @@ The optional `settings.advanced_machine_features` subblock supports:
 
 * `threads_per_core` - (Optional) The number of threads per core. The value of this flag can be 1 or 2. To disable SMT, set this flag to 1. Only available in Cloud SQL for SQL Server instances. See [smt](https://cloud.google.com/sql/docs/sqlserver/create-instance#smt-create-instance) for more details.
 
+* `activation_policy` - (Optional) This specifies when the instance should be
+    active. Can be either `ALWAYS`, `NEVER` or `ON_DEMAND`.
+
+* `availability_type` - (Optional) The availability type of the Cloud SQL
+  instance, high availability (`REGIONAL`) or single zone (`ZONAL`).' For all instances, ensure that
+  `settings.backup_configuration.enabled` is set to `true`.
+  For MySQL instances, ensure that `settings.backup_configuration.binary_log_enabled` is set to `true`.
+  For Postgres and SQL Server instances, ensure that `settings.backup_configuration.point_in_time_recovery_enabled`
+  is set to `true`. Defaults to `ZONAL`.
+
+* `collation` - (Optional) The name of server instance collation.
+
+* `connector_enforcement` - (Optional) Specifies if connections must use Cloud SQL connectors.
+
+* `deletion_protection_enabled` - (Optional) Enables deletion protection of an instance at the GCP level. Enabling this protection will guard against accidental deletion across all surfaces (API, gcloud, Cloud Console and Terraform) by enabling the [GCP Cloud SQL instance deletion protection](https://cloud.google.com/sql/docs/postgres/deletion-protection). Terraform provider support was introduced in version 4.48.0. Defaults to `false`.
+
+* `disk_autoresize` - (Optional) Enables auto-resizing of the storage size. Defaults to `true`.
+
+* `disk_autoresize_limit` - (Optional) The maximum size to which storage capacity can be automatically increased. The default value is 0, which specifies that there is no limit.
+
+* `disk_size` - (Optional) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. The minimum value is 10GB.
+
+* `disk_type` - (Optional) The type of data disk: PD_SSD or PD_HDD. Defaults to `PD_SSD`.
+
+* `pricing_plan` - (Optional) Pricing plan for this instance, can only be `PER_USE`.
+
+* `threads_per_core` - (Optional) The number of threads per core. The value of this flag can be 1 or 2. To disable SMT, set this flag to 1. Only available in Cloud SQL for SQL Server instances. See [smt](https://cloud.google.com/sql/docs/sqlserver/create-instance#smt-create-instance) for more details.
+
+* `time_zone` - (Optional) The time_zone to be used by the database engine (supported only for SQL Server), in SQL Server timezone format.
+
 The optional `settings.database_flags` sublist supports:
 
 * `name` - (Required) Name of the flag.
