@@ -4557,6 +4557,83 @@ resource "google_container_cluster" "with_private_endpoint_subnetwork" {
 `, containerNetName, s1Name, s1Cidr, s2Name, s2Cidr, clusterName)
 }
 
+func TestAccContainerCluster_withPrivateClusterConfigPrivateEndpointSubnetwork(t *testing.T) {
+	t.Parallel()
+
+	r := acctest.RandString(t, 10)
+
+	subnet1Name := fmt.Sprintf("tf-test-container-subnetwork1-%s", r)
+	subnet1Cidr := "10.0.36.0/24"
+
+	subnet2Name := fmt.Sprintf("tf-test-container-subnetwork2-%s", r)
+	subnet2Cidr := "10.9.26.0/24"
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", r)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withPrivateClusterConfigPrivateEndpointSubnetwork(containerNetName, clusterName, subnet1Name, subnet1Cidr, subnet2Name, subnet2Cidr),
+			},
+			{
+				ResourceName:				"google_container_cluster.with_private_cluster_private_endpoint_subnetwork",
+				ImportState:				true,
+				ImportStateVerify:			true,
+				ImportStateVerifyIgnore:	[]string{"min_master_version"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_withPrivateClusterConfigPrivateEndpointSubnetwork(containerNetName, clusterName, s1Name, s1Cidr, s2Name, s2Cidr string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "uscentral1a" {
+  location = "us-central1-a"
+}
+
+resource "google_compute_network" "container_network" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "container_subnetwork1" {
+  name                     = "%s"
+  network                  = google_compute_network.container_network.name
+  ip_cidr_range            = "%s"
+  region                   = "us-central1"
+  private_ip_google_access = true
+}
+
+resource "google_compute_subnetwork" "container_subnetwork2" {
+  name                     = "%s"
+  network                  = google_compute_network.container_network.name
+  ip_cidr_range            = "%s"
+  region                   = "us-central1"
+  private_ip_google_access = true
+}
+
+resource "google_container_cluster" "with_private_endpoint_subnetwork" {
+  name               = "%s"
+  location           = "us-central1-a"
+  min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
+  initial_node_count = 1
+
+  network    = google_compute_network.container_network.name
+  subnetwork = google_compute_subnetwork.container_subnetwork1.name
+
+  private_cluster_config {
+	enable_private_nodes    = true
+	enable_private_endpoint = true
+    private_endpoint_subnetwork = google_compute_subnetwork.container_subnetwork2.name
+  }
+}
+`, containerNetName, s1Name, s1Cidr, s2Name, s2Cidr, clusterName)
+}
+
 func TestAccContainerCluster_withEnablePrivateEndpointToggle(t *testing.T) {
 	t.Parallel()
 
