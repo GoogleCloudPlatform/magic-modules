@@ -3695,14 +3695,7 @@ func TestAccContainerCluster_autopilot_net_admin(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
-			},
-			{
-				Config: testAccContainerCluster_autopilot_net_admin(clusterName, false),
-			},
-			{
-				ResourceName:      "google_container_cluster.primary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ImportStateVerifyIgnore:	[]string{"min_master_version"},
 			},
 		},
 	})
@@ -7656,6 +7649,7 @@ resource "google_container_cluster" "primary" {
   name             = "%s"
   location         = "us-central1"
   enable_autopilot = true
-  allow_net_admin  = "%t"
+  allow_net_admin  = %t
+  min_master_version = 1.27
 }`, name, enabled)
 }

@@ -2055,6 +2055,13 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
+	var workloadPolicyConfig *container.WorkloadPolicyConfig
+	if allowed := d.Get("allow_net_admin").(bool); allowed {
+		workloadPolicyConfig = &container.WorkloadPolicyConfig{
+			AllowNetAdmin: allowed,
+		}
+	}
+
 	cluster := &container.Cluster{
 		Name:                           clusterName,
 		InitialNodeCount:               int64(d.Get("initial_node_count").(int)),
@@ -2080,9 +2087,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		BinaryAuthorization:     expandBinaryAuthorization(d.Get("binary_authorization"), d.Get("enable_binary_authorization").(bool)),
 		Autopilot: &container.Autopilot{
 			Enabled:         d.Get("enable_autopilot").(bool),
-			WorkloadPolicyConfig: &container.WorkloadPolicyConfig{
-            	AllowNetAdmin: d.Get("allow_net_admin").(bool),
-            },
+			WorkloadPolicyConfig: workloadPolicyConfig,
 			ForceSendFields: []string{"Enabled"},
 		},
 		ReleaseChannel:          expandReleaseChannel(d.Get("release_channel")),
@@ -2766,12 +2771,16 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if d.HasChange("allow_net_admin") {
+		var workloadPolicyConfig *container.WorkloadPolicyConfig
 		allowed := d.Get("allow_net_admin").(bool)
+		if allowed {
+			workloadPolicyConfig = &container.WorkloadPolicyConfig{
+				AllowNetAdmin: allowed,
+			}
+		}
 		req := &container.UpdateClusterRequest{
 		    Update: &container.ClusterUpdate{
-		        DesiredAutopilotWorkloadPolicyConfig: &container.WorkloadPolicyConfig{
-		        	AllowNetAdmin: allowed,
-		        },
+		        DesiredAutopilotWorkloadPolicyConfig: workloadPolicyConfig,
 		    },
 		}
 		
