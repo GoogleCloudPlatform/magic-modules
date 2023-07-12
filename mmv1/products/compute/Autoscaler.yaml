@@ -367,6 +367,7 @@ properties:
                 TimeSeries are returned upon the query execution, the autoscaler
                 will sum their respective values to obtain its scaling value.
               min_version: beta
+              default_value: 'resource.type = gce_instance'
       - !ruby/object:Api::Type::NestedObject
         name: 'loadBalancingUtilization'
         description: |
