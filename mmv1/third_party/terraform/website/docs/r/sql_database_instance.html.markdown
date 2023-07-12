@@ -244,9 +244,9 @@ The `settings` block supports:
     for more details and supported versions. Postgres supports only shared-core machine types,
     and custom machine types such as `db-custom-2-13312`. See the [Custom Machine Type Documentation](https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#create) to learn about specifying custom machine types.
 
-* `user_labels` - (Optional) A set of key/value user label pairs to assign to the instance.
-
 * `edition` - (Optional) The edition of the instance, can be `ENTERPRISE` or `ENTERPRISE_PLUS`.
+
+* `user_labels` - (Optional) A set of key/value user label pairs to assign to the instance.
 
 The optional `settings.advanced_machine_features` subblock supports:
 
