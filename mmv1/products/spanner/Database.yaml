@@ -163,4 +163,7 @@ properties:
     name: 'enableDropProtection'
     default_value: false
     description: |
-      Whether drop protection is enabled for this database. Defaults to false.
+      Enable drop protection for this database at Spanner instance level. Drop protection is disabled by default.
+      Drop protection is different from "deletion_protection" attribute, "deletion_protection" is a virtual field that does not map to any underlying API fields.
+      Setting "enableDropProtection" to true prevents the deletion of the parent instance containing the database.
+      "deletion_protection" attribute does not provide protection against the deletion of the parent instance.
