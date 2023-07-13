@@ -13,6 +13,35 @@
 	# limitations under the License.
 -%>
 
+if d.HasChange("enable_drop_protection") {
+		updateMask := []string{"enableDropProtection"}
+		patchUrl, err := tpgresource.ReplaceVars(d, config, "{{SpannerBasePath}}projects/{{project}}/instances/{{instance}}/databases/{{name}}")
+		if err != nil {
+			return err
+		}
+		// updateMask is a URL parameter but not present in the schema, so ReplaceVars
+		// won't set it
+		patchUrl, err = transport_tpg.AddQueryParams(patchUrl, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+		if err != nil {
+			return err
+		}
+		patchObj := map[string]interface{}{"enableDropProtection": d.Get("enable_drop_protection")}
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "PATCH",
+			Project:   billingProject,
+			RawURL:    patchUrl,
+			UserAgent: userAgent,
+			Body:      patchObj,
+			Timeout:   d.Timeout(schema.TimeoutUpdate),
+		})
+		if err != nil {
+			return fmt.Errorf("Error updating enableDropDatabaseProtection on Database: %s", err)
+		} else {
+			log.Printf("[DEBUG] Finished updating enableDropDatabaseProtection %q: %#v", d.Id(), res)
+		}
+}
+
 if len(obj["statements"].([]string)) == 0 {
 	// Return early to avoid making an API call that errors,
 	// due to containing no DDL SQL statements
