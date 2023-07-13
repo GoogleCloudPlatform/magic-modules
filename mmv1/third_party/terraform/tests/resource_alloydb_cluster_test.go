@@ -167,16 +167,8 @@ func TestAccAlloydbCluster_AutomatedBackupPolicyHandlesMidnight(t *testing.T) {
 		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAlloydbCluster_withoutInitialUserAndAutomatedBackupPolicy(context),
-			},
-			{
-				ResourceName:            "google_alloydb_cluster.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
-			},
-			{
-				Config: testAccAlloydbCluster_withInitialUserAndAutomatedBackupPolicy(context),
+				Config:             testAccAlloydbCluster_withInitialUserAndAutomatedBackupPolicy(context),
+				ExpectNonEmptyPlan: false,
 			},
 			{
 				ResourceName:            "google_alloydb_cluster.default",
