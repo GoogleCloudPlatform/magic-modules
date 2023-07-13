@@ -41,7 +41,7 @@ resource "google_identity_platform_project_default_config" "<%= ctx[:primary_res
 
     authorized_domains = [
         "localhost",
-        "project_id.firebaseapp.com",
-        "project_id.web.app",
+        "<%= ctx[:vars]['project_id'] %>.firebaseapp.com",
+        "<%= ctx[:vars]['project_id'] %>.web.app",
     ]
 }
