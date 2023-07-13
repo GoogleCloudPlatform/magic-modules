@@ -278,7 +278,6 @@ func ResourceComputeInstance() *schema.Resource {
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
 				Description: `The name of the instance. One of name or self_link must be provided.`,
 			},
 
@@ -2018,7 +2017,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	}
 
 
-	needToStopInstanceBeforeUpdating := scopesChange || d.HasChange("service_account.0.email") || d.HasChange("machine_type") || d.HasChange("min_cpu_platform") || d.HasChange("enable_display") || d.HasChange("shielded_instance_config") || len(updatesToNIWhileStopped) > 0 || bootRequiredSchedulingChange || d.HasChange("advanced_machine_features")
+	needToStopInstanceBeforeUpdating := scopesChange || d.HasChange("service_account.0.email") || d.HasChange("machine_type") || d.HasChange("min_cpu_platform") || d.HasChange("enable_display") || d.HasChange("shielded_instance_config") || len(updatesToNIWhileStopped) > 0 || bootRequiredSchedulingChange || d.HasChange("advanced_machine_features") || d.HasChange("name")
 
 	if d.HasChange("desired_status") && !needToStopInstanceBeforeUpdating {
 		desiredStatus := d.Get("desired_status").(string)
@@ -2068,6 +2067,24 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if opErr != nil {
 				return opErr
 			}
+		}
+
+		if d.HasChange("name") {
+			nameV1 := d.Get("name").(string)
+			req := compute.InstancesSetNameRequest{Name: nameV1}
+
+			op, err := config.NewComputeClient(userAgent).Instances.SetName(
+				project, zone, nameV1, &req).Do()
+			if err != nil {
+				return fmt.Errorf("Error updating instance name: %s", err)
+			}
+
+			opErr := ComputeOperationWaitTime(config, op, project, "updating instance name", userAgent, d.Timeout(schema.TimeoutUpdate))
+			if opErr != nil {
+				return opErr
+			}
+
+			d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, nameV1))
 		}
 
 		if d.HasChange("min_cpu_platform") {
