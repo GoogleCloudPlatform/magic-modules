@@ -4,7 +4,7 @@ set -e
 
 function clone_repo() {
     SCRATCH_OWNER=modular-magician
-    UPSTREAM_BRANCH=$BRANCH_NAME
+    UPSTREAM_BRANCH=$BASE_BRANCH
     if [ "$REPO" == "terraform" ]; then
         if [ "$VERSION" == "ga" ]; then
             UPSTREAM_OWNER=hashicorp
@@ -49,13 +49,8 @@ function clone_repo() {
     mkdir -p "$(dirname $LOCAL_PATH)"
     # git clone $GITHUB_PATH $LOCAL_PATH
 
-    if [ "$COMMAND" == "downstream" ]; then
-        echo "BRANCH_NAME: $BRANCH_NAME"
-        git clone $GITHUB_PATH $LOCAL_PATH --branch $BRANCH_NAME
-    else 
-        echo "BASE_BRANCH: $BASE_BRANCH"
-        git clone $GITHUB_PATH $LOCAL_PATH --branch $BASE_BRANCH
-    fi
+    echo "BASE_BRANCH: $BASE_BRANCH"
+    git clone $GITHUB_PATH $LOCAL_PATH --branch $BASE_BRANCH
 }
 
 if [ $# -lt 4 ]; then
@@ -130,13 +125,13 @@ if [ "$REPO" == "terraform-google-conversion" ]; then
 
     if [ "$VERSION" == "ga" ]; then
       if [ "$COMMAND" == "downstream" ]; then
-        go get -d github.com/hashicorp/terraform-provider-google@$BRANCH_NAME
+        go get -d github.com/hashicorp/terraform-provider-google@$BASE_BRANCH
       else
         go mod edit -replace github.com/hashicorp/terraform-provider-google=github.com/$SCRATCH_OWNER/terraform-provider-google@$BRANCH
       fi
     elif [ "$VERSION" == "beta" ]; then
       if [ "$COMMAND" == "downstream" ]; then
-        go get -d github.com/hashicorp/terraform-provider-google-beta@$BRANCH_NAME
+        go get -d github.com/hashicorp/terraform-provider-google-beta@$BASE_BRANCH
       else
         go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/$SCRATCH_OWNER/terraform-provider-google-beta@$BRANCH
       fi
