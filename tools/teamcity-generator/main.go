@@ -44,7 +44,7 @@ func main() {
 		log.Fatalf("invalid version flag value: value must be `%s` or `%s`", GA_VERSION, BETA_VERSION)
 	}
 
-	log.Println("Generating TeamCity configuration service package map for `%s` provider", terraformResourceDirectory)
+	log.Printf("Generating TeamCity configuration service package map for `%s` provider", terraformResourceDirectory)
 
 	// Get a list of the service packages found in a given directory
 	servicesDir := fmt.Sprintf("%s/%s/services", outputPath, terraformResourceDirectory)
