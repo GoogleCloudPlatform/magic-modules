@@ -23,7 +23,7 @@ func TestUniqueRuleIdentifiers(t *testing.T) {
 
 func TestMarkdownIdentifiers(t *testing.T) {
 	// Define the Markdown file path relative to the importer
-	mdFilePath := "../../../docs/content/develop/breaking-changes.md"
+	mdFilePath := "../../../docs/content/reference/breaking-change-detector.md"
 
 	// Read the Markdown file
 	mdContent, err := ioutil.ReadFile(mdFilePath)
