@@ -97,7 +97,7 @@ func readAllServicePackages(providerDir string) ([]string, error) {
 
 func createMap(packageNames []string) (string, error) {
 
-	entryTemplate := "       \"%s\" to \"%s\"\n"
+	entryTemplate := "        \"%s\" to \"%s\"\n"
 	caser := cases.Title(language.English)
 
 	var b strings.Builder
