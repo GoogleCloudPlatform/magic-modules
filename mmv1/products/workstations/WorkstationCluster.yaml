@@ -155,6 +155,12 @@ properties:
           The service attachment is created when private endpoint is enabled.
           To access workstations in the cluster, configure access to the managed service using (Private Service Connect)[https://cloud.google.com/vpc/docs/configure-private-service-connect-services].
         output: true
+      - !ruby/object:Api::Type::Array
+        name: 'allowedProjects'
+        item_type: Api::Type::String
+        description: |
+          Additional projects that are allowed to attach to the workstation cluster's service attachment. 
+          By default, the workstation cluster's project and the VPC host project (if different) are allowed.
   - !ruby/object:Api::Type::Array
     name: 'conditions'
     description: |-
