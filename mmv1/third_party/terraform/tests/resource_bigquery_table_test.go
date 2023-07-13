@@ -1658,11 +1658,11 @@ resource "google_bigquery_table" "test" {
   external_data_configuration {
     autodetect    = false
     source_format = "PARQUET"
-	reference_file_schema_uri = "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}"
+    reference_file_schema_uri = "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}"
 
     parquet_options {
       enum_as_string        = "%t"
-	  enable_list_inference = "%t"
+      enable_list_inference = "%t"
     }
 
     source_uris = [
@@ -1917,7 +1917,7 @@ resource "google_bigquery_table" "test" {
     autodetect = false
     source_uris= ["gs://${google_storage_bucket.test.name}/*"]
 
-	json_options {
+    json_options {
       encoding = "%s"
     }
 
