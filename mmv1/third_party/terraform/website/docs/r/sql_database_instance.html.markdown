@@ -248,8 +248,6 @@ The `settings` block supports:
 
 * `user_labels` - (Optional) A set of key/value user label pairs to assign to the instance.
 
-The optional `settings.advanced_machine_features` subblock supports:
-
 * `activation_policy` - (Optional) This specifies when the instance should be
     active. Can be either `ALWAYS`, `NEVER` or `ON_DEMAND`.
 
@@ -276,9 +274,11 @@ The optional `settings.advanced_machine_features` subblock supports:
 
 * `pricing_plan` - (Optional) Pricing plan for this instance, can only be `PER_USE`.
 
-* `threads_per_core` - (Optional) The number of threads per core. The value of this flag can be 1 or 2. To disable SMT, set this flag to 1. Only available in Cloud SQL for SQL Server instances. See [smt](https://cloud.google.com/sql/docs/sqlserver/create-instance#smt-create-instance) for more details.
-
 * `time_zone` - (Optional) The time_zone to be used by the database engine (supported only for SQL Server), in SQL Server timezone format.
+
+The optional `settings.advanced_machine_features` subblock supports:
+
+* `threads_per_core` - (Optional) The number of threads per core. The value of this flag can be 1 or 2. To disable SMT, set this flag to 1. Only available in Cloud SQL for SQL Server instances. See [smt](https://cloud.google.com/sql/docs/sqlserver/create-instance#smt-create-instance) for more details.
 
 The optional `settings.database_flags` sublist supports:
 
