@@ -108,6 +108,7 @@ parameters:
     required: false
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'sourceImageEncryptionKey'
     description: |
@@ -218,6 +219,7 @@ parameters:
       * `projects/project/global/snapshots/snapshot`
       * `global/snapshots/snapshot`
       * `snapshot`
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'sourceSnapshotEncryptionKey'
     description: |
@@ -336,6 +338,7 @@ properties:
       resource: 'Instance'
       imports: 'selfLink'
       description: 'A reference to a user of this disk'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
     output: true
   - !ruby/object:Api::Type::Integer
     name: 'physicalBlockSizeBytes'
@@ -389,6 +392,7 @@ properties:
       create the disk. Provide this when creating the disk.
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     default_value: 'pd-standard'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'image'
     api_name: 'sourceImage'
@@ -423,6 +427,7 @@ properties:
       description:
         'A resource policy applied to this disk for automatic snapshot
         creations.'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Boolean
     name: 'multiWriter'
     description: |
@@ -433,7 +438,7 @@ properties:
     description: |
       Indicates how many IOPS must be provisioned for the disk.
       Note: Updating currently is only supported by hyperdisk skus without the need to delete and recreate the disk, hyperdisk
-      allows for an update of IOPS every 4 hours. To update your hyperdisk more frequently, you'll need to manually delete and recreate it 
+      allows for an update of IOPS every 4 hours. To update your hyperdisk more frequently, you'll need to manually delete and recreate it
     required: false
     default_from_api: true
     update_verb: :PATCH
@@ -443,7 +448,7 @@ properties:
     description: |
       Indicates how much Throughput must be provisioned for the disk.
       Note: Updating currently is only supported by hyperdisk skus without the need to delete and recreate the disk, hyperdisk
-      allows for an update of Throughput every 4 hours. To update your hyperdisk more frequently, you'll need to manually delete and recreate it 
+      allows for an update of Throughput every 4 hours. To update your hyperdisk more frequently, you'll need to manually delete and recreate it
     default_from_api: true
     update_verb: :PATCH
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}?paths=provisionedThroughput'
@@ -492,3 +497,4 @@ properties:
       description: 'An applicable license URI'
       resource: 'License'
       imports: 'selfLink'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
