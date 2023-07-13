@@ -29,9 +29,9 @@ function clone_repo() {
         GH_REPO=terraform-google-conversion
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
     elif [ "$REPO" == "tf-oics" ]; then
-        if [ "$UPSTREAM_BRANCH" == "main"]{
+        if [ "$UPSTREAM_BRANCH" == "main"]; then
             UPSTREAM_BRANCH=master
-        }
+        fi
         UPSTREAM_OWNER=terraform-google-modules
         GH_REPO=docs-examples
         LOCAL_PATH=$GOPATH/src/github.com/terraform-google-modules/docs-examples
