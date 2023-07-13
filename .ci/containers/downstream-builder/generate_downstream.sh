@@ -4,11 +4,7 @@ set -e
 
 function clone_repo() {
     SCRATCH_OWNER=modular-magician
-    UPSTREAM_BRANCH=main
-    if [ -n "$BASE_BRANCH" ]; then
-        echo "BASE_BRANCH: $BASE_BRANCH"
-        UPSTREAM_BRANCH=$BASE_BRANCH
-    fi
+    UPSTREAM_BRANCH=$BRANCH_NAME
     if [ "$REPO" == "terraform" ]; then
         if [ "$VERSION" == "ga" ]; then
             UPSTREAM_OWNER=hashicorp
@@ -29,21 +25,13 @@ function clone_repo() {
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
     elif [ "$REPO" == "terraform-google-conversion" ]; then
         UPSTREAM_OWNER=GoogleCloudPlatform
-        UPSTREAM_BRANCH=main
-        if [ -n "$BASE_BRANCH" ]; then
-            if [ "$BASE_BRANCH" != "main" ]; then
-                UPSTREAM_BRANCH=$BASE_BRANCH
-            fi
-        fi
+        # UPSTREAM_BRANCH=main
         GH_REPO=terraform-google-conversion
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
     elif [ "$REPO" == "tf-oics" ]; then
-        UPSTREAM_BRANCH=master
-        if [ -n "$BASE_BRANCH" ]; then
-            if [ "$BASE_BRANCH" != "main" ]; then
-                UPSTREAM_BRANCH=$BASE_BRANCH
-            fi
-        fi
+        if [ "$UPSTREAM_BRANCH" == "main"]{
+            UPSTREAM_BRANCH=master
+        }
         UPSTREAM_OWNER=terraform-google-modules
         GH_REPO=docs-examples
         LOCAL_PATH=$GOPATH/src/github.com/terraform-google-modules/docs-examples
@@ -56,16 +44,18 @@ function clone_repo() {
         exit 1
     fi
 
-    # the check of existence of BASE_BRANCH is for backwards-compatability
-    if [ -n "$BASE_BRANCH" ]; then
-        echo "BASE_BRANCH: $BASE_BRANCH"
-        git -C $LOCAL_PATH checkout $BASE_BRANCH
-    fi
-
     GITHUB_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
     SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/$SCRATCH_OWNER/$GH_REPO
     mkdir -p "$(dirname $LOCAL_PATH)"
-    git clone $GITHUB_PATH $LOCAL_PATH
+    # git clone $GITHUB_PATH $LOCAL_PATH
+
+    if [ "$COMMAND" == "downstream" ]; then
+        echo "BRANCH_NAME: $BRANCH_NAME"
+        git clone $GITHUB_PATH $LOCAL_PATH --branch $BRANCH_NAME
+    else 
+        echo "BASE_BRANCH: $BASE_BRANCH"
+        git clone $GITHUB_PATH $LOCAL_PATH --branch $BASE_BRANCH
+    fi
 }
 
 if [ $# -lt 4 ]; then
@@ -86,6 +76,12 @@ REFERENCE=$4
 mkdir ../mm-$REPO-$VERSION-$COMMAND
 cp -rp ./. ../mm-$REPO-$VERSION-$COMMAND
 pushd ../mm-$REPO-$VERSION-$COMMAND
+
+# for backwards-compatibility
+if [ -z "$BASE_BRANCH" ]; then
+    BASE_BRANCH=main
+fi
+
 
 clone_repo
 
@@ -134,21 +130,13 @@ if [ "$REPO" == "terraform-google-conversion" ]; then
 
     if [ "$VERSION" == "ga" ]; then
       if [ "$COMMAND" == "downstream" ]; then
-        if [ -n "$BASE_BRANCH" ]; then
-            go get -d github.com/hashicorp/terraform-provider-google@$BASE_BRANCH
-        else
-            go get -d github.com/hashicorp/terraform-provider-google@main
-        fi
+        go get -d github.com/hashicorp/terraform-provider-google@$BRANCH_NAME
       else
         go mod edit -replace github.com/hashicorp/terraform-provider-google=github.com/$SCRATCH_OWNER/terraform-provider-google@$BRANCH
       fi
     elif [ "$VERSION" == "beta" ]; then
       if [ "$COMMAND" == "downstream" ]; then
-        if [ -n "$BASE_BRANCH" ]; then
-            go get -d github.com/hashicorp/terraform-provider-google-beta@$BASE_BRANCH
-        else
-            go get -d github.com/hashicorp/terraform-provider-google-beta@main
-        fi
+        go get -d github.com/hashicorp/terraform-provider-google-beta@$BRANCH_NAME
       else
         go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/$SCRATCH_OWNER/terraform-provider-google-beta@$BRANCH
       fi

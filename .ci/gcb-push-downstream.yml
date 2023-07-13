@@ -54,7 +54,7 @@ steps:
             if [ "$BRANCH_NAME" == "main" ]; then
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpg-sync
             else 
-              git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpg-sync-FEATURE-BRANCH-$$BRANCH_NAME
+              git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpg-sync-$BRANCH_NAME
             fi
 
     # TPGB
@@ -87,7 +87,7 @@ steps:
             if [ "$BRANCH_NAME" == "main" ]; then
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpgb-sync
             else 
-              git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpgb-sync-FEATURE-BRANCH-$$BRANCH_NAME
+              git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpgb-sync-$BRANCH_NAME
             fi
 
     # TGC
@@ -120,7 +120,7 @@ steps:
             if [ "$BRANCH_NAME" == "main" ]; then
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tgc-sync
             else 
-              git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tgc-sync-FEATURE-BRANCH-$$BRANCH_NAME
+              git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tgc-sync-$BRANCH_NAME
             fi
 
     # TF-OICS
@@ -153,7 +153,7 @@ steps:
             if [ "$BRANCH_NAME" == "main" ]; then
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-oics-sync
             else 
-              git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-oics-sync-FEATURE-BRANCH-$$BRANCH_NAME
+              git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-oics-sync-$BRANCH_NAME
             fi
 
     - name: 'gcr.io/graphite-docker-images/vcr-cassette-merger'

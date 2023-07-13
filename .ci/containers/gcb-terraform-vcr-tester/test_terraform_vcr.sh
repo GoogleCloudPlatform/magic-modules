@@ -54,21 +54,23 @@ function update_status {
 
 update_status "pending"
 
+# for backwards-compatibility
+if [ -z "$BRANCH_NAME" ]; then
+  BRANCH_NAME=main
+else
+  echo "BRANCH_NAME: $BRANCH_NAME"
+fi
+
 set +e
 # cassette retrieval
 mkdir fixtures
-# # the check of existence of BASE_BRANCH is for backwards-compatability
-if [ -n "$BASE_BRANCH" ]; then
-  if [ "$BASE_BRANCH" != "FEATURE-BRANCH-major-release-5.0.0" ]; then
-    # pull main cassettes (major release uses branch specific casssettes as primary ones)
-    gsutil -m -q cp gs://ci-vcr-cassettes/beta/fixtures/* fixtures/
-  fi
-  if [ "$BASE_BRANCH" != "main" ]; then
-    # copy feature branch specific cassettes over main. This might fail but that's ok if the folder doesnt exist
-    gsutil -m -q cp gs://ci-vcr-cassettes/beta/refs/branches/$BASE_BRANCH/fixtures/* fixtures/
-  fi
-else
+if [ "$BASE_BRANCH" != "FEATURE-BRANCH-major-release-5.0.0" ]; then
+  # pull main cassettes (major release uses branch specific casssettes as primary ones)
   gsutil -m -q cp gs://ci-vcr-cassettes/beta/fixtures/* fixtures/
+fi
+if [ "$BASE_BRANCH" != "main" ]; then
+  # copy feature branch specific cassettes over main. This might fail but that's ok if the folder doesnt exist
+  gsutil -m -q cp gs://ci-vcr-cassettes/beta/refs/branches/$BASE_BRANCH/fixtures/* fixtures/
 fi
 # copy PR branch specific cassettes over main. This might fail but that's ok if the folder doesnt exist
 gsutil -m -q cp gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-$pr_number/fixtures/* fixtures/
