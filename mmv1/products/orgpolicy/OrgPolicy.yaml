@@ -20,10 +20,7 @@ self_link: projects/{{project}}
 description: |
   The Org Policy API allows users to configure governance rules on their GCP resources across the Cloud Resource Hierarchy.  
 references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-   # Link to quickstart in the API's Guides section. For example:
-   # 'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
-    'QUICKSTART_TITLE': 'QUICKSTART_URL'
-  # Link to the REST API reference for the resource. For example,
-  # https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups
+ name: 'storageBillingModel'
+    description: |
+      In resource "google_org_policy_policy" to resolve the [permadiff](https://github.com/hashicorp/terraform-provider-google/issues/12363), we have changed data-type of filed "rules" from "TypeList" to "TypeSet"  in file resource_org_policy_policy.go
   api: 'https://console.cloud.google.com/marketplace/product/google/orgpolicy.googleapis.com'
