@@ -84,7 +84,7 @@ steps:
           - 'ga'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder:feature-branch-test'
       id: tpg-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
@@ -96,7 +96,7 @@ steps:
           - 'ga'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder:feature-branch-test'
       secretEnv: ["GITHUB_TOKEN"]
       id: tpgb-head
       waitFor: ["merged"]
@@ -108,7 +108,7 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder:feature-branch-test'
       id: tpgb-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
@@ -120,7 +120,7 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder:feature-branch-test'
       id: tgc-head
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged", "tpg-head"]
@@ -132,7 +132,7 @@ steps:
           - 'ga'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder:feature-branch-test'
       id: tgc-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged", "tpg-base"]
@@ -144,7 +144,7 @@ steps:
           - 'ga'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder:feature-branch-test'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       env:
@@ -155,7 +155,7 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder:feature-branch-test'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       env:
