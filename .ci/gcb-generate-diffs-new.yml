@@ -72,10 +72,12 @@ steps:
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder:feature-branch-test'
       secretEnv: ["GITHUB_TOKEN"]
       id: tpg-head
       waitFor: ["merged"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
       args:
           - 'head'
           - 'terraform'
@@ -86,6 +88,8 @@ steps:
       id: tpg-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
       args:
           - 'base'
           - 'terraform'
@@ -96,6 +100,8 @@ steps:
       secretEnv: ["GITHUB_TOKEN"]
       id: tpgb-head
       waitFor: ["merged"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
       args:
           - 'head'
           - 'terraform'
@@ -106,6 +112,8 @@ steps:
       id: tpgb-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
       args:
           - 'base'
           - 'terraform'
@@ -116,6 +124,8 @@ steps:
       id: tgc-head
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged", "tpg-head"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
       args:
           - 'head'
           - 'terraform-google-conversion'
@@ -126,6 +136,8 @@ steps:
       id: tgc-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged", "tpg-base"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
       args:
           - 'base'
           - 'terraform-google-conversion'
@@ -135,6 +147,8 @@ steps:
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
       args:
           - 'head'
           - 'tf-oics'
@@ -144,6 +158,8 @@ steps:
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
       args:
           - 'base'
           - 'tf-oics'
@@ -252,10 +268,12 @@ steps:
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/gcb-terraform-vcr-tester'
+    - name: 'gcr.io/graphite-docker-images/gcb-terraform-vcr-tester:feature-branch-test'
       id: gcb-tpg-vcr-test
       secretEnv: ["GITHUB_TOKEN", "GOOGLE_BILLING_ACCOUNT", "GOOGLE_CUST_ID", "GOOGLE_FIRESTORE_PROJECT", "GOOGLE_IDENTITY_USER", "GOOGLE_MASTER_BILLING_ACCOUNT", "GOOGLE_ORG", "GOOGLE_ORG_2", "GOOGLE_ORG_DOMAIN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_SERVICE_ACCOUNT", "SA_KEY", "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION"]
       waitFor: ["diff"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
       args:
           - $_PR_NUMBER
           - $COMMIT_SHA
