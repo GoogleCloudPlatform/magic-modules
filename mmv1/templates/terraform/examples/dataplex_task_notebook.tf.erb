@@ -33,7 +33,7 @@ resource "google_dataplex_task" "<%= ctx[:primary_resource_id] %>" {
         }
     }
     notebook {
-        notebook = "gs://terraform-test4/test-notebook.ipynb"
+        notebook = "gs://terraform-test/test-notebook.ipynb"
         infrastructure_spec  {
             batch {
                 executors_count = 2
