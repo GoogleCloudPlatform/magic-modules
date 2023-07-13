@@ -89,6 +89,7 @@ resource "google_vertex_ai_index" "index" {
     config {
       dimensions = 2
       approximate_neighbors_count = 150
+      shard_size = "SHARD_SIZE_SMALL"
       distance_measure_type = "DOT_PRODUCT_DISTANCE"
       algorithm_config {
         tree_ah_config {
@@ -145,6 +146,7 @@ resource "google_vertex_ai_index" "index" {
     config {
       dimensions = 2
       approximate_neighbors_count = 150
+      shard_size = "SHARD_SIZE_SMALL"
       distance_measure_type = "DOT_PRODUCT_DISTANCE"
       algorithm_config {
         tree_ah_config {

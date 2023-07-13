@@ -57,3 +57,4 @@ Quotas that will need to be adjusted to support all tests:
 - Cloud Workstation cluster quota in `us-central1`
 - VMWare Engine nodes per region in `southamerica-west1`
 - VMWare Engine nodes across regions
+- Looker `EnterpriseSubscriptionInstancesPerProjectPerRegion`. This must be requested manually from their team, and can't be self-served in the Cloud Console.
