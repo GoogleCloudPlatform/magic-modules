@@ -7,7 +7,7 @@ import (
 )
 
 func DataSourceGoogleComputeHealthCheck() *schema.Resource {
-	// Generate datasource schema from resource
+	// Generate datasource schema from resource test
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceComputeHealthCheck().Schema)
 
 	// Set 'Required' schema elements

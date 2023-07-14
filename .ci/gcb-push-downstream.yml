@@ -90,7 +90,7 @@ steps:
           - $BRANCH_NAME
           - $COMMIT_SHA
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder:zhenhua-test-071401'
       secretEnv: ["GITHUB_TOKEN"]
       id: tgc-push
       waitFor: ["tgc-sync", "tpg-push"]
