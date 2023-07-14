@@ -5,7 +5,7 @@ resource "google_looker_instance" "<%= ctx[:primary_resource_id] %>" {
   private_ip_enabled = true
   public_ip_enabled  = false
   reserved_range     = "${google_compute_global_address.looker_range.name}"
-  consumer_network   = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.looker_network.name}"
+  consumer_network   = google_compute_network.looker_network.id
   admin_settings {
     allowed_email_domains = ["google.com"]
   }
