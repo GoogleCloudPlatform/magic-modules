@@ -252,7 +252,7 @@ steps:
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/gcb-terraform-vcr-tester:zhenhua-test-062601'
+    - name: 'gcr.io/graphite-docker-images/gcb-terraform-vcr-tester'
       id: gcb-tpg-vcr-test
       secretEnv: ["GITHUB_TOKEN", "GOOGLE_BILLING_ACCOUNT", "GOOGLE_CUST_ID", "GOOGLE_FIRESTORE_PROJECT", "GOOGLE_IDENTITY_USER", "GOOGLE_MASTER_BILLING_ACCOUNT", "GOOGLE_ORG", "GOOGLE_ORG_2", "GOOGLE_ORG_DOMAIN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_SERVICE_ACCOUNT", "SA_KEY", "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION"]
       waitFor: ["diff"]
