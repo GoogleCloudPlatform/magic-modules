@@ -45,6 +45,15 @@ examples:
     test_env_vars:
       org_id: :ORG_ID
       project_id: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'monitoring_monitored_project_long_form'
+    primary_resource_id: 'primary'
+    vars:
+      monitored_project: 'm-id'
+    test_env_vars:
+      org_id: :ORG_ID
+      project_id: :PROJECT_NAME
+    skip_docs: true
 parameters:
   - !ruby/object:Api::Type::String
     name: metricsScope
