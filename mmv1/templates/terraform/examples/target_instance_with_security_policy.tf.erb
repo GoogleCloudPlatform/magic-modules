@@ -1,0 +1,58 @@
+resource "google_compute_network" "default" {
+  provider                = google-beta
+  name                    = "<%= ctx[:vars]['network_name'] %>"
+  auto_create_subnetworks = false
+  routing_mode            = "REGIONAL"
+}
+      
+resource "google_compute_subnetwork" "default" {
+  provider                   = google-beta
+  name                       = "<%= ctx[:vars]['subnetname_name'] %>"
+  ip_cidr_range              = "10.1.2.0/24"
+  network                    = google_compute_network.default.id
+  private_ipv6_google_access = "DISABLE_GOOGLE_ACCESS"
+  purpose                    = "PRIVATE"
+  region                     = "asia-southeast1"
+  stack_type                 = "IPV4_ONLY"
+}
+
+data "google_compute_image" "vmimage" {
+  provider = google-beta
+  family   = "debian-11"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance" "target-vm" {
+  provider     = google-beta
+  name         = "<%= ctx[:vars]['instance_name'] %>"
+  machine_type = "e2-medium"
+  zone         = "asia-southeast1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.vmimage.self_link
+    }
+  }
+
+  network_interface {       
+    network = google_compute_network.default.self_link
+    subnetwork = google_compute_subnetwork.default.self_link
+    access_config {
+    }
+  }
+}
+
+resource "google_compute_region_security_policy" "regionsecuritypolicy" {
+  provider    = google-beta
+  name        = "<%= ctx[:vars]['region_sec_policy'] %>"
+  region      = "asia-southeast1"
+  description = "basic security policy for target instance"
+  type        = "CLOUD_ARMOR_NETWORK"
+}
+
+resource "google_compute_target_instance" "<%= ctx[:primary_resource_id] %>" {
+  provider        = google-beta
+  name            = "<%= ctx[:vars]['target_name'] %>"
+  instance        = google_compute_instance.target-vm.id
+  security_policy = google_compute_region_security_policy.regionsecuritypolicy.self_link
+}

@@ -61,6 +61,18 @@ examples:
     vars:
       target_name: 'custom-network'
       instance_name: 'custom-network-target-vm'
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: 'target_instance_with_security_policy'
+    primary_resource_id: 'default'
+    vars:
+      network_name: 'custom-default-network'
+      subnetname_name: 'custom-default-subnet'
+      instance_name: 'target-vm'
+      region_sec_policy: 'regionsecpolicy'
+      target_name: 'target'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: 'templates/terraform/post_create/compute_target_instance_security_policy.go.erb'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
@@ -123,3 +135,10 @@ properties:
     default_value: :NO_NAT
     values:
       - :NO_NAT
+  - !ruby/object:Api::Type::String
+    name: 'securityPolicy'
+    min_version: beta
+    description: |
+      The resource URL for the security policy associated with this target instance.
+    immutable: true
+    min_version: beta
