@@ -11,20 +11,19 @@ import (
 func TestAccNetworkConnectivityServiceConnectionPolicy_update(t *testing.T) {
 	t.Parallel()
 
-  networkName := fmt.Sprintf("tf-test-network-%s", RandString(t, 10))
-  networkProducerName := fmt.Sprintf("tf-test-network-%s", RandString(t, 10))
-  subnetworkConsumerName := fmt.Sprintf("tf-test-subnet-consumer-%s", RandString(t, 10))
-  subnetworkProducerName := fmt.Sprintf("tf-test-subnet-producer-%s", RandString(t, 10)) 
-	serviceClassName := fmt.Sprintf("tf-test-service-class-%s", RandString(t, 10))
+	networkName := fmt.Sprintf("tf-test-network-%s", RandString(t, 10))
+	networkProducerName := fmt.Sprintf("tf-test-network-%s", RandString(t, 10))
+	subnetworkConsumerName := fmt.Sprintf("tf-test-subnet-consumer-%s", RandString(t, 10))
+	subnetworkProducerName := fmt.Sprintf("tf-test-subnet-producer-%s", RandString(t, 10))
 	serviceConnectionPolicyName := fmt.Sprintf("tf-test-service-connection-policy-%s", RandString(t, 10))
-	
-  VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckNetworkConnectivityServiceConnectionPolicyDestroyProducer(t),
+		CheckDestroy:             testAccCheckNetworkConnectivityServiceConnectionPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkConnectivityServiceConnectionPolicy_basic(networkName, subnetworkConsumerName, networkProducerName, subnetworkProducerName, serviceClassName, serviceConnectionPolicyName),
+				Config: testAccNetworkConnectivityServiceConnectionPolicy_basic(networkName, subnetworkConsumerName, networkProducerName, subnetworkProducerName, serviceConnectionPolicyName),
 			},
 			{
 				ResourceName:      "google_network_connectivity_service_connection_policy.default",
@@ -32,7 +31,7 @@ func TestAccNetworkConnectivityServiceConnectionPolicy_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccNetworkConnectivityServiceConnectionPolicy_update(networkName, subnetworkConsumerName, networkProducerName, subnetworkProducerName, serviceClassName, serviceConnectionPolicyName),
+				Config: testAccNetworkConnectivityServiceConnectionPolicy_update(networkName, subnetworkConsumerName, networkProducerName, subnetworkProducerName, serviceConnectionPolicyName),
 			},
 			{
 				ResourceName:      "google_network_connectivity_service_connection_policy.default",
@@ -40,7 +39,7 @@ func TestAccNetworkConnectivityServiceConnectionPolicy_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccNetworkConnectivityServiceConnectionPolicy_basic(networkName, subnetworkConsumerName, networkProducerName, subnetworkProducerName, serviceClassName, serviceConnectionPolicyName),
+				Config: testAccNetworkConnectivityServiceConnectionPolicy_basic(networkName, subnetworkConsumerName, networkProducerName, subnetworkProducerName, serviceConnectionPolicyName),
 			},
 			{
 				ResourceName:      "google_network_connectivity_service_connection_policy.default",
@@ -51,7 +50,7 @@ func TestAccNetworkConnectivityServiceConnectionPolicy_update(t *testing.T) {
 	})
 }
 
-func testAccNetworkConnectivityServiceConnectionPolicy_basic(networkName, subnetworkConsumerName, networkProducerName, subnetworkProducerName, serviceClassName, serviceConnectionPolicyName string) string {
+func testAccNetworkConnectivityServiceConnectionPolicy_basic(networkName, subnetworkConsumerName, networkProducerName, subnetworkProducerName, serviceConnectionPolicyName string) string {
 	return fmt.Sprintf(`
   resource "google_compute_network" "consumer_net" {
     name                    = "%s"
@@ -77,30 +76,21 @@ func testAccNetworkConnectivityServiceConnectionPolicy_basic(networkName, subnet
     network       = google_compute_network.producer_net.id
   }
   
-  resource "google_network_connectivity_service_class" "default"{
-    name        = "%s"
-    location    = "us-central1"
-    description = "my-basic serviceClass"
-    labels      = {
-        foo = "bar"
-      }
-  }
-  
   resource "google_network_connectivity_service_connection_policy" "default" {
     name = "%s"
     location = "us-central1"
     description = "my basic sevice connection policy"
-    service_class = google_network_connectivity_service_class.default.service_class
+    service_class = "gcp-memorystore-redis"
     network = google_compute_network.producer_net.id
     psc_config {
       subnetworks = [google_compute_subnetwork.producer_subnet.id]
       limit = 2
     }
   }
-`, networkName, subnetworkConsumerName, networkProducerName, subnetworkProducerName, serviceClassName, serviceConnectionPolicyName)
+`, networkName, subnetworkConsumerName, networkProducerName, subnetworkProducerName, serviceConnectionPolicyName)
 }
 
-func testAccNetworkConnectivityServiceConnectionPolicy_update(networkName, subnetworkConsumerName, networkProducerName, subnetworkProducerName, serviceClassName, serviceConnectionPolicyName string) string {
+func testAccNetworkConnectivityServiceConnectionPolicy_update(networkName, subnetworkConsumerName, networkProducerName, subnetworkProducerName, serviceConnectionPolicyName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "consumer_net" {
   name                    = "%s"
@@ -126,20 +116,11 @@ resource "google_compute_subnetwork" "producer_subnet" {
   network       = google_compute_network.producer_net.id
 }
 
-resource "google_network_connectivity_service_class" "default"{
-  name        = "%s"
-  location    = "us-central1"
-  description = "my-basic serviceClass"
-  labels      = {
-    foo = "bar"
-  }
-}
-
 resource "google_network_connectivity_service_connection_policy" "default" {
   name = "%s"
   location = "us-central1"
   description = "my basic sevice connection policy"
-  service_class = google_network_connectivity_service_class.default.service_class
+  service_class = "gcp-memorystore-redis"
   network = google_compute_network.producer_net.id
   psc_config {
     subnetworks = [google_compute_subnetwork.producer_subnet.id]
@@ -149,5 +130,5 @@ resource "google_network_connectivity_service_connection_policy" "default" {
     foo = "bar"
   }
 }
-`, networkName, subnetworkConsumerName, networkProducerName, subnetworkProducerName, serviceClassName, serviceConnectionPolicyName)
+`, networkName, subnetworkConsumerName, networkProducerName, subnetworkProducerName, serviceConnectionPolicyName)
 }
