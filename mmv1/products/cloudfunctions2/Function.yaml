@@ -92,6 +92,26 @@ examples:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudfunctions2_scheduler_auth'
+    primary_resource_id: 'function'
+    vars:
+      bucket_name: 'gcf-source'
+      service_account: 'gcf-sa'
+      function: 'gcf-function'
+      zip_path: 'function-source.zip'
+    test_env_vars:
+      project: :PROJECT_NAME
+    test_vars_overrides:
+      zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
+      primary_resource_id: '"terraform-test"'
+      location:
+        '"us-central1"'
+        # ignore these fields during import step
+    ignore_read_extra:
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
     name: 'cloudfunctions2_basic_gcs'
     primary_resource_id: 'function'
     vars:
@@ -106,7 +126,7 @@ examples:
       zip_path: '"./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip"'
       primary_resource_id: '"terraform-test"'
       policyChanged:
-        "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
+        "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
         \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
         )"
         # ignore these fields during import step
@@ -128,7 +148,7 @@ examples:
       zip_path: '"./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip"'
       primary_resource_id: '"terraform-test"'
       policyChanged:
-        "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
+        "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
         \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
         )"
         # ignore these fields during import step
@@ -149,7 +169,7 @@ examples:
       zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
       location: '"us-central1"'
       policyChanged:
-        "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
+        "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
         \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
         )"
         # ignore these fields during import step
@@ -170,7 +190,7 @@ examples:
       zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
       location: '"us-central1"'
       policyChanged:
-        "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
+        "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
         \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
         )"
         # ignore these fields during import step
@@ -375,12 +395,14 @@ properties:
           The function execution timeout. Execution is considered failed and
           can be terminated if the function is not completed at the end of the
           timeout period. Defaults to 60 seconds.
+        default_from_api: true
       - !ruby/object:Api::Type::String
         name: 'availableMemory'
         description: |
           The amount of memory available for a function.
           Defaults to 256M. Supported units are k, M, G, Mi, Gi. If no unit is
           supplied the value is interpreted as bytes.
+        default_from_api: true
       - !ruby/object:Api::Type::Integer
         name: 'maxInstanceRequestConcurrency'
         description:
@@ -403,6 +425,7 @@ properties:
         description: |
           The limit on the maximum number of function instances that may coexist at a
           given time.
+        default_from_api: true
       - !ruby/object:Api::Type::Integer
         name: 'minInstanceCount'
         description: |

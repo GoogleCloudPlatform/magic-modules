@@ -110,7 +110,11 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/region_backend_service.go.erb
   encoder: templates/terraform/encoders/region_backend_service.go.erb
   decoder: templates/terraform/decoders/region_backend_service.go.erb
-  resource_definition: 'templates/terraform/resource_definition/region_backend_service.go.erb'
+custom_diff: [
+  'customDiffRegionBackendService',
+]
+migrate_state: 'tpgresource.MigrateStateNoop'
+schema_version: 1
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -122,6 +126,7 @@ parameters:
     required: false
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'affinityCookieTtlSec'
@@ -1234,6 +1239,7 @@ properties:
     description: |
       The URL of the network to which this backend service belongs.
       This field can only be specified when the load balancing scheme is set to INTERNAL.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'subsetting'
     min_version: beta

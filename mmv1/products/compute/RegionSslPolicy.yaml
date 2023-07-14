@@ -46,7 +46,9 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/region_ssl_policy.erb'
-  resource_definition: 'templates/terraform/resource_definition/region_ssl_policy.erb'
+custom_diff: [
+  'regionSslPolicyCustomizeDiff',
+]
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -56,6 +58,7 @@ parameters:
     immutable: true
     description: |
       The region where the regional SSL policy resides.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'

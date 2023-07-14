@@ -242,8 +242,10 @@ module Provider
                 data.object.custom_code.post_delete ||
                 data.object.skip_delete
 
+      product_name = @api.api_name
+      target_folder = File.join(folder_name(data.version), 'services', product_name)
       file_name =
-        "#{folder_name(data.version)}/resource_#{full_resource_name(data)}_sweeper_test.go"
+        "#{target_folder}/resource_#{full_resource_name(data)}_sweeper.go"
       FileUtils.mkpath folder_name(data.version)
       data.generate(pwd,
                     'templates/terraform/sweeper_file.go.erb',

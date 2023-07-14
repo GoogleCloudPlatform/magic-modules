@@ -446,8 +446,9 @@ func generateSweeperFile(res *Resource) {
 	if oPath == nil || *oPath == "" {
 		fmt.Printf("%v", string(formatted))
 	} else {
-		outname := fmt.Sprintf("resource_%s_%s_sweeper_test.go", res.ProductName(), res.Name())
-		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
+		outname := fmt.Sprintf("resource_%s_%s_sweeper.go", res.ProductName(), res.Name())
+		parentDir := getParentDir(res)
+		err := ioutil.WriteFile(path.Join(parentDir, outname), formatted, 0644)
 		if err != nil {
 			glog.Exit(err)
 		}
@@ -516,7 +517,7 @@ func generateProviderResourcesFile(resources []*Resource) {
 
 	if oPath == nil || *oPath == "" {
 		fmt.Print(string(formatted))
-	} else if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, "provider_dcl_resources.go"), formatted, 0644); err != nil {
+	} else if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, "provider", "provider_dcl_resources.go"), formatted, 0644); err != nil {
 		glog.Exit(err)
 	}
 }

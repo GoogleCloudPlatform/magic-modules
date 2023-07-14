@@ -14,7 +14,7 @@ If this PR is for Terraform, I acknowledge that I have:
 - [ ] Ensured that all new fields I added that can be set by a user appear in at least one [example](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform/examples) (for generated resources) or [third_party test](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests) (for handwritten resources or update tests).
 - [ ] [Generated Terraform providers](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/docs/content/docs/getting-started/generate-providers.md), and ran [`make test` and `make lint`](https://googlecloudplatform.github.io/magic-modules/docs/getting-started/run-provider-tests/#run-unit-tests) in the generated providers to ensure it passes unit and linter tests.
 - [ ] [Ran](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/docs/content/docs/getting-started/run-provider-tests.md) relevant acceptance tests using my own Google Cloud project and credentials (If the acceptance tests do not yet pass or you are unable to run them, please let your reviewer know).
-- [ ] Read the [Release Notes Guide](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/.ci/RELEASE_NOTES_GUIDE.md) before writing my release note below.
+- [ ] Read [Write release notes](https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/) before writing my release note below.
 
 <!-- AUTOCHANGELOG for Downstream PRs.
 
@@ -30,7 +30,7 @@ Please select one of the following "release-note:" headings:
 
 Unless you choose release-note:none, please add a release note.
 
-See .ci/RELEASE_NOTES_GUIDE.md for writing good release notes.
+See https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/ for writing good release notes.
 
 You can add more release note blocks if you want more than one CHANGELOG
 entry for this PR.

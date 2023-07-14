@@ -78,10 +78,12 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/spanner_database.go.erb
   decoder: templates/terraform/decoders/spanner_database.go.erb
   update_encoder: templates/terraform/update_encoder/spanner_database.go.erb
-  resource_definition: 'templates/terraform/resource_definition/spanner_database.go.erb'
   post_create: templates/terraform/post_create/spanner_database.go.erb
   pre_delete: templates/terraform/pre_delete/resource_spanner_database.go
   pre_update: templates/terraform/pre_update/spanner_database.go.erb
+custom_diff: [
+  'resourceSpannerDBDdlCustomDiff',
+]
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'instance'
@@ -89,6 +91,7 @@ parameters:
     imports: 'name'
     description: 'The instance to create the database on.'
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   # This resource returns only one attribute ("name") from which we parse
   # "instance", "name", and "project".  You will need custom code handling

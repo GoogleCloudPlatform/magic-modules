@@ -72,7 +72,6 @@ examples:
       name: 'gce-policy'
   - !ruby/object:Provider::Terraform::Examples
     name: 'resource_policy_consistency_group'
-    min_version: 'beta'
     primary_resource_id: 'cgroup'
     vars:
       name: 'gce-policy'
@@ -85,6 +84,7 @@ parameters:
     immutable: true
     required: false
     default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -345,7 +345,6 @@ properties:
           The expiration time of the schedule. The timestamp is an RFC3339 string.
   - !ruby/object:Api::Type::NestedObject
     name: 'diskConsistencyGroupPolicy'
-    min_version: 'beta'
     conflicts:
       - 'snapshot_schedule_policy'
       - 'group_placement_policy'

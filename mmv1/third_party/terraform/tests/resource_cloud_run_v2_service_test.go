@@ -15,12 +15,12 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceFullUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -46,7 +46,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceFullUpdate(t *testing.T) {
 }
 
 func testAccCloudRunV2Service_cloudrunv2ServiceFull(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
   description = "description creating"
@@ -110,7 +110,7 @@ resource "google_service_account" "service_account" {
 }
 
 func testAccCloudRunV2Service_cloudrunv2ServiceFullUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
   description = "description updating"
@@ -212,12 +212,12 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceTCPProbesUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -246,12 +246,12 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceHTTPProbesUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -279,14 +279,14 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceHTTPProbesUpdate(t *testing.T) {
 func TestAccCloudRunV2Service_cloudrunv2ServiceGRPCProbesUpdate(t *testing.T) {
 	t.Parallel()
 
-	serviceName := fmt.Sprintf("tf-test-cloudrun-service%s", RandString(t, 10))
+	serviceName := fmt.Sprintf("tf-test-cloudrun-service%s", acctest.RandString(t, 10))
 	context := map[string]interface{}{
 		"service_name": serviceName,
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -338,7 +338,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceGRPCProbesUpdate(t *testing.T) {
 
 func testAccCheckCloudRunV2ServiceDestroyByNameProducer(t *testing.T, serviceName string) func() {
 	return func() {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		service := config.NewCloudRunV2Client(config.UserAgent).Projects.Locations.Services
 		qualifiedServiceName := fmt.Sprintf("projects/%s/locations/%s/services/%s", config.Project, config.Region, serviceName)
 		op, err := service.Delete(qualifiedServiceName).Do()
@@ -354,7 +354,7 @@ func testAccCheckCloudRunV2ServiceDestroyByNameProducer(t *testing.T, serviceNam
 }
 
 func testAccCloudRunV2Service_cloudrunv2ServiceWithEmptyTCPStartupProbeAndHTTPLivenessProbe(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
   location = "us-central1"
@@ -378,7 +378,7 @@ resource "google_cloud_run_v2_service" "default" {
 }
 
 func testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithTCPStartupProbeAndHTTPLivenessProbe(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
   location = "us-central1"
@@ -422,7 +422,7 @@ resource "google_cloud_run_v2_service" "default" {
 }
 
 func testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithEmptyHTTPStartupProbe(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
   location = "us-central1"
@@ -440,7 +440,7 @@ resource "google_cloud_run_v2_service" "default" {
 }
 
 func testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithHTTPStartupProbe(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
   location = "us-central1"
@@ -472,7 +472,7 @@ resource "google_cloud_run_v2_service" "default" {
 }
 
 func testAccCloudRunV2Service_cloudRunServiceUpdateWithEmptyGRPCLivenessProbe(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     ="%{service_name}"
   location = "us-central1"
@@ -493,7 +493,7 @@ resource "google_cloud_run_v2_service" "default" {
 }
 
 func testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessProbe(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "%{service_name}"
   location = "us-central1"
@@ -517,7 +517,7 @@ resource "google_cloud_run_v2_service" "default" {
 }
 
 func testAccCloudRunV2Service_cloudRunServiceUpdateWithEmptyGRPCStartupProbe(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "%{service_name}"
   location = "us-central1"
@@ -538,7 +538,7 @@ resource "google_cloud_run_v2_service" "default" {
 }
 
 func testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCStartupProbe(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "%{service_name}"
   location = "us-central1"
@@ -562,7 +562,7 @@ resource "google_cloud_run_v2_service" "default" {
 }
 
 func testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessAndStartupProbes(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "%{service_name}"
   location = "us-central1"

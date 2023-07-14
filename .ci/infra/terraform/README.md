@@ -46,6 +46,7 @@ After applying this configuration:
 - Add Group Admin role to new service account in the Google Workspace Admin Console: https://admin.google.com/ac/roles
 - Add a new test user in the Google Workspace Admin Console: https://admin.google.com/ac/users
 - Create a `support@` group in the Google Workspace Admin Console, add new service account as a member, and make it an owner
+- Enroll in Cloud Armor Managed Protection Plus tier
 
 Quotas that will need to be adjusted to support all tests:
 - Project quota for the new service account
@@ -54,3 +55,6 @@ Quotas that will need to be adjusted to support all tests:
 - CPUS quota in `us-central1`
 - AlloyDB cluster quota in `us-central1`
 - Cloud Workstation cluster quota in `us-central1`
+- VMWare Engine nodes per region in `southamerica-west1`
+- VMWare Engine nodes across regions
+- Looker `EnterpriseSubscriptionInstancesPerProjectPerRegion`. This must be requested manually from their team, and can't be self-served in the Cloud Console.
