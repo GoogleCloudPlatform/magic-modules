@@ -13,3 +13,5 @@ complete output, running presubmit tests, and updating the providers following y
 change.
 
 For information on how to use or contribute to Magic Modules, see [the documentation](https://googlecloudplatform.github.io/magic-modules).
+
+Added this line and it should generate no diff in downstreams and skip test run
