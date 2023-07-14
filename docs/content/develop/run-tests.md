@@ -47,7 +47,6 @@ aliases:
 
 {{< tab "GA Provider" >}}
 
-
 1. Run unit tests and linters
 
     ```bash
@@ -74,10 +73,7 @@ aliases:
 1. Optional: Debug tests with [Delve](https://github.com/go-delve/delve). See [`dlv test` documentation](https://github.com/go-delve/delve/blob/master/Documentation/usage/dlv_test.md) for information about available flags.
 
     ```bash
-    ## Navigate to the google package within your local GCP Terraform provider Git clone.
-
-    ## Execute the dlv command to launch the test.
-    ## Note that the --test.run flag uses the same regexp matching as go test --run.
+    cd google
     TF_ACC=1 dlv test -- --test.v --test.run TestAccComputeRegionBackendService_withCdnPolicy
     ```
 
@@ -93,15 +89,14 @@ aliases:
     make lint
     ```
 
-1. Run acceptance tests
+
+1. Run acceptance tests for only modified resources. (Full test runs can take over 9 hours.) See [Go's documentation](https://pkg.go.dev/cmd/go#hdr-Testing_flags) for more information about `-run` and other flags.
 
     ```bash
-    make testacc TEST=./google-beta TESTARGS='-run=TestAccContainerNodePool_basic'
+    make testacc TEST=./google-beta TESTARGS='-run=TestAccContainerNodePool'
     ```
 
-    TESTARGS allows you to pass [testing flags](https://pkg.go.dev/cmd/go#hdr-Testing_flags) to `go test`. The most important is `-run`, which allows you to limit the tests that get run. There are 2000+ tests, and running all of them takes over 9 hours and requires a lot of GCP quota.
 
-    `-run` is regexp-like, so multiple tests can be run in parallel by specifying a common substring of those tests (for example, `TestAccContainerNodePool` to run all node pool tests).
 
 1. Optional: Save verbose test output to a file for analysis.
 
@@ -109,14 +104,10 @@ aliases:
     TF_LOG=TRACE make testacc TEST=./google-beta TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
     ```
 
-1. Optional: debug tests with [Delve](https://github.com/go-delve/delve):
+1. Optional: Debug tests with [Delve](https://github.com/go-delve/delve). See [`dlv test` documentation](https://github.com/go-delve/delve/blob/master/Documentation/usage/dlv_test.md) for information about available flags.
 
     ```bash
-    ## Navigate to the google package within your local GCP Terraform provider Git clone.
-    cd $GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta/google-beta
-
-    ## Execute the dlv command to launch the test.
-    ## Note that the --test.run flag uses the same regexp matching as go test --run.
+    cd google-beta
     TF_ACC=1 dlv test -- --test.v --test.run TestAccComputeRegionBackendService_withCdnPolicy
     ```
 
@@ -129,13 +120,18 @@ aliases:
 Tests will use whatever version of the `terraform` binary is found on your `PATH`. If you are testing a change that you know only impacts certain `terraform` versions, follow these steps:
 
 1. Install [`tfenv`](https://github.com/tfutils/tfenv).
-2. Install the version of `terraform` you want to test.
-   \`\`\`bash
-   tfenv install VERSION
-   \`\`\`
-   Replace `VERSION` with the version you want to test.
-3. Run automated tests following the earlier section.
-4. Run manual tests following the earlier section.
+
+1. Install the version of `terraform` you want to test.
+
+    ```bash
+    tfenv install VERSION
+    ```
+
+    Replace `VERSION` with the version you want to test.
+
+1. Run automated tests following the earlier section.
+
+1. Run manual tests following the earlier section.
 
 ## Test manually
 
@@ -157,10 +153,6 @@ make build
 
 {{< tab "Developer overrides" >}}
 
-{{< hint info >}}
-**Note:** Developer overrides are only available in Terraform v0.14 and later.
-{{< /hint >}}
-
 In the sections below we describe how to create a Terraform CLI configuration file, and how to make the CLI use the file via an environment variable.
 
 ### Create developer overrides file
@@ -171,129 +163,136 @@ Choose your architecture below.
 
 {{< tab "Mac (ARM64 and AMD64), Linux AMD64" >}}
 
-First, you need to find the location where built provider binaries are created. To do this, run this command and make a note of the path value:
+1. Find the location where built provider binaries are created. To do this, run this command and make a note of the path value:
 
-```bash
-go env GOBIN
+    ```bash
+    go env GOBIN
 
-## If the above returns nothing, then run the command below and add "/bin" to the end of the output path.
-go env GOPATH
-```
+    ## If the above returns nothing, then run the command below and add "/bin" to the end of the output path.
+    go env GOPATH
+    ```
 
-Next, create an empty configuration file. This could be in your `$HOME` directory or in a project directory; location does not matter. The extension `.tfrc` is required but the file name can be whatever you choose.
+1. Create an empty configuration file.
 
-```bash
-## create an empty file
-touch ~/tf-dev-override.tfrc
+    ```bash
+    ## create an empty file
+    touch ~/tf-dev-override.tfrc
 
-## open the file with a text editor of your choice, e.g:
-vi ~/tf-dev-override.tfrc
-```
+    ## open the file with a text editor of your choice, e.g:
+    vi ~/tf-dev-override.tfrc
+    ```
 
-Open the empty file with a text editor and paste in these contents:
+    Open the empty file with a text editor and paste in these contents:
 
-```hcl
-provider_installation {
+    ```hcl
+    provider_installation {
 
-  # Developer overrides will stop Terraform from downloading the listed
-  # providers their origin provider registries.
-  dev_overrides {
-      "hashicorp/google" = "<REPLACE-ME>/bin"
-      "hashicorp/google-beta" = "<REPLACE-ME>/bin"
-  }
+      # Developer overrides will stop Terraform from downloading the listed
+      # providers their origin provider registries.
+      dev_overrides {
+          "hashicorp/google" = "<REPLACE-ME>/bin"
+          "hashicorp/google-beta" = "<REPLACE-ME>/bin"
+      }
 
-  # For all other providers, install them directly from their origin provider
-  # registries as normal. If you omit this, Terraform will _only_ use
-  # the dev_overrides block, and so no other providers will be available.
-  direct {}
-}
-```
+      # For all other providers, install them directly from their origin provider
+      # registries as normal. If you omit this, Terraform will _only_ use
+      # the dev_overrides block, and so no other providers will be available.
+      direct {}
+    }
+    ```
 
-Edit the file to replace `<REPLACE-ME>` with the path you saved from the first step, making sure to keep `/bin` at the end of the path.
+1. Edit the file to replace `<REPLACE-ME>` with the path you saved from the first step, making sure to keep `/bin` at the end of the path.
 
-**Please note**: the _full_ path is required and environment variables cannot be used. For example, `"/Users/MyUserName/go/bin"` is a valid path for a user called `MyUserName`, but `"~/go/bin"` or `"$HOME/go/bin"` will not work.
+    **Please note**: the _full_ path is required and environment variables cannot be used. For example, `"/Users/MyUserName/go/bin"` is a valid path for a user called `MyUserName`, but `"~/go/bin"` or `"$HOME/go/bin"` will not work.
 
-Finally, save the file.
+1. Save the file.
 
 {{< /tab >}}
 
 {{< tab "Windows (Vista and above)" >}}
 
-First, you need to find the location where built provider binaries are created. To do this, run this command and make a note of the path value:
+1. Find the location where built provider binaries are created. To do this, run this command and make a note of the path value:
 
-```bash
-echo %GOPATH%
-```
+    ```bash
+    echo %GOPATH%
+    ```
 
-Next, create an empty configuration file. The location does not matter and could be in your home directory or a specific project directory. The extension `.tfrc` is required but the file name can be whatever you choose.
+1. Create an empty configuration file in the `%APPDATA%` directory (use `$env:APPDATA` in PowerShell to find its location on your system).
 
-If you are unsure where to put the file, put it in the `%APPDATA%` directory (use `$env:APPDATA` in PowerShell to find its location on your system).
+    ```powershell
+    ## create an empty file
+    type nul > "$($env:APPDATA)\tf-dev-override.tfrc"
 
-```powershell
-## create an empty file
-type nul > "$($env:APPDATA)\tf-dev-override.tfrc"
+    ## open the file with a text editor of your choice, e.g:
+    notepad "$($env:APPDATA)\tf-dev-override.tfrc"
+    ```
 
-## open the file with a text editor of your choice, e.g:
-notepad "$($env:APPDATA)\tf-dev-override.tfrc"
-```
+    Open the empty file with a text editor and paste in these contents:
 
-Open the empty file with a text editor and paste in these contents:
+    ```hcl
+    provider_installation {
 
-```hcl
-provider_installation {
+      # Developer overrides will stop Terraform from downloading the listed
+      # providers their origin provider registries.
+      dev_overrides {
+          "hashicorp/google" = "<REPLACE-ME>\bin"
+          "hashicorp/google-beta" = "<REPLACE-ME>\bin"
+      }
 
-  # Developer overrides will stop Terraform from downloading the listed
-  # providers their origin provider registries.
-  dev_overrides {
-      "hashicorp/google" = "<REPLACE-ME>\bin"
-      "hashicorp/google-beta" = "<REPLACE-ME>\bin"
-  }
+      # For all other providers, install them directly from their origin provider
+      # registries as normal. If you omit this, Terraform will _only_ use
+      # the dev_overrides block, and so no other providers will be available.
+      direct {}
+    }
+    ```
 
-  # For all other providers, install them directly from their origin provider
-  # registries as normal. If you omit this, Terraform will _only_ use
-  # the dev_overrides block, and so no other providers will be available.
-  direct {}
-}
-```
+1. Edit the file to replace `<REPLACE-ME>` with the output you saved from the first step, making sure to keep `\bin` at the end of the path.
 
-Edit the file to replace `<REPLACE-ME>` with the output you saved from the first step, making sure to keep `\bin` at the end of the path.
+    **Please note**: The _full_ path is required and environment variables cannot be used. For example, `C:\Users\MyUserName\go\bin` is a valid path for a user called `MyUserName`.
 
-**Please note**: The _full_ path is required and environment variables cannot be used. For example, `C:\Users\MyUserName\go\bin` is a valid path for a user called `MyUserName`.
-
-Finally, save the file.
+1. Save the file.
 
 {{< /tab >}}
 
 {{< /tabs >}}
 
-This CLI configuration file you created in the steps above will allow Terraform to automatically use the binaries generated by the `make build` commands in the `terraform-provider-google` and `terraform-provider-google-beta` repositories instead of downloading the latest versions. All other providers will continue to be downloaded from the public Registry as normal.
+This CLI configuration file you created in the steps above will allow Terraform to use the binaries generated by the `make build` commands in the `terraform-provider-google` and `terraform-provider-google-beta` repositories instead of downloading the latest versions.
 
 ### Using Terraform CLI developer overrides
 
-To make Terraform use the configuration file you created, you need to set the `TF_CLI_CONFIG_FILE` environment variable to be a string containing the path to the configuration file ([see the documentation here](https://developer.hashicorp.com/terraform/cli/config/environment-variables#tf_cli_config_file)). The path can be either a relative or absolute path.
+1. Create a new directory and a `main.tf` file with your resource and its dependencies.
 
-Assuming that a configuration file was created at `~/tf-dev-override.tfrc`, you can either export the environment variable or set it explicitly for each `terraform` command. Note that you need to use the full path:
+1. To make Terraform use the configuration file you created, you need to set the `TF_CLI_CONFIG_FILE` environment variable to the path to the configuration file ([see the documentation here](https://developer.hashicorp.com/terraform/cli/config/environment-variables#tf_cli_config_file)).
 
-```bash
-# either export the environment variable for your session
-export TF_CLI_CONFIG_FILE="/Users/MyUserName/tf-dev-override.tfrc"
+    Assuming that a configuration file was created at `~/tf-dev-override.tfrc`, you can either export the environment variable or set it explicitly for each `terraform` command. Note that you need to use the full path:
 
-# OR, set the environment variable value per command
-TF_CLI_CONFIG_FILE="/Users/MyUserName/tf-dev-override.tfrc" terraform plan
-```
+    ```bash
+    # either export the environment variable for your session
+    export TF_CLI_CONFIG_FILE="/Users/MyUserName/tf-dev-override.tfrc"
+    terraform plan
 
-To check that the developer override is working, run a `terraform plan` command and look for a warning near the start of the terminal output that looks like the example below. It is not necessary to run the terraform init command to use development overrides.
+    # OR, set the environment variable value per command
+    TF_CLI_CONFIG_FILE="/Users/MyUserName/tf-dev-override.tfrc" terraform plan
+    ```
 
-```
-│ Warning: Provider development overrides are in effect
-│ 
-│ The following provider development overrides are set in the CLI configuration:
-│  - hashicorp/google in /Users/MyUserName/go/bin
-│  - hashicorp/google-beta in /Users/MyUserName/go/bin
-│ 
-│ The behavior may therefore not match any released version of the provider and applying
-│ changes may cause the state to become incompatible with published releases.
-```
+1. To check that the developer override is working, look for a warning near the start of the terminal output that looks like the example below. It is not necessary to run the terraform init command to use development overrides.
+
+    ```
+    │ Warning: Provider development overrides are in effect
+    │ 
+    │ The following provider development overrides are set in the CLI configuration:
+    │  - hashicorp/google in /Users/MyUserName/go/bin
+    │  - hashicorp/google-beta in /Users/MyUserName/go/bin
+    │ 
+    │ The behavior may therefore not match any released version of the provider and applying
+    │ changes may cause the state to become incompatible with published releases.
+    ```
+
+1. Apply your configuration.
+
+    ```bash
+    TF_LOG=DEBUG TF_LOG_PATH=output.log terraform apply
+    ```
 
 {{< hint info >}}
 **Note:** Developer overrides work without you needing to alter your Terraform configuration in any way.
@@ -307,7 +306,7 @@ This will then let Terraform resume normal behaviour of pulling published provid
 
 ### Alternative: using a global CLI configuration file
 
-If you do not want to use the `TF_CLI_CONFIG_FILE` environment variable, as described above, you can instead create a global version of the CLI configuration file. This configuration will be used automatically by Terraform. To do this, follow [the guidance in the official documentation](https://developer.hashicorp.com/terraform/cli/config/config-file#locations).
+If you do not want to use the `TF_CLI_CONFIG_FILE` environment variable, as described above, you can instead create a global version of the CLI configuration file. This configuration will be used automatically by Terraform. To do this, follow [the guidance in the official documentation](https://developer.hashicorp.com/terraform/cli/config/config-file#locations). For Windows, the file will be named `terraform.rc` and go in the `%APPDATA` directory. For all other systems, it will be named `.terraformrc` and go in the user's home directory.
 
 In this scenario you will need to remember to edit this file to swap between using developer overrides and using the production provider versions.
 
