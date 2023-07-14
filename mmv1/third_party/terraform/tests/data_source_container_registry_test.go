@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestDataSourceGoogleContainerRegistryRepository(t *testing.T) {
@@ -11,9 +12,9 @@ func TestDataSourceGoogleContainerRegistryRepository(t *testing.T) {
 
 	resourceName := "data.google_container_registry_repository.test"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleContainerRegistryRepo_basic,
@@ -45,9 +46,9 @@ func TestDataSourceGoogleContainerRegistryImage(t *testing.T) {
 
 	resourceName := "data.google_container_registry_image.test"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleContainerRegistryImage_basic,

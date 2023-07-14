@@ -43,14 +43,14 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_target_https_proxy_basic"
-    primary_resource_id: "default"
+    name: 'region_target_https_proxy_basic'
+    primary_resource_id: 'default'
     vars:
-      region_target_https_proxy_name: "test-proxy"
-      region_ssl_certificate_name: "my-certificate"
-      region_url_map_name: "url-map"
-      region_backend_service_name: "backend-service"
-      region_health_check_name: "http-health-check"
+      region_target_https_proxy_name: 'test-proxy'
+      region_ssl_certificate_name: 'my-certificate'
+      region_url_map_name: 'url-map'
+      region_backend_service_name: 'backend-service'
+      region_health_check_name: 'http-health-check'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -63,6 +63,7 @@ parameters:
       If it is not provided, the provider region is used.
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -89,25 +90,25 @@ properties:
       character, which cannot be a dash.
     immutable: true
     required: true
- # This field is present in the schema but as of 2019 Sep 23 attempting to set it fails with
- # a 400 "QUIC override is supported only with global TargetHttpsProxy". jamessynge@ said in an
- # email sent on 2019 Sep 20 that support for this "is probably far in the future."
- #- !ruby/object:Api::Type::Enum
- #  name: 'quicOverride'
- #  description: |
- #    Specifies the QUIC override policy for this resource. This determines
- #    whether the load balancer will attempt to negotiate QUIC with clients
- #    or not. Can specify one of NONE, ENABLE, or DISABLE. If NONE is
- #    specified, uses the QUIC policy with no user overrides, which is
- #    equivalent to DISABLE. Not specifying this field is equivalent to
- #    specifying NONE.
- #  values:
- #    - :NONE
- #    - :ENABLE
- #    - :DISABLE
- #  update_verb: :POST
- #  update_url:
- #    'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setQuicOverride'
+  # This field is present in the schema but as of 2019 Sep 23 attempting to set it fails with
+  # a 400 "QUIC override is supported only with global TargetHttpsProxy". jamessynge@ said in an
+  # email sent on 2019 Sep 20 that support for this "is probably far in the future."
+  # - !ruby/object:Api::Type::Enum
+  #   name: 'quicOverride'
+  #   description: |
+  #     Specifies the QUIC override policy for this resource. This determines
+  #     whether the load balancer will attempt to negotiate QUIC with clients
+  #     or not. Can specify one of NONE, ENABLE, or DISABLE. If NONE is
+  #     specified, uses the QUIC policy with no user overrides, which is
+  #     equivalent to DISABLE. Not specifying this field is equivalent to
+  #     specifying NONE.
+  #   values:
+  #     - :NONE
+  #     - :ENABLE
+  #     - :DISABLE
+  #   update_verb: :POST
+  #   update_url:
+  #     'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setQuicOverride'
   - !ruby/object:Api::Type::Array
     name: 'sslCertificates'
     description: |
@@ -122,6 +123,7 @@ properties:
       resource: 'RegionSslCertificate'
       imports: 'selfLink'
       description: 'The SSL certificates used by this TargetHttpsProxy'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'sslPolicy'
     resource: 'RegionSslPolicy'
@@ -131,11 +133,12 @@ properties:
       A reference to the Region SslPolicy resource that will be associated with
       the TargetHttpsProxy resource. If not set, the TargetHttpsProxy
       resource will not have any SSL policy configured.
- # 2022 May 28 - setSslPolicy method not yet listed
- # https://cloud.google.com/compute/docs/reference/rest/beta/regionTargetHttpsProxies
- #  update_verb: :POST
- #  update_url:
- #    'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslPolicy'
+  # 2022 May 28 - setSslPolicy method not yet listed
+  # https://cloud.google.com/compute/docs/reference/rest/beta/regionTargetHttpsProxies
+  #  update_verb: :POST
+  #  update_url:
+  #    'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslPolicy'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'urlMap'
     resource: 'RegionUrlMap'
@@ -145,4 +148,5 @@ properties:
       to the RegionBackendService.
     required: true
     update_verb: :POST
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
     update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setUrlMap'

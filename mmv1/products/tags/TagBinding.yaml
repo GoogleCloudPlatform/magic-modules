@@ -14,37 +14,38 @@
 --- !ruby/object:Api::Resource
 name: 'TagBinding'
 base_url: tagBindings
-self_link: "tagBindings/?parent={{parent}}&pageSize=300"
-delete_url: "tagBindings/{{name}}"
+self_link: 'tagBindings/?parent={{parent}}&pageSize=300'
+delete_url: 'tagBindings/{{name}}'
 nested_query: !ruby/object:Api::Resource::NestedQuery
   keys: ['tagBindings']
 immutable: true
-description: A TagBinding represents a connection between a TagValue and a cloud resource
-  (currently project, folder, or organization). Once a TagBinding is created, the
-  TagValue is applied to all the descendants of the cloud resource.
+description:
+  A TagBinding represents a connection between a TagValue and a cloud resource
+  (currently project, folder, or organization). Once a TagBinding is created,
+  the TagValue is applied to all the descendants of the cloud resource.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
   api: 'https://cloud.google.com/resource-manager/reference/rest/v3/tagBindings'
 autogen_async: true
-id_format: "tagBindings/{{name}}"
-import_format: ["tagBindings/{{name}}", "{{name}}"]
+id_format: 'tagBindings/{{name}}'
+import_format: ['tagBindings/{{name}}', '{{name}}']
 mutex: tagBindings/{{parent}}
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/tags_tag_binding.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "tag_binding_basic"
+    name: 'tag_binding_basic'
     skip_test: true
-    primary_resource_id: "binding"
+    primary_resource_id: 'binding'
     vars:
-      key_short_name: "keyname"
-      value_short_name: "valuename"
+      key_short_name: 'keyname'
+      value_short_name: 'valuename'
       project_id: project_id
     test_vars_overrides:
-      key_short_name: '"tf-test-key-" + RandString(t, 10)'
-      value_short_name: '"tf-test-value-" + RandString(t, 10)'
-      project_id: '"tf-test-" + RandString(t, 10)'
+      key_short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
+      value_short_name: '"tf-test-value-" + acctest.RandString(t, 10)'
+      project_id: '"tf-test-" + acctest.RandString(t, 10)'
     test_env_vars:
       org_id: :ORG_ID
 properties:
@@ -64,4 +65,3 @@ properties:
     description: |
       The TagValue of the TagBinding. Must be of the form tagValues/456.
     required: true
-

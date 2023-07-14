@@ -4,24 +4,25 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccDataSourceGameServicesGameServerDeploymentRollout_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGameServicesGameServerDeploymentRolloutDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGameServicesGameServerDeploymentRollout_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_game_services_game_server_deployment_rollout.qa", "google_game_services_game_server_deployment_rollout.foo"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_game_services_game_server_deployment_rollout.qa", "google_game_services_game_server_deployment_rollout.foo"),
 				),
 			},
 		},
@@ -29,7 +30,7 @@ func TestAccDataSourceGameServicesGameServerDeploymentRollout_basic(t *testing.T
 }
 
 func testAccDataSourceGameServicesGameServerDeploymentRollout_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_game_services_game_server_deployment" "default" {
   deployment_id  = "tf-test-deployment-%{random_suffix}"
   description = "a deployment description"

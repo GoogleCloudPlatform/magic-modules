@@ -45,11 +45,12 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 exclude_resource: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "instance_basic"
-    primary_resource_id: "default"
+    name: 'instance_basic'
+    primary_resource_id: 'default'
     vars:
-      instance_name: "my-instance"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\", context[\"random_suffix\"\
+      instance_name: 'my-instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
+      context[\"random_suffix\"\
       ])"
 parameters:
   - !ruby/object:Api::Type::ResourceRef
@@ -58,6 +59,7 @@ parameters:
     imports: 'name'
     description: 'A reference to the zone where the machine resides.'
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Boolean
     name: 'canIpForward'
@@ -170,6 +172,7 @@ properties:
                 If not specified, the default is pd-standard.
               resource: 'DiskType'
               imports: 'selfLink'
+              custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
             - !ruby/object:Api::Type::String
               name: 'sourceImage'
               description: |
@@ -214,9 +217,9 @@ properties:
           values:
             - :SCSI
             - :NVME
-      # Ignoring kind - It's a constant and we don't need it.
-      # TODO(alexstephen): Place in licenses - it's a Array of
-      # ResourceRefs
+        # Ignoring kind - It's a constant and we don't need it.
+        # TODO(alexstephen): Place in licenses - it's a Array of
+        # ResourceRefs
         - !ruby/object:Api::Type::Enum
           name: 'mode'
           description: |
@@ -238,6 +241,7 @@ properties:
             If desired, you can also attach existing non-root
             persistent disks using this property. This field is only
             applicable for persistent disks.
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
         - !ruby/object:Api::Type::Enum
           name: 'type'
           description: |
@@ -331,6 +335,7 @@ properties:
     update_url: projects/{{project}}/zones/{{zone}}/instances/{{name}}/setMachineType
     update_verb: :POST
   # TODO(alexstephen): Add metadata
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'minCpuPlatform'
     description: |
@@ -365,7 +370,7 @@ properties:
             external internet access.
           item_type: !ruby/object:Api::Type::NestedObject
             properties:
-             # 'kind' is not needed for object convergence
+              # 'kind' is not needed for object convergence
               - !ruby/object:Api::Type::String
                 name: 'name'
                 description: |
@@ -386,6 +391,7 @@ properties:
                   from a shared ephemeral IP address pool. If you specify a
                   static external IP address, it must live in the same
                   region as the zone of the instance.
+                custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
               - !ruby/object:Api::Type::Enum
                 name: 'type'
                 description: |
@@ -460,6 +466,7 @@ properties:
             the default network global/networks/default is used; if the network
             is not specified but the subnetwork is specified, the network is
             inferred.
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
         - !ruby/object:Api::Type::String
           name: 'networkIP'
           description: |
@@ -479,6 +486,7 @@ properties:
             the network is in custom subnet mode, then this field
             should be specified.
         # networkInterfaces.kind is not necessary for convergence.
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'scheduling'
     description: Sets the scheduling options for this instance.
@@ -523,7 +531,8 @@ properties:
           item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: 'shieldedInstanceConfig'
-    description: Configuration for various parameters related to shielded instances.
+    description:
+      Configuration for various parameters related to shielded instances.
     # The code for this update method is custom because MM does not support
     # sending just the nested properties
     update_verb: :PATCH
@@ -541,12 +550,14 @@ properties:
         update_url: projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig
       - !ruby/object:Api::Type::Boolean
         name: 'enableIntegrityMonitoring'
-        description: Defines whether the instance has integrity monitoring enabled.
+        description:
+          Defines whether the instance has integrity monitoring enabled.
         update_verb: :PATCH
         update_url: projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig
   - !ruby/object:Api::Type::NestedObject
     name: 'confidentialInstanceConfig'
-    description: 'Configuration for confidential computing (requires setting the machine
+    description:
+      'Configuration for confidential computing (requires setting the machine
       type to any of the n2d-* types and a boot disk of type pd-ssd).'
     properties:
       - !ruby/object:Api::Type::Boolean

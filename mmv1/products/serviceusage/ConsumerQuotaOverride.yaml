@@ -22,7 +22,8 @@ update_verb: :PATCH
 delete_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}?force={{force}}
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Managing Service Quota': 'https://cloud.google.com/service-usage/docs/manage-quota '
+    'Managing Service Quota':
+      'https://cloud.google.com/service-usage/docs/manage-quota '
     'REST API documentation': 'https://cloud.google.com/service-usage/docs/reference/rest/v1beta1/services.consumerQuotaMetrics.limits.consumerOverrides'
 nested_query: !ruby/object:Api::Resource::NestedQuery
   keys:
@@ -52,41 +53,44 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "consumer_quota_override"
-    primary_resource_id: "override"
+    name: 'consumer_quota_override'
+    primary_resource_id: 'override'
     min_version: 'beta'
     vars:
-      project_id: "quota"
+      project_id: 'quota'
     test_env_vars:
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
-    name: "consumer_quota_override_zero_value"
-    primary_resource_id: "override"
+    name: 'consumer_quota_override_zero_value'
+    primary_resource_id: 'override'
     min_version: 'beta'
     skip_docs: true
     vars:
-      project_id: "quota"
+      project_id: 'quota'
     test_env_vars:
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_consumer_quota_override"
-    primary_resource_id: "override"
+    name: 'region_consumer_quota_override'
+    primary_resource_id: 'override'
     min_version: 'beta'
     vars:
-      project_id: "quota"
+      project_id: 'quota'
     test_env_vars:
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
-    name: "consumer_quota_override_custom_dimension"
-    primary_resource_id: "override"
+    name: 'consumer_quota_override_custom_dimension'
+    primary_resource_id: 'override'
     min_version: 'beta'
     vars:
-      project_id: "quota"
+      project_id: 'quota'
     test_env_vars:
       org_id: :ORG_ID
-id_format: "projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}"
-import_format: ["services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}",
-  "projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}"]
+id_format: 'projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}'
+import_format:
+  [
+    'services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}',
+    'projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}',
+  ]
 skip_sweeper: true
 autogen_async: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -141,4 +145,3 @@ properties:
     immutable: true
     description: |
       If this map is nonempty, then this override applies only to specific values for dimensions defined in the limit unit.
-

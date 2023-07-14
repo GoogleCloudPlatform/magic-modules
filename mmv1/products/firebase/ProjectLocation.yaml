@@ -39,11 +39,13 @@ skip_delete: true
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_project_location_basic"
+    name: 'firebase_project_location_basic'
     min_version: 'beta'
-    primary_resource_id: "basic"
+    primary_resource_id: 'basic'
     test_env_vars:
       org_id: :ORG_ID
+    vars:
+      project_name: "my-project"
 properties:
   - !ruby/object:Api::Type::String
     name: locationId

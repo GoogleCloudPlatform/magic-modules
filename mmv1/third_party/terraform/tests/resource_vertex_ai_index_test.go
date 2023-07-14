@@ -5,21 +5,26 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccVertexAIIndex_updated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckVertexAIIndexDestroyProducer_basic(t),
 		Steps: []resource.TestStep{
 			{
@@ -45,7 +50,7 @@ func TestAccVertexAIIndex_updated(t *testing.T) {
 }
 
 func testAccVertexAIIndex_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "tf-test-%{random_suffix}"
   location = "us-central1"
@@ -84,6 +89,7 @@ resource "google_vertex_ai_index" "index" {
     config {
       dimensions = 2
       approximate_neighbors_count = 150
+      shard_size = "SHARD_SIZE_SMALL"
       distance_measure_type = "DOT_PRODUCT_DISTANCE"
       algorithm_config {
         tree_ah_config {
@@ -99,7 +105,7 @@ resource "google_vertex_ai_index" "index" {
 }
 
 func testAccVertexAIIndex_updated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "tf-test-%{random_suffix}"
   location = "us-central1"
@@ -140,6 +146,7 @@ resource "google_vertex_ai_index" "index" {
     config {
       dimensions = 2
       approximate_neighbors_count = 150
+      shard_size = "SHARD_SIZE_SMALL"
       distance_measure_type = "DOT_PRODUCT_DISTANCE"
       algorithm_config {
         tree_ah_config {
@@ -164,9 +171,9 @@ func testAccCheckVertexAIIndexDestroyProducer_basic(t *testing.T) func(s *terraf
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{VertexAIBasePath}}projects/{{project}}/locations/{{region}}/indexes/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{VertexAIBasePath}}projects/{{project}}/locations/{{region}}/indexes/{{name}}")
 			if err != nil {
 				return err
 			}
@@ -177,7 +184,13 @@ func testAccCheckVertexAIIndexDestroyProducer_basic(t *testing.T) func(s *terraf
 				billingProject = config.BillingProject
 			}
 
-			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
 			if err == nil {
 				return fmt.Errorf("VertexAIIndex still exists at %s", url)
 			}

@@ -23,11 +23,11 @@ function clone_repo() {
         UPSTREAM_OWNER=GoogleCloudPlatform
         GH_REPO=terraform-google-conversion
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
-    elif [ "$REPO" == "terraform-validator" ]; then
+    elif [ "$REPO" == "terraform-google-conversion" ]; then
         UPSTREAM_OWNER=GoogleCloudPlatform
         UPSTREAM_BRANCH=main
-        GH_REPO=terraform-validator
-        LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-validator
+        GH_REPO=terraform-google-conversion
+        LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
     elif [ "$REPO" == "tf-oics" ]; then
         UPSTREAM_BRANCH=master
         UPSTREAM_OWNER=terraform-google-modules
@@ -49,7 +49,7 @@ function clone_repo() {
 }
 
 if [ $# -lt 4 ]; then
-    echo "Usage: $0 (build|diff|downstream) (terraform|terraform-validator) (ga|beta) (pr number|sha)"
+    echo "Usage: $0 (build|diff|downstream) (terraform) (ga|beta) (pr number|sha)"
     exit 1
 fi
 if [ -z "$GITHUB_TOKEN" ]; then
@@ -97,35 +97,33 @@ if [ "$REPO" == "terraform" ]; then
     popd
 fi
 
-if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
-    # use terraform generator with validator overrides.
-    # Check for tf-conversion is legacy and can be removed after Nov 15 2021
-    if [ "$REPO" == "terraform-validator" ] && [ "$COMMAND" == "base" ] && [ ! -d "../.ci/containers/terraform-validator-tester" ]; then
-        # Temporary shim to allow building a "base" version; only required until after
-        # initial merge. If we're building a base branch on an old mmv1 main (which
-        # we can detect by the lack of files added in this PR) the base version will
-        # require a `google` folder to exist.
-        mkdir -p $LOCAL_PATH/google
-    fi
-
+if [ "$REPO" == "terraform-google-conversion" ]; then
     pushd $LOCAL_PATH
     # clear out the templates as they are copied during
     # generation from mmv1/third_party/validator/tests/data
-    rm -rf ./testdata/templates/
-    rm -rf ./testdata/generatedconvert/
-    rm -rf ./converters/google/provider
-    find ./test/** -type f -exec git rm {} \;
-
+    rm -rf ./tfplan2cai/testdata/templates/
+    rm -rf ./tfplan2cai/testdata/generatedconvert/
+    rm -rf ./tfplan2cai/converters/google/provider
+    rm -rf ./tfplan2cai/converters/google/resources
+    find ./tfplan2cai/test/** -type f -exec git rm {} \;
     popd
-    rm -rf third_party/validator/tests/source
-    cp -rf third_party/validator/tests/tfv-source third_party/validator/tests/source
-    bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
+
+    bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH/tfplan2cai -v $VERSION
+
     pushd $LOCAL_PATH
 
-    if [ "$COMMAND" == "downstream" ]; then
-      go get -d github.com/hashicorp/terraform-provider-google@main
-    else
-      go mod edit -replace github.com/hashicorp/terraform-provider-google=github.com/$SCRATCH_OWNER/terraform-provider-google@$BRANCH
+    if [ "$VERSION" == "ga" ]; then
+      if [ "$COMMAND" == "downstream" ]; then
+        go get -d github.com/hashicorp/terraform-provider-google@main
+      else
+        go mod edit -replace github.com/hashicorp/terraform-provider-google=github.com/$SCRATCH_OWNER/terraform-provider-google@$BRANCH
+      fi
+    elif [ "$VERSION" == "beta" ]; then
+      if [ "$COMMAND" == "downstream" ]; then
+        go get -d github.com/hashicorp/terraform-provider-google-beta@main
+      else
+        go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/$SCRATCH_OWNER/terraform-provider-google-beta@$BRANCH
+      fi
     fi
 
     go mod tidy
@@ -138,8 +136,6 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     fi
 
     make build
-    export TFV_CREATE_GENERATED_FILES=true
-    go test ./test -run "TestAcc.*_generated_offline"
 
     if [ "$COMMAND" == "downstream" ]; then
       set -e
@@ -159,11 +155,6 @@ else
         fi
         pushd ../
         make tpgtools OUTPUT_PATH=$LOCAL_PATH VERSION=$VERSION
-        pushd ./tools/breaking-change-detector
-        set +e
-        go run . -docs -providerFolder="${LOCAL_PATH}/.github/"
-        set -e
-        popd
         popd
     fi
 fi

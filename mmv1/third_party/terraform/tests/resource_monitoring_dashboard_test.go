@@ -5,16 +5,20 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccMonitoringDashboard_basic(t *testing.T) {
 	t.Parallel()
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckMonitoringDashboardDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -39,9 +43,9 @@ func TestAccMonitoringDashboard_gridLayout(t *testing.T) {
 	t.Skip()
 	t.Parallel()
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckMonitoringDashboardDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -60,9 +64,9 @@ func TestAccMonitoringDashboard_gridLayout(t *testing.T) {
 func TestAccMonitoringDashboard_rowLayout(t *testing.T) {
 	t.Parallel()
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckMonitoringDashboardDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -83,9 +87,9 @@ func TestAccMonitoringDashboard_update(t *testing.T) {
 	t.Skip()
 	t.Parallel()
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckMonitoringDashboardDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -129,14 +133,20 @@ func testAccCheckMonitoringDashboardDestroyProducer(t *testing.T) func(s *terraf
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{MonitoringBasePath}}v1/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{MonitoringBasePath}}v1/{{name}}")
 			if err != nil {
 				return err
 			}
 
-			_, err = SendRequest(config, "GET", "", url, config.UserAgent, nil, isMonitoringConcurrentEditError)
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:               config,
+				Method:               "GET",
+				RawURL:               url,
+				UserAgent:            config.UserAgent,
+				ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsMonitoringConcurrentEditError},
+			})
 			if err == nil {
 				return fmt.Errorf("MonitoringDashboard still exists at %s", url)
 			}

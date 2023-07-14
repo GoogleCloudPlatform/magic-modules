@@ -4,13 +4,15 @@ package google
 
 import (
 	"testing"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func testAccFirebaseDatabaseInstance_firebaseDatabaseInstanceInState(context map[string]interface{}, state string) string {
 	context["desired_state"] = state
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_firebase_database_instance" "updated" {
   provider = google-beta
   project  = "%{project_id}"
@@ -25,14 +27,14 @@ func TestAccFirebaseDatabaseInstance_firebaseDatabaseInstanceStateChange(t *test
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    GetTestProjectFromEnv(),
-		"region":        GetTestRegionFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"region":        envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckFirebaseDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

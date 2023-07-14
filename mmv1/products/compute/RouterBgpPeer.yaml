@@ -53,40 +53,42 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 legacy_name: 'google_compute_router_peer'
 exclude_validator: true
-id_format: "projects/{{project}}/regions/{{region}}/routers/{{router}}/{{name}}"
+id_format: 'projects/{{project}}/regions/{{region}}/routers/{{router}}/{{name}}'
 mutex: router/{{region}}/{{router}}
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/router_bgp_peer.erb
 examples:
   # These examples are not used to autogenerate tests, as fine-grained
   # resources do not fit the normal test flow - we need to test deletion
   # in a test step while parent resource still exists vs in CheckDestroy
   # when all resources have been deleted.
   - !ruby/object:Provider::Terraform::Examples
-    name: "router_peer_basic"
-    primary_resource_id: "peer"
+    name: 'router_peer_basic'
+    primary_resource_id: 'peer'
     skip_test: true
     vars:
-      router_name: "my-router"
-      peer_name: "my-router-peer"
+      router_name: 'my-router'
+      peer_name: 'my-router-peer'
   - !ruby/object:Provider::Terraform::Examples
-    name: "router_peer_disabled"
-    primary_resource_id: "peer"
+    name: 'router_peer_disabled'
+    primary_resource_id: 'peer'
     skip_test: true
     vars:
-      router_name: "my-router"
-      peer_name: "my-router-peer"
+      router_name: 'my-router'
+      peer_name: 'my-router-peer'
   - !ruby/object:Provider::Terraform::Examples
-    name: "router_peer_bfd"
-    primary_resource_id: "peer"
+    name: 'router_peer_bfd'
+    primary_resource_id: 'peer'
     skip_test: true
     vars:
-      router_name: "my-router"
-      peer_name: "my-router-peer"
+      router_name: 'my-router'
+      peer_name: 'my-router-peer'
   - !ruby/object:Provider::Terraform::Examples
-    name: "router_peer_router_appliance"
-    primary_resource_id: "peer"
+    name: 'router_peer_router_appliance'
+    primary_resource_id: 'peer'
     vars:
-      router_name: "my-router"
-      peer_name: "my-router-peer"
+      router_name: 'my-router'
+      peer_name: 'my-router-peer'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'router'
@@ -122,7 +124,7 @@ properties:
     required: true
     immutable: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateRFC1035Name(2, 63)'
+      function: 'verify.ValidateRFC1035Name(2, 63)'
   - !ruby/object:Api::Type::String
     name: 'interface'
     api_name: 'interfaceName'
@@ -140,8 +142,8 @@ properties:
     name: 'peerIpAddress'
     description: |
       IP address of the BGP interface outside Google Cloud Platform.
-      Only IPv4 is supported.
-    required: true
+      Only IPv4 is supported. Required if `ip_address` is set.
+    default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: 'peerAsn'
     description: |
@@ -282,3 +284,32 @@ properties:
       such as Next Gen Firewalls, Virtual Routers, or Router Appliances.
       The VM instance must be located in zones contained in the same region as
       this Cloud Router. The VM instance is the peer side of the BGP session.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+  - !ruby/object:Api::Type::Boolean
+    name: 'enableIpv6'
+    description: |
+      Enable IPv6 traffic over BGP Peer. If not specified, it is disabled by default.
+    default_value: false
+    send_empty_value: true
+  - !ruby/object:Api::Type::String
+    name: 'ipv6NexthopAddress'
+    description: |
+      IPv6 address of the interface inside Google Cloud Platform.
+      The address must be in the range 2600:2d00:0:2::/64 or 2600:2d00:0:3::/64.
+      If you do not specify the next hop addresses, Google Cloud automatically
+      assigns unused addresses from the 2600:2d00:0:2::/64 or 2600:2d00:0:3::/64 range for you.
+    default_from_api: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'verify.ValidateIpAddress'
+    diff_suppress_func: ipv6RepresentationDiffSuppress
+  - !ruby/object:Api::Type::String
+    name: 'peerIpv6NexthopAddress'
+    description: |
+      IPv6 address of the BGP interface outside Google Cloud Platform.
+      The address must be in the range 2600:2d00:0:2::/64 or 2600:2d00:0:3::/64.
+      If you do not specify the next hop addresses, Google Cloud automatically
+      assigns unused addresses from the 2600:2d00:0:2::/64 or 2600:2d00:0:3::/64 range for you.
+    default_from_api: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'verify.ValidateIpAddress'
+    diff_suppress_func: ipv6RepresentationDiffSuppress

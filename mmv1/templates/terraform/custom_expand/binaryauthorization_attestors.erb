@@ -12,7 +12,7 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	r := regexp.MustCompile("projects/(.+)/attestors/(.+)")
 
 	// It's possible that all entries in the list will specify a project, in
@@ -22,7 +22,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 	var err error
 	for _, s := range v.(*schema.Set).List() {
 		if !r.MatchString(s.(string)) {
-			project, err = getProject(d, config)
+			project, err = tpgresource.GetProject(d, config)
 			if err != nil {
 				return []interface{}{}, err
 			}
@@ -30,7 +30,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 		}
 	}
 
-	return convertAndMapStringArr(v.(*schema.Set).List(), func(s string) string {
+	return tpgresource.ConvertAndMapStringArr(v.(*schema.Set).List(), func(s string) string {
 		if r.MatchString(s) {
 			return s
 		}

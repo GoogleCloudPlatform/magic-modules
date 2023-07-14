@@ -23,61 +23,61 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Datasets Intro': 'https://cloud.google.com/bigquery/docs/datasets-intro'
   api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets'
-import_format: ["projects/{{project}}/datasets/{{dataset_id}}"]
+import_format: ['projects/{{project}}/datasets/{{dataset_id}}']
 delete_url: projects/{{project}}/datasets/{{dataset_id}}?deleteContents={{delete_contents_on_destroy}}
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_dataset_basic"
-    primary_resource_id: "dataset"
+    name: 'bigquery_dataset_basic'
+    primary_resource_id: 'dataset'
     vars:
-      dataset_id: "example_dataset"
-      account_name: "bqowner"
+      dataset_id: 'example_dataset'
+      account_name: 'bqowner'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_dataset_with_max_time_travel_hours"
-    primary_resource_id: "dataset"
+    name: 'bigquery_dataset_with_max_time_travel_hours'
+    primary_resource_id: 'dataset'
     skip_docs: true
     vars:
-      dataset_id: "example_dataset"
-      account_name: "bqowner"
+      dataset_id: 'example_dataset'
+      account_name: 'bqowner'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_dataset_cmek"
+    name: 'bigquery_dataset_cmek'
     skip_test: true
-    primary_resource_id: "dataset"
+    primary_resource_id: 'dataset'
     vars:
-      dataset_id: "example_dataset"
-      key_name: "example-key"
-      keyring_name: "example-keyring"
+      dataset_id: 'example_dataset'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_dataset_authorized_dataset"
-    primary_resource_id: "dataset"
+    name: 'bigquery_dataset_authorized_dataset'
+    primary_resource_id: 'dataset'
     vars:
-      private: "private"
-      public: "public"
-      account_name: "bqowner"
+      private: 'private'
+      public: 'public'
+      account_name: 'bqowner'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_dataset_authorized_routine"
-    primary_resource_id: "private"
+    name: 'bigquery_dataset_authorized_routine'
+    primary_resource_id: 'private'
     vars:
-      private_dataset: "private_dataset"
-      public_dataset: "public_dataset"
-      public_routine: "public_routine"
+      private_dataset: 'private_dataset'
+      public_dataset: 'public_dataset'
+      public_routine: 'public_routine'
     test_env_vars:
       service_account: :SERVICE_ACCT
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_dataset_case_insensitive_names"
-    primary_resource_id: "dataset"
+    name: 'bigquery_dataset_case_insensitive_names'
+    primary_resource_id: 'dataset'
     skip_docs: true
     vars:
-      dataset_id: "example_dataset"
-      account_name: "bqowner"
+      dataset_id: 'example_dataset'
+      account_name: 'bqowner'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_dataset_default_collation_set"
-    primary_resource_id: "dataset"
+    name: 'bigquery_dataset_default_collation_set'
+    primary_resource_id: 'dataset'
     skip_docs: true
     vars:
-      dataset_id: "example_dataset"
-      account_name: "bqowner"
+      dataset_id: 'example_dataset'
+      account_name: 'bqowner'
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'delete_contents_on_destroy'
@@ -90,22 +90,20 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/bigquery_dataset.go.erb
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
-    You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`. 
+    You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`.
     The API does accept both formats but it will always return the legacy format which results in Terraform
     showing permanent diff on each plan and apply operation.
 properties:
   - !ruby/object:Api::Type::String
-    name: 'name'
-    description: 'Dataset name'
-    exclude: true
-  - !ruby/object:Api::Type::String
     name: 'maxTimeTravelHours'
-    description: 'Defines the time travel window in hours. The value can be from 48
-      to 168 hours (2 to 7 days).'
+    description:
+      'Defines the time travel window in hours. The value can be from 48 to 168
+      hours (2 to 7 days).'
     default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'access'
-    description: 'An array of objects that define dataset access for one or more entities.'
+    description:
+      'An array of objects that define dataset access for one or more entities.'
     default_from_api: true
     is_set: true
     item_type: !ruby/object:Api::Type::NestedObject
@@ -147,12 +145,6 @@ properties:
           description: |
             An email address of a user to grant access to. For example:
             fred@example.com
-        - !ruby/object:Api::Type::String
-          name: 'iamMember'
-          description: |
-            Some other type of member that appears in the IAM Policy but isn't a user,
-            group, domain, or special group. For example: `allUsers`
-          exclude: true
         - !ruby/object:Api::Type::NestedObject
           name: 'view'
           description: |
@@ -250,11 +242,6 @@ properties:
         immutable: true
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateDatasetId'
-      - !ruby/object:Api::Type::String
-        name: 'projectId'
-        description: The ID of the project containing this dataset.
-        immutable: true
-        exclude: true
   - !ruby/object:Api::Type::Integer
     name: 'defaultTableExpirationMs'
     description: |
@@ -303,14 +290,6 @@ properties:
     name: 'friendlyName'
     description: A descriptive name for the dataset
     send_empty_value: true
-  - !ruby/object:Api::Type::String
-    name: 'id'
-    output: true
-    description: |
-      The fully-qualified unique name of the dataset in the format
-      projectId:datasetId. The dataset name without the project name is
-      given in the datasetId field
-    exclude: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: |
@@ -341,7 +320,7 @@ properties:
     default_value: US
     immutable: true
     custom_flatten: templates/terraform/custom_flatten/bigquery_dataset_location.go.erb
-    diff_suppress_func: 'caseDiffSuppress'
+    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
   - !ruby/object:Api::Type::NestedObject
     name: 'defaultEncryptionConfiguration'
     description: |
@@ -376,4 +355,13 @@ properties:
       The following values are supported:
       - 'und:ci': undetermined locale, case insensitive.
       - '': empty string. Default to case-sensitive behavior.
+    default_from_api: true
+  - !ruby/object:Api::Type::String
+    name: 'storageBillingModel'
+    description: |
+      Specifies the storage billing model for the dataset.
+      Set this flag value to LOGICAL to use logical bytes for storage billing,
+      or to PHYSICAL to use physical bytes instead.
+
+      LOGICAL is the default if this flag isn't specified.
     default_from_api: true

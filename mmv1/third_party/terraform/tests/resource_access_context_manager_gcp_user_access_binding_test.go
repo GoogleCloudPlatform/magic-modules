@@ -7,6 +7,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // Since each test here is acting on the same organization and only one AccessPolicy
@@ -16,15 +21,15 @@ func testAccAccessContextManagerGcpUserAccessBinding_basicTest(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        GetTestOrgFromEnv(t),
-		"org_domain":    GetTestOrgDomainFromEnv(t),
-		"cust_id":       GetTestCustIdFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
+		"cust_id":       envvar.GetTestCustIdFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAccessContextManagerGcpUserAccessBindingDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -41,7 +46,7 @@ func testAccAccessContextManagerGcpUserAccessBinding_basicTest(t *testing.T) {
 }
 
 func testAccAccessContextManagerGcpUserAccessBinding_accessContextManagerGcpUserAccessBindingBasicExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_identity_group" "group" {
   display_name = "tf-test-my-identity-group%{random_suffix}"
 
@@ -102,14 +107,19 @@ func testAccCheckAccessContextManagerGcpUserAccessBindingDestroyProducer(t *test
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}organizations/{{organization_id}}/gcpUserAccessBindings/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}organizations/{{organization_id}}/gcpUserAccessBindings/{{name}}")
 			if err != nil {
 				return err
 			}
 
-			_, err = SendRequest(config, "GET", "", url, config.UserAgent, nil)
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
 			if err == nil {
 				return fmt.Errorf("AccessContextManagerGcpUserAccessBinding still exists at %s", url)
 			}

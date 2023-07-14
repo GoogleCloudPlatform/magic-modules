@@ -6,19 +6,22 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccServiceDirectoryNamespace_serviceDirectoryNamespaceUpdateExample(t *testing.T) {
 	t.Parallel()
 
-	project := GetTestProjectFromEnv()
+	project := envvar.GetTestProjectFromEnv()
 	location := "us-central1"
-	testId := fmt.Sprintf("tf-test-example-namespace%s", RandString(t, 10))
+	testId := fmt.Sprintf("tf-test-example-namespace%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckServiceDirectoryNamespaceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

@@ -7,17 +7,18 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccDataSourceGoogleKmsKeyRing_basic(t *testing.T) {
-	kms := BootstrapKMSKey(t)
+	kms := acctest.BootstrapKMSKey(t)
 
 	keyParts := strings.Split(kms.KeyRing.Name, "/")
 	keyRingId := keyParts[len(keyParts)-1]
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleKmsKeyRing_basic(keyRingId),

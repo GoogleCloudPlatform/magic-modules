@@ -6,17 +6,19 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDataSourceGoogleActiveFolder_default(t *testing.T) {
-	org := GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "tf-test-" + RandString(t, 10)
+	displayName := "tf-test-" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleActiveFolderConfig(parent, displayName),
@@ -29,14 +31,14 @@ func TestAccDataSourceGoogleActiveFolder_default(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleActiveFolder_space(t *testing.T) {
-	org := GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "terraform test " + RandString(t, 10)
+	displayName := "terraform test " + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleActiveFolderConfig(parent, displayName),
@@ -49,14 +51,14 @@ func TestAccDataSourceGoogleActiveFolder_space(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleActiveFolder_dash(t *testing.T) {
-	org := GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "terraform - test " + RandString(t, 10)
+	displayName := "terraform - test " + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleActiveFolderConfig(parent, displayName),

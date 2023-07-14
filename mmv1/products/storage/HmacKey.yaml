@@ -27,18 +27,18 @@ description: |
   The hmacKeys resource represents an HMAC key within Cloud Storage. The resource
   consists of a secret and HMAC key metadata. HMAC keys can be used as credentials
   for service accounts.
-id_format: "projects/{{project}}/hmacKeys/{{access_id}}"
+id_format: 'projects/{{project}}/hmacKeys/{{access_id}}'
 import_format: ['projects/{{project}}/hmacKeys/{{access_id}}']
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
   actions: ['create']
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "storage_hmac_key"
-    primary_resource_id: "key"
+    name: 'storage_hmac_key'
+    primary_resource_id: 'key'
     vars:
-      account_id: "my-svc-acc"
+      account_id: 'my-svc-acc'
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     All arguments including the `secret` value will be stored in the raw
@@ -80,12 +80,6 @@ properties:
     output: true
     description: |
       The access ID of the HMAC Key.
-  - !ruby/object:Api::Type::String
-    name: 'id'
-    output: true
-    description: |
-      The ID of the HMAC key, including the Project ID and the Access ID.
-    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'timeCreated'
     output: true
@@ -96,4 +90,3 @@ properties:
     output: true
     description: |
       'The last modification time of the HMAC key metadata in RFC 3339 format.'
-

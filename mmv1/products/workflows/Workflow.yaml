@@ -32,13 +32,14 @@ autogen_async: true
 id_format: 'projects/{{project}}/locations/{{region}}/workflows/{{name}}'
 exclude_import: true
 schema_version: 1
+state_upgraders: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "workflow_basic"
-    primary_resource_id: "example"
+    name: 'workflow_basic'
+    primary_resource_id: 'example'
     vars:
-      name: "workflow"
-      account_id: "my-account"
+      name: 'workflow'
+      account_id: 'my-account'
     skip_import_test: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   extra_schema_entry: templates/terraform/extra_schema_entry/workflow.erb
@@ -85,10 +86,13 @@ properties:
     description: |
       Name of the service account associated with the latest workflow version. This service
       account represents the identity of the workflow and determines what permissions the workflow has.
-
-      Format: projects/{project}/serviceAccounts/{account}.
+      Format: projects/{project}/serviceAccounts/{account} or {account}.
+      Using - as a wildcard for the {project} or not providing one at all will infer the project from the account.
+      The {account} value can be the email address or the unique_id of the service account.
+      If not provided, workflow will use the project's default service account.
+      Modifying this field for an existing workflow results in a new workflow revision.
     default_from_api: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: 'sourceContents'
     description: |
@@ -98,4 +102,9 @@ properties:
     output: true
     description: |
       The revision of the workflow. A new one is generated if the service account or source contents is changed.
+  - !ruby/object:Api::Type::String
+    name: 'cryptoKeyName'
+    description: |
+      The KMS key used to encrypt workflow and execution data.
 
+      Format: projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{cryptoKey}

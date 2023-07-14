@@ -19,6 +19,7 @@ collection_url_key: 'items'
 has_self_link: true
 readonly: true
 description: 'Represents a Zone resource.'
+# Used as a resource reference
 exclude: true
 properties:
   - !ruby/object:Api::Type::Time
@@ -92,6 +93,7 @@ properties:
     imports: 'selfLink'
     description: 'The region where the zone is located.'
     output: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Enum
     name: 'status'
     description: 'The status of the zone.'

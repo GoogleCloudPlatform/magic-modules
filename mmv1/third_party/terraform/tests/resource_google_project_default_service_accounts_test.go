@@ -5,6 +5,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
@@ -14,13 +17,13 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsBasic(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "google_project_default_service_accounts.acceptance"
-	org := GetTestOrgFromEnv(t)
-	project := fmt.Sprintf("tf-test-%d", RandInt(t))
-	billingAccount := GetTestBillingAccountFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
+	project := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleProjectDefaultServiceAccountsBasic(org, project, billingAccount),
@@ -54,15 +57,15 @@ resource "google_project_default_service_accounts" "acceptance" {
 func TestAccResourceGoogleProjectDefaultServiceAccountsDisable(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	project := fmt.Sprintf("tf-test-%d", RandInt(t))
-	billingAccount := GetTestBillingAccountFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
+	project := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
 	action := "DISABLE"
 	restorePolicy := "REVERT"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectDefaultServiceAccountsRevert(t, project, action),
 		Steps: []resource.TestStep{
 			{
@@ -72,7 +75,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDisable(t *testing.T) {
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "action", action),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
-					SleepInSecondsForTest(5),
+					acctest.SleepInSecondsForTest(5),
 					testAccCheckGoogleProjectDefaultServiceAccountsChanges(t, project, action),
 				),
 			},
@@ -83,15 +86,15 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDisable(t *testing.T) {
 func TestAccResourceGoogleProjectDefaultServiceAccountsDelete(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	project := fmt.Sprintf("tf-test-%d", RandInt(t))
-	billingAccount := GetTestBillingAccountFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
+	project := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
 	action := "DELETE"
 	restorePolicy := "REVERT"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectDefaultServiceAccountsRevert(t, project, action),
 		Steps: []resource.TestStep{
 			{
@@ -101,7 +104,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDelete(t *testing.T) {
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "action", action),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
-					SleepInSecondsForTest(10),
+					acctest.SleepInSecondsForTest(10),
 					testAccCheckGoogleProjectDefaultServiceAccountsChanges(t, project, action),
 				),
 			},
@@ -112,15 +115,15 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDelete(t *testing.T) {
 func TestAccResourceGoogleProjectDefaultServiceAccountsDeleteRevertIgnoreFailure(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	project := fmt.Sprintf("tf-test-%d", RandInt(t))
-	billingAccount := GetTestBillingAccountFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
+	project := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
 	action := "DELETE"
 	restorePolicy := "REVERT_AND_IGNORE_FAILURE"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleProjectDefaultServiceAccountsAdvanced(org, project, billingAccount, action, restorePolicy),
@@ -129,7 +132,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDeleteRevertIgnoreFailure
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "action", action),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
-					SleepInSecondsForTest(10),
+					acctest.SleepInSecondsForTest(10),
 					testAccCheckGoogleProjectDefaultServiceAccountsChanges(t, project, action),
 				),
 			},
@@ -140,15 +143,15 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDeleteRevertIgnoreFailure
 func TestAccResourceGoogleProjectDefaultServiceAccountsDeprivilege(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	project := fmt.Sprintf("tf-test-%d", RandInt(t))
-	billingAccount := GetTestBillingAccountFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
+	project := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
 	action := "DEPRIVILEGE"
 	restorePolicy := "REVERT"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleProjectDefaultServiceAccountsRevert(t, project, action),
 		Steps: []resource.TestStep{
 			{
@@ -158,7 +161,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDeprivilege(t *testing.T)
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "action", action),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
-					SleepInSecondsForTest(5),
+					acctest.SleepInSecondsForTest(5),
 					testAccCheckGoogleProjectDefaultServiceAccountsChanges(t, project, action),
 				),
 			},
@@ -193,7 +196,7 @@ resource "google_project_default_service_accounts" "acceptance" {
 
 func testAccCheckGoogleProjectDefaultServiceAccountsChanges(t *testing.T, project, action string) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		response, err := config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.List(PrefixedProject(project)).Do()
 		if err != nil {
 			return fmt.Errorf("failed to list service accounts on project %q: %v", project, err)
@@ -230,7 +233,7 @@ func testAccCheckGoogleProjectDefaultServiceAccountsChanges(t *testing.T, projec
 // Test if actions were reverted properly
 func testAccCheckGoogleProjectDefaultServiceAccountsRevert(t *testing.T, project, action string) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		response, err := config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.List(PrefixedProject(project)).Do()
 		if err != nil {
 			return fmt.Errorf("failed to list service accounts on project %q: %v", project, err)

@@ -7,6 +7,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -100,7 +101,9 @@ func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, va
 		if exprStmt, ok := stmt.(*ast.ExprStmt); ok {
 			if callExpr, ok := exprStmt.X.(*ast.CallExpr); ok {
 				// This is a call expression.
-				if ident, ok := callExpr.Fun.(*ast.Ident); ok && ident.Name == "VcrTest" {
+				ident, isIdent := callExpr.Fun.(*ast.Ident)
+				selExpr, isSelExpr := callExpr.Fun.(*ast.SelectorExpr)
+				if isIdent && ident.Name == "VcrTest" || isSelExpr && selExpr.Sel.Name == "VcrTest" {
 					return readVcrTestCall(callExpr, funcDecls, varDecls)
 				}
 			}
@@ -169,6 +172,7 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 	return test, nil
 }
 
+// Read the call expression in the public test function that returns the config.
 func readConfigCallExpr(configCallExpr *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (Step, error) {
 	if ident, ok := configCallExpr.Fun.(*ast.Ident); ok {
 		if configFunc, ok := funcDecls[ident.Name]; ok {
@@ -184,13 +188,7 @@ func readConfigFunc(configFunc *ast.FuncDecl) (Step, error) {
 		if returnStmt, ok := stmt.(*ast.ReturnStmt); ok {
 			for _, result := range returnStmt.Results {
 				if callExpr, ok := result.(*ast.CallExpr); ok {
-					if len(callExpr.Args) == 0 {
-						return nil, fmt.Errorf("no arguments found for call expression %v in %v", callExpr, result)
-					}
-					if basicLit, ok := callExpr.Args[0].(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
-						return readConfigBasicLit(basicLit)
-					}
-					return nil, fmt.Errorf("no string literal found in arguments to call expression %v", callExpr)
+					return readConfigFuncCallExpr(callExpr)
 				}
 			}
 			return nil, fmt.Errorf("failed to find a call expression in results %v", returnStmt.Results)
@@ -199,12 +197,30 @@ func readConfigFunc(configFunc *ast.FuncDecl) (Step, error) {
 	return nil, fmt.Errorf("failed to find a return statement in %v", configFunc.Body.List)
 }
 
+// Read the call expression in the config function that returns the config string.
+// The call expression can contain a nested call expression.
+func readConfigFuncCallExpr(configFuncCallExpr *ast.CallExpr) (Step, error) {
+	if len(configFuncCallExpr.Args) == 0 {
+		return nil, fmt.Errorf("no arguments found for call expression %v", configFuncCallExpr)
+	}
+	if basicLit, ok := configFuncCallExpr.Args[0].(*ast.BasicLit); ok {
+		if basicLit.Kind == token.STRING {
+			return readConfigBasicLit(basicLit)
+		}
+	} else if nestedCallExpr, ok := configFuncCallExpr.Args[0].(*ast.CallExpr); ok {
+		return readConfigFuncCallExpr(nestedCallExpr)
+	}
+	return nil, fmt.Errorf("no string literal found in arguments to call expression %v", configFuncCallExpr)
+}
+
 func readConfigBasicLit(configBasicLit *ast.BasicLit) (Step, error) {
 	if configStr, err := strconv.Unquote(configBasicLit.Value); err != nil {
 		return nil, err
 	} else {
 		// Remove template variables because they interfere with hcl parsing.
-		configStr = strings.ReplaceAll(configStr, "%", "")
+		pattern := regexp.MustCompile("%{[^{}]*}")
+		// Replace with a value that can be parsed outside quotation marks.
+		configStr = pattern.ReplaceAllString(configStr, "true")
 		parser := hclparse.NewParser()
 		file, diagnostics := parser.ParseHCL([]byte(configStr), "config.hcl")
 		if diagnostics.HasErrors() {
@@ -220,6 +236,13 @@ func readConfigBasicLit(configBasicLit *ast.BasicLit) (Step, error) {
 					Type:       "data",
 					LabelNames: []string{"type", "name"},
 				},
+				{
+					Type:       "output",
+					LabelNames: []string{"name"},
+				},
+				{
+					Type: "locals",
+				},
 			},
 		})
 		if diagnostics.HasErrors() {
@@ -228,6 +251,9 @@ func readConfigBasicLit(configBasicLit *ast.BasicLit) (Step, error) {
 		m := make(map[string]Resources)
 		errs := make([]error, 0)
 		for _, block := range content.Blocks {
+			if len(block.Labels) != 2 {
+				continue
+			}
 			if _, ok := m[block.Labels[0]]; !ok {
 				// Create an empty map for this resource type.
 				m[block.Labels[0]] = make(Resources)
@@ -250,11 +276,9 @@ func readHCLBlockBody(body hcl.Body, fileBytes []byte) (Resource, error) {
 	var m Resource
 	gohcl.DecodeBody(body, nil, &m)
 	for k, v := range m {
-		attr, ok := v.(*hcl.Attribute)
-		if !ok {
-			continue
+		if attr, ok := v.(*hcl.Attribute); ok {
+			m[k] = string(attr.Expr.Range().SliceBytes(fileBytes))
 		}
-		m[k] = string(attr.Expr.Range().SliceBytes(fileBytes))
 	}
 	syntaxBody, ok := body.(*hclsyntax.Body)
 	if !ok {
@@ -266,10 +290,32 @@ func readHCLBlockBody(body hcl.Body, fileBytes []byte) (Resource, error) {
 		if err != nil {
 			errs = append(errs, err)
 		}
-		m[block.Type] = blockConfig
+		if existing, ok := m[block.Type]; ok {
+			// Merge the fields from the current block into the existing resource config.
+			if existingResource, ok := existing.(Resource); ok {
+				mergeResources(existingResource, blockConfig)
+			}
+		} else {
+			m[block.Type] = blockConfig
+		}
 	}
 	if len(errs) > 0 {
 		return m, fmt.Errorf("errors reading hcl blocks: %v", errs)
 	}
 	return m, nil
+}
+
+// Perform a recursive one-way merge of b into a.
+func mergeResources(a, b Resource) {
+	for k, bv := range b {
+		if av, ok := a[k]; ok {
+			if avr, ok := av.(Resource); ok {
+				if bvr, ok := bv.(Resource); ok {
+					mergeResources(avr, bvr)
+				}
+			}
+		} else {
+			a[k] = bv
+		}
+	}
 }

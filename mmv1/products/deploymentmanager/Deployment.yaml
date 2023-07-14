@@ -43,10 +43,10 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-id_format: "projects/{{project}}/deployments/{{name}}"
-import_format: ["projects/{{project}}/deployments/{{name}}"]
-timeouts: !ruby/object:Api::Timeouts
-      # Very long to support very long deployments
+id_format: 'projects/{{project}}/deployments/{{name}}'
+import_format: ['projects/{{project}}/deployments/{{name}}']
+timeouts:
+  !ruby/object:Api::Timeouts  # Very long to support very long deployments
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
@@ -66,28 +66,31 @@ docs: !ruby/object:Provider::Terraform::Docs
     `preview=false`).
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "deployment_manager_deployment_basic"
-    primary_resource_id: "deployment"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-deployment-%s\", context[\"random_suffix\"\
+    name: 'deployment_manager_deployment_basic'
+    primary_resource_id: 'deployment'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-deployment-%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      deployment_name: "my-deployment"
+      deployment_name: 'my-deployment'
     skip_test: true
   - !ruby/object:Provider::Terraform::Examples
-    name: "deployment_manager_deployment_imports"
-    primary_resource_id: "deployment"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-deployment-%s\", context[\"random_suffix\"\
+    name: 'deployment_manager_deployment_imports'
+    primary_resource_id: 'deployment'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-deployment-%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      deployment_name: "my-deployment"
+      deployment_name: 'my-deployment'
     skip_test: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-      # post-create failure: Delete deployment if an invalid deployment was created
+custom_code:
+  !ruby/object:Provider::Terraform::CustomCode  # post-create failure: Delete deployment if an invalid deployment was created
   post_create_failure: 'templates/terraform/post_create_failure/delete_on_failure.go.erb'
-      # Custom diff to force new if 'preview' is true
+  # Custom diff to force new if 'preview' is true
   constants: 'templates/terraform/constants/deployment_manager_deployment.go.erb'
-  resource_definition: 'templates/terraform/resource_definition/deployment_manager_deployment.go.erb'
-
+custom_diff: [
+  'customDiffDeploymentManagerDeployment',
+]
 parameters:
   # These properties are query parameters given on create/update/delete.
   # They should be tracked and updatable.
@@ -230,4 +233,3 @@ properties:
     output: true
     description: |
       Output only. Server defined URL for the resource.
-

@@ -346,7 +346,7 @@ subnetwork in which the cluster's instances are launched.
     The desired state of IPv6 connectivity to Google Services. By default, no private IPv6 access to or from Google Services (all access will be via IPv4).
 
 * `datapath_provider` - (Optional)
-    The desired datapath provider for this cluster. By default, uses the IPTables-based kube-proxy implementation.
+    The desired datapath provider for this cluster. This is set to `LEGACY_DATAPATH` by default, which uses the IPTables-based kube-proxy implementation. Set to `ADVANCED_DATAPATH` to enable Dataplane v2.
 
 * `default_snat_status` - (Optional)
   [GKE SNAT](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-masquerade-agent#how_ipmasq_works) DefaultSnatStatus contains the desired state of whether default sNAT should be disabled on the cluster, [API doc](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#networkconfig). Structure is [documented below](#nested_default_snat_status)
@@ -359,6 +359,9 @@ subnetwork in which the cluster's instances are launched.
 
 * `protect_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
   Enable/Disable Protect API features for the cluster. Structure is [documented below](#nested_protect_config).
+
+* `security_posture_config` - (Optional)
+Enable/Disable Security Posture API features for the cluster. Structure is [documented below](#nested_security_posture_config).
 
 <a name="nested_default_snat_status"></a>The `default_snat_status` block supports
 
@@ -389,6 +392,10 @@ subnetwork in which the cluster's instances are launched.
 
 * `gcp_filestore_csi_driver_config` - (Optional) The status of the Filestore CSI driver addon,
     which allows the usage of filestore instance as volumes.
+    It is disabled by default; set `enabled = true` to enable.
+
+* `gcs_fuse_csi_driver_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))) The status of the GCSFuse CSI driver addon,
+    which allows the usage of a gcs bucket as volumes.
     It is disabled by default; set `enabled = true` to enable.
 
 * `cloudrun_config` - (Optional). Structure is [documented below](#nested_cloudrun_config).
@@ -693,7 +700,7 @@ pick a specific range to use.
 
 * `stack_type` - (Optional) The IP Stack Type of the cluster. 
 Default value is `IPV4`.
-Possible values are `IPV4` and `PV4_IPV6`.
+Possible values are `IPV4` and `IPV4_IPV6`.
 
 <a name="nested_master_auth"></a>The `master_auth` block supports:
 
@@ -742,6 +749,13 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
 
 ```hcl
 ephemeral_storage_config {
+  local_ssd_count = 2
+}
+```
+* `ephemeral_storage_local_ssd_config` - (Optional) Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk. Structure is [documented below](#nested_ephemeral_storage_local_ssd_config).
+
+```hcl
+ephemeral_storage_local_ssd_config {
   local_ssd_count = 2
 }
 ```
@@ -880,14 +894,38 @@ linux_node_config {
 
 * `node_group` - (Optional) Setting this field will assign instances of this pool to run on the specified node group. This is useful for running workloads on [sole tenant nodes](https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes).
 
+* `sole_tenant_config` (Optional)  Allows specifying multiple [node affinities](https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes#node_affinity_and_anti-affinity) useful for running workloads on [sole tenant nodes](https://cloud.google.com/kubernetes-engine/docs/how-to/sole-tenancy). `node_affinity` structure is [documented below](#nested_node_affinity).
+
+```hcl
+sole_tenant_config {
+  node_affinity {
+    key = "compute.googleapis.com/node-group-name"
+    operator = "IN"
+    values = ["node-group-name"]
+  }
+}
+```
+
 * `advanced_machine_features` - (Optional) Specifies options for controlling
-  advanced machine features. Structure is documented below.
+  advanced machine features. Structure is [documented below](#nested_advanced_machine_features).
+
+<a name="nested_node_affinity"></a>The `node_affinity` block supports:
+
+* `key` (Required) - The default or custom node affinity label key name.
+
+* `operator` (Required) - Specifies affinity or anti-affinity. Accepted values are `"IN"` or `"NOT_IN"`
+
+* `values` (Required) - List of node affinity label values as strings.
 
 <a name="nested_advanced_machine_features"></a>The `advanced_machine_features` block supports:
 
 * `threads_per_core` - (Required) The number of threads per physical core. To disable simultaneous multithreading (SMT) set this to 1. If unset, the maximum number of threads supported per core by the underlying processor is assumed.
 
 <a name="nested_ephemeral_storage_config"></a>The `ephemeral_storage_config` block supports:
+
+* `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
+
+<a name="nested_ephemeral_storage_local_ssd_config"></a>The `ephemeral_storage_local_ssd_config` block supports:
 
 * `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
 
@@ -909,6 +947,17 @@ linux_node_config {
 * `type` (Required) - The accelerator type resource to expose to this instance. E.g. `nvidia-tesla-k80`.
 
 * `count` (Required) - The number of the guest accelerator cards exposed to this instance.
+
+* `gpu_driver_installation_config` (Optional) - Configuration for auto installation of GPU driver. Structure is [documented below](#nested_gpu_driver_installation_config).
+
+<a name="nested_gpu_driver_installation_config"></a>The `gpu_driver_installation_config` block supports:
+
+* `gpu_driver_version` (Required) - Mode for how the GPU driver is installed.
+    Accepted values are:
+    * `"GPU_DRIVER_VERSION_UNSPECIFIED"`: Default value is to not install any GPU driver.
+    * `"INSTALLATION_DISABLED"`: Disable GPU driver auto installation and needs manual installation.
+    * `"DEFAULT"`: "Default" GPU driver in COS and Ubuntu.
+    * `"LATEST"`: "Latest" GPU driver in COS.
 
 * `gpu_partition_size` (Optional) - Size of partitions to create on the GPU. Valid values are described in the NVIDIA mig [user guide](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/#partitioning).
 
@@ -1160,17 +1209,25 @@ and all pods running on the nodes. Specified as a map from the key, such as
 
 <a name="nested_gateway_api_config"></a>The `gateway_api_config` block supports:
 
-* `channel` - (Required) Which Gateway Api channel should be used. `CHANNEL_DISABLED` or `CHANNEL_STANDARD`.
+* `channel` - (Required) Which Gateway Api channel should be used. `CHANNEL_DISABLED`, `CHANNEL_EXPERIMENTAL` or `CHANNEL_STANDARD`.
 
 <a name="nested_protect_config"></a>The `protect_config` block supports:
 
 * `workload_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) WorkloadConfig defines which actions are enabled for a cluster's workload configurations. Structure is [documented below](#nested_workload_config)
 
-* `workload_vulnerability_mode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Sets which mode to use for Protect workload vulnerability scanning feature. Accepted values are WORKLOAD_VULNERABILITY_MODE_UNSPECIFIED, DISABLED, BASIC.
+* `workload_vulnerability_mode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Sets which mode to use for Protect workload vulnerability scanning feature. Accepted values are DISABLED, BASIC.
 
 <a name="nested_workload_config"></a>The `protect_config.workload_config` block supports:
 
-* `auditMode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) WorkloadConfig defines the flags to enable or disable the workload configurations for the cluster. Accepted values are MODE_UNSPECIFIED, DISABLED, BASIC.
+* `audit_mode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Sets which mode of auditing should be used for the cluster's workloads. Accepted values are DISABLED, BASIC.
+
+<a name="nested_security_posture_config"></a>The `security_posture_config` block supports:
+
+* `mode` - (Optional) Sets the mode of the Kubernetes security posture API's off-cluster features. Available options include `DISABLED` and `BASIC`.
+
+
+* `vulnerability_mode` - (Optional) Sets the mode of the Kubernetes security posture API's workload vulnerability scanning. Available options include `VULNERABILITY_DISABLED` and `VULNERABILITY_BASIC`.
+
 
 ## Attributes Reference
 

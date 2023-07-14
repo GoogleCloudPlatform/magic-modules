@@ -25,15 +25,15 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/filestore/docs/backups'
     'Creating Backups': 'https://cloud.google.com/filestore/docs/create-backups'
   api: 'https://cloud.google.com/filestore/docs/reference/rest/v1/projects.locations.instances.backups'
-mutex: "filestore/{{project}}"
-error_retry_predicates: ["isNotFilestoreQuotaError"]
+mutex: 'filestore/{{project}}'
+error_abort_predicates: ['transport_tpg.Is429QuotaError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "filestore_backup_basic"
-    primary_resource_id: "backup"
+    name: 'filestore_backup_basic'
+    primary_resource_id: 'backup'
     vars:
-      backup_name: "tf-fs-bkup"
-      instance_name: "tf-fs-inst"
+      backup_name: 'tf-fs-bkup'
+      instance_name: 'tf-fs-inst'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -125,4 +125,3 @@ properties:
     description: |
       KMS key name used for data encryption.
     output: true
-

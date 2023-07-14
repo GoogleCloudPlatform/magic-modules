@@ -26,24 +26,27 @@ min_version: beta
 description: |
   An individual endpoint that provides a service.
 skip_sweeper: true
-import_format: ["projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}/endpoints/{{endpoint_id}}"]
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}/endpoints/{{endpoint_id}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "service_directory_endpoint_basic"
-    primary_resource_id: "example"
+    name: 'service_directory_endpoint_basic'
+    primary_resource_id: 'example'
     vars:
-      service_id: "example-service"
-      namespace_id: "example-namespace"
-      endpoint_id: "example-endpoint"
+      service_id: 'example-service'
+      namespace_id: 'example-namespace'
+      endpoint_id: 'example-endpoint'
     min_version: beta
   - !ruby/object:Provider::Terraform::Examples
-    name: "service_directory_endpoint_with_network"
-    primary_resource_id: "example"
+    name: 'service_directory_endpoint_with_network'
+    primary_resource_id: 'example'
     vars:
-      service_id: "example-service"
-      namespace_id: "example-namespace"
-      endpoint_id: "example-endpoint"
-      network_name: "example-network"
+      service_id: 'example-service'
+      namespace_id: 'example-namespace'
+      endpoint_id: 'example-endpoint'
+      network_name: 'example-network'
     min_version: beta
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/service_directory_endpoint.go.erb
@@ -65,7 +68,7 @@ parameters:
     immutable: true
     url_param_only: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateRFC1035Name(2, 63)'
+      function: 'verify.ValidateRFC1035Name(2, 63)'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -78,7 +81,7 @@ properties:
     description: |
       IPv4 or IPv6 address of the endpoint.
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateIpAddress'
+      function: 'verify.ValidateIpAddress'
   - !ruby/object:Api::Type::Integer
     name: 'port'
     description: |
@@ -97,6 +100,4 @@ properties:
     name: 'network'
     immutable: true
     description: |
-      The URL to the network, such as projects/PROJECT_NUMBER/locations/global/networks/NETWORK_NAME.          
-
-
+      The URL to the network, such as projects/PROJECT_NUMBER/locations/global/networks/NETWORK_NAME.

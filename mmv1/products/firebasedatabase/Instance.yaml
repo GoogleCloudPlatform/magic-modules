@@ -22,33 +22,36 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://firebase.google.com/products/realtime-database'
   api: 'https://firebase.google.com/docs/reference/rest/database/database-management/rest'
-import_format: ['projects/{{project}}/locations/{{region}}/instances/{{instance_id}}',
-  '{{region}}/{{instance_id}}']
+import_format:
+  [
+    'projects/{{project}}/locations/{{region}}/instances/{{instance_id}}',
+    '{{region}}/{{instance_id}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_database_instance_basic"
-    min_version: "beta"
-    primary_resource_id: "basic"
+    name: 'firebase_database_instance_basic'
+    min_version: 'beta'
+    primary_resource_id: 'basic'
     vars:
-      instance_id: "active-db"
+      instance_id: 'active-db'
     test_env_vars:
       project_id: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_database_instance_full"
-    min_version: "beta"
-    primary_resource_id: "full"
+    name: 'firebase_database_instance_full'
+    min_version: 'beta'
+    primary_resource_id: 'full'
     vars:
-      instance_id: "disabled-db"
+      instance_id: 'disabled-db'
     test_env_vars:
       project_id: :PROJECT_NAME
     ignore_read_extra:
-      - "desired_state"
+      - 'desired_state'
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_database_instance_default_database"
-    min_version: "beta"
-    primary_resource_id: "default"
+    name: 'firebase_database_instance_default_database'
+    min_version: 'beta'
+    primary_resource_id: 'default'
     vars:
-      project_id: "rtdb-project"
+      project_id: 'rtdb-project'
     test_env_vars:
       org_id: :ORG_ID
 virtual_fields:
@@ -79,7 +82,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'instance_id'
     description: |
-      The globally unique identifier of the Firebase Realtime Database instance. 
+      The globally unique identifier of the Firebase Realtime Database instance.
       Instance IDs cannot be reused after deletion.
     required: true
     immutable: true
@@ -119,5 +122,3 @@ properties:
     values:
       - :ACTIVE
       - :DISABLED
-
-

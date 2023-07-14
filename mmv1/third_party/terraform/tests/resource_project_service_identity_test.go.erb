@@ -4,6 +4,7 @@ package google
 <% unless version == 'ga' -%>
 import (
 	"testing"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -11,9 +12,9 @@ import (
 func TestAccProjectServiceIdentity_basic(t *testing.T) {
 	t.Parallel()
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleProjectServiceIdentity_basic(),

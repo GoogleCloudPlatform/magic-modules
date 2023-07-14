@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -12,21 +14,21 @@ import (
 func TestAccDataSourceComputeResourcePolicy(t *testing.T) {
 	t.Parallel()
 
-	randomSuffix := RandString(t, 10)
+	randomSuffix := acctest.RandString(t, 10)
 
 	rsName := "foo_" + randomSuffix
 	rsFullName := fmt.Sprintf("google_compute_resource_policy.%s", rsName)
 	dsName := "my_policy_" + randomSuffix
 	dsFullName := fmt.Sprintf("data.google_compute_resource_policy.%s", dsName)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataSourceComputeResourcePolicyDestroy(t, rsFullName),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeResourcePolicyConfig(rsName, dsName, randomSuffix),
-				Check:  checkDataSourceStateMatchesResourceState(rsFullName, dsFullName),
+				Check:  acctest.CheckDataSourceStateMatchesResourceState(rsFullName, dsFullName),
 			},
 		},
 	})
@@ -43,7 +45,7 @@ func testAccCheckDataSourceComputeResourcePolicyDestroy(t *testing.T, name strin
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			policyAttrs := rs.Primary.Attributes
 

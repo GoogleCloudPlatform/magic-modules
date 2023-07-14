@@ -20,16 +20,20 @@ description: |
   **NOTE**: This is a private feature and users should contact GCP support
   if they would like to test it.
 autogen_async: true
-import_format: ["{{parent}}/{{name}}"]
-id_format: "{{parent}}/{{name}}"
+# Skipping sweeper since this is a child resource
+skip_sweeper: true
+import_format: ['{{parent}}/{{name}}']
+id_format: '{{parent}}/{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "iam_access_boundary_policy_basic"
+    name: 'iam_access_boundary_policy_basic'
     skip_test: true
-    primary_resource_id: "example"
+    primary_resource_id: 'example'
     vars:
-      policy_name: "my-ab-policy"
-      account_id: "svc-acc"
+      policy_name: 'my-ab-policy'
+      account_id: 'svc-acc'
+      project_id: 'my-project'
+      access_level_title: 'chromeos_no_lock'
     test_env_vars:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
@@ -74,16 +78,19 @@ properties:
           properties:
             - !ruby/object:Api::Type::String
               name: 'availableResource'
-              description: The full resource name of a Google Cloud resource entity.
+              description:
+                The full resource name of a Google Cloud resource entity.
             - !ruby/object:Api::Type::Array
               name: 'availablePermissions'
-              description: A list of permissions that may be allowed for use on the
+              description:
+                A list of permissions that may be allowed for use on the
                 specified resource.
               item_type: Api::Type::String
             - !ruby/object:Api::Type::NestedObject
               name: 'availabilityCondition'
-              description: The availability condition further constrains the access
-                allowed by the access boundary rule.
+              description:
+                The availability condition further constrains the access allowed
+                by the access boundary rule.
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'expression'
@@ -105,4 +112,3 @@ properties:
                   description: |
                     String indicating the location of the expression for error reporting,
                     e.g. a file name and a position in the file.
-

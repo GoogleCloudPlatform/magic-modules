@@ -77,7 +77,7 @@ module Provider
       #   - tests config will have `"network = my-vpc%{random_suffix}"`
       #     with context
       #       map[string]interface{}{
-      #         "random_suffix": RandString()
+      #         "random_suffix": acctest.RandString()
       #       }
       #
       # If test_vars_overrides["network"] = "nameOfVpc()"
@@ -162,7 +162,8 @@ module Provider
           MASTER_BILLING_ACCT: '000000-0000000-0000000-000000',
           SERVICE_ACCT: 'my@service-account.com',
           CUST_ID: 'A01b123xz',
-          IDENTITY_USER: 'cloud_identity_user'
+          IDENTITY_USER: 'cloud_identity_user',
+          PAP_DESCRIPTION: 'description'
         }
         @vars ||= {}
         @test_env_vars ||= {}

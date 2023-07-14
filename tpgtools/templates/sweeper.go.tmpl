@@ -11,6 +11,9 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License. */}}
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // ----------------------------------------------------------------------------
 //
 //     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
@@ -26,28 +29,27 @@
 //
 // ----------------------------------------------------------------------------
 
-package google
+package {{$.Package}}
 
 import(
 	"context"
 	"log"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	{{$.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$.DCLPackage}}"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 )
 
 func init() {
-	resource.AddTestSweepers("{{$.TitleCaseFullName}}", &resource.Sweeper{
-		Name: "{{$.TitleCaseFullName}}",
-		F: testSweep{{$.TitleCaseFullName}},
-	})
+	sweeper.AddTestSweepers("{{$.TitleCaseFullName}}", testSweep{{$.TitleCaseFullName}})
 }
 
 func testSweep{{$.TitleCaseFullName}}(region string) error {
 	log.Print("[INFO][SWEEPER_LOG] Starting sweeper for {{$.TitleCaseFullName}}")
 
-	config, err := SharedConfigForRegion(region)
+	config, err := sweeper.SharedConfigForRegion(region)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
 		return err
@@ -60,7 +62,7 @@ func testSweep{{$.TitleCaseFullName}}(region string) error {
 	}
 
 	t := &testing.T{}
-	billingId := GetTestBillingAccountFromEnv(t)
+	billingId := envvar.GetTestBillingAccountFromEnv(t)
 
 	// Setup variables to be used for Delete arguments.
 	d := map[string]string{
@@ -71,7 +73,7 @@ func testSweep{{$.TitleCaseFullName}}(region string) error {
 		"billing_account":billingId,
 	}
 
-	client := NewDCL{{$.TitleCasePackageName}}Client(config, config.UserAgent, "", 0)
+	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, config.UserAgent, "", 0)
 	err = client.DeleteAll{{$.DCLTitle}}(context.Background(), {{$.SweeperFunctionArgs}} isDeletable{{$.TitleCaseFullName}})
 	if err != nil {
 		return err
@@ -80,5 +82,5 @@ func testSweep{{$.TitleCaseFullName}}(region string) error {
 }
 
 func isDeletable{{$.TitleCaseFullName}}(r *{{$.Package}}.{{$.DCLStructName}}) bool {
-	return IsSweepableTestResource(*r.Name)
+	return sweeper.IsSweepableTestResource(*r.Name)
 }

@@ -1,3 +1,9 @@
+# There is no automation around this configuration, and it is expected to be
+# run locally by an administrator. It specifies the configuration needed for a
+# test environment where the full set of acceptance tests can be run.
+#
+# More info can be found in the ./README.md
+
 provider "google" {}
 
 data "google_organization" "org" {
@@ -204,6 +210,7 @@ module "project-services" {
     "dataflow.googleapis.com",
     "dataform.googleapis.com",
     "datafusion.googleapis.com",
+    "datamigration.googleapis.com",
     "dataplex.googleapis.com",
     "dataproc.googleapis.com",
     "datastore.googleapis.com",
@@ -224,6 +231,7 @@ module "project-services" {
     "firebaseappdistribution.googleapis.com",
     "firebasedatabase.googleapis.com",
     "firebasedynamiclinks.googleapis.com",
+    "firebaseextensions.googleapis.com",
     "firebasehosting.googleapis.com",
     "firebaseinstallations.googleapis.com",
     "firebaseremoteconfig.googleapis.com",
@@ -236,6 +244,7 @@ module "project-services" {
     "gkeconnect.googleapis.com",
     "gkehub.googleapis.com",
     "gkemulticloud.googleapis.com",
+    "gkeonprem.googleapis.com",
     "googlecloudmessaging.googleapis.com",
     "healthcare.googleapis.com",
     "iam.googleapis.com",
@@ -244,6 +253,7 @@ module "project-services" {
     "identitytoolkit.googleapis.com",
     "ids.googleapis.com",
     "logging.googleapis.com",
+    "looker.googleapis.com",
     "managedidentities.googleapis.com",
     "memcache.googleapis.com",
     "metastore.googleapis.com",
@@ -261,6 +271,7 @@ module "project-services" {
     "privateca.googleapis.com",
     "pubsub.googleapis.com",
     "pubsublite.googleapis.com",
+    "publicca.googleapis.com",
     "recaptchaenterprise.googleapis.com",
     "redis.googleapis.com",
     "replicapool.googleapis.com",
@@ -291,6 +302,7 @@ module "project-services" {
     "testing.googleapis.com",
     "tpu.googleapis.com",
     "trafficdirector.googleapis.com",
+    "vmwareengine.googleapis.com",
     "vpcaccess.googleapis.com",
     "websecurityscanner.googleapis.com",
     "workflowexecutions.googleapis.com",

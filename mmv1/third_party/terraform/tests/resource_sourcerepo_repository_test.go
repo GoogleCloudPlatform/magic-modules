@@ -5,15 +5,16 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccSourceRepoRepository_basic(t *testing.T) {
 	t.Parallel()
 
-	repositoryName := fmt.Sprintf("source-repo-repository-test-%s", RandString(t, 10))
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	repositoryName := fmt.Sprintf("source-repo-repository-test-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckSourceRepoRepositoryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -31,12 +32,12 @@ func TestAccSourceRepoRepository_basic(t *testing.T) {
 func TestAccSourceRepoRepository_update(t *testing.T) {
 	t.Parallel()
 
-	repositoryName := fmt.Sprintf("source-repo-repository-test-%s", RandString(t, 10))
-	accountId := fmt.Sprintf("account-id-%s", RandString(t, 10))
-	topicName := fmt.Sprintf("topic-name-%s", RandString(t, 10))
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	repositoryName := fmt.Sprintf("source-repo-repository-test-%s", acctest.RandString(t, 10))
+	accountId := fmt.Sprintf("account-id-%s", acctest.RandString(t, 10))
+	topicName := fmt.Sprintf("topic-name-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckSourceRepoRepositoryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

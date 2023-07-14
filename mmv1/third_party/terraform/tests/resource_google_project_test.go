@@ -1,9 +1,7 @@
 package google
 
 import (
-	"context"
 	"fmt"
-	"log"
 	"os"
 	"reflect"
 	"strconv"
@@ -13,92 +11,32 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"google.golang.org/api/cloudresourcemanager/v1"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 var (
-	pname          = "Terraform Acceptance Tests"
-	OriginalPolicy *cloudresourcemanager.Policy
-	TestPrefix     = "tf-test"
+	TestPrefix = "tf-test"
 )
-
-func init() {
-	// SKIP_PROJECT_SWEEPER can be set for a sweeper run to prevent it from
-	// sweeping projects. This can be useful when running sweepers in
-	// organizations where acceptance tests intiated by another project may
-	// already be in-progress.
-	// Example: SKIP_PROJECT_SWEEPER=1 go test ./google -v -sweep=us-central1 -sweep-run=
-	if os.Getenv("SKIP_PROJECT_SWEEPER") != "" {
-		return
-	}
-
-	resource.AddTestSweepers("GoogleProject", &resource.Sweeper{
-		Name: "GoogleProject",
-		F:    testSweepProject,
-	})
-}
-
-func testSweepProject(region string) error {
-	config, err := SharedConfigForRegion(region)
-	if err != nil {
-		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
-		return err
-	}
-
-	err = config.LoadAndValidate(context.Background())
-	if err != nil {
-		log.Printf("[INFO][SWEEPER_LOG] error loading: %s", err)
-		return err
-	}
-
-	org := UnsafeGetTestOrgFromEnv()
-	if org == "" {
-		log.Printf("[INFO][SWEEPER_LOG] no organization set, failing project sweeper")
-		return fmt.Errorf("no organization set")
-	}
-
-	token := ""
-	for paginate := true; paginate; {
-		// Filter for projects with test prefix
-		filter := fmt.Sprintf("id:\"%s*\" -lifecycleState:DELETE_REQUESTED parent.id:%v", TestPrefix, org)
-		found, err := config.NewResourceManagerClient(config.UserAgent).Projects.List().Filter(filter).PageToken(token).Do()
-		if err != nil {
-			log.Printf("[INFO][SWEEPER_LOG] error listing projects: %s", err)
-			return nil
-		}
-
-		for _, project := range found.Projects {
-			log.Printf("[INFO][SWEEPER_LOG] Sweeping Project id: %s", project.ProjectId)
-			_, err := config.NewResourceManagerClient(config.UserAgent).Projects.Delete(project.ProjectId).Do()
-			if err != nil {
-				log.Printf("[INFO][SWEEPER_LOG] Error, failed to delete project %s: %s", project.Name, err)
-				continue
-			}
-		}
-		token = found.NextPageToken
-		paginate = token != ""
-	}
-
-	return nil
-}
 
 // Test that a Project resource can be created without an organization
 func TestAccProject_createWithoutOrg(t *testing.T) {
 	t.Parallel()
 
-	creds := MultiEnvSearch(CredsEnvVars)
+	creds := transport_tpg.MultiEnvSearch(envvar.CredsEnvVars)
 	if strings.Contains(creds, "iam.gserviceaccount.com") {
 		t.Skip("Service accounts cannot create projects without a parent. Requires user credentials.")
 	}
 
-	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// This step creates a new project
 			{
-				Config: testAccProject_createWithoutOrg(pid, pname),
+				Config: testAccProject_createWithoutOrg(pid),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
 				),
@@ -112,15 +50,15 @@ func TestAccProject_createWithoutOrg(t *testing.T) {
 func TestAccProject_create(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	org := envvar.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// This step creates a new project
 			{
-				Config: testAccProject_create(pid, pname, org),
+				Config: testAccProject_create(pid, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
 				),
@@ -133,20 +71,20 @@ func TestAccProject_create(t *testing.T) {
 // billing account
 func TestAccProject_billing(t *testing.T) {
 	t.Parallel()
-	org := GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	// This is a second billing account that can be charged, which is used only in this test to
 	// verify that a project can update its billing account.
-	SkipIfEnvNotSet(t, "GOOGLE_BILLING_ACCOUNT_2")
+	acctest.SkipIfEnvNotSet(t, "GOOGLE_BILLING_ACCOUNT_2")
 	billingId2 := os.Getenv("GOOGLE_BILLING_ACCOUNT_2")
-	billingId := GetTestBillingAccountFromEnv(t)
-	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	billingId := envvar.GetTestBillingAccountFromEnv(t)
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// This step creates a new project with a billing account
 			{
-				Config: testAccProject_createBilling(pid, pname, org, billingId),
+				Config: testAccProject_createBilling(pid, org, billingId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectHasBillingAccount(t, "google_project.acceptance", pid, billingId),
 				),
@@ -160,14 +98,14 @@ func TestAccProject_billing(t *testing.T) {
 			},
 			// Update to a different  billing account
 			{
-				Config: testAccProject_createBilling(pid, pname, org, billingId2),
+				Config: testAccProject_createBilling(pid, org, billingId2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectHasBillingAccount(t, "google_project.acceptance", pid, billingId2),
 				),
 			},
 			// Unlink the billing account
 			{
-				Config: testAccProject_create(pid, pname, org),
+				Config: testAccProject_create(pid, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectHasBillingAccount(t, "google_project.acceptance", pid, ""),
 				),
@@ -180,14 +118,14 @@ func TestAccProject_billing(t *testing.T) {
 func TestAccProject_labels(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	org := envvar.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProject_labels(pid, pname, org, map[string]string{"test": "that"}),
+				Config: testAccProject_labels(pid, org, map[string]string{"test": "that"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectHasLabels(t, "google_project.acceptance", pid, map[string]string{"test": "that"}),
 				),
@@ -201,7 +139,7 @@ func TestAccProject_labels(t *testing.T) {
 			},
 			// update project with labels
 			{
-				Config: testAccProject_labels(pid, pname, org, map[string]string{"label": "label-value"}),
+				Config: testAccProject_labels(pid, org, map[string]string{"label": "label-value"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
 					testAccCheckGoogleProjectHasLabels(t, "google_project.acceptance", pid, map[string]string{"label": "label-value"}),
@@ -209,7 +147,7 @@ func TestAccProject_labels(t *testing.T) {
 			},
 			// update project delete labels
 			{
-				Config: testAccProject_create(pid, pname, org),
+				Config: testAccProject_create(pid, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
 					testAccCheckGoogleProjectHasNoLabels(t, "google_project.acceptance", pid),
@@ -222,15 +160,15 @@ func TestAccProject_labels(t *testing.T) {
 func TestAccProject_deleteDefaultNetwork(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
-	billingId := GetTestBillingAccountFromEnv(t)
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	org := envvar.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
+	billingId := envvar.GetTestBillingAccountFromEnv(t)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProject_deleteDefaultNetwork(pid, pname, org, billingId),
+				Config: testAccProject_deleteDefaultNetwork(pid, org, billingId),
 			},
 		},
 	})
@@ -239,15 +177,15 @@ func TestAccProject_deleteDefaultNetwork(t *testing.T) {
 func TestAccProject_parentFolder(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
-	folderDisplayName := TestPrefix + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	org := envvar.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
+	folderDisplayName := TestPrefix + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProject_parentFolder(pid, pname, folderDisplayName, org),
+				Config: testAccProject_parentFolder(pid, folderDisplayName, org),
 			},
 		},
 	})
@@ -256,15 +194,15 @@ func TestAccProject_parentFolder(t *testing.T) {
 func TestAccProject_migrateParent(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
-	folderDisplayName := TestPrefix + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	org := envvar.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
+	folderDisplayName := TestPrefix + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProject_migrateParentFolder(pid, pname, folderDisplayName, org),
+				Config: testAccProject_migrateParentFolder(pid, folderDisplayName, org),
 			},
 			{
 				ResourceName:            "google_project.acceptance",
@@ -273,7 +211,7 @@ func TestAccProject_migrateParent(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"skip_delete"},
 			},
 			{
-				Config: testAccProject_migrateParentOrg(pid, pname, folderDisplayName, org),
+				Config: testAccProject_migrateParentOrg(pid, folderDisplayName, org),
 			},
 			{
 				ResourceName:            "google_project.acceptance",
@@ -282,7 +220,7 @@ func TestAccProject_migrateParent(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"skip_delete"},
 			},
 			{
-				Config: testAccProject_migrateParentFolder(pid, pname, folderDisplayName, org),
+				Config: testAccProject_migrateParentFolder(pid, folderDisplayName, org),
 			},
 			{
 				ResourceName:            "google_project.acceptance",
@@ -328,7 +266,7 @@ func testAccCheckGoogleProjectHasBillingAccount(t *testing.T, r, pid, billingId 
 
 		// Actual value in API should match state and expected
 		// Read the billing account
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		ba, err := config.NewBillingClient(config.UserAgent).Projects.GetBillingInfo(PrefixedProject(pid)).Do()
 		if err != nil {
 			return fmt.Errorf("Error reading billing account for project %q: %v", PrefixedProject(pid), err)
@@ -353,7 +291,7 @@ func testAccCheckGoogleProjectHasLabels(t *testing.T, r, pid string, expected ma
 		}
 
 		// Actual value in API should match state and expected
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		found, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(pid).Do()
 		if err != nil {
@@ -395,7 +333,7 @@ func testAccCheckGoogleProjectHasNoLabels(t *testing.T, r, pid string) resource.
 		}
 
 		// Actual value in API should match state and expected
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		found, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(pid).Do()
 		if err != nil {
@@ -411,16 +349,16 @@ func testAccCheckGoogleProjectHasNoLabels(t *testing.T, r, pid string) resource.
 	}
 }
 
-func testAccProject_createWithoutOrg(pid, name string) string {
+func testAccProject_createWithoutOrg(pid string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
 }
-`, pid, name)
+`, pid, pid)
 }
 
-func testAccProject_createBilling(pid, name, org, billing string) string {
+func testAccProject_createBilling(pid, org, billing string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id      = "%s"
@@ -428,16 +366,16 @@ resource "google_project" "acceptance" {
   org_id          = "%s"
   billing_account = "%s"
 }
-`, pid, name, org, billing)
+`, pid, pid, org, billing)
 }
 
-func testAccProject_labels(pid, name, org string, labels map[string]string) string {
+func testAccProject_labels(pid, org string, labels map[string]string) string {
 	r := fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
-  labels = {`, pid, name, org)
+  labels = {`, pid, pid, org)
 
 	l := ""
 	for key, value := range labels {
@@ -448,7 +386,7 @@ resource "google_project" "acceptance" {
 	return r + l
 }
 
-func testAccProject_deleteDefaultNetwork(pid, name, org, billing string) string {
+func testAccProject_deleteDefaultNetwork(pid, org, billing string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id          = "%s"
@@ -457,10 +395,10 @@ resource "google_project" "acceptance" {
   billing_account     = "%s" # requires billing to enable compute API
   auto_create_network = false
 }
-`, pid, name, org, billing)
+`, pid, pid, org, billing)
 }
 
-func testAccProject_parentFolder(pid, projectName, folderName, org string) string {
+func testAccProject_parentFolder(pid, folderName, org string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id = "%s"
@@ -473,10 +411,10 @@ resource "google_folder" "folder1" {
   display_name = "%s"
   parent       = "organizations/%s"
 }
-`, pid, projectName, folderName, org)
+`, pid, pid, folderName, org)
 }
 
-func testAccProject_migrateParentFolder(pid, projectName, folderName, org string) string {
+func testAccProject_migrateParentFolder(pid, folderName, org string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id = "%s"
@@ -489,10 +427,10 @@ resource "google_folder" "folder1" {
   display_name = "%s"
   parent       = "organizations/%s"
 }
-`, pid, projectName, folderName, org)
+`, pid, pid, folderName, org)
 }
 
-func testAccProject_migrateParentOrg(pid, projectName, folderName, org string) string {
+func testAccProject_migrateParentOrg(pid, folderName, org string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id = "%s"
@@ -505,5 +443,5 @@ resource "google_folder" "folder1" {
   display_name = "%s"
   parent       = "organizations/%s"
 }
-`, pid, projectName, org, folderName, org)
+`, pid, pid, org, folderName, org)
 }

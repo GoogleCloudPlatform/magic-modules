@@ -18,8 +18,7 @@ create_url: 'projects/{{project}}/databases?databaseId={{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
-  A Cloud Firestore Database. Currently only one database is allowed per
-  Cloud project; this database must have a `database_id` of '(default)'.
+  A Cloud Firestore Database.
 
   If you wish to use Firestore with App Engine, use the
   [`google_app_engine_application`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/app_engine_application)
@@ -48,30 +47,58 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 skip_delete: true
 autogen_async: true
-id_format: "projects/{{project}}/databases/{{name}}"
+id_format: 'projects/{{project}}/databases/{{name}}'
 import_format:
-  - "projects/{{project}}/databases/{{name}}"
-  - "{{project}}/{{name}}"
-  - "{{name}}"
+  - 'projects/{{project}}/databases/{{name}}'
+  - '{{project}}/{{name}}'
+  - '{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firestore_database"
-    primary_resource_id: "database"
+    name: 'firestore_default_database'
+    primary_resource_id: 'database'
     pull_external: true
     test_env_vars:
       org_id: :ORG_ID
     ignore_read_extra:
       - project
       - etag
+    vars:
+      project_id: 'my-project'
   - !ruby/object:Provider::Terraform::Examples
-    name: "firestore_database_datastore_mode"
-    primary_resource_id: "datastore_mode_database"
+    name: 'firestore_database'
+    primary_resource_id: 'database'
+    pull_external: true
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+    ignore_read_extra:
+      - project
+      - etag
+    vars:
+      project_id: 'my-project'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firestore_default_database_in_datastore_mode'
+    primary_resource_id: 'datastore_mode_database'
     pull_external: true
     test_env_vars:
       org_id: :ORG_ID
     ignore_read_extra:
       - project
       - etag
+    vars:
+      project_id: 'my-project'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firestore_database_in_datastore_mode'
+    primary_resource_id: 'database'
+    pull_external: true
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+    ignore_read_extra:
+      - project
+      - etag
+    vars:
+      project_id: 'my-project'
 properties:
   - !ruby/object:Api::Type::String
     name: name

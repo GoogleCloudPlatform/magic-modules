@@ -5,18 +5,19 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccNetworkManagementConnectivityTest_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkManagementConnectivityTestDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -40,7 +41,7 @@ func TestAccNetworkManagementConnectivityTest_update(t *testing.T) {
 }
 
 func testAccNetworkManagementConnectivityTest_instanceToInstance(context map[string]interface{}) string {
-	connTestCfg := Nprintf(`
+	connTestCfg := acctest.Nprintf(`
 resource "google_network_management_connectivity_test" "conn-test" {
   name = "tf-test-conntest%{random_suffix}"
   source {
@@ -58,7 +59,7 @@ resource "google_network_management_connectivity_test" "conn-test" {
 }
 
 func testAccNetworkManagementConnectivityTest_instanceToAddr(context map[string]interface{}) string {
-	connTestCfg := Nprintf(`
+	connTestCfg := acctest.Nprintf(`
 resource "google_network_management_connectivity_test" "conn-test" {
   name = "tf-test-conntest%{random_suffix}"
   source {
@@ -81,7 +82,7 @@ resource "google_network_management_connectivity_test" "conn-test" {
 }
 
 func testAccNetworkManagementConnectivityTest_baseResources(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 
 resource "google_compute_address" "addr" {
 	name         = "tf-test-addr%{random_suffix}"

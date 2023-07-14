@@ -90,7 +90,7 @@ module Api
       #
       # [Optional] This is the name of the list of items
       # within the collection (list) json. Will default to the
-      # camelcase pluralize name of the resource.
+      # camelcase plural name of the resource.
       attr_reader :collection_url_key
       # [Optional] An ordered list of names of parameters that uniquely identify
       # the resource.
@@ -147,9 +147,20 @@ module Api
       # The Terraform resource id format used when calling #setId(...).
       # For instance, `{{name}}` means the id will be the resource name.
       attr_reader :id_format
+      # Override attribute used to handwrite the formats for generating regex strings
+      # that match templated values to a self_link when importing, only necessary when
+      # a resource is not adequately covered by the standard provider generated options.
+      # Leading a token with `%`
+      # i.e. {{%parent}}/resource/{{resource}}
+      # will allow that token to hold multiple /'s.
       attr_reader :import_format
       attr_reader :custom_code
       attr_reader :docs
+
+      # This block inserts entries into the customdiff.All() block in the
+      # resource schema -- the code for these custom diff functions must
+      # be included in the resource constants or come from tpgresource
+      attr_reader :custom_diff
 
       # Lock name for a mutex to prevent concurrent API calls for a given
       # resource.
@@ -182,15 +193,39 @@ module Api
       # An array of function names that determine whether an error is retryable.
       attr_reader :error_retry_predicates
 
+      # An array of function names that determine whether an error is not retryable.
+      attr_reader :error_abort_predicates
+
+      # Optional attributes for declaring a resource's current version and generating
+      # state_upgrader code to the output .go file from files stored at
+      # mmv1/templates/terraform/state_migrations/
+      # used for maintaining state stability with resources first provisioned on older api versions.
       attr_reader :schema_version
+      attr_reader :state_upgraders
+      # This block inserts the named function and its attribute into the
+      # resource schema -- the code for the migrate_state function must
+      # be included in the resource constants or come from tpgresource
+      # included for backwards compatibility as an older state migration method
+      # and should not be used for new resources.
+      attr_reader :migrate_state
 
       # Set to true for resources that are unable to be deleted, such as KMS keyrings or project
       # level resources such as firebase project
       attr_reader :skip_delete
 
+      # Set to true for resources that are unable to be read from the API, such as
+      # public ca external account keys
+      attr_reader :skip_read
+
       # This enables resources that get their project via a reference to a different resource
       # instead of a project field to use User Project Overrides
       attr_reader :supports_indirect_user_project_override
+
+      # If true, the resource's project field can be specified as either the short form project
+      # id or the long form projects/project-id. The extra projects/ string will be removed from
+      # urls and ids. This should only be used for resources that previously supported long form
+      # project ids for backwards compatibility.
+      attr_reader :legacy_long_form_project
 
       # Function to transform a read error so that handleNotFound recognises
       # it as a 404. This should be added as a handwritten fn that takes in
@@ -237,7 +272,7 @@ module Api
               `has exactly one :identity property"'
       end
 
-      check :collection_url_key, default: @name.pluralize.camelize(:lower)
+      check :collection_url_key, default: @name.plural.camelize(:lower)
 
       check :create_verb, type: Symbol, default: :POST, allowed: %i[POST PUT PATCH]
       check :read_verb, type: Symbol, default: :GET, allowed: %i[GET POST]
@@ -275,12 +310,17 @@ module Api
       check :import_format, type: Array, item_type: String, default: []
       check :autogen_async, type: :boolean, default: false
       check :exclude_import, type: :boolean, default: false
-
+      check :custom_diff, type: Array, item_type: String, default: []
       check :timeouts, type: Api::Timeouts
       check :error_retry_predicates, type: Array, item_type: String
+      check :error_abort_predicates, type: Array, item_type: String
       check :schema_version, type: Integer
+      check :state_upgraders, type: :boolean, default: false
+      check :migrate_state, type: String
       check :skip_delete, type: :boolean, default: false
+      check :skip_read, type: :boolean, default: false
       check :supports_indirect_user_project_override, type: :boolean, default: false
+      check :legacy_long_form_project, type: :boolean, default: false
       check :read_error_transform, type: String
       check :taint_resource_on_failed_create, type: :boolean, default: false
       check :skip_sweeper, type: :boolean, default: false
@@ -335,7 +375,7 @@ module Api
     # All settable properties in the resource.
     # Fingerprints aren't *really" settable properties, but they behave like one.
     # At Create, they have no value but they can just be read in anyways, and after a Read
-    # they will need ot be set in every Update.
+    # they will need to be set in every Update.
     def settable_properties
       all_user_properties.reject { |v| v.output && !v.is_a?(Api::Type::Fingerprint) }
                          .reject(&:url_param_only)

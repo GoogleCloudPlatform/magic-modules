@@ -27,17 +27,18 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://firebase.google.com/'
   api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects'
-import_format: ["projects/{{project}}", "{{project}}"]
+import_format: ['projects/{{project}}', '{{project}}']
 autogen_async: true
 skip_delete: true
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_project_basic"
+    name: 'firebase_project_basic'
     min_version: 'beta'
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      instance_name: "memory-cache"
+      instance_name: 'memory-cache'
+      project_name: "my-project"
     test_env_vars:
       org_id: :ORG_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode

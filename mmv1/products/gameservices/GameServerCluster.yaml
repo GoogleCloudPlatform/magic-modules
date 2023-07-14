@@ -40,19 +40,25 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-import_format: ["projects/{{project}}/locations/{{location}}/realms/{{realm_id}}/gameServerClusters/{{cluster_id}}"]
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/realms/{{realm_id}}/gameServerClusters/{{cluster_id}}',
+  ]
+# Skipping the sweeper due to the non-standard base_url
+skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "game_service_cluster_basic"
-    primary_resource_id: "default"
-        # NO_TEST: Not worth setting up as it is complicated and game servers are being deprecated
+    name: 'game_service_cluster_basic'
+    primary_resource_id:
+      'default'
+      # NO_TEST: Not worth setting up as it is complicated and game servers are being deprecated
     skip_test: true
     vars:
-      realm_id: "realm"
+      realm_id: 'realm'
     test_vars_overrides:
-      agones_cluster: "\"bootstrapped-agones-cluster\""
+      agones_cluster: '"bootstrapped-agones-cluster"'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: "templates/terraform/constants/gameserver_cluster_custom_diff.go"
+  constants: 'templates/terraform/constants/gameserver_cluster_custom_diff.go'
 properties:
   - !ruby/object:Api::Type::String
     immutable: true
@@ -101,7 +107,8 @@ properties:
         name: gkeClusterReference
         required: true
         immutable: true
-        description: Reference of the GKE cluster where the game servers are installed.
+        description:
+          Reference of the GKE cluster where the game servers are installed.
         properties:
           - !ruby/object:Api::Type::String
             name: cluster

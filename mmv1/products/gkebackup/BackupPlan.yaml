@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'BackupPlan'
-base_url: "projects/{{project}}/locations/{{location}}/backupPlans"
+base_url: 'projects/{{project}}/locations/{{location}}/backupPlans'
 create_url: projects/{{project}}/locations/{{location}}/backupPlans?backupPlanId={{name}}
 update_verb: :PATCH
 update_mask: true
@@ -27,42 +27,46 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: projects/{{project}}/locations/{{location}}/backupPlans/{{name}}
-  import_format: ["projects/{{project}}/locations/{{location}}/backupPlans/{{name}}",
-    "{{name}}"]
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/backupPlans/{{name}}',
+      '{{name}}',
+    ]
 timeouts: !ruby/object:Api::Timeouts
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "gkebackup_backupplan_basic"
-    primary_resource_id: "basic"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-basic-plan%s\", context[\"random_suffix\"\
+    name: 'gkebackup_backupplan_basic'
+    primary_resource_id: 'basic'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-basic-plan%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      name: "basic-plan"
-      cluster_name: "basic-cluster"
+      name: 'basic-plan'
+      cluster_name: 'basic-cluster'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "gkebackup_backupplan_autopilot"
-    primary_resource_id: "autopilot"
+    name: 'gkebackup_backupplan_autopilot'
+    primary_resource_id: 'autopilot'
     vars:
-      name: "autopilot-plan"
-      cluster_name: "autopilot-cluster"
+      name: 'autopilot-plan'
+      cluster_name: 'autopilot-cluster'
   - !ruby/object:Provider::Terraform::Examples
-    name: "gkebackup_backupplan_cmek"
-    primary_resource_id: "cmek"
+    name: 'gkebackup_backupplan_cmek'
+    primary_resource_id: 'cmek'
     vars:
-      name: "cmek-plan"
-      cluster_name: "cmek-cluster"
-      key_name: "backup-key"
+      name: 'cmek-plan'
+      cluster_name: 'cmek-cluster'
+      key_name: 'backup-key'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "gkebackup_backupplan_full"
-    primary_resource_id: "full"
+    name: 'gkebackup_backupplan_full'
+    primary_resource_id: 'full'
     vars:
-      name: "full-plan"
-      cluster_name: "full-cluster"
+      name: 'full-plan'
+      cluster_name: 'full-cluster'
     test_env_vars:
       project: :PROJECT_NAME
 skip_sweeper: true
@@ -100,7 +104,8 @@ properties:
       The source cluster from which Backups will be created via this BackupPlan.
   - !ruby/object:Api::Type::NestedObject
     name: retentionPolicy
-    description: RetentionPolicy governs lifecycle of Backups created under this plan.
+    description:
+      RetentionPolicy governs lifecycle of Backups created under this plan.
     properties:
       - !ruby/object:Api::Type::Integer
         name: backupDeleteLockDays
@@ -141,7 +146,8 @@ properties:
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
   - !ruby/object:Api::Type::NestedObject
     name: backupSchedule
-    description: Defines a schedule for automatic Backup creation via this BackupPlan.
+    description:
+      Defines a schedule for automatic Backup creation via this BackupPlan.
     properties:
       - !ruby/object:Api::Type::String
         name: cronSchedule
@@ -254,4 +260,3 @@ properties:
     output: true
     description: |
       The number of Kubernetes Pods backed up in the last successful Backup created via this BackupPlan.
-

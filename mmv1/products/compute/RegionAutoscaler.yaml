@@ -48,13 +48,13 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_autoscaler_basic"
-    primary_resource_id: "foobar"
+    name: 'region_autoscaler_basic'
+    primary_resource_id: 'foobar'
     vars:
-      region_autoscaler_name: "my-region-autoscaler"
-      instance_template_name: "my-instance-template"
-      target_pool_name: "my-target-pool"
-      rigm_name: "my-region-igm"
+      region_autoscaler_name: 'my-region-autoscaler'
+      instance_template_name: 'my-instance-template'
+      target_pool_name: 'my-target-pool'
+      rigm_name: 'my-region-igm'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -65,12 +65,8 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'Unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
@@ -86,7 +82,7 @@ properties:
     required: true
     immutable: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -410,4 +406,4 @@ properties:
     description: |
       URL of the managed instance group that this autoscaler will scale.
     required: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'

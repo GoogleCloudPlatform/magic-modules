@@ -70,42 +70,45 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   iam_conditions_request_type: :QUERY_PARAM
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/subnetwork.erb
-  resource_definition: templates/terraform/resource_definition/subnetwork.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/subnetwork.erb
+custom_diff: [
+  'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)',
+]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "subnetwork_basic"
-    primary_resource_id: "network-with-private-secondary-ip-ranges"
+    name: 'subnetwork_basic'
+    primary_resource_id: 'network-with-private-secondary-ip-ranges'
     vars:
-      subnetwork_name: "test-subnetwork"
-      network_name: "test-network"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-test-subnetwork%s\", context[\"\
+      subnetwork_name: 'test-subnetwork'
+      network_name: 'test-network'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-test-subnetwork%s\",
+      context[\"\
       random_suffix\"])"
   - !ruby/object:Provider::Terraform::Examples
-    name: "subnetwork_logging_config"
-    primary_resource_id: "subnet-with-logging"
+    name: 'subnetwork_logging_config'
+    primary_resource_id: 'subnet-with-logging'
     vars:
-      subnetwork_name: "log-test-subnetwork"
-      network_name: "log-test-network"
+      subnetwork_name: 'log-test-subnetwork'
+      network_name: 'log-test-network'
   - !ruby/object:Provider::Terraform::Examples
-    name: "subnetwork_internal_l7lb"
+    name: 'subnetwork_internal_l7lb'
     min_version: beta
-    primary_resource_id: "network-for-l7lb"
+    primary_resource_id: 'network-for-l7lb'
     vars:
-      subnetwork_name: "l7lb-test-subnetwork"
-      network_name: "l7lb-test-network"
+      subnetwork_name: 'l7lb-test-subnetwork'
+      network_name: 'l7lb-test-network'
   - !ruby/object:Provider::Terraform::Examples
-    name: "subnetwork_ipv6"
-    primary_resource_id: "subnetwork-ipv6"
+    name: 'subnetwork_ipv6'
+    primary_resource_id: 'subnetwork-ipv6'
     vars:
-      subnetwork_name: "ipv6-test-subnetwork"
-      network_name: "ipv6-test-network"
+      subnetwork_name: 'ipv6-test-subnetwork'
+      network_name: 'ipv6-test-network'
   - !ruby/object:Provider::Terraform::Examples
-    name: "subnetwork_internal_ipv6"
-    primary_resource_id: "subnetwork-internal-ipv6"
+    name: 'subnetwork_internal_ipv6'
+    primary_resource_id: 'subnetwork-internal-ipv6'
     vars:
-      subnetwork_name: "internal-ipv6-test-subnetwork"
-      network_name: "internal-ipv6-test-network"
+      subnetwork_name: 'internal-ipv6-test-subnetwork'
+      network_name: 'internal-ipv6-test-network'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -123,11 +126,6 @@ properties:
       The gateway address for default routes to reach destination addresses
       outside this subnetwork.
     output: true
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'ipCidrRange'
     description: |
@@ -139,7 +137,7 @@ properties:
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/expandIpCidrRange'
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateIpCidrRange'
+      function: 'verify.ValidateIpCidrRange'
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -152,7 +150,7 @@ properties:
       except the last character, which cannot be a dash.
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::ResourceRef
     name: 'network'
     resource: 'Network'
@@ -162,13 +160,15 @@ properties:
       Only networks that are in the distributed mode can have subnetworks.
     immutable: true
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'purpose'
     immutable: true
     description: |
-      The purpose of the resource. This field can be either `PRIVATE_RFC_1918`, `INTERNAL_HTTPS_LOAD_BALANCER` or `REGIONAL_MANAGED_PROXY`.
+      The purpose of the resource. This field can be either `PRIVATE_RFC_1918`, `INTERNAL_HTTPS_LOAD_BALANCER`, `REGIONAL_MANAGED_PROXY`, or `PRIVATE_SERVICE_CONNECT`.
       A subnetwork with purpose set to `INTERNAL_HTTPS_LOAD_BALANCER` is a user-created subnetwork that is reserved for Internal HTTP(S) Load Balancing.
       A subnetwork in a given region with purpose set to `REGIONAL_MANAGED_PROXY` is a proxy-only subnet and is shared between all the regional Envoy-based load balancers.
+      A subnetwork with purpose set to `PRIVATE_SERVICE_CONNECT` reserves the subnet for hosting a Private Service Connect published service.
       If unspecified, the purpose defaults to `PRIVATE_RFC_1918`.
       The enableFlowLogs field isn't supported with the purpose field set to `INTERNAL_HTTPS_LOAD_BALANCER`.
     default_from_api: true
@@ -216,7 +216,7 @@ properties:
           name: 'rangeName'
           required: true
           validation: !ruby/object:Provider::Terraform::Validation
-            function: 'validateGCEName'
+            function: 'verify.ValidateGCEName'
           description: |
             The name associated with this subnetwork secondary range, used
             when adding an alias IP range to a VM instance. The name must
@@ -226,7 +226,7 @@ properties:
           name: 'ipCidrRange'
           required: true
           validation: !ruby/object:Provider::Terraform::Validation
-            function: 'validateIpCidrRange'
+            function: 'verify.ValidateIpCidrRange'
           description: |
             The range of IP addresses belonging to this subnetwork secondary
             range. Provide this property when you create the subnetwork.
@@ -257,6 +257,7 @@ properties:
     immutable: true
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'logConfig'
     update_verb: :PATCH
@@ -271,10 +272,6 @@ properties:
     custom_expand: 'templates/terraform/custom_expand/subnetwork_log_config.go.erb'
     custom_flatten: 'templates/terraform/custom_flatten/subnetwork_log_config.go.erb'
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'enable'
-        description: If logging is enabled for this subnetwork
-        exclude: true
       - !ruby/object:Api::Type::Enum
         name: 'aggregationInterval'
         at_least_one_of:
@@ -343,7 +340,7 @@ properties:
           Export filter used to define which VPC flow logs should be logged, as as CEL expression. See
           https://cloud.google.com/vpc/docs/flow-logs#filtering for details on how to format this field.
           The default value is 'true', which evaluates to include everything.
-        default_value: "true"
+        default_value: 'true'
   - !ruby/object:Api::Type::Enum
     name: 'stackType'
     update_verb: :PATCH

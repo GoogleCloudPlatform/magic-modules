@@ -54,11 +54,11 @@ func (prc ProviderConfigRule) Identifier() string {
 
 // Message - a message to to inform the user
 // of a breakage.
-func (prc ProviderConfigRule) Message(version, resource string) string {
+func (prc ProviderConfigRule) Message(resource string) string {
 	msg := prc.message
 	resource = fmt.Sprintf("`%s`", resource)
 	msg = strings.ReplaceAll(msg, "{{resource}}", resource)
-	return msg + documentationReference(version, prc.identifier)
+	return msg + documentationReference(prc.identifier)
 }
 
 // IsRuleBreak - compares resource entries and returns

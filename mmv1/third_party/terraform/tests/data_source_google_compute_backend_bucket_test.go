@@ -5,22 +5,23 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccDataSourceComputeBackendBucket_basic(t *testing.T) {
 	t.Parallel()
 
-	backendBucketName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	backendBucketName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	bucketName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeBackendBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeBackendBucket_basic(backendBucketName, bucketName),
-				Check:  checkDataSourceStateMatchesResourceState("data.google_compute_backend_bucket.baz", "google_compute_backend_bucket.foobar"),
+				Check:  acctest.CheckDataSourceStateMatchesResourceState("data.google_compute_backend_bucket.baz", "google_compute_backend_bucket.foobar"),
 			},
 		},
 	})

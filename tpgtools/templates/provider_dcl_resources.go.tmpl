@@ -11,6 +11,9 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License. */}}
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // ----------------------------------------------------------------------------
 //
 //     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
@@ -26,16 +29,21 @@
 //
 // ----------------------------------------------------------------------------
 
-package google
+package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	{{- range $res := . }}
+		{{- if not $res.SkipInProvider }}
+			"github.com/hashicorp/terraform-provider-google/google/services/{{$res.Package}}"
+		{{- end }}
+	{{- end }}
 )
 
 var dclResources = map[string]*schema.Resource{
 {{- range $res := . }}
 	{{- if not $res.SkipInProvider }}
-	"{{$res.TerraformName}}": Resource{{$res.PathType}}(),
+	"{{$res.TerraformName}}": {{$res.Package}}.Resource{{$res.PathType}}(),
 	{{- end }}
 {{- end }}
 }

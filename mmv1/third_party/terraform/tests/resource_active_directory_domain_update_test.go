@@ -7,6 +7,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccActiveDirectoryDomain_update(t *testing.T) {
@@ -15,17 +19,17 @@ func TestAccActiveDirectoryDomain_update(t *testing.T) {
 
 	t.Parallel()
 
-	domain := fmt.Sprintf("tf-test%s.org1.com", RandString(t, 5))
+	domain := fmt.Sprintf("tf-test%s.org1.com", acctest.RandString(t, 5))
 	context := map[string]interface{}{
 		"domain":        domain,
 		"resource_name": "ad-domain",
 	}
 
-	resourceName := Nprintf("google_active_directory_domain.%{resource_name}", context)
+	resourceName := acctest.Nprintf("google_active_directory_domain.%{resource_name}", context)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckActiveDirectoryDomainDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -61,7 +65,7 @@ func TestAccActiveDirectoryDomain_update(t *testing.T) {
 
 func testAccADDomainBasic(context map[string]interface{}) string {
 
-	return Nprintf(`
+	return acctest.Nprintf(`
 	resource "google_active_directory_domain" "%{resource_name}" {
 	  domain_name       = "%{domain}"
 	  locations         = ["us-central1"]
@@ -71,7 +75,7 @@ func testAccADDomainBasic(context map[string]interface{}) string {
 }
 
 func testAccADDomainUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 	resource "google_active_directory_domain" "%{resource_name}" {
 	  domain_name       = "%{domain}"	
 	  locations         = ["us-central1", "us-west1"]
@@ -94,9 +98,9 @@ func testAccCheckActiveDirectoryDomainDestroyProducer(t *testing.T) func(s *terr
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{ActiveDirectoryBasePath}}{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ActiveDirectoryBasePath}}{{name}}")
 			if err != nil {
 				return err
 			}
@@ -107,7 +111,13 @@ func testAccCheckActiveDirectoryDomainDestroyProducer(t *testing.T) func(s *terr
 				billingProject = config.BillingProject
 			}
 
-			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
 			if err == nil {
 				return fmt.Errorf("ActiveDirectoryDomain still exists at %s", url)
 			}

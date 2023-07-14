@@ -43,31 +43,31 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "service_attachment_basic"
-    primary_resource_id: "psc_ilb_service_attachment"
+    name: 'service_attachment_basic'
+    primary_resource_id: 'psc_ilb_service_attachment'
     vars:
-      service_attachment_name: "my-psc-ilb"
-      network_name: "psc-ilb-network"
-      nat_subnetwork_name: "psc-ilb-nat"
-      producer_subnetwork_name: "psc-ilb-producer-subnetwork"
-      producer_health_check_name: "producer-service-health-check"
-      producer_service_name: "producer-service"
-      producer_forwarding_rule_name: "producer-forwarding-rule"
-      consumer_address_name: "psc-ilb-consumer-address"
-      consumer_forwarding_rule_name: "psc-ilb-consumer-forwarding-rule"
+      service_attachment_name: 'my-psc-ilb'
+      network_name: 'psc-ilb-network'
+      nat_subnetwork_name: 'psc-ilb-nat'
+      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
+      producer_health_check_name: 'producer-service-health-check'
+      producer_service_name: 'producer-service'
+      producer_forwarding_rule_name: 'producer-forwarding-rule'
+      consumer_address_name: 'psc-ilb-consumer-address'
+      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
   - !ruby/object:Provider::Terraform::Examples
-    name: "service_attachment_explicit_projects"
-    primary_resource_id: "psc_ilb_service_attachment"
+    name: 'service_attachment_explicit_projects'
+    primary_resource_id: 'psc_ilb_service_attachment'
     vars:
-      service_attachment_name: "my-psc-ilb"
-      network_name: "psc-ilb-network"
-      nat_subnetwork_name: "psc-ilb-nat"
-      producer_subnetwork_name: "psc-ilb-producer-subnetwork"
-      producer_health_check_name: "producer-service-health-check"
-      producer_service_name: "producer-service"
-      producer_forwarding_rule_name: "producer-forwarding-rule"
-      consumer_address_name: "psc-ilb-consumer-address"
-      consumer_forwarding_rule_name: "psc-ilb-consumer-forwarding-rule"
+      service_attachment_name: 'my-psc-ilb'
+      network_name: 'psc-ilb-network'
+      nat_subnetwork_name: 'psc-ilb-nat'
+      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
+      producer_health_check_name: 'producer-service-health-check'
+      producer_service_name: 'producer-service'
+      producer_forwarding_rule_name: 'producer-forwarding-rule'
+      consumer_address_name: 'psc-ilb-consumer-address'
+      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   update_encoder: 'templates/terraform/update_encoder/compute_service_attachment.go.erb'
 parameters:
@@ -80,6 +80,7 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -135,6 +136,7 @@ properties:
     description: |
       The URL of a forwarding rule that represents the service identified by
       this service attachment.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Array
     name: 'natSubnets'
     required: true
@@ -147,6 +149,7 @@ properties:
       imports: 'selfLink'
       description: |
         A subnet that is provided for NAT in this service attachment.
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Boolean
     name: 'enableProxyProtocol'
     required: true

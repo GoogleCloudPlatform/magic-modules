@@ -4,20 +4,22 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDataSourceAccessApprovalOrganizationServiceAccount_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id": GetTestOrgFromEnv(t),
+		"org_id": envvar.GetTestOrgFromEnv(t),
 	}
 
 	resourceName := "data.google_access_approval_organization_service_account.aa_account"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceAccessApprovalOrganizationServiceAccount_basic(context),
@@ -30,7 +32,7 @@ func TestAccDataSourceAccessApprovalOrganizationServiceAccount_basic(t *testing.
 }
 
 func testAccDataSourceAccessApprovalOrganizationServiceAccount_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 data "google_access_approval_organization_service_account" "aa_account" {
   organization_id = "%{org_id}"
 }

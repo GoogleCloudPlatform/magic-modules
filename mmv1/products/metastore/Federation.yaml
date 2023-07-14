@@ -14,9 +14,9 @@
 --- !ruby/object:Api::Resource
 name: 'Federation'
 min_version: beta
-base_url: "projects/{{project}}/locations/{{location}}/federations"
+base_url: 'projects/{{project}}/locations/{{location}}/federations'
 create_url: 'projects/{{project}}/locations/{{location}}/federations?federationId={{federation_id}}'
-self_link: "projects/{{project}}/locations/{{location}}/federations/{{federation_id}}"
+self_link: 'projects/{{project}}/locations/{{location}}/federations/{{federation_id}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -24,10 +24,12 @@ description: |
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   skip_import_test: true
   parent_resource_attribute: federation_id
-  exclude: false
   method_name_separator: ':'
-  import_format: ["projects/{{project}}/locations/{{location}}/federations/{{federation_id}}",
-    "{{federation_id}}"]
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/federations/{{federation_id}}',
+      '{{federation_id}}',
+    ]
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -45,26 +47,29 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
 autogen_async: true
-import_format: ["projects/{{project}}/locations/{{location}}/federations/{{federation_id}}"]
+import_format:
+  ['projects/{{project}}/locations/{{location}}/federations/{{federation_id}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dataproc_metastore_federation_basic"
-    skip_test: true      # https://github.com/hashicorp/terraform-provider-google/issues/13710
-    primary_resource_id: "default"
+    name: 'dataproc_metastore_federation_basic'
+    skip_test: true  # https://github.com/hashicorp/terraform-provider-google/issues/13710
+    primary_resource_id: 'default'
     min_version: beta
-    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
     vars:
-      federation_id: "metastore-fed"
-      service_id:    "metastore-service"
+      federation_id: 'metastore-fed'
+      service_id: 'metastore-service'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dataproc_metastore_federation_bigquery"
-    skip_test: true      # https://github.com/hashicorp/terraform-provider-google/issues/13710
-    primary_resource_id: "default"
+    name: 'dataproc_metastore_federation_bigquery'
+    skip_test: true  # https://github.com/hashicorp/terraform-provider-google/issues/13710
+    primary_resource_id: 'default'
     min_version: beta
-    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
     vars:
-      federation_id: "metastore-fed"
-      service_id:    "metastore-service"
+      federation_id: 'metastore-fed'
+      service_id: 'metastore-service'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'federationId'
@@ -140,4 +145,3 @@ properties:
             - :METASTORE_TYPE_UNSPECIFIED
             - :DATAPROC_METASTORE
             - :BIGQUERY
-

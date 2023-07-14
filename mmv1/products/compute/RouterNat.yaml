@@ -53,47 +53,49 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 exclude_validator: true
-id_format: "{{project}}/{{region}}/{{router}}/{{name}}"
+id_format: '{{project}}/{{region}}/{{router}}/{{name}}'
 mutex: router/{{region}}/{{router}}
 examples:
   # These examples are not used to autogenerate tests, as fine-grained
   # resources do not fit the normal test flow - we need to test deletion
   # in a test step while parent resource still exists vs in CheckDestroy
   # when all resources have been deleted.
-  - !ruby/object:Provider::Terraform::Examples 
-    name: "router_nat_basic"
-    primary_resource_id: "nat"
-    skip_test: true
-    vars:
-      router_name: "my-router"
-      nat_name: "my-router-nat"
-      network_name: "my-network"
-      subnet_name: "my-subnetwork"
   - !ruby/object:Provider::Terraform::Examples
-    name: "router_nat_manual_ips"
-    primary_resource_id: "nat_manual"
+    name: 'router_nat_basic'
+    primary_resource_id: 'nat'
     skip_test: true
     vars:
-      router_name: "my-router"
-      nat_name: "my-router-nat"
-      network_name: "my-network"
-      subnet_name: "my-subnetwork"
-      address_name: "nat-manual-ip"
+      router_name: 'my-router'
+      nat_name: 'my-router-nat'
+      network_name: 'my-network'
+      subnet_name: 'my-subnetwork'
   - !ruby/object:Provider::Terraform::Examples
-    name: "router_nat_rules"
-    primary_resource_id: "nat_rules"
+    name: 'router_nat_manual_ips'
+    primary_resource_id: 'nat_manual'
     skip_test: true
     vars:
-      router_name: "my-router"
-      nat_name: "my-router-nat"
-      network_name: "my-network"
-      subnet_name: "my-subnetwork"
-      address_name1: "nat-address1"
-      address_name2: "nat-address2"
-      address_name3: "nat-address3"
+      router_name: 'my-router'
+      nat_name: 'my-router-nat'
+      network_name: 'my-network'
+      subnet_name: 'my-subnetwork'
+      address_name: 'nat-manual-ip'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'router_nat_rules'
+    primary_resource_id: 'nat_rules'
+    skip_test: true
+    vars:
+      router_name: 'my-router'
+      nat_name: 'my-router-nat'
+      network_name: 'my-network'
+      subnet_name: 'my-subnetwork'
+      address_name1: 'nat-address1'
+      address_name2: 'nat-address2'
+      address_name3: 'nat-address3'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/router_nat.go.erb'
-  resource_definition: 'templates/terraform/resource_definition/router_nat.go.erb'
+custom_diff: [
+  'resourceComputeRouterNatDrainNatIpsCustomDiff',
+]
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'router'
@@ -123,7 +125,7 @@ properties:
     required: true
     immutable: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateRFC1035Name(2, 63)'
+      function: 'verify.ValidateRFC1035Name(2, 63)'
   - !ruby/object:Api::Type::Enum
     name: 'natIpAllocateOption'
     required: true
@@ -147,6 +149,7 @@ properties:
       resource: 'Address'
       imports: 'selfLink'
       description: 'A reference to an address associated with this NAT'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Array
     name: 'drainNatIps'
     description: |
@@ -159,6 +162,7 @@ properties:
       resource: 'Address'
       imports: 'selfLink'
       description: 'A reference to an address associated with this NAT'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Enum
     name: 'sourceSubnetworkIpRangesToNat'
     required: true
@@ -194,6 +198,7 @@ properties:
           imports: 'selfLink'
           description: 'Self-link of subnetwork to NAT'
           required: true
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
         - !ruby/object:Api::Type::Array
           name: 'sourceIpRangesToNat'
           description: |
@@ -326,7 +331,8 @@ properties:
           required: true
         - !ruby/object:Api::Type::NestedObject
           name: 'action'
-          description: 'The action to be enforced for traffic that matches this rule.'
+          description:
+            'The action to be enforced for traffic that matches this rule.'
           default_from_api: true
           properties:
             - !ruby/object:Api::Type::Array
@@ -342,7 +348,9 @@ properties:
                 name: 'address'
                 resource: 'Address'
                 imports: 'selfLink'
-                description: 'A reference to an address associated with this NAT'
+                description:
+                  'A reference to an address associated with this NAT'
+              custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
             - !ruby/object:Api::Type::Array
               name: 'sourceNatDrainIps'
               description: |
@@ -357,7 +365,9 @@ properties:
                 name: 'address'
                 resource: 'Address'
                 imports: 'selfLink'
-                description: 'A reference to an address associated with this NAT'
+                description:
+                  'A reference to an address associated with this NAT'
+              custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Boolean
     name: enableEndpointIndependentMapping
     description: |

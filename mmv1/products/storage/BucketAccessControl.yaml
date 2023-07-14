@@ -43,13 +43,13 @@ identity:
   - entity
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "storage_bucket_access_control_public_bucket"
-    primary_resource_id: "public_rule"
+    name: 'storage_bucket_access_control_public_bucket'
+    primary_resource_id: 'public_rule'
     vars:
-      bucket_name: "static-content-bucket"
-id_format: "{{bucket}}/{{entity}}"
-import_format: ["{{bucket}}/{{entity}}"]
-mutex: "storage/buckets/{{bucket}}"
+      bucket_name: 'static-content-bucket'
+id_format: '{{bucket}}/{{entity}}'
+import_format: ['{{bucket}}/{{entity}}']
+mutex: 'storage/buckets/{{bucket}}'
 skip_sweeper: true
 properties:
   - !ruby/object:Api::Type::ResourceRef
@@ -59,7 +59,6 @@ properties:
     description: 'The name of the bucket.'
     required: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
   - !ruby/object:Api::Type::String
     name: 'domain'
     description: 'The domain associated with the entity.'
@@ -88,33 +87,6 @@ properties:
         example.com, the entity would be domain-example.com.
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'entityId'
-    description: 'The ID for the entity'
-    output: true
-  # | 'etag' is not applicable for state convergence.
-    exclude: true
-  - !ruby/object:Api::Type::String
-    name: 'id'
-    description: 'The ID of the access-control entry.'
-    output: true
-    exclude: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'projectTeam'
-    description: 'The project team associated with the entity'
-    output: true
-    exclude: true
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'projectNumber'
-        description: 'The project team associated with the entity'
-      - !ruby/object:Api::Type::Enum
-        name: 'team'
-        description: 'The team.'
-        values:
-          - :editors
-          - :owners
-          - :viewers
   - !ruby/object:Api::Type::Enum
     name: 'role'
     description: 'The access permission for the entity.'

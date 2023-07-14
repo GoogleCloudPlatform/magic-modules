@@ -48,42 +48,42 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_network_endpoint_group_functions"
-    primary_resource_id: "function_neg"
+    name: 'region_network_endpoint_group_functions'
+    primary_resource_id: 'function_neg'
     vars:
-      neg_name: "function-neg"
-      function_name: "function-neg"
-      bucket_name: "cloudfunctions-function-example-bucket"
-      zip_path: "path/to/index.zip"
+      neg_name: 'function-neg'
+      function_name: 'function-neg'
+      bucket_name: 'cloudfunctions-function-example-bucket'
+      zip_path: 'path/to/index.zip'
     test_vars_overrides:
       zip_path: 'createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_network_endpoint_group_cloudrun"
-    primary_resource_id: "cloudrun_neg"
+    name: 'region_network_endpoint_group_cloudrun'
+    primary_resource_id: 'cloudrun_neg'
     vars:
-      neg_name: "cloudrun-neg"
+      neg_name: 'cloudrun-neg'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_network_endpoint_group_appengine"
-    primary_resource_id: "appengine_neg"
+    name: 'region_network_endpoint_group_appengine'
+    primary_resource_id: 'appengine_neg'
     vars:
-      neg_name: "appengine-neg"
+      neg_name: 'appengine-neg'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_network_endpoint_group_psc"
-    primary_resource_id: "psc_neg"
+    name: 'region_network_endpoint_group_psc'
+    primary_resource_id: 'psc_neg'
     vars:
-      neg_name: "psc-neg"
+      neg_name: 'psc-neg'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_network_endpoint_group_psc_service_attachment"
-    primary_resource_id: "psc_neg_service_attachment"
+    name: 'region_network_endpoint_group_psc_service_attachment'
+    primary_resource_id: 'psc_neg_service_attachment'
     vars:
-      neg_name: "psc-neg"
-      network_name: "psc-network"
-      subnetwork_name: "psc-subnetwork"
-      psc_subnetwork_name: "psc-subnetwork-nat"
-      backend_service_name: "psc-backend"
-      forwarding_rule_name: "psc-forwarding-rule"
-      service_attachment_name: "psc-service-attachment"
-      health_check_name: "psc-healthcheck"
+      neg_name: 'psc-neg'
+      network_name: 'psc-network'
+      subnetwork_name: 'psc-subnetwork'
+      psc_subnetwork_name: 'psc-subnetwork-nat'
+      backend_service_name: 'psc-backend'
+      forwarding_rule_name: 'psc-forwarding-rule'
+      service_attachment_name: 'psc-service-attachment'
+      health_check_name: 'psc-healthcheck'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -92,6 +92,7 @@ parameters:
     description: |
       A reference to the region where the Serverless NEGs Reside.
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -105,7 +106,7 @@ properties:
       character, which cannot be a dash.
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -132,6 +133,7 @@ properties:
       This field is only used for PSC.
       The URL of the network to which all network endpoints in the NEG belong. Uses
       "default" project network if unspecified.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'subnetwork'
     resource: 'Subnetwork'
@@ -139,6 +141,7 @@ properties:
     description: |
       This field is only used for PSC.
       Optional URL of the subnetwork to which all network endpoints in the NEG belong.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'cloudRun'
     conflicts:

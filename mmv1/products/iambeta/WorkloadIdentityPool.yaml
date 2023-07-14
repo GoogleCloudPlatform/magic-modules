@@ -26,18 +26,21 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Managing workload identity pools': 'https://cloud.google.com/iam/docs/manage-workload-identity-pools-providers#pools'
   api: 'https://cloud.google.com/iam/docs/reference/rest/v1/projects.locations.workloadIdentityPools'
 autogen_async: true
-import_format: ["projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}"]
+import_format:
+  [
+    'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "iam_workload_identity_pool_basic"
-    primary_resource_id: "example"
+    name: 'iam_workload_identity_pool_basic'
+    primary_resource_id: 'example'
     vars:
-      workload_identity_pool_id: "example-pool"
+      workload_identity_pool_id: 'example-pool'
   - !ruby/object:Provider::Terraform::Examples
-    name: "iam_workload_identity_pool_full"
-    primary_resource_id: "example"
+    name: 'iam_workload_identity_pool_full'
+    primary_resource_id: 'example'
     vars:
-      workload_identity_pool_id: "example-pool"
+      workload_identity_pool_id: 'example-pool'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/iam_workload_identity_pool.go.erb
   decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
@@ -53,7 +56,7 @@ properties:
     immutable: true
     url_param_only: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateWorkloadIdentityPoolId'
+      function: 'ValidateWorkloadIdentityPoolId'
   - !ruby/object:Api::Type::Enum
     name: 'state'
     description: |

@@ -2,26 +2,29 @@ package google
 
 import (
 	"reflect"
+
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
-func resourceConverterBigtableInstance() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterBigtableInstance() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType: "bigtableadmin.googleapis.com/Instance",
 		Convert:   GetBigtableInstanceCaiObject,
 	}
 }
 
-func GetBigtableInstanceCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//bigtable.googleapis.com/projects/{{project}}/instances/{{name}}")
+func GetBigtableInstanceCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	name, err := tpgresource.AssetName(d, config, "//bigtable.googleapis.com/projects/{{project}}/instances/{{name}}")
 
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 	if obj, err := GetBigtableInstanceApiObject(d, config); err == nil {
-		return []Asset{{
+		return []tpgresource.Asset{{
 			Name: name,
 			Type: "bigtableadmin.googleapis.com/Instance",
-			Resource: &AssetResource{
+			Resource: &tpgresource.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://bigtableadmin.googleapis.com/$discovery/rest",
 				DiscoveryName:        "Instance",
@@ -29,45 +32,45 @@ func GetBigtableInstanceCaiObject(d TerraformResourceData, config *Config) ([]As
 			},
 		}}, nil
 	} else {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 }
 
-func GetBigtableInstanceApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
+func GetBigtableInstanceApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
 	obj := make(map[string]interface{})
 	nameProp, err := expandBigtableInstanceName(d.Get("name"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
+	} else if v, ok := d.GetOkExists("name"); !tpgresource.IsEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
 		obj["name"] = nameProp
 	}
 
 	displayNameProp, err := expandBigtableDisplayName(d.Get("name"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(displayNameProp)) && (ok || !reflect.DeepEqual(v, displayNameProp)) {
+	} else if v, ok := d.GetOkExists("name"); !tpgresource.IsEmptyValue(reflect.ValueOf(displayNameProp)) && (ok || !reflect.DeepEqual(v, displayNameProp)) {
 		obj["name"] = nameProp
 	}
 
 	labelsProp, err := expandBigtableDisplayName(d.Get("labels"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("labels"); !isEmptyValue(reflect.ValueOf(labelsProp)) && (ok || !reflect.DeepEqual(v, labelsProp)) {
+	} else if v, ok := d.GetOkExists("labels"); !tpgresource.IsEmptyValue(reflect.ValueOf(labelsProp)) && (ok || !reflect.DeepEqual(v, labelsProp)) {
 		obj["labels"] = labelsProp
 	}
 
 	return obj, nil
 }
 
-func expandBigtableInstanceName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	return replaceVars(d, config, "projects/{{project}}/instances/{{name}}")
+func expandBigtableInstanceName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return tpgresource.ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}")
 }
 
-func expandBigtableDisplayName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigtableDisplayName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigtableInstanceLabels(v interface{}, d TerraformResourceData, config *Config) (map[string]string, error) {
+func expandBigtableInstanceLabels(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
 	if v == nil {
 		return map[string]string{}, nil
 	}
