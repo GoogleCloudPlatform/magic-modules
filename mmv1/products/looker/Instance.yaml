@@ -403,4 +403,3 @@ properties:
         description: |
           Number of additional Developer Users to allocate to the Looker Instance.
   # UserMetadata Object - End
-
