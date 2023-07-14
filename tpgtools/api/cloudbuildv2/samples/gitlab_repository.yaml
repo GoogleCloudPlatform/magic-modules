@@ -15,7 +15,7 @@ name: gitlab_repository
 description: Creates a gitlab repository.
 type: repository
 versions:
-- beta
+- ga
 resource: samples/gitlab.repository.json
 dependencies:
 - samples/gitlab.connection.json

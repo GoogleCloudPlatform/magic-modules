@@ -1,0 +1,9 @@
+## product level overrides
+
+- type: PRODUCT_DOCS_SECTION
+  details:
+    docssection: Cloud Build v2
+
+- type: PRODUCT_BASE_PATH
+  details:
+    skip: true

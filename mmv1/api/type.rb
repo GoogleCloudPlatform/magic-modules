@@ -655,7 +655,6 @@ module Api
         # TODO: (camthornton) product reference may not exist yet
         return if @__resource.__product.nil?
 
-        check_resource_ref_exists
         check_resource_ref_property_exists
       end
 
@@ -663,13 +662,11 @@ module Api
         props = resource_ref.all_user_properties
                             .select { |prop| prop.name == @imports }
         return props.first unless props.empty?
-        raise "#{@imports} does not exist on #{@resource}" if props.empty?
       end
 
       def resource_ref
         product = @__resource.__product
         resources = product.objects.select { |obj| obj.name == @resource }
-        raise "Unknown item type '#{@resource}'" if resources.empty?
 
         resources[0]
       end
@@ -683,13 +680,9 @@ module Api
 
       private
 
-      def check_resource_ref_exists
-        product = @__resource.__product
-        resources = product.objects.select { |obj| obj.name == @resource }
-        raise "Missing '#{@resource}'" if resources.empty?
-      end
-
       def check_resource_ref_property_exists
+        return unless defined?(resource_ref.all_user_properties)
+
         exported_props = resource_ref.all_user_properties
         exported_props << Api::Type::String.new('selfLink') \
           if resource_ref.has_self_link

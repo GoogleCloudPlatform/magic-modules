@@ -101,7 +101,9 @@ func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, va
 		if exprStmt, ok := stmt.(*ast.ExprStmt); ok {
 			if callExpr, ok := exprStmt.X.(*ast.CallExpr); ok {
 				// This is a call expression.
-				if ident, ok := callExpr.Fun.(*ast.Ident); ok && ident.Name == "VcrTest" {
+				ident, isIdent := callExpr.Fun.(*ast.Ident)
+				selExpr, isSelExpr := callExpr.Fun.(*ast.SelectorExpr)
+				if isIdent && ident.Name == "VcrTest" || isSelExpr && selExpr.Sel.Name == "VcrTest" {
 					return readVcrTestCall(callExpr, funcDecls, varDecls)
 				}
 			}
