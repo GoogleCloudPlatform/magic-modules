@@ -55,10 +55,10 @@ function update_status {
 update_status "pending"
 
 # for backwards-compatibility
-if [ -z "$BRANCH_NAME" ]; then
-  BRANCH_NAME=main
+if [ -z "$BASE_BRANCH" ]; then
+  BASE_BRANCH=main
 else
-  echo "BRANCH_NAME: $BRANCH_NAME"
+  echo "BASE_BRANCH: $BASE_BRANCH"
 fi
 
 set +e
