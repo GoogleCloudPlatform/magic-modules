@@ -263,6 +263,27 @@ properties:
                     resource is a recursive structure; when the depth is 2, the CodeSystem table will have a column called
                     concept.concept but not concept.concept.concept. If not specified or set to 0, the server will use the default
                     value 2. The maximum depth allowed is 5.
+                - !ruby/object:Api::Type::NestedObject
+                  name: lastUpdatedPartitionConfig
+                  description: |
+                    The configuration for exported BigQuery tables to be partitioned by FHIR resource's last updated time column.
+                  properties:
+                    - !ruby/object:Api::Type::Enum
+                      name: type
+                      description: |
+                        Type of partitioning.
+                      default_value: :PARTITION_TYPE_UNSPECIFIED
+                      values:
+                        - :PARTITION_TYPE_UNSPECIFIED	
+                        - :HOUR
+                        - :DAY
+                        - :MONTH
+                        - :YEAR
+                    - !ruby/object:Api::Type::String
+                      name: expirationMs
+                      description: |
+                        Number of milliseconds for which to keep the storage for a partition.
+
   - !ruby/object:Api::Type::Array
     name: notificationConfigs
     description: |-
