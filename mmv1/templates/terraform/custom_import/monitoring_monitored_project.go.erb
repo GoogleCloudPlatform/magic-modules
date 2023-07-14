@@ -21,6 +21,7 @@ d.Set("metrics_scope", metricsScope)
 config := meta.(*transport_tpg.Config)
 if err := tpgresource.ParseImportId([]string{
 	"locations/global/metricsScopes/(?P<metrics_scope>[^/]+)/projects/(?P<name>[^/]+)",
+	"v1/locations/global/metricsScopes/(?P<metrics_scope>[^/]+)/projects/(?P<name>[^/]+)",
 	"(?P<metrics_scope>[^/]+)/(?P<name>[^/]+)",
 }, d, config); err != nil {
 	return nil, err
