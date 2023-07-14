@@ -5,6 +5,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+<% if version != 'ga' -%>
+	"strings"
+<% end -%>
 
 	"time"
 
@@ -771,7 +774,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 		}
 	}
 
-
+	<% if version == 'ga' -%>
 	if d.HasChange("rule") {
 		o, n := d.GetChange("rule")
 		oSet := o.(*schema.Set)
@@ -787,12 +790,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 			priority := int64(rule.(map[string]interface{})["priority"].(int))
 			nPriorities[priority] = true
 			if !oPriorities[priority] {
-			<% if version == 'ga' -%>
 				client := config.NewComputeClient(userAgent)
-			<% else -%>
-				client := config.NewComputeClient(userAgent)
-			<% end -%>
-
 				// If the rule is in new and its priority does not exist in old, then add it.
 				op, err := client.SecurityPolicies.AddRule(project, sp, expandSecurityPolicyRule(rule)).Do()
 
@@ -805,11 +803,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 					return err
 				}
 			} else if !oSet.Contains(rule) {
-			<% if version == 'ga' -%>
 				client := config.NewComputeClient(userAgent)
-			<% else -%>
-				client := config.NewComputeClient(userAgent)
-			<% end -%>
 
 				// If the rule is in new, and its priority is in old, but its hash is different than the one in old, update it.
 				op, err := client.SecurityPolicies.PatchRule(project, sp, expandSecurityPolicyRule(rule)).Priority(priority).Do()
@@ -828,11 +822,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 		for _, rule := range oSet.List() {
 			priority := int64(rule.(map[string]interface{})["priority"].(int))
 			if !nPriorities[priority] {
-			<% if version == 'ga' -%>
 				client := config.NewComputeClient(userAgent)
-			<% else -%>
-				client := config.NewComputeClient(userAgent)
-			<% end -%>
 
 				// If the rule's priority is in old but not new, remove it.
 				op, err := client.SecurityPolicies.RemoveRule(project, sp).Priority(priority).Do()
@@ -848,6 +838,109 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 			}
 		}
 	}
+
+	<% else -%>
+	if d.HasChange("rule") {
+		o, n := d.GetChange("rule")
+		oSet := o.(*schema.Set)
+		nSet := n.(*schema.Set)
+
+		oPriorities := map[int64]bool{}
+		nPriorities := map[int64]bool{}
+		oRules := make(map[int64]map[string]interface{})
+		nRules := make(map[int64]map[string]interface{})
+
+		for _, rule := range oSet.List() {
+			oPriorities[int64(rule.(map[string]interface{})["priority"].(int))] = true
+			oRules[int64(rule.(map[string]interface{})["priority"].(int))] = rule.(map[string]interface{})
+		}
+
+		for _, rule := range nSet.List() {
+			nRules[int64(rule.(map[string]interface{})["priority"].(int))] = rule.(map[string]interface{})
+			priority := int64(rule.(map[string]interface{})["priority"].(int))
+			nPriorities[priority] = true
+
+			if !oPriorities[priority] {
+				client := config.NewComputeClient(userAgent)
+
+				// If the rule is in new and its priority does not exist in old, then add it.
+				op, err := client.SecurityPolicies.AddRule(project, sp, expandSecurityPolicyRule(rule)).Do()
+
+				if err != nil {
+					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
+				}
+
+				err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
+				if err != nil {
+					return err
+				}
+			} else if !oSet.Contains(rule) {
+
+				oMap := make(map[string]interface{})
+				nMap := make(map[string]interface{})
+
+				updateMask := []string{}
+
+				if oRules[priority]["rate_limit_options"] != nil {
+					for _, oValue := range oRules[priority]["rate_limit_options"].([]interface{}) {
+						oMap = oValue.(map[string]interface{})
+					}
+				}
+
+				if nRules[priority]["rate_limit_options"] != nil {
+					for _, nValue := range nRules[priority]["rate_limit_options"].([]interface{}) {
+						nMap = nValue.(map[string]interface{})
+					}
+				}
+
+				if fmt.Sprintf("%v", oMap["enforce_on_key"]) != fmt.Sprintf("%v", nMap["enforce_on_key"]) {
+					updateMask = append(updateMask, "rate_limit_options.enforce_on_key")
+				}
+
+				if fmt.Sprintf("%v", oMap["enforce_on_key_configs"]) != fmt.Sprintf("%v", nMap["enforce_on_key_configs"]) {
+					updateMask = append(updateMask, "rate_limit_options.enforce_on_key_configs")
+				}
+
+				if fmt.Sprintf("%v", oMap["enforce_on_key_name"]) != fmt.Sprintf("%v", nMap["enforce_on_key_name"]) {
+					updateMask = append(updateMask, "rate_limit_options.enforce_on_key_name")
+				}
+
+				client := config.NewComputeClient(userAgent)
+
+				// If the rule is in new, and its priority is in old, but its hash is different than the one in old, update it.
+				op, err := client.SecurityPolicies.PatchRule(project, sp, expandSecurityPolicyRule(rule)).Priority(priority).UpdateMask(strings.Join(updateMask, ",")).Do()
+
+				if err != nil {
+					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
+				}
+
+				err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		for _, rule := range oSet.List() {
+			priority := int64(rule.(map[string]interface{})["priority"].(int))
+			if !nPriorities[priority] {
+				client := config.NewComputeClient(userAgent)
+
+				// If the rule's priority is in old but not new, remove it.
+				op, err := client.SecurityPolicies.RemoveRule(project, sp).Priority(priority).Do()
+
+				if err != nil {
+					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
+				}
+
+				err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	<% end -%>
 
 	return resourceComputeSecurityPolicyRead(d, meta)
 }
