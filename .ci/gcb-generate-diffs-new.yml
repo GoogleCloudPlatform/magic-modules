@@ -82,7 +82,7 @@ steps:
           - 'ga'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder:pr-8344-test'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
       id: tpg-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
@@ -102,7 +102,7 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder:pr-8344-test'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
       id: tpgb-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
