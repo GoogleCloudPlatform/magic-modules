@@ -429,6 +429,14 @@ properties:
         creations.'
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Boolean
+    name: 'enableConfidentialCompute'
+    description: |
+      Whether this disk is using confidential compute mode.
+      Note: Only supported on hyperdisk skus, disk_encryption_key is required when setting to true
+    min_version: beta
+    required: false
+    default_from_api: true
+  - !ruby/object:Api::Type::Boolean
     name: 'multiWriter'
     description: |
       Indicates whether or not the disk can be read/write attached to more than one instance.
