@@ -73,7 +73,7 @@ tpgtools:
 tgc:
 	cd mmv1;\
 		bundle;\
-		bundle exec compiler -e terraform -f validator -v $(VERSION) -o $(OUTPUT_PATH) $(mmv1_compile);\
+		bundle exec compiler -e terraform -f validator -o $(OUTPUT_PATH) $(mmv1_compile);\
 
 test:
 	cd mmv1; \
