@@ -683,7 +683,7 @@ The `config` block supports:
   (Optional, Cloud Composer 2.1.15 or newer only)
   The resilience mode states whether high resilience is enabled for 
   the environment or not. Values for resilience mode are `HIGH_RESILIENCE` 
-  for high resilience and `RESILIENCE_MODE_UNSPECIFIED` for standard
+  for high resilience and `STANDARD_RESILIENCE` for standard
   resilience.
 
 * `master_authorized_networks_config` -
