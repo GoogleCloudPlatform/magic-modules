@@ -110,7 +110,11 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/region_backend_service.go.erb
   encoder: templates/terraform/encoders/region_backend_service.go.erb
   decoder: templates/terraform/decoders/region_backend_service.go.erb
-  resource_definition: 'templates/terraform/resource_definition/region_backend_service.go.erb'
+custom_diff: [
+  'customDiffRegionBackendService',
+]
+migrate_state: 'tpgresource.MigrateStateNoop'
+schema_version: 1
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -122,6 +126,7 @@ parameters:
     required: false
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'affinityCookieTtlSec'
@@ -731,20 +736,11 @@ properties:
     set_hash_func: 'tpgresource.SelfLinkRelativePathHash'
     custom_flatten: templates/terraform/custom_flatten/guard_self_link_array.go.erb
     item_type: Api::Type::String
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: 'iap'
     description: Settings for enabling Cloud Identity Aware Proxy
     send_empty_value: true
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'enabled'
-        description: Enables IAP.
-        exclude: true
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientId'
         required: true
@@ -1234,6 +1230,7 @@ properties:
           the field must be in [0, 1]. This configures the sampling rate of requests to the load balancer
           where 1.0 means all logged requests are reported and 0.0 means no logged requests are reported.
           The default value is 1.0.
+        default_value: 1.0
         diff_suppress_func: 'suppressWhenDisabled'
   - !ruby/object:Api::Type::ResourceRef
     resource: 'Network'
@@ -1242,6 +1239,7 @@ properties:
     description: |
       The URL of the network to which this backend service belongs.
       This field can only be specified when the load balancing scheme is set to INTERNAL.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'subsetting'
     min_version: beta

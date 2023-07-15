@@ -15,8 +15,7 @@
 name: 'Config'
 base_url: projects/{{project}}/locations/{{location}}/transferConfigs?serviceAccountName={{service_account_name}}
 self_link: '{{name}}'
-# see comment at service_account_name, PATCHing service_account_name also required update_mask entry
-# update_url: "{{name}}?serviceAccountName={{service_account_name}}"
+update_url: "{{name}}?serviceAccountName={{service_account_name}}"
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -30,12 +29,15 @@ import_format: ['{{name}}']
 id_format: '{{name}}'
 error_retry_predicates: ['transport_tpg.IamMemberMissing']
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/bigquery_data_transfer.go.erb
   constants: templates/terraform/constants/bigquery_data_transfer.go.erb
   decoder: templates/terraform/decoders/bigquery_data_transfer.go.erb
   encoder: templates/terraform/encoders/bigquery_data_transfer.go.erb
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
   post_create: templates/terraform/post_create/set_computed_name.erb
+custom_diff: [
+  'sensitiveParamCustomizeDiff',
+  'paramsCustomizeDiff',
+]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     skip_test: true
@@ -57,10 +59,6 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'serviceAccountName'
     url_param_only: true
-    # The API would support PATCHing the service account, but setting the
-    # update_mask accordingly for a url_param_only is currently not
-    # supported in magic-modules
-    immutable: true
     default_value: ''
     description: |
       Service account email. If this field is set, transfer config will
@@ -181,8 +179,6 @@ properties:
     custom_flatten: templates/terraform/custom_flatten/json_to_string_map.go.erb
   - !ruby/object:Api::Type::NestedObject
     name: sensitiveParams
-    # This is a helper object for Terraform only
-    exclude: false
     url_param_only: true
     description: |
       Different parameters are configured primarily using the the `params` field on this

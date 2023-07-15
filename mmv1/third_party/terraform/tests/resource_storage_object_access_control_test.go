@@ -2,9 +2,10 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"io/ioutil"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -13,19 +14,19 @@ func TestAccStorageObjectAccessControl_update(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	objectName := fmt.Sprintf("%s-%d", "tf-test-acl-object", RandInt(t))
+	objectName := fmt.Sprintf("%s-%d", "tf-test-acl-object", acctest.RandInt(t))
 	objectData := []byte("data data data")
 	if err := ioutil.WriteFile(tfObjectAcl.Name(), objectData, 0644); err != nil {
 		t.Errorf("error writing file: %v", err)
 	}
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck: func() {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
 			acctest.AccTestPreCheck(t)
 		},
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckStorageObjectAccessControlDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -52,19 +53,19 @@ func TestAccStorageObjectAccessControl_updateWithSlashes(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	objectName := fmt.Sprintf("%s-%d", "tf-test/acl/object", RandInt(t))
+	objectName := fmt.Sprintf("%s-%d", "tf-test/acl/object", acctest.RandInt(t))
 	objectData := []byte("data data data")
 	if err := ioutil.WriteFile(tfObjectAcl.Name(), objectData, 0644); err != nil {
 		t.Errorf("error writing file: %v", err)
 	}
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck: func() {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
 			acctest.AccTestPreCheck(t)
 		},
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckStorageObjectAccessControlDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

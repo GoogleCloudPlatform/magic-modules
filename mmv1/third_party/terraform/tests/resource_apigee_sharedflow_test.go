@@ -2,12 +2,15 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -15,17 +18,17 @@ func TestAccApigeeSharedFlow_apigeeSharedflowTestExample(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	fmt.Printf("from t: org_id %s", acctest.GetTestOrgFromEnv(t))
+	fmt.Printf("from t: org_id %s", envvar.GetTestOrgFromEnv(t))
 
 	context := map[string]interface{}{
-		"org_id":          acctest.GetTestOrgFromEnv(t),
-		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
-		"random_suffix":   RandString(t, 10),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckApigeeSharedFlowDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -51,7 +54,7 @@ func TestAccApigeeSharedFlow_apigeeSharedflowTestExample(t *testing.T) {
 }
 
 func testAccApigeeSharedFlow_apigeeSharedflowTestExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
@@ -127,9 +130,9 @@ func testAccCheckApigeeSharedFlowDestroyProducer(t *testing.T) func(s *terraform
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
-			url, err := acctest.ReplaceVarsForTest(config, rs, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows/{{name}}")
 			if err != nil {
 				return err
 			}
@@ -140,7 +143,13 @@ func testAccCheckApigeeSharedFlowDestroyProducer(t *testing.T) func(s *terraform
 				billingProject = config.BillingProject
 			}
 			fmt.Printf("testAccCheckApigeeSharedFlowDestroyProducer, url %s", url)
-			_, err = transport_tpg.SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
 			if err == nil {
 				return fmt.Errorf("ApigeeSharedFlow still exists at %s", url)
 			}
@@ -151,7 +160,7 @@ func testAccCheckApigeeSharedFlowDestroyProducer(t *testing.T) func(s *terraform
 }
 
 func testAccApigeeSharedFlow_apigeeSharedflowTestExampleUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"

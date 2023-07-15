@@ -1,10 +1,12 @@
 package google
 
 import (
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"log"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -15,15 +17,15 @@ import (
 // See AccessApprovalOrganizationSettings for the test runner.
 func testAccAccessApprovalFolderSettings(t *testing.T) {
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
-		"org_id":        acctest.GetTestOrgFromEnv(t),
-		"location":      acctest.GetTestRegionFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"location":      envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
@@ -61,7 +63,7 @@ func testAccAccessApprovalFolderSettings(t *testing.T) {
 }
 
 func testAccAccessApprovalFolderSettings_full(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_folder" "my_folder" {
   display_name = "tf-test-my-folder%{random_suffix}"
   parent       = "organizations/%{org_id}"
@@ -88,7 +90,7 @@ resource "google_folder_access_approval_settings" "folder_access_approval" {
 }
 
 func testAccAccessApprovalFolderSettings_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_folder" "my_folder" {
   display_name = "tf-test-my-folder%{random_suffix}"
   parent       = "organizations/%{org_id}"
@@ -115,7 +117,7 @@ resource "google_folder_access_approval_settings" "folder_access_approval" {
 }
 
 func testAccAccessApprovalFolderSettings_activeKeyVersion(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_folder" "my_folder" {
   display_name = "tf-test-my-folder%{random_suffix}"
   parent       = "organizations/%{org_id}"

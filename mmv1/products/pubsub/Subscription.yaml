@@ -25,11 +25,8 @@ create_verb: :PUT
 update_verb: :PATCH
 update_mask: true
 update_url: projects/{{project}}/subscriptions/{{name}}
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: true
-  method_name_separator: ':'
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
   actions: ['create']
   suppress_error: true
 examples:

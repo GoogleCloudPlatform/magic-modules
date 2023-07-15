@@ -37,6 +37,7 @@ id_format: '{{key_ring}}/cryptoKeys/{{name}}'
 import_format: ['{{key_ring}}/cryptoKeys/{{name}}']
 supports_indirect_user_project_override: true
 schema_version: 1
+state_upgraders: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'kms_crypto_key_basic'
@@ -79,29 +80,18 @@ properties:
     immutable: true
     url_param_only: true
     ignore_read: true
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
-    description: |
-      The time that this resource was created on the server.
-      This is in RFC3339 text format.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: |
       Labels with user-defined metadata to apply to this resource.
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'purpose'
     description: |
       The immutable purpose of this CryptoKey. See the
       [purpose reference](https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys#CryptoKeyPurpose)
       for possible inputs.
-    values:
-      - 'ENCRYPT_DECRYPT'
-      - 'ASYMMETRIC_SIGN'
-      - 'ASYMMETRIC_DECRYPT'
-      - 'MAC'
-    default_value: :ENCRYPT_DECRYPT
+      Default value is "ENCRYPT_DECRYPT".
+    default_value: 'ENCRYPT_DECRYPT'
     immutable: true
   - !ruby/object:Api::Type::String
     name: 'rotationPeriod'
@@ -135,12 +125,6 @@ properties:
           The protection level to use when creating a version based on this template. Possible values include "SOFTWARE", "HSM", "EXTERNAL", "EXTERNAL_VPC". Defaults to "SOFTWARE".
         immutable: true
         default_value: 'SOFTWARE'
-  - !ruby/object:Api::Type::Time
-    name: 'nextRotationTime'
-    description: |
-      The time when KMS will create a new version of this Crypto Key.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'destroyScheduledDuration'
     immutable: true

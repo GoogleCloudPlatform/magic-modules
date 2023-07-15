@@ -14,29 +14,30 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
 const SQLDatabaseInstanceAssetType string = "sqladmin.googleapis.com/Instance"
 
-func resourceConverterSQLDatabaseInstance() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterSQLDatabaseInstance() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType: SQLDatabaseInstanceAssetType,
 		Convert:   GetSQLDatabaseInstanceCaiObject,
 	}
 }
 
-func GetSQLDatabaseInstanceCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}")
+func GetSQLDatabaseInstanceCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	name, err := tpgresource.AssetName(d, config, "//cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}")
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 	if obj, err := GetSQLDatabaseInstanceApiObject(d, config); err == nil {
-		return []Asset{{
+		return []tpgresource.Asset{{
 			Name: name,
 			Type: SQLDatabaseInstanceAssetType,
-			Resource: &AssetResource{
+			Resource: &tpgresource.AssetResource{
 				Version:              "v1beta4",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/sqladmin/v1beta4/rest",
 				DiscoveryName:        "DatabaseInstance",
@@ -44,17 +45,17 @@ func GetSQLDatabaseInstanceCaiObject(d TerraformResourceData, config *transport_
 			},
 		}}, nil
 	} else {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 }
 
-func GetSQLDatabaseInstanceApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
-	project, err := getProject(d, config)
+func GetSQLDatabaseInstanceApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := tpgresource.GetRegion(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -76,11 +77,11 @@ func GetSQLDatabaseInstanceApiObject(d TerraformResourceData, config *transport_
 		ReplicaConfiguration: expandReplicaConfiguration(d.Get("replica_configuration").([]interface{})),
 	}
 
-	return jsonMap(instance)
+	return tpgresource.JsonMap(instance)
 }
 
 // Detects whether a database is 1st Generation by inspecting the tier name
-func isFirstGen(d TerraformResourceData) bool {
+func isFirstGen(d tpgresource.TerraformResourceData) bool {
 	settingsList := d.Get("settings").([]interface{})
 	settings := settingsList[0].(map[string]interface{})
 	tier := settings["tier"].(string)

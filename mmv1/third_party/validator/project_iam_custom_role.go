@@ -10,23 +10,23 @@ import (
 
 const ProjectIAMCustomRoleAssetType string = "iam.googleapis.com/Role"
 
-func resourceConverterProjectIAMCustomRole() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterProjectIAMCustomRole() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType: ProjectIAMCustomRoleAssetType,
 		Convert:   GetProjectIAMCustomRoleCaiObject,
 	}
 }
 
-func GetProjectIAMCustomRoleCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//iam.googleapis.com/projects/{{project}}/roles/{{role_id}}")
+func GetProjectIAMCustomRoleCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	name, err := tpgresource.AssetName(d, config, "//iam.googleapis.com/projects/{{project}}/roles/{{role_id}}")
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 	if obj, err := GetProjectIAMCustomRoleApiObject(d, config); err == nil {
-		return []Asset{{
+		return []tpgresource.Asset{{
 			Name: name,
 			Type: ProjectIAMCustomRoleAssetType,
-			Resource: &AssetResource{
+			Resource: &tpgresource.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://iam.googleapis.com/$discovery/rest?version=v1",
 				DiscoveryName:        "Role",
@@ -34,11 +34,11 @@ func GetProjectIAMCustomRoleCaiObject(d TerraformResourceData, config *transport
 			},
 		}}, nil
 	} else {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 }
 
-func GetProjectIAMCustomRoleApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+func GetProjectIAMCustomRoleApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
 	obj := make(map[string]interface{})
 
 	descriptionProp, err := expandProjectIAMCustomRoleDescription(d.Get("description"), d, config)
@@ -72,18 +72,18 @@ func GetProjectIAMCustomRoleApiObject(d TerraformResourceData, config *transport
 	return obj, nil
 }
 
-func expandProjectIAMCustomRoleDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandProjectIAMCustomRoleDescription(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandProjectIAMCustomRoleTitle(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandProjectIAMCustomRoleTitle(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandProjectIAMCustomRoleStage(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandProjectIAMCustomRoleStage(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandProjectIAMCustomRolePermissions(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandProjectIAMCustomRolePermissions(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v.(*schema.Set).List(), nil
 }

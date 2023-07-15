@@ -12,13 +12,13 @@
   # See the License for the specific language governing permissions and
   # limitations under the License.
 -%>
-func resourceDatastreamStreamCustomDiffFunc(diff TerraformResourceDiff) error {
+func resourceDatastreamStreamCustomDiffFunc(diff tpgresource.TerraformResourceDiff) error {
 	if diff.HasChange("desired_state") {
 		old, new := diff.GetChange("desired_state")
 		oldState := old.(string)
 		newState := new.(string)
 
-		if isNewResource(diff) {
+		if tpgresource.IsNewResource(diff) {
 			if newState != "NOT_STARTED" && newState != "RUNNING" {
 				return fmt.Errorf("`desired_state` can only be set to `NOT_STARTED` or `RUNNING` when creating a new Stream")
 			}

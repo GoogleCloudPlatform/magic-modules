@@ -26,6 +26,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/network/forwarding-rules'
   api: 'https://cloud.google.com/compute/docs/reference/v1/forwardingRules'
 immutable: true
+legacy_long_form_project: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
@@ -162,7 +163,23 @@ examples:
       - 'ip_address'
   - !ruby/object:Provider::Terraform::Examples
     name: 'forwarding_rule_vpc_psc'
-    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      forwarding_rule_name: 'psc-endpoint'
+      consumer_network_name: 'consumer-net'
+      ip_name: 'website-ip'
+      producer_network_name: 'producer-net'
+      producer_psc_network_name: 'producer-psc-net'
+      service_attachment_name: 'producer-service'
+      producer_forwarding_rule_name: 'producer-forwarding-rule'
+      producer_backend_name: 'producer-service-backend'
+      producer_healthcheck_name: 'producer-service-health-check'
+    ignore_read_extra:
+      - 'port_range'
+      - 'target'
+      - 'ip_address'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'forwarding_rule_vpc_psc_no_automate_dns'
     primary_resource_id: 'default'
     vars:
       forwarding_rule_name: 'psc-endpoint'
@@ -200,6 +217,7 @@ parameters:
     required: false
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -230,11 +248,6 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   # This is a multi-resource resource reference (Address, GlobalAddress)
   - !ruby/object:Api::Type::String
     name: 'IPAddress'
@@ -366,6 +379,7 @@ properties:
     # manifest input from a single value to a range of form NN-NN. The API
     # accepts a single value, e.g. '80', but the API stores and returns
     # '80-80'. This causes idempotency false positive.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'portRange'
     description: |
@@ -438,6 +452,7 @@ properties:
     # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
     # TargetInstance)
     default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'target'
     description: |
@@ -486,9 +501,6 @@ properties:
       internally during updates.
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
     update_verb: :POST
-    # While this field doesn't appear in the resource definition in the docs,
-    # it's present in Get and Insert, and the resource has no Update/Patch call.
-    exclude: false
   - !ruby/object:Api::Type::Boolean
     name: 'allPorts'
     description: |
@@ -596,5 +608,12 @@ properties:
     description:
       This is used in PSC consumer ForwardingRule to control whether the PSC
       endpoint can be accessed from another region.
-    min_version: beta
     send_empty_value: true
+  - !ruby/object:Api::Type::Boolean
+    name: noAutomateDnsZone
+    description:
+      This is used in PSC consumer ForwardingRule to control whether it should try to auto-generate a DNS zone or not.
+      Non-PSC forwarding rules do not use this field.
+    send_empty_value: true
+    immutable: true
+    ignore_read: true

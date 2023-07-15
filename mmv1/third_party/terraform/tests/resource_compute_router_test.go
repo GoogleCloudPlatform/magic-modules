@@ -6,17 +6,18 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccComputeRouter_basic(t *testing.T) {
 	t.Parallel()
 
-	testId := RandString(t, 10)
+	testId := acctest.RandString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-%s", testId)
 	resourceRegion := "europe-west1"
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -34,12 +35,12 @@ func TestAccComputeRouter_basic(t *testing.T) {
 func TestAccComputeRouter_noRegion(t *testing.T) {
 	t.Parallel()
 
-	testId := RandString(t, 10)
+	testId := acctest.RandString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-%s", testId)
 	providerRegion := "us-central1"
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -57,11 +58,11 @@ func TestAccComputeRouter_noRegion(t *testing.T) {
 func TestAccComputeRouter_full(t *testing.T) {
 	t.Parallel()
 
-	testId := RandString(t, 10)
+	testId := acctest.RandString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-%s", testId)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -79,12 +80,12 @@ func TestAccComputeRouter_full(t *testing.T) {
 func TestAccComputeRouter_update(t *testing.T) {
 	t.Parallel()
 
-	testId := RandString(t, 10)
+	testId := acctest.RandString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-%s", testId)
-	region := acctest.GetTestRegionFromEnv()
-	VcrTest(t, resource.TestCase{
+	region := envvar.GetTestRegionFromEnv()
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -118,12 +119,12 @@ func TestAccComputeRouter_update(t *testing.T) {
 func TestAccComputeRouter_updateAddRemoveBGP(t *testing.T) {
 	t.Parallel()
 
-	testId := RandString(t, 10)
+	testId := acctest.RandString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-%s", testId)
-	region := acctest.GetTestRegionFromEnv()
-	VcrTest(t, resource.TestCase{
+	region := envvar.GetTestRegionFromEnv()
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

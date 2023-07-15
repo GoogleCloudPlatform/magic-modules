@@ -2,10 +2,13 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"sort"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -17,11 +20,11 @@ import (
 func TestAccFolderIamBinding_basic(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
-	fname := "tf-test-" + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	org := envvar.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -50,11 +53,11 @@ func TestAccFolderIamBinding_multiple(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
-	fname := "tf-test-" + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	org := envvar.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -97,11 +100,11 @@ func TestAccFolderIamBinding_multipleAtOnce(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
-	fname := "tf-test-" + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	org := envvar.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -132,11 +135,11 @@ func TestAccFolderIamBinding_multipleAtOnce(t *testing.T) {
 func TestAccFolderIamBinding_update(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
-	fname := "tf-test-" + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	org := envvar.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -185,11 +188,11 @@ func TestAccFolderIamBinding_remove(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
-	fname := "tf-test-" + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	org := envvar.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -225,7 +228,7 @@ func TestAccFolderIamBinding_remove(t *testing.T) {
 
 func testAccCheckGoogleFolderIamBindingExists(t *testing.T, expected *cloudresourcemanager.Binding, org, fname string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		folderPolicy, err := getFolderIamPolicyByParentAndDisplayName("organizations/"+org, fname, config)
 		if err != nil {
 			return fmt.Errorf("Failed to retrieve IAM policy for folder %q: %s", fname, err)
@@ -282,7 +285,7 @@ func getFolderIamPolicyByParentAndDisplayName(parent, displayName string, config
 		return nil, fmt.Errorf("Folder not found: %s", displayName)
 	}
 
-	return getFolderIamPolicyByFolderName(folderMatch.Name, config.UserAgent, config)
+	return resourcemanager.GetFolderIamPolicyByFolderName(folderMatch.Name, config.UserAgent, config)
 }
 
 func testAccFolderIamBasic(org, fname string) string {
