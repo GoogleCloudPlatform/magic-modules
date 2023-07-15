@@ -1,6 +1,12 @@
-name: Build and Unit Test GA Provider
+name: Provider Build and Unit Test
 
-permissions: read-all
+permissions:
+  actions: read
+  contents: read
+  statuses: write
+
+env:
+  status_suffix: "-build-and-unit-tests"
 
 on:
   workflow_dispatch:
@@ -14,36 +20,89 @@ on:
         required: false
         default: 'terraform-provider-google'
       branch:
-        description: 'The branch or sha to execute against'
+        description: 'The branch or sha of the provider execute against'
+        required: true
+      sha:
+        description: "The commit SHA in magic-modules repository where the status result will be posted"
         required: true
 
+concurrency:
+  group: test-tpg-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.branch }}
+  cancel-in-progress: true
+
 jobs:
-  build-and-test:
+  build-and-unit-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
       with:
-        repository: ${{ github.event.client_payload.owner }}/${{ github.event.client_payload.repo }}
-        ref: ${{ github.event.client_payload.branch }}
+        repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}
+        ref: ${{ github.event.inputs.branch }}
         path: provider
+        fetch-depth: 2
+    - name: Check for Code Changes
+      id: pull_request
+      run: |
+        cd provider
+        gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
+        if [ -z "$gofiles" ]; then
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+        else
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+        fi
+    - name: Get Job URL
+      if: ${{ !cancelled() }}
+      id: get_job
+      run: |
+        response=$(curl --get -Ss -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs")
+        html_url=$(echo "$response" | jq -r --arg job_name "${{ github.job }}" '.jobs | map(select(.name == $job_name)) | .[0].html_url')
+        echo "url=${html_url}" >> $GITHUB_OUTPUT
+    - name: Post Pending Status to Pull Request
+      if: ${{ !cancelled() }}
+      run: |
+        curl -X POST -H "Authorization: token ${{secrets.GITHUB_TOKEN}}" \
+        -H "Accept: application/vnd.github.v3+json" \
+        "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/${{github.event.inputs.sha}}" \
+        -d '{
+        "context": "${{ github.event.inputs.repo }}${{ env.status_suffix }}",
+        "target_url": "${{ steps.get_job.outputs.url }}",
+        "state": "pending"
+        }'
     - name: Set up Go
-      uses: golang/setup-go@v2
+      if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
+      uses: actions/setup-go@v4
       with:
-        go-version: '1.19.x'
-    - name: Build
+        go-version: '^1.19.1'
+    - name: Build Provider
+      if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
         cd provider
         go build
-    - name: Lint
-      run: |
-        cd provider
-        make lint
-      if: ${{ always() }} # This step will always run, even if the previous fails
-    - name: Test
+    - name: Run Unit Tests
+      if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
         cd provider
         make test
-      if: ${{ always() }} # This step will always run, even if the previous fails
-
-
+    - name: Lint Check
+      if: ${{ !cancelled() && steps.pull_request.outputs.has_changes == 'true' }}
+      run: |
+        cd provider
+        make lint
+    - name: Documentation Check
+      if: ${{ !cancelled() && steps.pull_request.outputs.has_changes == 'true' }}
+      run: |
+        cd provider
+        make docscheck
+    - name: Post Result Status to Pull Request
+      if: ${{ !cancelled() }}
+      run: |
+        curl -X POST -H "Authorization: token ${{secrets.GITHUB_TOKEN}}" \
+        -H "Accept: application/vnd.github.v3+json" \
+        "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/${{github.event.inputs.sha}}" \
+        -d '{
+        "context": "${{ github.event.inputs.repo }}${{ env.status_suffix }}",
+        "target_url": "${{ steps.get_job.outputs.url }}",
+        "state": "${{ job.status }}"
+        }'

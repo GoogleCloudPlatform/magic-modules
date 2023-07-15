@@ -103,11 +103,6 @@ properties:
     send_empty_value: true
     update_verb: :PATCH
     update_url: 'projects/{{project}}/policies/{{name}}'
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: Unique identifier for the resource; defined by the server.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |

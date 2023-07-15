@@ -39,7 +39,7 @@ examples:
     vars:
       short_name: 'keyname'
     test_vars_overrides:
-      short_name: '"tf-test-key-" + RandString(t, 10)'
+      short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
     test_env_vars:
       org_id: :ORG_ID
 properties:
@@ -55,6 +55,7 @@ properties:
       Input only. The resource name of the new TagKey's parent. Must be of the form organizations/{org_id} or projects/{project_id_or_number}.
     immutable: true
     required: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - !ruby/object:Api::Type::String
     name: shortName
     description: |

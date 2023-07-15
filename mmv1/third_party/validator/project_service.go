@@ -10,23 +10,23 @@ import (
 
 const ServiceUsageAssetType string = "serviceusage.googleapis.com/Service"
 
-func resourceConverterServiceUsage() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterServiceUsage() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType: ServiceUsageAssetType,
 		Convert:   GetServiceUsageCaiObject,
 	}
 }
 
-func GetServiceUsageCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//serviceusage.googleapis.com/projects/{{project}}/services/{{service}}")
+func GetServiceUsageCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	name, err := tpgresource.AssetName(d, config, "//serviceusage.googleapis.com/projects/{{project}}/services/{{service}}")
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 	if obj, err := GetServiceUsageApiObject(d, config); err == nil {
-		return []Asset{{
+		return []tpgresource.Asset{{
 			Name: name,
 			Type: ServiceUsageAssetType,
-			Resource: &AssetResource{
+			Resource: &tpgresource.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/serviceusage/v1/rest",
 				DiscoveryName:        "Service",
@@ -34,10 +34,10 @@ func GetServiceUsageCaiObject(d TerraformResourceData, config *transport_tpg.Con
 			}},
 		}, nil
 	}
-	return []Asset{}, err
+	return []tpgresource.Asset{}, err
 }
 
-func GetServiceUsageApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+func GetServiceUsageApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
 	obj := make(map[string]interface{})
 	parentProjectProp, err := expandServiceUsageParentProject(d.Get("project"), d, config)
 	if err != nil {
@@ -57,7 +57,7 @@ func GetServiceUsageApiObject(d TerraformResourceData, config *transport_tpg.Con
 	return obj, nil
 }
 
-func expandServiceUsageParentProject(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandServiceUsageParentProject(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	if v == nil || v.(string) == "" {
 		// It does not try to construct anything from empty.
 		return "", nil
@@ -67,6 +67,6 @@ func expandServiceUsageParentProject(v interface{}, d TerraformResourceData, con
 	return fmt.Sprintf("projects/%s", v.(string)), nil
 }
 
-func expandServiceUsageServiceName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandServiceUsageServiceName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }

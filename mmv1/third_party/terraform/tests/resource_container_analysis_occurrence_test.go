@@ -11,6 +11,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"crypto/sha512"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"google.golang.org/api/cloudkms/v1"
 )
@@ -33,7 +34,7 @@ func getTestOccurrenceAttestationPayload(t *testing.T) string {
 
 func getSignedTestOccurrenceAttestationPayload(
 	t *testing.T, config *transport_tpg.Config,
-	signingKey BootstrappedKMS, rawPayload string) string {
+	signingKey acctest.BootstrappedKMS, rawPayload string) string {
 	pbytes := []byte(rawPayload)
 	ssum := sha512.Sum512(pbytes)
 	hashed := base64.StdEncoding.EncodeToString(ssum[:])
@@ -54,14 +55,14 @@ func getSignedTestOccurrenceAttestationPayload(
 
 func TestAccContainerAnalysisOccurrence_basic(t *testing.T) {
 	t.Parallel()
-	randSuffix := RandString(t, 10)
+	randSuffix := acctest.RandString(t, 10)
 
-	config := BootstrapConfig(t)
+	config := acctest.BootstrapConfig(t)
 	if config == nil {
 		return
 	}
 
-	signKey := BootstrapKMSKeyWithPurpose(t, "ASYMMETRIC_SIGN")
+	signKey := acctest.BootstrapKMSKeyWithPurpose(t, "ASYMMETRIC_SIGN")
 	payload := getTestOccurrenceAttestationPayload(t)
 	signed := getSignedTestOccurrenceAttestationPayload(t, config, signKey, payload)
 	params := map[string]interface{}{
@@ -73,9 +74,9 @@ func TestAccContainerAnalysisOccurrence_basic(t *testing.T) {
 		"signature":     base64.StdEncoding.EncodeToString([]byte(signed)),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerAnalysisNoteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -92,18 +93,18 @@ func TestAccContainerAnalysisOccurrence_basic(t *testing.T) {
 
 func TestAccContainerAnalysisOccurrence_multipleSignatures(t *testing.T) {
 	t.Parallel()
-	randSuffix := RandString(t, 10)
+	randSuffix := acctest.RandString(t, 10)
 
-	config := BootstrapConfig(t)
+	config := acctest.BootstrapConfig(t)
 	if config == nil {
 		return
 	}
 
 	payload := getTestOccurrenceAttestationPayload(t)
-	key1 := BootstrapKMSKeyWithPurposeInLocationAndName(t, "ASYMMETRIC_SIGN", "global", "tf-bootstrap-binauthz-key1")
+	key1 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ASYMMETRIC_SIGN", "global", "tf-bootstrap-binauthz-key1")
 	signature1 := getSignedTestOccurrenceAttestationPayload(t, config, key1, payload)
 
-	key2 := BootstrapKMSKeyWithPurposeInLocationAndName(t, "ASYMMETRIC_SIGN", "global", "tf-bootstrap-binauthz-key2")
+	key2 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ASYMMETRIC_SIGN", "global", "tf-bootstrap-binauthz-key2")
 	signature2 := getSignedTestOccurrenceAttestationPayload(t, config, key2, payload)
 
 	paramsMultipleSignatures := map[string]interface{}{
@@ -125,9 +126,9 @@ func TestAccContainerAnalysisOccurrence_multipleSignatures(t *testing.T) {
 		"signature":     base64.StdEncoding.EncodeToString([]byte(signature1)),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerAnalysisNoteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -151,7 +152,7 @@ func TestAccContainerAnalysisOccurrence_multipleSignatures(t *testing.T) {
 }
 
 func testAccContainerAnalysisOccurence_basic(params map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_binary_authorization_attestor" "attestor" {
   name = "test-attestor%{random_suffix}"
   attestation_authority_note {
@@ -205,7 +206,7 @@ resource "google_container_analysis_occurrence" "occurrence" {
 }
 
 func testAccContainerAnalysisOccurence_multipleSignatures(params map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_binary_authorization_attestor" "attestor" {
   name = "test-attestor%{random_suffix}"
   attestation_authority_note {

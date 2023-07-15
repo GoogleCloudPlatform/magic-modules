@@ -17,6 +17,11 @@ module Provider
   # Code generator for runnable Terraform examples that can be run via an
   # Open in Cloud Shell link.
   class TerraformOiCS < Provider::Terraform
+    def generating_hashicorp_repo?
+      # This code is not used when generating TPG/TPGB
+      false
+    end
+
     # We don't want *any* static generation, so we override generate to only
     # generate objects.
     def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)

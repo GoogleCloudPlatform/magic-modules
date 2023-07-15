@@ -3,9 +3,11 @@ package google
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"regexp"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/bigtable"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -16,12 +18,12 @@ func TestAccBigtableTable_basic(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -41,12 +43,12 @@ func TestAccBigtableTable_splitKeys(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -67,13 +69,13 @@ func TestAccBigtableTable_family(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	family := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -93,13 +95,13 @@ func TestAccBigtableTable_deletion_protection_protected(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	family := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			// creating a table with a column family and deletion protection equals to protected
@@ -153,13 +155,13 @@ func TestAccBigtableTable_deletion_protection_unprotected(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	family := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			// creating a table with a column family and deletion protection equals to unprotected
@@ -207,18 +209,81 @@ func TestAccBigtableTable_deletion_protection_unprotected(t *testing.T) {
 	})
 }
 
+func TestAccBigtableTable_change_stream_enable(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// creating a table with a column family and change stream of 1 day
+			{
+				Config: testAccBigtableTable_change_stream_retention(instanceName, tableName, "24h0m0s", family),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// it is not possible to delete the table because of change stream is enabled
+			{
+				Config:      testAccBigtableTable_destroyTable(instanceName),
+				ExpectError: regexp.MustCompile(".*the change stream is enabled.*"),
+			},
+			// changing change stream retention value
+			{
+				Config: testAccBigtableTable_change_stream_retention(instanceName, tableName, "120h0m0s", family),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// it is not possible to delete the table because of change stream is enabled
+			{
+				Config:      testAccBigtableTable_destroyTable(instanceName),
+				ExpectError: regexp.MustCompile(".*the change stream is enabled.*"),
+			},
+			// disable changing change stream retention
+			{
+				Config: testAccBigtableTable_change_stream_retention(instanceName, tableName, "0", family),
+				Check: resource.ComposeTestCheckFunc(
+					testAccBigtableChangeStreamDisabled(t),
+				),
+			},
+			// destroying the table is possible when change stream is disabled
+			{
+				Config: testAccBigtableTable_destroyTable(instanceName),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"},
+			},
+		},
+	})
+}
+
 func TestAccBigtableTable_familyMany(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	family := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -238,13 +303,13 @@ func TestAccBigtableTable_familyUpdate(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	family := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -275,7 +340,7 @@ func testAccCheckBigtableTableDestroyProducer(t *testing.T) func(s *terraform.St
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 			c, err := config.BigTableClientFactory(config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
 			if err != nil {
 				// The instance is already gone
@@ -302,7 +367,7 @@ func testAccBigtableColumnFamilyExists(t *testing.T, table_name_space, family st
 			return fmt.Errorf("Table not found: %s", table_name_space)
 		}
 
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		c, err := config.BigTableClientFactory(config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
 		if err != nil {
 			return fmt.Errorf("Error starting admin client. %s", err)
@@ -314,10 +379,39 @@ func testAccBigtableColumnFamilyExists(t *testing.T, table_name_space, family st
 		if err != nil {
 			return fmt.Errorf("Error retrieving table. Could not find %s in %s.", rs.Primary.Attributes["name"], rs.Primary.Attributes["instance_name"])
 		}
-		for _, data := range flattenColumnFamily(table.Families) {
+		for _, data := range bigtable.FlattenColumnFamily(table.Families) {
 			if data["family"] != family {
 				return fmt.Errorf("Error checking column family. Could not find column family %s in %s.", family, rs.Primary.Attributes["name"])
 			}
+		}
+
+		return nil
+	}
+}
+
+func testAccBigtableChangeStreamDisabled(t *testing.T) resource.TestCheckFunc {
+	var ctx = context.Background()
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources["google_bigtable_table.table"]
+		if !ok {
+			return fmt.Errorf("Table not found: %s", "google_bigtable_table.table")
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+		c, err := config.BigTableClientFactory(config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
+		if err != nil {
+			return fmt.Errorf("Error starting admin client. %s", err)
+		}
+
+		defer c.Close()
+
+		table, err := c.TableInfo(ctx, rs.Primary.Attributes["name"])
+		if err != nil {
+			return fmt.Errorf("Error retrieving table. Could not find %s in %s.", rs.Primary.Attributes["name"], rs.Primary.Attributes["instance_name"])
+		}
+
+		if table.ChangeStreamRetention != nil {
+			return fmt.Errorf("Change Stream is expected to be disabled but it's not: %v", table)
 		}
 
 		return nil
@@ -414,6 +508,32 @@ resource "google_bigtable_table" "table" {
   }
 }
 `, instanceName, instanceName, tableName, deletionProtection, family)
+}
+
+func testAccBigtableTable_change_stream_retention(instanceName, tableName, changeStreamRetention, family string) string {
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+
+  cluster {
+    cluster_id = "%s"
+    zone       = "us-central1-b"
+  }
+
+  instance_type = "DEVELOPMENT"
+  deletion_protection = false
+}
+
+resource "google_bigtable_table" "table" {
+  name          = "%s"
+  instance_name = google_bigtable_instance.instance.name
+  change_stream_retention = "%s"
+
+  column_family {
+    family = "%s"
+  }
+}
+`, instanceName, instanceName, tableName, changeStreamRetention, family)
 }
 
 func testAccBigtableTable_familyMany(instanceName, tableName, family string) string {

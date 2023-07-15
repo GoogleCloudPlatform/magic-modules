@@ -94,6 +94,7 @@ parameters:
     required: false
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'tunnel_id'
@@ -130,6 +131,7 @@ properties:
     resource: 'VpnGateway'
     imports: 'selfLink'
     immutable: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'vpnGateway'
     description: |
@@ -139,6 +141,7 @@ properties:
     resource: 'HaVpnGateway'
     imports: 'selfLink'
     immutable: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Integer
     name: 'vpnGatewayInterface'
     description: |
@@ -154,6 +157,7 @@ properties:
       - peer_gcp_gateway
     description: |
       URL of the peer side external VPN gateway to which this VPN tunnel is connected.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Integer
     name: 'peerExternalGatewayInterface'
     description: |
@@ -170,6 +174,7 @@ properties:
       This field must reference a `google_compute_ha_vpn_gateway` resource.
     resource: 'HaVpnGateway'
     imports: 'selfLink'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'router'
     description: |
@@ -239,9 +244,7 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}/setLabels'
     update_verb: :POST
     min_version: beta
-    exclude: false
   - !ruby/object:Api::Type::String
-    exclude: false
     name: 'detailedStatus'
     output: true
     description: 'Detailed status message for the VPN tunnel.'

@@ -7,32 +7,32 @@ import (
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
-func resourceConverterBigtableCluster() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterBigtableCluster() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType: "bigtableadmin.googleapis.com/Cluster",
 		Convert:   GetBigtableClusterCaiObject,
 	}
 }
 
-func GetBigtableClusterCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetBigtableClusterCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
 
 	objs, err := GetBigtableClusterApiObjects(d, config)
 
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 
-	assets := []Asset{}
+	assets := []tpgresource.Asset{}
 	for _, obj := range objs {
-		name, err := assetName(d, config, "//bigtable.googleapis.com/projects/{{project}}/instances/{{name}}/clusters/{{cluster_id}}")
+		name, err := tpgresource.AssetName(d, config, "//bigtable.googleapis.com/projects/{{project}}/instances/{{name}}/clusters/{{cluster_id}}")
 		if err != nil {
-			return []Asset{}, err
+			return []tpgresource.Asset{}, err
 		}
 
-		asset := Asset{
+		asset := tpgresource.Asset{
 			Name: name,
 			Type: "bigtableadmin.googleapis.com/Cluster",
-			Resource: &AssetResource{
+			Resource: &tpgresource.AssetResource{
 				Version:              "v2",
 				DiscoveryDocumentURI: "https://bigtableadmin.googleapis.com/$discovery/rest",
 				DiscoveryName:        "Cluster",
@@ -44,12 +44,12 @@ func GetBigtableClusterCaiObject(d TerraformResourceData, config *transport_tpg.
 	return assets, nil
 }
 
-func GetBigtableClusterApiObjects(d TerraformResourceData, config *transport_tpg.Config) ([]map[string]interface{}, error) {
+func GetBigtableClusterApiObjects(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]map[string]interface{}, error) {
 	return expandBigtableClusters(d.Get("cluster"), d, config)
 
 }
 
-func expandBigtableClusters(v interface{}, d TerraformResourceData, config *transport_tpg.Config) ([]map[string]interface{}, error) {
+func expandBigtableClusters(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]map[string]interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -94,20 +94,20 @@ func expandBigtableClusters(v interface{}, d TerraformResourceData, config *tran
 	return transformedEntries, nil
 }
 
-func expandBigtableClusterLocation(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandBigtableClusterLocation(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigtableClusterServerNodes(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandBigtableClusterServerNodes(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigtableClusterDefaultStorageType(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandBigtableClusterDefaultStorageType(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigtableClusterName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	cluster, err := ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}/clusters/")
+func expandBigtableClusterName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	cluster, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}/clusters/")
 	if err != nil {
 		return nil, err
 	}

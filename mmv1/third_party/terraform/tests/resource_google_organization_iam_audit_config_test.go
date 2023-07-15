@@ -2,10 +2,12 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -26,11 +28,11 @@ func TestAccOrganizationIamAuditConfig_basic(t *testing.T) {
 	if os.Getenv(runOrgIamAuditConfigTestEnvVar) != "true" {
 		t.Skipf("Environment variable %s is not set, skipping.", runOrgIamAuditConfigTestEnvVar)
 	}
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	service := "cloudkms.googleapis.com"
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Apply an IAM audit config
 			{
@@ -46,13 +48,13 @@ func TestAccOrganizationIamAuditConfig_multiple(t *testing.T) {
 	if os.Getenv(runOrgIamAuditConfigTestEnvVar) != "true" {
 		t.Skipf("Environment variable %s is not set, skipping.", runOrgIamAuditConfigTestEnvVar)
 	}
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Apply an IAM audit config
 			{
@@ -75,13 +77,13 @@ func TestAccOrganizationIamAuditConfig_multipleAtOnce(t *testing.T) {
 	if os.Getenv(runOrgIamAuditConfigTestEnvVar) != "true" {
 		t.Skipf("Environment variable %s is not set, skipping.", runOrgIamAuditConfigTestEnvVar)
 	}
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Apply an IAM audit config
 			{
@@ -98,12 +100,12 @@ func TestAccOrganizationIamAuditConfig_update(t *testing.T) {
 	if os.Getenv(runOrgIamAuditConfigTestEnvVar) != "true" {
 		t.Skipf("Environment variable %s is not set, skipping.", runOrgIamAuditConfigTestEnvVar)
 	}
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	service := "cloudkms.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Apply an IAM audit config
 			{
@@ -133,13 +135,13 @@ func TestAccOrganizationIamAuditConfig_remove(t *testing.T) {
 	if os.Getenv(runOrgIamAuditConfigTestEnvVar) != "true" {
 		t.Skipf("Environment variable %s is not set, skipping.", runOrgIamAuditConfigTestEnvVar)
 	}
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Apply multiple IAM audit configs
 			{
@@ -162,14 +164,14 @@ func TestAccOrganizationIamAuditConfig_addFirstExemptMember(t *testing.T) {
 	if os.Getenv(runOrgIamAuditConfigTestEnvVar) != "true" {
 		t.Skipf("Environment variable %s is not set, skipping.", runOrgIamAuditConfigTestEnvVar)
 	}
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	service := "cloudkms.googleapis.com"
 	members := []string{}
 	members2 := []string{"user:gterraformtest1@gmail.com"}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Apply IAM audit config with no members
 			{
@@ -191,14 +193,14 @@ func TestAccOrganizationIamAuditConfig_removeLastExemptMember(t *testing.T) {
 	if os.Getenv(runOrgIamAuditConfigTestEnvVar) != "true" {
 		t.Skipf("Environment variable %s is not set, skipping.", runOrgIamAuditConfigTestEnvVar)
 	}
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	service := "cloudkms.googleapis.com"
 	members := []string{"user:gterraformtest1@gmail.com"}
 	members2 := []string{}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Apply IAM audit config with member
 			{
@@ -220,14 +222,14 @@ func TestAccOrganizationIamAuditConfig_updateNoExemptMembers(t *testing.T) {
 	if os.Getenv(runOrgIamAuditConfigTestEnvVar) != "true" {
 		t.Skipf("Environment variable %s is not set, skipping.", runOrgIamAuditConfigTestEnvVar)
 	}
-	org := acctest.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 	logType := "DATA_READ"
 	logType2 := "DATA_WRITE"
 	service := "cloudkms.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Apply IAM audit config with DATA_READ
 			{

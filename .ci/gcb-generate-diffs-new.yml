@@ -64,6 +64,14 @@ steps:
           - --no-ff
           - head/$_HEAD_BRANCH
 
+    - name: 'gcr.io/graphite-docker-images/pre-build-validator'
+      id: pre-build-validate
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["merged"]
+      env:
+        - COMMIT_SHA=$COMMIT_SHA
+        - PR_NUMBER=$_PR_NUMBER
+
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
       id: tpg-head
@@ -106,7 +114,6 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       id: tgc-head
-      allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged", "tpg-head"]
       args:
@@ -117,7 +124,6 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       id: tgc-base
-      allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged", "tpg-base"]
       args:
@@ -217,26 +223,34 @@ steps:
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tpgb-head", "tpgb-base"]
       args:
-          - 'beta'
-          - $_PR_NUMBER
-          - $COMMIT_SHA
-          - $BUILD_ID
-          - $PROJECT_ID
-          - GoogleCloudPlatform/magic-modules
-          - "20"  # Build step
+          - 'beta'                            # remove after 07/2023
+          - $_PR_NUMBER                       # remove after 07/2023
+          - $COMMIT_SHA                       # remove after 07/2023
+          - $BUILD_ID                         # remove after 07/2023
+          - $PROJECT_ID                       # remove after 07/2023
+          - GoogleCloudPlatform/magic-modules # remove after 07/2023
+          - "20"                              # remove after 07/2023
+      env:
+        - VERSION=beta
+        - COMMIT_SHA=$COMMIT_SHA
+        - PR_NUMBER=$_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpg-test
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tpg-head", "tpg-base"]
       args:
-          - 'ga'
-          - $_PR_NUMBER
-          - $COMMIT_SHA
-          - $BUILD_ID
-          - $PROJECT_ID
-          - GoogleCloudPlatform/magic-modules
-          - "21"  # Build step
+          - 'ga'                               # remove after 07/2023
+          - $_PR_NUMBER                        # remove after 07/2023
+          - $COMMIT_SHA                        # remove after 07/2023
+          - $BUILD_ID                          # remove after 07/2023
+          - $PROJECT_ID                        # remove after 07/2023
+          - GoogleCloudPlatform/magic-modules  # remove after 07/2023
+          - "21"                               # remove after 07/2023
+      env:
+        - VERSION=ga
+        - COMMIT_SHA=$COMMIT_SHA
+        - PR_NUMBER=$_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/gcb-terraform-vcr-tester'
       id: gcb-tpg-vcr-test

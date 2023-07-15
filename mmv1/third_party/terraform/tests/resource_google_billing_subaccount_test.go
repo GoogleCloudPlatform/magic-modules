@@ -2,9 +2,11 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -13,11 +15,11 @@ import (
 func TestAccBillingSubaccount_renameOnDestroy(t *testing.T) {
 	t.Parallel()
 
-	masterBilling := acctest.GetTestMasterBillingAccountFromEnv(t)
+	masterBilling := envvar.GetTestMasterBillingAccountFromEnv(t)
 	resource.Test(t, resource.TestCase{
 
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGoogleBillingSubaccountRenameOnDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -32,10 +34,10 @@ func TestAccBillingSubaccount_renameOnDestroy(t *testing.T) {
 func TestAccBillingSubaccount_basic(t *testing.T) {
 	t.Parallel()
 
-	masterBilling := acctest.GetTestMasterBillingAccountFromEnv(t)
+	masterBilling := envvar.GetTestMasterBillingAccountFromEnv(t)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test Billing Subaccount creation
@@ -98,7 +100,7 @@ func testAccCheckGoogleBillingSubaccountExists(t *testing.T, bindingResourceName
 			return fmt.Errorf("Not found: %s", bindingResourceName)
 		}
 
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		_, err := config.NewBillingClient(config.UserAgent).BillingAccounts.Get(subaccount.Primary.ID).Do()
 		if err != nil {
 			return err
@@ -118,7 +120,7 @@ func testAccCheckGoogleBillingSubaccountRenameOnDestroy(t *testing.T) func(s *te
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			res, err := config.NewBillingClient(config.UserAgent).BillingAccounts.Get(rs.Primary.ID).Do()
 			if err != nil {

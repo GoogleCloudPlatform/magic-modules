@@ -2,18 +2,19 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"regexp"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceComputeInstanceSerialPort_basic(t *testing.T) {
-	instanceName := fmt.Sprintf("tf-test-serial-data-%s", RandString(t, 10))
-	VcrTest(t, resource.TestCase{
+	instanceName := fmt.Sprintf("tf-test-serial-data-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstanceSerialPort(instanceName),

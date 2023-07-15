@@ -28,9 +28,9 @@ async: !ruby/object:Api::OpAsync
     base_url: '{{op_id}}'
     wait_ms: 1000
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 20
-      update_minutes: 20
-      delete_minutes: 20
+      insert_minutes: 40
+      update_minutes: 40
+      delete_minutes: 40
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
   status: !ruby/object:Api::OpAsync::Status
@@ -134,7 +134,12 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: 'availabilityType'
     description: |
-      Availability type of an Instance. Defaults to REGIONAL for both primary and read instances. Note that primary and read instances can have different availability types.
+      'Availability type of an Instance. Defaults to REGIONAL for both primary and read instances.
+      Note that primary and read instances can have different availability types.
+      Only READ_POOL instance supports ZONAL type. Users can't specify the zone for READ_POOL instance.
+      Zone is automatically chosen from the list of zones in the region specified.
+      Read pool of size 1 can only have zonal availability. Read pools with node count of 2 or more
+      can have regional availability (nodes are present in 2 or more zones in a region).'
     values:
       - :AVAILABILITY_TYPE_UNSPECIFIED
       - :ZONAL

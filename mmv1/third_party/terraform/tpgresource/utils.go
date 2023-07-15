@@ -1,24 +1,57 @@
 package tpgresource
 
 import (
+	"crypto/md5"
+	"encoding/base64"
+	"errors"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"net/url"
 	"reflect"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/errwrap"
 	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+
+type TerraformResourceDataChange interface {
+	GetChange(string) (interface{}, interface{})
+}
+
+type TerraformResourceData interface {
+	HasChange(string) bool
+	GetOkExists(string) (interface{}, bool)
+	GetOk(string) (interface{}, bool)
+	Get(string) interface{}
+	Set(string, interface{}) error
+	SetId(string)
+	Id() string
+	GetProviderMeta(interface{}) error
+	Timeout(key string) time.Duration
+}
+
+type TerraformResourceDiff interface {
+	HasChange(string) bool
+	GetChange(string) (interface{}, interface{})
+	Get(string) interface{}
+	GetOk(string) (interface{}, bool)
+	Clear(string) error
+	ForceNew(string) error
+}
 
 // Contains functions that don't really belong anywhere else.
 
@@ -32,6 +65,28 @@ func GetRegionFromZone(zone string) string {
 		return region
 	}
 	return ""
+}
+
+// Infers the region based on the following (in order of priority):
+// - `region` field in resource schema
+// - region extracted from the `zone` field in resource schema
+// - provider-level region
+// - region extracted from the provider-level zone
+func GetRegion(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	return GetRegionFromSchema("region", "zone", d, config)
+}
+
+// GetProject reads the "project" field from the given resource data and falls
+// back to the provider's value if not given. If the provider's value is not
+// given, an error is returned.
+func GetProject(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	return GetProjectFromSchema("project", d, config)
+}
+
+// GetBillingProject reads the "billing_project" field from the given resource data and falls
+// back to the provider's value if not given. If no value is found, an error is returned.
+func GetBillingProject(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	return GetBillingProjectFromSchema("billing_project", d, config)
 }
 
 // GetProjectFromDiff reads the "project" field from the given diff and falls
@@ -90,6 +145,32 @@ func IsNotFoundGrpcError(err error) bool {
 		return true
 	}
 	return false
+}
+
+// ExpandLabels pulls the value of "labels" out of a TerraformResourceData as a map[string]string.
+func ExpandLabels(d TerraformResourceData) map[string]string {
+	return ExpandStringMap(d, "labels")
+}
+
+// ExpandEnvironmentVariables pulls the value of "environment_variables" out of a schema.ResourceData as a map[string]string.
+func ExpandEnvironmentVariables(d *schema.ResourceData) map[string]string {
+	return ExpandStringMap(d, "environment_variables")
+}
+
+// ExpandBuildEnvironmentVariables pulls the value of "build_environment_variables" out of a schema.ResourceData as a map[string]string.
+func ExpandBuildEnvironmentVariables(d *schema.ResourceData) map[string]string {
+	return ExpandStringMap(d, "build_environment_variables")
+}
+
+// ExpandStringMap pulls the value of key out of a TerraformResourceData as a map[string]string.
+func ExpandStringMap(d TerraformResourceData, key string) map[string]string {
+	v, ok := d.GetOk(key)
+
+	if !ok {
+		return map[string]string{}
+	}
+
+	return ConvertStringMap(v.(map[string]interface{}))
 }
 
 func ConvertStringMap(v map[string]interface{}) map[string]string {
@@ -208,19 +289,41 @@ func ExtractFirstMapConfig(m []interface{}) map[string]interface{} {
 	return m[0].(map[string]interface{})
 }
 
-// This is a Printf sibling (Nprintf; Named Printf), which handles strings like
-// Nprintf("Hello %{target}!", map[string]interface{}{"target":"world"}) == "Hello world!".
-// This is particularly useful for generated tests, where we don't want to use Printf,
-// since that would require us to generate a very particular ordering of arguments.
-func Nprintf(format string, params map[string]interface{}) string {
-	for key, val := range params {
-		format = strings.Replace(format, "%{"+key+"}", fmt.Sprintf("%v", val), -1)
+//	ServiceAccountFQN will attempt to generate the fully qualified name in the format of:
+//
+// "projects/(-|<project>)/serviceAccounts/<service_account_id>@<project>.iam.gserviceaccount.com"
+// A project is required if we are trying to build the FQN from a service account id and
+// and error will be returned in this case if no project is set in the resource or the
+// provider-level config
+func ServiceAccountFQN(serviceAccount string, d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	// If the service account id is already the fully qualified name
+	if strings.HasPrefix(serviceAccount, "projects/") {
+		return serviceAccount, nil
 	}
-	return format
+
+	// If the service account id is an email
+	if strings.Contains(serviceAccount, "@") {
+		return "projects/-/serviceAccounts/" + serviceAccount, nil
+	}
+
+	// Get the project from the resource or fallback to the project
+	// in the provider configuration
+	project, err := GetProject(d, config)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("projects/-/serviceAccounts/%s@%s.iam.gserviceaccount.com", serviceAccount, project), nil
 }
 
 func PaginatedListRequest(project, baseUrl, userAgent string, config *transport_tpg.Config, flattener func(map[string]interface{}) []interface{}) ([]interface{}, error) {
-	res, err := transport_tpg.SendRequest(config, "GET", project, baseUrl, userAgent, nil)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    baseUrl,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +335,13 @@ func PaginatedListRequest(project, baseUrl, userAgent string, config *transport_
 			break
 		}
 		url := fmt.Sprintf("%s?pageToken=%s", baseUrl, pageToken.(string))
-		res, err = transport_tpg.SendRequest(config, "GET", project, url, userAgent, nil)
+		res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: userAgent,
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -303,6 +412,10 @@ func MigrateStateNoop(v int, is *terraform.InstanceState, meta interface{}) (*te
 	return is, nil
 }
 
+func ExpandString(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	return v.(string), nil
+}
+
 func ChangeFieldSchemaToForceNew(sch *schema.Schema) {
 	sch.ForceNew = true
 	switch sch.Type {
@@ -314,6 +427,21 @@ func ChangeFieldSchemaToForceNew(sch *schema.Schema) {
 			}
 		}
 	}
+}
+
+func GenerateUserAgentString(d TerraformResourceData, currentUserAgent string) (string, error) {
+	var m transport_tpg.ProviderMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return currentUserAgent, err
+	}
+
+	if m.ModuleName != "" {
+		return strings.Join([]string{currentUserAgent, m.ModuleName}, " "), nil
+	}
+
+	return currentUserAgent, nil
 }
 
 func SnakeToPascalCase(s string) string {
@@ -373,6 +501,22 @@ func CheckGoogleIamPolicy(value string) error {
 	return nil
 }
 
+// Retries an operation while the canonical error code is FAILED_PRECONDTION
+// which indicates there is an incompatible operation already running on the
+// cluster. This error can be safely retried until the incompatible operation
+// completes, and the newly requested operation can begin.
+func RetryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f func() error) error {
+	return resource.Retry(timeout, func() *resource.RetryError {
+		if err := transport_tpg.LockedCall(lockKey, f); err != nil {
+			if IsFailedPreconditionError(err) {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+}
+
 func FrameworkDiagsToSdkDiags(fwD fwDiags.Diagnostics) *diag.Diagnostics {
 	var diags diag.Diagnostics
 	for _, e := range fwD.Errors() {
@@ -413,4 +557,148 @@ func IsEmptyValue(v reflect.Value) bool {
 		return v.IsNil()
 	}
 	return false
+}
+
+func ReplaceVars(d TerraformResourceData, config *transport_tpg.Config, linkTmpl string) (string, error) {
+	return ReplaceVarsRecursive(d, config, linkTmpl, false, 0)
+}
+
+// relaceVarsForId shortens variables by running them through GetResourceNameFromSelfLink
+// this allows us to use long forms of variables from configs without needing
+// custom id formats. For instance:
+// accessPolicies/{{access_policy}}/accessLevels/{{access_level}}
+// with values:
+// access_policy: accessPolicies/foo
+// access_level: accessPolicies/foo/accessLevels/bar
+// becomes accessPolicies/foo/accessLevels/bar
+func ReplaceVarsForId(d TerraformResourceData, config *transport_tpg.Config, linkTmpl string) (string, error) {
+	return ReplaceVarsRecursive(d, config, linkTmpl, true, 0)
+}
+
+// ReplaceVars must be done recursively because there are baseUrls that can contain references to regions
+// (eg cloudrun service) there aren't any cases known for 2+ recursion but we will track a run away
+// substitution as 10+ calls to allow for future use cases.
+func ReplaceVarsRecursive(d TerraformResourceData, config *transport_tpg.Config, linkTmpl string, shorten bool, depth int) (string, error) {
+	if depth > 10 {
+		return "", errors.New("Recursive substitution detcted")
+	}
+
+	// https://github.com/google/re2/wiki/Syntax
+	re := regexp.MustCompile("{{([%[:word:]]+)}}")
+	f, err := BuildReplacementFunc(re, d, config, linkTmpl, shorten)
+	if err != nil {
+		return "", err
+	}
+	final := re.ReplaceAllStringFunc(linkTmpl, f)
+
+	if re.Match([]byte(final)) {
+		return ReplaceVarsRecursive(d, config, final, shorten, depth+1)
+	}
+
+	return final, nil
+}
+
+// This function replaces references to Terraform properties (in the form of {{var}}) with their value in Terraform
+// It also replaces {{project}}, {{project_id_or_project}}, {{region}}, and {{zone}} with their appropriate values
+// This function supports URL-encoding the result by prepending '%' to the field name e.g. {{%var}}
+func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *transport_tpg.Config, linkTmpl string, shorten bool) (func(string) string, error) {
+	var project, projectID, region, zone string
+	var err error
+
+	if strings.Contains(linkTmpl, "{{project}}") {
+		project, err = GetProject(d, config)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if strings.Contains(linkTmpl, "{{project_id_or_project}}") {
+		v, ok := d.GetOkExists("project_id")
+		if ok {
+			projectID, _ = v.(string)
+		}
+		if projectID == "" {
+			project, err = GetProject(d, config)
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if strings.Contains(linkTmpl, "{{region}}") {
+		region, err = GetRegion(d, config)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if strings.Contains(linkTmpl, "{{zone}}") {
+		zone, err = GetZone(d, config)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	f := func(s string) string {
+
+		m := re.FindStringSubmatch(s)[1]
+		if m == "project" {
+			return project
+		}
+		if m == "project_id_or_project" {
+			if projectID != "" {
+				return projectID
+			}
+			return project
+		}
+		if m == "region" {
+			return region
+		}
+		if m == "zone" {
+			return zone
+		}
+		if string(m[0]) == "%" {
+			v, ok := d.GetOkExists(m[1:])
+			if ok {
+				return url.PathEscape(fmt.Sprintf("%v", v))
+			}
+		} else {
+			v, ok := d.GetOkExists(m)
+			if ok {
+				if shorten {
+					return GetResourceNameFromSelfLink(fmt.Sprintf("%v", v))
+				} else {
+					return fmt.Sprintf("%v", v)
+				}
+			}
+		}
+
+		// terraform-google-conversion doesn't provide a provider config in tests.
+		if config != nil {
+			// Attempt to draw values from the provider config if it's present.
+			if f := reflect.Indirect(reflect.ValueOf(config)).FieldByName(m); f.IsValid() {
+				return f.String()
+			}
+		}
+		return ""
+	}
+
+	return f, nil
+}
+
+func GetFileMd5Hash(filename string) string {
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		log.Printf("[WARN] Failed to read source file %q. Cannot compute md5 hash for it.", filename)
+		return ""
+	}
+	return GetContentMd5Hash(data)
+}
+
+func GetContentMd5Hash(content []byte) string {
+	h := md5.New()
+	if _, err := h.Write(content); err != nil {
+		log.Printf("[WARN] Failed to compute md5 hash for content: %v", err)
+	}
+	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }

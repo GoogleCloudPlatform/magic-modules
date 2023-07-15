@@ -15,15 +15,12 @@
 name: 'Connection'
 base_url: projects/{{project}}/locations/{{location}}/connections
 self_link: projects/{{project}}/locations/{{location}}/connections/{{name}}
-min_version: beta
 exclude_resource: true
 description: |
   Only used to generate IAM resources.
 exclude_validator: true
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   skip_import_test: true
-  min_version: beta
-  exclude: false
   method_name_separator: ':'
   fetch_iam_policy_verb: :GET
   allowed_iam_role: 'roles/cloudbuild.connectionViewer'
@@ -37,9 +34,6 @@ import_format:
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuildv2_connection'
-    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14390
-    skip_test: true
-    min_version: beta
     primary_resource_id: 'my-connection'
     primary_resource_name: "fmt.Sprintf(\"tf-test-connection%s\",
       context[\"random_suffix\"\

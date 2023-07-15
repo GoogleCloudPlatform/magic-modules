@@ -88,6 +88,13 @@ examples:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'workstation_config_source_snapshot'
+    min_version: beta
+    primary_resource_id: 'default'
+    vars:
+      workstation_cluster_name: 'workstation-cluster'
+      workstation_config_name: 'workstation-config'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'workstation_config_shielded_instance_config'
     min_version: beta
     primary_resource_id: 'default'
@@ -157,6 +164,18 @@ properties:
     description: |
       Time when this resource was created.
     output: true
+  - !ruby/object:Api::Type::String
+    name: 'idleTimeout'
+    default_value: '1200s'
+    description: |
+      How long to wait before automatically stopping an instance that hasn't recently received any user traffic. A value of 0 indicates that this instance should never time out from idleness. Defaults to 20 minutes.
+      A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+  - !ruby/object:Api::Type::String
+    name: 'runningTimeout'
+    default_value: '43200s'
+    description: |
+      How long to wait before automatically stopping a workstation after it was started. A value of 0 indicates that workstations using this configuration should never time out from running duration. Must be greater than 0 and less than 24 hours if `encryption_key` is set. Defaults to 12 hours.
+      A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
   - !ruby/object:Api::Type::NestedObject
     name: 'host'
     description: |
@@ -249,7 +268,6 @@ properties:
     description: |
       Directories to persist across workstation sessions.
     default_from_api: true
-    immutable: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
@@ -261,36 +279,40 @@ properties:
         - !ruby/object:Api::Type::NestedObject
           name: 'gcePd'
           description: |
-            PersistentDirectory backed by a Compute Engine regional persistent disk.
+            A directory to persist across workstation sessions, backed by a Compute Engine regional persistent disk. Can only be updated if not empty during creation.
           default_from_api: true
-          immutable: true
           properties:
             - !ruby/object:Api::Type::String
               name: 'fsType'
               description: |
-                Type of file system that the disk should be formatted with. The workstation image must support this file system type. Must be empty if sourceSnapshot is set.
+                Type of file system that the disk should be formatted with. The workstation image must support this file system type. Must be empty if `sourceSnapshot` is set. Defaults to `ext4`.
               default_from_api: true
               immutable: true
             - !ruby/object:Api::Type::String
               name: 'diskType'
               description: |
-                Type of the disk to use.
+                The type of the persistent disk for the home directory. Defaults to `pd-standard`.
               default_from_api: true
               immutable: true
             - !ruby/object:Api::Type::Integer
               name: 'sizeGb'
               description: |-
-                Size of the disk in GB. Must be empty if sourceSnapshot is set.
+                The GB capacity of a persistent home directory for each workstation created with this configuration. Must be empty if `sourceSnapshot` is set.
+                Valid values are `10`, `50`, `100`, `200`, `500`, or `1000`. Defaults to `200`. If less than `200` GB, the `diskType` must be `pd-balanced` or `pd-ssd`.
               default_from_api: true
               immutable: true
             - !ruby/object:Api::Type::Enum
               name: 'reclaimPolicy'
               description: |
-                What should happen to the disk after the workstation is deleted. Defaults to DELETE.
-              immutable: true
+                Whether the persistent disk should be deleted when the workstation is deleted. Valid values are `DELETE` and `RETAIN`. Defaults to `DELETE`.
               values:
                 - :DELETE
                 - :RETAIN
+            - !ruby/object:Api::Type::String
+              name: 'sourceSnapshot'
+              description: |
+                Name of the snapshot to use as the source for the disk. This can be the snapshot's `self_link`, `id`, or a string in the format of `projects/{project}/global/snapshots/{snapshot}`. If set, `sizeGb` and `fsType` must be empty. Can only be updated if it has an existing value.
+              # TODO(esu): Add conflicting fields once complex lists are supported.
   - !ruby/object:Api::Type::NestedObject
     name: 'container'
     description: |

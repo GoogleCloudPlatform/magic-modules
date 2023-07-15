@@ -47,7 +47,7 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 autogen_async: true
 skip_sweeper: true
-import_format: ["{{name}}"]
+import_format: ['{{name}}']
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     This resource creates a Firestore Single Field override on a project that
@@ -56,18 +56,18 @@ docs: !ruby/object:Provider::Terraform::Docs
     chosen location.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firestore_field_basic"
-    primary_resource_id: "basic"
+    name: 'firestore_field_basic'
+    primary_resource_id: 'basic'
     test_env_vars:
       project_id: :FIRESTORE_PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "firestore_field_timestamp"
-    primary_resource_id: "timestamp"
+    name: 'firestore_field_timestamp'
+    primary_resource_id: 'timestamp'
     test_env_vars:
       project_id: :FIRESTORE_PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "firestore_field_match_override"
-    primary_resource_id: "match_override"
+    name: 'firestore_field_match_override'
+    primary_resource_id: 'match_override'
     test_env_vars:
       project_id: :FIRESTORE_PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -111,56 +111,58 @@ properties:
     custom_expand: templates/terraform/custom_expand/firestore_field_index_config.go.erb
     custom_flatten: templates/terraform/custom_flatten/firestore_field_index_config.go.erb
     properties:
-    - !ruby/object:Api::Type::Array
-      name: indexes
-      description: The indexes to configure on the field. Order or array contains must be specified.
-      is_set: true
-      item_type: !ruby/object:Api::Type::NestedObject
-        properties:
-        - !ruby/object:Api::Type::Enum
-          name: queryScope
-          description: |
-            The scope at which a query is run. Collection scoped queries require you specify
-            the collection at query time. Collection group scope allows queries across all
-            collections with the same id.
-          default_value: :COLLECTION
-          values:
-            - :COLLECTION
-            - :COLLECTION_GROUP
-        - !ruby/object:Api::Type::Enum
-          name: 'order'
-          description: |
-            Indicates that this field supports ordering by the specified order or comparing using =, <, <=, >, >=, !=.
-            Only one of `order` and `arrayConfig` can be specified.
-          values:
-            - :ASCENDING
-            - :DESCENDING
-          exactly_one_of:
-            - order
-            - arrayConfig
-        - !ruby/object:Api::Type::Enum
-          name: 'arrayConfig'
-          description: |
-            Indicates that this field supports operations on arrayValues. Only one of `order` and `arrayConfig` can
-            be specified.
-          values:
-            - :CONTAINS
-          exactly_one_of:
-            - order
-            - arrayConfig
+      - !ruby/object:Api::Type::Array
+        name: indexes
+        description:
+          The indexes to configure on the field. Order or array contains must be
+          specified.
+        is_set: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: queryScope
+              description: |
+                The scope at which a query is run. Collection scoped queries require you specify
+                the collection at query time. Collection group scope allows queries across all
+                collections with the same id.
+              default_value: :COLLECTION
+              values:
+                - :COLLECTION
+                - :COLLECTION_GROUP
+            - !ruby/object:Api::Type::Enum
+              name: 'order'
+              description: |
+                Indicates that this field supports ordering by the specified order or comparing using =, <, <=, >, >=, !=.
+                Only one of `order` and `arrayConfig` can be specified.
+              values:
+                - :ASCENDING
+                - :DESCENDING
+              exactly_one_of:
+                - order
+                - arrayConfig
+            - !ruby/object:Api::Type::Enum
+              name: 'arrayConfig'
+              description: |
+                Indicates that this field supports operations on arrayValues. Only one of `order` and `arrayConfig` can
+                be specified.
+              values:
+                - :CONTAINS
+              exactly_one_of:
+                - order
+                - arrayConfig
   - !ruby/object:Api::Type::NestedObject
-    name: ttlConfig   
+    name: ttlConfig
     custom_expand: templates/terraform/custom_expand/empty_object_if_set.go.erb
     description: |
-      If set, this field is configured for TTL deletion. 
+      If set, this field is configured for TTL deletion.
     send_empty_value: true
     properties:
-    - !ruby/object:Api::Type::Enum
-      name: state
-      description: |
-        The state of the TTL configuration.
-      output: true
-      values:
-        - :CREATING
-        - :ACTIVE
-        - :NEEDS_REPAIR
+      - !ruby/object:Api::Type::Enum
+        name: state
+        description: |
+          The state of the TTL configuration.
+        output: true
+        values:
+          - :CREATING
+          - :ACTIVE
+          - :NEEDS_REPAIR

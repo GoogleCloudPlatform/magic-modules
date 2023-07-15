@@ -10,23 +10,23 @@ import (
 
 const ComputeSecurityPolicyAssetType string = "compute.googleapis.com/SecurityPolicy"
 
-func resourceConverterComputeSecurityPolicy() ResourceConverter {
-	return ResourceConverter{
+func resourceConverterComputeSecurityPolicy() tpgresource.ResourceConverter {
+	return tpgresource.ResourceConverter{
 		AssetType: ComputeSecurityPolicyAssetType,
 		Convert:   GetComputeSecurityPolicyCaiObject,
 	}
 }
 
-func GetComputeSecurityPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//compute.googleapis.com/projects/{{project}}/global/securityPolicies/{{name}}")
+func GetComputeSecurityPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+	name, err := tpgresource.AssetName(d, config, "//compute.googleapis.com/projects/{{project}}/global/securityPolicies/{{name}}")
 	if err != nil {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 	if obj, err := GetComputeSecurityPolicyApiObject(d, config); err == nil {
-		return []Asset{{
+		return []tpgresource.Asset{{
 			Name: name,
 			Type: ComputeSecurityPolicyAssetType,
-			Resource: &AssetResource{
+			Resource: &tpgresource.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
 				DiscoveryName:        "SecurityPolicy",
@@ -34,11 +34,11 @@ func GetComputeSecurityPolicyCaiObject(d TerraformResourceData, config *transpor
 			},
 		}}, nil
 	} else {
-		return []Asset{}, err
+		return []tpgresource.Asset{}, err
 	}
 }
 
-func GetComputeSecurityPolicyApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+func GetComputeSecurityPolicyApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
 	obj := make(map[string]interface{})
 	nameProp, err := expandComputeSecurityPolicyName(d.Get("name"), d, config)
 	if err != nil {
@@ -62,11 +62,11 @@ func GetComputeSecurityPolicyApiObject(d TerraformResourceData, config *transpor
 	return obj, nil
 }
 
-func expandComputeSecurityPolicyName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandComputeSecurityPolicyName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandComputeSecurityPolicyRules(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandComputeSecurityPolicyRules(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	v = v.(*schema.Set).List()
 	l := v.([]interface{})
 	req := make([]interface{}, 0, len(l))
@@ -124,23 +124,23 @@ func expandComputeSecurityPolicyRules(v interface{}, d TerraformResourceData, co
 	return req, nil
 }
 
-func expandComputeSecurityPolicyRulesDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandComputeSecurityPolicyRulesDescription(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandComputeSecurityPolicyRulesPriority(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandComputeSecurityPolicyRulesPriority(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandComputeSecurityPolicyRulesAction(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandComputeSecurityPolicyRulesAction(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandComputeSecurityPolicyRulesPreview(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandComputeSecurityPolicyRulesPreview(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandComputeSecurityPolicyRulesMatch(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandComputeSecurityPolicyRulesMatch(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -180,11 +180,11 @@ func expandComputeSecurityPolicyRulesMatch(v interface{}, d TerraformResourceDat
 	return transformed, nil
 }
 
-func expandComputeSecurityPolicyRulesMatchDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandComputeSecurityPolicyRulesMatchDescription(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandComputeSecurityPolicyRulesMatchExpr(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandComputeSecurityPolicyRulesMatchExpr(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -224,27 +224,27 @@ func expandComputeSecurityPolicyRulesMatchExpr(v interface{}, d TerraformResourc
 	return transformed, nil
 }
 
-func expandComputeSecurityPolicyRulesMatchExprExpression(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandComputeSecurityPolicyRulesMatchExprExpression(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandComputeSecurityPolicyRulesMatchExprTitle(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandComputeSecurityPolicyRulesMatchExprTitle(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandComputeSecurityPolicyRulesMatchExprDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandComputeSecurityPolicyRulesMatchExprDescription(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandComputeSecurityPolicyRulesMatchExprLocation(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandComputeSecurityPolicyRulesMatchExprLocation(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandComputeSecurityPolicyRulesMatchVersionedExpr(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandComputeSecurityPolicyRulesMatchVersionedExpr(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandComputeSecurityPolicyRulesMatchConfig(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandComputeSecurityPolicyRulesMatchConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -263,7 +263,7 @@ func expandComputeSecurityPolicyRulesMatchConfig(v interface{}, d TerraformResou
 	return transformed, nil
 }
 
-func expandComputeSecurityPolicyRulesMatchConfigSrcIpRanges(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandComputeSecurityPolicyRulesMatchConfigSrcIpRanges(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	v = v.(*schema.Set).List()
 	return v, nil
 }

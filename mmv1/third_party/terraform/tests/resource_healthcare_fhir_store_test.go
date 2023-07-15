@@ -2,10 +2,13 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"path"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/healthcare"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -48,7 +51,7 @@ func TestAccHealthcareFhirStoreIdParsing(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		fhirStoreId, err := ParseHealthcareFhirStoreId(tc.ImportId, tc.Config)
+		fhirStoreId, err := healthcare.ParseHealthcareFhirStoreId(tc.ImportId, tc.Config)
 
 		if tc.ExpectedError && err == nil {
 			t.Fatalf("bad: %s, expected an error", tn)
@@ -74,14 +77,14 @@ func TestAccHealthcareFhirStoreIdParsing(t *testing.T) {
 func TestAccHealthcareFhirStore_basic(t *testing.T) {
 	t.Parallel()
 
-	datasetName := fmt.Sprintf("tf-test-dataset-%s", RandString(t, 10))
-	fhirStoreName := fmt.Sprintf("tf-test-fhir-store-%s", RandString(t, 10))
-	pubsubTopic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
+	datasetName := fmt.Sprintf("tf-test-dataset-%s", acctest.RandString(t, 10))
+	fhirStoreName := fmt.Sprintf("tf-test-fhir-store-%s", acctest.RandString(t, 10))
+	pubsubTopic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	resourceName := "google_healthcare_fhir_store.default"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckHealthcareFhirStoreDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -174,9 +177,9 @@ func testAccCheckGoogleHealthcareFhirStoreUpdate(t *testing.T, pubsubTopic strin
 			}
 			foundResource = true
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
-			gcpResourceUri, err := acctest.ReplaceVarsForTest(config, rs, "{{dataset}}/fhirStores/{{name}}")
+			gcpResourceUri, err := tpgresource.ReplaceVarsForTest(config, rs, "{{dataset}}/fhirStores/{{name}}")
 			if err != nil {
 				return err
 			}

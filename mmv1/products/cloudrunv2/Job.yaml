@@ -93,6 +93,14 @@ examples:
     vars:
       cloud_run_job_name: 'cloudrun-job'
       secret_id: 'secret'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_job_emptydir'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-job%s\", context[\"random_suffix\"\
+      ])"
+    vars:
+      cloud_run_job_name: 'cloudrun-job'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -124,12 +132,20 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: |-
-      KRM-style labels for the resource. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component, environment, state, etc. For more information, visit https://cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels Cloud Run will populate some labels with 'run.googleapis.com' or 'serving.knative.dev' namespaces. Those labels are read-only, and user changes will not be preserved.
-  # blocked on b/244872932
-  # - !ruby/object:Api::Type::KeyValuePairs
-  #   name: "annotations"
-  #   description: |-
-  #     KRM-style annotations for the resource. Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects. Cloud Run will populate some annotations using 'run.googleapis.com' or 'serving.knative.dev' namespaces. This field follows Kubernetes annotations' namespacing, limits, and rules. More info: https://kubernetes.io/docs/user-guide/annotations
+      Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component,
+      environment, state, etc. For more information, visit https://cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels.
+
+      Cloud Run API v2 does not support labels with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
+      All system labels in v1 now have a corresponding field in v2 Job.
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: "annotations"
+    description: |-
+      Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects.
+
+      Cloud Run API v2 does not support annotations with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected on new resources.
+      All system annotations in v1 now have a corresponding field in v2 Job.
+
+      This field follows Kubernetes annotations' namespacing, limits, and rules.
   - !ruby/object:Api::Type::String
     name: 'client'
     description: |
@@ -176,12 +192,21 @@ properties:
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |-
-          KRM-style labels for the resource.
-      # blocked on b/244872932
-      # - !ruby/object:Api::Type::KeyValuePairs
-      #   name: "annotations"
-      #   description: |-
-      #     KRM-style annotations for the resource.
+          Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter,
+          or break down billing charges by team, component, environment, state, etc. For more information, visit https://cloud.google.com/resource-manager/docs/creating-managing-labels or
+          https://cloud.google.com/run/docs/configuring/labels.
+
+          Cloud Run API v2 does not support labels with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
+          All system labels in v1 now have a corresponding field in v2 ExecutionTemplate.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: "annotations"
+        description: |-
+          Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects.
+
+          Cloud Run API v2 does not support annotations with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
+          All system annotations in v1 now have a corresponding field in v2 ExecutionTemplate.
+
+          This field follows Kubernetes annotations' namespacing, limits, and rules.
       - !ruby/object:Api::Type::Integer
         name: 'parallelism'
         description: |-
@@ -488,6 +513,7 @@ properties:
                   # exactly_one_of:
                   #   - template.0.template.0.volumes.0.secret
                   #   - template.0.template.0.volumes.0.cloudSqlInstance
+                  #   - template.0.template.0.volumes.0.emptyDir
                   properties:
                     - !ruby/object:Api::Type::String
                       name: 'secret'
@@ -526,12 +552,34 @@ properties:
                   # exactly_one_of:
                   #   - template.0.template.0.volumes.0.secret
                   #   - template.0.template.0.volumes.0.cloudSqlInstance
+                  #   - template.0.template.0.volumes.0.emptyDir
                   properties:
                     - !ruby/object:Api::Type::Array
                       name: 'instances'
                       description: |-
                         The Cloud SQL instance connection names, as can be found in https://console.cloud.google.com/sql/instances. Visit https://cloud.google.com/sql/docs/mysql/connect-run for more information on how to connect Cloud SQL and Cloud Run. Format: {project}:{location}:{instance}
                       item_type: Api::Type::String
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'emptyDir'
+                  description: |-
+                    Ephemeral storage used as a shared volume.
+                  min_version: beta
+                  # exactly_one_of:
+                  #   - template.0.template.0.volumes.0.secret
+                  #   - template.0.template.0.volumes.0.cloudSqlInstance
+                  #   - template.0.template.0.volumes.0.emptyDir
+                  properties:
+                    - !ruby/object:Api::Type::Enum
+                      name: 'medium'
+                      description: |-
+                        The different types of medium supported for EmptyDir.
+                      values:
+                        - :MEMORY
+                      default_value: :MEMORY
+                    - !ruby/object:Api::Type::String
+                      name: 'sizeLimit'
+                      description: |-
+                          Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir.
           - !ruby/object:Api::Type::String
             name: 'timeout'
             description: |-

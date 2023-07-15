@@ -2,9 +2,10 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"regexp"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -14,11 +15,11 @@ func TestAccDataSourceSqlBackupRun_basic(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instance := BootstrapSharedSQLInstanceBackupRun(t)
+	instance := acctest.BootstrapSharedSQLInstanceBackupRun(t)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -35,12 +36,12 @@ func TestAccDataSourceSqlBackupRun_notFound(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -61,7 +62,7 @@ data "google_sql_backup_run" "backup" {
 }
 
 func testAccDataSourceSqlBackupRun_notFound(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-instance-%{random_suffix}"
   database_version = "POSTGRES_11"

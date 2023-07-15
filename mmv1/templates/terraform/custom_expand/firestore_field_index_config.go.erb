@@ -1,4 +1,4 @@
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	// We drop all output only fields as they are unnecessary.
 	if v == nil {
 		return nil, nil
@@ -30,15 +30,15 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 		transformed := make(map[string]interface{})
 		transformedField := make(map[string]interface{})
 
-		if val := reflect.ValueOf(original["query_scope"]); val.IsValid() && !isEmptyValue(val) {
+		if val := reflect.ValueOf(original["query_scope"]); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["queryScope"] = original["query_scope"]
 		}
 
-		if val := reflect.ValueOf(original["order"]); val.IsValid() && !isEmptyValue(val) {
+		if val := reflect.ValueOf(original["order"]); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformedField["order"] = original["order"]
 		}
 
-		if val := reflect.ValueOf(original["array_config"]); val.IsValid() && !isEmptyValue(val) {
+		if val := reflect.ValueOf(original["array_config"]); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformedField["arrayConfig"] = original["array_config"]
 		}
 		transformed["fields"] = [1]interface{}{

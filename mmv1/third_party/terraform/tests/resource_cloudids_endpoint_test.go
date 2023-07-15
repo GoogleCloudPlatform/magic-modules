@@ -2,12 +2,14 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -15,12 +17,12 @@ func TestAccCloudIdsEndpoint_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudIdsEndpointDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -44,7 +46,7 @@ func TestAccCloudIdsEndpoint_basic(t *testing.T) {
 }
 
 func testCloudIds_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
 	name = "tf-test-my-network%{random_suffix}"
 }
@@ -73,7 +75,7 @@ resource "google_cloud_ids_endpoint" "endpoint" {
 }
 
 func testCloudIds_basicUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
 	name = "tf-test-my-network%{random_suffix}"
 }
@@ -111,9 +113,9 @@ func testAccCheckCloudIdsEndpointDestroyProducer(t *testing.T) func(s *terraform
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
-			url, err := acctest.ReplaceVarsForTest(config, rs, "{{CloudIdsBasePath}}projects/{{project}}/locations/{{location}}/endpoints/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{CloudIdsBasePath}}projects/{{project}}/locations/{{location}}/endpoints/{{name}}")
 			if err != nil {
 				return err
 			}
@@ -124,7 +126,13 @@ func testAccCheckCloudIdsEndpointDestroyProducer(t *testing.T) func(s *terraform
 				billingProject = config.BillingProject
 			}
 
-			_, err = transport_tpg.SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
 			if err == nil {
 				return fmt.Errorf("CloudIdsEndpoint still exists at %s", url)
 			}
