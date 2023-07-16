@@ -114,7 +114,7 @@ func TestAccMonitoringUptimeCheckConfig_jsonPathUpdate(t *testing.T) {
 	})
 }
 
-func testAccMonitoringUptimeCheckConfig_update(suffix, perdiod, path, pwd, project, host string) string {
+func testAccMonitoringUptimeCheckConfig_update(suffix, period, path, pwd, project, host string) string {
 	return fmt.Sprintf(`
 resource "google_monitoring_uptime_check_config" "http" {
   display_name = "http-uptime-check-%s"
@@ -144,7 +144,7 @@ resource "google_monitoring_uptime_check_config" "http" {
     matcher = "CONTAINS_STRING"
   }
 }
-`, suffix, path, pwd, project, host,
+`, suffix, period, path, pwd, project, host,
 	)
 }
 
