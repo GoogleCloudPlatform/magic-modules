@@ -4578,10 +4578,10 @@ func TestAccContainerCluster_withPrivateClusterConfigPrivateEndpointSubnetwork(t
 				Config: testAccContainerCluster_withPrivateClusterConfigPrivateEndpointSubnetwork(containerNetName, clusterName, subnet1Name, subnet2Name),
 			},
 			{
-				ResourceName:			"google_container_cluster.with_private_cluster_private_endpoint_subnetwork",
-				ImportState:			true,
-				ImportStateVerify:		true,
-				ImportStateVerifyIgnore: []string{"min_master_version"},
+				ResourceName:				"google_container_cluster.with_private_cluster_private_endpoint_subnetwork",
+				ImportState:				true,
+				ImportStateVerify:			true,
+				ImportStateVerifyIgnore:	[]string{"min_master_version"},
 			},
 		},
 	})
