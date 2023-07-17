@@ -1,0 +1,5 @@
+resource "google_cloud_tasks_queue" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]["name"] %>"
+  location = "us-central1"
+  state = "PAUSED"
+}

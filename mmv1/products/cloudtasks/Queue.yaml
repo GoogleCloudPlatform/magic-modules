@@ -51,6 +51,11 @@ examples:
       - 'app_engine_routing_override.0.instance'
     vars:
       name: 'instance-name'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloud_tasks_queue_paused'
+    primary_resource_id: 'paused_queue'
+    vars:
+      name: 'cloud-tasks-paused-queue-test'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -200,3 +205,11 @@ properties:
           Specifies the fraction of operations to write to Stackdriver Logging.
           This field may contain any value between 0.0 and 1.0, inclusive. 0.0 is the
           default and means that no operations are logged.
+  - !ruby/object:Api::Type::Enum
+    name: 'state'
+    description: |
+      The state for the job. Set to `PAUSED` to pause the job.
+    values:
+      - :PAUSED
+      - :RUNNING
+      - :STATE_UNSPECIFIED
