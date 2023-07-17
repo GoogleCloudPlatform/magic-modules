@@ -18,7 +18,20 @@ d.Set("name", name)
 metricsScope := d.Get("metrics_scope").(string)
 metricsScope = tpgresource.GetResourceNameFromSelfLink(metricsScope)
 d.Set("metrics_scope", metricsScope)
-url, err = tpgresource.ReplaceVars(d, config, "{{MonitoringBasePath}}v1/locations/global/metricsScopes/{{metrics_scope}}")
-if err != nil {
-	return err
+config := meta.(*transport_tpg.Config)
+if err := tpgresource.ParseImportId([]string{
+	"locations/global/metricsScopes/(?P<metrics_scope>[^/]+)/projects/(?P<name>[^/]+)",
+	"v1/locations/global/metricsScopes/(?P<metrics_scope>[^/]+)/projects/(?P<name>[^/]+)",
+	"(?P<metrics_scope>[^/]+)/(?P<name>[^/]+)",
+}, d, config); err != nil {
+	return nil, err
 }
+
+// Replace import id for the resource id
+id, err := tpgresource.ReplaceVars(d, config, "locations/global/metricsScopes/{{metrics_scope}}/projects/{{name}}")
+if err != nil {
+	return nil, fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+return []*schema.ResourceData{d}, nil
