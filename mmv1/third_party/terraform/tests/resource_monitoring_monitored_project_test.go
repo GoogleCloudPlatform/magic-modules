@@ -25,7 +25,7 @@ func TestAccMonitoringMonitoredProject_monitoringMonitoredProjectBasic(t *testin
 			{
 				ExternalProviders: map[string]resource.ExternalProvider{
 					"google": {
-						VersionConstraint: "4.73.0",
+						VersionConstraint: "4.73.1",
 						Source:            "hashicorp/google",
 					},
 				},
