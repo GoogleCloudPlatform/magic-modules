@@ -217,7 +217,6 @@ type Config struct {
 	TagsLocationBasePath string
 
 	// dcl
-	ContainerAwsBasePath string
 	ContainerAzureBasePath string
 
 	RequestBatcherServiceUsage *RequestBatcher
@@ -236,7 +235,6 @@ const IamCredentialsBasePathKey = "IamCredentials"
 const ResourceManagerV3BasePathKey = "ResourceManagerV3"
 const ServiceNetworkingBasePathKey = "ServiceNetworking"
 const BigtableAdminBasePathKey = "BigtableAdmin"
-const ContainerAwsBasePathKey = "ContainerAws"
 const ContainerAzureBasePathKey = "ContainerAzure"
 const TagsLocationBasePathKey = "TagsLocation"
 
@@ -262,7 +260,6 @@ var DefaultBasePaths = map[string]string{
 	ResourceManagerV3BasePathKey : "https://cloudresourcemanager.googleapis.com/v3/",
 	ServiceNetworkingBasePathKey : "https://servicenetworking.googleapis.com/v1/",
 	BigtableAdminBasePathKey : "https://bigtableadmin.googleapis.com/v2/",
-	ContainerAwsBasePathKey:  "https://{{location}}-gkemulticloud.googleapis.com/v1/",
 	ContainerAzureBasePathKey: "https://{{location}}-gkemulticloud.googleapis.com/v1/",
 	TagsLocationBasePathKey: "https://{{location}}-cloudresourcemanager.googleapis.com/v3/",
 }
@@ -399,12 +396,6 @@ func HandleSDKDefaults(d *schema.ResourceData) error {
 		d.Set(TagsLocationCustomEndpointEntryKey, MultiEnvDefault([]string{
 			"GOOGLE_TAGS_LOCATION_CUSTOM_ENDPOINT",
 		}, DefaultBasePaths[TagsLocationBasePathKey]))
-	}
-
-	if d.Get(ContainerAwsCustomEndpointEntryKey) == "" {
-		d.Set(ContainerAwsCustomEndpointEntryKey, MultiEnvDefault([]string{
-			"GOOGLE_CONTAINERAWS_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[ContainerAwsBasePathKey]))
 	}
 
 	if d.Get(ContainerAzureCustomEndpointEntryKey) == "" {

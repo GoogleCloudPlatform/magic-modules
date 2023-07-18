@@ -1,0 +1,37 @@
+// The generated code sets the wrong masks for the following fields.
+newUpdateMask := []string{}
+fields := map[string]string{
+	"autoscaling.0.min_node_count": "autoscaling.min_node_count",
+	"autoscaling.0.max_node_count": "autoscaling.max_node_count",
+	"config.0.config_encryption.0.kms_key_arn": "config.config_encryption.kms_key_arn",
+	"config.0.security_group_ids": "config.security_group_ids",
+	"config.0.root_volume.0.iops": "config.root_volume.iops",
+	"config.0.root_volume.0.throughput": "config.root_volume.throughput",
+	"config.0.root_volume.0.kms_key_arn": "config.root_volume.kms_key_arn",
+	"config.0.root_volume.0.size_gib": "config.root_volume.size_gib",
+	"config.0.root_volume.0.volume_type": "config.root_volume.volume_type",
+	"config.0.proxy_config": "config.proxy_config",
+	"config.0.ssh_config": "config.ssh_config",
+	"config.0.instance_placement.0.tenancy": "config.instance_placement.tenancy",
+	"config.0.iam_instance_profile": "config.iam_instance_profile",
+	"config.0.labels": "config.labels",
+	"config.0.tags": "config.tags",
+	"config.0.autoscaling_metrics_collection": "config.autoscaling_metrics_collection",
+}
+for k, v := range fields {
+	if d.HasChange(k) {
+		newUpdateMask = append(newUpdateMask, v)
+	}
+}
+// Pull out any other set fields from the generated mask.
+for _, mask := range updateMask {
+    if mask == "config" || mask == "autoscaling" {
+        continue
+    }
+    newUpdateMask = append(newUpdateMask, mask)
+}
+// Overwrite the previously set mask.
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(newUpdateMask, ",")})
+if err != nil {
+    return err
+}

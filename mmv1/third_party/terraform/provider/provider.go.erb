@@ -32,7 +32,6 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/services/composer"
 	"github.com/hashicorp/terraform-provider-google/google/services/container"
-	"github.com/hashicorp/terraform-provider-google/google/services/containeraws"
 	"github.com/hashicorp/terraform-provider-google/google/services/containerazure"
 	"github.com/hashicorp/terraform-provider-google/google/services/dataflow"
 	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
@@ -167,7 +166,6 @@ func Provider() *schema.Provider {
 			transport_tpg.TagsLocationCustomEndpointEntryKey:           transport_tpg.TagsLocationCustomEndpointEntry,
 
 			// dcl
-			transport_tpg.ContainerAwsCustomEndpointEntryKey:           transport_tpg.ContainerAwsCustomEndpointEntry,
 			transport_tpg.ContainerAzureCustomEndpointEntryKey:         transport_tpg.ContainerAzureCustomEndpointEntry,
 		},
 
@@ -743,7 +741,6 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.TagsLocationBasePath = d.Get(transport_tpg.TagsLocationCustomEndpointEntryKey).(string)
 
 	// dcl
-	config.ContainerAwsBasePath = d.Get(transport_tpg.ContainerAwsCustomEndpointEntryKey).(string)
 	config.ContainerAzureBasePath = d.Get(transport_tpg.ContainerAzureCustomEndpointEntryKey).(string)
 
 	stopCtx, ok := schema.StopContext(ctx)

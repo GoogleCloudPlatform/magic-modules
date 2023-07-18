@@ -323,15 +323,6 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 	}
 
 	// dcl
-	if data.ContainerAwsCustomEndpoint.IsNull() {
-		customEndpoint := transport_tpg.MultiEnvDefault([]string{
-			"GOOGLE_CONTAINERAWS_CUSTOM_ENDPOINT",
-		}, transport_tpg.DefaultBasePaths[transport_tpg.ContainerAwsBasePathKey])
-		if customEndpoint != nil {
-			data.ContainerAwsCustomEndpoint = types.StringValue(customEndpoint.(string))
-		}
-	}
-
 	if data.ContainerAzureCustomEndpoint.IsNull() {
 		customEndpoint := transport_tpg.MultiEnvDefault([]string{
 			"GOOGLE_CONTAINERAZURE_CUSTOM_ENDPOINT",

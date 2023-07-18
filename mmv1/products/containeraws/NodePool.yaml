@@ -1,0 +1,367 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: NodePool
+base_url: projects/{{project}}/locations/{{location}}/awsClusters/{{cluster}}/awsNodePools
+create_url: projects/{{project}}/locations/{{location}}/awsClusters/{{cluster}}/awsNodePools?awsNodePoolId={{name}}
+self_link: projects/{{project}}/locations/{{location}}/awsClusters/{{cluster}}/awsNodePools/{{name}}
+update_verb: :PATCH
+update_mask: true
+references: null
+async: null
+description: "An Anthos node pool running on AWS."
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'API reference': 'https://cloud.google.com/anthos/clusters/docs/multi-cloud/reference/rest/v1/projects.locations.awsClusters.awsNodePools'
+    'Multicloud overview': 'https://cloud.google.com/anthos/clusters/docs/multi-cloud'
+  api: 'https://cloud.google.com/anthos/clusters/docs/multi-cloud/reference/rest'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    full_url: 'https://{{location}}-gkemulticloud.googleapis.com/v1/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: 'true'
+    allowed:
+      - 'true'
+      - 'false'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+autogen_async: false
+id_format: "projects/{{project}}/locations/{{location}}/awsClusters/{{cluster}}/awsNodePools/{{name}}"
+import_format: ["projects/{{project}}/locations/{{location}}/awsClusters/{{cluster}}/awsNodePools/{{name}}"]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "container_aws_node_pool_basic"
+    primary_resource_name: "fmt.Sprintf(\"basic%s\", context[\"random_suffix\"])"
+    primary_resource_id: "primary"
+    vars:
+      name: "basic"
+    test_env_vars:
+      service_account: :SERVICE_ACCT
+    test_vars_overrides:
+      aws_acct_id: "\"111111111111\""
+      aws_db_key: "\"00000000-0000-0000-0000-17aad2f0f61f\""
+      aws_region: "\"us-west-2\""
+      aws_subnet: "\"subnet-0b3f63cb91b247628\""
+      aws_vpc: "\"vpc-0b3f63cb91b247628\""
+      byo_prefix: "\"mmv1\""
+  - !ruby/object:Provider::Terraform::Examples
+    name: "container_aws_node_pool_full"
+    primary_resource_name: "fmt.Sprintf(\"full%s\", context[\"random_suffix\"])"
+    primary_resource_id: "primary"
+    vars:
+      name: "full"
+    test_env_vars:
+      service_account: :SERVICE_ACCT
+    test_vars_overrides:
+      aws_acct_id: "\"111111111111\""
+      aws_db_key: "\"00000000-0000-0000-0000-17aad2f0f61f\""
+      aws_region: "\"us-west-2\""
+      aws_sg: "\"sg-0b3f63cb91b247628\""
+      aws_subnet: "\"subnet-0b3f63cb91b247628\""
+      aws_vol_key: "\"00000000-0000-0000-0000-17aad2f0f61f\""
+      aws_vpc: "\"vpc-0b3f63cb91b247628\""
+      byo_prefix: "\"mmv1\""
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: "container_aws_node_pool_beta"
+    primary_resource_name: "fmt.Sprintf(\"beta%s\", context[\"random_suffix\"])"
+    primary_resource_id: "primary"
+    vars:
+      name: "beta"
+    test_env_vars:
+      service_account: :SERVICE_ACCT
+    test_vars_overrides:
+      aws_acct_id: "\"111111111111\""
+      aws_db_key: "\"00000000-0000-0000-0000-17aad2f0f61f\""
+      aws_region: "\"us-west-2\""
+      aws_sg: "\"sg-0b3f63cb91b247628\""
+      aws_subnet: "\"subnet-0b3f63cb91b247628\""
+      aws_vol_key: "\"00000000-0000-0000-0000-17aad2f0f61f\""
+      aws_vpc: "\"vpc-0b3f63cb91b247628\""
+      byo_prefix: "\"mmv1\""
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_update: templates/terraform/pre_update/containeraws_node_pool_update.go.erb
+parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description: The location for the resource
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: cluster
+    description: The awsCluster for the resource
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: The name of this resource.
+    required: true
+    immutable: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+  - !ruby/object:Api::Type::String
+    name: version
+    description: The Kubernetes version to run on this node pool (e.g. `1.19.10-gke.1000`). You can list all supported versions on a given Google Cloud region by calling GetAwsServerConfig.
+    required: true
+  - !ruby/object:Api::Type::NestedObject
+    name: config
+    description: The configuration of the node pool.
+    required: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: instanceType
+        description: Optional. The AWS instance type. When unspecified, it defaults to `m5.large`.
+        immutable: true
+        default_from_api: true
+      - !ruby/object:Api::Type::NestedObject
+        name: rootVolume
+        description: Optional. Template for the root volume provisioned for node pool nodes. Volumes will be provisioned in the availability zone assigned to the node pool subnet. When unspecified, it defaults to 32 GiB with the GP2 volume type.
+        default_from_api: true
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: sizeGib
+            description: Optional. The size of the volume, in GiBs. When unspecified, a default value is provided. See the specific reference in the parent resource.
+            default_from_api: true
+          - !ruby/object:Api::Type::Enum
+            name: volumeType
+            description: Optional. Type of the EBS volume. When unspecified, it defaults to GP2 volume.
+            values:
+              - :VOLUME_TYPE_UNSPECIFIED
+              - :GP2
+              - :GP3
+            default_value: :GP2
+          - !ruby/object:Api::Type::Integer
+            name: iops
+            description: Optional. The number of I/O operations per second (IOPS) to provision for GP3 volume.
+            default_from_api: true
+          - !ruby/object:Api::Type::Integer
+            name: throughput
+            description: Optional. The throughput to provision for the volume, in MiB/s. Only valid if the volume type is GP3.
+            default_from_api: true
+          - !ruby/object:Api::Type::String
+            name: kmsKeyArn
+            description: Optional. The Amazon Resource Name (ARN) of the Customer Managed Key (CMK) used to encrypt AWS EBS volumes. If not specified, the default Amazon managed key associated to the AWS region where this cluster runs will be used.
+      - !ruby/object:Api::Type::Array
+        name: taints
+        description: Optional. The initial taints assigned to nodes of this node pool.
+        immutable: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: taint
+          description: Optional. The initial taints assigned to nodes of this node pool.
+          properties:
+            - !ruby/object:Api::Type::String
+              name: key
+              description: Key for the taint.
+              required: true
+              immutable: true
+            - !ruby/object:Api::Type::String
+              name: value
+              description: Value for the taint.
+              required: true
+              immutable: true
+            - !ruby/object:Api::Type::Enum
+              name: effect
+              description: The taint effect.
+              required: true
+              immutable: true
+              values:
+                - :EFFECT_UNSPECIFIED
+                - :NO_SCHEDULE
+                - :PREFER_NO_SCHEDULE
+                - :NO_EXECUTE
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: labels
+        description: 'Optional. The initial labels assigned to nodes of this node pool. An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.'
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: tags
+        description: Optional. Key/value metadata to assign to each underlying AWS resource. Specify at most 50 pairs containing alphanumerics, spaces, and symbols (.+-=_:@/). Keys can be up to 127 Unicode characters. Values can be up to 255 Unicode characters.
+      - !ruby/object:Api::Type::String
+        name: iamInstanceProfile
+        description: The name of the AWS IAM role assigned to nodes in the pool.
+        required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: configEncryption
+        description: The ARN of the AWS KMS key used to encrypt node pool configuration.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: kmsKeyArn
+            description: The ARN of the AWS KMS key used to encrypt node pool configuration.
+            required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: sshConfig
+        description: Optional. The SSH configuration.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: ec2KeyPair
+            description: The name of the EC2 key pair used to login into cluster machines.
+            required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: spotConfig
+        description: Optional. When specified, the node pool will provision Spot instances from the set of spot_config.instance_types. This field is mutually exclusive with `instance_type`
+        min_version: beta
+        immutable: true
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: instanceTypes
+            description: List of AWS EC2 instance types for creating a spot node pool's nodes. The specified instance types must have the same number of CPUs and memory. You can use the Amazon EC2 Instance Selector tool (https://github.com/aws/amazon-ec2-instance-selector) to choose instance types with matching CPU and memory
+            min_version: beta
+            required: true
+            immutable: true
+            item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: securityGroupIds
+        description: Optional. The IDs of additional security groups to add to nodes in this pool. The manager will automatically create security groups with minimum rules needed for a functioning cluster.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: proxyConfig
+        description: Proxy configuration for outbound HTTP(S) traffic.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: secretArn
+            description: The ARN of the AWS Secret Manager secret that contains the HTTP(S) proxy configuration.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: secretVersion
+            description: The version string of the AWS Secret Manager secret that contains the HTTP(S) proxy configuration.
+            required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: instancePlacement
+        description: Details of placement information for an instance.
+        default_from_api: true
+        min_version: beta
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: tenancy
+            description: The tenancy for the instance.
+            values:
+              - :TENANCY_UNSPECIFIED
+              - :DEFAULT
+              - :DEDICATED
+              - :HOST
+            default_value: :DEFAULT
+      - !ruby/object:Api::Type::String
+        name: imageType
+        description: The OS image type to use on node pool instances.
+        immutable: true
+        default_from_api: true
+      - !ruby/object:Api::Type::NestedObject
+        name: autoscalingMetricsCollection
+        description: Optional. Configuration related to CloudWatch metrics collection on the Auto Scaling group of the node pool. When unspecified, metrics collection is disabled.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: granularity
+            description: The frequency at which EC2 Auto Scaling sends aggregated data to AWS CloudWatch. The only valid value is "1Minute".
+            required: true
+          - !ruby/object:Api::Type::Array
+            name: metrics
+            description: The metrics to enable. For a list of valid metrics, see https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_EnableMetricsCollection.html. If you specify granularity and don't specify any metrics, all metrics are enabled.
+            item_type: Api::Type::String
+  - !ruby/object:Api::Type::NestedObject
+    name: autoscaling
+    description: Autoscaler configuration for this node pool.
+    required: true
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: minNodeCount
+        description: Minimum number of nodes in the NodePool. Must be >= 1 and <= max_node_count.
+        required: true
+      - !ruby/object:Api::Type::Integer
+        name: maxNodeCount
+        description: Maximum number of nodes in the NodePool. Must be >= min_node_count.
+        required: true
+  - !ruby/object:Api::Type::String
+    name: subnetId
+    description: The subnet where the node pool node run.
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::Enum
+    name: state
+    description: Output only. The lifecycle state of the node pool.
+    output: true
+    values:
+      - :STATE_UNSPECIFIED
+      - :PROVISIONING
+      - :RUNNING
+      - :RECONCILING
+      - :STOPPING
+      - :ERROR
+      - :DEGRADED
+  - !ruby/object:Api::Type::String
+    name: uid
+    description: Output only. A globally unique identifier for the node pool.
+    output: true
+  - !ruby/object:Api::Type::Boolean
+    name: reconciling
+    description: Output only. If set, there are currently changes in flight to the node pool.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: createTime
+    description: Output only. The time at which this node pool was created.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    description: Output only. The time at which this node pool was last updated.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: etag
+    description: Allows clients to perform consistent read-modify-writes through optimistic concurrency control. May be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
+    output: true
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: annotations
+    description: 'Optional. Annotations on the node pool. This field has the same restrictions as Kubernetes annotations. The total size of all keys and values combined is limited to 256k. Key can have 2 segments: prefix (optional) and name (required), separated by a slash (/). Prefix must be a DNS subdomain. Name must be 63 characters or less, begin and end with alphanumerics, with dashes (-), underscores (_), dots (.), and alphanumerics between.'
+  - !ruby/object:Api::Type::NestedObject
+    name: maxPodsConstraint
+    description: The constraint on the maximum number of pods that can be run simultaneously on a node in the node pool.
+    required: true
+    immutable: true
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: maxPodsPerNode
+        description: The maximum number of pods to schedule on a single node.
+        required: true
+        immutable: true
+  - !ruby/object:Api::Type::Array
+    name: errors
+    description: A set of errors found in the node pool.
+    output: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      name: taint
+      description: AwsNodePoolError describes errors found on AWS node pools.
+      properties:
+        - !ruby/object:Api::Type::String
+          name: message
+          description: Human-friendly description of the error.
+          output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: management
+    description: The Management configuration for this node pool.
+    min_version: beta
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: autoRepair
+        description: |
+          Whether or not the nodes will be automatically repaired. When set to true,
+          the nodes in this node pool will be monitored and if they fail health
+          checks consistently over a period of time, an automatic repair action
+          will be triggered to replace them with new nodes.

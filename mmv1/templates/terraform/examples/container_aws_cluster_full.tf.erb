@@ -1,0 +1,99 @@
+data "google_project" "project" {
+}
+
+data "google_container_aws_versions" "versions" {
+  project = data.google_project.project.project_id
+  location = "us-west1"
+}
+
+resource "google_container_aws_cluster" "primary" {
+  location = "us-west1"
+  name     = "<%= ctx[:vars]['name'] %>"
+  description = "A sample aws cluster"
+  project     = data.google_project.project.project_id
+
+  authorization {
+    admin_users {
+      username = "<%= ctx[:test_env_vars]['service_account'] %>"
+    }
+  }
+
+  aws_region = "<%= ctx[:vars]['aws_region'] %>"
+
+  control_plane {
+    aws_services_authentication {
+      role_arn          = "arn:aws:iam::<%= ctx[:vars]['aws_acct_id'] %>:role/<%= ctx[:vars]['byo_prefix'] %>-1p-dev-oneplatform"
+      role_session_name = "<%= ctx[:vars]['byo_prefix'] %>-1p-dev-session"
+    }
+
+    config_encryption {
+      kms_key_arn = "arn:aws:kms:<%= ctx[:vars]['aws_region'] %>:<%= ctx[:vars]['aws_acct_id'] %>:key/<%= ctx[:vars]['aws_db_key'] %>"
+    }
+
+    database_encryption {
+      kms_key_arn = "arn:aws:kms:<%= ctx[:vars]['aws_region'] %>:<%= ctx[:vars]['aws_acct_id'] %>:key/<%= ctx[:vars]['aws_db_key'] %>"
+    }
+
+    iam_instance_profile = "<%= ctx[:vars]['byo_prefix'] %>-1p-dev-controlplane"
+    subnet_ids           = ["<%= ctx[:vars]['aws_subnet'] %>"]
+    version              = "${data.google_container_aws_versions.versions.valid_versions[0]}"
+    instance_type        = "t3.medium"
+
+    main_volume {
+      iops        = 3000
+      kms_key_arn = "arn:aws:kms:<%= ctx[:vars]['aws_region'] %>:<%= ctx[:vars]['aws_acct_id'] %>:key/<%= ctx[:vars]['aws_vol_key'] %>"
+      size_gib    = 10
+      throughput  = 500
+      volume_type = "GP3"
+    }
+
+    proxy_config {
+      secret_arn     = "arn:aws:secretsmanager:us-west-2:126285863215:secret:proxy_config20210824150329476300000001-ABCDEF"
+      secret_version = "12345678-ABCD-EFGH-IJKL-987654321098"
+    }
+
+    root_volume {
+      iops        = 3000
+      kms_key_arn = "arn:aws:kms:<%= ctx[:vars]['aws_region'] %>:<%= ctx[:vars]['aws_acct_id'] %>:key/<%= ctx[:vars]['aws_vol_key'] %>"
+      size_gib    = 10
+      throughput  = 500
+      volume_type = "GP3"
+    }
+
+    security_group_ids = ["<%= ctx[:vars]['aws_sg'] %>"]
+
+    ssh_config {
+      ec2_key_pair = "<%= ctx[:vars]['byo_prefix'] %>-1p-dev-ssh"
+    }
+
+    tags = {
+      owner = "<%= ctx[:test_env_vars]['service_account'] %>"
+    }
+  }
+
+  fleet {
+    project = "projects/${data.google_project.project.number}"
+  }
+
+  networking {
+    pod_address_cidr_blocks     = ["10.2.0.0/16"]
+    service_address_cidr_blocks = ["10.1.0.0/16"]
+    vpc_id                      = "<%= ctx[:vars]['aws_vpc'] %>"
+  }
+
+  annotations = {
+    label-one = "value-one"
+  }
+
+  logging_config {
+    component_config {
+      enable_components = ["SYSTEM_COMPONENTS", "WORKLOADS"]
+    }
+  }
+
+  monitoring_config {
+    managed_prometheus_config {
+      enabled = true
+    }
+  }
+}
