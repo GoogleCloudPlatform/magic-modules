@@ -277,7 +277,6 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
       override_providers[force_provider].new(provider_config, product_api, version, start_time)
   end
 
-
   unless products_to_generate.include?(product_name)
     Google::LOGGER.info "#{product_name}: Not specified, skipping generation"
     next
@@ -298,10 +297,12 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
   { definitions: product_api, overrides: provider_config }
 end
 
+products_for_version = products_for_version.compact # remove any nil values
+
 # In order to only copy/compile files once per provider this must be called outside
 # of the products loop. This will get called with the provider from the final iteration
 # of the loop
-final_product = products_for_version.compact.last # added compact to remove nils
+final_product = products_for_version.compact.last
 final_provider_config = final_product[:overrides] # access the hash values with keys
 final_product_api = final_product[:definitions]
 provider = \
