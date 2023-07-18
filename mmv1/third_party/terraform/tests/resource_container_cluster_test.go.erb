@@ -4613,7 +4613,6 @@ resource "google_compute_subnetwork" "container_subnetwork2" {
 resource "google_container_cluster" "with_private_endpoint_subnetwork" {
   name               = "%s"
   location           = "us-central1-a"
-  min_master_version = "latest"
   initial_node_count = 1
 
   network    = google_compute_network.container_network.name
