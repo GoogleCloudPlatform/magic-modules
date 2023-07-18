@@ -21,11 +21,11 @@ Dir.chdir(File.dirname(__FILE__))
 # generation.
 ENV['TZ'] = 'UTC'
 
-require 'parallel'
 require 'active_support/inflector'
 require 'api/compiler'
 require 'google/logger'
 require 'optparse'
+require 'parallel'
 require 'pathname'
 require 'provider/terraform'
 require 'provider/terraform_kcc'
@@ -131,7 +131,6 @@ allowed_classes = Google::YamlValidator.allowed_classes
 # Building compute takes a long time and can't be parallelized within the product
 # so lets build it first
 all_product_files = all_product_files.sort_by { |product| product == 'products/compute' ? 0 : 1 }
-
 
 # products_for_version entries are a hash of product definitions (:definitions)
 # and provider config (:overrides) for the product
@@ -259,7 +258,8 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
   pp provider_config if ENV['COMPILER_DEBUG']
 
   if force_provider.nil?
-    provider = provider_config.provider.new(provider_config, product_api, version, start_time)
+    provider = \
+      provider_config.provider.new(provider_config, product_api, version, start_time)
   else
     override_providers = {
       'oics' => Provider::TerraformOiCS,
@@ -295,7 +295,7 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
   )
 
   # provider_config is mutated by instantiating a provider
-  {definitions: product_api, overrides: provider_config}
+  { definitions: product_api, overrides: provider_config }
 end
 
 # In order to only copy/compile files once per provider this must be called outside
@@ -304,7 +304,8 @@ end
 final_product = products_for_version.compact.last # added compact to remove nils
 final_provider_config = final_product[:overrides] # access the hash values with keys
 final_product_api = final_product[:definitions]
-provider = final_provider_config.provider.new(final_provider_config, final_product_api, version, start_time)
+provider = \
+  final_provider_config.provider.new(final_provider_config, final_product_api, version, start_time)
 
 provider&.copy_common_files(output_path, generate_code, generate_docs)
 Google::LOGGER.info "Compiling common files for #{provider_name}"
