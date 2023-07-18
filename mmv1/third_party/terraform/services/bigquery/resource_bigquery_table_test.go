@@ -248,7 +248,7 @@ func TestAccBigQueryTable_AvroPartitioning(t *testing.T) {
 
 func TestAccBigQueryExternalDataTable_json(t *testing.T) {
 	t.Parallel()
-	bucketName := testBucketName(t)
+	bucketName := acctest.TestBucketName(t)
 	resourceName := "google_bigquery_table.test"
 	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
@@ -511,7 +511,7 @@ func TestAccBigQueryExternalDataTable_parquet(t *testing.T) {
 func TestAccBigQueryExternalDataTable_parquetOptions(t *testing.T) {
 	t.Parallel()
 
-	bucketName := testBucketName(t)
+	bucketName := acctest.TestBucketName(t)
 	objectName := fmt.Sprintf("tf_test_%s.gz.parquet", acctest.RandString(t, 10))
 
 	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
@@ -604,19 +604,19 @@ func TestAccBigQueryExternalDataTable_queryAcceleration(t *testing.T) {
 func TestAccBigQueryExternalDataTable_objectTable(t *testing.T) {
 	t.Parallel()
 
-	bucketName := testBucketName(t)
-	objectName := fmt.Sprintf("tf_test_%s.csv", RandString(t, 10))
+	bucketName := acctest.TestBucketName(t)
+	objectName := fmt.Sprintf("tf_test_%s.csv", acctest.RandString(t, 10))
 
-	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
-	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
-	connectionID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	connectionID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 	// including an optional field. Should work without specifiying.
 	// Has to follow google sql IntervalValue encoding
 	maxStaleness := "0-0 0 10:0:0"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

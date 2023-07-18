@@ -2,8 +2,9 @@ package networkservices_test
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -113,8 +114,8 @@ resource "google_network_services_gateway" "foobar" {
 //  name        = "%s"
 //  location    = "us-east1"
 //  self_managed {
-//    pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
-//	pem_private_key = file("test-fixtures/certificatemanager/private-key.pem")
+//    pem_certificate = file("test-fixtures/cert.pem")
+//	pem_private_key = file("test-fixtures/private-key.pem")
 //  }
 //}
 //
@@ -182,8 +183,8 @@ resource "google_network_services_gateway" "foobar" {
 //  name        = "%s"
 //  location    = "us-east1"
 //  self_managed {
-//    pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
-//	pem_private_key = file("test-fixtures/certificatemanager/private-key.pem")
+//    pem_certificate = file("test-fixtures/cert.pem")
+//	pem_private_key = file("test-fixtures/private-key.pem")
 //  }
 //}
 //
@@ -191,8 +192,8 @@ resource "google_network_services_gateway" "foobar" {
 //  name        = "%s"
 //  location    = "us-east1"
 //  self_managed {
-//    pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
-//	pem_private_key = file("test-fixtures/certificatemanager/private-key.pem")
+//    pem_certificate = file("test-fixtures/cert.pem")
+//	pem_private_key = file("test-fixtures/private-key.pem")
 //  }
 //}
 //
@@ -318,8 +319,8 @@ resource "google_certificate_manager_certificate" "default" {
   name        = "%s"
   location    = "us-west1"
   self_managed {
-    pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
-	pem_private_key = file("test-fixtures/certificatemanager/private-key.pem")
+    pem_certificate = file("test-fixtures/cert.pem")
+	pem_private_key = file("test-fixtures/private-key.pem")
   }
 }
 
@@ -412,8 +413,8 @@ resource "google_certificate_manager_certificate" "default" {
   name        = "%s"
   location    = "us-west1"
   self_managed {
-    pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
-	pem_private_key = file("test-fixtures/certificatemanager/private-key.pem")
+    pem_certificate = file("test-fixtures/cert.pem")
+	pem_private_key = file("test-fixtures/private-key.pem")
   }
 }
 
@@ -534,8 +535,8 @@ resource "google_certificate_manager_certificate" "default" {
   name        = "%s"
   location    = "us-west2"
   self_managed {
-    pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
-	  pem_private_key = file("test-fixtures/certificatemanager/private-key.pem")
+    pem_certificate = file("test-fixtures/cert.pem")
+	  pem_private_key = file("test-fixtures/private-key.pem")
   }
 }
 
@@ -643,8 +644,8 @@ resource "google_certificate_manager_certificate" "default" {
   name        = "%s"
   location    = "us-west2"
   self_managed {
-    pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
-	  pem_private_key = file("test-fixtures/certificatemanager/private-key.pem")
+    pem_certificate = file("test-fixtures/cert.pem")
+	  pem_private_key = file("test-fixtures/private-key.pem")
   }
 }
 

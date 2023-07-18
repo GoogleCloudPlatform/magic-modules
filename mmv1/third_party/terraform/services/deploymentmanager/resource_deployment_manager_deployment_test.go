@@ -1,4 +1,4 @@
-package google
+package deploymentmanager_test
 
 import (
 	"bytes"
