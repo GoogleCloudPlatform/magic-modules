@@ -216,7 +216,7 @@ type compareConvertOutputFunc func(t *testing.T, expected []caiasset.Asset, actu
 func compareUnmergedConvertOutput(t *testing.T, expected []caiasset.Asset, actual []caiasset.Asset, offline bool) {
 	expectedAssets := normalizeAssets(t, expected, offline)
 	actualAssets := normalizeAssets(t, actual, offline)
-  if diff := cmp.Diff(expectedAssets, actualAssets); diff != "" {
+	if diff := cmp.Diff(expectedAssets, actualAssets); diff != "" {
 		t.Errorf("%v diff(-want, +got):\n%s", t.Name(), diff)
 	}
 }
@@ -259,7 +259,7 @@ func compareMergedIamMemberOutput(t *testing.T, expected []caiasset.Asset, actua
 
 	expectedAssets := normalizeAssets(t, expected, offline)
 	actualAssets := normalizeAssets(t, normalizedActual, offline)
-  if diff := cmp.Diff(expectedAssets, actualAssets); diff != "" {
+	if diff := cmp.Diff(expectedAssets, actualAssets); diff != "" {
 		t.Errorf("%v diff(-want, +got):\n%s", t.Name(), diff)
 	}
 }
@@ -291,7 +291,7 @@ func compareMergedIamBindingOutput(t *testing.T, expected []caiasset.Asset, actu
 
 	expectedAssets := normalizeAssets(t, expected, offline)
 	actualAssets := normalizeAssets(t, normalizedActual, offline)
-  if diff := cmp.Diff(expectedAssets, actualAssets); diff != "" {
+	if diff := cmp.Diff(expectedAssets, actualAssets); diff != "" {
 		t.Errorf("%v diff(-want, +got):\n%s", t.Name(), diff)
 	}
 }
