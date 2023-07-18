@@ -25,7 +25,6 @@ function clone_repo() {
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
     elif [ "$REPO" == "terraform-google-conversion" ]; then
         UPSTREAM_OWNER=GoogleCloudPlatform
-        # UPSTREAM_BRANCH=main
         GH_REPO=terraform-google-conversion
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
     elif [ "$REPO" == "tf-oics" ]; then
@@ -47,7 +46,6 @@ function clone_repo() {
     GITHUB_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
     SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/$SCRATCH_OWNER/$GH_REPO
     mkdir -p "$(dirname $LOCAL_PATH)"
-    # git clone $GITHUB_PATH $LOCAL_PATH
 
     echo "BASE_BRANCH: $BASE_BRANCH"
     git clone $GITHUB_PATH $LOCAL_PATH --branch $BASE_BRANCH
