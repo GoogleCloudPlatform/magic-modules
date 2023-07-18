@@ -23,7 +23,9 @@ import (
 func defaultCompareConverterOutput(t *testing.T, expected []caiasset.Asset, actual []caiasset.Asset, offline bool) {
 	expectedAssets := normalizeAssets(t, expected, offline)
 	actualAssets := normalizeAssets(t, actual, offline)
-	require.ElementsMatch(t, expectedAssets, actualAssets)
+	if diff := cmp.Diff(expectedAssets, actualAssets); diff != "" {
+		t.Errorf("%v diff(-want, +got):\n%s", t.Name(), diff)
+	}
 }
 
 func testConvertCommand(t *testing.T, dir, tfplanName string, jsonName string, offline bool, withProject bool, compare compareConvertOutputFunc) {

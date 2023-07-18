@@ -84,7 +84,9 @@ func TestReadPlannedAssetsCoverage(t *testing.T) {
 			}
 			expectedAssets := normalizeAssets(t, want, true)
 			actualAssets := normalizeAssets(t, got, true)
-			require.ElementsMatch(t, actualAssets, expectedAssets)
+      if diff := cmp.Diff(expectedAssets, actualAssets); diff != "" {
+        t.Errorf("%v diff(-want, +got):\n%s", t.Name(), diff)
+      }
 		})
 	}
 }
@@ -146,7 +148,9 @@ func TestReadPlannedAssetsCoverage_WithoutDefaultProject(t *testing.T) {
 			}
 			expectedAssets := normalizeAssets(t, want, true)
 			actualAssets := normalizeAssets(t, got, true)
-			require.ElementsMatch(t, actualAssets, expectedAssets)
+      if diff := cmp.Diff(expectedAssets, actualAssets); diff != "" {
+        t.Errorf("%v diff(-want, +got):\n%s", t.Name(), diff)
+      }
 		})
 	}
 }
