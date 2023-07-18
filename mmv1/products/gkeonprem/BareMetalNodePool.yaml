@@ -34,7 +34,8 @@ examples:
     primary_resource_id: 'nodepool-basic'
     min_version: beta
     vars:
-      name: 'nodepool'
+      name: 'my-nodepool'
+      cluster: 'my-cluster'
     test_env_vars:
       project: 'fake-backend-360322'
   - !ruby/object:Provider::Terraform::Examples
@@ -42,7 +43,8 @@ examples:
     primary_resource_id: 'nodepool-full'
     min_version: beta
     vars:
-      name: 'nodepool'
+      name: 'my-nodepool'
+      cluster: 'my-cluster'
     test_env_vars:
       project: 'fake-backend-360322'
 skip_sweeper: true

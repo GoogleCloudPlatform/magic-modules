@@ -4,6 +4,8 @@ resource "google_vpc_access_connector" "connector" {
     name = google_compute_subnetwork.custom_test.name
   }
   machine_type = "e2-standard-4"
+  min_instances = 2
+  max_instances = 3
 }
 
 resource "google_compute_subnetwork" "custom_test" {
