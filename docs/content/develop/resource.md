@@ -145,21 +145,14 @@ For more information about types of resources and the generation process overall
      # actions: ['create', 'update', 'delete']
      operation: !ruby/object:Api::OpAsync::Operation
        base_url: '{{op_id}}'
-     # If true, the completed operation's returned JSON is expected to
-     # contain a full resource in the "response" field
+
+     # If true, the provider sets the resource's Terraform ID after the resource is created,
+     # taking into account values that are set by the API at create time. This is only possible
+     # when the completed operation's JSON includes the created resource in the "response" field.
+     # If false (or unset), the provider sets the resource's Terraform ID before the resource is
+     # created, based only on the resource configuration.
      # result: !ruby/object:Api::OpAsync::Result
      #   resource_inside_response: true
-     # The following are all required but unused.
-       path: 'unused'
-       wait_ms: 0  # unused
-     result: !ruby/object:Api::OpAsync::Result
-       path: 'unused'
-     status: !ruby/object:Api::OpAsync::Status
-       path: 'unused'
-       allowed: []
-     error: !ruby/object:Api::OpAsync::Error
-       path: 'unused'
-       message: 'unused'
 
    # All resources (of all kinds) that share a mutex value block rather than
    # executing concurrent API requests.
@@ -379,8 +372,9 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   # Allowed values: :POST, :PUT. Default: :POST
   # set_iam_policy_verb: :POST
 
-  # Must match the parent resource's import_format, but with the
-  # parent_resource_attribute value substituted for the final field.
+  # Must match the parent resource's `import_format` (or `self_link` if
+  # `import_format` is unset), but with the `parent_resource_attribute`
+  # value substituted for the final field.
   import_format: [
     'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_name}}'
   ]
@@ -405,7 +399,14 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 
 ### Add support in MMv1
 
-1. Follow the MMv1 directions in [Add the resource]({{<ref "#add-the-resource" >}}) to create a skeleton ResourceName.yaml file for the handwritten resource, but set only the following top-level fields: `name`, `base_url` (set to URL of IAM parent resource), `self_link` (set to same value as `base_url`) `description` (required but unused), `id_format`, `import_format`, and `properties`.
+1. Follow the MMv1 directions in [Add the resource]({{<ref "#add-the-resource" >}}) to create a skeleton ResourceName.yaml file for the handwritten resource, but set only the following top-level fields:
+   - `name`
+   - `description` (required but unused)
+   - `base_url` (set to URL of IAM parent resource)
+   - `self_link` (set to same value as `base_url`)
+   - `id_format` (set to same value as `base_url`)
+   - `import_format` (including `base_url` value)
+   - `properties`
 2. Follow the MMv1 directions in [Add fields]({{<ref "#add-fields" >}}) to add only the fields used by base_url.
 3. Follow the MMv1 directions in this section to add IAM support.
 
