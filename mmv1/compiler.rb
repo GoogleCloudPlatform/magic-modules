@@ -21,6 +21,7 @@ Dir.chdir(File.dirname(__FILE__))
 # generation.
 ENV['TZ'] = 'UTC'
 
+require 'parallel'
 require 'active_support/inflector'
 require 'api/compiler'
 require 'google/logger'
@@ -127,12 +128,15 @@ Google::LOGGER.info "Using #{version} version"
 
 allowed_classes = Google::YamlValidator.allowed_classes
 
+# Building compute takes a long time and can't be parallelized within the product
+# so lets build it first
+all_product_files = all_product_files.sort_by { |product| product == 'products/compute' ? 0 : 1 }
+
+
 # products_for_version entries are a hash of product definitions (:definitions)
 # and provider config (:overrides) for the product
-products_for_version = []
-provider = nil
 # rubocop:disable Metrics/BlockLength
-all_product_files.each do |product_name|
+products_for_version = Parallel.map(all_product_files, in_processes: 8) do |product_name|
   product_override_path = ''
   product_override_path = File.join(override_dir, product_name, 'product.yaml') if override_dir
   product_yaml_path = File.join(product_name, 'product.yaml')
@@ -273,8 +277,6 @@ all_product_files.each do |product_name|
       override_providers[force_provider].new(provider_config, product_api, version, start_time)
   end
 
-  # provider_config is mutated by instantiating a provider
-  products_for_version.push(definitions: product_api, overrides: provider_config)
 
   unless products_to_generate.include?(product_name)
     Google::LOGGER.info "#{product_name}: Not specified, skipping generation"
@@ -291,11 +293,19 @@ all_product_files.each do |product_name|
     generate_code,
     generate_docs
   )
+
+  # provider_config is mutated by instantiating a provider
+  {definitions: product_api, overrides: provider_config}
 end
 
 # In order to only copy/compile files once per provider this must be called outside
 # of the products loop. This will get called with the provider from the final iteration
 # of the loop
+final_product = products_for_version.compact.last # added compact to remove nils
+final_provider_config = final_product[:overrides] # access the hash values with keys
+final_product_api = final_product[:definitions]
+provider = final_provider_config.provider.new(final_provider_config, final_product_api, version, start_time)
+
 provider&.copy_common_files(output_path, generate_code, generate_docs)
 Google::LOGGER.info "Compiling common files for #{provider_name}"
 common_compile_file = "provider/#{provider_name}/common~compile.yaml"
