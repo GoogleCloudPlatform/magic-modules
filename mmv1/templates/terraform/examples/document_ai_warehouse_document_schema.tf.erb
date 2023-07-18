@@ -1,0 +1,9 @@
+resource "google_document_ai_warehouse_document_schema" "<%= ctx[:primary_resource_id] %>" {
+  display_name = "<%= ctx[:vars]['document_schema_name'] %>"
+  location = "us"
+  property_definitions {
+    name          = "testinvoice"
+    display_name  = "testpropdef"
+    text_type_options {}
+  }
+}

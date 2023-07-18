@@ -1,0 +1,55 @@
+--- !ruby/object:Api::Resource
+name: 'Location'
+base_url: 'projects/{{project}}/locations/us:initialize'
+self_link: '{{name}}'
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/document-warehouse/docs/overview'
+  api: 'https://cloud.google.com/document-warehouse/docs/reference/rest/v1/projects.locations'
+description: |
+  A location is used to initialize a project.
+skip_delete: true
+skip_sweeper: true
+# import_format:
+#   [
+#     'projects/{{project}}/locations/{{location}}',
+#     '{{location}}'
+#   ]
+# timeouts: !ruby/object:Api::Timeouts
+#   insert_minutes: 20
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "document_ai_warehouse_location"
+    primary_resource_id: "example"
+# custom_code: !ruby/object:Provider::Terraform::CustomCode
+#   custom_create: 'templates/terraform/custom_create/document_ai_warehouse_location.go'
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    description: |
+      The location of the resource.
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    output: true
+    description: |
+      Name of the instance. 
+  - !ruby/object:Api::Type::Enum
+    name: 'databaseType'
+    description: |
+      The type of database used to store customer data.
+    values:
+      - :DB_UNKNOWN
+      - :DB_INFRA_SPANNER
+      - :DB_CLOUD_SQL_POSTGRES
+    default_value: :DB_INFRA_SPANNER
+  - !ruby/object:Api::Type::Enum
+    name: 'accessControlMode'
+    description: |
+      The access control mode for accessing the customer data.
+    values:
+      - :ACL_MODE_UNKNOWN
+      - :ACL_MODE_DOCUMENT_LEVEL_ACCESS_CONTROL_GCI
+      - :ACL_MODE_DOCUMENT_LEVEL_ACCESS_CONTROL_BYOID
+      - :ACL_MODE_UNIVERSAL_ACCESS
+    default_value: :ACL_MODE_DOCUMENT_LEVEL_ACCESS_CONTROL_GCI
