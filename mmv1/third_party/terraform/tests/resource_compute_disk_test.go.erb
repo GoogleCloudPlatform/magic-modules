@@ -552,6 +552,41 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 		},
 	})
 }
+<% unless version = 'ga' -%>
+func TestAccComputeDisk_pdHyperDiskEnableConfidentialCompute(t *testing.T) {
+	t.Parallel()
+
+
+	context := map[string]interface{}{
+		"random_suffix":        RandString(t, 10),
+		"kms":                  BootstrapKMSKey(t),
+		"disk_size":            64,
+		"confidential_compute": true,
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeDisk_pdHyperDiskEnableConfidentialCompute(context),
+				Check: resource.ComposeTestCheckFunc( 
+					testAccCheckEncryptionKey(t, "google_compute_disk.foobar", &disk),
+			),
+				
+			},
+			{
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+<% end -%>
+
+
 
 func TestAccComputeDisk_deleteDetach(t *testing.T) {
 	t.Parallel()
@@ -1023,6 +1058,24 @@ resource "google_compute_instance_group_manager" "manager" {
 }
 `, diskName, mgrName)
 }
+
+func testAccComputeDisk_pdHyperDiskEnableConfidentialCompute(context map[string]interface{}) string {
+	return Nprintf(`
+	resource "google_compute_disk" "foobar" {
+		name                        = "tf-test-ecc-%{random_suffix}"
+		size                        = %{disk_size}
+		type                        = "hyperdisk-balanced"
+		zone                        = "us-central1-a"
+		enable_confidential_compute = %{confidential_compute}
+
+		disk_encryption_key {
+			kms_key_self_link       = "%{kms}"
+		}
+
+	}
+`, context)
+}
+
 
 func testAccComputeDisk_pdHyperDiskProvisionedIopsLifeCycle(context map[string]interface{}) string {
 	return acctest.Nprintf(`
