@@ -309,7 +309,6 @@ module Provider
         "#{tpg}/version"
       )
 
-      Google::LOGGER.info "replace_import_path target #{output_folder}/#{target}"
       data = data.gsub(
         "module #{TERRAFORM_PROVIDER_GA}",
         "module #{tpg}"
