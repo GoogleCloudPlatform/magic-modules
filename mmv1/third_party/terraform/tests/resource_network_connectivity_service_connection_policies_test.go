@@ -79,7 +79,7 @@ func testAccNetworkConnectivityServiceConnectionPolicy_basic(networkName, subnet
   resource "google_network_connectivity_service_connection_policy" "default" {
     name = "%s"
     location = "us-central1"
-    description = "my basic sevice connection policy"
+    description = "my basic service connection policy"
     service_class = "gcp-memorystore-redis"
     network = google_compute_network.producer_net.id
     psc_config {
@@ -119,7 +119,7 @@ resource "google_compute_subnetwork" "producer_subnet" {
 resource "google_network_connectivity_service_connection_policy" "default" {
   name = "%s"
   location = "us-central1"
-  description = "my basic sevice connection policy"
+  description = "my basic service connection policy"
   service_class = "gcp-memorystore-redis"
   network = google_compute_network.producer_net.id
   psc_config {
