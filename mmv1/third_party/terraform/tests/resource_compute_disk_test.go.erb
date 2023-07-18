@@ -552,7 +552,7 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 		},
 	})
 }
-<% unless version = 'ga' -%>
+<% unless version == 'ga' -%>
 func TestAccComputeDisk_pdHyperDiskEnableConfidentialCompute(t *testing.T) {
 	t.Parallel()
 
