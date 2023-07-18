@@ -22,12 +22,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 		original := raw.(map[string]interface{})
 		if len(original) < 1 {
 			// If no start times exist, that means we take backups at midnight. This is represented as 0's all around.
-            return append(transformed, map[string]interface{}{
-                "hours":   0,
-                "minutes": 0,
-                "seconds": 0,
-                "nanos":   0,
-            })
+			return append(transformed, map[string]interface{}{})
 		}
 		transformed = append(transformed, map[string]interface{}{
 			"hours":   flattenAlloydbClusterAutomatedBackupPolicyWeeklyScheduleStartTimesHours(original["hours"], d, config),
