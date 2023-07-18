@@ -1,7 +1,7 @@
 package constants
 
-const BreakingChangeRelativeLocation = "develop/"
-const BreakingChangeFileName = "make-a-breaking-change"
+const BreakingChangeRelativeLocation = "reference/"
+const BreakingChangeFileName = "breaking-change-detector"
 
 var docsite = "https://googlecloudplatform.github.io/magic-modules/"
 
