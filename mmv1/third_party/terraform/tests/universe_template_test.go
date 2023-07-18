@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
+
 func TestAccUniverseDomain(t *testing.T) {
 	t.Parallel()
 	// Skip VCR since this test can only run in specific test project.
@@ -24,7 +25,7 @@ func TestAccUniverseDomain(t *testing.T) {
 }
 
 func testAccUniverseDomain_basic_disk() string {
-return fmt.Sprintf(`
+	return fmt.Sprintf(`
 provider "google" {
   universe_domain = "test"
 }
