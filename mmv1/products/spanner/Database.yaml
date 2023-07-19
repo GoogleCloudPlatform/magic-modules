@@ -80,6 +80,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   update_encoder: templates/terraform/update_encoder/spanner_database.go.erb
   post_create: templates/terraform/post_create/spanner_database.go.erb
   pre_delete: templates/terraform/pre_delete/resource_spanner_database.go
+  custom_update: templates/terraform/custom_update/spanner_database.go.erb
 custom_diff: [
   'resourceSpannerDBDdlCustomDiff',
 ]
