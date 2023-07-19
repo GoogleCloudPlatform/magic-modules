@@ -14,6 +14,8 @@ import (
 func TestAccDataSourceAlloydbLocations_basic(t *testing.T) {
 	t.Parallel()
 
+	fmt.Println("Hopefully this diff happens alongside some Kotlin file changes...")
+
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
