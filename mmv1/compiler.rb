@@ -293,8 +293,9 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
     generate_docs
   )
 
-  # provider_config is mutated by instantiating a provider
-  { definitions: product_api, overrides: provider_config }
+  # provider_config is mutated by instantiating a provider.
+  # we need to preserve a single provider instance to use outside of this loop.
+  { definitions: product_api, overrides: provider_config, provider: provider }
 end
 
 products_for_version = products_for_version.compact # remove any nil values
@@ -303,10 +304,7 @@ products_for_version = products_for_version.compact # remove any nil values
 # of the products loop. This will get called with the provider from the final iteration
 # of the loop
 final_product = products_for_version.compact.last
-final_provider_config = final_product[:overrides] # access the hash values with keys
-final_product_api = final_product[:definitions]
-provider = \
-  final_provider_config.provider.new(final_provider_config, final_product_api, version, start_time)
+provider = final_product[:provider]
 
 provider&.copy_common_files(output_path, generate_code, generate_docs)
 Google::LOGGER.info "Compiling common files for #{provider_name}"
