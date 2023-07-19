@@ -54,7 +54,7 @@ parameters:
     name: 'location'
     url_param_only: true
     description: |
-      The location in which the instance is to be provisioned.
+      The location in which the instance is to be provisioned. It takes the form projects/{projectNumber}/locations/{location}.
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
