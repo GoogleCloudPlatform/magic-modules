@@ -28,7 +28,7 @@ function clone_repo() {
         GH_REPO=terraform-google-conversion
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
     elif [ "$REPO" == "tf-oics" ]; then
-        if [ "$UPSTREAM_BRANCH" == "main"]; then
+        if [ "$UPSTREAM_BRANCH" == "main" ]; then
             UPSTREAM_BRANCH=master
         fi
         UPSTREAM_OWNER=terraform-google-modules
@@ -48,7 +48,7 @@ function clone_repo() {
     mkdir -p "$(dirname $LOCAL_PATH)"
 
     echo "BASE_BRANCH: $BASE_BRANCH"
-    git clone $GITHUB_PATH $LOCAL_PATH --branch $BASE_BRANCH
+    git clone $GITHUB_PATH $LOCAL_PATH --branch $UPSTREAM_BRANCH
 }
 
 if [ $# -lt 4 ]; then
