@@ -674,7 +674,7 @@ be from 0 to 999,999,999 inclusive.`,
 							Description: `Specifies the frequency of planned maintenance events. The accepted values are: PERIODIC`,
 						},
 						"local_ssd_recovery_timeout" : {
-							Type:        schema.TypeString,
+							Type:        schema.TypeList,
 							Optional:    true,
 							Description: `Specifies the maximum amount of time a Local Ssd Vm should wait while
   recovery of the Local Ssd state is attempted. Its value should be in

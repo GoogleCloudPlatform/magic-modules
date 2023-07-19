@@ -2459,8 +2459,8 @@ func TestAccComputeInstance_localSsdRecoveryTimeout_update(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	// Define in testAccComputeInstance_localSsdRecoveryTimeout
 	var expectedLocalSsdRecoveryTimeout = compute.Duration{}
-	expectedLocalSsdRecoveryTimeout.Nanos = 123
-	expectedLocalSsdRecoveryTimeout.Seconds = 60
+	expectedLocalSsdRecoveryTimeout.Nanos = 0
+	expectedLocalSsdRecoveryTimeout.Seconds = 3600
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
