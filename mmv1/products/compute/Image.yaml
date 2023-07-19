@@ -191,6 +191,7 @@ properties:
       description: 'An applicable license URI'
       resource: 'License'
       imports: 'selfLink'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -239,6 +240,7 @@ properties:
       rawDisk.source property but not both to create an image.
     resource: 'Disk'
     imports: 'selfLink'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'sourceImage'
     description: |
@@ -251,6 +253,7 @@ properties:
       * The sourceDisk URL
     resource: 'Image'
     imports: 'selfLink'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'sourceSnapshot'
     description: |
@@ -265,4 +268,5 @@ properties:
       * The sourceDisk URL
     resource: 'Snapshot'
     imports: 'selfLink'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 # State is not applicable for state convergence.

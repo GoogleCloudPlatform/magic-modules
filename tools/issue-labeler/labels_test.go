@@ -27,7 +27,7 @@ func TestLabels(t *testing.T) {
 			google_gke_hub_feature
 			google_storage_hmac_key
 			#`,
-			expectedLabels: `["services/gkehub", "services/storage"]`,
+			expectedLabels: `["forward/review", "services/gkehub", "services/storage"]`,
 		},
 		{
 			issueBody: `### New or Affected Resource(s):

@@ -93,6 +93,7 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -148,6 +149,7 @@ properties:
     description: |
       The URL of a forwarding rule that represents the service identified by
       this service attachment.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Array
     name: 'natSubnets'
     required: true
@@ -160,6 +162,7 @@ properties:
       imports: 'selfLink'
       description: |
         A subnet that is provided for NAT in this service attachment.
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Boolean
     name: 'enableProxyProtocol'
     required: true

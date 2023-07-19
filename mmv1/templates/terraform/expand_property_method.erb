@@ -160,26 +160,13 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
     if raw == nil {
       return nil, fmt.Errorf("Invalid value for <%= property.name.underscore -%>: nil")
     }
-    f, err := <%= build_expand_resource_ref('raw.(string)', property.item_type, pwd) %>
-    if err != nil {
-      return nil, fmt.Errorf("Invalid value for <%= property.name.underscore -%>: %s", err)
-    }
-    req = append(req, f.RelativeLink())
+    req = append(req, raw.(string))
   }
   return req, nil
 }
 <%     else -%>
-<%       if property.is_a?(Api::Type::ResourceRef) -%>
-  f, err := <%= build_expand_resource_ref('v.(string)', property, pwd) %>
-  if err != nil {
-    return nil, fmt.Errorf("Invalid value for <%= property.name.underscore -%>: %s", err)
-  }
-  return f.RelativeLink(), nil
-}
-<%       else -%>
   return v, nil
 }
-<%       end -%>
 <%     end # nested_properties, array of resourcerefs, else -%>
 <%   else -%>
   // TODO: Property '<%= property.name -%>' of type <%= property.class -%> is not supported

@@ -6,9 +6,17 @@ if [ $# -lt 3 ]; then
     exit 1
 fi
 
-SYNC_BRANCH=$1
+SYNC_BRANCH_PREFIX=$1
 BASE_BRANCH=$2
 SHA=$3
+
+if [ "$BASE_BRANCH" == "main"]; then
+    SYNC_BRANCH=$SYNC_BRANCH_PREFIX
+else
+    SYNC_BRANCH=$SYNC_BRANCH_PREFIX-$BASE_BRANCH
+fi
+
+echo "SYNC_BRANCH: $SYNC_BRANCH"
 
 if git merge-base --is-ancestor $SHA origin/$SYNC_BRANCH; then
     echo "Found $SHA in history of $SYNC_BRANCH - dying to avoid double-generating that commit."
