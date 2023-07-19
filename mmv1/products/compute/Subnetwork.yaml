@@ -366,7 +366,7 @@ properties:
       or the first time the subnet is updated into IPV4_IPV6 dual stack. If the ipv6_type is EXTERNAL then this subnet
       cannot enable direct path.
   - !ruby/object:Api::Type::String
-    name: 'ipv6CidrRange'
+    name: 'internalIpv6Prefix'
     output: true
     description: |
       The range of internal IPv6 addresses that are owned by this subnetwork.
