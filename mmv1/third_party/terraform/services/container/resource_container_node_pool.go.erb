@@ -402,11 +402,13 @@ var schemaNodePool = map[string]*schema.Schema{
 						Schema: map[string]*schema.Schema{
 							"subnetwork": {
 								Type:         schema.TypeString,
+								Optional:     true,
 								ForceNew:     true,
 								Description:  `Name of the subnetwork where the additional pod network belongs.`,
 							},
 							"secondary_pod_range": {
 								Type:         schema.TypeString,
+								Optional:     true,
 								ForceNew:     true,
 								Description:  `The name of the secondary range on the subnet which provides IP address for this pod range.`,
 							},
@@ -1176,6 +1178,10 @@ func flattenNodeNetworkConfig(c *container.NodeNetworkConfig, d *schema.Resource
 
 <% unless version == 'ga' -%>
 func flattenAdditionalNodeNetworkConfig(c []*container.AdditionalNodeNetworkConfig) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+
 	result := []map[string]interface{}{}
 	for _, nodeNetworkConfig := range c {
 		result = append(result, map[string]interface{}{
@@ -1187,6 +1193,10 @@ func flattenAdditionalNodeNetworkConfig(c []*container.AdditionalNodeNetworkConf
 }
 
 func flattenAdditionalPodNetworkConfig(c []*container.AdditionalPodNetworkConfig) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+
 	result := []map[string]interface{}{}
 	for _, podNetworkConfig := range c {
 		result = append(result, map[string]interface{}{
