@@ -403,20 +403,22 @@ func TestAccSpannerDatabase_enableDropProtection(t *testing.T) {
 		CheckDestroy:             testAccCheckSpannerDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				// Test creating a database with `enable_drop_protection` set
 				Config: testAccSpannerDatabase_enableDropProtection(instanceName, databaseName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_spanner_database.basic", "state"),
-					resource.TestCheckResourceAttr("google_spanner_database.basic", "enable_drop_protection", "true"),
-				),
 			},
 			{
-				// Test removing `enable_drop_protection` and setting enableDropProtection to false
+				ResourceName:            "google_spanner_database.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ddl", "deletion_protection"},
+			},
+			{
 				Config: testAccSpannerDatabase_enableDropProtectionUpdate(instanceName, databaseName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_spanner_database.basic", "state"),
-					resource.TestCheckResourceAttr("google_spanner_database.basic", "enable_drop_protection", "false"),
-				),
+			},
+			{
+				ResourceName:            "google_spanner_database.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ddl", "deletion_protection"},
 			},
 		},
 	})
