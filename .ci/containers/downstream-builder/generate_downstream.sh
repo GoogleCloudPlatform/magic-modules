@@ -155,6 +155,11 @@ else
         fi
         pushd ../
         make tpgtools OUTPUT_PATH=$LOCAL_PATH VERSION=$VERSION
+
+        # Only generate TeamCity-related file for TPG and TPGB
+        if [ "$VERSION" == "ga" ] || [ "$VERSION" == "beta" ]; then
+            make teamcity-servicemap-generate OUTPUT_PATH=$LOCAL_PATH VERSION=$VERSION
+        fi
         popd
     fi
 fi
