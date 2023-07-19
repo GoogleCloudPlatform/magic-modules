@@ -890,7 +890,6 @@ func ResourceContainerCluster() *schema.Resource {
 				Type: schema.TypeBool,
 				Optional: true,
 				Description: `Enable NET_ADMIN for this cluster.`,
-				RequiredWith: []string{"enable_autopilot"},
             },
 
 			"authenticator_groups_config": {
