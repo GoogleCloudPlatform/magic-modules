@@ -1166,8 +1166,8 @@ func flattenNodeNetworkConfig(c *container.NodeNetworkConfig, d *schema.Resource
 			"enable_private_nodes":            c.EnablePrivateNodes,
 			"pod_cidr_overprovision_config":   flattenPodCidrOverprovisionConfig(c.PodCidrOverprovisionConfig),
 <% unless version == 'ga' -%>
-			"additional_node_network_configs": flattenAdditionalNodeNetworkConfig(c.AdditionalNodeNetworkConfig),
-			"additional_pod_network_configs":  flattenAdditionalPodNetworkConfig(c.AdditionalPodNetworkConfig),
+			"additional_node_network_configs": flattenAdditionalNodeNetworkConfig(c.AdditionalNodeNetworkConfigs),
+			"additional_pod_network_configs":  flattenAdditionalPodNetworkConfig(c.AdditionalPodNetworkConfigs),
 <% end -%>
 		})
 	}
@@ -1239,7 +1239,7 @@ func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
 			}
 			nodeNetworkConfigs = append(nodeNetworkConfigs, networkConfig)
 		}
-		nnc.AdditionalNodeNetworkConfig = nodeNetworkConfigs
+		nnc.AdditionalNodeNetworkConfigs = nodeNetworkConfigs
 	}
 
 	if v, ok := networkNodeConfig["additional_pod_network_configs"]; ok && len(v.([]interface{})) > 0 {
@@ -1251,12 +1251,12 @@ func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
 				Subnetwork:        data["network"].(string),
 				SecondaryPodRange: data["subnetwork"].(string),
 				MaxPodsPerNode:    &container.MaxPodsConstraint{
-					MaxPodsPerNode: data["max_pods_per_node"].(int),
+					MaxPodsPerNode: data["max_pods_per_node"].(int64),
 				},
 			}
 			podNetworkConfigs = append(podNetworkConfigs, podnetworkConfig)
 		}
-		nnc.AdditionalPodNetworkConfig = podNetworkConfigs
+		nnc.AdditionalPodNetworkConfigs = podNetworkConfigs
 	}
 <% end -%>
 
