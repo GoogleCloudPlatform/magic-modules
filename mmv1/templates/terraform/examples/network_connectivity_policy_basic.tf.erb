@@ -22,19 +22,10 @@ resource "google_compute_subnetwork" "producer_subnet" {
   network       = google_compute_network.producer_net.id
 }
 
-resource "google_network_connectivity_service_class" "default"{
-  name        = "<%= ctx[:vars]['service_class_name'] %>"
-  location    = "us-central1"
-  description = "my-basic serviceClass"
-  labels      = {
-      foo = "bar"
-    }
-}
-
 resource "google_network_connectivity_service_connection_policy" "default" {
   name = "<%= ctx[:vars]['resource_name'] %>"
   location = "us-central1"
-  service_class = google_network_connectivity_service_class.default.service_class
+  service_class = "gcp-memorystore-redis"
   network = google_compute_network.producer_net.id
   psc_config {
     subnetworks = [google_compute_subnetwork.producer_subnet.id]

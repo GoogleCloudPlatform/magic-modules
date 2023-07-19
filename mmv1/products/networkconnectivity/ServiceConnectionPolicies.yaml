@@ -59,7 +59,6 @@ examples:
       consumer_subnetwork_name: 'consumer-subnet'
       producer_network_name: 'producer-net'
       producer_subnetwork_name: 'producer-subnet'
-      service_class_name: 'my-service-class'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
