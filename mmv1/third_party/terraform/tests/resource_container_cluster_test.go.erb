@@ -317,6 +317,7 @@ func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccContainerCluster_withMultiNetworking(t *testing.T) {
 	t.Parallel()
 
@@ -339,6 +340,7 @@ func TestAccContainerCluster_withMultiNetworking(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func TestAccContainerCluster_withMasterAuthConfig_NoCert(t *testing.T) {
 	t.Parallel()
@@ -414,6 +416,7 @@ func TestAccContainerCluster_withAuthenticatorGroupsConfig(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func testAccContainerCluster_enableMultiNetworking(clusterName string, npName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "multi_network_cluster" {
@@ -435,6 +438,7 @@ resource "google_container_cluster" "multi_network_cluster" {
 }
 `, clusterName, npName)
 }
+<% end -%>
 
 func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 	t.Parallel()

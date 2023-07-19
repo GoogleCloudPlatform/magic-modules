@@ -521,6 +521,7 @@ func TestAccContainerNodePool_withNetworkConfig(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccContainerNodePool_withMultiNicNetworkConfig(t *testing.T) {
 	t.Parallel()
 
@@ -545,7 +546,7 @@ func TestAccContainerNodePool_withMultiNicNetworkConfig(t *testing.T) {
 		},
 	})
 }
-
+<% end -%>
 
 func TestAccContainerNodePool_withEnablePrivateNodesToggle(t *testing.T) {
 	t.Parallel()
@@ -2630,6 +2631,7 @@ resource "google_container_node_pool" "with_pco_disabled" {
 `, network, cluster, np, np, np)
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func testAccContainerNodePool_withMultiNicNetworkConfig(cluster, np, network string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
@@ -2734,7 +2736,7 @@ resource "google_container_node_pool" "with_multi_nic" {
 
 `, network, cluster, np)
 }
-
+<% end -%>
 
 <% unless version.nil? || version == 'ga' -%>
 func testAccContainerNodePool_withBootDiskKmsKey(cluster, np string) string {
