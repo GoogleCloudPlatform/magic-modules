@@ -13,6 +13,15 @@ import jetbrains.buildServer.configs.kotlin.triggers.schedule
 //
 // Until that changes, we'll continue to use `teamcity-go-test` to run
 // each test individually
+
+// NOTE: this file includes Extensions of Kotlin DSL classes
+// See
+// - BuildFeatures           https://teamcity.jetbrains.com/app/dsl-documentation/root/build-features/index.html
+// - BuildSteps              https://teamcity.jetbrains.com/app/dsl-documentation/root/build-steps/index.html
+// - ParametrizedWithType    https://teamcity.jetbrains.com/app/dsl-documentation/root/parametrized-with-type/index.html
+// - Triggers                https://teamcity.jetbrains.com/app/dsl-documentation/root/triggers/index.html
+
+
 const val useTeamCityGoTest = false
 
 fun BuildFeatures.Golang() {
