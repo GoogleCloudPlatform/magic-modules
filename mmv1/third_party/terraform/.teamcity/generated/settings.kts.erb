@@ -35,7 +35,7 @@ var identityUser = DslContext.getParameter("identityUser", "")
 var manualVcsRoot = DslContext.settingsRootId
 
 // Values of these parameters change configuration code behaviour.
-var environment = DslContext.getParameter("environment", "public")
+var environment = DslContext.getParameter("environment", "default")
 
 var clientConfig = ClientConfiguration(custId, org, org2, billingAccount, billingAccount2, masterBillingAccount, credentials, project, orgDomain, projectNumber, region, serviceAccount, zone, firestoreProject, identityUser)
 
