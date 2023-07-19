@@ -21,15 +21,28 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/document-warehouse/docs/reference/rest/v1/projects.locations'
 description: |
   A location is used to initialize a project.
+autogen_async: true
+async: !ruby/object:Api::OpAsync
+  actions: ['create'] 
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms:
+      1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    # resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
 skip_delete: true
 skip_sweeper: true
-# import_format:
-#   [
-#     'projects/{{project}}/locations/{{location}}',
-#     '{{location}}'
-#   ]
-# timeouts: !ruby/object:Api::Timeouts
-#   insert_minutes: 20
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "document_ai_warehouse_location"
@@ -39,8 +52,9 @@ examples:
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
+    url_param_only: true
     description: |
-      The location of the resource.
+      The location in which the instance is to be provisioned.
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -51,18 +65,37 @@ properties:
     name: 'databaseType'
     description: |
       The type of database used to store customer data.
+    required: true
     values:
       - :DB_UNKNOWN
       - :DB_INFRA_SPANNER
       - :DB_CLOUD_SQL_POSTGRES
-    default_value: :DB_INFRA_SPANNER
+    # default_value: :DB_INFRA_SPANNER
   - !ruby/object:Api::Type::Enum
     name: 'accessControlMode'
     description: |
       The access control mode for accessing the customer data.
+    required: true
     values:
       - :ACL_MODE_UNKNOWN
       - :ACL_MODE_DOCUMENT_LEVEL_ACCESS_CONTROL_GCI
       - :ACL_MODE_DOCUMENT_LEVEL_ACCESS_CONTROL_BYOID
       - :ACL_MODE_UNIVERSAL_ACCESS
-    default_value: :ACL_MODE_DOCUMENT_LEVEL_ACCESS_CONTROL_GCI
+    # default_value: :ACL_MODE_DOCUMENT_LEVEL_ACCESS_CONTROL_GCI
+  - !ruby/object:Api::Type::String
+    name: 'kmsKey'
+    description: |
+      The KMS key used for CMEK encryption. It is required that
+      the kms key is in the same region as the endpoint. The
+      same key will be used for all provisioned resources, if
+      encryption is available. If the kmsKey is left empty, no
+      encryption will be enforced.
+  - !ruby/object:Api::Type::Enum
+    name: 'documentCreatorDefaultRole'
+    description: |
+      The default role for the person who create a document.
+    values:
+      - :DOCUMENT_CREATOR_DEFAULT_ROLE_UNSPECIFIED
+      - :DOCUMENT_ADMIN
+      - :DOCUMENT_EDITOR
+      - :DOCUMENT_VIEWER

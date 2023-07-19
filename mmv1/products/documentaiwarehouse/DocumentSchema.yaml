@@ -23,7 +23,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 description: |
   A document schema is used to define document structure.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/document_wh.go.erb
+  custom_import: templates/terraform/custom_import/document_ai_warehouse_document_schema.go.erb
 # import_format: [ 
 #   "projects/{{project}}/locations/{{location}}/documentSchemas/{{name}}",
 #   "{{project}}/{{locations}}/{{name}}",
