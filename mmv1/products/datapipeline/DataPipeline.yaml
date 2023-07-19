@@ -15,6 +15,7 @@
 name: Pipeline
 base_url: projects/{{project}}/locations/{{region}}/pipelines
 update_verb: :PATCH
+update_mask: true
 description: |
   The main pipeline entity and all the necessary metadata for launching and managing linked jobs.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -49,7 +50,6 @@ properties:
     name: 'displayName'
     description: |
       The display name of the pipeline. It can contain only letters ([A-Za-z]), numbers ([0-9]), hyphens (-), and underscores (_).
-    immutable: true
   - !ruby/object:Api::Type::Enum
     name: 'type'
     description: |
@@ -239,7 +239,6 @@ properties:
                 description: |
                   The job name to use for the created job. For an update job request, the job name should be the same as the existing running job.
                 required: true
-                immutable: true
               - !ruby/object:Api::Type::KeyValuePairs
                 name: 'parameters'
                 description: |
@@ -369,6 +368,7 @@ properties:
         name: 'timeZone'
         description: |
           Timezone ID. This matches the timezone IDs used by the Cloud Scheduler API. If empty, UTC time is assumed.
+        default_value: UTC
       - !ruby/object:Api::Type::String
         name: 'nextJobTime'
         description: |
