@@ -115,7 +115,7 @@ aliases:
 
 {{< /tabs >}}
 
-## Test with different `terraform` versions
+## Optional: Test with different `terraform` versions
 
 Tests will use whatever version of the `terraform` binary is found on your `PATH`. If you are testing a change that you know only impacts certain `terraform` versions, follow these steps:
 
@@ -129,11 +129,9 @@ Tests will use whatever version of the `terraform` binary is found on your `PATH
 
     Replace `VERSION` with the version you want to test.
 
-1. Run automated tests following the earlier section.
+1. Run automated tests following the [earlier section]({{< ref "/develop/run-tests#run-automated-tests" >}}).
 
-1. Run manual tests following the earlier section.
-
-## Test manually
+## Optional: Test manually
 
 Sometimes, for example for manual testing, you may want to build the provider from source and use it with `terraform`.
 
@@ -190,8 +188,8 @@ Choose your architecture below.
       # Developer overrides will stop Terraform from downloading the listed
       # providers their origin provider registries.
       dev_overrides {
-          "hashicorp/google" = "<REPLACE-ME>/bin"
-          "hashicorp/google-beta" = "<REPLACE-ME>/bin"
+          "hashicorp/google" = "GO_BIN_PATH/bin"
+          "hashicorp/google-beta" = "GO_BIN_PATH/bin"
       }
 
       # For all other providers, install them directly from their origin provider
@@ -201,9 +199,9 @@ Choose your architecture below.
     }
     ```
 
-1. Edit the file to replace `<REPLACE-ME>` with the path you saved from the first step, making sure to keep `/bin` at the end of the path.
+1. Edit the file to replace `GO_BIN_PATH` with the path you saved from the first step, making sure to keep `/bin` at the end of the path.
 
-    **Please note**: the _full_ path is required and environment variables cannot be used. For example, `"/Users/MyUserName/go/bin"` is a valid path for a user called `MyUserName`, but `"~/go/bin"` or `"$HOME/go/bin"` will not work.
+    **Please note**: the _full_ path is required and environment variables cannot be used. For example, `"/Users/UserName/go/bin"` is a valid path for a user called `UserName`, but `"~/go/bin"` or `"$HOME/go/bin"` will not work.
 
 1. Save the file.
 
@@ -235,8 +233,8 @@ Choose your architecture below.
       # Developer overrides will stop Terraform from downloading the listed
       # providers their origin provider registries.
       dev_overrides {
-          "hashicorp/google" = "<REPLACE-ME>\bin"
-          "hashicorp/google-beta" = "<REPLACE-ME>\bin"
+          "hashicorp/google" = "GO_BIN_PATH\bin"
+          "hashicorp/google-beta" = "GO_BIN_PATH\bin"
       }
 
       # For all other providers, install them directly from their origin provider
@@ -246,9 +244,9 @@ Choose your architecture below.
     }
     ```
 
-1. Edit the file to replace `<REPLACE-ME>` with the output you saved from the first step, making sure to keep `\bin` at the end of the path.
+1. Edit the file to replace `GO_BIN_PATH` with the output you saved from the first step, making sure to keep `\bin` at the end of the path.
 
-    **Please note**: The _full_ path is required and environment variables cannot be used. For example, `C:\Users\MyUserName\go\bin` is a valid path for a user called `MyUserName`.
+    **Please note**: The _full_ path is required and environment variables cannot be used. For example, `C:\Users\UserName\go\bin` is a valid path for a user called `UserName`.
 
 1. Save the file.
 
@@ -268,11 +266,11 @@ This CLI configuration file you created in the steps above will allow Terraform 
 
     ```bash
     # either export the environment variable for your session
-    export TF_CLI_CONFIG_FILE="/Users/MyUserName/tf-dev-override.tfrc"
+    export TF_CLI_CONFIG_FILE="/Users/UserName/tf-dev-override.tfrc"
     terraform plan
 
     # OR, set the environment variable value per command
-    TF_CLI_CONFIG_FILE="/Users/MyUserName/tf-dev-override.tfrc" terraform plan
+    TF_CLI_CONFIG_FILE="/Users/UserName/tf-dev-override.tfrc" terraform plan
     ```
 
 1. To check that the developer override is working, look for a warning near the start of the terminal output that looks like the example below. It is not necessary to run the terraform init command to use development overrides.
@@ -281,8 +279,8 @@ This CLI configuration file you created in the steps above will allow Terraform 
     │ Warning: Provider development overrides are in effect
     │ 
     │ The following provider development overrides are set in the CLI configuration:
-    │  - hashicorp/google in /Users/MyUserName/go/bin
-    │  - hashicorp/google-beta in /Users/MyUserName/go/bin
+    │  - hashicorp/google in /Users/UserName/go/bin
+    │  - hashicorp/google-beta in /Users/UserName/go/bin
     │ 
     │ The behavior may therefore not match any released version of the provider and applying
     │ changes may cause the state to become incompatible with published releases.
@@ -336,7 +334,7 @@ rm -rf ~/.terraform.d/plugins/registry.terraform.io/hashicorp/
 Another way to debug this is to run a Terraform command with the `TF_LOG` environment variable set to `TRACE` . Then, look for a log line similar to the below:
 
 ```bash
-[TRACE] getproviders.SearchLocalDirectory: found registry.terraform.io/hashicorp/google vX.X.X for darwin_arm64 at /Users/MyUserName/.terraform.d/plugins/registry.terraform.io/hashicorp/google/xxx
+[TRACE] getproviders.SearchLocalDirectory: found registry.terraform.io/hashicorp/google vX.X.X for darwin_arm64 at /Users/UserName/.terraform.d/plugins/registry.terraform.io/hashicorp/google/xxx
 ```
 
 {{< /tab >}}
