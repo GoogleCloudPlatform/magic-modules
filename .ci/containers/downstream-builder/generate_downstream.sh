@@ -48,11 +48,7 @@ function clone_repo() {
     mkdir -p "$(dirname $LOCAL_PATH)"
 
     echo "BASE_BRANCH: $BASE_BRANCH"
-    if [ "$REPO" == "tf-oics" ] && [ "$BASE_BRANCH" == "main" ]; then
-        git clone $GITHUB_PATH $LOCAL_PATH --branch master
-    else
-        git clone $GITHUB_PATH $LOCAL_PATH --branch $BASE_BRANCH
-    fi
+    git clone $GITHUB_PATH $LOCAL_PATH --branch $UPSTREAM_BRANCH
 }
 
 if [ $# -lt 4 ]; then
