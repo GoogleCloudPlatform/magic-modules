@@ -1700,8 +1700,8 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
   	if err != nil {
   		return nil, err
   	}
-	if transformedResilienceMode == "RESILIENCE_MODE_UNSPECIFIED" {
-		transformed.ResilienceMode = "STANDARD_RESILIENCE"
+	if transformedResilienceMode == "STANDARD_RESILIENCE" {
+		transformed.ResilienceMode = "RESILIENCE_MODE_UNSPECIFIED"
 	} else {
 		transformed.ResilienceMode = transformedResilienceMode	
 	}
