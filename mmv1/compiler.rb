@@ -295,7 +295,7 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
 
   # provider_config is mutated by instantiating a provider.
   # we need to preserve a single provider instance to use outside of this loop.
-  { definitions: product_api, overrides: provider_config, provider: provider }
+  { definitions: product_api, overrides: provider_config, provider }
 end
 
 products_for_version = products_for_version.compact # remove any nil values
