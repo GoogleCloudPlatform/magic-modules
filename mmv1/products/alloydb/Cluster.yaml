@@ -212,6 +212,7 @@ properties:
           - !ruby/object:Api::Type::Array
             name: 'startTimes'
             required: true
+            custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_automated_backup_policy_start_times_flatten.go.erb'
             description: |
               The times during the day to start a backup. At least one start time must be provided. The start times are assumed to be in UTC and to be an exact hour (e.g., 04:00:00).
             item_type: !ruby/object:Api::Type::NestedObject

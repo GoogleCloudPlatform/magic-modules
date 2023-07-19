@@ -1,0 +1,4 @@
+// Are the number of min/max instances reduced?
+func AreInstancesReduced(_ context.Context, old, new, _ interface{}) bool {
+	return new.(int) < old.(int)
+}
