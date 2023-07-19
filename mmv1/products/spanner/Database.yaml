@@ -80,7 +80,6 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   update_encoder: templates/terraform/update_encoder/spanner_database.go.erb
   post_create: templates/terraform/post_create/spanner_database.go.erb
   pre_delete: templates/terraform/pre_delete/resource_spanner_database.go
-  pre_update: templates/terraform/pre_update/spanner_database.go.erb
 custom_diff: [
   'resourceSpannerDBDdlCustomDiff',
 ]
@@ -160,9 +159,8 @@ properties:
     default_from_api: true
   - !ruby/object:Api::Type::Boolean
     name: 'enableDropProtection'
-    update_url: projects/{{project}}/instances/{{instance}}/databases/{{name}}/ddl
+    update_url: projects/{{project}}/instances/{{instance}}/databases/{{name}}
     update_verb: :PATCH
-    immutable: false
     default_value: false
     description: |
       Whether drop protection is enabled for this database. Defaults to false.
