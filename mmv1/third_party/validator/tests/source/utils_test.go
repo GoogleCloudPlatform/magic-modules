@@ -15,9 +15,8 @@ import (
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai"
+	"github.com/google/go-cmp/cmp"
 	"go.uber.org/zap/zaptest"
-
-	"github.com/stretchr/testify/require"
 )
 
 func defaultCompareConverterOutput(t *testing.T, expected []caiasset.Asset, actual []caiasset.Asset, offline bool) {
