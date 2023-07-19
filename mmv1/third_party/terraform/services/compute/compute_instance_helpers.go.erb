@@ -149,11 +149,11 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		scheduling.MaintenanceInterval = v.(string)
 	}
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
-		localSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeout(v)
+		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeout(v)
 		if err != nil {
 			return nil, err
 		}
-		scheduling.LocalSsdRecoveryTimeout = localSsdRecoveryTimeout
+		scheduling.LocalSsdRecoveryTimeout = transformedLocalSsdRecoveryTimeout
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "LocalSsdRecoveryTimeout")
 	}
 <% end -%>
@@ -195,7 +195,7 @@ func expandComputeMaxRunDurationSeconds(v interface{}) (interface{}, error) {
 	return v, nil
 }
 
-func expandComputeLocalSsdRecoveryTimeout(v interface{}) (interface{}, error) {
+func expandComputeLocalSsdRecoveryTimeout(v interface{}) (*compute.Duration, error) {
 	l := v.([]interface{})
 	duration := compute.Duration{}
 	if len(l) == 0 || l[0] == nil {

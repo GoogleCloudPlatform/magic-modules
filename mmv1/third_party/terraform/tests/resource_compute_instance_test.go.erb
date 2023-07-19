@@ -2444,7 +2444,7 @@ func TestAccComputeInstance_localSsdRecoveryTimeout(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceLocalSsdRecoveryTimeout(&instance, expectedMaxRunDuration),
+					testAccCheckComputeInstanceLocalSsdRecoveryTimeout(&instance, expectedLocalSsdRecoveryTimeout),
 				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
@@ -2479,7 +2479,7 @@ func TestAccComputeInstance_localSsdRecoveryTimeout_update(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceLocalSsdRecoveryTimeout(&instance, expectedMaxRunDuration),
+					testAccCheckComputeInstanceLocalSsdRecoveryTimeout(&instance, expectedLocalSsdRecoveryTimeout),
 				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
@@ -2735,8 +2735,8 @@ func testAccCheckComputeInstanceLocalSsdRecoveryTimeout(instance *compute.Instan
 			return fmt.Errorf("no scheduling")
 		}
 
-		if !reflect.DeepEqual(*instance.Scheduling.LocalSsdRecoveryTiemout, instanceLocalSsdRecoveryTiemoutWant) {
-			return fmt.Errorf("got the wrong instance local ssd recovery timeout action: have: %#v; want: %#v",instance.Scheduling.LocalSsdRecoveryTiemout, instanceLocalSsdRecoveryTiemoutWant)
+		if !reflect.DeepEqual(*instance.Scheduling.LocalSsdRecoveryTimeout, instanceLocalSsdRecoveryTiemoutWant) {
+			return fmt.Errorf("got the wrong instance local ssd recovery timeout action: have: %#v; want: %#v",instance.Scheduling.LocalSsdRecoveryTimeout, instanceLocalSsdRecoveryTiemoutWant)
 		}
 
 		return nil
