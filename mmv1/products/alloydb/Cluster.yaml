@@ -48,6 +48,8 @@ import_format:
     'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}',
     '{{cluster_id}}',
   ]
+# Skipping the sweeper because we need to force-delete clusters.
+skip_sweeper: true
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
