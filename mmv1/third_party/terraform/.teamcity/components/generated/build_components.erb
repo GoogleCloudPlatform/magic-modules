@@ -130,10 +130,12 @@ fun ParametrizedWithType.hiddenPasswordVariable(name: String, value: String, des
     password(name, value, "", description, ParameterDisplay.HIDDEN)
 }
 
-fun Triggers.RunNightly(nightlyTestsEnabled: Boolean, startHour: Int, daysOfWeek: String, daysOfMonth: String) {
+fun Triggers.RunNightly(nightlyTestsEnabled: Boolean, startHour: Int, daysOfWeek: String, daysOfMonth: String, branchRef: String) {
+    val filter = "+:" + branchRef // e.g. "+:refs/heads/main"
+
     schedule{
         enabled = nightlyTestsEnabled
-        branchFilter = "+:refs/heads/main"
+        branchFilter = filter
 
         schedulingPolicy = cron {
             hours = startHour.toString()

@@ -3,10 +3,11 @@
 import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.AbsoluteId
 
-class packageDetails(name: String, displayName: String, environment: String) {
+class packageDetails(name: String, displayName: String, environment: String, branchRef: String) {
     val packageName = name
     val displayName = displayName
     val environment = environment
+    val branchRef = branchRef
 
     // buildConfiguration returns a BuildType for a service package
     // For BuildType docs, see https://teamcity.jetbrains.com/app/dsl-documentation/root/build-type/index.html
@@ -52,7 +53,7 @@ class packageDetails(name: String, displayName: String, environment: String) {
             }
 
             triggers {
-                RunNightly(nightlyTestsEnabled, startHour, daysOfWeek, daysOfMonth)
+                RunNightly(nightlyTestsEnabled, startHour, daysOfWeek, daysOfMonth, branchRef)
             }
         }
     }
