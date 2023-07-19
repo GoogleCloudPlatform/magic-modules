@@ -14,6 +14,8 @@ import (
 func TestAccDataSourceAlloydbLocations_basic(t *testing.T) {
 	t.Parallel()
 
+	fmt.Println("This change is on a branch coming from `a04bb0511` on main; the commit before adding `d637a195d` Add tool to generate services.kt file that contains mmv1 and tpgtools/DCL services (#8344)")
+
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
