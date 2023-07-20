@@ -1,109 +1,135 @@
-services/accesscontextmanager:
+service/accesscontextmanager:
 - google_access_context_manager_
-services/alloydb:
+service/alloydb:
 - google_alloydb_
-services/apigateway:
+service/apigateway:
 - google_api_gateway_
-services/apigee:
+service/apigee:
 - google_apigee_
-services/artifactregistry:
+service/artifactregistry:
 - google_artifact_registry_
-services/beyondcorp:
+service/beyondcorp:
 - google_beyondcorp_
-services/bigquery:
+service/bigquery:
 - google_bigquery_
-services/bigtableadmin:
+service/bigtableadmin:
 - google_bigtable_
-services/cloudbuild:
+service/billingbudgets:
+- google_billing_budget
+service/certificatemanager:
+- google_certificate_manager_
+service/cloudbilling:
+- google_billing_account
+- google_billing_subaccount
+service/cloudbuild:
 - google_cloudbuild_
 - google_cloudbuildv2_
-services/cloudfunctions:
+service/cloudfunctions:
 - google_cloudfunctions_
 - google_cloudfunctions2_
-services/cloudkms:
+service/cloudkms:
 - google_kms_
-services/cloudscheduler:
+service/cloudscheduler:
 - google_cloud_scheduler_
-services/cloudtasks:
+service/cloudtasks:
 - google_cloud_tasks_
-services/composer:
+service/composer:
 - google_composer_
-services/compute-nat:
+service/compute-nat:
 - google_compute_router_nat
-services/dataproc:
+service/compute-regional-l7-load-balancer:
+- google_compute_region_target_http_proxy
+- google_compute_region_target_https_proxy
+service/container:
+- google_container_cluster
+- google_container_engine_versions
+- google_container_node_pool
+service/dataproc:
 - google_dataproc_cluster
 - google_dataproc_autoscaling_policy
 - google_dataproc_job
 - google_dataproc_workflow_template
 - google_dataproc_batch
-services/dlp:
+service/dlp:
 - google_data_loss_prevention_
-services/eventarc:
+service/edgenetwork:
+- google_edgenetwork_
+service/eventarc:
 - google_eventarc_
-services/filestore:
+service/filestore:
 - google_filestore_
-services/firebase:
+service/firebase:
 - google_firebase_
 - google_firebaserules_
-services/firestore-controlplane:
+service/firestore-controlplane:
 - google_firestore_database
-services/firestore-dataplane:
+service/firestore-dataplane:
 - google_firestore_document
 - google_firestore_index
 - google_firestore_ttl
-services/gkebackup:
+service/gkebackup:
 - google_gke_backup_
-services/gkehub:
+service/gkehub:
 - google_gke_hub_
-services/gkeonprem:
+service/gkemulticloud:
+- google_container_aws_
+- google_container_azure_
+- google_container_attached_
+service/gkeonprem:
 - google_gkeonprem_
-services/iam-core:
+service/healthcare:
+- google_healthcare_
+service/iam-core:
 - google_organization_iam_custom_role
 - google_project_iam_custom_role
 - google_iam_deny_policy
 - google_iam_policy
 - google_iam_role
 - google_iam_testable_permissions
-services/iam-serviceaccount:
+service/iam-serviceaccount:
 - google_service_account
-services/iam-wlid:
+service/iam-wlid:
 - google_iam_access_boundary_policy
 - google_iam_workload_identity_pool
 - google_iam_workload_identity_pool_provider
-services/iam-workforce:
+service/iam-workforce:
 - google_iam_workforce_pool
-services/identitytoolkit:
+service/identitytoolkit:
 - google_identity_platform_
-services/ids:
+service/ids:
 - google_cloud_ids_
-services/logging:
+service/logging:
 - google_logging_
-services/looker-core:
+service/looker-core:
 - google_looker_instance
-services/monitoring-alerting:
+service/monitoring-alerting:
 - google_monitoring_notification_channel
 - google_monitoring_alert_policy
-services/monitoring-services:
+service/monitoring-services:
 - google_monitoring_custom_service
 - google_monitoring_dashboard
 - google_monitoring_monitored_project
 - google_monitoring_service_
 - google_monitoring_slo
 - google_monitoring_istio_canonical_service
-services/orgpolicy:
+service/orgpolicy:
 - google_org_policy_
-services/privateca:
+service/privateca:
 - google_privateca_
-services/run:
+service/pubsublite:
+- google_pubsub_lite_
+service/redis-instance:
+- google_redis_instance
+service/run:
 - google_cloud_run_
 - google_cloud_run_v2_
-services/secretmanager:
+service/secretmanager:
 - google_secret_manager_
-services/spanner:
+service/spanner:
 - google_spanner_
-services/sqladmin:
+service/sqladmin:
 - google_sql_
-services/storage:
+service/storage:
 - google_storage_bucket_
 - google_storage_default_object_
 - google_storage_hmac_key

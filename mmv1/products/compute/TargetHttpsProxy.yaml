@@ -55,7 +55,6 @@ examples:
       http_health_check_name: 'http-health-check'
   - !ruby/object:Provider::Terraform::Examples
     name: 'target_https_proxy_http_keep_alive_timeout'
-    min_version: beta
     primary_resource_id: 'default'
     vars:
       target_https_proxy_name: 'test-http-keep-alive-timeout-proxy'
@@ -117,6 +116,7 @@ properties:
       resource: 'SslCertificate'
       imports: 'selfLink'
       description: 'The SSL certificates used by this TargetHttpsProxy'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'certificateMap'
     description: |
@@ -135,6 +135,7 @@ properties:
       resource will not have any SSL policy configured.
     update_verb: :POST
     update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}/setSslPolicy'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'urlMap'
     resource: 'UrlMap'
@@ -145,6 +146,7 @@ properties:
     required: true
     update_verb: :POST
     update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setUrlMap'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Boolean
     name: 'proxyBind'
     description: |
@@ -153,7 +155,6 @@ properties:
     default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: 'httpKeepAliveTimeoutSec'
-    min_version: beta
     description: |
       Specifies how long to keep a connection open, after completing a response,
       while there is no matching traffic (in seconds). If an HTTP keepalive is
