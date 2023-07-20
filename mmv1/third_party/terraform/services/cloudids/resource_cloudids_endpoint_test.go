@@ -1,4 +1,4 @@
-package google
+package cloudids_test
 
 import (
 	"fmt"

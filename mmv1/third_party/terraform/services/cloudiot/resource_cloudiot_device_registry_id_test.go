@@ -1,4 +1,4 @@
-package google
+package cloudiot_test
 
 import (
 	"strings"

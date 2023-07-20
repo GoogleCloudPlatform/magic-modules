@@ -1,4 +1,4 @@
-package google
+package alloydb_test
 
 import (
 	"errors"

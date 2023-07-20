@@ -1,4 +1,4 @@
-package google
+package composer_test
 
 import (
 	"errors"
