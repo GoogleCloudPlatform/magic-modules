@@ -157,6 +157,7 @@ properties:
     name: "primaryConfig"
     description: |
       Cross Region replication config specific to PRIMARY cluster.
+    output: true
     properties:
       - !ruby/object:Api::Type::Array
         name: "secondaryClusterNames"
