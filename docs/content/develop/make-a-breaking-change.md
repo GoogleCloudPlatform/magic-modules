@@ -116,7 +116,7 @@ The process of contributing to the major release `5.0.0` follows most of the [Ge
 3. If your change is a follow-up to a recent commit to main that is not yet contained in the released branch, it is strongly encouraged to wait until the branch sync and resolve any merge conflicts in the PR. 
    For example, if you are removing a field that has been recently deprecated in main. 
 
-   The release branch is synced with main on a weekly basis every Monday.
+The release branch is synced with main on a weekly basis every Monday.
 
 
 ### Renaming a field
