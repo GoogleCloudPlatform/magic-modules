@@ -925,15 +925,17 @@ The `software_config` block supports:
 
   Property keys are specified in `prefix:property` format, for example `core:hadoop.tmp.dir`. The following are supported prefixes and their mappings:
 
-  capacity-scheduler: `capacity-scheduler.xml`
-  core: `core-site.xml`
-  distcp: `distcp-default.xml`
-  hdfs: `hdfs-site.xml`
-  hive: `hive-site.xml`
-  mapred: `mapred-site.xml`
-  pig: `pig.properties`
-  spark: `spark-defaults.conf`
-  yarn: `yarn-site.xml`
+  * capacity-scheduler: `capacity-scheduler.xml`
+  * core: `core-site.xml`
+  * distcp: `distcp-default.xml`
+  * hdfs: `hdfs-site.xml`
+  * hive: `hive-site.xml`
+  * mapred: `mapred-site.xml`
+  * pig: `pig.properties`
+  * spark: `spark-defaults.conf`
+  * yarn: `yarn-site.xml`
+
+  
   For more information, see [Cluster properties](https://cloud.google.com/dataproc/docs/concepts/cluster-properties).
 
 ## Attributes Reference
