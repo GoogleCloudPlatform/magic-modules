@@ -2708,6 +2708,7 @@ resource "google_container_cluster" "cluster" {
 	channel = "RAPID"
   }
   enable_multi_networking = true
+  datapath_provider = "ADVANCED_DATAPATH"
 }
 
 resource "google_container_node_pool" "with_multi_nic" {
