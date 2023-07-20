@@ -1,4 +1,4 @@
-package google
+package storagetransfer_test
 
 import (
 	"fmt"

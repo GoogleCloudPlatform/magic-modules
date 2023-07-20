@@ -1,4 +1,4 @@
-package google
+package servicenetworking_test
 
 import (
 	"fmt"

@@ -1,4 +1,4 @@
-package google
+package sql_test
 
 import (
 	"testing"

@@ -1,4 +1,4 @@
-package google
+package servicemanagement_test
 
 import (
 	"strings"
