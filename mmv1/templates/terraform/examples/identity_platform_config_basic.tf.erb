@@ -17,4 +17,25 @@ resource "google_project_service" "identitytoolkit" {
 resource "google_identity_platform_config" "default" {
   project = google_project.default.project_id
   autodelete_anonymous_users = true
+  blocking_functions {
+    triggers {
+      event_type = "beforeSignIn"
+      function_uri = "new_uri-before-sign-in"
+    }
+    forward_inbound_credentials {
+      refresh_token = true
+      access_token = true
+      id_token = true
+    }
+  }
+  quota {
+    sign_up_quota_config {
+      quota = 1000
+    }
+  }
+  authorized_domains = [
+    "localhost",
+    "<%= ctx[:vars]['project_id'] %>.firebaseapp.com",
+    "<%= ctx[:vars]['project_id'] %>.web.app",
+  ]
 }
