@@ -1199,6 +1199,9 @@ properties:
           - :DEFAULT_FOR_PROTOCOL
           - :NEVER_PERSIST
           - :ALWAYS_PERSIST
+      - !ruby/object:Api::Type::Boolean
+        name: enableStrongAffinity
+        description: Enable Strong Session Affinity for Network Load Balancing. This option is not available publicly.
   - !ruby/object:Api::Type::Integer
     name: 'timeoutSec'
     description: |
