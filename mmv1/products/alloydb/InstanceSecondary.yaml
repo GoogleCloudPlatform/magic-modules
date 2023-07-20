@@ -21,7 +21,7 @@ description: 'A managed alloydb cluster instance.'
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'AlloyDB': 'https://cloud.google.com/alloydb/docs/'
-  api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.clusters.instances/create'
+  api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.clusters.instances/createsecondary'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
