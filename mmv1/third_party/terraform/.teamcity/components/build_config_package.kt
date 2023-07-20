@@ -62,7 +62,7 @@ class packageDetails(name: String, displayName: String, environment: String, bra
         // Replacing chars can be necessary, due to limitations on IDs
         // "ID should start with a latin letter and contain only latin letters, digits and underscores (at most 225 characters)." 
         var pv = provider.replace("-", "").toUpperCase()
-        var env = environment.toUpperCase().replace("-", "").replace(".", "")
+        var env = environment.toUpperCase().replace("-", "").replace(".", "").toUpperCase()
         var pkg = packageName.toUpperCase()
 
         return "%s_SERVICE_%s_%s".format(pv, env, pkg)
