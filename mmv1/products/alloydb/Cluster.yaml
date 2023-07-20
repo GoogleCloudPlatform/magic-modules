@@ -272,6 +272,16 @@ properties:
             name: 'kmsKeyName'
             description: |
               The fully-qualified resource name of the KMS key. Each Cloud KMS key is regionalized and has the following format: projects/[PROJECT]/locations/[REGION]/keyRings/[RING]/cryptoKeys/[KEY_NAME].
+=======
+    name: "secondaryConfig"
+    description: |
+      Cross Region replication config specific to SECONDARY cluster.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "primaryClusterName"
+        description: |
+          The name of the primary cluster name with the format: projects/{project}/locations/{region}/clusters/{clusterId}.
+>>>>>>> 707c73add (feat: add secondaryConfig to AlloyDB Cluster)
   - !ruby/object:Api::Type::NestedObject
     name: 'automatedBackupPolicy'
     description: |
