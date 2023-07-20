@@ -270,6 +270,7 @@ properties:
                   properties:
                     - !ruby/object:Api::Type::Enum
                       name: type
+                      required: true
                       description: |
                         Type of partitioning.
                       default_value: :PARTITION_TYPE_UNSPECIFIED
