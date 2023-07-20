@@ -1137,7 +1137,6 @@ properties:
       The security policy associated with this backend service.
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/backendServices/{{name}}/setSecurityPolicy'
-    min_version: beta
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Enum
     name: 'sessionAffinity'
