@@ -150,10 +150,9 @@ properties:
     required: true
     immutable: true
     description: |
-      The type of the instance. If the instance type is READ_POOL, provide the associated PRIMARY instance in the `depends_on` meta-data attribute.
+      The type of the instance.
     values:
-      - :PRIMARY
-      - :READ_POOL
+      - :SECONDARY
   - !ruby/object:Api::Type::String
     name: 'ipAddress'
     output: true
