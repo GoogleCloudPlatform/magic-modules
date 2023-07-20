@@ -2729,7 +2729,7 @@ resource "google_container_node_pool" "with_multi_nic" {
     }
   }
   node_config {
-    machine_type = "a2-highgpu-1g"  // can't be e2 because of accelerator
+    machine_type = "n1-standard-8"
     disk_size_gb = 32
 
     oauth_scopes = [
@@ -2745,19 +2745,6 @@ resource "google_container_node_pool" "with_multi_nic" {
     preemptible     = true
     service_account = "default"
     image_type      = "COS_CONTAINERD"
-
-    guest_accelerator {
-      type  = "nvidia-tesla-a100"
-      gpu_partition_size = "1g.5gb"
-      count = 1
-	  gpu_driver_installation_config {
-		gpu_driver_version = "LATEST"
-	  }
-      gpu_sharing_config {
-        gpu_sharing_strategy = "TIME_SHARING"
-        max_shared_clients_per_gpu = 2
-      }
-    }
   }
 }
 
