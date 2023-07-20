@@ -1,5 +1,5 @@
 <% autogen_exception -%>
-package google
+package provider_test
 
 import (
 	"fmt"
@@ -148,7 +148,7 @@ func TestAccProviderIndirectUserProjectOverride(t *testing.T) {
 	pid := "tf-test-" + acctest.RandString(t, 10)
 
 	config := acctest.BootstrapConfig(t)
-	accessToken, err := setupProjectsAndGetAccessToken(org, billing, pid, "cloudkms", config)
+	accessToken, err := acctest.SetupProjectsAndGetAccessToken(org, billing, pid, "cloudkms", config)
 	if err != nil {
 		t.Error(err)
 	}
@@ -276,4 +276,86 @@ provider "google" {
 	user_project_override = %v
 }
 `, accessToken, override)
+}
+
+// Copy the Mmv1 generated function testAccCheckComputeAddressDestroyProducer from the compute_test package to here,
+// as that function is in the _test.go file and not importable.
+func testAccCheckComputeAddressDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_compute_address" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := GoogleProviderConfig(t)
+
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/addresses/{{name}}")
+			if err != nil {
+				return err
+			}
+
+			billingProject := ""
+
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
+			if err == nil {
+				return fmt.Errorf("ComputeAddress still exists at %s", url)
+			}
+		}
+
+		return nil
+	}
+}
+
+// Copy the Mmv1 generated function testAccCheckComputeAddressDestroyProducer from the compute_test package to here,
+// as that function is in the _test.go file and not importable.
+func testAccCheckComputeAddressDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_compute_address" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/addresses/{{name}}")
+			if err != nil {
+				return err
+			}
+
+			billingProject := ""
+
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
+			if err == nil {
+				return fmt.Errorf("ComputeAddress still exists at %s", url)
+			}
+		}
+
+		return nil
+	}
 }
