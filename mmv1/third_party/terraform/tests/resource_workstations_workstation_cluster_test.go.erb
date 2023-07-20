@@ -58,7 +58,7 @@ resource "google_workstations_workstation_cluster" "default" {
 
   private_cluster_config {
 	allowed_projects        = ["${data.google_project.project.project_id}"]
-	enable_private_endpoint = true
+	enable_private_endpoint = false
   }
 
   labels = {
