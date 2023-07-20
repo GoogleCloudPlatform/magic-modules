@@ -65,7 +65,7 @@ resource "google_compute_address" "address" {
   count = 3
 
   region = local.region
-  name = "tf-test-${local.address_name}-${local.region}-${count.index}"
+  name = "${local.address_name}-${local.region}-${count.index}"
 <% unless version == 'ga' -%>
   labels = {
 	mykey = "myvalue"
@@ -77,7 +77,7 @@ resource "google_compute_address" "address_region_bis" {
   count = 3
 
   region = local.region_bis
-  name = "tf-test-${local.address_name}-${local.region_bis}-${count.index}"
+  name = "${local.address_name}-${local.region_bis}-${count.index}"
 <% unless version == 'ga' -%>
   labels = {
 	mykey = "myvalue"
