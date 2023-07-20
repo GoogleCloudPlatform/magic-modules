@@ -59,6 +59,12 @@ class packageDetails(name: String, displayName: String, environment: String, bra
     }
 
     fun uniqueID(provider : String) : String {
-        return "%s_SERVICE_%s_%s".format(provider.replace("-", "").toUpperCase(), environment.toUpperCase(), packageName.toUpperCase())
+        // Replacing chars can be necessary, due to limitations on IDs
+        // "ID should start with a latin letter and contain only latin letters, digits and underscores (at most 225 characters)." 
+        var pv = provider.replace("-", "").toUpperCase()
+        var env = environment.toUpperCase().replace("-", "").replace(".", "")
+        var pkg = packageName.toUpperCase()
+
+        return "%s_SERVICE_%s_%s".format(pv, env, pkg)
     }
 }
