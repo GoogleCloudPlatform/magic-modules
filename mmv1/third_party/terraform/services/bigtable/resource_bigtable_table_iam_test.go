@@ -1,4 +1,4 @@
-package google
+package bigtable_test
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccBigtableInstanceIamBinding(t *testing.T) {
+func TestAccBigtableTableIamBinding(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	acctest.SkipIfVcr(t)
 	t.Parallel()
@@ -19,8 +19,8 @@ func TestAccBigtableInstanceIamBinding(t *testing.T) {
 	account := "tf-bigtable-iam-" + acctest.RandString(t, 10)
 	role := "roles/bigtable.user"
 
-	importId := fmt.Sprintf("projects/%s/instances/%s %s",
-		envvar.GetTestProjectFromEnv(), instance, role)
+	importId := fmt.Sprintf("projects/%s/instances/%s/tables/%s %s",
+		envvar.GetTestProjectFromEnv(), instance, cluster, role)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -28,24 +28,24 @@ func TestAccBigtableInstanceIamBinding(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
-				Config: testAccBigtableInstanceIamBinding_basic(instance, cluster, account, role),
+				Config: testAccBigtableTableIamBinding_basic(instance, cluster, account, role),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"google_bigtable_instance_iam_binding.binding", "role", role),
+						"google_bigtable_table_iam_binding.binding", "role", role),
 				),
 			},
 			{
-				ResourceName:      "google_bigtable_instance_iam_binding.binding",
+				ResourceName:      "google_bigtable_table_iam_binding.binding",
 				ImportStateId:     importId,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				// Test IAM Binding update
-				Config: testAccBigtableInstanceIamBinding_update(instance, cluster, account, role),
+				Config: testAccBigtableTableIamBinding_update(instance, cluster, account, role),
 			},
 			{
-				ResourceName:      "google_bigtable_instance_iam_binding.binding",
+				ResourceName:      "google_bigtable_table_iam_binding.binding",
 				ImportStateId:     importId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -54,7 +54,7 @@ func TestAccBigtableInstanceIamBinding(t *testing.T) {
 	})
 }
 
-func TestAccBigtableInstanceIamMember(t *testing.T) {
+func TestAccBigtableTableIamMember(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	acctest.SkipIfVcr(t)
 	t.Parallel()
@@ -64,9 +64,10 @@ func TestAccBigtableInstanceIamMember(t *testing.T) {
 	account := "tf-bigtable-iam-" + acctest.RandString(t, 10)
 	role := "roles/bigtable.user"
 
-	importId := fmt.Sprintf("projects/%s/instances/%s %s serviceAccount:%s",
+	importId := fmt.Sprintf("projects/%s/instances/%s/tables/%s %s serviceAccount:%s",
 		envvar.GetTestProjectFromEnv(),
 		instance,
+		cluster,
 		role,
 		envvar.ServiceAccountCanonicalEmail(account))
 
@@ -76,16 +77,16 @@ func TestAccBigtableInstanceIamMember(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
-				Config: testAccBigtableInstanceIamMember(instance, cluster, account, role),
+				Config: testAccBigtableTableIamMember(instance, cluster, account, role),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"google_bigtable_instance_iam_member.member", "role", role),
+						"google_bigtable_table_iam_member.member", "role", role),
 					resource.TestCheckResourceAttr(
-						"google_bigtable_instance_iam_member.member", "member", "serviceAccount:"+envvar.ServiceAccountCanonicalEmail(account)),
+						"google_bigtable_table_iam_member.member", "member", "serviceAccount:"+envvar.ServiceAccountCanonicalEmail(account)),
 				),
 			},
 			{
-				ResourceName:      "google_bigtable_instance_iam_member.member",
+				ResourceName:      "google_bigtable_table_iam_member.member",
 				ImportStateId:     importId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -94,7 +95,7 @@ func TestAccBigtableInstanceIamMember(t *testing.T) {
 	})
 }
 
-func TestAccBigtableInstanceIamPolicy(t *testing.T) {
+func TestAccBigtableTableIamPolicy(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	acctest.SkipIfVcr(t)
 	t.Parallel()
@@ -104,8 +105,8 @@ func TestAccBigtableInstanceIamPolicy(t *testing.T) {
 	account := "tf-bigtable-iam-" + acctest.RandString(t, 10)
 	role := "roles/bigtable.user"
 
-	importId := fmt.Sprintf("projects/%s/instances/%s",
-		envvar.GetTestProjectFromEnv(), instance)
+	importId := fmt.Sprintf("projects/%s/instances/%s/tables/%s",
+		envvar.GetTestProjectFromEnv(), instance, cluster)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -113,11 +114,11 @@ func TestAccBigtableInstanceIamPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
-				Config: testAccBigtableInstanceIamPolicy(instance, cluster, account, role),
-				Check:  resource.TestCheckResourceAttrSet("data.google_bigtable_instance_iam_policy.policy", "policy_data"),
+				Config: testAccBigtableTableIamPolicy(instance, cluster, account, role),
+				Check:  resource.TestCheckResourceAttrSet("data.google_bigtable_table_iam_policy.policy", "policy_data"),
 			},
 			{
-				ResourceName:      "google_bigtable_instance_iam_policy.policy",
+				ResourceName:      "google_bigtable_table_iam_policy.policy",
 				ImportStateId:     importId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -126,71 +127,74 @@ func TestAccBigtableInstanceIamPolicy(t *testing.T) {
 	})
 }
 
-func testAccBigtableInstanceIamBinding_basic(instance, cluster, account, role string) string {
-	return fmt.Sprintf(testBigtableInstanceIam+`
+func testAccBigtableTableIamBinding_basic(instance, cluster, account, role string) string {
+	return fmt.Sprintf(testBigtableTableIam+`
 resource "google_service_account" "test-account1" {
   account_id   = "%s-1"
-  display_name = "Bigtable Instance IAM Testing Account"
+  display_name = "Bigtable Table IAM Testing Account"
 }
 
 resource "google_service_account" "test-account2" {
   account_id   = "%s-2"
-  display_name = "Bigtable instance Iam Testing Account"
+  display_name = "Bigtable Table Iam Testing Account"
 }
 
-resource "google_bigtable_instance_iam_binding" "binding" {
+resource "google_bigtable_table_iam_binding" "binding" {
   instance = google_bigtable_instance.instance.name
+  table    = google_bigtable_table.table.name
   role     = "%s"
-  members = [
+  members  = [
     "serviceAccount:${google_service_account.test-account1.email}",
   ]
 }
-`, instance, cluster, account, account, role)
+`, instance, cluster, cluster, account, account, role)
 }
 
-func testAccBigtableInstanceIamBinding_update(instance, cluster, account, role string) string {
-	return fmt.Sprintf(testBigtableInstanceIam+`
+func testAccBigtableTableIamBinding_update(instance, cluster, account, role string) string {
+	return fmt.Sprintf(testBigtableTableIam+`
 resource "google_service_account" "test-account1" {
   account_id   = "%s-1"
-  display_name = "Bigtable Instance IAM Testing Account"
+  display_name = "Bigtable Table IAM Testing Account"
 }
 
 resource "google_service_account" "test-account2" {
   account_id   = "%s-2"
-  display_name = "Bigtable Instance IAM Testing Account"
+  display_name = "Bigtable Table IAM Testing Account"
 }
 
-resource "google_bigtable_instance_iam_binding" "binding" {
+resource "google_bigtable_table_iam_binding" "binding" {
   instance = google_bigtable_instance.instance.name
+  table    = google_bigtable_table.table.name
   role     = "%s"
-  members = [
+  members  = [
     "serviceAccount:${google_service_account.test-account1.email}",
     "serviceAccount:${google_service_account.test-account2.email}",
   ]
 }
-`, instance, cluster, account, account, role)
+`, instance, cluster, cluster, account, account, role)
 }
 
-func testAccBigtableInstanceIamMember(instance, cluster, account, role string) string {
-	return fmt.Sprintf(testBigtableInstanceIam+`
+func testAccBigtableTableIamMember(instance, cluster, account, role string) string {
+	return fmt.Sprintf(testBigtableTableIam+`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
-  display_name = "Bigtable Instance IAM Testing Account"
+  display_name = "Bigtable Table IAM Testing Account"
 }
 
-resource "google_bigtable_instance_iam_member" "member" {
+resource "google_bigtable_table_iam_member" "member" {
   instance = google_bigtable_instance.instance.name
+  table    = google_bigtable_table.table.name
   role     = "%s"
   member   = "serviceAccount:${google_service_account.test-account.email}"
 }
-`, instance, cluster, account, role)
+`, instance, cluster, cluster, account, role)
 }
 
-func testAccBigtableInstanceIamPolicy(instance, cluster, account, role string) string {
-	return fmt.Sprintf(testBigtableInstanceIam+`
+func testAccBigtableTableIamPolicy(instance, cluster, account, role string) string {
+	return fmt.Sprintf(testBigtableTableIam+`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
-  display_name = "Bigtable Instance IAM Testing Account"
+  display_name = "Bigtable Table IAM Testing Account"
 }
 
 data "google_iam_policy" "policy" {
@@ -200,22 +204,25 @@ data "google_iam_policy" "policy" {
   }
 }
 
-resource "google_bigtable_instance_iam_policy" "policy" {
+resource "google_bigtable_table_iam_policy" "policy" {
   instance    = google_bigtable_instance.instance.name
+  table       = google_bigtable_table.table.name
   policy_data = data.google_iam_policy.policy.policy_data
 }
 
-data "google_bigtable_instance_iam_policy" "policy" {
+data "google_bigtable_table_iam_policy" "policy" {
   instance    = google_bigtable_instance.instance.name
+  table       = google_bigtable_table.table.name
 }
-`, instance, cluster, account, role)
+
+`, instance, cluster, cluster, account, role)
 }
 
 // Smallest instance possible for testing
-var testBigtableInstanceIam = `
+var testBigtableTableIam = `
 resource "google_bigtable_instance" "instance" {
 	name                  = "%s"
-    instance_type = "DEVELOPMENT"
+    instance_type         = "DEVELOPMENT"
 
     cluster {
       cluster_id   = "%s"
@@ -224,5 +231,11 @@ resource "google_bigtable_instance" "instance" {
     }
 
     deletion_protection = false
+}
+
+resource "google_bigtable_table" "table" {
+	name          = "%s"
+	instance_name = google_bigtable_instance.instance.name
+	split_keys    = ["a", "b", "c"]
 }
 `

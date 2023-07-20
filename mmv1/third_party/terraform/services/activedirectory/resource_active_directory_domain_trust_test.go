@@ -1,4 +1,4 @@
-package google
+package activedirectory_test
 
 import (
 	"fmt"

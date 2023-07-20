@@ -1,4 +1,4 @@
-package google
+package appengine_test
 
 import (
 	"fmt"

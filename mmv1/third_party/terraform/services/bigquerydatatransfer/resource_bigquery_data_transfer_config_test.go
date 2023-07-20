@@ -1,4 +1,4 @@
-package google
+package bigquerydatatransfer_test
 
 import (
 	"fmt"

@@ -1,4 +1,4 @@
-package google
+package billing_test
 
 import (
 	"fmt"

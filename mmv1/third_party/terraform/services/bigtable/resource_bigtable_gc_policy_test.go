@@ -1,4 +1,4 @@
-package google
+package bigtable_test
 
 import (
 	"context"
