@@ -11,7 +11,7 @@
       "data": {
         "IPProtocol": "TCP",
         "allowGlobalAccess": false,
-        "backendService": "https://compute.googleapis.com/compute/v1/projects/{{.Provider.project}}/regions/australia-southeast1/test-backend-service-id",
+        "backendService": "https://compute.googleapis.com/compute/beta/projects/{{.Provider.project}}/regions/australia-southeast1/test-backend-service-id",
         "loadBalancingScheme": "INTERNAL_MANAGED",
         "name": "test-forwarding-rule",
         "portRange": "80",
