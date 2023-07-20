@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -47,4 +48,8 @@ func ProtoV5ProviderBetaFactories(t *testing.T) map[string]func() (tfprotov5.Pro
 
 func serviceAccountCanonicalEmail(account string) string {
 	return envvar.ServiceAccountCanonicalEmail(account)
+}
+
+func getResourceAttributes(n string, s *terraform.State) (map[string]string, error) {
+	return tpgresource.GetResourceAttributes(n, s)
 }
