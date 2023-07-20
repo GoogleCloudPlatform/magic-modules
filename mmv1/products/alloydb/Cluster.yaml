@@ -283,6 +283,17 @@ properties:
           The name of the primary cluster name with the format: projects/{project}/locations/{region}/clusters/{clusterId}.
 >>>>>>> 707c73add (feat: add secondaryConfig to AlloyDB Cluster)
   - !ruby/object:Api::Type::NestedObject
+    name: "primaryConfig"
+    description: |
+      Cross Region replication config specific to PRIMARY cluster.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: "secondaryClusterNames"
+        item_type: Api::Type::String
+        description: |
+          Names of the clusters that are replicating from this cluster.
+        output: true
+  - !ruby/object:Api::Type::NestedObject
     name: 'automatedBackupPolicy'
     description: |
       The automated backup policy for this cluster. AutomatedBackupPolicy is disabled by default.
