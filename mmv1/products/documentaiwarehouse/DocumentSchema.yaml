@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'DocumentSchema'
-base_url: 'projects/{{project}}/locations/{{location}}/documentSchemas'
+base_url: 'projects/{{project_number}}/locations/{{location}}/documentSchemas'
 self_link: '{{name}}'
 delete_url: '{{name}}'
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -31,6 +31,12 @@ examples:
     vars:
       document_schema_name: "schema-name"
 parameters:
+  - !ruby/object:Api::Type::String
+    name: 'project_number'
+    url_param_only: true
+    required: true
+    description: |
+      The unique identifier of the project.
   - !ruby/object:Api::Type::String
     name: 'location'
     url_param_only: true

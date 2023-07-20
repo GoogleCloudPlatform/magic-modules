@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'Location'
-base_url: 'projects/{{project}}/locations/{{location}}:initialize'
+base_url: 'projects/{{project_number}}/locations/{{location}}:initialize'
 # self_link: '{{name}}'
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
@@ -50,17 +50,18 @@ examples:
     primary_resource_id: "example"
 parameters:
   - !ruby/object:Api::Type::String
+    name: 'project_number'
+    url_param_only: true
+    required: true
+    description: |
+      The unique identifier of the project.
+  - !ruby/object:Api::Type::String
     name: 'location'
     url_param_only: true
     required: true
     description: |
       The location in which the instance is to be provisioned. It takes the form projects/{projectNumber}/locations/{location}.
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
-    description: |
-      Name of the instance. 
   - !ruby/object:Api::Type::Enum
     name: 'databaseType'
     description: |
