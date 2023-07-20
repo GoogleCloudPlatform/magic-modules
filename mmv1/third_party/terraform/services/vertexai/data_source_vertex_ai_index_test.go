@@ -1,4 +1,4 @@
-package google
+package vertexai_test
 
 import (
 	"testing"

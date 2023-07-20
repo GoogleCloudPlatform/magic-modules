@@ -1,4 +1,4 @@
-package google
+package tags_test
 
 import (
 	"fmt"

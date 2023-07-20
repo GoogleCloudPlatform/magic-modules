@@ -1,4 +1,4 @@
-package google
+package tpu_test
 
 import (
 	"errors"
