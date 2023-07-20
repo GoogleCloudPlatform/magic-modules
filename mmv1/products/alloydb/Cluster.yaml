@@ -154,6 +154,15 @@ properties:
         required: true
         sensitive: true
   - !ruby/object:Api::Type::NestedObject
+    name: "secondaryConfig"
+    description: |
+      Cross Region replication config specific to SECONDARY cluster.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "primaryClusterName"
+        description: |
+          The name of the primary cluster name with the format: projects/{project}/locations/{region}/clusters/{clusterId}.
+  - !ruby/object:Api::Type::NestedObject
     name: 'automatedBackupPolicy'
     description: |
       The automated backup policy for this cluster.
