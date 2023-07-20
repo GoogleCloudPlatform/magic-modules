@@ -46,7 +46,7 @@ examples:
       billing_acct:
         :BILLING_ACCT
         # Resource creation race
-    skip_vcr: true
+    #skip_vcr: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_create: 'templates/terraform/custom_create/identity_platform_config.go'
 properties:
@@ -112,7 +112,7 @@ properties:
           - !ruby/object:Api::Type::Integer
             name: 'quota'
             description: |
-              Corresponds to the 'refill_token_count' field in QuotaServer config.
+              A sign up APIs quota that customers can override temporarily.
           - !ruby/object:Api::Type::Time
             name: 'startTime'
             description: |
