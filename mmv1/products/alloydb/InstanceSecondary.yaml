@@ -49,11 +49,11 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/alloydb_instance.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'alloydb_instance_basic'
+    name: 'alloydb_instance_secondary'
     primary_resource_id: 'default'
     vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_instance_name: 'alloydb-instance'
+      alloydb_cluster_name: 'alloydb-cluster-secondary'
+      alloydb_instance_name: 'alloydb-instance-secondary'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
