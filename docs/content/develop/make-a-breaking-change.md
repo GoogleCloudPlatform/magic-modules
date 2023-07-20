@@ -181,6 +181,21 @@ Example (`google_container_cluster.enable_shielded_nodes`)
 * https://github.com/GoogleCloudPlatform/magic-modules/pull/5263 changed the default value for the field and added an upgrade guide entry
 * Note: In 4.0.0 the upgrade guide was split between main and the major release branch. Going forward, those changes will be made against main exclusively.
 
+## Contributing to the next major release (`5.0.0`)
+
+For the next major release, `5.0.0`, a specific branch named [`FEATURE-BRANCH-major-release-5.0.0`](https://github.com/GoogleCloudPlatform/magic-modules/tree/FEATURE-BRANCH-major-release-5.0.0) will be managed parallel to `main` in the magic-modules repo.
+All breaking changes targeting `5.0.0` must be committed to `FEATURE-BRANCH-major-release-5.0.0`.
+
+A downstream branch with the same name `FEATURE-BRANCH-major-release-5.0.0` will also be created to track the generated `5.0.0` changes in both [`google`](https://github.com/hashicorp/terraform-provider-google/tree/FEATURE-BRANCH-major-release-5.0.0) and [`google-beta`](https://github.com/hashicorp/terraform-provider-google-beta/tree/FEATURE-BRANCH-major-release-5.0.0) provider repos
+
+The process of contributing to the major release `5.0.0` should follow most of the [General contributing steps]({{< ref "/get-started/contributing" >}}), with the following exceptions
+
+1. Use `FEATURE-BRANCH-major-release-5.0.0` branch instead of the `main` branch as the base branch when you
+   * checkout your working branch where you make your code changes.
+   * sync your working branch using `git rebase` or `git merge`.
+   * create a pull request in the magic-modules repo.
+2. Make sure that you checkout to the `FEATURE-BRANCH-major-release-5.0.0` branch in your downstream `google` and `google-beta` repos before generating the providers locally.
+
 ## References
 
 * Terraform (Provider) Plugin Development
