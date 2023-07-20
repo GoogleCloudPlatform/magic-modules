@@ -167,8 +167,7 @@ func TestAccAlloydbCluster_AutomatedBackupPolicyHandlesMidnight(t *testing.T) {
 		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:             testAccAlloydbCluster_withInitialUserAndAutomatedBackupPolicy(context),
-				ExpectNonEmptyPlan: false,
+				Config: testAccAlloydbCluster_withInitialUserAndAutomatedBackupPolicy(context),
 			},
 			{
 				ResourceName:            "google_alloydb_cluster.default",
@@ -739,10 +738,42 @@ resource "google_kms_crypto_key_iam_binding" "crypto_key2" {
 `, context)
 }
 
-// Even with continuous backups not explicitly called out, it defaults to being enabled with 14d retention.
-// This test ensures that if you were to explicitly add the default continuous backup configuration and call
-// terraform plan, no changes would be found.
+// Validates continuous backups defaults to being enabled with 14d retention, even if not explicitly configured.
 func TestAccAlloydbCluster_continuousBackup_enabledByDefault(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbCluster_withoutContinuousBackupConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.recovery_window_days", "14"),
+				),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+			},
+			{
+				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
+			},
+		},
+	})
+}
+
+// Continuous backups defaults to being enabled with 14d retention. If the same configuration is set explicitly, terraform plan
+// should return no changes.
+func TestAccAlloydbCluster_continuousBackup_update_noChangeIfDefaultsSet(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -757,7 +788,11 @@ func TestAccAlloydbCluster_continuousBackup_enabledByDefault(t *testing.T) {
 		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
+				Config: testAccAlloydbCluster_withoutContinuousBackupConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.recovery_window_days", "14"),
+				),
 			},
 			{
 				ResourceName:            "google_alloydb_cluster.default",
@@ -766,8 +801,11 @@ func TestAccAlloydbCluster_continuousBackup_enabledByDefault(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
 			},
 			{
-				Config:             testAccAlloydbCluster_continuousBackupConfig(context),
-				ExpectNonEmptyPlan: false,
+				Config: testAccAlloydbCluster_continuousBackupConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.recovery_window_days", "14"),
+				),
 			},
 			{
 				ResourceName:            "google_alloydb_cluster.default",
@@ -783,7 +821,7 @@ func TestAccAlloydbCluster_continuousBackup_enabledByDefault(t *testing.T) {
 }
 
 // This test ensures that if you start with a terraform configuration where continuous backups are explicitly set to the default configuration
-// and then remove continuous backups and call terraform pan, no changes would be found.
+// and then remove continuous backups and call terraform plan, no changes would be found.
 func TestAccAlloydbCluster_continuousBackup_noChangeIfRemoved(t *testing.T) {
 	t.Parallel()
 
@@ -800,6 +838,10 @@ func TestAccAlloydbCluster_continuousBackup_noChangeIfRemoved(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAlloydbCluster_continuousBackupConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.recovery_window_days", "14"),
+				),
 			},
 			{
 				ResourceName:            "google_alloydb_cluster.default",
@@ -808,15 +850,18 @@ func TestAccAlloydbCluster_continuousBackup_noChangeIfRemoved(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
 			},
 			{
-				Config:             testAccAlloydbCluster_alloydbClusterBasicExample(context),
-				ExpectNonEmptyPlan: false,
+				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.recovery_window_days", "14"),
+				),
 			},
 		},
 	})
 }
 
 // Ensures changes to the continuous backup config properly applies
-func TestAccAlloydbCluster_continuousBackup_update(t *testing.T) {
+func TestAccAlloydbCluster_continuousBackup_updateRecoveryWindowDays(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -832,6 +877,10 @@ func TestAccAlloydbCluster_continuousBackup_update(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAlloydbCluster_withoutContinuousBackupConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.recovery_window_days", "14"),
+				),
 			},
 			{
 				ResourceName:            "google_alloydb_cluster.default",
@@ -840,8 +889,11 @@ func TestAccAlloydbCluster_continuousBackup_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
 			},
 			{
-				Config:             testAccAlloydbCluster_continuousBackupConfig(context),
-				ExpectNonEmptyPlan: true,
+				Config: testAccAlloydbCluster_continuousBackupConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.recovery_window_days", "15"),
+				),
 			},
 			{
 				ResourceName:            "google_alloydb_cluster.default",
@@ -856,8 +908,8 @@ func TestAccAlloydbCluster_continuousBackup_update(t *testing.T) {
 	})
 }
 
-// Ensures basic example enabled by default and disabling applies
-func TestAccAlloydbCluster_continuousBackup_disable(t *testing.T) {
+// Disabling continuous backups works correctly
+func TestAccAlloydbCluster_continuousBackup_updateDisable(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -873,6 +925,10 @@ func TestAccAlloydbCluster_continuousBackup_disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAlloydbCluster_withoutContinuousBackupConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.recovery_window_days", "14"),
+				),
 			},
 			{
 				ResourceName:            "google_alloydb_cluster.default",
@@ -881,8 +937,11 @@ func TestAccAlloydbCluster_continuousBackup_disable(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
 			},
 			{
-				Config:             testAccAlloydbCluster_continuousBackupConfig(context),
-				ExpectNonEmptyPlan: false,
+				Config: testAccAlloydbCluster_continuousBackupConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.enabled", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.recovery_window_days", "14"),
+				),
 			},
 			{
 				ResourceName:            "google_alloydb_cluster.default",
