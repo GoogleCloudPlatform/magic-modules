@@ -385,3 +385,7 @@ func replaceVarsRecursive(d tpgresource.TerraformResourceData, config *transport
 func buildReplacementFunc(re *regexp.Regexp, d tpgresource.TerraformResourceData, config *transport_tpg.Config, linkTmpl string, shorten bool) (func(string) string, error) {
 	return tpgresource.BuildReplacementFunc(re, d, config, linkTmpl, shorten)
 }
+
+func getResourceAttributes(n string, s *terraform.State) (map[string]string, error) {
+	return tpgresource.GetResourceAttributes(n, s)
+}
