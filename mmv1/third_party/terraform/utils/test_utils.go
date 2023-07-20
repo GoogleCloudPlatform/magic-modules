@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 // Deprecated: For backward compatibility CheckDataSourceStateMatchesResourceState is still working,
@@ -42,4 +43,8 @@ func ProtoV5ProviderFactories(t *testing.T) map[string]func() (tfprotov5.Provide
 // normal beta tests should continue to use ProtoV5ProviderFactories
 func ProtoV5ProviderBetaFactories(t *testing.T) map[string]func() (tfprotov5.ProviderServer, error) {
 	return acctest.ProtoV5ProviderBetaFactories(t)
+}
+
+func serviceAccountCanonicalEmail(account string) string {
+	return envvar.ServiceAccountCanonicalEmail(account)
 }

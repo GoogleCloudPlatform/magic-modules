@@ -61,7 +61,7 @@ func TestAccDataprocJobIamMember(t *testing.T) {
 		"us-central1",
 		job,
 		role,
-		serviceAccountCanonicalEmail(account))
+		envvar.ServiceAccountCanonicalEmail(account))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

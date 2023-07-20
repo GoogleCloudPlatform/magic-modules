@@ -68,7 +68,7 @@ func TestAccBigtableInstanceIamMember(t *testing.T) {
 		envvar.GetTestProjectFromEnv(),
 		instance,
 		role,
-		serviceAccountCanonicalEmail(account))
+		envvar.ServiceAccountCanonicalEmail(account))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -81,7 +81,7 @@ func TestAccBigtableInstanceIamMember(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"google_bigtable_instance_iam_member.member", "role", role),
 					resource.TestCheckResourceAttr(
-						"google_bigtable_instance_iam_member.member", "member", "serviceAccount:"+serviceAccountCanonicalEmail(account)),
+						"google_bigtable_instance_iam_member.member", "member", "serviceAccount:"+envvar.ServiceAccountCanonicalEmail(account)),
 				),
 			},
 			{

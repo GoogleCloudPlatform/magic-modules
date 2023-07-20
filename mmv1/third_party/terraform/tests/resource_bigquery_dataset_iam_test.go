@@ -62,7 +62,7 @@ func TestAccBigqueryDatasetIamMember(t *testing.T) {
 		envvar.GetTestProjectFromEnv(),
 		dataset,
 		role,
-		serviceAccountCanonicalEmail(account))
+		envvar.ServiceAccountCanonicalEmail(account))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -75,7 +75,7 @@ func TestAccBigqueryDatasetIamMember(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"google_bigquery_dataset_iam_member.member", "role", role),
 					resource.TestCheckResourceAttr(
-						"google_bigquery_dataset_iam_member.member", "member", "serviceAccount:"+serviceAccountCanonicalEmail(account)),
+						"google_bigquery_dataset_iam_member.member", "member", "serviceAccount:"+envvar.ServiceAccountCanonicalEmail(account)),
 				),
 			},
 			{

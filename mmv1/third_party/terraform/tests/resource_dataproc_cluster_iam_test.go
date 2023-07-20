@@ -63,7 +63,7 @@ func TestAccDataprocClusterIamMember(t *testing.T) {
 		"us-central1",
 		cluster,
 		role,
-		serviceAccountCanonicalEmail(account))
+		envvar.ServiceAccountCanonicalEmail(account))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -76,7 +76,7 @@ func TestAccDataprocClusterIamMember(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"google_dataproc_cluster_iam_member.member", "role", role),
 					resource.TestCheckResourceAttr(
-						"google_dataproc_cluster_iam_member.member", "member", "serviceAccount:"+serviceAccountCanonicalEmail(account)),
+						"google_dataproc_cluster_iam_member.member", "member", "serviceAccount:"+envvar.ServiceAccountCanonicalEmail(account)),
 				),
 			},
 			{
