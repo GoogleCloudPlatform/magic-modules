@@ -4,7 +4,7 @@ set -e
 
 function clone_repo() {
     SCRATCH_OWNER=modular-magician
-    UPSTREAM_BRANCH=main
+    UPSTREAM_BRANCH=$BASE_BRANCH
     if [ "$REPO" == "terraform" ]; then
         if [ "$VERSION" == "ga" ]; then
             UPSTREAM_OWNER=hashicorp
@@ -25,11 +25,12 @@ function clone_repo() {
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
     elif [ "$REPO" == "terraform-google-conversion" ]; then
         UPSTREAM_OWNER=GoogleCloudPlatform
-        UPSTREAM_BRANCH=main
         GH_REPO=terraform-google-conversion
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
     elif [ "$REPO" == "tf-oics" ]; then
-        UPSTREAM_BRANCH=master
+        if [ "$UPSTREAM_BRANCH" == "main" ]; then
+            UPSTREAM_BRANCH=master
+        fi
         UPSTREAM_OWNER=terraform-google-modules
         GH_REPO=docs-examples
         LOCAL_PATH=$GOPATH/src/github.com/terraform-google-modules/docs-examples
@@ -45,7 +46,9 @@ function clone_repo() {
     GITHUB_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
     SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/$SCRATCH_OWNER/$GH_REPO
     mkdir -p "$(dirname $LOCAL_PATH)"
-    git clone $GITHUB_PATH $LOCAL_PATH
+
+    echo "BASE_BRANCH: $BASE_BRANCH"
+    git clone $GITHUB_PATH $LOCAL_PATH --branch $UPSTREAM_BRANCH
 }
 
 if [ $# -lt 4 ]; then
@@ -66,6 +69,12 @@ REFERENCE=$4
 mkdir ../mm-$REPO-$VERSION-$COMMAND
 cp -rp ./. ../mm-$REPO-$VERSION-$COMMAND
 pushd ../mm-$REPO-$VERSION-$COMMAND
+
+# for backwards-compatibility
+if [ -z "$BASE_BRANCH" ]; then
+    BASE_BRANCH=main
+fi
+
 
 clone_repo
 
@@ -104,6 +113,7 @@ if [ "$REPO" == "terraform-google-conversion" ]; then
     rm -rf ./tfplan2cai/testdata/templates/
     rm -rf ./tfplan2cai/testdata/generatedconvert/
     rm -rf ./tfplan2cai/converters/google/provider
+    rm -rf ./tfplan2cai/converters/google/resources
     find ./tfplan2cai/test/** -type f -exec git rm {} \;
     popd
 
@@ -111,10 +121,18 @@ if [ "$REPO" == "terraform-google-conversion" ]; then
 
     pushd $LOCAL_PATH
 
-    if [ "$COMMAND" == "downstream" ]; then
-      go get -d github.com/hashicorp/terraform-provider-google@main
-    else
-      go mod edit -replace github.com/hashicorp/terraform-provider-google=github.com/$SCRATCH_OWNER/terraform-provider-google@$BRANCH
+    if [ "$VERSION" == "ga" ]; then
+      if [ "$COMMAND" == "downstream" ]; then
+        go get -d github.com/hashicorp/terraform-provider-google@$BASE_BRANCH
+      else
+        go mod edit -replace github.com/hashicorp/terraform-provider-google=github.com/$SCRATCH_OWNER/terraform-provider-google@$BRANCH
+      fi
+    elif [ "$VERSION" == "beta" ]; then
+      if [ "$COMMAND" == "downstream" ]; then
+        go get -d github.com/hashicorp/terraform-provider-google-beta@$BASE_BRANCH
+      else
+        go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/$SCRATCH_OWNER/terraform-provider-google-beta@$BRANCH
+      fi
     fi
 
     go mod tidy
@@ -146,11 +164,11 @@ else
         fi
         pushd ../
         make tpgtools OUTPUT_PATH=$LOCAL_PATH VERSION=$VERSION
-        pushd ./tools/breaking-change-detector
-        set +e
-        go run . -docs -providerFolder="${LOCAL_PATH}/.github/"
-        set -e
-        popd
+
+        # Only generate TeamCity-related file for TPG and TPGB
+        if [ "$VERSION" == "ga" ] || [ "$VERSION" == "beta" ]; then
+            make teamcity-servicemap-generate OUTPUT_PATH=$LOCAL_PATH VERSION=$VERSION
+        fi
         popd
     fi
 fi
@@ -173,7 +191,7 @@ if [ "$REPO" == "terraform" ]; then
 fi
 
 PR_NUMBER=$(curl -L -s -H "Authorization: token ${GITHUB_TOKEN}" \
-    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=closed&base=main&sort=updated&direction=desc" | \
+    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=closed&base=$BASE_BRANCH&sort=updated&direction=desc" | \
     jq -r ".[] | if .merge_commit_sha == \"$REFERENCE\" then .number else empty end")
 if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ] && [ "$CHANGELOG" == "true" ]; then
     # Add the changelog entry!

@@ -29,6 +29,7 @@ id_format: '{{name}}'
 import_format: ['{{name}}']
 mutex: alertPolicy/{{project}}
 error_retry_predicates: ['transport_tpg.IsMonitoringConcurrentEditError']
+error_abort_predicates: ['transport_tpg.Is429QuotaError']
 examples:
   # skipping tests because the API is full of race conditions
   - !ruby/object:Provider::Terraform::Examples
@@ -36,8 +37,7 @@ examples:
     name: 'monitoring_alert_policy_basic'
     primary_resource_id: 'alert_policy'
     vars:
-      alert_policy_display_name:
-        'My Alert Policy'
+      alert_policy_display_name: 'My Alert Policy'
   # skipping tests because the API is full of race conditions
   - !ruby/object:Provider::Terraform::Examples
     skip_test: true
@@ -48,10 +48,10 @@ examples:
   # skipping tests because the API is full of race conditions
   - !ruby/object:Provider::Terraform::Examples
     skip_test: true
-    name: "monitoring_alert_policy_forecast_options"
-    primary_resource_id: "alert_policy"
+    name: 'monitoring_alert_policy_forecast_options'
+    primary_resource_id: 'alert_policy'
     vars:
-      alert_policy_display_name: "My Alert Policy"
+      alert_policy_display_name: 'My Alert Policy'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/monitoring_alert_policy.go.erb
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
@@ -577,16 +577,16 @@ properties:
                 `MetricThreshold` tests the current value of the
                 timeseries against the threshold.
               properties:
-              - !ruby/object:Api::Type::String
-                name: forecastHorizon
-                description: |
-                  The length of time into the future to forecast
-                  whether a timeseries will violate the threshold.
-                  If the predicted value is found to violate the
-                  threshold, and the violation is observed in all
-                  forecasts made for the Configured `duration`,
-                  then the timeseries is considered to be failing.
-                required: true
+                - !ruby/object:Api::Type::String
+                  name: forecastHorizon
+                  description: |
+                    The length of time into the future to forecast
+                    whether a timeseries will violate the threshold.
+                    If the predicted value is found to violate the
+                    threshold, and the violation is observed in all
+                    forecasts made for the Configured `duration`,
+                    then the timeseries is considered to be failing.
+                  required: true
             - !ruby/object:Api::Type::Enum
               name: comparison
               description: |

@@ -70,7 +70,7 @@ examples:
       keyring_name: 'keyring'
     test_vars_overrides:
       policyChanged:
-        'BootstrapPSARole(t, "service-", "compute-system",
+        'acctest.BootstrapPSARole(t, "service-", "compute-system",
         "roles/cloudkms.cryptoKeyEncrypterDecrypter")'
 
 properties:
@@ -89,6 +89,7 @@ properties:
     resource: 'Instance'
     imports: 'selfLink'
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Array
     name: 'storageLocations'
     description: |
@@ -124,7 +125,7 @@ properties:
         name: 'kmsKeyName'
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
-        diff_suppress_func: compareCryptoKeyVersions
+        diff_suppress_func: tpgresource.CompareCryptoKeyVersions
       - !ruby/object:Api::Type::String
         name: 'kmsKeyServiceAccount'
         description: |

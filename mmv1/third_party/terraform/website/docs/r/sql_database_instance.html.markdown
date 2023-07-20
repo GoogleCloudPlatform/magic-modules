@@ -25,7 +25,7 @@ It is recommended to not set this field (or set it to true) until you're ready t
 ```hcl
 resource "google_sql_database_instance" "main" {
   name             = "main-instance"
-  database_version = "POSTGRES_14"
+  database_version = "POSTGRES_15"
   region           = "us-central1"
 
   settings {
@@ -69,7 +69,7 @@ locals {
 
 resource "google_sql_database_instance" "postgres" {
   name             = "postgres-instance-${random_id.db_name_suffix.hex}"
-  database_version = "POSTGRES_14"
+  database_version = "POSTGRES_15"
 
   settings {
     tier = "db-f1-micro"
@@ -157,6 +157,22 @@ provider "google-beta" {
 }
 ```
 
+### ENTERPRISE_PLUS Instance with data_cache_config
+
+```hcl
+resource "google_sql_database_instance" "main" {
+  name             = "enterprise-plus-main-instance"
+  database_version = "MYSQL_8_0_31"
+  settings {
+    tier    = "db-perf-optimized-N-2"
+    edition = "ENTERPRISE_PLUS"
+    data_cache_config {
+        data_cache_enabled = true
+    }
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -172,7 +188,7 @@ The following arguments are supported:
 * `database_version` - (Required) The MySQL, PostgreSQL or
 SQL Server version to use. Supported values include `MYSQL_5_6`,
 `MYSQL_5_7`, `MYSQL_8_0`, `POSTGRES_9_6`,`POSTGRES_10`, `POSTGRES_11`,
-`POSTGRES_12`, `POSTGRES_13`, `POSTGRES_14`, `SQLSERVER_2017_STANDARD`,
+`POSTGRES_12`, `POSTGRES_13`, `POSTGRES_14`, `POSTGRES_15`, `SQLSERVER_2017_STANDARD`,
 `SQLSERVER_2017_ENTERPRISE`, `SQLSERVER_2017_EXPRESS`, `SQLSERVER_2017_WEB`.
 `SQLSERVER_2019_STANDARD`, `SQLSERVER_2019_ENTERPRISE`, `SQLSERVER_2019_EXPRESS`,
 `SQLSERVER_2019_WEB`.
@@ -228,9 +244,9 @@ The `settings` block supports:
     for more details and supported versions. Postgres supports only shared-core machine types,
     and custom machine types such as `db-custom-2-13312`. See the [Custom Machine Type Documentation](https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#create) to learn about specifying custom machine types.
 
-The optional `settings.advanced_machine_features` subblock supports:
+* `edition` - (Optional) The edition of the instance, can be `ENTERPRISE` or `ENTERPRISE_PLUS`.
 
-* `threads_per_core` - (Optional) The number of threads per core. The value of this flag can be 1 or 2. To disable SMT, set this flag to 1. Only available in Cloud SQL for SQL Server instances. See [smt](https://cloud.google.com/sql/docs/sqlserver/create-instance#smt-create-instance) for more details.
+* `user_labels` - (Optional) A set of key/value user label pairs to assign to the instance.
 
 * `activation_policy` - (Optional) This specifies when the instance should be
     active. Can be either `ALWAYS`, `NEVER` or `ON_DEMAND`.
@@ -260,7 +276,9 @@ The optional `settings.advanced_machine_features` subblock supports:
 
 * `time_zone` - (Optional) The time_zone to be used by the database engine (supported only for SQL Server), in SQL Server timezone format.
 
-* `user_labels` - (Optional) A set of key/value user label pairs to assign to the instance.
+The optional `settings.advanced_machine_features` subblock supports:
+
+* `threads_per_core` - (Optional) The number of threads per core. The value of this flag can be 1 or 2. To disable SMT, set this flag to 1. Only available in Cloud SQL for SQL Server instances. See [smt](https://cloud.google.com/sql/docs/sqlserver/create-instance#smt-create-instance) for more details.
 
 The optional `settings.database_flags` sublist supports:
 
@@ -272,6 +290,11 @@ The optional `settings.active_directory_config` subblock supports:
 
 * `domain` - (Required) The domain name for the active directory (e.g., mydomain.com).
     Can only be used with SQL Server.
+
+The optional `settings.data_cache_config` subblock supports:
+
+* `data_cache_enabled` - (Optional) Whether data cache is enabled for the instance. Defaults to `false`
+    Can only be used with MYSQL.
 
 The optional `settings.deny_maintenance_period` subblock supports:
 
@@ -367,7 +390,7 @@ The optional `settings.insights_config` subblock for instances declares Query In
 
 * `query_insights_enabled` - True if Query Insights feature is enabled.
 
-* `query_string_length` - Maximum query length stored in bytes. Between 256 and 4500. Default to 1024.
+* `query_string_length` - Maximum query length stored in bytes. Between 256 and 4500. Default to 1024. Higher query lengths are more useful for analytical queries, but they also require more memory. Changing the query length requires you to restart the instance. You can still add tags to queries that exceed the length limit.
 
 * `record_application_tags` - True if Query Insights will record application tags from query when enabled.
 

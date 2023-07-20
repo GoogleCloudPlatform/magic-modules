@@ -185,7 +185,7 @@ type Config struct {
 	BillingProject                      string
 	Zone                                string
 	Scopes                              []string
-	BatchingConfig                      *batchingConfig
+	BatchingConfig                      *BatchingConfig
 	UserProjectOverride                 bool
 	RequestReason                       string
 	RequestTimeout                      time.Duration
@@ -501,8 +501,8 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	return nil
 }
 
-func ExpandProviderBatchingConfig(v interface{}) (*batchingConfig, error) {
-	config := &batchingConfig{
+func ExpandProviderBatchingConfig(v interface{}) (*BatchingConfig, error) {
+	config := &BatchingConfig{
 		SendAfter:      time.Second * DefaultBatchSendIntervalSec,
 		EnableBatching: true,
 	}
@@ -1161,7 +1161,7 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 			return *creds, nil
 		}
 
-		creds, err := googleoauth.CredentialsFromJSON(c.Context, []byte(contents), clientScopes...)
+		creds, err := transport.Creds(c.Context, option.WithCredentialsJSON([]byte(contents)), option.WithScopes(clientScopes...))
 		if err != nil {
 			return googleoauth.Credentials{}, fmt.Errorf("unable to parse credentials from '%s': %s", contents, err)
 		}
@@ -1183,14 +1183,12 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 
 	log.Printf("[INFO] Authenticating using DefaultClient...")
 	log.Printf("[INFO]   -- Scopes: %s", clientScopes)
-	defaultTS, err := googleoauth.DefaultTokenSource(context.Background(), clientScopes...)
+	creds, err := transport.Creds(context.Background(), option.WithScopes(clientScopes...))
 	if err != nil {
 		return googleoauth.Credentials{}, fmt.Errorf("Attempted to load application default credentials since neither `credentials` nor `access_token` was set in the provider block.  No credentials loaded. To use your gcloud credentials, run 'gcloud auth application-default login'.  Original error: %w", err)
 	}
 
-	return googleoauth.Credentials{
-		TokenSource: defaultTS,
-	}, err
+	return *creds, nil
 }
 
 // Remove the `/{{version}}/` from a base path if present.
@@ -1231,7 +1229,13 @@ func GetCurrentUserEmail(config *Config, userAgent string) (string, error) {
 
 	// See https://github.com/golang/oauth2/issues/306 for a recommendation to do this from a Go maintainer
 	// URL retrieved from https://accounts.google.com/.well-known/openid-configuration
-	res, err := SendRequest(config, "GET", "NO_BILLING_PROJECT_OVERRIDE", "https://openidconnect.googleapis.com/v1/userinfo", userAgent, nil)
+	res, err := SendRequest(SendRequestOptions{
+		Config: config,
+		Method: "GET",
+		Project: "NO_BILLING_PROJECT_OVERRIDE",
+		RawURL: "https://openidconnect.googleapis.com/v1/userinfo",
+		UserAgent: userAgent,
+	})
 
 	if err != nil {
 		return "", fmt.Errorf("error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope? error: %s", err)

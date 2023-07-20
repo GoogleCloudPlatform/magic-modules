@@ -1,3 +1,22 @@
+
+<% unless compiler == "terraformvalidator-codegen" -%>
+// diffsupress for hyperdisk provisioned_iops
+func hyperDiskIopsUpdateDiffSupress(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	if !strings.Contains(d.Get("type").(string), "hyperdisk") {
+		resourceSchema := ResourceComputeDisk().Schema
+		for field := range resourceSchema {
+			if field == "provisioned_iops" && d.HasChange(field) {
+				if err := d.ForceNew(field); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
+}
+<% end -%>
+
 // diffsupress for beta and to check change in source_disk attribute
 func sourceDiskDiffSupress(_, old, new string, _ *schema.ResourceData) bool {
 	s1 := strings.TrimPrefix(old, "https://www.googleapis.com/compute/beta")
@@ -9,7 +28,7 @@ func sourceDiskDiffSupress(_, old, new string, _ *schema.ResourceData) bool {
 }
 
 // Is the new disk size smaller than the old one?
-func isDiskShrinkage(_ context.Context, old, new, _ interface{}) bool {
+func IsDiskShrinkage(_ context.Context, old, new, _ interface{}) bool {
 	// It's okay to remove size entirely.
 	if old == nil || new == nil {
 		return false
@@ -107,7 +126,7 @@ func DiskImageDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 func diskImageProjectNameEquals(project1, project2 string) bool {
 	// Convert short project name to full name
 	// For instance, centos => centos-cloud
-	fullProjectName, ok := imageMap[project2]
+	fullProjectName, ok := ImageMap[project2]
 	if ok {
 		project2 = fullProjectName
 	}

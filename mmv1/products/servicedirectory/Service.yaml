@@ -24,7 +24,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/service-directory/docs/reference/rest/v1beta1/projects.locations.namespaces.services'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   skip_import_test: true
-  exclude: false
   parent_resource_attribute: 'name'
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST

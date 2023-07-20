@@ -11,12 +11,12 @@ import (
 func TestAccVPCAccessConnectorDatasource_basic(t *testing.T) {
 	t.Parallel()
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVPCAccessConnectorDatasourceConfig(RandString(t, 10)),
+				Config: testAccVPCAccessConnectorDatasourceConfig(acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_vpc_access_connector.connector",
@@ -40,6 +40,8 @@ resource "google_vpc_access_connector" "connector" {
   ip_cidr_range = "10.8.0.0/28"
   network       = "default"
   region        = "us-central1"
+  min_instances = 2
+  max_instances = 3
 }
 
 data "google_vpc_access_connector" "connector" {

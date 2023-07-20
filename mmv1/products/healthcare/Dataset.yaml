@@ -60,14 +60,6 @@ properties:
       (e.g., HL7 messages) where no explicit timezone is specified.
     required: false
     default_from_api: true
-  - !ruby/object:Api::Type::Time
-    name: 'creationTime'
-    description: |
-      The time that this resource was created on the server.
-      This is in RFC3339 text format.
-    required: false
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'selfLink'
     description: |

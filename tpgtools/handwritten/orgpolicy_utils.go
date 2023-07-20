@@ -1,4 +1,4 @@
-package google
+package tpgdclresource
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 
 // OrgPolicyPolicy has a custom import method because the parent field needs to allow an additional forward slash
 // to represent the type of parent (e.g. projects/{project_id}).
-func resourceOrgPolicyPolicyCustomImport(d *schema.ResourceData, meta interface{}) error {
+func ResourceOrgPolicyPolicyCustomImport(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	if err := tpgresource.ParseImportId([]string{
 		"^(?P<parent>[^/]+/?[^/]*)/policies/(?P<name>[^/]+)",
@@ -23,6 +23,11 @@ func resourceOrgPolicyPolicyCustomImport(d *schema.ResourceData, meta interface{
 	id, err := tpgresource.ReplaceVarsRecursive(d, config, "{{parent}}/policies/{{name}}", false, 0)
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
+	}
+
+	// reset name to match the one from resourceOrgPolicyPolicyRead
+	if err := d.Set("name", id); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 	d.SetId(id)
 

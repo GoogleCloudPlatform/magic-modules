@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/workflows"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -15,11 +16,11 @@ func TestAccWorkflowsWorkflow_Update(t *testing.T) {
 	// Custom test written to test diffs
 	t.Parallel()
 
-	workflowName := fmt.Sprintf("tf-test-acc-workflow-%d", RandInt(t))
+	workflowName := fmt.Sprintf("tf-test-acc-workflow-%d", acctest.RandInt(t))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkflowsWorkflowDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -135,7 +136,7 @@ func TestWorkflowsWorkflowStateUpgradeV0(t *testing.T) {
 	}
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
-			actual, err := ResourceWorkflowsWorkflowUpgradeV0(context.Background(), tc.Attributes, tc.Meta)
+			actual, err := workflows.ResourceWorkflowsWorkflowUpgradeV0(context.Background(), tc.Attributes, tc.Meta)
 
 			if err != nil {
 				t.Error(err)
@@ -155,15 +156,15 @@ func TestAccWorkflowsWorkflow_CMEK(t *testing.T) {
 	// Custom test written to test diffs
 	t.Parallel()
 
-	workflowName := fmt.Sprintf("tf-test-acc-workflow-%d", RandInt(t))
-	kms := BootstrapKMSKeyInLocation(t, "us-central1")
-	if BootstrapPSARole(t, "service-", "gcp-sa-workflows", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
+	workflowName := fmt.Sprintf("tf-test-acc-workflow-%d", acctest.RandInt(t))
+	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+	if acctest.BootstrapPSARole(t, "service-", "gcp-sa-workflows", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
 		t.Fatal("Stopping the test because a role was added to the policy.")
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkflowsWorkflowDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

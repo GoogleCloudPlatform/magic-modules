@@ -22,7 +22,7 @@ resource "google_project" "default" {
 }
 
 resource "google_logging_project_bucket_config" "basic" {
-	project    = google_project.default.id
+	project    = google_project.default.project_id
 	location  = "global"
 	retention_days = 30
 	bucket_id = "_Default"
@@ -104,6 +104,8 @@ The following arguments are supported:
 * `bucket_id` - (Required) The name of the logging bucket. Logging automatically creates two log buckets: `_Required` and `_Default`.
 
 * `description` - (Optional) Describes this bucket.
+
+* `locked` - (Optional) Whether the bucket is locked. The retention period on a locked bucket cannot be changed. Locked buckets may only be deleted if they are empty.
 
 * `retention_days` - (Optional) Logs will be retained by default for this amount of time, after which they will automatically be deleted. The minimum retention period is 1 day. If this value is set to zero at bucket creation time, the default time of 30 days will be used.
 

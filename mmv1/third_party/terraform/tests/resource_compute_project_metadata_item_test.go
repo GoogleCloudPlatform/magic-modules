@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -15,11 +16,11 @@ func TestAccComputeProjectMetadataItem_basic(t *testing.T) {
 	t.Parallel()
 
 	// Key must be unique to avoid concurrent tests interfering with each other
-	key := "myKey" + RandString(t, 10)
+	key := "myKey" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -40,14 +41,14 @@ func TestAccComputeProjectMetadataItem_basicMultiple(t *testing.T) {
 	t.Parallel()
 
 	// Generate a config of two config keys
-	key1 := "myKey" + RandString(t, 10)
-	key2 := "myKey" + RandString(t, 10)
+	key1 := "myKey" + acctest.RandString(t, 10)
+	key2 := "myKey" + acctest.RandString(t, 10)
 	config := testAccProjectMetadataItem_basic("foobar", key1, "myValue") +
 		testAccProjectMetadataItem_basic("foobar2", key2, "myOtherValue")
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -71,11 +72,11 @@ func TestAccComputeProjectMetadataItem_basicWithEmptyVal(t *testing.T) {
 	t.Parallel()
 
 	// Key must be unique to avoid concurrent tests interfering with each other
-	key := "myKey" + RandString(t, 10)
+	key := "myKey" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -94,11 +95,11 @@ func TestAccComputeProjectMetadataItem_basicUpdate(t *testing.T) {
 	t.Parallel()
 
 	// Key must be unique to avoid concurrent tests interfering with each other
-	key := "myKey" + RandString(t, 10)
+	key := "myKey" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -125,12 +126,12 @@ func TestAccComputeProjectMetadataItem_exists(t *testing.T) {
 	t.Parallel()
 
 	// Key must be unique to avoid concurrent tests interfering with each other
-	key := "myKey" + RandString(t, 10)
+	key := "myKey" + acctest.RandString(t, 10)
 	originalConfig := testAccProjectMetadataItem_basic("foobar", key, "myValue")
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -152,14 +153,14 @@ func TestAccComputeProjectMetadataItem_exists(t *testing.T) {
 
 func testAccCheckProjectMetadataItemDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		project, err := config.NewComputeClient(config.UserAgent).Projects.Get(config.Project).Do()
 		if err != nil {
 			return err
 		}
 
-		metadata := flattenMetadata(project.CommonInstanceMetadata)
+		metadata := tpgcompute.FlattenMetadata(project.CommonInstanceMetadata)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_compute_project_metadata_item" {

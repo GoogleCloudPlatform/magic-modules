@@ -25,7 +25,6 @@ properties:
     description: |
       Dummy property.
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   method_name_separator: ':'
   parent_resource_attribute: 'asset'
   fetch_iam_policy_verb: :GET

@@ -27,7 +27,15 @@
 		billingProject = bp
 	}
 
-	res, err := transport_tpg.SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "POST",
+		Project: billingProject,
+		RawURL: url,
+		UserAgent: userAgent,
+		Body: obj,
+		Timeout: d.Timeout(schema.TimeoutDelete),
+	})
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, "App")
 	}
