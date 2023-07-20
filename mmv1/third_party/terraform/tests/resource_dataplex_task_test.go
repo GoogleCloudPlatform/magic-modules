@@ -15,7 +15,7 @@
 //
 // ----------------------------------------------------------------------------
 
-package dataplex_test
+package google
 
 import (
 	"testing"

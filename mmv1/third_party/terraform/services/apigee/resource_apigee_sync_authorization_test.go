@@ -1,4 +1,4 @@
-package google
+package apigee_test
 
 import (
 	"testing"
