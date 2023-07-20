@@ -51,15 +51,10 @@ import_format:
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'alloydb_cluster_basic'
+    name: 'alloydb_cluster_secondary'
     primary_resource_id: 'default'
     vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'alloydb_cluster_full'
-    primary_resource_id: 'full'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster-full'
+      alloydb_cluster_name: 'alloydb-cluster-secondary'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'clusterId'
