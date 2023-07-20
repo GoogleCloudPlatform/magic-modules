@@ -6613,6 +6613,7 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
+<% unless version == 'ga' -%>
 func testAccComputeInstance_localSsdRecoveryTimeout(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -6634,17 +6635,18 @@ resource "google_compute_instance" "foobar" {
   network_interface {
     network = "default"
   }
-<% unless version == 'ga' -%>
+
   scheduling {
     local_ssd_recovery_timeout {
         nanos = 0
         seconds = 3600
     }
   }
-<% end -%>
+
 }
 `, instance)
 }
+<% end -%>
 
 func testAccComputeInstance_metadataStartupScript(instance, machineType, metadata string) string {
 	return fmt.Sprintf(`

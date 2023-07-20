@@ -3120,6 +3120,7 @@ resource "google_compute_region_instance_template" "foobar" {
 `, suffix)
 }
 
+<% unless version == 'ga' -%>
 func testAccComputeRegionInstanceTemplate_localSsdRecoveryTimeout(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -3143,14 +3144,14 @@ resource "google_compute_region_instance_template" "foobar" {
   network_interface {
     network = "default"
   }
-<% unless version == 'ga' -%>
+
   scheduling { 
     local_ssd_recovery_timeout {
 	nanos = 0
 	seconds = 3600
     }
   }
-<% end -%>
+
   metadata = {
     foo = "bar"
   }
@@ -3161,6 +3162,7 @@ resource "google_compute_region_instance_template" "foobar" {
 }
 `, suffix)
 }
+<% end -%>
 
 func testAccComputeRegionInstanceTemplate_sourceSnapshotEncryptionKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`
