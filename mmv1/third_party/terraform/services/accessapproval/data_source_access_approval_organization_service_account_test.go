@@ -1,4 +1,4 @@
-package google
+package accessapproval_test
 
 import (
 	"testing"
@@ -8,21 +8,21 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccDataSourceAccessApprovalProjectServiceAccount_basic(t *testing.T) {
+func TestAccDataSourceAccessApprovalOrganizationServiceAccount_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id": envvar.GetTestProjectFromEnv(),
+		"org_id": envvar.GetTestOrgFromEnv(t),
 	}
 
-	resourceName := "data.google_access_approval_project_service_account.aa_account"
+	resourceName := "data.google_access_approval_organization_service_account.aa_account"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceAccessApprovalProjectServiceAccount_basic(context),
+				Config: testAccDataSourceAccessApprovalOrganizationServiceAccount_basic(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "account_email"),
 				),
@@ -31,10 +31,10 @@ func TestAccDataSourceAccessApprovalProjectServiceAccount_basic(t *testing.T) {
 	})
 }
 
-func testAccDataSourceAccessApprovalProjectServiceAccount_basic(context map[string]interface{}) string {
+func testAccDataSourceAccessApprovalOrganizationServiceAccount_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_access_approval_project_service_account" "aa_account" {
-  project_id = "%{project_id}"
+data "google_access_approval_organization_service_account" "aa_account" {
+  organization_id = "%{org_id}"
 }
 `, context)
 }

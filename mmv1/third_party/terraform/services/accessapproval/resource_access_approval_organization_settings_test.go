@@ -1,4 +1,4 @@
-package google
+package accessapproval_test
 
 import (
 	"log"
