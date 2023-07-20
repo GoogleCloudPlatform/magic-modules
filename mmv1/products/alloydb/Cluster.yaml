@@ -214,8 +214,8 @@ properties:
         name: recoveryWindowDays
         default_from_api: true
         description: |
-          The numbers of days that are eligible to restore from using PITR. To support the entire recovery window, backups and logs are retained for one day more than the recovery window. 
-          
+          The numbers of days that are eligible to restore from using PITR. To support the entire recovery window, backups and logs are retained for one day more than the recovery window.
+
           If not set, defaults to 14 days.
       - !ruby/object:Api::Type::NestedObject
         name: 'encryptionConfig'
