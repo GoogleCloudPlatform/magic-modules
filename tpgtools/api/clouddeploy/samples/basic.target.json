@@ -15,5 +15,8 @@
   "requireApproval": false,
   "gke": {
     "cluster": "projects/{{project}}/locations/{{region}}/clusters/example-cluster-name"
+  },
+  "deployParameters": {
+    "deployParameterKey": "deployParameterValue"
   }
 }

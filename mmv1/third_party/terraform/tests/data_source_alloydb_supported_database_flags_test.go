@@ -15,12 +15,12 @@ func TestAccDataSourceAlloydbSupportedDatabaseFlags_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceAlloydbSupportedDatabaseFlags_basic(context),
@@ -35,7 +35,7 @@ func TestAccDataSourceAlloydbSupportedDatabaseFlags_basic(t *testing.T) {
 }
 
 func testAccDataSourceAlloydbSupportedDatabaseFlags_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 data "google_alloydb_supported_database_flags" "qa" {
 	location = "us-central1"
 }

@@ -77,13 +77,13 @@ func (rs ResourceSchemaRule) Identifier() string {
 
 // Message - a message to to inform the user
 // of a breakage.
-func (rs ResourceSchemaRule) Message(version, resource, field string) string {
+func (rs ResourceSchemaRule) Message(resource, field string) string {
 	msg := rs.message
 	resource = fmt.Sprintf("`%s`", resource)
 	field = fmt.Sprintf("`%s`", field)
 	msg = strings.ReplaceAll(msg, "{{resource}}", resource)
 	msg = strings.ReplaceAll(msg, "{{field}}", field)
-	return msg + documentationReference(version, rs.identifier)
+	return msg + documentationReference(rs.identifier)
 }
 
 // IsRuleBreak - compares the field entries and returns

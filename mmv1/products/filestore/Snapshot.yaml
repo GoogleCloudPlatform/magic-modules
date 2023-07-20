@@ -40,7 +40,6 @@ examples:
     vars:
       snapshot_name: 'test-snapshot'
       instance_name: 'test-instance-for-snapshot'
-
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'

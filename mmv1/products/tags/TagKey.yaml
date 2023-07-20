@@ -39,7 +39,7 @@ examples:
     vars:
       short_name: 'keyname'
     test_vars_overrides:
-      short_name: '"tf-test-key-" + RandString(t, 10)'
+      short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
     test_env_vars:
       org_id: :ORG_ID
 properties:

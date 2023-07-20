@@ -70,8 +70,10 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   iam_conditions_request_type: :QUERY_PARAM
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/subnetwork.erb
-  resource_definition: templates/terraform/resource_definition/subnetwork.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/subnetwork.erb
+custom_diff: [
+  'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)',
+]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'subnetwork_basic'
@@ -158,13 +160,15 @@ properties:
       Only networks that are in the distributed mode can have subnetworks.
     immutable: true
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'purpose'
     immutable: true
     description: |
-      The purpose of the resource. This field can be either `PRIVATE_RFC_1918`, `INTERNAL_HTTPS_LOAD_BALANCER` or `REGIONAL_MANAGED_PROXY`.
+      The purpose of the resource. This field can be either `PRIVATE_RFC_1918`, `INTERNAL_HTTPS_LOAD_BALANCER`, `REGIONAL_MANAGED_PROXY`, or `PRIVATE_SERVICE_CONNECT`.
       A subnetwork with purpose set to `INTERNAL_HTTPS_LOAD_BALANCER` is a user-created subnetwork that is reserved for Internal HTTP(S) Load Balancing.
       A subnetwork in a given region with purpose set to `REGIONAL_MANAGED_PROXY` is a proxy-only subnet and is shared between all the regional Envoy-based load balancers.
+      A subnetwork with purpose set to `PRIVATE_SERVICE_CONNECT` reserves the subnet for hosting a Private Service Connect published service.
       If unspecified, the purpose defaults to `PRIVATE_RFC_1918`.
       The enableFlowLogs field isn't supported with the purpose field set to `INTERNAL_HTTPS_LOAD_BALANCER`.
     default_from_api: true
@@ -253,6 +257,7 @@ properties:
     immutable: true
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'logConfig'
     update_verb: :PATCH
@@ -361,7 +366,7 @@ properties:
       or the first time the subnet is updated into IPV4_IPV6 dual stack. If the ipv6_type is EXTERNAL then this subnet
       cannot enable direct path.
   - !ruby/object:Api::Type::String
-    name: 'ipv6CidrRange'
+    name: 'internalIpv6Prefix'
     output: true
     description: |
       The range of internal IPv6 addresses that are owned by this subnetwork.
