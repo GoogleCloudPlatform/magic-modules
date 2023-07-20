@@ -5,6 +5,7 @@ import (
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
+//Force build
 type ConvertFunc = tpgresource.ConvertFunc
 type GetApiObjectFunc = tpgresource.GetApiObjectFunc
 type FetchFullResourceFunc = tpgresource.FetchFullResourceFunc
