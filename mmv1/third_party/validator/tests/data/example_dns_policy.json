@@ -4,8 +4,8 @@
     "asset_type": "compute.googleapis.com/Network",
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "resource": {
-      "version": "v1",
-      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+      "version": "beta",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
       "discovery_name": "Network",
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
@@ -19,8 +19,8 @@
     "asset_type": "compute.googleapis.com/Network",
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "resource": {
-      "version": "v1",
-      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+      "version": "beta",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
       "discovery_name": "Network",
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
@@ -34,8 +34,8 @@
     "asset_type": "dns.googleapis.com/Policy",
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "resource": {
-      "version": "v1",
-      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/dns/v1/rest",
+      "version": "v1beta2",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/dns/v1beta2/rest",
       "discovery_name": "Policy",
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
