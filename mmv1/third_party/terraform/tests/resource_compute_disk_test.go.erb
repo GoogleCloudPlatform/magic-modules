@@ -733,7 +733,7 @@ func TestAccComputeDisk_resourcePolicies(t *testing.T) {
 func TestAccComputeDisk_multiWriter(t *testing.T) {
 	t.Parallel()
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	diskName := fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
