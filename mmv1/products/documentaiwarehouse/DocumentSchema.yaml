@@ -40,6 +40,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
     url_param_only: true
+    required: true
     description: |
       The location of the resource.
 properties:
@@ -96,13 +97,13 @@ properties:
           description: |
             Stores the retrieval importance.
           values:
-            - :RETRIEVAL_IMPORTANCE_UNSPECIFIED
             - :HIGHEST
             - :HIGHER
             - :HIGH
             - :MEDIUM
             - :LOW
             - :LOWEST
+          default_value: :MEDIUM
         - !ruby/object:Api::Type::Array
           name: 'schemaSources'
           description: |
@@ -118,6 +119,7 @@ properties:
                 required: true
                 description: |
                   The Doc AI processor type name.
+        # select any one of the property types (integer, float, text, property, enum, dateTime, map, timestamp)
         - !ruby/object:Api::Type::NestedObject
           name: 'integerTypeOptions'
           description: |
@@ -215,6 +217,7 @@ properties:
           properties:
             - !ruby/object:Api::Type::Array
               name: 'possibleValues'
+              required: true
               description: |
                 List of possible enum values.
               item_type: Api::Type::String
