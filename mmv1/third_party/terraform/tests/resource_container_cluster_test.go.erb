@@ -4612,8 +4612,8 @@ resource "google_container_cluster" "with_private_endpoint_subnetwork" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
+  networking_mode    = "VPC_NATIVE"
 
-  networking_mode = "VPC_NATIVE"
   network    = google_compute_network.container_network.name
   subnetwork = google_compute_subnetwork.container_subnetwork.name
 
