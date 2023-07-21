@@ -1,4 +1,4 @@
-package google
+package resourcemanager_test
 
 import (
 	"errors"
