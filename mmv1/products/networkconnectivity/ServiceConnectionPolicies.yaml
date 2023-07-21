@@ -16,7 +16,6 @@ name: 'ServiceConnectionPolicy'
 base_url: 'projects/{{project}}/locations/{{location}}/serviceConnectionPolicies'
 create_url: 'projects/{{project}}/locations/{{location}}/serviceConnectionPolicies?serviceConnectionPolicyId={{name}}'
 self_link: 'projects/{{project}}/locations/{{location}}/serviceConnectionPolicies/{{name}}'
-min_version: ga
 update_verb: :PATCH
 update_mask: true
 description:
@@ -50,7 +49,6 @@ import_format:
   ['projects/{{project}}/locations/{{location}}/serviceConnectionPolicies/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    min_version: ga
     name: 'network_connectivity_policy_basic'
     primary_resource_id: 'default'
     vars:
@@ -69,9 +67,10 @@ parameters:
       The name of a ServiceConnectionPolicy. Format: projects/{project}/locations/{location}/serviceConnectionPolicies/{service_connection_policy} See: https://google.aip.dev/122#fields-representing-resource-names
   - !ruby/object:Api::Type::String
     name: 'location'
-    description: |
-      The location of the tls inspection policy.
+    required: true
     url_param_only: true
+    description: |
+      The location of the ServiceConnectionPolicy.
 properties:
   - !ruby/object:Api::Type::Time
     name: 'createTime'
@@ -111,9 +110,8 @@ properties:
         name: 'limit'
         description: |
           Max number of PSC connections for this policy.
-  - !ruby/object:Api::Type::String
+  - !ruby/object:Api::Type::Fingerprint
     name: 'etag'
-    ignore_read: true
     description: |
       The etag is computed by the server, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
   - !ruby/object:Api::Type::Array
