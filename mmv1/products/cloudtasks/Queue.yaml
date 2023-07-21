@@ -172,6 +172,7 @@ properties:
           maxBackoff duration after it fails, if the queue's RetryConfig
           specifies that the task should be retried.
         default_from_api: true
+        diff_suppress_func: 'tpgresource.DurationDiffSuppress'
       - !ruby/object:Api::Type::String
         name: 'maxBackoff'
         description: |
@@ -179,6 +180,7 @@ properties:
           maxBackoff duration after it fails, if the queue's RetryConfig
           specifies that the task should be retried.
         default_from_api: true
+        diff_suppress_func: 'tpgresource.DurationDiffSuppress'
       - !ruby/object:Api::Type::Integer
         name: 'maxDoublings'
         description: |
