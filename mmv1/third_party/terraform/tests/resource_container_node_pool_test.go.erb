@@ -525,14 +525,14 @@ func TestAccContainerNodePool_withNetworkConfig(t *testing.T) {
 func TestAccContainerNodePool_withMultiNicNetworkConfig(t *testing.T) {
 	t.Parallel()
 
-	randstr := RandString(t, 10)
+	randstr := acctest.RandString(t, 10)
 	cluster := fmt.Sprintf("tf-test-cluster-%s", randstr)
 	np := fmt.Sprintf("tf-test-np-%s", randstr)
 	network := fmt.Sprintf("tf-test-net-%s", randstr)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
