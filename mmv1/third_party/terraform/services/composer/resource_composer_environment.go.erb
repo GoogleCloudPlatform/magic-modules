@@ -486,7 +486,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 										AtLeastOneOf: composerPrivateEnvironmentConfig,
 										ForceNew: true,
 										ValidateFunc: validation.StringInSlice([]string{"VPC_PEERING", "PRIVATE_SERVICE_CONNECT"}, false),
-										Description: `When specified, the environment will use Private Service Connect instead of VPC peerings to connect to Cloud SQL in the Tenant Project, and the PSC endpoint in the Customer Project will use an IP address from this subnetwork. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
+										Description: `Configuration options for networking connections in the Composer 2 environment. Indicates the user requested specific connection type between Tenant and Customer projects. You cannot set networking connection type in public IP environment. Must be either: "VPC_PEERING" or "PRIVATE_SERVICE_CONNECT".`,
 									},
 									"enable_private_endpoint": {
 										Type:     schema.TypeBool,
