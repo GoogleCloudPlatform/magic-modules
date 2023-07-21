@@ -85,9 +85,9 @@ module Api
       super
 
       check :operation, type: Operation, required: true
-      check :result, type: Result, required: true
-      check :status, type: Status, required: true
-      check :error, type: Error, required: true
+      check :result, type: Result, default: Result.new
+      check :status, type: Status
+      check :error, type: Error
       check :actions, default: %w[create delete update], type: ::Array, item_type: ::String
       check :include_project, type: :boolean, default: false
     end
@@ -116,9 +116,9 @@ module Api
         super
 
         check :kind, type: String
-        check :path, type: String, required: true
+        check :path, type: String
         check :base_url, type: String
-        check :wait_ms, type: Integer, required: true
+        check :wait_ms, type: Integer
 
         check :full_url, type: String
 
@@ -159,8 +159,8 @@ module Api
 
       def validate
         super
-        check :path, type: String, required: true
-        check :allowed, type: Array, item_type: [::String, :boolean], required: true
+        check :path, type: String
+        check :allowed, type: Array, item_type: [::String, :boolean]
       end
     end
 
@@ -177,8 +177,8 @@ module Api
 
       def validate
         super
-        check :path, type: String, required: true
-        check :message, type: String, required: true
+        check :path, type: String
+        check :message, type: String
       end
     end
   end

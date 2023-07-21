@@ -246,9 +246,7 @@ The `settings` block supports:
 
 * `edition` - (Optional) The edition of the instance, can be `ENTERPRISE` or `ENTERPRISE_PLUS`.
 
-The optional `settings.advanced_machine_features` subblock supports:
-
-* `threads_per_core` - (Optional) The number of threads per core. The value of this flag can be 1 or 2. To disable SMT, set this flag to 1. Only available in Cloud SQL for SQL Server instances. See [smt](https://cloud.google.com/sql/docs/sqlserver/create-instance#smt-create-instance) for more details.
+* `user_labels` - (Optional) A set of key/value user label pairs to assign to the instance.
 
 * `activation_policy` - (Optional) This specifies when the instance should be
     active. Can be either `ALWAYS`, `NEVER` or `ON_DEMAND`.
@@ -278,7 +276,9 @@ The optional `settings.advanced_machine_features` subblock supports:
 
 * `time_zone` - (Optional) The time_zone to be used by the database engine (supported only for SQL Server), in SQL Server timezone format.
 
-* `user_labels` - (Optional) A set of key/value user label pairs to assign to the instance.
+The optional `settings.advanced_machine_features` subblock supports:
+
+* `threads_per_core` - (Optional) The number of threads per core. The value of this flag can be 1 or 2. To disable SMT, set this flag to 1. Only available in Cloud SQL for SQL Server instances. See [smt](https://cloud.google.com/sql/docs/sqlserver/create-instance#smt-create-instance) for more details.
 
 The optional `settings.database_flags` sublist supports:
 
@@ -434,6 +434,7 @@ to work, cannot be updated, and supports:
     If the field is set to true the replica will be designated as a failover replica.
     If the master instance fails, the replica instance will be promoted as
     the new master instance.
+  ~> **NOTE:** Not supported for Postgres database.
 
 * `master_heartbeat_period` - (Optional) Time in ms between replication
     heartbeats.

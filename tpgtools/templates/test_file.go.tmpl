@@ -29,7 +29,7 @@
 //
 // ----------------------------------------------------------------------------
 
-package google
+package {{$.Package}}_test
 
 import (
 	"context"
@@ -58,15 +58,15 @@ func TestAcc{{$.PathType}}_{{$s.TestSlug}}(t *testing.T) {
 		{{- range $contextkey, $contextvalue := $s.ExpandContext }}
 		  "{{$contextkey}}" : {{$contextvalue}},
 		{{- end }}
-			"random_suffix": RandString(t, 10),
+			"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 	{{ if $s.HasGAEquivalent -}}
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 	{{- else }}
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 	{{- end }}
 	{{ if true -}}
 		CheckDestroy: testAccCheck{{$.PathType}}DestroyProducer(t),
@@ -122,7 +122,7 @@ func testAccCheck{{$.PathType}}DestroyProducer(t *testing.T) func(s *terraform.S
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			billingProject := ""
 			if config.BillingProject != "" {
