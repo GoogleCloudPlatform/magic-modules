@@ -17,25 +17,25 @@ require 'active_support/inflector'
 
 describe OpenAPIGenerate::Parser do
   context 'should run on sample file for Post' do
-    subject {
+    subject do
       OpenAPIGenerate::Parser.new('fake', 'fake').build_resource(
         'spec/data/test-openapi-spec.json',
         '/v1alpha5/projects/{projectsId}/locations/{locationsId}/posts',
         'Post'
       )
-    }
+    end
     it { is_expected.to have_attributes(name: 'Post') }
     it { is_expected.to have_attribute_of_length(properties: 12) }
   end
 
   context 'should run on sample file for Comment' do
-    subject {
+    subject do
       OpenAPIGenerate::Parser.new('fake', 'fake').build_resource(
         'spec/data/test-openapi-spec.json',
         '/v1alpha5/projects/{projectsId}/locations/{locationsId}/posts/{postsId}/comments',
         'Comment'
       )
-    }
+    end
     it { is_expected.to have_attributes(name: 'Comment') }
     it { is_expected.to have_attribute_of_length(properties: 9) }
   end
