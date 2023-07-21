@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"testing"
 	"text/template"
@@ -164,6 +165,16 @@ func normalizeAssets(t *testing.T, assets []caiasset.Asset, offline bool) []caia
 		}
 		ret[i] = asset
 	}
+	sort.Slice(ret, func(i, j int) bool {
+		if ret[i].Name == ret[j].Name {
+			if ret[i].Resource != nil && ret[j].Resource == nil {
+				return true
+			} else {
+				return false
+			}
+		}
+		return ret[i].Name < ret[j].Name
+	})
 	return ret
 }
 
