@@ -1,0 +1,1360 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "test API",
+    "description": "test API.",
+    "version": "v1alpha5"
+  },
+  "servers": [
+    {
+      "url": "https://test-example.googleapis.com"
+    }
+  ],
+  "paths": {
+    "/v1alpha5/projects/{projectsId}/locations/{locationsId}/posts": {
+      "get": {
+        "tags": ["resourceproviderblog_pa"],
+        "operationId": "ListPosts",
+        "description": "This is an example of providing customized documentation. All of the details about options and messages will be generated or updated, but the doc text will not replace what appears here.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "description": "Part of `parent`. ",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "description": "Part of `parent`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "approvalNeeded",
+            "description": "This is an example of adding method-specific fields to a standard method. All other standard fields are added by generator, and this text documents the additional parameter.",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "pageSize",
+            "description": "The maximum number of posts to send per page.",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "description": "The page token: If the next_page_token from a previous response is provided, this request will send the subsequent page.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "description": "Filter the list as specified in https://google.aip.dev/160.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderBy",
+            "description": "Order results as specified in https://google.aip.dev/132.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListPostsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["resourceproviderblog_pa"],
+        "operationId": "CreatePost",
+        "description": "Create a new post.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "description": "Part of `parent`. ",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "description": "Part of `parent`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "validateOnly",
+            "description": "If mvalidate_onlym is set to true, the service will try to validate that this request would succeed, but will not actually make changes.",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "requestId",
+            "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postId",
+            "description": "Required. The ID value for the new post.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Required. The desired state for the post.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1alpha5/projects/{projectsId}/locations/{locationsId}/posts/{postsId}": {
+      "get": {
+        "tags": ["resourceproviderblog_pa"],
+        "operationId": "GetPost",
+        "description": "Retrieve a single post.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "description": "Part of `name`. ",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["resourceproviderblog_pa"],
+        "operationId": "ApplyPost",
+        "description": "Create or update a single post.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "description": "Part of `name`. ",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "etag",
+            "description": "The etag known to the client for the expected state of the post. This is used with state-changing methods to prevent accidental overwrites when multiple user agents might be acting in parallel on the same resource. An etag wildcard provide optimistic concurrency based on the expected existence of the post. The Any wildcard (`*`) requires that the resource must already exists, and the Not Any wildcard (`!*`) requires that it must not.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "validateOnly",
+            "description": "If mvalidate_onlym is set to true, the service will try to validate that this request would succeed, but will not actually make changes.",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "requestId",
+            "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Required. The desired state for the post.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["resourceproviderblog_pa"],
+        "operationId": "UpdatePost",
+        "description": "Update a single post.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "description": "Part of `name`. ",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "etag",
+            "description": "The etag known to the client for the expected state of the post. This is used with state-changing methods to prevent accidental overwrites when multiple user agents might be acting in parallel on the same resource. An etag wildcard provide optimistic concurrency based on the expected existence of the post. The Any wildcard (`*`) requires that the resource must already exists, and the Not Any wildcard (`!*`) requires that it must not.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "validateOnly",
+            "description": "If mvalidate_onlym is set to true, the service will try to validate that this request would succeed, but will not actually make changes.",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "requestId",
+            "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updateMask",
+            "description": "Field mask is used to specify the fields to be overwritten in the Post resource by the update. The fields specified in the update_mask are relative to the resource, not the full request. A field will be overwritten if it is in the mask. If the user does not provide a mask then all fields in the Post will be overwritten.",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "google-fieldmask"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Required. The desired state for the post.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["resourceproviderblog_pa"],
+        "operationId": "DeletePost",
+        "description": "Delete a single post.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "description": "Part of `name`. ",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "etag",
+            "description": "The etag known to the client for the expected state of the post. This is used with state-changing methods to prevent accidental overwrites when multiple user agents might be acting in parallel on the same resource. An etag wildcard provide optimistic concurrency based on the expected existence of the post. The Any wildcard (`*`) requires that the resource must already exists, and the Not Any wildcard (`!*`) requires that it must not.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "validateOnly",
+            "description": "If mvalidate_onlym is set to true, the service will try to validate that this request would succeed, but will not actually make changes.",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "requestId",
+            "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1alpha5/projects/{projectsId}/locations/{locationsId}/posts/{postsId}:approvePostComments": {
+      "post": {
+        "tags": ["resourceproviderblog_pa"],
+        "operationId": "ApprovePostComments",
+        "description": "Calls the approvePostComments method on the post.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "description": "Part of `name`. ",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "etag",
+            "description": "The etag known to the client for the expected state of the post. This is used with state-changing methods to prevent accidental overwrites when multiple user agents might be acting in parallel on the same resource. An etag wildcard provide optimistic concurrency based on the expected existence of the post. The Any wildcard (`*`) requires that the resource must already exists, and the Not Any wildcard (`!*`) requires that it must not.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "validateOnly",
+            "description": "If mvalidate_onlym is set to true, the service will try to validate that this request would succeed, but will not actually make changes.",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "requestId",
+            "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprovePostCommentsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovePostCommentsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1alpha5/projects/{projectsId}/locations/{locationsId}/posts/{postsId}/comments": {
+      "get": {
+        "tags": ["resourceproviderblog_pa"],
+        "operationId": "ListComments",
+        "description": "Retrieve a collection of comments.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "description": "Part of `parent`. ",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "description": "Part of `parent`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postsId",
+            "description": "Part of `parent`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "description": "The maximum number of comments to send per page.",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "description": "The page token: If the next_page_token from a previous response is provided, this request will send the subsequent page.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "description": "Filter the list as specified in https://google.aip.dev/160.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderBy",
+            "description": "Order results as specified in https://google.aip.dev/132.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCommentsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["resourceproviderblog_pa"],
+        "operationId": "CreateComment",
+        "description": "Create a new comment.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "description": "Part of `parent`. ",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "description": "Part of `parent`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postsId",
+            "description": "Part of `parent`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "commentId",
+            "description": "Required. The ID value for the new comment.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "validateOnly",
+            "description": "If mvalidate_onlym is set to true, the service will try to validate that this request would succeed, but will not actually make changes.",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "requestId",
+            "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Required. The desired state for the comment.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Comment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1alpha5/projects/{projectsId}/locations/{locationsId}/posts/{postsId}/comments/{commentsId}": {
+      "get": {
+        "tags": ["resourceproviderblog_pa"],
+        "operationId": "GetComment",
+        "description": "Retrieve a single comment.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "description": "Part of `name`. ",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "commentsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comment"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["resourceproviderblog_pa"],
+        "operationId": "ApplyComment",
+        "description": "Create or update a single comment.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "description": "Part of `name`. ",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "commentsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "etag",
+            "description": "The etag known to the client for the expected state of the comment. This is used with state-changing methods to prevent accidental overwrites when multiple user agents might be acting in parallel on the same resource. An etag wildcard provide optimistic concurrency based on the expected existence of the comment. The Any wildcard (`*`) requires that the resource must already exists, and the Not Any wildcard (`!*`) requires that it must not.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "validateOnly",
+            "description": "If mvalidate_onlym is set to true, the service will try to validate that this request would succeed, but will not actually make changes.",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "requestId",
+            "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Required. The desired state for the comment.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Comment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["resourceproviderblog_pa"],
+        "operationId": "UpdateComment",
+        "description": "Update a single comment.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "description": "Part of `name`. ",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "commentsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "etag",
+            "description": "The etag known to the client for the expected state of the comment. This is used with state-changing methods to prevent accidental overwrites when multiple user agents might be acting in parallel on the same resource. An etag wildcard provide optimistic concurrency based on the expected existence of the comment. The Any wildcard (`*`) requires that the resource must already exists, and the Not Any wildcard (`!*`) requires that it must not.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "validateOnly",
+            "description": "If mvalidate_onlym is set to true, the service will try to validate that this request would succeed, but will not actually make changes.",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "requestId",
+            "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updateMask",
+            "description": "Field mask is used to specify the fields to be overwritten in the Comment resource by the update. The fields specified in the update_mask are relative to the resource, not the full request. A field will be overwritten if it is in the mask. If the user does not provide a mask then all fields in the Comment will be overwritten.",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "google-fieldmask"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Required. The desired state for the comment.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Comment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["resourceproviderblog_pa"],
+        "operationId": "DeleteComment",
+        "description": "Delete a single comment.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "description": "Part of `name`. ",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "commentsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "etag",
+            "description": "The etag known to the client for the expected state of the comment. This is used with state-changing methods to prevent accidental overwrites when multiple user agents might be acting in parallel on the same resource. An etag wildcard provide optimistic concurrency based on the expected existence of the comment. The Any wildcard (`*`) requires that the resource must already exists, and the Not Any wildcard (`!*`) requires that it must not.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "validateOnly",
+            "description": "If mvalidate_onlym is set to true, the service will try to validate that this request would succeed, but will not actually make changes.",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "requestId",
+            "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ListPostsResponse": {
+        "description": "The response structure for the ListPosts method.",
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "The resulting posts.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            }
+          },
+          "nextPageToken": {
+            "description": "If present, the next page token can be provided to a subsequent ListPosts call to list the next page. If empty, there are no more pages.",
+            "type": "string"
+          },
+          "unreachable": {
+            "description": "Locations that could not be reached.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "Post": {
+        "type": "object",
+        "properties": {
+          "quota": {
+            "$ref": "#/components/schemas/AccessModelQuota"
+          },
+          "paywall": {
+            "$ref": "#/components/schemas/AccessModelPaywall"
+          },
+          "title": {
+            "description": "Required. Title of blog post.",
+            "type": "string"
+          },
+          "abstract": {
+            "description": "Optional. Abstract summary of blog post.",
+            "type": "string"
+          },
+          "destination": {
+            "description": "Immutable. Where the blog should be located",
+            "x-google-immutable": true,
+            "type": "string"
+          },
+          "name": {
+            "description": "Output only.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "labels": {
+            "description": "The labels on the resource, which can be used for categorization. similar to Kubernetes resource labels.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "uid": {
+            "description": "Output only. The unique identifier of the resource. UID is unique in the time and space for this resource within the scope of the service. It is typically generated by the server on successful creation of a resource and must not be changed. UID is used to uniquely identify resources with resource name reuses. This should be a UUID4.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "etag": {
+            "description": "Output only. An opaque value that uniquely identifies a version or generation of a resource. It can be used to confirm that the client and server agree on the ordering of a resource being written.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "createTime": {
+            "description": "Output only. The timestamp when the resource was created.",
+            "readOnly": true,
+            "type": "string",
+            "format": "google-datetime"
+          },
+          "updateTime": {
+            "description": "Output only. The timestamp when the resource was last updated. Any change to the resource made by users must refresh this value. Changes to a resource made by the service should refresh this value.",
+            "readOnly": true,
+            "type": "string",
+            "format": "google-datetime"
+          },
+          "metadata": {
+            "description": "Output only. Holds standardized information about the post resource.",
+            "readOnly": true,
+            "$ref": "#/components/schemas/PostMetadata"
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "AccessModelQuota": {
+        "description": "Configuration for a quota-based access model",
+        "type": "object",
+        "properties": {
+          "bucketName": {
+            "description": "Non-empty default. BucketName is the internal quota name that a fetch request for the current user is counted against. Fetch requests are sent to the blog data plane (not implemented) and calls to GetPost are not counted. The default bucket, if not specified, is the well-known mtwenty_per_daym.",
+            "x-google-server-default": true,
+            "type": "string"
+          }
+        }
+      },
+      "AccessModelPaywall": {
+        "description": "Configuration for a paywall-based access model",
+        "type": "object",
+        "properties": {
+          "productSkus": {
+            "description": "ProductSkus are the list of internal product codes that the current user is tested for in order to determine access.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PostMetadata": {
+        "description": "PostMetadata holds standardized information about the post resource.",
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "description": "Output only.",
+            "type": "string"
+          },
+          "type": {
+            "description": "Output only.",
+            "type": "string"
+          },
+          "collection": {
+            "description": "Output only.",
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "project": {
+            "type": "string"
+          },
+          "location": {
+            "description": "Output only. The location of the resource. The location encoding is specific to the service provider, and new encoding may be introduced as the service evolves. For Google Cloud products, the encoding is what is used by Google Cloud APIs, such as `us-east1`, `aws-us-east-1`, and `azure-eastus2`. The semantics of `location` is identical to the `cloud.googleapis.com/location` label used by some Google Cloud APIs.",
+            "type": "string"
+          }
+        }
+      },
+      "Operation": {
+        "description": "This resource represents a long-running operation that is the result of a network API call.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The server-assigned name, which is only unique within the same service that originally returns it. If you use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`.",
+            "type": "string"
+          },
+          "metadata": {
+            "description": "Service-specific metadata associated with the operation. It typically contains progress information and common metadata such as create time. Some services might not provide such metadata. Any method that returns a long-running operation should document the metadata type, if any.",
+            "type": "object",
+            "additionalProperties": {
+              "description": "Properties of the object. Contains field @type with type URL."
+            }
+          },
+          "done": {
+            "description": "If the value is `false`, it means the operation is still in progress. If `true`, the operation is completed, and either `error` or `response` is available.",
+            "type": "boolean"
+          },
+          "error": {
+            "description": "The error result of the operation in case of failure or cancellation.",
+            "$ref": "#/components/schemas/Status"
+          },
+          "response": {
+            "description": "The normal response of the operation in case of success. If the original method returns no data on success, such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.",
+            "type": "object",
+            "additionalProperties": {
+              "description": "Properties of the object. Contains field @type with type URL."
+            }
+          }
+        }
+      },
+      "Status": {
+        "description": "The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).",
+        "type": "object",
+        "properties": {
+          "code": {
+            "description": "The status code, which should be an enum value of google.rpc.Code.",
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "description": "A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.",
+            "type": "string"
+          },
+          "details": {
+            "description": "A list of messages that carry the error details. There is a common set of message types for APIs to use.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "description": "Properties of the object. Contains field @type with type URL."
+              }
+            }
+          }
+        }
+      },
+      "ApprovePostCommentsBody": {
+        "description": "ApprovePostCommentsRequest is the request body for ApprovePostComments",
+        "type": "object",
+        "properties": {
+          "comments": {
+            "description": "Comments to approve for the post.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "isAutomated": {
+            "description": "True if the comment approval is being done by an automated system.",
+            "type": "boolean"
+          }
+        }
+      },
+      "ApprovePostCommentsResponse": {
+        "description": "ApprovePostCommentsResponse is the LRO response field of ApprovePostComments method.",
+        "type": "object",
+        "properties": {
+          "trackingNumber": {
+            "description": "Some form of tracking number the caller can store in their records.",
+            "type": "string"
+          }
+        }
+      },
+      "ListCommentsResponse": {
+        "description": "The response structure for the ListComments method.",
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "The resulting comments.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Comment"
+            }
+          },
+          "nextPageToken": {
+            "description": "If present, the next page token can be provided to a subsequent ListComments call to list the next page. If empty, there are no more pages.",
+            "type": "string"
+          },
+          "unreachable": {
+            "description": "Locations that could not be reached.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "Comment": {
+        "description": "A Comment on a blog",
+        "type": "object",
+        "properties": {
+          "markdown": {
+            "description": "Markdown content from original commenter.",
+            "type": "string"
+          },
+          "approved": {
+            "description": "Output only. Approved indicates that Post custom method ApproveComments has been called. This indicates either either automated or manual clearance of markdown text has taken place.",
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "name": {
+            "description": "Output only.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "labels": {
+            "description": "The labels on the resource, which can be used for categorization. similar to Kubernetes resource labels.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "uid": {
+            "description": "Output only. The unique identifier of the resource. UID is unique in the time and space for this resource within the scope of the service. It is typically generated by the server on successful creation of a resource and must not be changed. UID is used to uniquely identify resources with resource name reuses. This should be a UUID4.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "etag": {
+            "description": "Output only. An opaque value that uniquely identifies a version or generation of a resource. It can be used to confirm that the client and server agree on the ordering of a resource being written.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "createTime": {
+            "description": "Output only. The timestamp when the resource was created.",
+            "readOnly": true,
+            "type": "string",
+            "format": "google-datetime"
+          },
+          "updateTime": {
+            "description": "Output only. The timestamp when the resource was last updated. Any change to the resource made by users must refresh this value. Changes to a resource made by the service should refresh this value.",
+            "readOnly": true,
+            "type": "string",
+            "format": "google-datetime"
+          },
+          "metadata": {
+            "description": "Output only. Holds standardized information about the comment resource.",
+            "readOnly": true,
+            "$ref": "#/components/schemas/CommentMetadata"
+          }
+        }
+      },
+      "CommentMetadata": {
+        "description": "CommentMetadata holds standardized information about the comment resource.",
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "description": "Output only.",
+            "type": "string"
+          },
+          "type": {
+            "description": "Output only.",
+            "type": "string"
+          },
+          "collection": {
+            "description": "Output only.",
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "project": {
+            "type": "string"
+          },
+          "location": {
+            "description": "Output only. The location of the resource. The location encoding is specific to the service provider, and new encoding may be introduced as the service evolves. For Google Cloud products, the encoding is what is used by Google Cloud APIs, such as `us-east1`, `aws-us-east-1`, and `azure-eastus2`. The semantics of `location` is identical to the `cloud.googleapis.com/location` label used by some Google Cloud APIs.",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
