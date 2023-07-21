@@ -4562,10 +4562,6 @@ func TestAccContainerCluster_withPrivateClusterConfigPrivateEndpointSubnetwork(t
 
 	r := acctest.RandString(t, 10)
 
-	subnet1Name := fmt.Sprintf("tf-test-container-subnetwork1-%s", r)
-
-	subnet2Name := fmt.Sprintf("tf-test-container-subnetwork2-%s", r)
-
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	containerNetName := fmt.Sprintf("tf-test-container-net-%s", r)
 
@@ -4575,7 +4571,7 @@ func TestAccContainerCluster_withPrivateClusterConfigPrivateEndpointSubnetwork(t
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withPrivateClusterConfigPrivateEndpointSubnetwork(containerNetName, clusterName, subnet1Name, subnet2Name),
+				Config: testAccContainerCluster_withPrivateClusterConfigPrivateEndpointSubnetwork(containerNetName, clusterName),
 			},
 			{
 				ResourceName:            "google_container_cluster.with_private_cluster_private_endpoint_subnetwork",
@@ -4587,27 +4583,29 @@ func TestAccContainerCluster_withPrivateClusterConfigPrivateEndpointSubnetwork(t
 	})
 }
 
-func testAccContainerCluster_withPrivateClusterConfigPrivateEndpointSubnetwork(containerNetName, clusterName, s1Name, s2Name string) string {
+func testAccContainerCluster_withPrivateClusterConfigPrivateEndpointSubnetwork(containerNetName, clusterName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
   name                    = "%s"
   auto_create_subnetworks = false
 }
 
-resource "google_compute_subnetwork" "container_subnetwork1" {
-  name                     = "%s"
+resource "google_compute_subnetwork" "container_subnetwork" {
+  name                     = google_compute_network.container_network.name
   network                  = google_compute_network.container_network.name
   ip_cidr_range            = "10.0.36.0/24"
   region                   = "us-central1"
   private_ip_google_access = true
-}
 
-resource "google_compute_subnetwork" "container_subnetwork2" {
-  name                     = "%s"
-  network                  = google_compute_network.container_network.name
-  ip_cidr_range            = "10.9.26.0/24"
-  region                   = "us-central1"
-  private_ip_google_access = true
+  secondary_ip_range {
+    range_name    = "pod"
+    ip_cidr_range = "10.0.0.0/19"
+  }
+
+  secondary_ip_range {
+    range_name    = "svc"
+    ip_cidr_range = "10.0.32.0/22"
+  }
 }
 
 resource "google_container_cluster" "with_private_endpoint_subnetwork" {
@@ -4615,20 +4613,24 @@ resource "google_container_cluster" "with_private_endpoint_subnetwork" {
   location           = "us-central1-a"
   initial_node_count = 1
 
+  networking_mode = "VPC_NATIVE"
   network    = google_compute_network.container_network.name
-  subnetwork = google_compute_subnetwork.container_subnetwork1.name
-
-  master_authorized_networks_config {
-    gcp_public_cidrs_access_enabled = false
-  }
+  subnetwork = google_compute_subnetwork.container_subnetwork.name
 
   private_cluster_config {
 	enable_private_nodes        = true
 	enable_private_endpoint     = true
-	private_endpoint_subnetwork = google_compute_subnetwork.container_subnetwork2.name
+	private_endpoint_subnetwork = google_compute_subnetwork.container_subnetwork.name
+  }
+  master_authorized_networks_config {
+    gcp_public_cidrs_access_enabled = false
+  }
+  ip_allocation_policy {
+    cluster_secondary_range_name  = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
+    services_secondary_range_name = google_compute_subnetwork.container_subnetwork.secondary_ip_range[1].range_name
   }
 }
-`, containerNetName, s1Name, s2Name, clusterName)
+`, containerNetName, clusterName)
 }
 
 func TestAccContainerCluster_withEnablePrivateEndpointToggle(t *testing.T) {
