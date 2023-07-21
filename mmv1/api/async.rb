@@ -73,6 +73,14 @@ module Api
     # The list of methods where operations are used.
     attr_reader :actions
 
+    def initialize(operation, result, status, error)
+      super()
+      @operation = operation
+      @result = result
+      @status = status
+      @error = error
+    end
+
     def validate
       super
 
@@ -96,6 +104,14 @@ module Api
       # Use this if the resource includes the full operation url.
       attr_reader :full_url
 
+      def initialize(path, base_url, wait_ms, timeouts)
+        super()
+        @path = path
+        @base_url = base_url
+        @wait_ms = wait_ms
+        @timeouts = timeouts
+      end
+
       def validate
         super
 
@@ -114,6 +130,12 @@ module Api
     class Result < Async::Result
       attr_reader :path
 
+      def initialize(path, resource_inside_response)
+        super()
+        @path = path
+        @resource_inside_response = resource_inside_response
+      end
+
       def validate
         super
 
@@ -128,6 +150,13 @@ module Api
       attr_reader :complete
       attr_reader :allowed
 
+      def initialize(path, complete, allowed)
+        super()
+        @path = path
+        @complete = complete
+        @allowed = allowed
+      end
+
       def validate
         super
         check :path, type: String
@@ -139,6 +168,12 @@ module Api
     class Error < Api::Object
       attr_reader :path
       attr_reader :message
+
+      def initialize(path, message)
+        super()
+        @path = path
+        @message = message
+      end
 
       def validate
         super
