@@ -27,13 +27,13 @@ module Api
 
       # [Required] A description of the resource that's surfaced in provider
       # documentation.
-      attr_reader :description
+      attr_accessor :description
       # [Required] (Api::Resource::ReferenceLinks) Reference links provided in
       # downstream documentation.
       attr_reader :references
       # [Required] The GCP "relative URI" of a resource, relative to the product
       # base URL. It can often be inferred from the `create` path.
-      attr_reader :base_url
+      attr_accessor :base_url
 
       # ====================
       # Common Configuration
@@ -44,10 +44,10 @@ module Api
       # [Optional] If set to true, don't generate the resource.
       attr_reader :exclude
       # [Optional] If set to true, the resource is not able to be updated.
-      attr_reader :immutable
+      attr_accessor :immutable
       # [Optional] If set to true, this resource uses an update mask to perform
       # updates. This is typical of newer GCP APIs.
-      attr_reader :update_mask
+      attr_accessor :update_mask
       # [Optional] If set to true, the object has a `self_link` field. This is
       # typical of older GCP APIs.
       attr_reader :has_self_link
@@ -63,23 +63,23 @@ module Api
       # [Optional] The "identity" URL of the resource. Defaults to:
       # * base_url when the create_verb is :POST
       # * self_link when the create_verb is :PUT  or :PATCH
-      attr_reader :self_link
+      attr_accessor :self_link
       # [Optional] The URL used to creating the resource. Defaults to:
       # * collection url when the create_verb is :POST
       # * self_link when the create_verb is :PUT or :PATCH
-      attr_reader :create_url
+      attr_accessor :create_url
       # [Optional] The URL used to delete the resource. Defaults to the self
       # link.
-      attr_reader :delete_url
+      attr_accessor :delete_url
       # [Optional] The URL used to update the resource. Defaults to the self
       # link.
-      attr_reader :update_url
+      attr_accessor :update_url
       # [Optional] The HTTP verb used during create. Defaults to :POST.
       attr_reader :create_verb
       # [Optional] The HTTP verb used during read. Defaults to :GET.
       attr_reader :read_verb
       # [Optional] The HTTP verb used during update. Defaults to :PUT.
-      attr_reader :update_verb
+      attr_accessor :update_verb
       # [Optional] The HTTP verb used during delete. Defaults to :DELETE.
       attr_reader :delete_verb
       # [Optional] Additional Query Parameters to append to GET. Defaults to ""
@@ -176,7 +176,7 @@ module Api
 
       # TODO(alexstephen): Deprecate once all resources using autogen async.
       # If true, generates product operation handling logic.
-      attr_reader :autogen_async
+      attr_accessor :autogen_async
 
       # If true, resource is not importable
       attr_reader :exclude_import
@@ -329,7 +329,7 @@ module Api
     end
 
     # ====================
-    # Custom Getters
+    # Custom Getters and Setters
     # ====================
 
     # Returns all properties and parameters including the ones that are
@@ -342,9 +342,13 @@ module Api
       (@properties || []).reject(&:exclude)
     end
 
+    attr_writer :properties
+
     def parameters
       (@parameters || []).reject(&:exclude)
     end
+
+    attr_writer :parameters
 
     # Return the user-facing properties in client tools; this ends up meaning
     # both properties and parameters but without any that are excluded due to
@@ -405,6 +409,8 @@ module Api
 
       @async
     end
+
+    attr_writer :async
 
     # Return the resource-specific identity properties, or a best guess of the
     # `name` value for the resource.
