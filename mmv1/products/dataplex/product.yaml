@@ -23,4 +23,4 @@ scopes:
 apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Cloud Dataplex API
-    url: https://cloud.google.com/dataplex/docs/reference/rest/
+    url: https://console.cloud.google.com/apis/library/dataplex.googleapis.com

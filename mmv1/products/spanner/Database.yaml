@@ -91,6 +91,7 @@ parameters:
     imports: 'name'
     description: 'The instance to create the database on.'
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   # This resource returns only one attribute ("name") from which we parse
   # "instance", "name", and "project".  You will need custom code handling

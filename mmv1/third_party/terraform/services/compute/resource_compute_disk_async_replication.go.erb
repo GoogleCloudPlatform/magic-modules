@@ -1,6 +1,5 @@
 <% autogen_exception -%>
 package compute
-<% if version != "ga" -%>
 
 import (
 	"fmt"
@@ -303,4 +302,3 @@ func resourceDiskAsyncReplicationDelete(d *schema.ResourceData, meta interface{}
 	}
 	return nil
 }
-<% end -%>

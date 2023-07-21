@@ -149,6 +149,7 @@ properties:
       resource: 'Address'
       imports: 'selfLink'
       description: 'A reference to an address associated with this NAT'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Array
     name: 'drainNatIps'
     description: |
@@ -161,6 +162,7 @@ properties:
       resource: 'Address'
       imports: 'selfLink'
       description: 'A reference to an address associated with this NAT'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Enum
     name: 'sourceSubnetworkIpRangesToNat'
     required: true
@@ -196,6 +198,7 @@ properties:
           imports: 'selfLink'
           description: 'Self-link of subnetwork to NAT'
           required: true
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
         - !ruby/object:Api::Type::Array
           name: 'sourceIpRangesToNat'
           description: |
@@ -347,6 +350,7 @@ properties:
                 imports: 'selfLink'
                 description:
                   'A reference to an address associated with this NAT'
+              custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
             - !ruby/object:Api::Type::Array
               name: 'sourceNatDrainIps'
               description: |
@@ -363,6 +367,7 @@ properties:
                 imports: 'selfLink'
                 description:
                   'A reference to an address associated with this NAT'
+              custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Boolean
     name: enableEndpointIndependentMapping
     description: |

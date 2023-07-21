@@ -221,6 +221,12 @@ module Api
       # instead of a project field to use User Project Overrides
       attr_reader :supports_indirect_user_project_override
 
+      # If true, the resource's project field can be specified as either the short form project
+      # id or the long form projects/project-id. The extra projects/ string will be removed from
+      # urls and ids. This should only be used for resources that previously supported long form
+      # project ids for backwards compatibility.
+      attr_reader :legacy_long_form_project
+
       # Function to transform a read error so that handleNotFound recognises
       # it as a 404. This should be added as a handwritten fn that takes in
       # an error and returns one.
@@ -314,6 +320,7 @@ module Api
       check :skip_delete, type: :boolean, default: false
       check :skip_read, type: :boolean, default: false
       check :supports_indirect_user_project_override, type: :boolean, default: false
+      check :legacy_long_form_project, type: :boolean, default: false
       check :read_error_transform, type: String
       check :taint_resource_on_failed_create, type: :boolean, default: false
       check :skip_sweeper, type: :boolean, default: false

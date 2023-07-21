@@ -20,7 +20,6 @@ description: |
 base_url: 'projects/{{project}}/responsePolicies'
 self_link: 'projects/{{project}}/responsePolicies/{{response_policy_name}}'
 update_verb: :PATCH
-min_version: beta
 identity:
   - responsePolicyName
 examples:

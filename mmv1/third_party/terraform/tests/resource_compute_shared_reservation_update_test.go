@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccComputeSharedReservation_update(t *testing.T) {
@@ -12,15 +13,15 @@ func TestAccComputeSharedReservation_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":         acctest.GetTestProjectFromEnv(),
-		"org_id":          acctest.GetTestOrgFromEnv(t),
-		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
-		"random_suffix":   RandString(t, 10),
+		"project":         envvar.GetTestProjectFromEnv(),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeReservationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -55,7 +56,7 @@ func TestAccComputeSharedReservation_update(t *testing.T) {
 }
 
 func testAccComputeReservation_sharedReservation_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "owner_project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
@@ -144,7 +145,7 @@ resource "google_compute_reservation" "gce_reservation" {
 }
 
 func testAccComputeReservation_sharedReservation_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "owner_project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"

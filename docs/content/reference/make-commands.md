@@ -53,16 +53,32 @@ git checkout -- . && git clean -f google/ google-beta/ website/
 
 {{< hint warning >}}This approach is in beta and still collecting feedback. Please [file an issue](https://github.com/hashicorp/terraform-provider-google/issues/new/choose) if you encounter challenges.{{< /hint >}}
 
-For ease of contribution, we provide containers with the required dependencies for building magic-modules, as well as the option to build them yourself.
+[`./scripts/make-in-container.sh`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/scripts/make-in-container.sh) runs `make` with the provided arguments inside a container with all necessary dependencies preinstalled. It uses [Docker](https://docker.io/) if available and [Podman](https://podman.io/) otherwise. Like `make`, this script must be run in the root of a `magic-modules` repository clone.
 
-[scripts/make-in-container.sh](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/scripts/make-in-container.sh) acts as a drop-in replacement for magic-modules `make` commands by setting up the containers and running `make` inside the container.
+If you run into any problems, please [file an issue](https://github.com/hashicorp/terraform-provider-google/issues/new/choose).
 
-For example, to build the `google` provider:
+#### Before you begin
+
+1. Ensure that `GOPATH` is set on your host machine.
+
+   ```bash
+   printenv | grep GOPATH
+   ```
+
+   If not, add `export GOPATH=$HOME/go` to your terminal's startup script and restart your terminal.
+1. Clone the `google` and `google-beta` provider repositories with the following commands:
+
+   ```bash
+   git clone https://github.com/hashicorp/terraform-provider-google.git $GOPATH/src/github.com/hashicorp/terraform-provider-google
+   git clone https://github.com/hashicorp/terraform-provider-google-beta.git $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+   ```
+
+#### Example
+
+To build the `google` provider, run the following command in the root of a `magic-modules` repository clone:
 
 ```bash
 ./scripts/make-in-container.sh \
   terraform VERSION=ga \
   OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google"
 ```
-
-`make-in-container.sh` will use [Docker](https://docker.io/) if available and otherwise attempt to fall back to [Podman](https://podman.io/). If you run into any problems, try pulling the latest version of `gcr.io/graphite-docker-images/downstream-builder`. If that doesn't resolve your problem, please [file an issue](https://github.com/hashicorp/terraform-provider-google/issues/new/choose).

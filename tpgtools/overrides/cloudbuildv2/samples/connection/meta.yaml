@@ -13,3 +13,8 @@ doc_hide:
 - ghe_complete_connection.yaml
 - ghe_priv_connection.yaml
 - ghe_priv_update_connection.yaml
+- gitlab_connection.yaml
+- gle_connection.yaml
+- gle_old_connection.yaml
+- gle_priv_connection.yaml
+- gle_priv_update_connection.yaml
