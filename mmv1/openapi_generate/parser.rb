@@ -87,6 +87,7 @@ module OpenAPIGenerate
         end
       else
         raise "Failed to identify field type #{type}"
+
       end
       field.instance_variable_set(:@description, obj.description || 'No description')
       if url_param
@@ -139,12 +140,14 @@ module OpenAPIGenerate
       end
       unless required_properties.empty?
         raise "Unknown required properties in top-level object #{required_properties}"
+
       end
 
       id_param = path.post.parameters.select do |p|
         p.name.downcase.include?(resource_name.downcase)
       end.last
-      raise "did not find ID param" unless id_param
+      raise 'did not find ID param' unless id_param
+
       [properties, parameters, id_param.name]
     end
 
@@ -184,7 +187,7 @@ module OpenAPIGenerate
       error = Api::OpAsync::Error.new('error', 'message')
       async = Api::OpAsync.new(op, result, status, error)
       resource.async = async
-      return resource
+      resource
     end
 
     def write_yaml(spec_path, output)
