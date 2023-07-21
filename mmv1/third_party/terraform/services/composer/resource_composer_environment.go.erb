@@ -546,7 +546,6 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Optional: true,
 										Computed: true,
 										AtLeastOneOf: composerPrivateEnvironmentConfig,
-										DiffSuppressFunc: testDiffSupressFunc,
 										ForceNew: true,
 										Description: `When enabled, IPs from public (non-RFC1918) ranges can be used for ip_allocation_policy.cluster_ipv4_cidr_block and ip_allocation_policy.service_ipv4_cidr_block.`,
 									},
@@ -2418,23 +2417,6 @@ func validateServiceAccountRelativeNameOrEmail(v interface{}, k string) (ws []st
 	}
 
 	return
-}
-
-func isComposer25(imageVersion string) bool {
-	composerVersion := strings.Split(imageVersion, "-")[1]
-	if composerVersion == "1" || composerVersion == "2" {
-		return false
-	}
-	composerVersionDetails := strings.Split(composerVersion, ".")
-	major, minor := composerVersionDetails[0], composerVersionDetails[1]
-	minorInt, _ := strconv.Atoi(minor)
-	return major == "2" && minorInt >= 50
-}
-
-func testDiffSupressFunc(k, old, new string, d *schema.ResourceData) bool {
-	var image_version = d.Get("config").([]interface{})[0].(map[string]interface{})["software_config"].([]interface{})[0].(map[string]interface{})["image_version"]
-	fmt.Printf("resource data %T, %s\n", image_version, image_version)
-	return true
 }
 
 func composerImageVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
