@@ -552,17 +552,20 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 		},
 	})
 }
+
 <% unless version == 'ga' -%>
 func TestAccComputeDisk_pdHyperDiskEnableConfidentialCompute(t *testing.T) {
 	t.Parallel()
 
 
 	context := map[string]interface{}{
-		"random_suffix":        RandString(t, 10),
-		"kms":                  BootstrapKMSKey(t),
+		"random_suffix":        acctest.RandString(t, 10),
+		"kms":                  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 		"disk_size":            64,
 		"confidential_compute": true,
 	}
+
+	var disk compute.Disk
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -571,10 +574,12 @@ func TestAccComputeDisk_pdHyperDiskEnableConfidentialCompute(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDisk_pdHyperDiskEnableConfidentialCompute(context),
-				Check: resource.ComposeTestCheckFunc( 
-					testAccCheckEncryptionKey(t, "google_compute_disk.foobar", &disk),
-			),
-				
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeDiskExists(
+						t, "google_compute_disk.foobar", envvar.GetTestProjectFromEnv(), &disk),
+					testAccCheckEncryptionKey(
+						t, "google_compute_disk.foobar", &disk),
+				),
 			},
 			{
 				ResourceName:      "google_compute_disk.foobar",
@@ -1151,7 +1156,7 @@ resource "google_compute_disk" "foobar" {
 <% end -%>
 
 <% unless version == 'ga' -%>
-func testAccComputeDisk_multiWriter(instance string,  diskName string, enableMultiwriter bool) string {
+func testAccComputeDisk_multiWriter(instance string, diskName string, enableMultiwriter bool) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"
