@@ -435,6 +435,7 @@ resource "google_container_cluster" "multi_network_cluster" {
   }
 
   enable_multi_networking = true
+  datapath_provider = "ADVANCED_DATAPATH"
 }
 `, clusterName, npName)
 }
