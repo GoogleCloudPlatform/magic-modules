@@ -2770,16 +2770,12 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if d.HasChange("allow_net_admin") {
-		var workloadPolicyConfig *container.WorkloadPolicyConfig
 		allowed := d.Get("allow_net_admin").(bool)
-		if allowed {
-			workloadPolicyConfig = &container.WorkloadPolicyConfig{
-				AllowNetAdmin: allowed,
-			}
-		}
 		req := &container.UpdateClusterRequest{
 		    Update: &container.ClusterUpdate{
-		        DesiredAutopilotWorkloadPolicyConfig: workloadPolicyConfig,
+		        DesiredAutopilotWorkloadPolicyConfig: &container.WorkloadPolicyConfig{
+					AllowNetAdmin: allowed,
+				},
 		    },
 		}
 		
