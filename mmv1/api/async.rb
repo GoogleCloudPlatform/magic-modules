@@ -130,7 +130,7 @@ module Api
     class Result < Async::Result
       attr_reader :path
 
-      def initialize(path, resource_inside_response)
+      def initialize(path = nil, resource_inside_response = nil)
         super()
         @path = path
         @resource_inside_response = resource_inside_response
