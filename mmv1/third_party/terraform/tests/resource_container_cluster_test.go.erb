@@ -322,7 +322,6 @@ func TestAccContainerCluster_withMultiNetworking(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { AccTestPreCheck(t) },
@@ -330,10 +329,10 @@ func TestAccContainerCluster_withMultiNetworking(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_enableMultiNetworking(clusterName, npName),
+				Config: testAccContainerCluster_enableMultiNetworking(clusterName),
 			},
 			{
-				ResourceName:      "google_container_cluster.multi_network_cluster",
+				ResourceName:      "google_container_cluster.cluster",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -417,27 +416,61 @@ func TestAccContainerCluster_withAuthenticatorGroupsConfig(t *testing.T) {
 }
 
 <% unless version == 'ga' -%>
-func testAccContainerCluster_enableMultiNetworking(clusterName string, npName string) string {
+func testAccContainerCluster_enableMultiNetworking(clusterName string) string {
 	return fmt.Sprintf(`
-resource "google_container_cluster" "multi_network_cluster" {
+resource "google_compute_network" "container_network" {
+  name                    = "%s-nw"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "container_subnetwork" {
+  name                     = google_compute_network.container_network.name
+  network                  = google_compute_network.container_network.name
+  ip_cidr_range            = "10.0.36.0/24"
+  region                   = "us-central1"
+  private_ip_google_access = true
+
+  secondary_ip_range {
+    range_name    = "pod"
+    ip_cidr_range = "10.0.0.0/19"
+  }
+
+  secondary_ip_range {
+    range_name    = "svc"
+    ip_cidr_range = "10.0.32.0/22"
+  }
+
+  secondary_ip_range {
+    range_name    = "another-pod"
+    ip_cidr_range = "10.1.32.0/22"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      # The auto nodepool creates a secondary range which diffs this resource.
+      secondary_ip_range,
+    ]
+  }
+}
+
+resource "google_container_cluster" "cluster" {
   name               = "%s"
-  location           = "us-central1-a"
+  location           = "us-central1"
+  initial_node_count = 1
+
+  network    = google_compute_network.container_network.name
+  subnetwork = google_compute_subnetwork.container_subnetwork.name
+  ip_allocation_policy {
+    cluster_secondary_range_name  = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
+    services_secondary_range_name = google_compute_subnetwork.container_subnetwork.secondary_ip_range[1].range_name
+  }
   release_channel {
-    channel = "RAPID"
+	channel = "RAPID"
   }
-
-  node_pool {
-    name = "%s"
-    initial_node_count = 1
-    node_config {
-      machine_type = "e2-medium"
-    }
-  }
-
   enable_multi_networking = true
   datapath_provider = "ADVANCED_DATAPATH"
 }
-`, clusterName, npName)
+`, clusterName, clusterName)
 }
 <% end -%>
 

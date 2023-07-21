@@ -525,9 +525,10 @@ func TestAccContainerNodePool_withNetworkConfig(t *testing.T) {
 func TestAccContainerNodePool_withMultiNicNetworkConfig(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
-	network := fmt.Sprintf("tf-test-net-%s", RandString(t, 10))
+	randstr := RandString(t, 10)
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randstr)
+	np := fmt.Sprintf("tf-test-np-%s", randstr)
+	network := fmt.Sprintf("tf-test-net-%s", randstr)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { AccTestPreCheck(t) },
@@ -538,7 +539,7 @@ func TestAccContainerNodePool_withMultiNicNetworkConfig(t *testing.T) {
 				Config: testAccContainerNodePool_withMultiNicNetworkConfig(cluster, np, network),
 			},
 			{
-				ResourceName:            "google_container_node_pool.with_multi_nic",
+				ResourceName:            "google_container_cluster.cluster",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"network_config.0.create_pod_range"},
@@ -2729,7 +2730,7 @@ resource "google_container_node_pool" "with_multi_nic" {
     }
   }
   node_config {
-    machine_type = "n1-standard-8"
+    machine_type = "n2-standard-64"
 	oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform",
     ]
