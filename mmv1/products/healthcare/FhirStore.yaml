@@ -273,7 +273,6 @@ properties:
                       required: true
                       description: |
                         Type of partitioning.
-                      default_value: :PARTITION_TYPE_UNSPECIFIED
                       values:
                         - :PARTITION_TYPE_UNSPECIFIED
                         - :HOUR
