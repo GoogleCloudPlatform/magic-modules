@@ -1,7 +1,6 @@
 package tpgresource
 
 import (
-	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
@@ -178,17 +177,4 @@ func SetupTestResourceDataFromConfigMap(t *testing.T, s map[string]*schema.Schem
 	}
 
 	return d
-}
-
-func GetResourceAttributes(n string, s *terraform.State) (map[string]string, error) {
-	rs, ok := s.RootModule().Resources[n]
-	if !ok {
-		return nil, fmt.Errorf("Not found: %s", n)
-	}
-
-	if rs.Primary.ID == "" {
-		return nil, fmt.Errorf("No ID is set")
-	}
-
-	return rs.Primary.Attributes, nil
 }
