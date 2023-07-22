@@ -1,0 +1,18 @@
+[
+  {
+    "name": "//pubsub.googleapis.com/projects/{{.Provider.project}}/schemas/example",
+    "asset_type": "pubsub.googleapis.com/Schema",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/pubsub/v1/rest",
+      "discovery_name": "Schema",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "definition": "{\n  \"type\" : \"record\",\n  \"name\" : \"Avro\",\n  \"fields\" : [\n    {\n      \"name\" : \"StringField\",\n      \"type\" : \"string\"\n    },\n    {\n      \"name\" : \"IntField\",\n      \"type\" : \"int\"\n    }\n  ]\n}\n",
+        "name": "example",
+        "type": "AVRO"
+      }
+    }
+  }
+]

@@ -1,0 +1,17 @@
+[
+    {
+        "name": "//cloudresourcemanager.googleapis.com/folders/{{.FolderID}}",
+        "asset_type": "cloudresourcemanager.googleapis.com/Folder",
+        "ancestry_path": "{{.Ancestry}}",
+        "iam_policy": {
+            "bindings": [
+                {
+                    "role": "roles/editor",
+                    "members": [
+                        "user:jane@example.com"
+                    ]
+                }
+            ]
+        }
+    }
+]

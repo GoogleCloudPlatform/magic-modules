@@ -3,11 +3,14 @@
 package cai2hcl
 
 import (
-<%- # We list all the v2 imports here and unstable imports, because we run 'goimports' to guess the correct
-    # set of imports, which will never guess the major version correctly.-%>
+<%- 
+	# We list all the v2 imports here and unstable imports, because we run 'goimports' to guess the correct
+    # set of imports, which will never guess the major version correctly.
+-%>
   "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
-  tfschema "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
   "google.golang.org/api/compute/v1"
+  transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 <%
@@ -34,7 +37,7 @@ const <%=resource_name-%>AssetType string = "<%=product_backend_name.downcase-%>
 
 type <%=converter_name-%> struct {
 	name   string
-	schema map[string]*tfschema.Schema
+	schema map[string]*Schema
 }
 
 func New<%=converter_name-%>(name string) Converter {
@@ -86,6 +89,7 @@ func (c *<%=converter_name-%>) convertResourceData(asset *caiasset.Asset) (*HCLR
 
 func resource<%=resource_name-%>Read(res *<%=api_type-%>) (map[string]interface{}, error) {
     result := make(map[string]interface{})
+	config := meta.(*transport_tpg.Config)
 
 <%  object.gettable_properties.reject{|p| p.ignore_read }.each do |prop|-%>
 <%    if prop.flatten_object-%>
@@ -101,7 +105,7 @@ func resource<%=resource_name-%>Read(res *<%=api_type-%>) (map[string]interface{
         }
     }
 <%    else-%>
-    result["<%=prop.name.underscore-%>"] = flatten<%="Nested" if object.nested_query-%><%=resource_name-%><%=titlelize_property(prop)-%>(res.<%=titlelize_property(prop)-%>)
+    result["<%=prop.name.underscore-%>"] = flatten<%="Nested" if object.nested_query-%><%=resource_name-%><%=titlelize_property(prop)-%>(res.<%=titlelize_property(prop)-%>, config)
 <%    end-%>
 <%  end-%>
 

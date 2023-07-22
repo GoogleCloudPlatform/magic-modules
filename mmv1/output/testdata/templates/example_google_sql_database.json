@@ -1,0 +1,17 @@
+[
+  {
+    "name": "//sqladmin.googleapis.com/projects/{{.Provider.project}}/instances/my-database-instance/databases/my-database",
+    "asset_type": "sqladmin.googleapis.com/Database",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1beta4",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/sqladmin/v1beta4/rest",
+      "discovery_name": "Database",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "instance": "my-database-instance",
+        "name": "my-database"
+      }
+    }
+  }
+]

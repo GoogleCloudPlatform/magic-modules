@@ -1,3 +1,11 @@
+GIT
+  remote: https://github.com/ruby-debug/debase.git
+  revision: a90f2270351ae0f48370d60809ecd82d6110c85c
+  tag: v0.2.5.beta2
+  specs:
+    debase (0.2.5.beta2)
+      debase-ruby_core_source (>= 0.10.12)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -10,10 +18,17 @@ GEM
     binding_of_caller (1.0.0)
       debug_inspector (>= 0.0.1)
     concurrent-ruby (1.2.0)
+    debase-ruby_core_source (3.2.0)
+    debug (1.7.2)
+      irb (>= 1.5.0)
+      reline (>= 0.3.1)
     debug_inspector (1.1.0)
     diff-lcs (1.5.0)
     i18n (1.12.0)
       concurrent-ruby (~> 1.0)
+    io-console (0.6.0)
+    irb (1.6.4)
+      reline (>= 0.3.0)
     json (2.6.3)
     metaclass (0.0.4)
     minitest (5.17.0)
@@ -25,6 +40,8 @@ GEM
     rainbow (3.1.1)
     rake (13.0.6)
     regexp_parser (2.6.2)
+    reline (0.3.3)
+      io-console (~> 0.5)
     rexml (3.2.5)
     rspec (3.12.0)
       rspec-core (~> 3.12.0)
@@ -51,6 +68,8 @@ GEM
       unicode-display_width (>= 2.4.0, < 3.0)
     rubocop-ast (1.24.1)
       parser (>= 3.1.1.0)
+    ruby-debug-ide (0.7.3)
+      rake (>= 0.8.1)
     ruby-progressbar (1.11.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
@@ -62,10 +81,13 @@ PLATFORMS
 DEPENDENCIES
   activesupport
   binding_of_caller
+  debase!
+  debug
   mocha (~> 1.3.0)
   rake
   rspec
   rubocop (>= 0.77.0)
+  ruby-debug-ide
 
 BUNDLED WITH
    2.4.6

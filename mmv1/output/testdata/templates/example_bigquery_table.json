@@ -1,0 +1,21 @@
+[
+  {
+    "name": "//bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/dataset/tables/table",
+    "asset_type": "bigquery.googleapis.com/Table",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v2",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/bigquery/v2/rest",
+      "discovery_name": "Table",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "friendlyName": "friendly table",
+        "tableReference": {
+          "datasetId": "dataset",
+          "project": "{{.Provider.project}}",
+          "tableId": "table"
+        }
+      }
+    }
+  }
+]

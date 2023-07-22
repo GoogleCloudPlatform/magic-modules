@@ -1,0 +1,113 @@
+[
+  {
+    "name": "//storage.googleapis.com/image-store-bucket",
+    "asset_type": "storage.googleapis.com/Bucket",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/storage/v1/rest",
+      "discovery_name": "Bucket",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "billing": {
+          "requesterPays": true
+        },
+        "cors": [
+          {
+            "maxAgeSeconds": 42,
+            "method": [
+              "test-method1",
+              "test-method2"
+            ],
+            "origin": [
+              "test-origin1",
+              "test-origin2"
+            ],
+            "responseHeader": [
+              "test-response_header1",
+              "test-response_header2"
+            ]
+          },
+          {
+            "maxAgeSeconds": 42,
+            "method": [
+              "test-method1",
+              "test-method2"
+            ],
+            "origin": [
+              "test-origin1",
+              "test-origin2"
+            ],
+            "responseHeader": [
+              "test-response_header1",
+              "test-response_header2"
+            ]
+          }
+        ],
+        "encryption": {
+          "defaultKmsKeyName": "test-default_kms_key_name"
+        },
+        "iamConfiguration": {
+          "uniformBucketLevelAccess": {
+            "enabled": true
+          }
+        },
+        "labels": {
+          "label_foo1": "label-bar1"
+        },
+        "lifecycle": {
+          "rule": [
+            {
+              "action": {
+                "storageClass": "test-storage_class",
+                "type": "test-type"
+              },
+              "condition": {
+                "age": 42,
+                "createdBefore": "test-created_before",
+                "matchesStorageClass": [
+                  "test-matches_storage_class1",
+                  "matches_storage_class2"
+                ],
+                "numNewerVersions": 42
+              }
+            },
+            {
+              "action": {
+                "storageClass": "test-storage_class",
+                "type": "test-type"
+              },
+              "condition": {
+                "age": 42,
+                "createdBefore": "test-created_before",
+                "matchesStorageClass": [
+                  "test-matches_storage_class1",
+                  "matches_storage_class2"
+                ],
+                "numNewerVersions": 42
+              }
+            }
+          ]
+        },
+        "location": "EU",
+        "logging": {
+          "logBucket": "test-log_bucket",
+          "logObjectPrefix": "test-log_object_prefix"
+        },
+        "name": "image-store-bucket",
+        "project": "{{.Provider.project}}",
+        "retentionPolicy": {
+          "retentionPeriod": "42"
+        },
+        "storageClass": "test-storage_class",
+        "versioning": {
+          "enabled": true
+        },
+        "website": {
+          "mainPageSuffix": "index.html",
+          "notFoundPage": "404.html"
+        }
+      }
+    }
+  }
+]
