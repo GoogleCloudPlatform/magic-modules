@@ -128,7 +128,6 @@ resource "google_cloud_run_v2_service" "default" {
   }
   client = "client-update"
   client_version = "client-version-update"
-  custom_audiences = ["aud1"]
 
   template {
     labels = {
