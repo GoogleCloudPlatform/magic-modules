@@ -31,6 +31,7 @@ resource "google_identity_platform_config" "default" {
   quota {
     sign_up_quota_config {
       quota = 1000
+      start_time = "<%= ctx[:vars]['quota_start_time'] %>"
     }
   }
   authorized_domains = [

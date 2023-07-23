@@ -46,7 +46,9 @@ examples:
       billing_acct:
         :BILLING_ACCT
         # Resource creation race
-    #skip_vcr: true
+    test_vars_overrides:
+      quota_start_time: 'time.Now()'
+    skip_vcr: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_create: 'templates/terraform/custom_create/identity_platform_config.go'
 properties:
@@ -120,7 +122,7 @@ properties:
           - !ruby/object:Api::Type::String
             name: 'quotaDuration'
             description: |
-              How long this quota will be active for.
+              How long this quota will be active for. It is measurred in seconds, e.g., Example: "9.615s".
   - !ruby/object:Api::Type::Array
     name: authorizedDomains
     description: |
