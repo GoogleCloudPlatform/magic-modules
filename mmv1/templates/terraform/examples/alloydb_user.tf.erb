@@ -1,0 +1,5 @@
+resource "google_alloydb_user" "<%= ctx[:primary_resource_id] %>" {
+  name     = "us-central1"
+  password    = "<%= ctx[:vars]['alloydb_password'] %>"
+  instance = google_alloydb_instance.<%= ctx[:primary_resource_id] %>.id
+}

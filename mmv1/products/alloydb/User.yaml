@@ -1,0 +1,79 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'User'
+self_link: '{{cluster}}/users/{{user_id}}'
+base_url: '{{cluster}}/users'
+create_url: '{{cluster}}/users?userId={{user_id}}'
+update_verb: :PATCH
+update_mask: true
+description: 'An AlloyDB User.'
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'AlloyDB': 'https://cloud.google.com/alloydb/docs/'
+  api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.clusters.users/create'
+async: !ruby/object:Provider::Terraform::PollAsync
+  check_response_func_existence: transport_tpg.PollCheckForExistence
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
+  target_occurrences: 10
+  actions: ['create', 'update', 'delete']
+import_format: ['{{cluster}}/users/{{user_id}}']
+autogen_async: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_user'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_password: 'changeme'
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'userId'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The ID of the alloydb user.
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'cluster'
+    description: |
+      Identifies the alloydb cluster. Must be in the format
+      'projects/{project}/locations/{location}/clusters/{cluster_id}'
+    required: true
+    immutable: true
+    resource: 'Cluster'
+    imports: 'name'
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    output: true
+    description: |
+      Output only. The name of the backup resource with the format: * projects/{project}/locations/{region}/backups/{user}
+  - !ruby/object:Api::Type::String
+    name: 'password'
+    description: |
+      Input only. Password for the user.
+  - !ruby/object:Api::Type::Array
+    name: 'databaseRoles'
+    item_type: Api::Type::String
+    description:
+      Optional. List of database roles this user has. The database role strings are subject to the PostgreSQL naming conventions.
+  - !ruby/object:Api::Type::Enum
+    name: 'userType'
+    description: 'Optional. Type of this user.'
+    default_value: :ALLOYDB_BUILT_IN
+    values:
+      - :USER_TYPE_UNSPECIFIED
+      - :ALLOYDB_BUILT_IN
+      - :ALLOYDB_IAM_USER
