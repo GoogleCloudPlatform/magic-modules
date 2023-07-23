@@ -26,7 +26,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 async: !ruby/object:Provider::Terraform::PollAsync
   check_response_func_existence: transport_tpg.PollCheckForExistence
   check_response_func_absence: transport_tpg.PollCheckForAbsence
-  target_occurrences: 10
+  target_occurrences: 1
   actions: ['create', 'update', 'delete']
 import_format: ['{{cluster}}/users/{{user_id}}']
 autogen_async: true
