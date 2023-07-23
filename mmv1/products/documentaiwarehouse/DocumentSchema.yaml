@@ -197,6 +197,33 @@ properties:
                     name: 'isRequired'
                     description: |
                       Whether the property is mandatory.
+                  - !ruby/object:Api::Type::Enum
+                    name: 'retrievalImportance'
+                    description: |
+                      Stores the retrieval importance.
+                    values:
+                      - :HIGHEST
+                      - :HIGHER
+                      - :HIGH
+                      - :MEDIUM
+                      - :LOW
+                      - :LOWEST
+                    default_value: :MEDIUM
+                  - !ruby/object:Api::Type::Array
+                    name: 'schemaSources'
+                    description: |
+                      The schema source information.
+                    item_type: !ruby/object:Api::Type::NestedObject
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'name'
+                          description: |
+                            The schema name in the source.
+                        - !ruby/object:Api::Type::String
+                          name: 'processorType'
+                          required: true
+                          description: |
+                            The Doc AI processor type name.
                   - !ruby/object:Api::Type::NestedObject
                     name: 'textTypeOptions'
                     description: |
