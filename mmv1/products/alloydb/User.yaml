@@ -59,11 +59,13 @@ properties:
     name: 'name'
     output: true
     description: |
-      Output only. The name of the backup resource with the format: * projects/{project}/locations/{region}/backups/{user}
+      Output only. Name of the resource in the form of projects/{project}/locations/{location}/cluster/{cluster}/users/{user}.
   - !ruby/object:Api::Type::String
     name: 'password'
     description: |
       Input only. Password for the user.
+    required: true
+    sensitive: true
   - !ruby/object:Api::Type::Array
     name: 'databaseRoles'
     item_type: Api::Type::String
