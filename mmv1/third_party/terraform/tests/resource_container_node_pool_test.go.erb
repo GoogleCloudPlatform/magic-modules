@@ -2651,7 +2651,7 @@ resource "google_compute_network" "addn_net_2" {
 }
 
 resource "google_compute_subnetwork" "container_subnetwork" {
-  name                     = google_compute_network.container_network.name
+  name                     = "%s-subnet-1"
   network                  = google_compute_network.container_network.name
   ip_cidr_range            = "10.0.36.0/24"
   region                   = "us-central1"
@@ -2667,11 +2667,6 @@ resource "google_compute_subnetwork" "container_subnetwork" {
     ip_cidr_range = "10.0.32.0/22"
   }
 
-  secondary_ip_range {
-    range_name    = "another-pod"
-    ip_cidr_range = "10.1.32.0/22"
-  }
-
   lifecycle {
     ignore_changes = [
       # The auto nodepool creates a secondary range which diffs this resource.
@@ -2681,14 +2676,14 @@ resource "google_compute_subnetwork" "container_subnetwork" {
 }
 
 resource "google_compute_subnetwork" "subnet1" {
-  name                     = google_compute_network.addn_net_1.name
+  name                     = "%s-subnet-2"
   network                  = google_compute_network.addn_net_1.name
   ip_cidr_range            = "10.0.37.0/24"
   region                   = "us-central1"
 }
 
 resource "google_compute_subnetwork" "subnet2" {
-  name                     = google_compute_network.addn_net_2.name
+  name                     = "%s-subnet-3"
   network                  = google_compute_network.addn_net_2.name
   ip_cidr_range            = "10.0.38.0/24"
   region                   = "us-central1"
@@ -2705,6 +2700,10 @@ resource "google_container_cluster" "cluster" {
     cluster_secondary_range_name  = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
     services_secondary_range_name = google_compute_subnetwork.container_subnetwork.secondary_ip_range[1].range_name
   }
+  private_cluster_config {
+    enable_private_nodes    = true
+    master_ipv4_cidr_block  = "10.42.0.0/28"
+  }
   release_channel {
 	channel = "RAPID"
   }
@@ -2719,7 +2718,8 @@ resource "google_container_node_pool" "with_multi_nic" {
   node_count = 1
   network_config {
     create_pod_range = false
-    pod_range = google_compute_subnetwork.container_subnetwork.secondary_ip_range[2].range_name
+    enable_private_nodes = true
+    pod_range = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
 	additional_node_network_configs {
 	  network    = google_compute_network.addn_net_1.name
       subnetwork = google_compute_subnetwork.subnet1.name
@@ -2738,7 +2738,7 @@ resource "google_container_node_pool" "with_multi_nic" {
   }
 }
 
-`, network, network, network, cluster, np)
+`, network, network, network, network, network, network, cluster, np)
 }
 <% end -%>
 
