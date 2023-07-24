@@ -5,5 +5,12 @@ Resource: `{{ $resourceName }}` ({{ len $missingTestInfo.Tests }} total tests)
 {{- if $missingTestInfo.UntestedFields }}
 Untested fields: {{ join (backTickAll $missingTestInfo.UntestedFields) ", " }}
 {{ end }}
-Please add acceptance tests which include these fields.
+Please add an acceptance test which includes these fields. The test should include the following:
+
+```
+{{ $missingTestInfo.SuggestedTest }}
+```
+
+Replace `"VALUE"` with appropriate values for these fields.
+
 {{- end }}

@@ -2,7 +2,6 @@ package main
 
 import (
 	"reflect"
-	"sort"
 	"testing"
 )
 
@@ -15,6 +14,7 @@ func TestDetectMissingTests(t *testing.T) {
 		name                   string
 		changedFields          map[string]ResourceChanges
 		expectedUntestedFields []string
+		expectedSuggestedTest  string
 	}{
 		{
 			name: "covered-resource",
@@ -48,6 +48,15 @@ func TestDetectMissingTests(t *testing.T) {
 				},
 			},
 			expectedUntestedFields: []string{"field_four.field_five.field_six", "field_one"},
+			expectedSuggestedTest: `resource "uncovered_resource" "primary" {
+  field_four {
+    field_five {
+      field_six = "VALUE"
+    }
+  }
+  field_one = "VALUE"
+}
+`,
 		},
 		{
 			name: "config-variable-resource",
@@ -65,6 +74,10 @@ func TestDetectMissingTests(t *testing.T) {
 				},
 			},
 			expectedUntestedFields: []string{"field_one"},
+			expectedSuggestedTest: `resource "no_test" "primary" {
+  field_one = "VALUE"
+}
+`,
 		},
 	} {
 		missingTests, err := detectMissingTests(test.changedFields, allTests)
@@ -80,11 +93,14 @@ func TestDetectMissingTests(t *testing.T) {
 		} else {
 			if len(missingTests) == 1 {
 				for _, missingTest := range missingTests {
-					sort.Strings(missingTest.UntestedFields)
 					if !reflect.DeepEqual(missingTest.UntestedFields, test.expectedUntestedFields) {
 						t.Errorf(
 							"did not find expected untested fields in %s, found %v, expected %v",
 							test.name, missingTest.UntestedFields, test.expectedUntestedFields)
+					}
+					if missingTest.SuggestedTest != test.expectedSuggestedTest {
+						t.Errorf("did not find expected suggested test in %s, found %s, expected %s",
+							test.name, missingTest.SuggestedTest, test.expectedSuggestedTest)
 					}
 				}
 			} else {
