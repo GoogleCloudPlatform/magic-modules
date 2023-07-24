@@ -118,7 +118,6 @@ properties:
                   The schema name in the source.
               - !ruby/object:Api::Type::String
                 name: 'processorType'
-                required: true
                 description: |
                   The Doc AI processor type name.
         # select any one of the property types (integer, float, text, property, enum, dateTime, map, timestamp)
