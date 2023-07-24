@@ -47,7 +47,7 @@ examples:
         :BILLING_ACCT
         # Resource creation race
     test_vars_overrides:
-      quota_start_time: 'time.Now()'
+      quota_start_time: 'time.Now().UTC()'
     skip_vcr: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_create: 'templates/terraform/custom_create/identity_platform_config.go'
