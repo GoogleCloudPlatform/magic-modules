@@ -245,6 +245,7 @@ properties:
                   Map of string keys and values that can be used to organize and categorize
                   (scope and select) objects.
                 default_from_api: true
+                diff_suppress_func: 'cloudrunTemplateLabelDiffSuppress'
               - !ruby/object:Api::Type::Integer
                 name: generation
                 description: |-
