@@ -53,7 +53,6 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
       'projects/{{project}}/locations/global/scopes/{{scope_id}}',
       '{{scope_id}}',
     ]
-autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkehub_scope_basic'
