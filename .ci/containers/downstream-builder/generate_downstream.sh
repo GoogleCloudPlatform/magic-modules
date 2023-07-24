@@ -102,7 +102,7 @@ fi
 if [ "$REPO" == "terraform" ]; then
     pushd $LOCAL_PATH
     go mod download
-    find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name ".go-version" -not -name ".hashibot.hcl" -exec git rm {} \;
+    find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name ".go-version" -not -name ".hashibot.hcl" -print0 | xargs -0 git rm
     popd
 fi
 
@@ -121,19 +121,12 @@ if [ "$REPO" == "terraform-google-conversion" ]; then
 
     pushd $LOCAL_PATH
 
-    if [ "$VERSION" == "ga" ]; then
-      if [ "$COMMAND" == "downstream" ]; then
-        go get -d github.com/hashicorp/terraform-provider-google@$BASE_BRANCH
-      else
-        go mod edit -replace github.com/hashicorp/terraform-provider-google=github.com/$SCRATCH_OWNER/terraform-provider-google@$BRANCH
-      fi
-    elif [ "$VERSION" == "beta" ]; then
-      if [ "$COMMAND" == "downstream" ]; then
-        go get -d github.com/hashicorp/terraform-provider-google-beta@$BASE_BRANCH
-      else
-        go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/$SCRATCH_OWNER/terraform-provider-google-beta@$BRANCH
-      fi
+    if [ "$COMMAND" == "downstream" ]; then
+      go get -d github.com/hashicorp/terraform-provider-google-beta@$BASE_BRANCH
+    else
+      go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/$SCRATCH_OWNER/terraform-provider-google-beta@$BRANCH
     fi
+
 
     go mod tidy
 

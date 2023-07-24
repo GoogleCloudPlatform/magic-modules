@@ -490,8 +490,7 @@ func generateResourceTestFile(res *Resource) {
 		fmt.Printf("%v", string(formatted))
 	} else {
 		outname := fmt.Sprintf("resource_%s_%s_generated_test.go", res.ProductName(), res.Name())
-		parentDir := getParentDir(res)
-		err = ioutil.WriteFile(path.Join(parentDir, outname), formatted, 0644)
+		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
 		if err != nil {
 			glog.Exit(err)
 		}
