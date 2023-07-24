@@ -487,6 +487,13 @@ properties:
             should be specified.
         # networkInterfaces.kind is not necessary for convergence.
           custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+        - !ruby/object:Api::Type::ResourceRef
+          name: 'networkAttachment'
+          resource: 'networkAttachment'
+          imports: 'selfLink'
+          description: |
+            The URL of the network attachment that this interface should connect to in the following format:
+            projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.
   - !ruby/object:Api::Type::NestedObject
     name: 'scheduling'
     description: Sets the scheduling options for this instance.
