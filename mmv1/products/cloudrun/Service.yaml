@@ -244,6 +244,7 @@ properties:
                 description: |-
                   Map of string keys and values that can be used to organize and categorize
                   (scope and select) objects.
+                default_from_api: true
               - !ruby/object:Api::Type::Integer
                 name: generation
                 description: |-
