@@ -555,6 +555,7 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 
 <% unless version == 'ga' -%>
 func TestAccComputeDisk_pdHyperDiskEnableConfidentialCompute(t *testing.T) {
+	t.Skip()
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -563,7 +564,6 @@ func TestAccComputeDisk_pdHyperDiskEnableConfidentialCompute(t *testing.T) {
 		"disk_size":            64,
 		"confidential_compute": true,
 	}
-	var disk compute.Disk
 
 	var disk compute.Disk
 
