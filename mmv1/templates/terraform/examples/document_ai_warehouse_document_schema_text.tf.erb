@@ -1,48 +1,4 @@
-resource "google_document_ai_warehouse_document_schema" "<%= ctx[:primary_resource_id] %>" {
-  project_number = "406397197218"
-  display_name   = "test-property-integer"
-  location       = "us"
-
-  property_definitions {
-    name                 = "prop1"
-    display_name         = "propdisp1"
-    is_repeatable        = false
-    is_filterable        = true
-    is_searchable        = true
-    is_metadata          = false
-    is_required          = false
-    retrieval_importance = "HIGHEST"
-    schema_sources {
-      name           = "dummy_source"
-      processor_type = "dummy_processor"
-    }
-    integer_type_options {}
-  }
-}
-
-resource "google_document_ai_warehouse_document_schema" "<%= ctx[:primary_resource_id] %>" {
-  project_number = "406397197218"
-  display_name   = "test-property-float"
-  location       = "us"
-
-  property_definitions {
-    name                 = "prop2"
-    display_name         = "propdisp2"
-    is_repeatable        = false
-    is_filterable        = true
-    is_searchable        = true
-    is_metadata          = false
-    is_required          = false
-    retrieval_importance = "HIGHEST"
-    schema_sources {
-      name           = "dummy_source"
-      processor_type = "dummy_processor"
-    }
-    float_type_options {}
-  }
-}
-
-resource "google_document_ai_warehouse_document_schema" "<%= ctx[:primary_resource_id] %>" {
+resource "google_document_ai_warehouse_document_schema" "example_text" {
   project_number     = "406397197218"
   display_name       = "test-property-text"
   location           = "us"
@@ -65,7 +21,51 @@ resource "google_document_ai_warehouse_document_schema" "<%= ctx[:primary_resour
   }
 }
 
-resource "google_document_ai_warehouse_document_schema" "<%= ctx[:primary_resource_id] %>" {
+resource "google_document_ai_warehouse_document_schema" "example_integer" {
+  project_number = "406397197218"
+  display_name   = "test-property-integer"
+  location       = "us"
+
+  property_definitions {
+    name                 = "prop1"
+    display_name         = "propdisp1"
+    is_repeatable        = false
+    is_filterable        = true
+    is_searchable        = true
+    is_metadata          = false
+    is_required          = false
+    retrieval_importance = "HIGHEST"
+    schema_sources {
+      name           = "dummy_source"
+      processor_type = "dummy_processor"
+    }
+    integer_type_options {}
+  }
+}
+
+resource "google_document_ai_warehouse_document_schema" "example_float" {
+  project_number = "406397197218"
+  display_name   = "test-property-float"
+  location       = "us"
+
+  property_definitions {
+    name                 = "prop2"
+    display_name         = "propdisp2"
+    is_repeatable        = false
+    is_filterable        = true
+    is_searchable        = true
+    is_metadata          = false
+    is_required          = false
+    retrieval_importance = "HIGHEST"
+    schema_sources {
+      name           = "dummy_source"
+      processor_type = "dummy_processor"
+    }
+    float_type_options {}
+  }
+}
+
+resource "google_document_ai_warehouse_document_schema" "example_property" {
   project_number     = "406397197218"
   display_name       = "test-property-property"
   location           = "us"
@@ -104,7 +104,7 @@ resource "google_document_ai_warehouse_document_schema" "<%= ctx[:primary_resour
   }
 }
 
-resource "google_document_ai_warehouse_document_schema" "<%= ctx[:primary_resource_id] %>" {
+resource "google_document_ai_warehouse_document_schema" "example_enum" {
   project_number = "406397197218"
   display_name   = "test-property-enum"
   location       = "us"
@@ -133,7 +133,7 @@ resource "google_document_ai_warehouse_document_schema" "<%= ctx[:primary_resour
   }
 }
 
-resource "google_document_ai_warehouse_document_schema" "<%= ctx[:primary_resource_id] %>" {
+resource "google_document_ai_warehouse_document_schema" "example_datetime" {
   project_number = "406397197218"
   display_name   = "test-property-date_time"
   location       = "us"
@@ -155,7 +155,7 @@ resource "google_document_ai_warehouse_document_schema" "<%= ctx[:primary_resour
   }
 }
 
-resource "google_document_ai_warehouse_document_schema" "<%= ctx[:primary_resource_id] %>" {
+resource "google_document_ai_warehouse_document_schema" "example_map" {
   project_number = "406397197218"
   display_name   = "test-property-map"
   location       = "us"
@@ -177,7 +177,7 @@ resource "google_document_ai_warehouse_document_schema" "<%= ctx[:primary_resour
   }
 }
 
-resource "google_document_ai_warehouse_document_schema" "<%= ctx[:primary_resource_id] %>" {
+resource "google_document_ai_warehouse_document_schema" "example_timestamp" {
   project_number = "406397197218"
   display_name   = "test-property-timestamp"
   location       = "us"
@@ -198,8 +198,6 @@ resource "google_document_ai_warehouse_document_schema" "<%= ctx[:primary_resour
     timestamp_type_options {}
   }
 }
-
-
 
 data "google_project" "project" {
 }
