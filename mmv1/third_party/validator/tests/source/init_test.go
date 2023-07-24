@@ -157,12 +157,6 @@ func normalizeAssets(t *testing.T, assets []caiasset.Asset, offline bool) []caia
 				asset.Resource.Data["name"] = re.ReplaceAllString(name, "/placeholder-foobar")
 			}
 		}
-		// skip comparing version, DiscoveryDocumentURI,
-		// since switching to beta generates version difference
-		if asset.Resource != nil {
-			asset.Resource.Version = ""
-			asset.Resource.DiscoveryDocumentURI = ""
-		}
 		ret[i] = asset
 	}
 	sort.Slice(ret, func(i, j int) bool {
