@@ -60,6 +60,8 @@ examples:
     primary_resource_id: 'full'
     vars:
       alloydb_cluster_name: 'alloydb-cluster-full'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: templates/terraform/post_create/org_security_policy_association.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'clusterId'
@@ -89,6 +91,13 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: 'User-defined labels for the alloydb cluster.'
+   - !ruby/object:Api::Type::Boolean
+    name: 'createSecondary'
+    input: true
+    default: false
+    url_param_only: true
+    description: |
+      Set to true if the cluster should be created as a secondary cluster.
   - !ruby/object:Api::Type::NestedObject
     name: 'encryptionConfig'
     description: |
@@ -165,6 +174,15 @@ properties:
         description: |
           Names of the clusters that are replicating from this cluster.
         output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: "secondaryConfig"
+    description: |
+      Cross Region replication config specific to SECONDARY cluster.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "primaryClusterName"
+        description: |
+          The name of the primary cluster name with the format: projects/{project}/locations/{region}/clusters/{clusterId}.
   - !ruby/object:Api::Type::NestedObject
     name: 'automatedBackupPolicy'
     description: |

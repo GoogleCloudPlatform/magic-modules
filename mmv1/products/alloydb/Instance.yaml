@@ -153,6 +153,7 @@ properties:
       The type of the instance. If the instance type is READ_POOL, provide the associated PRIMARY instance in the `depends_on` meta-data attribute.
     values:
       - :PRIMARY
+      - :SECONDARY
       - :READ_POOL
   - !ruby/object:Api::Type::String
     name: 'ipAddress'
