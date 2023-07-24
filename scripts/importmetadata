@@ -1,7 +1,7 @@
 #!/bin/bash
 # Generates an import format metadata file
-# Requires a built provider at a default location of 
-# $GOPATH/src/github.com/hashicorp/terraform-provider-google/google/
+# Requires a built provider to reference, defaults to
+# $GOPATH/src/github.com/hashicorp/<tpg ga or beta>/...
 # 
 # Produces via following priorities:
 # Checks for all output .go resources with a declared Importer: in schema
@@ -13,8 +13,10 @@
 shopt -s nullglob
 
 if [ -z "$1" ]
-echo "Please run script with the format `./scripts/importmetadata <ga or beta> <basepath (optional arg)>`
-
+then
+	echo "Please run script with the format './scripts/importmetadata <ga or beta> <basepath (optional arg)>'"
+	exit 1
+fi
 if [ -z "$2" ]
 then
 	basepath="$GOPATH/src/github.com/hashicorp/"
@@ -23,9 +25,9 @@ else
 fi
 if [ "$1"=="beta" ]
 then
-	basepath="${basepath}/terraform-provider-google-beta/google-beta
+	basepath="${basepath}/terraform-provider-google-beta/google-beta"
 else
-	basepath="${basepath}/terraform-provider-google/google
+	basepath="${basepath}/terraform-provider-google/google"
 fi
 
 echo "# $resource_type: [list-of-acceptable-import-templates]" > importmetadata.txt
@@ -53,18 +55,18 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 #logging bucket config uses MD files
 #needs to extract formats from MD files
 			resourcenogoog=${resource/google_/}
-			resourcemd=$GOPATH/src/github.com/hashicorp/terraform-provider-google/website/docs/r/$resourcenogoog.html.markdown
+			resourcemd=$basepath/website/docs/r/$resourcenogoog.html.markdown
 			importformat=$(ggrep -Pzo '```\n\$ terraform import(.*\n)*?```' $resourcemd)
 			if [ -z "$importformat"  ]
     		then
 				echo -n \	\"$resource\"\: >> importmetadata.txt
 				echo \	NON STANDARD MD LOGGING >> importmetadata.txt
     		else
-#				echo -n \	\"$resource\"\: >> importmetadata.txt
+				echo -n \	\"$resource\"\: >> importmetadata.txt
 				importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
 				importformat=$(sed -e 's| \$ terraform import [^.]*\.[^[[:space:]]* |", "|g'  <<< $importformat)
 				importformat=$(sed -e 's| ```|\"\]|g'  <<< $importformat)
-#		    	echo \ "$importformat" >> importmetadata.txt
+		    	echo \ "$importformat" >> importmetadata.txt
 	    	fi
 		fi
     else
@@ -79,7 +81,7 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 			then
 #if not passthrough or standard, will attempt to pull from MD
 				resourcenogoog=${resource/google_/}
-				resourcemd=$GOPATH/src/github.com/hashicorp/terraform-provider-google/website/docs/r/$resourcenogoog.html.markdown
+				resourcemd=$basepath/website/docs/r/$resourcenogoog.html.markdown
 
 #fake resources
 				if [[ "$resourcenogoog" == "logging_bucket_config" || "$resourcenogoog" == "logging_exclusion" ]]; then
@@ -91,7 +93,7 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 				if [ -z "$importformat"  ]
 	    		then
 #need to do a different check for google_* resources
-	    			resourcemd=$GOPATH/src/github.com/hashicorp/terraform-provider-google/website/docs/r/$resource.html.markdown
+	    			resourcemd=$basepath/website/docs/r/$resource.html.markdown
 					importformat=$(ggrep -Pzos '```\n\$ terraform import(.*\n)*?```' $resourcemd)
 					if [ -z "$importformat"  ]
     				then
@@ -112,56 +114,71 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 					##logging bucket config is fake resource
 					##
 	    		else
-#					echo -n \	\"$resource\"\: >> importmetadata.txt
+					echo -n \	\"$resource\"\: >> importmetadata.txt
 					importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
 					importformat=$(sed -e 's| \$ terraform import [^.]*\.[^[[:space:]]* |", "|g'  <<< $importformat)
 					importformat=$(sed -e 's| ```|\"\]|g'  <<< $importformat)
-#			    	echo \ "$importformat" >> importmetadata.txt
+			    	echo \ "$importformat" >> importmetadata.txt
 		    	fi
 		    else
-				echo -n \	\"$resource\"\: >> importmetadata.txt
 #these want generically "id", which can be a single field (usually project id), or multiple combined. there is no consistent format to programatically generate formats based on existing files or markdown.
 #as this is functionally unusable for creating this metadata format, all of these resources need to be hardcoded
 
 				case $resource in
 				google_app_engine_application)
+					echo -n \	\"$resource\"\: >> importmetadata.txt
 					echo \ '["{{project}}"]' >> importmetadata.txt
 					;;
 				google_compute_project_default_network_tier)
+					echo -n \	\"$resource\"\: >> importmetadata.txt
 					echo \ '["{{project}}"]' >> importmetadata.txt
 					;;
 				google_compute_project_metadata)
+					echo -n \	\"$resource\"\: >> importmetadata.txt
 					echo \ '["{{project}}"]' >> importmetadata.txt
 					;;
 				google_compute_project_metadata_item)
+					echo -n \	\"$resource\"\: >> importmetadata.txt
 					echo \ '["{{key}}"]' >> importmetadata.txt
 					;;
 				google_compute_shared_vpc_host_project)
+					echo -n \	\"$resource\"\: >> importmetadata.txt
 					echo \ '["{{project}}"]' >> importmetadata.txt
 					;;
 				google_compute_shared_vpc_service_project)
+					echo -n \	\"$resource\"\: >> importmetadata.txt
 					echo \ '["{{host_project}}/{{service_project}}"]' >> importmetadata.txt
 					;;
 				google_dataflow_job)
+					echo -n \	\"$resource\"\: >> importmetadata.txt
 					echo \ '["{{job_id}}"]' >> importmetadata.txt
 					;;
 				google_billing_subaccount)
+					echo -n \	\"$resource\"\: >> importmetadata.txt
 					echo \ '["billingAccounts/{{master_billing_account}}"]' >> importmetadata.txt
 					;;
 				google_organization_iam_custom_role)
+					echo -n \	\"$resource\"\: >> importmetadata.txt
 					echo \ '["organizations/{{org_id}}/roles/{{role_id}}"]' >> importmetadata.txt
 					;;
 				google_storage_notification)
+					echo -n \	\"$resource\"\: >> importmetadata.txt
 					echo \ '["{{notification_id}}", "{{bucket}}/notificationConfigs/{{id}}"]' >> importmetadata.txt
 					;;
+				google_dataflow_flex_template_job)
+#code checks for importstatepassthrough but officially does not support importing so we proceed with no entry
+					;;
+				google_compute_disk_async_replication)
+#code checks for importstatepassthrough but officially does not support importing so we proceed with no entry
+					;;
 				*)
-					echo \ NOT CONFIGURED
+#should not be generated -- will be configured with error code for CI integration
+					echo -n "$resource: " >> importmetadata.txt
+					echo \ NOT CONFIGURED  >> importmetadata.txt
 				esac
-
-#				echo \"{{these want id via importstatepassthrough}}\"\: >> importmetadata.txt
 			fi
 	    else
-#			echo -n \	\"$resource\"\: >> importmetadata.txt
+			echo -n \	\"$resource\"\: >> importmetadata.txt
 			importformat=${importformat/tpgresource.ParseImportId\(\[\]string\{/\[}
 			importformat=${importformat/\}/]}
 			importformat=${importformat//(?P</\{\{}}
@@ -176,7 +193,7 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 			importformat=$(sed -e 's|, \]|\]|g'  <<< $importformat)
 			importformat=$(sed -e 's|\[ \"|\[\"|g'  <<< $importformat)
 
-#	    	echo \ "$importformat" >> importmetadata.txt
+	    	echo \ "$importformat" >> importmetadata.txt
 	    fi
 	fi
 done
