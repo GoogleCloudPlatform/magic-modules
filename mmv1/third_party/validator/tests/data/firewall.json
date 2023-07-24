@@ -4,23 +4,23 @@
     "asset_type": "compute.googleapis.com/Firewall",
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "resource": {
-      "version": "v1",
-      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+      "version": "beta",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
       "discovery_name": "Firewall",
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "allowed": [
-            {
-                "IPProtocol": "icmp"
-            },
-            {
-                "IPProtocol": "tcp",
-                "ports": [
-                    "80",
-                    "8080",
-                    "1000-2000"
-                ]
-            }
+          {
+            "IPProtocol": "icmp"
+          },
+          {
+            "IPProtocol": "tcp",
+            "ports": [
+              "80",
+              "8080",
+              "1000-2000"
+            ]
+          }
         ],
         "disabled": false,
         "logConfig": {
@@ -30,7 +30,7 @@
         "network": "projects/{{.Provider.project}}/global/networks/default",
         "priority": 1000,
         "sourceTags": [
-            "web"
+          "web"
         ]
       }
     }
