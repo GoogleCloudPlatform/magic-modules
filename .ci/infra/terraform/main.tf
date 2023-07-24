@@ -263,6 +263,7 @@ module "project-services" {
     "multiclustermetering.googleapis.com",
     "networkconnectivity.googleapis.com",
     "networkmanagement.googleapis.com",
+    "networksecurity.googleapis.com",
     "networkservices.googleapis.com",
     "notebooks.googleapis.com",
     "orgpolicy.googleapis.com",
