@@ -61,7 +61,7 @@ examples:
     vars:
       alloydb_cluster_name: 'alloydb-cluster-full'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_create: templates/terraform/post_create/org_security_policy_association.go.erb
+  post_create: templates/terraform/post_create/alloydb_secondary_cluster_create.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'clusterId'
