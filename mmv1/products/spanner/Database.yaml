@@ -14,7 +14,8 @@
 --- !ruby/object:Api::Resource
 name: 'Database'
 base_url: projects/{{project}}/instances/{{instance}}/databases
-immutable: true
+update_verb: :PATCH
+update_mask: true
 description: |
   A Cloud Spanner Database which is hosted on a Spanner instance.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -80,7 +81,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   update_encoder: templates/terraform/update_encoder/spanner_database.go.erb
   post_create: templates/terraform/post_create/spanner_database.go.erb
   pre_delete: templates/terraform/pre_delete/resource_spanner_database.go
-  custom_update: templates/terraform/custom_update/spanner_database.go.erb
+  pre_update: templates/terraform/pre_update/spanner_database.go.erb
 custom_diff: [
   'resourceSpannerDBDdlCustomDiff',
 ]
@@ -90,6 +91,7 @@ parameters:
     resource: 'Instance'
     imports: 'name'
     description: 'The instance to create the database on.'
+    immutable: true
     required: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
@@ -140,17 +142,20 @@ properties:
       - :CREATING
   - !ruby/object:Api::Type::NestedObject
     name: 'encryptionConfig'
+    immutable: true
     description: |
       Encryption configuration for the database
     properties:
       - !ruby/object:Api::Type::String
         name: 'kmsKeyName'
+        immutable: true
         required: true
         description: |
           Fully qualified name of the KMS key to use to encrypt this database. This key must exist
           in the same location as the Spanner Database.
   - !ruby/object:Api::Type::Enum
     name: 'databaseDialect'
+    immutable: true
     description: |
       The dialect of the Cloud Spanner Database.
       If it is not provided, "GOOGLE_STANDARD_SQL" will be used.
@@ -160,8 +165,8 @@ properties:
     default_from_api: true
   - !ruby/object:Api::Type::Boolean
     name: 'enableDropProtection'
-    update_url: projects/{{project}}/instances/{{instance}}/databases/{{name}}
-    update_verb: :PATCH
+    # update_url: projects/{{project}}/instances/{{instance}}/databases/{{name}}
+    # update_verb: :PATCH
     default_value: false
     description: |
       Whether drop protection is enabled for this database. Defaults to false.
