@@ -191,6 +191,19 @@ properties:
           - v1beta1: uses the push format defined in the v1beta1 Pub/Sub API.
           - v1 or v1beta2: uses the push format defined in the v1 Pub/Sub API.
         diff_suppress_func: 'tpgresource.IgnoreMissingKeyInMap("x-goog-version")'
+      - !ruby/object:Api::Type::NestedObject
+        name: 'no_wrapper'
+        description: |
+          When set, the payload to the push endpoint is not wrapped.Sets the
+          `data` field as the HTTP body for delivery.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'writeMetadata'
+            required: true
+            description: |
+              When true, writes the Pub/Sub message metadata to
+             `x-goog-pubsub-<KEY>:<VAL>` headers of the HTTP request. Writes the
+              Pub/Sub message attributes to `<KEY>:<VAL>` headers of the HTTP request.
   - !ruby/object:Api::Type::Integer
     name: 'ackDeadlineSeconds'
     description: |
