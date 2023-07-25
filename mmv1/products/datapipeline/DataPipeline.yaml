@@ -141,7 +141,7 @@ properties:
                     description: |
                       The Compute Engine availability zone for launching worker instances to run your pipeline. In the future, workerZone will take precedence.
                   - !ruby/object:Api::Type::String
-                    name: 'schedulerServiceAccountEmail'
+                    name: 'serviceAccountEmail'
                     description: |
                       The email address of the service account to run the job as.
                   - !ruby/object:Api::Type::String
@@ -156,8 +156,9 @@ properties:
                     name: 'machineType'
                     description: |
                       The machine type to use for the job. Defaults to the value from the template if not specified.
-                  - !ruby/object:Api::Type::String
+                  - !ruby/object:Api::Type::Array
                     name: 'additionalExperiments'
+                    item_type: Api::Type::String
                     description: |
                       Additional experiment flags for the job.
                   - !ruby/object:Api::Type::String
@@ -269,7 +270,7 @@ properties:
                     description: |
                       The Compute Engine availability zone for launching worker instances to run your pipeline. In the future, workerZone will take precedence.
                   - !ruby/object:Api::Type::String
-                    name: 'schedulerServiceAccountEmail'
+                    name: 'serviceAccountEmail'
                     description: |
                       The email address of the service account to run the job as.
                   - !ruby/object:Api::Type::String
@@ -280,8 +281,9 @@ properties:
                     name: 'machineType'
                     description: |
                       The machine type to use for the job. Defaults to the value from the template if not specified.
-                  - !ruby/object:Api::Type::String
+                  - !ruby/object:Api::Type::Array
                     name: 'additionalExperiments'
+                    item_type: Api::Type::String
                     description: |
                       Additional experiment flags for the job.
                   - !ruby/object:Api::Type::String
@@ -385,7 +387,7 @@ properties:
     description: |
       Optional. A service account email to be used with the Cloud Scheduler job. If not specified, the default compute engine service account will be used.
   - !ruby/object:Api::Type::KeyValuePairs
-    name: 'piplineSources'
+    name: 'pipelineSources'
     description: |
        The sources of the pipeline (for example, Dataplex). The keys and values are set by the corresponding sources during pipeline creation.
        An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
