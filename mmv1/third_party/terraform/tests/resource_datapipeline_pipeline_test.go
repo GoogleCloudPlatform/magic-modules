@@ -94,7 +94,7 @@ func TestAccDataPipelinePipeline_basic(t *testing.T) {
 func testAccDataPipelinePipeline_basicUpdate() string {
 	return `
 resource "google_data_pipeline_pipeline" "primary" {
-  name         = "my-pipeline"
+  name         = "tf-test-pipeline"
   display_name = "update-pipeline"
   type         = "PIPELINE_TYPE_BATCH"
   state        = "STATE_ACTIVE"
@@ -110,7 +110,7 @@ resource "google_data_pipeline_pipeline" "primary" {
         container_spec_gcs_path = "gs://my-bucket/templates/template_file"
       }
       location      = "us-central1"
-      validate_only = true
+      validate_only = false
     }
   }
   schedule_info {
@@ -123,7 +123,7 @@ resource "google_data_pipeline_pipeline" "primary" {
 func testAccDataPipelinePipeline_basic() string {
 	return `
 resource "google_data_pipeline_pipeline" "primary" {
-  name         = "my-pipeline"
+  name         = "tf-test-pipeline"
   type         = "PIPELINE_TYPE_BATCH"
   state        = "STATE_ACTIVE"
 
@@ -138,7 +138,7 @@ resource "google_data_pipeline_pipeline" "primary" {
         container_spec_gcs_path = "gs://my-bucket/templates/template_file"
       }
       location      = "us-central1"
-      validate_only = true
+      validate_only = false
     }
   }
   schedule_info {
