@@ -163,6 +163,7 @@ properties:
       MavenRepositoryConfig is maven related repository details.
       Provides additional configuration details for repositories of the maven
       format type.
+    allow_empty_object: true
     properties:
       # Maven properties.
       - !ruby/object:Api::Type::Boolean
@@ -181,6 +182,7 @@ properties:
           - :RELEASE
           - :SNAPSHOT
         default_value: :VERSION_POLICY_UNSPECIFIED
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   - !ruby/object:Api::Type::Enum
     name: 'mode'
     description: |-
