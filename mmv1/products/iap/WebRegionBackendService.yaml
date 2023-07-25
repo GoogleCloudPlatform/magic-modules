@@ -34,12 +34,12 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_backend_service_basic'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'region_backend-service'
-      http_health_check_name: 'health-check'
     primary_resource_name: "fmt.Sprintf(\"tf-test-region-backend-service%s\",
-      context[\"\
-      random_suffix\"])"
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      region_backend_service_name: 'region-backend-service'
+      health_check_name: 'health-check'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
