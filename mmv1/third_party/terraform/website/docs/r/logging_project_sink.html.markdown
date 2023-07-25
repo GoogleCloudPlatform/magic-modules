@@ -181,5 +181,5 @@ exported:
 Project-level logging sinks can be imported using their URI, e.g.
 
 ```
-$ terraform import google_logging_project_sink.my_sink projects/my-project/sinks/my-sink
+$ terraform import google_logging_project_sink.my_sink projects/{{project}}/sinks/{{name}}
 ```

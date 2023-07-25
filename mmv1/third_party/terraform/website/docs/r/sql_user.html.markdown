@@ -148,5 +148,5 @@ $ terraform import google_sql_user.users my-project/main-instance/my-domain.com/
 SQL users for PostgreSQL databases can be imported using the `project`, `instance` and `name`, e.g.
 
 ```
-$ terraform import google_sql_user.users my-project/main-instance/me
+$ terraform import google_sql_user.users {{project}}/{{instance}}/{{name}}
 ```

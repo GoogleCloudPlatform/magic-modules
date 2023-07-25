@@ -252,8 +252,8 @@ not enabled).
 e.g.
 
 ```
-$ terraform import google_storage_bucket.image-store image-store-bucket
-$ terraform import google_storage_bucket.image-store tf-test-project/image-store-bucket
+$ terraform import google_storage_bucket.image-store {{name}}
+$ terraform import google_storage_bucket.image-store {{project}}/{{name}}
 ```
 
 ~> **Note:** Terraform will import this resource with `force_destroy` set to

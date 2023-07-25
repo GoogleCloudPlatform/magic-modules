@@ -295,5 +295,5 @@ exported:
 Storage buckets can be imported using the Transfer Job's `project` and `name` without the `transferJob/` prefix, e.g.
 
 ```
-$ terraform import google_storage_transfer_job.nightly-backup-transfer-job my-project-1asd32/8422144862922355674
+$ terraform import google_storage_transfer_job.nightly-backup-transfer-job {{project}}/{{name}}
 ```

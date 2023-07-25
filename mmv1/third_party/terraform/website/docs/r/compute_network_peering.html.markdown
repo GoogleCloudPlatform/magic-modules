@@ -93,5 +93,5 @@ This resource provides the following
 VPC network peerings can be imported using the name and project of the primary network the peering exists in and the name of the network peering
 
 ```
-$ terraform import google_compute_network_peering.peering_network project-name/network-name/peering-name
+$ terraform import google_compute_network_peering.peering_network {{project}}/{{network}}/{{peer_network}}
 ```

@@ -138,7 +138,7 @@ exported:
 Organization Policies can be imported using the `org_id` and the `constraint`, e.g.
 
 ```
-$ terraform import google_organization_policy.services_policy 123456789/constraints/serviceuser.services
+$ terraform import google_organization_policy.services_policy {{ord_id}}/constraints/{{constraint}}
 ```
 
 It is all right if the constraint contains a slash, as in the example above.

@@ -121,5 +121,5 @@ This resource provides the following
 Projects can be imported using the `project_id`, e.g.
 
 ```
-$ terraform import google_project.my_project your-project-id
+$ terraform import google_project.my_project {{project_id}}
 ```

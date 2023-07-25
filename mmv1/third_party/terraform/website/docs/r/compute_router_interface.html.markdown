@@ -85,6 +85,6 @@ This resource provides the following
 Router interfaces can be imported using the `project` (optional), `region`, `router`, and `name`, e.g.
 
 ```
-$ terraform import google_compute_router_interface.foobar my-project/us-central1/router-1/interface-1
-$ terraform import google_compute_router_interface.foobar us-central1/router-1/interface-1
+$ terraform import google_compute_router_interface.foobar {{project}}/{{region}}/{{router}}/{{name}}
+$ terraform import google_compute_router_interface.foobar {{region}}/{{router}}/{{name}}
 ```

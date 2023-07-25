@@ -36,6 +36,7 @@ echo "{" >> importmetadata.txt
 
 for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 	importable=$(ggrep -Pzo 'Importer:' $file)
+	product=
 	shortfile="$(basename $file .go)"
 	resource=${shortfile/resource/google}
 
@@ -61,18 +62,21 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 #needs to extract formats from MD files
 			resourcenogoog=${resource/google_/}
 			resourcemd=$basepath/website/docs/r/$resourcenogoog.html.markdown
-			importformat=$(ggrep -Pzo '```\n\$ terraform import(.*\n)*?```' $resourcemd)
-			if [ -z "$importformat"  ]
-    		then
-				echo -n \	\"$resource\"\: >> importmetadata.txt
-				echo \	NON STANDARD MD LOGGING >> importmetadata.txt
-    		else
-				echo -n \	\"$resource\"\: >> importmetadata.txt
-				importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
-				importformat=$(sed -e 's| \$ terraform import [^.]*\.[^[[:space:]]* |", "|g'  <<< $importformat)
-				importformat=$(sed -e 's| ```|\"\]|g'  <<< $importformat)
-		    	echo \ "$importformat" >> importmetadata.txt
-	    	fi
+	    	if [ -f "$resourcemd" ]
+	    	then
+				importformat=$(ggrep -Pzo '```\n\$ terraform import(.*\n)*?```' $resourcemd)
+				if [ -z "$importformat"  ]
+	    		then
+					echo -n \	\"$resource\"\: >> importmetadata.txt
+					echo \	NON STANDARD MD LOGGING >> importmetadata.txt
+	    		else
+					echo -n \	\"$resource\"\: >> importmetadata.txt
+					importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
+					importformat=$(sed -e 's| \$ terraform import [^.]*\.[^[[:space:]]* |", "|g'  <<< $importformat)
+					importformat=$(sed -e 's| ```|\"\]|g'  <<< $importformat)
+			    	echo \ "$importformat" >> importmetadata.txt
+		    	fi
+		    fi
 		fi
 ##############################################
     else
@@ -90,44 +94,40 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 # if not passthrough or standard, will attempt to pull from MD
 				resourcenogoog=${resource/google_/}
 				resourcemd=$basepath/website/docs/r/$resourcenogoog.html.markdown
-
-# fake resources
-				if [[ "$resourcenogoog" == "logging_bucket_config" || "$resourcenogoog" == "logging_exclusion" ]]; then
-				    continue
-			    fi
-
-
-				importformat=$(ggrep -Pzos '```\n\$ terraform import(.*\n)*?```' $resourcemd)
-				if [ -z "$importformat"  ]
-	    		then
-# need to do a different check for google_* resources
-	    			resourcemd=$basepath/website/docs/r/$resource.html.markdown
+				if [ -f "$resourcemd" ]
+		    	then
 					importformat=$(ggrep -Pzos '```\n\$ terraform import(.*\n)*?```' $resourcemd)
 					if [ -z "$importformat"  ]
-    				then
-						echo -n \	\"$resource\"\: >> importmetadata.txt
-						if [[ "$resource" == "google_folder" ]]
-						then
-							echo \ '["folders/{{folder_id}}", "{{folder_id}}"]' >> importmetadata.txt
+		    		then
+# need to do a different check for google_* resources
+		    			resourcemd=$basepath/website/docs/r/$resource.html.markdown
+						importformat=$(ggrep -Pzos '```\n\$ terraform import(.*\n)*?```' $resourcemd)
+						if [ -z "$importformat"  ]
+	    				then
+							echo -n \	\"$resource\"\: >> importmetadata.txt
+							if [[ "$resource" == "google_folder" ]]
+							then
+								echo \ '["folders/{{folder_id}}", "{{folder_id}}"]' >> importmetadata.txt
+							else
+								echo \	NON STANDARD MD >> importmetadata.txt
+							fi
 						else
-							echo \	NON STANDARD MD >> importmetadata.txt
-						fi
-					else
+							echo -n \	\"$resource\"\: >> importmetadata.txt
+							importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
+							importformat=$(sed -e 's| \$ terraform import [^.]*\.[^[[:space:]]* |", "|g'  <<< $importformat)
+							importformat=$(sed -e 's| ```|\"\]|g'  <<< $importformat)
+					    	echo \ "$importformat" >> importmetadata.txt
+					    fi
+						##logging bucket config is fake resource
+						##
+		    		else
 						echo -n \	\"$resource\"\: >> importmetadata.txt
 						importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
 						importformat=$(sed -e 's| \$ terraform import [^.]*\.[^[[:space:]]* |", "|g'  <<< $importformat)
 						importformat=$(sed -e 's| ```|\"\]|g'  <<< $importformat)
 				    	echo \ "$importformat" >> importmetadata.txt
-				    fi
-					##logging bucket config is fake resource
-					##
-	    		else
-					echo -n \	\"$resource\"\: >> importmetadata.txt
-					importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
-					importformat=$(sed -e 's| \$ terraform import [^.]*\.[^[[:space:]]* |", "|g'  <<< $importformat)
-					importformat=$(sed -e 's| ```|\"\]|g'  <<< $importformat)
-			    	echo \ "$importformat" >> importmetadata.txt
-		    	fi
+			    	fi
+			    fi
 		    else
 # ImportStatePassthrough resources want generically "id", which can be a single field (usually project id), or multiple combined. there is no consistent format to programatically generate formats based on existing files or markdown.
 #as this is functionally unusable for automatically creating this metadata format, all of these resources need to be hardcoded
@@ -202,6 +202,14 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 			importformat=$(sed -e 's|, \]|\]|g'  <<< $importformat)
 			importformat=$(sed -e 's|\[ \"|\[\"|g'  <<< $importformat)
 
+	    	echo \ "$importformat" >> importmetadata.txt
+	    fi
+	    if
+	    iamname=${resource/google/iam}
+	    iamservice=$(basename $(dirname $file))
+	    if [ -f "$basepath/services/$iamservice/$iamname.go" ]
+	    then
+			echo -n \	\"$iamname\"\: >> importmetadata.txt
 	    	echo \ "$importformat" >> importmetadata.txt
 	    fi
 	fi
