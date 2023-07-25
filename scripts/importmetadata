@@ -8,7 +8,8 @@
 # Checks if it uses standard tpgresource.ParseImportId() functions, if so converts that regex
 # Checks if uses schema.ImportStatePassThrough(), if it has a hardcoded return based on how ID is constructed in the resource
 # Anything else is non standard -- will take from MD files 
-
+#
+# Expecting to see a resource and it's not being generated? Please reach out to @nickelliot
 
 shopt -s nullglob
 
@@ -37,11 +38,14 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 	importable=$(ggrep -Pzo 'Importer:' $file)
 	shortfile="$(basename $file .go)"
 	resource=${shortfile/resource/google}
+
 #does not work for GCP meta resources and we need to prune the extra google
 	resource=${resource/google_google_/google_}
+
     if [ -z "$importable"  ]
     then
 
+##############################################
 #resources with shared importing configuration
 #logging has imports configured in MD files
 		importable=$(ggrep -Pzo 'return ResourceLoggingBucketConfig' $file)
@@ -49,9 +53,10 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
     	then
 #			echo -n \	\"$resource\"\: >> importmetadata.txt
 #			echo \	not importable >> importmetadata.txt
+
+# NOT IMPORTABLE RESOURCES
 			continue
 		else
-
 #logging bucket config uses MD files
 #needs to extract formats from MD files
 			resourcenogoog=${resource/google_/}
@@ -69,21 +74,24 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 		    	echo \ "$importformat" >> importmetadata.txt
 	    	fi
 		fi
+##############################################
     else
 
-#checks for tpgresource.parseimportid
+# checks for tpgresource.parseimportid, standard output for all .yaml generated resources
 		importformat=$(ggrep -Pzo 'tpgresource\.ParseImportId\(\n*?[ \t]*?\[]string{\n*?([ \t]*".*?",\n)*.*?}' $file)
+
 	    if [ -z "$importformat"  ]
 	    then
-#checks for passthrough
+
+# checks for passthrough, another frequent method of collecting resource
 			imppassthrough=$(ggrep -Pzo 'Importer: &schema\.ResourceImporter{.*\n.*State: schema\.ImportStatePassthrough,\n[ \t]*}' $file)
 			if [ -z "$imppassthrough"  ]
 			then
-#if not passthrough or standard, will attempt to pull from MD
+# if not passthrough or standard, will attempt to pull from MD
 				resourcenogoog=${resource/google_/}
 				resourcemd=$basepath/website/docs/r/$resourcenogoog.html.markdown
 
-#fake resources
+# fake resources
 				if [[ "$resourcenogoog" == "logging_bucket_config" || "$resourcenogoog" == "logging_exclusion" ]]; then
 				    continue
 			    fi
@@ -92,7 +100,7 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 				importformat=$(ggrep -Pzos '```\n\$ terraform import(.*\n)*?```' $resourcemd)
 				if [ -z "$importformat"  ]
 	    		then
-#need to do a different check for google_* resources
+# need to do a different check for google_* resources
 	    			resourcemd=$basepath/website/docs/r/$resource.html.markdown
 					importformat=$(ggrep -Pzos '```\n\$ terraform import(.*\n)*?```' $resourcemd)
 					if [ -z "$importformat"  ]
@@ -121,8 +129,8 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 			    	echo \ "$importformat" >> importmetadata.txt
 		    	fi
 		    else
-#these want generically "id", which can be a single field (usually project id), or multiple combined. there is no consistent format to programatically generate formats based on existing files or markdown.
-#as this is functionally unusable for creating this metadata format, all of these resources need to be hardcoded
+# ImportStatePassthrough resources want generically "id", which can be a single field (usually project id), or multiple combined. there is no consistent format to programatically generate formats based on existing files or markdown.
+#as this is functionally unusable for automatically creating this metadata format, all of these resources need to be hardcoded
 
 				case $resource in
 				google_app_engine_application)
@@ -175,6 +183,7 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 #should not be generated -- will be configured with error code for CI integration
 					echo -n "$resource: " >> importmetadata.txt
 					echo \ NOT CONFIGURED  >> importmetadata.txt
+#					exit 1
 				esac
 			fi
 	    else
