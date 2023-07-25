@@ -14,5 +14,6 @@ delete(obj, "instance")
 <% unless compiler == "terraformvalidator-codegen" -%>
 delete(obj, "versionRetentionPeriod")
 delete(obj, "extraStatements")
+delete(obj, "enableDropProtection")
 <% end -%>
 return obj, nil
