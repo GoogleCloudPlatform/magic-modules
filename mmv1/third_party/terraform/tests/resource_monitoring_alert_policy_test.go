@@ -21,6 +21,7 @@ func TestAccMonitoringAlertPolicy(t *testing.T) {
 		"mql":      testAccMonitoringAlertPolicy_mql,
 		"log":      testAccMonitoringAlertPolicy_log,
 		"forecast": testAccMonitoringAlertPolicy_forecast,
+		"promql":   testAccMonitoringAlertPolicy_promql,
 	}
 
 	for name, tc := range testCases {
@@ -210,6 +211,28 @@ func testAccMonitoringAlertPolicy_forecast(t *testing.T) {
 	})
 }
 
+func testAccMonitoringAlertPolicy_promql(t *testing.T) {
+
+	alertName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	conditionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlertPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMonitoringAlertPolicy_promqlCfg(alertName, conditionName),
+			},
+			{
+				ResourceName:      "google_monitoring_alert_policy.promql",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccMonitoringAlertPolicy_basicCfg(alertName, conditionName, aligner, filter string) string {
 	return fmt.Sprintf(`
 resource "google_monitoring_alert_policy" "basic" {
@@ -392,4 +415,31 @@ resource "google_monitoring_alert_policy" "forecast" {
   }
 }
 `, alertName, conditionName, aligner, filter)
+}
+
+func testAccMonitoringAlertPolicy_promqlCfg(alertName, conditionName string) string {
+	return fmt.Sprintf(`
+resource "google_monitoring_alert_policy" "promql" {
+  display_name = "%s"
+  combiner     = "OR"
+  enabled      = true
+
+  conditions {
+    display_name = "%s"
+    
+    condition_prometheus_query_language {
+      query           = "vector(1)"
+      duration        = "60s"
+      evaluation_interval = "60s"
+      alert_rule      = "AlwaysOn"
+      rule_group      = "abc"
+    }
+  }
+
+  documentation {
+    content   = "test content"
+    mime_type = "text/markdown"
+  }
+}
+`, alertName, conditionName)
 }
