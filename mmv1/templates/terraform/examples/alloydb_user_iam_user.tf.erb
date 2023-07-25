@@ -1,14 +1,14 @@
 resource "google_alloydb_user" "<%= ctx[:primary_resource_id] %>" {
-  user_id     = "<%= ctx[:vars]['alloydb_user_id'] %>"
-  password    = "<%= ctx[:vars]['alloydb_user_password'] %>"
+  user_id      = "<%= ctx[:vars]['alloydb_user_id'] %>"
+  user_type    = "ALLOYDB_IAM_USER"
 
   database_roles = [
-    "postgres"
+    "alloydbiamuser"
   ]
 
   cluster = google_alloydb_cluster.<%= ctx[:primary_resource_id] %>.id
 
-  depends_on = [google_alloydb_cluster.<%= ctx[:primary_resource_id] %>]
+  depends_on = [google_alloydb_instance.<%= ctx[:primary_resource_id] %>]
 }
 
 resource "google_compute_network" "<%= ctx[:primary_resource_id] %>" {
