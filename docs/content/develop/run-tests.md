@@ -14,7 +14,7 @@ aliases:
 
 ## Before you begin
 
-1. [Generate the modified provider(s)](/magic-modules/docs/getting-started/generate-providers/)
+[Generate the modified provider(s)]({{< ref "/get-started/generate-providers" >}})
 
 
 1. Set up application default credentials for Terraform
