@@ -2,30 +2,28 @@ package main
 
 import (
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/golang/glog"
 )
 
-func labels(issueBody string, enrolledTeams map[string][]string) string {
+func labels(issueBody string, enrolledTeams map[string][]string, quoted bool) []string {
 	sectionRegexp := regexp.MustCompile(`### (New or )?Affected Resource\(s\)[^#]+`)
 	affectedResources := sectionRegexp.FindString(issueBody)
-	var labels []string
+	var results []string
 	for label, resources := range enrolledTeams {
 		for _, resource := range resources {
 			if strings.Contains(affectedResources, resource) {
 				glog.Infof("found resource %q, applying label %q", resource, label)
-				labels = append(labels, "\""+label+"\"")
+				if quoted {
+					results = append(results, `"`+label+`"`)
+				} else {
+					results = append(results, label)
+				}
 				break
 			}
 		}
 	}
 
-	if len(labels) > 0 {
-		labels = append(labels, "\"forward/review\"")
-		sort.Strings(labels)
-		return "[" + strings.Join(labels, ", ") + "]"
-	}
-	return ""
+	return results
 }
