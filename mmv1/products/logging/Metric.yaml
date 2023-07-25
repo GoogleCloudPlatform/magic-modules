@@ -75,14 +75,14 @@ properties:
     description: |
       A description of this metric, which is used in documentation. The maximum length of the
       description is 8000 characters.
+    update_mask_fields:
+      - 'description'
     required: false
   - !ruby/object:Api::Type::String
     name: bucketName
     description: |
       The resource name of the Log Bucket that owns the Log Metric. Only Log Buckets in projects
       are supported. The bucket has to be in the same project as the metric.
-    update_mask_fields:
-      - 'bucketName'
   - !ruby/object:Api::Type::Boolean
     name: disabled
     description: |
