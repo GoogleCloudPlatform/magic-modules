@@ -20,6 +20,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/document-warehouse/docs/reference/rest/v1/projects.locations'
 description: |
   A location is used to initialize a project.
+id_format: 'projects/{{project_number}}/locations/{{location}}'
 autogen_async: true
 async: !ruby/object:Api::OpAsync
   actions: ['create'] 

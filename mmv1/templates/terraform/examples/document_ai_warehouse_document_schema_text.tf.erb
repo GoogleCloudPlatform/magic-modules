@@ -1,5 +1,5 @@
 resource "google_document_ai_warehouse_document_schema" "example_text" {
-  project_number     = "406397197218"
+  project_number     = data.google_project.project.number
   display_name       = "test-property-text"
   location           = "us"
   document_is_folder = false
@@ -22,7 +22,7 @@ resource "google_document_ai_warehouse_document_schema" "example_text" {
 }
 
 resource "google_document_ai_warehouse_document_schema" "example_integer" {
-  project_number = "406397197218"
+  project_number = data.google_project.project.number
   display_name   = "test-property-integer"
   location       = "us"
 
@@ -44,7 +44,7 @@ resource "google_document_ai_warehouse_document_schema" "example_integer" {
 }
 
 resource "google_document_ai_warehouse_document_schema" "example_float" {
-  project_number = "406397197218"
+  project_number = data.google_project.project.number
   display_name   = "test-property-float"
   location       = "us"
 
@@ -66,7 +66,7 @@ resource "google_document_ai_warehouse_document_schema" "example_float" {
 }
 
 resource "google_document_ai_warehouse_document_schema" "example_property" {
-  project_number     = "406397197218"
+  project_number     = data.google_project.project.number
   display_name       = "test-property-property"
   location           = "us"
   document_is_folder = false
@@ -105,7 +105,7 @@ resource "google_document_ai_warehouse_document_schema" "example_property" {
 }
 
 resource "google_document_ai_warehouse_document_schema" "example_enum" {
-  project_number = "406397197218"
+  project_number = data.google_project.project.number
   display_name   = "test-property-enum"
   location       = "us"
 
@@ -134,7 +134,7 @@ resource "google_document_ai_warehouse_document_schema" "example_enum" {
 }
 
 resource "google_document_ai_warehouse_document_schema" "example_datetime" {
-  project_number = "406397197218"
+  project_number = data.google_project.project.number
   display_name   = "test-property-date_time"
   location       = "us"
 
@@ -156,7 +156,7 @@ resource "google_document_ai_warehouse_document_schema" "example_datetime" {
 }
 
 resource "google_document_ai_warehouse_document_schema" "example_map" {
-  project_number = "406397197218"
+  project_number = data.google_project.project.number
   display_name   = "test-property-map"
   location       = "us"
 
@@ -178,7 +178,7 @@ resource "google_document_ai_warehouse_document_schema" "example_map" {
 }
 
 resource "google_document_ai_warehouse_document_schema" "example_timestamp" {
-  project_number = "406397197218"
+  project_number = data.google_project.project.number
   display_name   = "test-property-timestamp"
   location       = "us"
 
