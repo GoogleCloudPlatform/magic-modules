@@ -12,7 +12,7 @@ The provider is [documented on HashiCorp's Terraform Registry](https://registry.
 
 This document includes details about how provider documentation is used by the [Terraform Registry](https://registry.terraform.io/providers), how it is made in the Magic Modules repo, and tools you can use when editing documentation.
 
-There are other pages under [How To](/magic-modules/docs/how-to) that describe _how_ to approach making additions to the documentation.
+There are other pages under [How To]({{< ref "/develop" >}}) that describe _how_ to approach making additions to the documentation.
 
 ## How documentation is used by the Terraform Registry
 
@@ -84,10 +84,10 @@ Something useful to be aware of are [callouts](https://developer.hashicorp.com/t
 ### Handwritten documentation
 
 Terraform Provider Google (TPG) contains handwritten documentation for handwritten resources and data sources. For guidance on updating handwritten documentation, see:
-- [Update handwritten provider documentation](/magic-modules/docs/how-to/update-handwritten-documentation) 
-- [Add documentation for a handwritten data source](/magic-modules/docs/how-to/add-handwritten-datasource-documentation)
+- [Update handwritten provider documentation]({{< ref "/develop/resource" >}})
+- [Add documentation for a handwritten data source]({{< ref "/develop/add-handwritten-datasource-documentation" >}})
 
 ### Generated documentation (mmv1)
 
 The majority of resources in TPG are generated, and the information used to generate provider code is also used to generate documentation. For information about how documentation is generated, see:
-- [Add and update MMv1 resource documentation](/magic-modules/docs/how-to/mmv1-resource-documentation)
+- [Add and update MMv1 resource documentation]({{< ref "/develop/resource" >}})
