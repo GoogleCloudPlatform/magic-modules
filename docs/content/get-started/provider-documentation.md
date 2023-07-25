@@ -12,7 +12,7 @@ The provider is [documented on HashiCorp's Terraform Registry](https://registry.
 
 This document includes details about how provider documentation is used by the [Terraform Registry](https://registry.terraform.io/providers), how it is made in the Magic Modules repo, and tools you can use when editing documentation.
 
-There are other pages under [How To]({{< ref "/develop" >}}) that describe _how_ to approach making additions to the documentation.
+There are other pages under Develop that describe _how_ to approach making additions to the documentation.
 
 ## How documentation is used by the Terraform Registry
 
