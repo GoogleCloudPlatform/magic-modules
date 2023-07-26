@@ -1,6 +1,5 @@
 <% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -230,4 +229,3 @@ resource "google_compute_region_ssl_policy" "update" {
 }
 `, resourceName)
 }
-<% end -%>
