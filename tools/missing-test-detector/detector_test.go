@@ -11,10 +11,9 @@ func TestDetectMissingTests(t *testing.T) {
 		t.Errorf("error reading tests before testing detect missing tests: %v", err)
 	}
 	for _, test := range []struct {
-		name                   string
-		changedFields          map[string]ResourceChanges
-		expectedUntestedFields []string
-		expectedSuggestedTest  string
+		name                 string
+		changedFields        map[string]ResourceChanges
+		expectedMissingTests map[string]MissingTestInfo
 	}{
 		{
 			name: "covered-resource",
@@ -47,8 +46,10 @@ func TestDetectMissingTests(t *testing.T) {
 					},
 				},
 			},
-			expectedUntestedFields: []string{"field_four.field_five.field_six", "field_one"},
-			expectedSuggestedTest: `resource "uncovered_resource" "primary" {
+			expectedMissingTests: map[string]MissingTestInfo{
+				"uncovered_resource": {
+					UntestedFields: []string{"field_four.field_five.field_six", "field_one"},
+					SuggestedTest: `resource "uncovered_resource" "primary" {
   field_four {
     field_five {
       field_six = "VALUE"
@@ -57,6 +58,8 @@ func TestDetectMissingTests(t *testing.T) {
   field_one = "VALUE"
 }
 `,
+				},
+			},
 		},
 		{
 			name: "config-variable-resource",
@@ -73,34 +76,79 @@ func TestDetectMissingTests(t *testing.T) {
 					"field_one": &Field{Added: true},
 				},
 			},
-			expectedUntestedFields: []string{"field_one"},
-			expectedSuggestedTest: `resource "no_test" "primary" {
+			expectedMissingTests: map[string]MissingTestInfo{
+				"no_test": {
+					UntestedFields: []string{"field_one"},
+					SuggestedTest: `resource "no_test" "primary" {
   field_one = "VALUE"
 }
 `,
+				},
+			},
+		},
+		{
+			name: "multiple-resources-missing-tests",
+			changedFields: map[string]ResourceChanges{
+				"no_test": {
+					"field_one": &Field{Added: true},
+				},
+				"uncovered_resource": {
+					"field_one": &Field{Changed: true},
+					"field_two": ResourceChanges{
+						"field_three": &Field{Added: true},
+					},
+					"field_four": ResourceChanges{
+						"field_five": ResourceChanges{
+							"field_six": &Field{Changed: true},
+						},
+					},
+				},
+			},
+			expectedMissingTests: map[string]MissingTestInfo{
+				"no_test": {
+					UntestedFields: []string{"field_one"},
+					SuggestedTest: `resource "no_test" "primary" {
+  field_one = "VALUE"
+}
+`,
+				},
+				"uncovered_resource": {
+					UntestedFields: []string{"field_four.field_five.field_six", "field_one"},
+					SuggestedTest: `resource "uncovered_resource" "primary" {
+  field_four {
+    field_five {
+      field_six = "VALUE"
+    }
+  }
+  field_one = "VALUE"
+}
+`,
+				},
+			},
 		},
 	} {
 		missingTests, err := detectMissingTests(test.changedFields, allTests)
 		if err != nil {
 			t.Errorf("error detecting missing tests for %s: %s", test.name, err)
 		}
-		if len(test.expectedUntestedFields) == 0 {
+		if len(test.expectedMissingTests) == 0 {
 			if len(missingTests) > 0 {
 				for resourceName, missingTest := range missingTests {
 					t.Errorf("found unexpected untested fields in %s for resource %s: %v", test.name, resourceName, missingTest.UntestedFields)
 				}
 			}
 		} else {
-			if len(missingTests) == 1 {
-				for _, missingTest := range missingTests {
-					if !reflect.DeepEqual(missingTest.UntestedFields, test.expectedUntestedFields) {
+			if len(missingTests) == len(test.expectedMissingTests) {
+				for resourceName, missingTest := range missingTests {
+					expectedMissingTest := test.expectedMissingTests[resourceName]
+					if !reflect.DeepEqual(missingTest.UntestedFields, expectedMissingTest.UntestedFields) {
 						t.Errorf(
 							"did not find expected untested fields in %s, found %v, expected %v",
-							test.name, missingTest.UntestedFields, test.expectedUntestedFields)
+							test.name, missingTest.UntestedFields, expectedMissingTest.UntestedFields)
 					}
-					if missingTest.SuggestedTest != test.expectedSuggestedTest {
+					if missingTest.SuggestedTest != expectedMissingTest.SuggestedTest {
 						t.Errorf("did not find expected suggested test in %s, found %s, expected %s",
-							test.name, missingTest.SuggestedTest, test.expectedSuggestedTest)
+							test.name, missingTest.SuggestedTest, expectedMissingTest.SuggestedTest)
 					}
 				}
 			} else {
