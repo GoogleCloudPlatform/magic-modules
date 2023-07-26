@@ -398,7 +398,7 @@ Enable/Disable Security Posture API features for the cluster. Structure is [docu
     which allows the usage of filestore instance as volumes.
     It is disabled by default; set `enabled = true` to enable.
 
-* `gcs_fuse_csi_driver_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))) The status of the GCSFuse CSI driver addon,
+* `gcs_fuse_csi_driver_config` - (Optional) The status of the GCSFuse CSI driver addon,
     which allows the usage of a gcs bucket as volumes.
     It is disabled by default; set `enabled = true` to enable.
 
@@ -637,7 +637,7 @@ maintenance_policy {
 }
 ```
 
-* `maintenance_exclusion` - Exceptions to maintenance window. Non-emergency maintenance should not occur in these windows. A cluster can have up to three maintenance exclusions at a time [Maintenance Window and Exclusions](https://cloud.google.com/kubernetes-engine/docs/concepts/maintenance-windows-and-exclusions)
+* `maintenance_exclusion` - Exceptions to maintenance window. Non-emergency maintenance should not occur in these windows. A cluster can have up to 20 maintenance exclusions at a time [Maintenance Window and Exclusions](https://cloud.google.com/kubernetes-engine/docs/concepts/maintenance-windows-and-exclusions)
 
 <a name="nested_maintenance_exclusion"></a>The `maintenance_exclusion` block supports:
 * `exclusion_options` - (Optional) MaintenanceExclusionOptions provides maintenance exclusion related options.
