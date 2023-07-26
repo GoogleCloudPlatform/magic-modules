@@ -6074,9 +6074,10 @@ func containerClusterEnableK8sBetaApisCustomizeDiffFunc(d tpgresource.TerraformR
 	if old != "" && new != "" {
 		oldAPIsSet := old.(*schema.Set)
 		newAPIsSet := new.(*schema.Set)
-		intersectedAPIsSet := oldAPIsSet.Intersection(newAPIsSet)
-		if !intersectedAPIsSet.Equal(oldAPIsSet) {
-			return d.ForceNew("enable_k8s_beta_apis.0.enabled_apis")
+		for _, oldAPI := range oldAPIsSet.List() {
+			if !newAPIsSet.Contains(oldAPI) {
+				return d.ForceNew("enable_k8s_beta_apis.0.enabled_apis")
+			}
 		}
 	}
 
