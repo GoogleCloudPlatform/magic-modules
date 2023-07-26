@@ -210,7 +210,7 @@ examples:
       forwarding_rule_name: "ilb-ipv6-forwarding-rule"
       backend_name: "ilb-ipv6-backend"
       network_name: "net-ipv6"
-      subnet_name:  "subnet-internal-ipv6"
+      subnet_name: "subnet-internal-ipv6"
     ignore_read_extra:
       - "port_range"
       - "target"
@@ -640,4 +640,3 @@ properties:
       - :IPV6
     immutable: true
     default_from_api: true
-
