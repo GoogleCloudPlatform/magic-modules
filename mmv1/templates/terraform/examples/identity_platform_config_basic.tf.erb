@@ -20,7 +20,7 @@ resource "google_identity_platform_config" "default" {
   blocking_functions {
     triggers {
       event_type = "beforeSignIn"
-      function_uri = "new_uri-before-sign-in"
+      function_uri = "https://us-east1-<%= ctx[:vars]['project_id'] %>.cloudfunctions.net/before-sign-in"
     }
     forward_inbound_credentials {
       refresh_token = true
@@ -32,6 +32,7 @@ resource "google_identity_platform_config" "default" {
     sign_up_quota_config {
       quota = 1000
       start_time = "<%= ctx[:vars]['quota_start_time'] %>"
+      quota_duration = "7200s"
     }
   }
   authorized_domains = [
