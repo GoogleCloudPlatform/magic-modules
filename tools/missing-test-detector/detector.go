@@ -39,6 +39,7 @@ func detectMissingTests(changedFields map[string]ResourceChanges, allTests []*Te
 	missingTests := make(map[string]*MissingTestInfo)
 	for resourceName, fieldCoverage := range changedFields {
 		untested := untestedFields(fieldCoverage, nil)
+		sort.Strings(untested)
 		if len(untested) > 0 {
 			missingTests[resourceName] = &MissingTestInfo{
 				UntestedFields: untested,
@@ -80,7 +81,6 @@ func untestedFields(fieldCoverage ResourceChanges, path []string) []string {
 			fields = append(fields, untestedFields(objectCoverage, append(path, fieldName))...)
 		}
 	}
-	sort.Strings(fields)
 	return fields
 }
 
