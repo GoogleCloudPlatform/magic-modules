@@ -4,10 +4,9 @@ Your PR includes resource fields which are not covered by any test.
 Resource: `{{ $resourceName }}` ({{ len $missingTestInfo.Tests }} total tests)
 Please add an acceptance test which includes these fields. The test should include the following:
 
-```
+```hcl
 {{ $missingTestInfo.SuggestedTest }}
 ```
 
-Replace `"VALUE"` with appropriate values for these fields.
 
 {{- end }}
