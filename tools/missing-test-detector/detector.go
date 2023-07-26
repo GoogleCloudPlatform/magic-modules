@@ -103,5 +103,5 @@ func suggestedTest(resourceName string, untested []string) string {
 			}
 		}
 	}
-	return strings.replaceAll(string(f.Bytes()), `"VALUE"`, "# value needed")
+	return strings.ReplaceAll(string(f.Bytes()), `"VALUE"`, "# value needed")
 }

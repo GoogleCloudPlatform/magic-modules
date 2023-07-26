@@ -52,10 +52,10 @@ func TestDetectMissingTests(t *testing.T) {
 					SuggestedTest: `resource "uncovered_resource" "primary" {
   field_four {
     field_five {
-      field_six = "VALUE"
+      field_six = # value needed
     }
   }
-  field_one = "VALUE"
+  field_one = # value needed
 }
 `,
 				},
@@ -80,7 +80,7 @@ func TestDetectMissingTests(t *testing.T) {
 				"no_test": {
 					UntestedFields: []string{"field_one"},
 					SuggestedTest: `resource "no_test" "primary" {
-  field_one = "VALUE"
+  field_one = # value needed
 }
 `,
 				},
@@ -108,7 +108,7 @@ func TestDetectMissingTests(t *testing.T) {
 				"no_test": {
 					UntestedFields: []string{"field_one"},
 					SuggestedTest: `resource "no_test" "primary" {
-  field_one = "VALUE"
+  field_one = # value needed
 }
 `,
 				},
@@ -117,10 +117,10 @@ func TestDetectMissingTests(t *testing.T) {
 					SuggestedTest: `resource "uncovered_resource" "primary" {
   field_four {
     field_five {
-      field_six = "VALUE"
+      field_six = # value needed
     }
   }
-  field_one = "VALUE"
+  field_one = # value needed
 }
 `,
 				},
