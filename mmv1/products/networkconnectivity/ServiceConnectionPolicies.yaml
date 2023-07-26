@@ -1,4 +1,4 @@
-# Copyright 2021 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -84,6 +84,7 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: 'serviceClass'
+    required: true
     description: |
       The service class identifier for which this ServiceConnectionPolicy is for. The service class identifier is a unique, symbolic representation of a ServiceClass.
       It is provided by the Service Producer. Google services have a prefix of gcp. For example, gcp-cloud-sql. 3rd party services do not. For example, test-service-a3dfcx.
@@ -93,6 +94,7 @@ properties:
       Free-text description of the resource.
   - !ruby/object:Api::Type::String
     name: 'network'
+    required: true
     description: |
       The resource path of the consumer network. Example: - projects/{projectNumOrId}/global/networks/{resourceId}.
   - !ruby/object:Api::Type::NestedObject

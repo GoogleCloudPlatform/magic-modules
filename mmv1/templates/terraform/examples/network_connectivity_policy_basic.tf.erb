@@ -25,7 +25,7 @@ resource "google_compute_subnetwork" "producer_subnet" {
 resource "google_network_connectivity_service_connection_policy" "default" {
   name = "<%= ctx[:vars]['resource_name'] %>"
   location = "us-central1"
-  service_class = "gcp-memorystore-redis"
+  service_class = "<%= ctx[:test_env_vars]['service_class'] %>"
   network = google_compute_network.producer_net.id
   psc_config {
     subnetworks = [google_compute_subnetwork.producer_subnet.id]
