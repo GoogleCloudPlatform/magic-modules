@@ -431,6 +431,9 @@ resource "google_monitoring_alert_policy" "promql" {
       query           = "vector(1)"
       duration        = "60s"
       evaluation_interval = "60s"
+      labels = {
+        "severity" = "page"
+      }
       alert_rule      = "AlwaysOn"
       rule_group      = "abc"
     }
