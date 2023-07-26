@@ -26,9 +26,9 @@ aliases:
       * MMv1 is strongly preferred over handwriting the resource unless the resource cannot be generated.
       * Currently, only handwritten datasources are supported.
 1. Make the code change.
-   * The [How To](/magic-modules/docs/how-to) section provides detailed instructions on how to make your change.
-1. [Generate the providers](/magic-modules/docs/getting-started/generate-providers/) that include your change.
-1. [Run provider tests locally](/magic-modules/docs/getting-started/run-provider-tests/) that are relevant to the change you made. (Testing the PR locally and pushing the commit to the PR only after the tests pass locally may significantly reduce back-and-forth in review.)
+   * The Develop section provides detailed instructions on how to make your change.
+1. [Generate the providers]({{< ref "/get-started/generate-providers" >}}) that include your change.
+1. [Run provider tests locally]({{< ref "/develop/run-tests" >}}) that are relevant to the change you made. (Testing the PR locally and pushing the commit to the PR only after the tests pass locally may significantly reduce back-and-forth in review.)
 1. Push your changes to your `magic-modules` repo fork and send a pull request from that branch to the main branch on `magic-modules`. A reviewer will be assigned automatically to your PR.
 1. Get approval to start Clould Builder jobs from the reviewer if you're an community contributor
 1. Wait for the the modules magician to generate downstream diff (which should take about 15 mins after creating the PR) to make sure all changes are generated correctly in downstream repos.
