@@ -203,6 +203,17 @@ examples:
       ip_name: 'website-ip'
       backend_name: 'service-backend'
       external_forwarding_rule_name: 'external-forwarding-rule'
+  - !ruby/object:Provider::Terraform::Examples
+    name: "forwarding_rule_internallb_ipv6"
+    primary_resource_id: "default"
+    vars:
+      forwarding_rule_name: "ilb-ipv6-forwarding-rule"
+      backend_name: "ilb-ipv6-backend"
+      network_name: "net-ipv6"
+      subnet_name:  "subnet-internal-ipv6"
+    ignore_read_extra:
+      - "port_range"
+      - "target"
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
 parameters:
@@ -617,3 +628,16 @@ properties:
     send_empty_value: true
     immutable: true
     ignore_read: true
+  - !ruby/object:Api::Type::Enum
+    name: 'ipVersion'
+    description: |
+      The IP address version that will be used by this forwarding rule.
+      Valid options are IPV4 and IPV6.
+
+      If not set, the IPv4 address will be used by default.
+    values:
+      - :IPV4
+      - :IPV6
+    immutable: true
+    default_from_api: true
+
