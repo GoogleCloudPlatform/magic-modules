@@ -202,7 +202,7 @@ properties:
             required: true
             description: |
               When true, writes the Pub/Sub message metadata to
-             `x-goog-pubsub-<KEY>:<VAL>` headers of the HTTP request. Writes the
+              `x-goog-pubsub-<KEY>:<VAL>` headers of the HTTP request. Writes the
               Pub/Sub message attributes to `<KEY>:<VAL>` headers of the HTTP request.
   - !ruby/object:Api::Type::Integer
     name: 'ackDeadlineSeconds'
