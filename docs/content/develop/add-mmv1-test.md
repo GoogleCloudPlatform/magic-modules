@@ -152,7 +152,7 @@ resource "google_pubsub_subscription" "example" {
 
 ## Update tests
 
-Update tests can only be [added as handwritten tests](/magic-modules/docs/how-to/add-handwritten-test/#update-tests).
+Update tests can only be [added as handwritten tests]({{< ref "/develop/add-handwritten-test#update-tests" >}}).
 
 ## Tests that use beta features
 
