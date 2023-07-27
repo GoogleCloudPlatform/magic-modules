@@ -57,7 +57,6 @@ resource "google_compute_region_security_policy_rule" "policy_rule" {
   action          = "allow"
   priority        = 100
   preview         = false
-  rule_number     = "154"
   match {
     versioned_expr = "SRC_IPS_V1"
     config {
@@ -84,7 +83,6 @@ resource "google_compute_region_security_policy_rule" "policy_rule" {
   action          = "deny(403)"
   priority        = 100
   preview         = true
-  rule_number     = "154"
   match {
     versioned_expr = "SRC_IPS_V1"
     config {
@@ -194,7 +192,6 @@ resource "google_compute_region_security_policy_rule" "policy_rule_network_match
   }
   action = "allow"
   preview = true
-  rule_number = "100"
 }
 `, context)
 }
@@ -260,7 +257,6 @@ resource "google_compute_region_security_policy_rule" "policy_rule_network_match
   }
   action = "allow"
   preview = true
-  rule_number = "100"
 }
 `, context)
 }
@@ -326,7 +322,6 @@ resource "google_compute_region_security_policy_rule" "policy_rule_network_match
   }
   action = "allow"
   preview = true
-  rule_number = "100"
 }
 `, context)
 }
