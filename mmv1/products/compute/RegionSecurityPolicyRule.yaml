@@ -26,10 +26,8 @@ description: |
   A rule for the RegionSecurityPolicy.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    # TODO(felipegc): evaluate if there will be something like this: 
     'Creating region security policy rules': 'https://cloud.google.com/armor/docs/configure-security-policies'
   api:
-    # TODO(felipegc): evaluate if there will be something like this:
     'https://cloud.google.com/compute/docs/reference/rest/beta/regionSecurityPolicies/addRule'
 id_format: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/priority/{{priority}}'
 import_format: ['projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/priority/{{priority}}']
@@ -96,8 +94,6 @@ properties:
     description: |
       A match condition that incoming traffic is evaluated against.
       If it evaluates to true, the corresponding 'action' is enforced.
-    # TODO(felipegc): this is not required because networkMatch 
-    required: false
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'versionedExpr'
