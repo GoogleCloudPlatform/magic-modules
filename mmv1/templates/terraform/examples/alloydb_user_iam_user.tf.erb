@@ -12,7 +12,7 @@ resource "google_alloydb_user" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_compute_network" "<%= ctx[:primary_resource_id] %>" {
-  name = "alloydb-cluster"
+	name = "tf-test-alloydb-cluster%{random_suffix}"
 }
 
 resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {

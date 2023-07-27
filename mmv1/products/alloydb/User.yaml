@@ -25,6 +25,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.clusters.users/create'
 async: !ruby/object:Provider::Terraform::PollAsync
   check_response_func_existence: transport_tpg.PollCheckForExistence
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
   target_occurrences: 10
   actions: ['create', 'update', 'delete']
 import_format: ['{{cluster}}/users/{{user_id}}']
@@ -98,6 +99,5 @@ properties:
     description: 'Optional. Type of this user.'
     default_value: :ALLOYDB_BUILT_IN
     values:
-      - :USER_TYPE_UNSPECIFIED
       - :ALLOYDB_BUILT_IN
       - :ALLOYDB_IAM_USER
