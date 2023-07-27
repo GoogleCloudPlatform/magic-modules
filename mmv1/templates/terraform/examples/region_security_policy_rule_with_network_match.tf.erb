@@ -28,6 +28,13 @@ resource "google_compute_region_security_policy" "policynetworkmatch" {
   name        = "<%= ctx[:vars]['sec_policy_name'] %>"
   description = "region security policy for network match"
   type        = "CLOUD_ARMOR_NETWORK"
+  user_defined_fields {
+    name = "SIG1_AT_0"
+    base = "TCP"
+    offset = 8
+    size = 2
+    mask = "0x8F00"
+  }
   depends_on  = [google_compute_network_edge_security_service.edge_sec_service]
 }
 
@@ -40,6 +47,10 @@ resource "google_compute_region_security_policy_rule" "<%= ctx[:primary_resource
   priority        = 100
   network_match {
     src_ip_ranges = ["10.10.0.0/16"]
+    user_defined_fields {
+      name = "SIG1_AT_0"
+      values = ["0x8F00"]
+    }
   }
   action          = "allow"
   preview         = true

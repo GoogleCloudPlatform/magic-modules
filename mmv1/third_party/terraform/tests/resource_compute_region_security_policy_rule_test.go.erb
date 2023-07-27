@@ -123,7 +123,22 @@ func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatch
         ImportState:       true,
         ImportStateVerify: true,
       },
-      // TODO(felipegc): consider adding a step where the network match has its properties erased. Currently the beta does not allow that.
+      {
+        Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdate2Example(context),
+      },
+      {
+        ResourceName:      "google_compute_region_security_policy_rule.policy_rule_network_match",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+				Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchBasicExample(context),
+			},
+      {
+        ResourceName:      "google_compute_region_security_policy_rule.policy_rule_network_match",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
 		},
 	})
 }
@@ -152,6 +167,20 @@ resource "google_compute_region_security_policy" "policynetworkmatch" {
   name        = "tf-test-polnetmatch%{random_suffix}"
   description = "region security policy for network match"
   type        = "CLOUD_ARMOR_NETWORK"
+  user_defined_fields {
+    name = "SIG1_AT_0"
+    base = "TCP"
+    offset = 8
+    size = 2
+    mask = "0x8F00"
+  }
+  user_defined_fields {
+    name = "SIG2_AT_8"
+    base = "TCP"
+    offset = 8
+    size = 2
+    mask = "0x8F00"
+  }
   depends_on  = [google_compute_network_edge_security_service.edge_sec_service]
 }
   
@@ -162,18 +191,6 @@ resource "google_compute_region_security_policy_rule" "policy_rule_network_match
   priority = 100
   network_match {
     src_ip_ranges    = ["10.10.0.0/16"]
-    src_asns         = [15169]
-    src_ports        = [443]
-    src_region_codes = ["AU"]
-    ip_protocols     = ["UDP"]
-    dest_ip_ranges   = ["10.0.0.0/8"]
-    dest_ports       = [80]
-    # TODO(felipegc): think about including this field in this test
-    # SIG1_AT_0;0x8700,SIG2_AT_8;0x12345678
-    # user_defined_fields {
-    #   name = "SIG1_AT_0"
-    #   values = ["0x8700"]
-    # }
   }
   action = "allow"
   preview = true
@@ -206,6 +223,86 @@ resource "google_compute_region_security_policy" "policynetworkmatch" {
   name        = "tf-test-polnetmatch%{random_suffix}"
   description = "region security policy for network match"
   type        = "CLOUD_ARMOR_NETWORK"
+  user_defined_fields {
+    name = "SIG1_AT_0"
+    base = "TCP"
+    offset = 8
+    size = 2
+    mask = "0x8F00"
+  }
+  user_defined_fields {
+    name = "SIG2_AT_8"
+    base = "TCP"
+    offset = 8
+    size = 2
+    mask = "0x8F00"
+  }
+  depends_on  = [google_compute_network_edge_security_service.edge_sec_service]
+}
+  
+resource "google_compute_region_security_policy_rule" "policy_rule_network_match" {
+  region          = "asia-southeast1"
+  project         = "ciandt-cloudarmor-gcam"
+  security_policy = google_compute_region_security_policy.policynetworkmatch.name
+  priority = 100
+  network_match {
+    src_ip_ranges    = ["10.10.0.0/16"]
+    src_asns         = [6939]
+    src_ports        = [443]
+    src_region_codes = ["US"]
+    ip_protocols     = ["UDP"]
+    dest_ip_ranges   = ["10.0.0.0/8"]
+    dest_ports       = [80]
+    user_defined_fields {
+      name = "SIG1_AT_0"
+      values = ["0x8700"]
+    }
+  }
+  action = "allow"
+  preview = true
+  rule_number = "100"
+}
+`, context)
+}
+
+func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdate2Example(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_compute_region_security_policy" "policyddosprotection" {
+  region      = "asia-southeast1"
+  name        = "tf-test-policyddos%{random_suffix}"
+  description = "region security policy for network match"
+  type        = "CLOUD_ARMOR_NETWORK"
+  ddos_protection_config {
+    ddos_protection = "ADVANCED_PREVIEW"
+  }
+}
+  
+resource "google_compute_network_edge_security_service" "edge_sec_service" {
+  region          = "asia-southeast1"
+  name            = "tf-test-edgesec%{random_suffix}"
+  security_policy = google_compute_region_security_policy.policyddosprotection.self_link
+}
+  
+resource "google_compute_region_security_policy" "policynetworkmatch" {
+  region      = "asia-southeast1"
+  project     = "ciandt-cloudarmor-gcam"
+  name        = "tf-test-polnetmatch%{random_suffix}"
+  description = "region security policy for network match"
+  type        = "CLOUD_ARMOR_NETWORK"
+  user_defined_fields {
+    name = "SIG1_AT_0"
+    base = "TCP"
+    offset = 8
+    size = 2
+    mask = "0x8F00"
+  }
+  user_defined_fields {
+    name = "SIG2_AT_8"
+    base = "TCP"
+    offset = 8
+    size = 2
+    mask = "0x8F00"
+  }
   depends_on  = [google_compute_network_edge_security_service.edge_sec_service]
 }
   
@@ -216,12 +313,16 @@ resource "google_compute_region_security_policy_rule" "policy_rule_network_match
   priority = 100
   network_match {
     src_ip_ranges    = ["10.0.0.0/8"]
-    src_asns         = [333]
+    src_asns         = [15169]
     src_ports        = [80]
-    src_region_codes = ["BR"]
+    src_region_codes = ["AU"]
     ip_protocols     = ["TCP"]
     dest_ip_ranges   = ["10.10.0.0/16"]
     dest_ports       = [443]
+    user_defined_fields {
+      name = "SIG2_AT_8"
+      values = ["0x8700","0x8F00"]
+    }
   }
   action = "allow"
   preview = true

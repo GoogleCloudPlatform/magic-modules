@@ -18,6 +18,7 @@ base_url: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_p
 self_link: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/getRule?priority={{priority}}'
 create_url: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/addRule?priority={{priority}}'
 update_verb: :POST
+update_mask: true
 update_url: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/patchRule?priority={{priority}}'
 delete_verb: :POST
 delete_url: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/removeRule?priority={{priority}}'
@@ -29,7 +30,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Creating region security policy rules': 'https://cloud.google.com/armor/docs/configure-security-policies'
   api:
     # TODO(felipegc): evaluate if there will be something like this:
-    'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies/addRule'
+    'https://cloud.google.com/compute/docs/reference/rest/beta/regionSecurityPolicies/addRule'
 id_format: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/priority/{{priority}}'
 import_format: ['projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/priority/{{priority}}']
 async: !ruby/object:Api::OpAsync
@@ -209,7 +210,6 @@ properties:
                           - :EQUALS
                           - :EQUALS_ANY
                           - :STARTS_WITH
-  # TODO(felipegc): waiting whitelisting networkMatch for testing
   - !ruby/object:Api::Type::NestedObject
     name: 'networkMatch'
     description: |
@@ -221,21 +221,31 @@ properties:
       Example:
       networkMatch: srcIpRanges: - "192.0.2.0/24" - "198.51.100.0/24" userDefinedFields: - name: "ipv4_fragment_offset" values: - "1-0x1fff"
       The above match condition matches packets with a source IP in 192.0.2.0/24 or 198.51.100.0/24 and a user-defined field named "ipv4_fragment_offset" with a value between 1 and 0x1fff inclusive
+    update_mask_fields:
+      - 'network_match.userDefinedFields'
+      - 'network_match.srcIpRanges'
+      - 'network_match.destIpRanges'
+      - 'network_match.ipProtocols'
+      - 'network_match.srcPorts'
+      - 'network_match.destPorts'
+      - 'network_match.srcRegionCodes'
+      - 'network_match.srcAsns'
     properties:
-      - !ruby/object:Api::Type::NestedObject
+      - !ruby/object:Api::Type::Array
         name: 'userDefinedFields'
         description: |
           User-defined fields. Each element names a defined field and lists the matching values for that field.
-        properties:
-          - !ruby/object:Api::Type::String
-            name: 'name'
-            description: |
-              Name of the user-defined field, as given in the definition.
-          - !ruby/object:Api::Type::Array
-            name: 'values'
-            description: |
-              Matching values of the field. Each element can be a 32-bit unsigned decimal or hexadecimal (starting with "0x") number (e.g. "64") or range (e.g. "0x400-0x7ff").
-            item_type: Api::Type::String
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              description: |
+                Name of the user-defined field, as given in the definition.
+            - !ruby/object:Api::Type::Array
+              name: 'values'
+              description: |
+                Matching values of the field. Each element can be a 32-bit unsigned decimal or hexadecimal (starting with "0x") number (e.g. "64") or range (e.g. "0x400-0x7ff").
+              item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'srcIpRanges'
         description: |
@@ -397,6 +407,7 @@ properties:
             description: |
               Can only be specified if the action for the rule is "rate_based_ban".
               If specified, determines the time (in seconds) the traffic will continue to be banned by the rate limit after the rate falls below the threshold.
+  # TODO(felipegc): cleanup since I will not being mapping it.
   - !ruby/object:Api::Type::String
     name: 'ruleNumber'
     description: |

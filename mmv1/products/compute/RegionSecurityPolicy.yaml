@@ -17,6 +17,7 @@ min_version: beta
 base_url: projects/{{project}}/regions/{{region}}/securityPolicies
 self_link: projects/{{project}}/regions/{{region}}/securityPolicies/{{name}}
 update_verb: :PATCH
+update_mask: true
 description: |
   Represents a Region Cloud Armor Security Policy resource.
 references: !ruby/object:Api::Resource::ReferenceLinks
