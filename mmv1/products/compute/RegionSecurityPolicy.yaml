@@ -151,7 +151,7 @@ properties:
         - !ruby/object:Api::Type::Enum
           name: 'base'
           required: true
-          description: | 
+          description: |
             The base relative to which 'offset' is measured. Possible values are:
             - IPV4: Points to the beginning of the IPv4 header.
             - IPV6: Points to the beginning of the IPv6 header.

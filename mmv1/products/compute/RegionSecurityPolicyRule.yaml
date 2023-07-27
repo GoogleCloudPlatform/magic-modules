@@ -65,7 +65,7 @@ examples:
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
-    description: | 
+    description: |
       The Region in which the created Region Security Policy rule should reside.
     url_param_only: true
     required: true
@@ -105,7 +105,7 @@ properties:
         default_value: :SRC_IPS_V1
       - !ruby/object:Api::Type::NestedObject
         name: 'config'
-        description: | 
+        description: |
           The configuration options available when specifying versionedExpr.
           This field must be specified if versionedExpr is specified and cannot be specified if versionedExpr is not specified.
         required: true
