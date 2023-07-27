@@ -291,7 +291,7 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
 
   unless products_to_generate.include?(product_name)
     Google::LOGGER.info "#{product_name}: Not specified, skipping generation"
-    next
+    next { definitions: product_api, overrides: provider_config, provider: provider } # rubocop:disable Style/HashSyntax
   end
 
   Google::LOGGER.info \
