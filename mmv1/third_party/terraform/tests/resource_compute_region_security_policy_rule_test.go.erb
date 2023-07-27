@@ -325,37 +325,4 @@ resource "google_compute_region_security_policy_rule" "policy_rule_network_match
 }
 `, context)
 }
-
-// TODO(felipegc): finish implementing this function once the policy preconfigured waf update starts working properly.
-// func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePreconfiguredWafUpdateExample(t *testing.T) {
-// 	t.Parallel()
-
-// 	context := map[string]interface{}{
-// 		"random_suffix": RandString(t, 10),
-// 	}
-
-// 	VcrTest(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-// 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-// 		CheckDestroy:             testAccCheckComputeRegionSecurityPolicyRuleDestroyProducer(t),
-// 		Steps: []resource.TestStep{
-// 			{
-// 				Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePreconfiguredWafBasicExample(context),
-// 			},
-//       {
-//         ResourceName:      "google_compute_region_security_policy_rule.policy_rule_preconfigured_waf",
-//         ImportState:       true,
-//         ImportStateVerify: true,
-//       },
-//       {
-//         Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyPreconfiguredWafUpdateExample(context),
-//       },
-//       {
-//         ResourceName:      "google_compute_region_security_policy_rule.policy_rule_network_match",
-//         ImportState:       true,
-//         ImportStateVerify: true,
-//       },
-// 		},
-// 	})
-// }
 <% end -%>
