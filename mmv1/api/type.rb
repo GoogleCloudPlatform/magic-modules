@@ -757,6 +757,15 @@ module Api
     class KeyValuePairs < Composite
     end
 
+    # An array of string -> string key -> value pairs used specifcally for the "labels" field of a resource.
+    # The field name with this type should be "labels" literally.
+    class KeyValueLabels < KeyValuePairs
+      def validate
+        super
+        raise "The field #{name} has the type KeyValueLabels, but the field name is not 'labels'!" if @name != "labels"
+      end
+    end
+
     # Map from string keys -> nested object entries
     class Map < Composite
       # The list of properties (attr_reader) that can be overridden in

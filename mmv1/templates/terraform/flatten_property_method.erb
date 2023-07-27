@@ -94,6 +94,19 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
     })
   }
   return transformed
+<% elsif property.is_a?(Api::Type::KeyValueLabels) -%>
+  if v == nil {
+    return v
+  }
+
+  l := v.(map[string]interface{})
+  transformed := make(map[string]interface{})
+
+  for k, _ := range l {
+    transformed[k] = l[k]
+  }
+
+  return transformed
 <% elsif property.is_a?(Api::Type::Integer) -%>
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {

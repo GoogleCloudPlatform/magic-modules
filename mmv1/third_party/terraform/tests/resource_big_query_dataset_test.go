@@ -22,7 +22,28 @@ func TestAccBigQueryDataset_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
+				Config: testAccBigQueryDataset_withoutLabels(datasetID),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_bigquery_dataset.test", "labels.%"),
+					resource.TestCheckNoResourceAttr("google_bigquery_dataset.test", "effective_labels.%"),
+				),
+			},
+			{
+				ResourceName:      "google_bigquery_dataset.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: testAccBigQueryDataset(datasetID),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "labels.%", "2"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "labels.env", "foo"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "labels.default_table_expiration_ms", "3600000"),
+
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "effective_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "effective_labels.env", "foo"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "effective_labels.default_table_expiration_ms", "3600000"),
+				),
 			},
 			{
 				ResourceName:      "google_bigquery_dataset.test",
@@ -31,6 +52,15 @@ func TestAccBigQueryDataset_basic(t *testing.T) {
 			},
 			{
 				Config: testAccBigQueryDatasetUpdated(datasetID),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "labels.%", "2"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "labels.env", "bar"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "labels.default_table_expiration_ms", "7200000"),
+
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "effective_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "effective_labels.env", "bar"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "effective_labels.default_table_expiration_ms", "7200000"),
+				),
 			},
 			{
 				ResourceName:      "google_bigquery_dataset.test",
@@ -44,6 +74,58 @@ func TestAccBigQueryDataset_basic(t *testing.T) {
 				ResourceName:      "google_bigquery_dataset.test",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBigQueryDataset_withoutLabels(datasetID),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_bigquery_dataset.test", "labels.%"),
+					resource.TestCheckNoResourceAttr("google_bigquery_dataset.test", "effective_labels.%"),
+				),
+			},
+			{
+				ResourceName:      "google_bigquery_dataset.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccBigQueryDataset_withProvider5(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	oldVersion := map[string]resource.ExternalProvider{
+		"google": {
+			VersionConstraint: "4.75.0", // a version that doesn't separate user defined labels and system labels
+			Source:            "registry.terraform.io/hashicorp/google",
+		},
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		CheckDestroy: testAccCheckBigQueryDatasetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:            testAccBigQueryDataset_withoutLabels(datasetID),
+				ExternalProviders: oldVersion,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_bigquery_dataset.test", "labels.%"),
+					resource.TestCheckNoResourceAttr("google_bigquery_dataset.test", "effective_labels.%"),
+				),
+			},
+			{
+				Config:                   testAccBigQueryDataset(datasetID),
+				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "labels.%", "2"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "labels.env", "foo"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "labels.default_table_expiration_ms", "3600000"),
+
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "effective_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "effective_labels.env", "foo"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "effective_labels.default_table_expiration_ms", "3600000"),
+				),
 			},
 		},
 	})
@@ -206,6 +288,19 @@ func testAccAddTable(t *testing.T, datasetID string, tableID string) resource.Te
 		}
 		return nil
 	}
+}
+
+func testAccBigQueryDataset_withoutLabels(datasetID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id                      = "%s"
+  friendly_name                   = "foo"
+  description                     = "This is a foo description"
+  location                        = "EU"
+  default_partition_expiration_ms = 3600000
+  default_table_expiration_ms     = 3600000
+}
+`, datasetID)
 }
 
 func testAccBigQueryDataset(datasetID string) string {

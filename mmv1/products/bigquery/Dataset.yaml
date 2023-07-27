@@ -290,12 +290,11 @@ properties:
     name: 'friendlyName'
     description: A descriptive name for the dataset
     send_empty_value: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       The labels associated with this dataset. You can use these to
       organize and group your datasets
-    default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: 'lastModifiedTime'
     description: |

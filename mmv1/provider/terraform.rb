@@ -91,6 +91,7 @@ module Provider
         Api::Type::NestedObject => 'schema.TypeList',
         Api::Type::Array => 'schema.TypeList',
         Api::Type::KeyValuePairs => 'schema.TypeMap',
+        Api::Type::KeyValueLabels => 'schema.TypeMap',
         Api::Type::Map => 'schema.TypeSet',
         Api::Type::Fingerprint => 'schema.TypeString'
       }
