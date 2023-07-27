@@ -1,4 +1,3 @@
-
 ---
 subcategory: "Compute Engine"
 description: |-
