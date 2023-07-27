@@ -81,7 +81,6 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-my-region-disk%s\",
       context[\"random_suffix\"\
       ])"
-    min_version: beta
     vars:
       region_disk_name: 'primary-region-disk'
       secondary_region_disk_name: 'secondary-region-disk'
@@ -109,6 +108,7 @@ parameters:
     required: false
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'diskEncryptionKey'
     description: |
@@ -157,6 +157,7 @@ parameters:
       * `projects/project/global/snapshots/snapshot`
       * `global/snapshots/snapshot`
       * `snapshot`
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'sourceSnapshotEncryptionKey'
     description: |
@@ -260,6 +261,7 @@ properties:
       resource: 'Instance'
       imports: 'selfLink'
       description: 'A reference to a user of this disk'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
     output: true
   - !ruby/object:Api::Type::Integer
     name: 'physicalBlockSizeBytes'
@@ -282,6 +284,7 @@ properties:
       imports: 'selfLink'
       description: |
         A reference to a zone where the disk should be replicated to.
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'type'
     resource: 'RegionDiskType'
@@ -291,6 +294,7 @@ properties:
       create the disk. Provide this when creating the disk.
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     default_value: 'pd-standard'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'interface'
     min_version: 'beta'
@@ -327,7 +331,6 @@ properties:
     output: true
   - !ruby/object:Api::Type::NestedObject
     name: 'asyncPrimaryDisk'
-    min_version: 'beta'
     properties:
       - !ruby/object:Api::Type::String
         name: 'disk'
@@ -371,3 +374,4 @@ properties:
       description: 'An applicable license URI'
       resource: 'License'
       imports: 'selfLink'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'

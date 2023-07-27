@@ -17,6 +17,7 @@ kind: 'compute#forwardingRule'
 base_url: projects/{{project}}/global/forwardingRules
 immutable: true
 has_self_link: true
+legacy_long_form_project: true
 collection_url_key: 'items'
 description: |
   Represents a GlobalForwardingRule resource. Global forwarding rules are
@@ -157,6 +158,19 @@ examples:
       - 'target'
   - !ruby/object:Provider::Terraform::Examples
     name: 'private_service_connect_google_apis'
+    min_version: beta
+    primary_resource_id: 'default'
+    vars:
+      network_name: 'my-network'
+      subnetwork_name: 'my-subnetwork'
+      global_address_name: 'global-psconnect-ip'
+      forwarding_rule_name: 'globalrule'
+    test_env_vars:
+      project: :PROJECT_NAME
+    ignore_read_extra:
+      - 'ip_address'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'private_service_connect_google_apis_no_automate_dns'
     min_version: beta
     primary_resource_id: 'default'
     vars:
@@ -383,6 +397,7 @@ properties:
   # manifest input from a single value to a range of form NN-NN. The API
   # accepts a single value, e.g. '80', but the API stores and returns
   # '80-80'. This causes idempotency false positive.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'portRange'
     description: |
@@ -441,3 +456,11 @@ properties:
     name: allowPscGlobalAccess
     description: This is used in PSC consumer ForwardingRule to control whether the PSC endpoint can be accessed from another region.
     min_version: beta
+  - !ruby/object:Api::Type::Boolean
+    name: noAutomateDnsZone
+    description:
+      This is used in PSC consumer ForwardingRule to control whether it should try to auto-generate a DNS zone or not.
+      Non-PSC forwarding rules do not use this field.
+    send_empty_value: true
+    immutable: true
+    ignore_read: true

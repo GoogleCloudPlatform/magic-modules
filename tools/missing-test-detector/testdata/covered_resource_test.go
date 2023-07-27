@@ -5,10 +5,11 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
 )
 
 func TestAccCoveredResource(t *testing.T) {
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCoveredResource(),
@@ -21,7 +22,7 @@ func TestAccCoveredResource(t *testing.T) {
 }
 
 func testAccCoveredResource() string {
-	return fmt.Sprintf(Nprintf(`
+	return fmt.Sprintf(acctest.Nprintf(`
 resource "covered_resource" "resource" {
   field_one = "value-one"
   field_four {
@@ -35,7 +36,7 @@ resource "covered_resource" "resource" {
 }
 
 func testAccCoveredResource_update() string {
-	return Nprintf(`
+	return `
 resource "covered_resource" "resource" {
   field_two {
     field_three = "value-two"
@@ -46,5 +47,5 @@ resource "covered_resource" "resource" {
     }
   }
 }
-`, context)
+`
 }

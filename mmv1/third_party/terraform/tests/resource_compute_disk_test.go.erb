@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 
 <% if version == "ga" -%>
@@ -301,8 +302,8 @@ func TestDiskImageDiffSuppress(t *testing.T) {
 func TestAccComputeDisk_imageDiffSuppressPublicVendorsFamilyNames(t *testing.T) {
 	t.Parallel()
 
-	if os.Getenv(acctest.TestEnvVar) == "" {
-		t.Skipf("Network access not allowed; use %s=1 to enable", acctest.TestEnvVar)
+	if os.Getenv(envvar.TestEnvVar) == "" {
+		t.Skipf("Network access not allowed; use %s=1 to enable", envvar.TestEnvVar)
 	}
 
 	config := getInitializedConfig(t)
@@ -329,11 +330,11 @@ func TestAccComputeDisk_imageDiffSuppressPublicVendorsFamilyNames(t *testing.T) 
 func TestAccComputeDisk_update(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDisk_basic(diskName),
@@ -358,7 +359,7 @@ func TestAccComputeDisk_pdHyperDiskProvisionedIopsLifeCycle(t *testing.T) {
 	t.Parallel()
 
 	context_1 := map[string]interface{}{
-		"random_suffix":    RandString(t, 10),
+		"random_suffix":    acctest.RandString(t, 10),
 		"provisioned_iops": 10000,
 		"lifecycle_bool":   true,
 	}
@@ -373,9 +374,9 @@ func TestAccComputeDisk_pdHyperDiskProvisionedIopsLifeCycle(t *testing.T) {
 		"lifecycle_bool":   false,
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -410,7 +411,7 @@ func TestAccComputeDisk_pdHyperDiskProvisionedThroughputLifeCycle(t *testing.T) 
 	t.Parallel()
 
 	context_1 := map[string]interface{}{
-		"random_suffix":          RandString(t, 10),
+		"random_suffix":          acctest.RandString(t, 10),
 		"provisioned_throughput": 180,
 		"lifecycle_bool":         true,
 	}
@@ -425,9 +426,9 @@ func TestAccComputeDisk_pdHyperDiskProvisionedThroughputLifeCycle(t *testing.T) 
 		"lifecycle_bool":         false,
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -461,14 +462,14 @@ func TestAccComputeDisk_pdHyperDiskProvisionedThroughputLifeCycle(t *testing.T) 
 func TestAccComputeDisk_fromSnapshot(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	firstDiskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	snapshotName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	projectName := acctest.GetTestProjectFromEnv()
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	firstDiskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	snapshotName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	projectName := envvar.GetTestProjectFromEnv()
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -494,19 +495,19 @@ func TestAccComputeDisk_fromSnapshot(t *testing.T) {
 func TestAccComputeDisk_encryption(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	var disk compute.Disk
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccComputeDisk_encryption(diskName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeDiskExists(
-						t, "google_compute_disk.foobar", acctest.GetTestProjectFromEnv(), &disk),
+						t, "google_compute_disk.foobar", envvar.GetTestProjectFromEnv(), &disk),
 					testAccCheckEncryptionKey(
 						t, "google_compute_disk.foobar", &disk),
 				),
@@ -518,19 +519,19 @@ func TestAccComputeDisk_encryption(t *testing.T) {
 func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 	t.Parallel()
 
-	kms := BootstrapKMSKey(t)
-	pid := acctest.GetTestProjectFromEnv()
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	kms := acctest.BootstrapKMSKey(t)
+	pid := envvar.GetTestProjectFromEnv()
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	importID := fmt.Sprintf("%s/%s/%s", pid, "us-central1-a", diskName)
 	var disk compute.Disk
 
-	if BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
+	if acctest.BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
 		t.Fatal("Stopping the test because a role was added to the policy.")
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -552,15 +553,53 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 	})
 }
 
-func TestAccComputeDisk_deleteDetach(t *testing.T) {
+<% unless version == 'ga' -%>
+func TestAccComputeDisk_pdHyperDiskEnableConfidentialCompute(t *testing.T) {
+	t.Skip()
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	context := map[string]interface{}{
+		"random_suffix":        acctest.RandString(t, 10),
+		"kms":                  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"disk_size":            64,
+		"confidential_compute": true,
+	}
+
+	var disk compute.Disk
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeDisk_pdHyperDiskEnableConfidentialCompute(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeDiskExists(
+						t, "google_compute_disk.foobar", envvar.GetTestProjectFromEnv(), &disk),
+					testAccCheckEncryptionKey(
+						t, "google_compute_disk.foobar", &disk),
+				),
+			},
+			{
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+<% end -%>
+
+func TestAccComputeDisk_deleteDetach(t *testing.T) {
+	t.Parallel()
+
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -592,13 +631,13 @@ func TestAccComputeDisk_deleteDetachIGM(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	diskName2 := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	mgrName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	diskName2 := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	mgrName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -646,11 +685,11 @@ func TestAccComputeDisk_deleteDetachIGM(t *testing.T) {
 func TestAccComputeDisk_pdExtremeImplicitProvisionedIops(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDisk_pdExtremeImplicitProvisionedIops(diskName),
@@ -668,12 +707,12 @@ func TestAccComputeDisk_pdExtremeImplicitProvisionedIops(t *testing.T) {
 func TestAccComputeDisk_resourcePolicies(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	policyName := fmt.Sprintf("tf-test-policy-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	policyName := fmt.Sprintf("tf-test-policy-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDisk_resourcePolicies(diskName, policyName),
@@ -691,12 +730,12 @@ func TestAccComputeDisk_resourcePolicies(t *testing.T) {
 <% unless version == 'ga' -%>
 func TestAccComputeDisk_multiWriter(t *testing.T) {
 	t.Parallel()
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	diskName := fmt.Sprintf("tf-testd-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDisk_multiWriter(instanceName, diskName, true),
@@ -722,7 +761,7 @@ func testAccCheckComputeDiskExists(t *testing.T, n, p string, disk *compute.Disk
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		found, err := config.NewComputeClient(config.UserAgent).Disks.Get(
 			p, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
@@ -760,14 +799,14 @@ func testAccCheckEncryptionKey(t *testing.T, n string, disk *compute.Disk) resou
 
 func TestAccComputeDisk_cloneDisk(t *testing.T) {
 	t.Parallel()
-	pid := acctest.GetTestProjectFromEnv()
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	pid := envvar.GetTestProjectFromEnv()
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	var disk compute.Disk
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckComputeDiskDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -789,11 +828,11 @@ func TestAccComputeDisk_cloneDisk(t *testing.T) {
 func TestAccComputeDisk_featuresUpdated(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDisk_features(diskName),
@@ -1023,8 +1062,26 @@ resource "google_compute_instance_group_manager" "manager" {
 `, diskName, mgrName)
 }
 
-func testAccComputeDisk_pdHyperDiskProvisionedIopsLifeCycle(context map[string]interface{}) string {
+func testAccComputeDisk_pdHyperDiskEnableConfidentialCompute(context map[string]interface{}) string {
 	return Nprintf(`
+	resource "google_compute_disk" "foobar" {
+		name                        = "tf-test-ecc-%{random_suffix}"
+		size                        = %{disk_size}
+		type                        = "hyperdisk-balanced"
+		zone                        = "us-central1-a"
+		enable_confidential_compute = %{confidential_compute}
+
+		disk_encryption_key {
+			kms_key_self_link       = "%{kms}"
+		}
+
+	}
+`, context)
+}
+
+
+func testAccComputeDisk_pdHyperDiskProvisionedIopsLifeCycle(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 	resource "google_compute_disk" "foobar" {
 		name                    = "tf-test-hyperdisk-%{random_suffix}"
 		type                    = "hyperdisk-extreme"
@@ -1038,7 +1095,7 @@ func testAccComputeDisk_pdHyperDiskProvisionedIopsLifeCycle(context map[string]i
 }
 
 func testAccComputeDisk_pdHyperDiskProvisionedThroughputLifeCycle(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 	resource "google_compute_disk" "foobar" {
 		name                   = "tf-test-hyperdisk-%{random_suffix}"
 		type                   = "hyperdisk-throughput"
@@ -1097,7 +1154,7 @@ resource "google_compute_disk" "foobar" {
 <% end -%>
 
 <% unless version == 'ga' -%>
-func testAccComputeDisk_multiWriter(instance string,  diskName string, enableMultiwriter bool) string {
+func testAccComputeDisk_multiWriter(instance string, diskName string, enableMultiwriter bool) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"
@@ -1174,19 +1231,19 @@ func testAccComputeDisk_diskClone(diskName, refSelector string) string {
 func TestAccComputeDisk_encryptionWithRSAEncryptedKey(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	var disk compute.Disk
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccComputeDisk_encryptionWithRSAEncryptedKey(diskName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeDiskExists(
-						t, "google_compute_disk.foobar-1", acctest.GetTestProjectFromEnv(), &disk),
+						t, "google_compute_disk.foobar-1", envvar.GetTestProjectFromEnv(), &disk),
 					testAccCheckEncryptionKey(
 						t, "google_compute_disk.foobar-1", &disk),
 				),

@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccCloudFunctions2Function_update(t *testing.T) {
@@ -12,12 +13,12 @@ func TestAccCloudFunctions2Function_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"zip_path":      "./test-fixtures/cloudfunctions2/function-source.zip",
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudfunctions2functionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -52,7 +53,7 @@ func TestAccCloudFunctions2Function_update(t *testing.T) {
 }
 
 func testAccCloudfunctions2function_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "tf-test-cloudfunctions2-function-bucket%{random_suffix}"
   location = "US"
@@ -91,7 +92,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
 }
 
 func testAccCloudFunctions2Function_test_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "tf-test-cloudfunctions2-function-bucket%{random_suffix}"
   location = "US"
@@ -128,7 +129,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
 }
 
 func testAccCloudFunctions2Function_test_redeploy(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "tf-test-cloudfunctions2-function-bucket%{random_suffix}"
   location = "US"
@@ -177,18 +178,18 @@ func TestAccCloudFunctions2Function_fullUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 		"zip_path":      "./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip",
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	if BootstrapPSARole(t, "service-", "gcp-sa-pubsub", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
+	if acctest.BootstrapPSARole(t, "service-", "gcp-sa-pubsub", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
 		t.Fatal("Stopping the test because a binding was added.")
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudfunctions2functionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -203,8 +204,7 @@ func TestAccCloudFunctions2Function_fullUpdate(t *testing.T) {
 }
 
 func testAccCloudfunctions2function_cloudfunctions2BasicAuditlogsExample_update(context map[string]interface{}) string {
-	return Nprintf(`
-# [START functions_v2_basic_auditlogs]
+	return acctest.Nprintf(`
 # This example follows the examples shown in this Google Cloud Community blog post
 # https://medium.com/google-cloud/applying-a-path-pattern-when-filtering-in-eventarc-f06b937b4c34
 # and the docs:
@@ -311,6 +311,5 @@ resource "google_cloudfunctions2_function" "function" {
       value = google_storage_bucket.audit-log-bucket.name # Update: stops using path pattern operator
     }
   }
-}
-# [END functions_v2_basic_auditlogs]`, context)
+}`, context)
 }

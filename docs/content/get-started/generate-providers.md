@@ -30,12 +30,11 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
 {{< /hint >}}
 
 1. [Install git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-1. [Install rbenv](https://github.com/rbenv/rbenv#installation)
+1. [Install rbenv](https://github.com/rbenv/rbenv#installation), ensuring you follow **both** steps 1 and 2. 
 1. Use rbenv to install ruby 3.1.0
    ```bash
    rbenv install 3.1.0
    ```
-1. [Install bundler](https://bundler.io/guides/getting_started.html)
 1. [Install go](https://go.dev/doc/install)
 1. Install goimports
    ```bash
@@ -58,8 +57,6 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
  
    ```
    Check for ruby in path...
-      found!
-   Check for bundle in path...
       found!
    Check for go in path...
       found!
@@ -131,7 +128,7 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
 1. Set up application default credentials for Terraform
    ```bash
    gcloud auth application-default login
-   export GOOGLE_USE_DEFAULT_CREDENTIALS=TRUE
+   export GOOGLE_USE_DEFAULT_CREDENTIALS=true
    ```
 1. Set required environment variables
    ```bash
@@ -165,9 +162,9 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
 
    ```bash
    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-   make testacc TEST=./google TESTARGS='-run=TestAccPubsubTopic'
+   make testacc TEST=./google TESTARGS='-run=TestAccPubsubTopic_'
    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-   make testacc TEST=./google-beta TESTARGS='-run=TestAccPubsubTopic'
+   make testacc TEST=./google-beta TESTARGS='-run=TestAccPubsubTopic_'
    ```
 
 ## Troubleshoot

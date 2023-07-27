@@ -6,23 +6,24 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDatasourceGoogleServiceNetworkingPeeredDnsDomain_basic(t *testing.T) {
 	t.Parallel()
-	org := acctest.GetTestOrgFromEnv(t)
-	billingId := acctest.GetTestBillingAccountFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
+	billingId := envvar.GetTestBillingAccountFromEnv(t)
 
-	project := fmt.Sprintf("tf-test-%d", RandInt(t))
+	project := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	resourceName := "data.google_service_networking_peered_dns_domain.acceptance"
-	name := fmt.Sprintf("test-name-%d", RandInt(t))
+	name := fmt.Sprintf("test-name-%d", acctest.RandInt(t))
 	network := "test-network"
 	service := "servicenetworking.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleServiceNetworkingPeeredDnsDomain_basic(project, org, billingId, name, network, service),
@@ -65,7 +66,7 @@ resource "google_compute_network" "test" {
 }
 
 resource "google_compute_global_address" "host-private-access" {
-  name          = "private-ip-alloc-host"
+  name          = "%s-ip"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 24
@@ -115,5 +116,5 @@ data "google_service_networking_peered_dns_domain" "acceptance" {
 		google_service_networking_peered_dns_domain.acceptance,
 	]
 }
-`, project, project, org, billing, service, service, name, service, name, service)
+`, project, project, org, billing, service, project, service, name, service, name, service)
 }

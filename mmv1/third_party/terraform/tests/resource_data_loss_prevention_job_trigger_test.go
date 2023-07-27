@@ -5,19 +5,20 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -46,13 +47,13 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample2(t *testing.
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -117,12 +118,12 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerPubsub(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project": acctest.GetTestProjectFromEnv(),
+		"project": envvar.GetTestProjectFromEnv(),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -142,13 +143,13 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerDeidentifyUpdate(t *testin
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -177,13 +178,13 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerChangingActions(t *testing
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -221,12 +222,12 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerHybridUpdate(t *testing.T)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project": acctest.GetTestProjectFromEnv(),
+		"project": envvar.GetTestProjectFromEnv(),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -255,12 +256,12 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerInspect(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project": acctest.GetTestProjectFromEnv(),
+		"project": envvar.GetTestProjectFromEnv(),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -298,12 +299,12 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerInspectCustomInfoTypes(t *
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project": acctest.GetTestProjectFromEnv(),
+		"project": envvar.GetTestProjectFromEnv(),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -359,13 +360,13 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerActionsOptionalExample(t *
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -403,13 +404,13 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerInspectOptionalExample(t *
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       acctest.GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -447,12 +448,12 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTrigger_withSensitivityScore(t *t
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project": acctest.GetTestProjectFromEnv(),
+		"project": envvar.GetTestProjectFromEnv(),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -487,7 +488,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTrigger_withSensitivityScore(t *t
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
 	description = "Starting description"
@@ -525,7 +526,7 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerIdentifyingFields(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
 	description = "Starting description"
@@ -569,7 +570,7 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerIncludedFields(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
 	description = "Starting description"
@@ -613,7 +614,7 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerExcludedFields(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
 	description = "Starting description"
@@ -657,7 +658,7 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
 	description = "An updated description"
@@ -694,7 +695,7 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerIdentifyingFieldsUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
 	description = "An updated description"
@@ -738,7 +739,7 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerIncludedFieldsUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
 	description = "An updated description"
@@ -782,7 +783,7 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerExcludedFieldsUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
 	description = "An updated description"
@@ -826,7 +827,7 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 }
 
 func testAccDataLossPreventionJobTrigger_publishToPubSub(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "pubsub" {
 	parent = "projects/%{project}"
 	description = "Starting description"
@@ -858,7 +859,7 @@ resource "google_data_loss_prevention_job_trigger" "pubsub" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerDeidentifyBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "actions" {
 	parent       = "projects/%{project}"
 	description  = "Description for the job_trigger created by terraform"
@@ -946,7 +947,7 @@ resource "google_bigquery_table" "default" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerDeidentifyUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "actions" {
 	parent       = "projects/%{project}"
 	description  = "Description for the job_trigger created by terraform"
@@ -1034,7 +1035,7 @@ resource "google_bigquery_table" "default" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerJobNotificationEmails(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "actions" {
 	parent       = "projects/%{project}"
 	description  = "Description for the job_trigger created by terraform"
@@ -1064,7 +1065,7 @@ resource "google_data_loss_prevention_job_trigger" "actions" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerHybrid(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "hybrid" {
 	parent = "projects/%{project}"
 
@@ -1106,7 +1107,7 @@ resource "google_data_loss_prevention_job_trigger" "hybrid" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerHybridUpdated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "hybrid" {
 	parent = "projects/%{project}"
 
@@ -1135,7 +1136,7 @@ resource "google_data_loss_prevention_job_trigger" "hybrid" {
 }
 
 func testAccDataLossPreventionJobTrigger_inspectBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "inspect" {
 	parent = "projects/%{project}"
 	description = "Starting description"
@@ -1272,7 +1273,7 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 }
 
 func testAccDataLossPreventionJobTrigger_inspectUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "inspect" {
 	parent = "projects/%{project}"
 	description = "Starting description"
@@ -1389,7 +1390,7 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 }
 
 func testAccDataLossPreventionJobTrigger_inspectCustomInfoTypesRegex(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "inspect" {
 	parent = "projects/%{project}"
 	description = "Starting description"
@@ -1540,7 +1541,7 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 }
 
 func testAccDataLossPreventionJobTrigger_inspectCustomInfoTypesDictionaryWordList(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "inspect" {
 	parent = "projects/%{project}"
 	description = "Starting description"
@@ -1690,7 +1691,7 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 }
 
 func testAccDataLossPreventionJobTrigger_inspectCustomInfoTypesDictionaryCloudStoragePath(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "inspect" {
 	parent = "projects/%{project}"
 	description = "Starting description"
@@ -1841,7 +1842,7 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 }
 
 func testAccDataLossPreventionJobTrigger_inspectCustomInfoTypesStoredType(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "inspect" {
 	parent = "projects/%{project}"
 	description = "Starting description"
@@ -2002,7 +2003,7 @@ resource "google_data_loss_prevention_stored_info_type" "basic" {
 }
 
 func testAccDataLossPreventionJobTrigger_inspectCustomInfoTypesSurrogateType(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "inspect" {
 	parent = "projects/%{project}"
 	description = "Starting description"
@@ -2148,7 +2149,7 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 }
 
 func testAccDataLossPreventionJobTrigger_inspectExclusionRule(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "inspect" {
 	parent = "projects/%{project}"
 	description = "Starting description"
@@ -2300,7 +2301,7 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerActionsOptionalBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
 	description = "Starting description"
@@ -2327,7 +2328,7 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerInspectOptionalBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
 	description = "Starting description"
@@ -2363,7 +2364,7 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTrigger_withSensitivityScoreBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent       = "projects/%{project}"
 	description  = "Starting description"
@@ -2498,7 +2499,7 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTrigger_withSensitivityScoreUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent       = "projects/%{project}"
 	description  = "Starting description"
@@ -2624,7 +2625,7 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTrigger_withSensitivityScoreUpdate2(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent       = "projects/%{project}"
 	description  = "Starting description"

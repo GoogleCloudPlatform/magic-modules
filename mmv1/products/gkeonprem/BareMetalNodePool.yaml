@@ -31,22 +31,20 @@ taint_resource_on_failed_create: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_bare_metal_node_pool_basic'
-    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14417
-    skip_test: true
     primary_resource_id: 'nodepool-basic'
     min_version: beta
     vars:
-      name: 'nodepool'
+      name: 'my-nodepool'
+      cluster: 'my-cluster'
     test_env_vars:
       project: 'fake-backend-360322'
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_bare_metal_node_pool_full'
-    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14417
-    skip_test: true
     primary_resource_id: 'nodepool-full'
     min_version: beta
     vars:
-      name: 'nodepool'
+      name: 'my-nodepool'
+      cluster: 'my-cluster'
     test_env_vars:
       project: 'fake-backend-360322'
 skip_sweeper: true

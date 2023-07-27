@@ -17,6 +17,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://networksecurity.googleapis.com/v1beta1/
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://networksecurity.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:

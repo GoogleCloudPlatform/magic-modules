@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
 )
 
 func TestAccUncoveredResource(t *testing.T) {
@@ -17,7 +18,7 @@ func TestAccUncoveredResource(t *testing.T) {
 }
 
 func testAccUncoveredResource() string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "uncovered_resource" "resource" {
   field_two {
     field_three = "value-two"

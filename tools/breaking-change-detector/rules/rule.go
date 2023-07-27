@@ -2,7 +2,7 @@ package rules
 
 // Rule is an interface that all Rule
 // types implement. This give consistency
-// for the documentation generation.
+// for the potential documentation generation.
 type Rule interface {
 	Name() string
 	Definition() string
@@ -19,13 +19,13 @@ type RuleCategory struct {
 }
 
 // Rules is a type to hold all existing
-// rules. Exposed for documentation generator
+// rules. Exposed for potential documentation generator
 type Rules struct {
 	Categories []RuleCategory
 }
 
 // GetRules returns a list of all rules for
-// documentation generation
+// potential documentation generation
 func GetRules() *Rules {
 	categories := []RuleCategory{
 		{

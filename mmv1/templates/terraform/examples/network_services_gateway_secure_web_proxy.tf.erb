@@ -1,5 +1,4 @@
 resource "google_certificate_manager_certificate" "default" {
-  provider    = google-beta
   name        = "<%= ctx[:vars]['certificate_name'] %>"
   location    = "us-central1"
   self_managed {
@@ -9,14 +8,12 @@ resource "google_certificate_manager_certificate" "default" {
 }
 
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "<%= ctx[:vars]['network_name'] %>"
   routing_mode            = "REGIONAL"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "<%= ctx[:vars]['subnetwork_name'] %>"
   purpose       = "PRIVATE"
   ip_cidr_range = "10.128.0.0/20"
@@ -26,7 +23,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_compute_subnetwork" "proxyonlysubnet" {
-  provider      = google-beta
   name          = "<%= ctx[:vars]['proxy_only_subnetwork_name'] %>"
   purpose       = "REGIONAL_MANAGED_PROXY"
   ip_cidr_range = "192.168.0.0/23"
@@ -36,13 +32,11 @@ resource "google_compute_subnetwork" "proxyonlysubnet" {
 }
 
 resource "google_network_security_gateway_security_policy" "default" {
-  provider    = google-beta
   name        = "<%= ctx[:vars]['policy_name'] %>"
   location    = "us-central1"
 }
 
 resource "google_network_security_gateway_security_policy_rule" "default" {
-  provider                = google-beta
   name                    = "<%= ctx[:vars]['policy_rule_name'] %>"
   location                = "us-central1"
   gateway_security_policy = google_network_security_gateway_security_policy.default.name
@@ -53,7 +47,6 @@ resource "google_network_security_gateway_security_policy_rule" "default" {
 }
 
 resource "google_network_services_gateway" "<%= ctx[:primary_resource_id] %>" {
-  provider                             = google-beta
   name                                 = "<%= ctx[:vars]['gateway_name_1'] %>"
   location                             = "us-central1"
   addresses                            = ["10.128.0.99"]
