@@ -131,7 +131,7 @@ func TestAccDataPipelinePipeline_basicFlexTemplate(t *testing.T) {
 func testAccDataPipelinePipeline_basicFlexTemplateUpdate(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "service_account" {
-  account_id   = "service-account-id-%s"
+  account_id   = "tf-test-service-%s"
   display_name = "Service Account"
 }
 
@@ -186,7 +186,7 @@ resource "google_data_pipeline_pipeline" "primary" {
 func testAccDataPipelinePipeline_basicFlexTemplate(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "service_account" {
-  account_id   = "service-account-id-%s"
+  account_id   = "tf-test-service-%s"
   display_name = "Service Account"
 }
 
@@ -241,7 +241,7 @@ resource "google_data_pipeline_pipeline" "primary" {
 func testAccDataPipelinePipeline_basicLaunchTemplateUpdate(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "service_account" {
-  account_id   = "service-account-id-%s"
+  account_id   = "tf-test-service-%s"
   display_name = "Service Account"
 }
 
@@ -297,7 +297,7 @@ resource "google_data_pipeline_pipeline" "primary" {
 func testAccDataPipelinePipeline_basicLaunchTemplate(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "service_account" {
-  account_id   = "service-account-id-%s"
+  account_id   = "tf-test-service-%s"
   display_name = "Service Account"
 }
 
