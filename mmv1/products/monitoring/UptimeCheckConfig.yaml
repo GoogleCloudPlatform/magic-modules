@@ -83,7 +83,6 @@ properties:
   - !ruby/object:Api::Type::String
     name: period
     default_value: '300s'
-    immutable: true
     description:
       How often, in seconds, the uptime check is performed. Currently, the only
       supported values are 60s (1 minute), 300s (5 minutes), 600s (10 minutes),
