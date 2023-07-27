@@ -3239,6 +3239,27 @@ resource "google_container_node_pool" "with_sole_tenant_config" {
 `, cluster, np)
 }
 
+func testAccContainerNodePool_withHostMaintenancePolicy(cluster, np string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 2
+  node_config {
+    host_maintenance_policy {
+		maintenance_interval = "PERIODIC"
+	}
+  }
+}
+`, cluster, np)
+}
 
 <% unless version == 'ga' -%>
 func TestAccContainerNodePool_tpuTopology(t *testing.T) {
