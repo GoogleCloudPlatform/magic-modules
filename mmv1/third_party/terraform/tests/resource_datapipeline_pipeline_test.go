@@ -60,13 +60,14 @@ func TestAccDataPipelinePipeline_basicLaunchTemplate(t *testing.T) {
 	t.Parallel()
 
 	var generatedId string
+	suffix := RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataPipelinePipelineDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataPipelinePipeline_basicLaunchTemplate(),
+				Config: testAccDataPipelinePipeline_basicLaunchTemplate(suffix),
 				Check:  setTestCheckDataPipelinePipelineId("google_data_pipeline_pipeline.primary", &generatedId),
 			},
 			{
@@ -77,7 +78,7 @@ func TestAccDataPipelinePipeline_basicLaunchTemplate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"region"},
 			},
 			{
-				Config: testAccDataPipelinePipeline_basicLaunchTemplateUpdate(),
+				Config: testAccDataPipelinePipeline_basicLaunchTemplateUpdate(suffix),
 				Check:  testCheckDataPipelinePipelineIdAfterUpdate("google_data_pipeline_pipeline.primary", &generatedId),
 			},
 			{
@@ -95,13 +96,14 @@ func TestAccDataPipelinePipeline_basicFlexTemplate(t *testing.T) {
 	t.Parallel()
 
 	var generatedId string
+	suffix := RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataPipelinePipelineDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataPipelinePipeline_basicFlexTemplate(),
+				Config: testAccDataPipelinePipeline_basicFlexTemplate(suffix),
 				Check:  setTestCheckDataPipelinePipelineId("google_data_pipeline_pipeline.primary", &generatedId),
 			},
 			{
@@ -112,7 +114,7 @@ func TestAccDataPipelinePipeline_basicFlexTemplate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"region"},
 			},
 			{
-				Config: testAccDataPipelinePipeline_basicFlexTemplateUpdate(),
+				Config: testAccDataPipelinePipeline_basicFlexTemplateUpdate(suffix),
 				Check:  testCheckDataPipelinePipelineIdAfterUpdate("google_data_pipeline_pipeline.primary", &generatedId),
 			},
 			{
@@ -126,15 +128,15 @@ func TestAccDataPipelinePipeline_basicFlexTemplate(t *testing.T) {
 	})
 }
 
-func testAccDataPipelinePipeline_basicFlexTemplateUpdate() string {
-	return `
+func testAccDataPipelinePipeline_basicFlexTemplateUpdate(suffix string) string {
+	return fmt.Sprintf(`
 resource "google_service_account" "service_account" {
-  account_id   = "service-account-id"
+  account_id   = "service-account-id-%s"
   display_name = "Service Account"
 }
 
 resource "google_data_pipeline_pipeline" "primary" {
-  name         = "tf-test-pipeline"
+  name         = "tf-test-pipeline-%s"
   display_name = "update-pipeline"
   type         = "PIPELINE_TYPE_BATCH"
   state        = "STATE_ACTIVE"
@@ -179,17 +181,17 @@ resource "google_data_pipeline_pipeline" "primary" {
     "name": "wrench"
   }
 }
-`
+`, suffix, suffix)
 }
-func testAccDataPipelinePipeline_basicFlexTemplate() string {
-	return `
+func testAccDataPipelinePipeline_basicFlexTemplate(suffix string) string {
+	return fmt.Sprintf(`
 resource "google_service_account" "service_account" {
-  account_id   = "service-account-id"
+  account_id   = "service-account-id-%s"
   display_name = "Service Account"
 }
 
 resource "google_data_pipeline_pipeline" "primary" {
-  name         = "tf-test-pipeline"
+  name         = "tf-test-pipeline-%s"
   type         = "PIPELINE_TYPE_BATCH"
   state        = "STATE_ACTIVE"
 
@@ -233,18 +235,18 @@ resource "google_data_pipeline_pipeline" "primary" {
     "name": "wrench"
   }
 }
-`
+`, suffix, suffix)
 }
 
-func testAccDataPipelinePipeline_basicLaunchTemplateUpdate() string {
-	return `
+func testAccDataPipelinePipeline_basicLaunchTemplateUpdate(suffix string) string {
+	return fmt.Sprintf(`
 resource "google_service_account" "service_account" {
-  account_id   = "service-account-id"
+  account_id   = "service-account-id-%s"
   display_name = "Service Account"
 }
 
 resource "google_data_pipeline_pipeline" "primary" {
-  name         = "tf-test-pipeline"
+  name         = "tf-test-pipeline-%s"
   display_name = "update-pipeline"
   type         = "PIPELINE_TYPE_BATCH"
   state        = "STATE_ACTIVE"
@@ -290,17 +292,17 @@ resource "google_data_pipeline_pipeline" "primary" {
     "name": "wrench"
   }
 }
-`
+`, suffix, suffix)
 }
-func testAccDataPipelinePipeline_basicLaunchTemplate() string {
-	return `
+func testAccDataPipelinePipeline_basicLaunchTemplate(suffix string) string {
+	return fmt.Sprintf(`
 resource "google_service_account" "service_account" {
-  account_id   = "service-account-id"
+  account_id   = "service-account-id-%s"
   display_name = "Service Account"
 }
 
 resource "google_data_pipeline_pipeline" "primary" {
-  name         = "tf-test-pipeline"
+  name         = "tf-test-pipeline-%s"
   type         = "PIPELINE_TYPE_BATCH"
   state        = "STATE_ACTIVE"
 
@@ -345,5 +347,5 @@ resource "google_data_pipeline_pipeline" "primary" {
     "name": "wrench"
   }
 }
-`
+`, suffix, suffix)
 }

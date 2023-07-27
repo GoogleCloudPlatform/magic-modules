@@ -1,10 +1,10 @@
 resource "google_service_account" "service_account" {
-  account_id   = "service-account-id"
+  account_id   = "<%= ctx[:vars]['account_id'] %>"
   display_name = "Service Account"
 }
 
-resource "google_data_pipeline_pipeline" "big_data_pipeline2" {
-  name         = "my-pipeline"
+resource "google_data_pipeline_pipeline" "primay" {
+  name         = "<%= ctx[:vars]["pipeline_name"] %>"
   display_name = "my-pipeline"
   type         = "PIPELINE_TYPE_BATCH"
   state        = "STATE_ACTIVE"
@@ -31,7 +31,6 @@ resource "google_data_pipeline_pipeline" "big_data_pipeline2" {
           additional_user_labels = {
             "context" : "test"
           }
-          ip_configuration = "WORKER_IP_UNSPECIFIED"
           worker_region    = "us-central1"
           worker_zone      = "us-central1-a"
 
