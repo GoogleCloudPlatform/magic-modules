@@ -119,7 +119,7 @@ func testAccMonitoringUptimeCheckConfig_update(suffix, period, path, pwd, projec
 resource "google_monitoring_uptime_check_config" "http" {
   display_name = "http-uptime-check-%s"
   timeout      = "60s"
-  period       = %s
+  period       = "%s"
 
   http_check {
     path = "/%s"
