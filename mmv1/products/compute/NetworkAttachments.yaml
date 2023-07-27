@@ -43,10 +43,19 @@ async: !ruby/object:Api::OpAsync
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'network_attachment_basic'
+    primary_resource_id: 'default'
     vars:
       resource_name: 'basic-network-attachment'
-      network_name: 'network'
-      subnetwork_name: 'subnetwork'
+      network_name: 'basic-network'
+      subnetwork_name: 'basic-subnetwork'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'network_attachment_instance_usage'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'basic-network-attachment'
+      network_name: 'basic-network'
+      subnetwork_name: 'basic-subnetwork'
+      instance_name: 'basic-instance'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'

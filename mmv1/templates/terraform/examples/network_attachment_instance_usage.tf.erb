@@ -19,3 +19,21 @@ resource "google_compute_network_attachment" "<%= ctx[:primary_resource_id] %>" 
     subnetworks = [google_compute_subnetwork.default.id] 
     connection_preference = "ACCEPT_AUTOMATIC"
 }
+
+resource "google_compute_instance" "default" {
+  name         = "<%= ctx[:vars]['instance_name'] %>"
+  zone         = "us-central1-a"
+  machine_type = "e2-micro"
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    network = google_compute_network.default.id
+    subnetwork = google_compute_subnetwork.default.id
+    network_attachment = google_compute_network_attachment.default.name
+  }
+}
