@@ -13,9 +13,18 @@
 	# limitations under the License.
 -%>
 config := meta.(*transport_tpg.Config)
+
+expectedName, _ := expandNestedMonitoringMonitoredProjectName(d.Get("name"), d, config)
+expectedFlattenedName := flattenNestedMonitoringMonitoredProjectName(expectedName, d, config)
+_, isNumErr := tpgresource.StringToFixed64(expectedFlattenedName.(string))
+expectProjectNumber := isNumErr == nil
+
 name := res["name"].(string)
 name = tpgresource.GetResourceNameFromSelfLink(name)
-if name != "" {
+
+if expectProjectNumber {
+	res["name"] = name
+} else if name != "" {
 	project, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(name).Do()
 	if err != nil {
 		return nil, err
