@@ -204,7 +204,6 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 
 	    	echo \ "$importformat" >> importmetadata.txt
 	    fi
-	    if
 	    iamname=${resource/google/iam}
 	    iamservice=$(basename $(dirname $file))
 	    if [ -f "$basepath/services/$iamservice/$iamname.go" ]
