@@ -120,7 +120,7 @@ resource "google_alloydb_user" "default" {
 }
 
 resource "google_compute_network" "default" {
-	name = "tf-test-alloydb-cluster%{random_suffix}"
+  name = "tf-test-alloydb-cluster-%{random_suffix}"
 }
 
 resource "google_alloydb_cluster" "default" {
