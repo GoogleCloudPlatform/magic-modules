@@ -3023,7 +3023,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 			// Wait until it's updated
 			err = ContainerOperationWait(config, op, project, location, "updating L4", userAgent, d.Timeout(schema.TimeoutUpdate))
-			log.Println("[DEBUG] done updating enable_intranode_visibility")
+			log.Println("[DEBUG] done updating enable_l4_ilb_subsetting")
 			return err
 		}
 
@@ -3742,26 +3742,26 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 
 <% unless version == 'ga' -%>
-        if d.HasChange("node_pool_defaults") && d.HasChange("node_pool_defaults.0.node_config_defaults.0.gcfs_config") {
-                if v, ok := d.GetOk("node_pool_defaults.0.node_config_defaults.0.gcfs_config"); ok {
-                        gcfsConfig := v.([]interface{})[0].(map[string]interface{})
-                        req := &container.UpdateClusterRequest{
-			        Update: &container.ClusterUpdate{
-				        DesiredGcfsConfig: &container.GcfsConfig{
-			                        Enabled: gcfsConfig["enabled"].(bool),
-		                        },
-			        },
-		        }
+	if d.HasChange("node_pool_defaults") && d.HasChange("node_pool_defaults.0.node_config_defaults.0.gcfs_config") {
+		if v, ok := d.GetOk("node_pool_defaults.0.node_config_defaults.0.gcfs_config"); ok {
+			gcfsConfig := v.([]interface{})[0].(map[string]interface{})
+			req := &container.UpdateClusterRequest{
+				Update: &container.ClusterUpdate{
+					DesiredGcfsConfig: &container.GcfsConfig{
+						Enabled: gcfsConfig["enabled"].(bool),
+					},
+				},
+			}
 
-		        updateF := updateFunc(req, "updating GKE cluster desired gcfs config.")
-		        // Call update serially.
-		        if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
-			        return err
-		        }
+			updateF := updateFunc(req, "updating GKE cluster desired gcfs config.")
+			// Call update serially.
+			if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+				return err
+			}
 
-                        log.Printf("[INFO] GKE cluster %s default gcfs config has been updated", d.Id())
-                }
-        }
+			log.Printf("[INFO] GKE cluster %s default gcfs config has been updated", d.Id())
+		}
+	}
 <% end -%>
 
 	if d.HasChange("security_posture_config") {
@@ -4576,13 +4576,13 @@ func expandBinaryAuthorization(configured interface{}, legacy_enabled bool) *con
 	if len(l) == 0 || l[0] == nil {
 		return &container.BinaryAuthorization{
 			Enabled:         legacy_enabled,
-                        ForceSendFields: []string{"Enabled"},
+			ForceSendFields: []string{"Enabled"},
 		}
 	}
 	config := l[0].(map[string]interface{})
 	return &container.BinaryAuthorization{
-                Enabled:        config["enabled"].(bool),
-                EvaluationMode: config["evaluation_mode"].(string),
+		Enabled:        config["enabled"].(bool),
+		EvaluationMode: config["evaluation_mode"].(string),
 	}
 }
 
@@ -4977,16 +4977,16 @@ func expandContainerClusterAuthenticatorGroupsConfig(configured interface{}) *co
 }
 
 func expandNodePoolDefaults(configured interface{}) *container.NodePoolDefaults {
-        l, ok := configured.([]interface{})
-        if !ok || l == nil || len(l) == 0 || l[0] == nil {
-                return nil
-        }
-        nodePoolDefaults := &container.NodePoolDefaults{}
-        config := l[0].(map[string]interface{})
-        if v, ok := config["node_config_defaults"]; ok && len(v.([]interface{})) > 0 {
-                nodePoolDefaults.NodeConfigDefaults = expandNodeConfigDefaults(v)
-        }
-        return nodePoolDefaults
+	l, ok := configured.([]interface{})
+	if !ok || l == nil || len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	nodePoolDefaults := &container.NodePoolDefaults{}
+	config := l[0].(map[string]interface{})
+	if v, ok := config["node_config_defaults"]; ok && len(v.([]interface{})) > 0 {
+		nodePoolDefaults.NodeConfigDefaults = expandNodeConfigDefaults(v)
+	}
+	return nodePoolDefaults
 }
 
 func flattenNodePoolDefaults(c *container.NodePoolDefaults) []map[string]interface{} {
@@ -5973,7 +5973,7 @@ func containerClusterNetworkPolicyDiffSuppress(k, old, new string, r *schema.Res
 }
 
 func BinaryAuthorizationDiffSuppress(k, old, new string, r *schema.ResourceData) bool {
-        // An empty config is equivalent to a config with enabled set to false.
+	// An empty config is equivalent to a config with enabled set to false.
 	if k == "binary_authorization.#" && old == "1" && new == "0" {
 		o, _ := r.GetChange("binary_authorization.0.enabled")
 		if !o.(bool) && !r.HasChange("binary_authorization.0.evaluation_mode") {
