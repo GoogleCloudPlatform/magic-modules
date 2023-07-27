@@ -1,11 +1,9 @@
-# TODO(felipegc): there is still an issue where the used defined fields is only working while performing patch op
 resource "google_compute_region_security_policy" "<%= ctx[:primary_resource_id] %>" {
   provider    = google-beta  
 
   name        = "<%= ctx[:vars]['sec_policy_name'] %>"
   description = "with user defined fields"
   type        = "CLOUD_ARMOR_NETWORK"
-
   user_defined_fields {
     name = "SIG1_AT_0"
     base = "UDP"
@@ -13,7 +11,6 @@ resource "google_compute_region_security_policy" "<%= ctx[:primary_resource_id] 
     size = 2
     mask = "0x8F00"
   }
-  
   user_defined_fields {
     name = "SIG2_AT_8"
     base = "UDP"
