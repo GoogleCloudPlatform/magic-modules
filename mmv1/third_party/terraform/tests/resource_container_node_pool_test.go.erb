@@ -3300,7 +3300,7 @@ func TestAccContainerNodePool_withHostMaintenancePolicy(t *testing.T) {
 			CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 			Steps: []resource.TestStep{
 					{
-							Config: testAccContainerNodePool_withSoleTenantConfig(cluster, np),
+							Config: testAccContainerNodePool_withHostMaintenancePolicy(cluster, np),
 					},
 					{
 							ResourceName:      "google_container_node_pool.np",
@@ -3323,8 +3323,9 @@ resource "google_container_node_pool" "np" {
   name               = "%s"
   location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
-  initial_node_count = 2
+  initial_node_count = 1
   node_config {
+	machine_type = "n2-standard-2"
     host_maintenance_policy {
 		maintenance_interval = "PERIODIC"
 	}
