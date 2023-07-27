@@ -12,6 +12,7 @@ import (
 )
 
 var flagBackfill = flag.String("backfill-date", "", "run in backfill mode to apply labels to issues filed after given date")
+var flagDryRun = flag.Bool("backfill-dry-run", false, "when combined with backfill-date, perform a dry run of backfill mode")
 
 func main() {
 	flag.Parse()
@@ -34,6 +35,6 @@ func main() {
 			fmt.Println("[" + strings.Join(desired, ", ") + "]")
 		}
 	} else {
-		backfill(*flagBackfill, enrolledTeams)
+		backfill(*flagBackfill, enrolledTeams, *flagDryRun)
 	}
 }

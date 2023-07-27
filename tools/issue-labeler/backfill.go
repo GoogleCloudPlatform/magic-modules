@@ -26,7 +26,7 @@ type IssueUpdate struct {
 	Labels []string `json:"labels"`
 }
 
-func backfill(since string, enrolledTeams map[string][]string) {
+func backfill(since string, enrolledTeams map[string][]string, dryRun bool) {
 	client := &http.Client{}
 	done := false
 	page := 1
@@ -70,7 +70,7 @@ func backfill(since string, enrolledTeams map[string][]string) {
 		}
 
 		if len(desired) > oldLength {
-			var desiredSlice []string
+			desiredSlice := []string{"forward/review"}
 			for label := range desired {
 				desiredSlice = append(desiredSlice, label)
 			}
@@ -86,9 +86,18 @@ func backfill(since string, enrolledTeams map[string][]string) {
 			if err != nil {
 				glog.Exitf("Error creating request: %v", err)
 			}
-			_, err = client.Do(req)
-			if err != nil {
-				glog.Exitf("Error updating issue: %v", err)
+			if dryRun {
+				fmt.Printf("%s %s\n", req.Method, req.URL)
+				b, err := json.MarshalIndent(update, "", "  ")
+				if err != nil {
+					glog.Exitf("Error marshalling json: %v", err)
+				}
+				fmt.Println(string(b))
+			} else {
+				_, err = client.Do(req)
+				if err != nil {
+					glog.Exitf("Error updating issue: %v", err)
+				}
 			}
 		}
 	}
