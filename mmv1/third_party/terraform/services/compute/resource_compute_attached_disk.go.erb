@@ -35,6 +35,11 @@ func ResourceComputeAttachedDisk() *schema.Resource {
 			Delete: schema.DefaultTimeout(300 * time.Second),
 		},
 
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+			tpgresource.DefaultProviderZone,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"disk": {
 				Type:             schema.TypeString,

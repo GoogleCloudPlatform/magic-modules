@@ -30,6 +30,10 @@ func ResourceOSConfigOSPolicyAssignment() *schema.Resource {
 			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+		),
+		
 		Schema: map[string]*schema.Schema{
 			"instance_filter": {
 				Type:        schema.TypeList,

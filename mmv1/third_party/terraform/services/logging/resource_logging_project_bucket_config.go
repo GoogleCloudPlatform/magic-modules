@@ -133,6 +133,10 @@ func ResourceLoggingProjectBucketConfig() *schema.Resource {
 		},
 		Schema:        loggingProjectBucketConfigSchema,
 		UseJSONNumber: true,
+		
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+		),
 	}
 }
 

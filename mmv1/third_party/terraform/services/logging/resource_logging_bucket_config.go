@@ -105,6 +105,9 @@ func ResourceLoggingBucketConfig(parentType string, parentSpecificSchema map[str
 		},
 		Schema:        tpgresource.MergeSchemas(loggingBucketConfigSchema, parentSpecificSchema),
 		UseJSONNumber: true,
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+		),
 	}
 }
 

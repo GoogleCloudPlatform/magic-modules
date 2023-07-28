@@ -35,7 +35,10 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceSecurityPolicyStateImporter,
 		},
-		CustomizeDiff: rulesCustomizeDiff,
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+			rulesCustomizeDiff,
+		),
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(8 * time.Minute),

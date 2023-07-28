@@ -32,6 +32,9 @@ func ResourceBigtableTable() *schema.Resource {
 			Update: schema.DefaultTimeout(20 * time.Minute),
 		},
 
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+		),
 		// ----------------------------------------------------------------------
 		// IMPORTANT: Do not add any additional ForceNew fields to this resource.
 		// Destroying/recreating tables can lead to data loss for users.
