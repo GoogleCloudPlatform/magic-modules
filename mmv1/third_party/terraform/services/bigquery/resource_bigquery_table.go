@@ -399,6 +399,7 @@ func ResourceBigQueryTable() *schema.Resource {
 			State: resourceBigQueryTableImport,
 		},
 		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
 			resourceBigQueryTableSchemaCustomizeDiff,
 		),
 		Schema: map[string]*schema.Schema{

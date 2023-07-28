@@ -32,7 +32,11 @@ func ResourceComputeInstanceFromTemplate() *schema.Resource {
 		Timeouts: ResourceComputeInstance().Timeouts,
 
 		Schema:        computeInstanceFromTemplateSchema(),
-		CustomizeDiff: ResourceComputeInstance().CustomizeDiff,
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+			tpgresource.DefaultProviderProject,
+			ResourceComputeInstance().CustomizeDiff,
+		),
 		UseJSONNumber: true,
 	}
 }
