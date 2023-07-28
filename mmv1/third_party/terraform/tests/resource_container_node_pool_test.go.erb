@@ -3318,10 +3318,10 @@ resource "google_container_cluster" "cluster" {
   location           = "asia-east1-c"
   initial_node_count = 1
   node_config {
-	machine_type = "n2-standard-2"
     host_maintenance_policy {
 		maintenance_interval = "PERIODIC"
 	}
+	machine_type = "n2-standard-2"
   }
 }
 
@@ -3331,10 +3331,10 @@ resource "google_container_node_pool" "np" {
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
   node_config {
-	machine_type = "n2-standard-2"
     host_maintenance_policy {
 		maintenance_interval = "PERIODIC"
 	}
+	machine_type = "n2-standard-2"
   }
 }
 `, cluster, np)
