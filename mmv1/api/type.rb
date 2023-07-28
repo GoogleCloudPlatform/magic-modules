@@ -138,8 +138,8 @@ module Api
       # For a TypeMap, the DSF to apply to the key.
       attr_reader :key_diff_suppress_func
 
-      # Ignore expand the "effectcive_labels" and "effective_annotations" fields
-      attr_reader :ignore_expand
+      # Ignore writing the "effectcive_labels" and "effective_annotations" fields to API.
+      attr_reader :ignore_write
 
       # ====================
       # Schema Modifications
@@ -215,6 +215,7 @@ module Api
       check :url_param_only, type: :boolean
       check :read_query_params, type: ::String
       check :immutable, type: :boolean
+      check :ignore_write, type: :boolean, default: false
 
       raise 'Property cannot be output and required at the same time.' \
         if @output && @required
@@ -772,6 +773,15 @@ module Api
       def validate
         super
         raise "The field #{name} has the type KeyValueLabels, but the field name is not 'labels'!" if @name != "labels"
+      end
+    end
+
+    # An array of string -> string key -> value pairs used specifcally for the "annotations" field of a resource.
+    # The field name with this type should be "annotations" literally.
+    class KeyValueAnnotations < KeyValuePairs
+      def validate
+        super
+        raise "The field #{name} has the type KeyValueAnnotations, but the field name is not 'annotations'!" if @name != "annotations"
       end
     end
 

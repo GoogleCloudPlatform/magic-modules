@@ -94,8 +94,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
     })
   }
   return transformed
-<% elsif property.is_a?(Api::Type::KeyValueLabels) -%>
-<% puts property.access_path -%>
+<% elsif (property.is_a?(Api::Type::KeyValueLabels)) || (property.is_a?(Api::Type::KeyValueAnnotations)) -%>
   if v == nil {
     return v
   }
