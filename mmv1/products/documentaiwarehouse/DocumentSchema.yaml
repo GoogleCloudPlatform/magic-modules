@@ -16,6 +16,7 @@ name: 'DocumentSchema'
 base_url: 'projects/{{project_number}}/locations/{{location}}/documentSchemas'
 self_link: '{{name}}'
 delete_url: '{{name}}'
+immutable: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/document-warehouse/docs/manage-document-schemas'
