@@ -54,6 +54,9 @@ func TestAccComputeInstanceFromMachineImage_localSsdRecoveryTimeout(t *testing.T
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
+	var expectedLocalSsdRecoveryTimeout = compute.Duration{}
+	expectedLocalSsdRecoveryTimeout.Nanos = 0
+	expectedLocalSsdRecoveryTimeout.Seconds = 3600
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -64,8 +67,7 @@ func TestAccComputeInstanceFromMachineImage_localSsdRecoveryTimeout(t *testing.T
 				Config: testAccComputeInstanceFromMachineImage_localSsdRecoveryTimeout(instanceName, generatedInstanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, resourceName, &instance),
-					resource.TestCheckResourceAttr(resourceName, "scheduling.0.local_ssd_recovery_timeout.seconds", "3600"),
-					resource.TestCheckResourceAttr(resourceName, "scheduling.0.local_ssd_recovery_timeout.nanos", "0"),
+					testAccCheckComputeInstanceLocalSsdRecoveryTimeout(&instance, expectedLocalSsdRecoveryTimeout),
 				),
 			},
 		},
@@ -79,7 +81,10 @@ func TestAccComputeInstanceFromMachineImageWithOverride_localSsdRecoveryTimeout(
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
-
+	var expectedLocalSsdRecoveryTimeout = compute.Duration{}
+	expectedLocalSsdRecoveryTimeout.Nanos = 0
+	expectedLocalSsdRecoveryTimeout.Seconds = 7200
+	
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
@@ -89,8 +94,7 @@ func TestAccComputeInstanceFromMachineImageWithOverride_localSsdRecoveryTimeout(
 				Config: testAccComputeInstanceFromMachineImageWithOverride_localSsdRecoveryTimeout(instanceName, generatedInstanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, resourceName, &instance),
-					resource.TestCheckResourceAttr(resourceName, "scheduling.0.local_ssd_recovery_timeout.seconds", "7200"),
-					resource.TestCheckResourceAttr(resourceName, "scheduling.0.local_ssd_recovery_timeout.nanos", "0"),
+					testAccCheckComputeInstanceLocalSsdRecoveryTimeout(&instance, expectedLocalSsdRecoveryTimeout),
 				),
 			},
 		},
@@ -258,8 +262,6 @@ resource "google_compute_instance" "vm" {
 			seconds = 3600
 		}
   }
-
-  can_ip_forward = true
 }
 
 resource "google_compute_machine_image" "foobar" {
@@ -275,8 +277,6 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 
   source_machine_image = google_compute_machine_image.foobar.self_link
 
-  // Overrides
-  can_ip_forward = false
   labels = {
     my_key = "my_value"
   }
@@ -316,8 +316,6 @@ resource "google_compute_instance" "vm" {
 			seconds = 3600
 		}
   }
-
-  can_ip_forward = true
 }
 
 resource "google_compute_machine_image" "foobar" {
@@ -333,8 +331,6 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 
   source_machine_image = google_compute_machine_image.foobar.self_link
 
-  // Overrides
-  can_ip_forward = false
   labels = {
     my_key = "my_value"
   }
