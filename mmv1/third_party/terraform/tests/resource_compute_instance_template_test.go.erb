@@ -1075,7 +1075,6 @@ func TestAccComputeInstanceTemplate_localSsdRecoveryTimeout(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 	var expectedLocalSsdRecoveryTimeout = compute.Duration{}
-	// Define in testAccComputeInstanceTemplate_spot
 	expectedLocalSsdRecoveryTimeout.Nanos = 0
 	expectedLocalSsdRecoveryTimeout.Seconds = 3600
 
@@ -1089,6 +1088,7 @@ func TestAccComputeInstanceTemplate_localSsdRecoveryTimeout(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
+					testAccCheckComputeInstanceTemplateAutomaticRestart(&instanceTemplate, false),
 					testAccCheckComputeInstanceTemplateLocalSsdRecoveryTimeout(&instanceTemplate, expectedLocalSsdRecoveryTimeout),
 				),
 			},
@@ -3263,6 +3263,7 @@ resource "google_compute_instance_template" "foobar" {
   }
 
   scheduling {
+    automatic_restart = false
     local_ssd_recovery_timeout {
 		nanos = 0
 		seconds = 3600
