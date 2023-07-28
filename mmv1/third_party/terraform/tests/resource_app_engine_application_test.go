@@ -14,37 +14,37 @@ func TestAccAppEngineApplication_basic(t *testing.T) {
 
 	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
-	billingAccount := envvar.GetTestBillingAccountFromEnv(t),
+	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
 
-		acctest.VcrTest(t, resource.TestCase{
-			PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-			ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-			Steps: []resource.TestStep{
-				{
-					Config: testAccAppEngineApplication_basic(pid, org, billingAccount),
-					Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttrSet("google_app_engine_application.acceptance", "url_dispatch_rule.#"),
-						resource.TestCheckResourceAttrSet("google_app_engine_application.acceptance", "name"),
-						resource.TestCheckResourceAttrSet("google_app_engine_application.acceptance", "code_bucket"),
-						resource.TestCheckResourceAttrSet("google_app_engine_application.acceptance", "default_hostname"),
-						resource.TestCheckResourceAttrSet("google_app_engine_application.acceptance", "default_bucket"),
-					),
-				},
-				{
-					ResourceName:      "google_app_engine_application.acceptance",
-					ImportState:       true,
-					ImportStateVerify: true,
-				},
-				{
-					Config: testAccAppEngineApplication_update(pid, org),
-				},
-				{
-					ResourceName:      "google_app_engine_application.acceptance",
-					ImportState:       true,
-					ImportStateVerify: true,
-				},
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAppEngineApplication_basic(pid, org, billingAccount),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_app_engine_application.acceptance", "url_dispatch_rule.#"),
+					resource.TestCheckResourceAttrSet("google_app_engine_application.acceptance", "name"),
+					resource.TestCheckResourceAttrSet("google_app_engine_application.acceptance", "code_bucket"),
+					resource.TestCheckResourceAttrSet("google_app_engine_application.acceptance", "default_hostname"),
+					resource.TestCheckResourceAttrSet("google_app_engine_application.acceptance", "default_bucket"),
+				),
 			},
-		})
+			{
+				ResourceName:      "google_app_engine_application.acceptance",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccAppEngineApplication_update(pid, org),
+			},
+			{
+				ResourceName:      "google_app_engine_application.acceptance",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }
 
 func TestAccAppEngineApplication_withIAP(t *testing.T) {
@@ -52,23 +52,23 @@ func TestAccAppEngineApplication_withIAP(t *testing.T) {
 
 	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
-	billingAccount := envvar.GetTestBillingAccountFromEnv(t),
+	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
 
-		acctest.VcrTest(t, resource.TestCase{
-			PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-			ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-			Steps: []resource.TestStep{
-				{
-					Config: testAccAppEngineApplication_withIAP(pid, org, billingAccount),
-				},
-				{
-					ResourceName:            "google_app_engine_application.acceptance",
-					ImportState:             true,
-					ImportStateVerify:       true,
-					ImportStateVerifyIgnore: []string{"iap.0.oauth2_client_secret"},
-				},
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAppEngineApplication_withIAP(pid, org, billingAccount),
 			},
-		})
+			{
+				ResourceName:            "google_app_engine_application.acceptance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"iap.0.oauth2_client_secret"},
+			},
+		},
+	})
 }
 
 func testAccAppEngineApplication_withIAP(pid, org string) string {
