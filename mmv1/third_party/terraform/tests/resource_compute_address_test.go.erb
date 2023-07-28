@@ -1,0 +1,251 @@
+<% autogen_exception -%>
+
+package google
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func TestAccComputeAddress_networkTier(t *testing.T) {
+	t.Parallel()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeAddressDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeAddress_networkTier(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_compute_address.foobar", "labels.%"),
+					resource.TestCheckNoResourceAttr("google_compute_address.foobar", "effective_labels.%"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeAddress_internal(t *testing.T) {
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeAddressDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeAddress_internal(acctest.RandString(t, 10)),
+			},
+			{
+				ResourceName:      "google_compute_address.internal",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+
+			{
+				ResourceName:      "google_compute_address.internal_with_subnet",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+
+			{
+				ResourceName:      "google_compute_address.internal_with_subnet_and_address",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+<% unless version == "ga" -%>
+func TestAccComputeAddress_networkTier_withLabels(t *testing.T) {
+	t.Parallel()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeAddressDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeAddress_networkTier(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_compute_address.foobar", "labels.%"),
+					resource.TestCheckNoResourceAttr("google_compute_address.foobar", "effective_labels.%"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_address.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeAddress_networkTier_withLabels(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.%", "2"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.env", "foo"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.default_expiration_ms", "3600000"),
+
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "effective_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "effective_labels.env", "foo"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "effective_labels.default_expiration_ms", "3600000"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_address.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeAddress_networkTier_withLabelsUpdate(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.%", "2"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.env", "bar"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.default_expiration_ms", "7200000"),
+
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "effective_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "effective_labels.env", "bar"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "effective_labels.default_expiration_ms", "7200000"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_address.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeAddress_networkTier(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_compute_address.foobar", "labels.%"),
+					resource.TestCheckNoResourceAttr("google_compute_address.foobar", "effective_labels.%"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_address.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeAddress_networkTier_withProvider5(t *testing.T) {
+	t.Parallel()
+
+	oldVersion := map[string]resource.ExternalProvider{
+		"google": {
+			VersionConstraint: "4.75.0", // a version that doesn't separate user defined labels and system labels
+			Source:            "registry.terraform.io/hashicorp/google",
+		},
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeAddress_networkTier(acctest.RandString(t, 10)),
+				ExternalProviders: oldVersion,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_compute_address.foobar", "labels.%"),
+					resource.TestCheckNoResourceAttr("google_compute_address.foobar", "effective_labels.%"),
+				),
+			},
+			{
+				Config: testAccComputeAddress_networkTier_withLabels(acctest.RandString(t, 10)),
+				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.%", "2"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.env", "foo"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.default_expiration_ms", "3600000"),
+
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "effective_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "effective_labels.env", "foo"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "effective_labels.default_expiration_ms", "3600000"),
+				),
+			},
+		},
+	})
+}
+
+func testAccComputeAddress_networkTier_withLabels(i string) string {
+	return fmt.Sprintf(`
+resource "google_compute_address" "foobar" {
+  name         = "tf-test-address-%s"
+  network_tier = "STANDARD"
+
+  labels = {
+	env                   = "foo"
+    default_expiration_ms = 3600000
+  }
+}
+`, i)
+}
+
+func testAccComputeAddress_networkTier_withLabelsUpdate(i string) string {
+	return fmt.Sprintf(`
+resource "google_compute_address" "foobar" {
+  name         = "tf-test-address-%s"
+  network_tier = "STANDARD"
+
+  labels = {
+	env                   = "bar"
+    default_expiration_ms = 7200000
+  }
+}
+`, i)
+}
+<% end -%>
+
+func testAccComputeAddress_internal(i string) string {
+	return fmt.Sprintf(`
+resource "google_compute_address" "internal" {
+  name         = "tf-test-address-internal-%s"
+  address_type = "INTERNAL"
+  region       = "us-east1"
+}
+
+resource "google_compute_network" "default" {
+  name = "tf-test-network-test-%s"
+}
+
+resource "google_compute_subnetwork" "foo" {
+  name          = "subnetwork-test-%s"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-east1"
+  network       = google_compute_network.default.self_link
+}
+
+resource "google_compute_address" "internal_with_subnet" {
+  name         = "tf-test-address-internal-with-subnet-%s"
+  subnetwork   = google_compute_subnetwork.foo.self_link
+  address_type = "INTERNAL"
+  region       = "us-east1"
+}
+
+// We can't test the address alone, because we don't know what IP range the
+// default subnetwork uses.
+resource "google_compute_address" "internal_with_subnet_and_address" {
+  name         = "tf-test-address-internal-with-subnet-and-address-%s"
+  subnetwork   = google_compute_subnetwork.foo.self_link
+  address_type = "INTERNAL"
+  address      = "10.0.42.42"
+  region       = "us-east1"
+}
+`,
+		i, // google_compute_address.internal name
+		i, // google_compute_network.default name
+		i, // google_compute_subnetwork.foo name
+		i, // google_compute_address.internal_with_subnet_name
+		i, // google_compute_address.internal_with_subnet_and_address name
+	)
+}
+
+func testAccComputeAddress_networkTier(i string) string {
+	return fmt.Sprintf(`
+resource "google_compute_address" "foobar" {
+  name         = "tf-test-address-%s"
+  network_tier = "STANDARD"
+}
+`, i)
+}
