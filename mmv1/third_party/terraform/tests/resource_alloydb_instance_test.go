@@ -74,7 +74,7 @@ data "google_project" "project" {
 }
 
 data "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
+  name = "%{network_name}"
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {
@@ -133,7 +133,7 @@ resource "google_alloydb_cluster" "default" {
 data "google_project" "project" {}
 
 data "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
+  name = "%{network_name}"
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {
@@ -211,7 +211,7 @@ resource "google_alloydb_cluster" "default" {
 data "google_project" "project" {}
 
 data "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
+  name = "%{network_name}"
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {
@@ -279,7 +279,7 @@ resource "google_alloydb_cluster" "default" {
 data "google_project" "project" {}
 
 data "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
+  name = "%{network_name}"
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {
@@ -348,7 +348,7 @@ resource "google_alloydb_cluster" "default" {
 data "google_project" "project" {}
 
 data "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
+  name = "%{network_name}"
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {
@@ -388,7 +388,7 @@ resource "google_alloydb_cluster" "default" {
 data "google_project" "project" {}
 
 data "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
+  name = "%{network_name}"
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {
