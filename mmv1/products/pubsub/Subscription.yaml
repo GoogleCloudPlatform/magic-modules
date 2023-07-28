@@ -192,7 +192,7 @@ properties:
           - v1 or v1beta2: uses the push format defined in the v1 Pub/Sub API.
         diff_suppress_func: 'tpgresource.IgnoreMissingKeyInMap("x-goog-version")'
       - !ruby/object:Api::Type::NestedObject
-        name: 'no_wrapper'
+        name: 'noWrapper'
         description: |
           When set, the payload to the push endpoint is not wrapped.Sets the
           `data` field as the HTTP body for delivery.
