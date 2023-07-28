@@ -335,6 +335,25 @@ func TestAccComputeRegionBackendService_subsettingUpdate(t *testing.T) {
 }
 <% end -%>
 
+func testAccComputeRegionBackendService_ilbBasic_withUnspecifiedProtocol(serviceName, checkName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_backend_service" "foobar" {
+  name                  = "%s"
+  health_checks         = [google_compute_health_check.health_check.self_link]
+  protocol              = "UNSPECIFIED"
+  load_balancing_scheme = "INTERNAL"
+  region        = "us-central1"
+}
+
+resource "google_compute_health_check" "health_check" {
+  name     = "%s"
+  http_health_check {
+    port = 80
+  }
+}
+`, serviceName, checkName)
+}
+
 func testAccComputeRegionBackendService_ilbBasic(serviceName, checkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_backend_service" "foobar" {
