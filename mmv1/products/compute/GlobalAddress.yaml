@@ -158,5 +158,3 @@ properties:
     values:
       - :VM
       - :NETLB
-  # status is not useful for state convergence
-  # users[] is not useful for state convergence
