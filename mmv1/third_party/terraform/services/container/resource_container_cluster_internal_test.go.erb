@@ -5,11 +5,9 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-<% unless version == 'ga' -%>
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
-	container "google.golang.org/api/container/v1beta1"
-<% else -%>
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+<% unless version == 'ga' -%>
+	container "google.golang.org/api/container/v1beta1"
 <% end -%>
 )
 
