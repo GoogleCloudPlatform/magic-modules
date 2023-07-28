@@ -31,11 +31,16 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'privateca_certificate_config'
     primary_resource_id: 'default'
+    skip_docs: true
     vars:
       ca_pool_id: 'my-pool'
       certificate_name: 'my-certificate'
     test_env_vars:
       project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'privateca_certificate_generated_key'
+    primary_resource_id: 'default'
+    skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'privateca_certificate_with_template'
     primary_resource_id: 'default'

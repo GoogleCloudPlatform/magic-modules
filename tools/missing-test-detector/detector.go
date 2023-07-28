@@ -2,11 +2,16 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"strings"
+
+	"github.com/hashicorp/hcl/v2/hclwrite"
+	"github.com/zclconf/go-cty/cty"
 )
 
 type MissingTestInfo struct {
 	UntestedFields []string
+	SuggestedTest  string
 	Tests          []string
 }
 
@@ -34,9 +39,11 @@ func detectMissingTests(changedFields map[string]ResourceChanges, allTests []*Te
 	missingTests := make(map[string]*MissingTestInfo)
 	for resourceName, fieldCoverage := range changedFields {
 		untested := untestedFields(fieldCoverage, nil)
+		sort.Strings(untested)
 		if len(untested) > 0 {
 			missingTests[resourceName] = &MissingTestInfo{
-				UntestedFields: untestedFields(fieldCoverage, nil),
+				UntestedFields: untested,
+				SuggestedTest:  suggestedTest(resourceName, untested),
 				Tests:          resourceNamesToTests[resourceName],
 			}
 		}
@@ -75,4 +82,26 @@ func untestedFields(fieldCoverage ResourceChanges, path []string) []string {
 		}
 	}
 	return fields
+}
+
+func suggestedTest(resourceName string, untested []string) string {
+	f := hclwrite.NewEmptyFile()
+	rootBody := f.Body()
+	resourceBlock := rootBody.AppendNewBlock("resource", []string{resourceName, "primary"})
+	for _, field := range untested {
+		body := resourceBlock.Body()
+		path := strings.Split(field, ".")
+		for i, step := range path {
+			if i < len(path)-1 {
+				block := body.FirstMatchingBlock(step, nil)
+				if block == nil {
+					block = body.AppendNewBlock(step, nil)
+				}
+				body = block.Body()
+			} else {
+				body.SetAttributeValue(step, cty.StringVal("VALUE"))
+			}
+		}
+	}
+	return strings.ReplaceAll(string(f.Bytes()), `"VALUE"`, "# value needed")
 }
