@@ -118,7 +118,7 @@ func TestAccPubsubSubscription_push(t *testing.T) {
 	})
 }
 
-func TestAccPubsubSubscription_nowrap(t *testing.T) {
+func TestAccPubsubSubscription_noWrap(t *testing.T) {
 	t.Parallel()
 
 	topicFoo := fmt.Sprintf("tf-test-topic-foo-%s", acctest.RandString(t, 10))
@@ -292,9 +292,9 @@ resource "google_pubsub_subscription" "foo" {
       service_account_email = google_service_account.pub_sub_service_account.email
     }
   }
-	no_wrapper {
-		write_metadata = true
-	}
+ no_wrapper {
+  write_metadata = true
+ }
 }
 `, saAccount, topicFoo, subscription)
 }
