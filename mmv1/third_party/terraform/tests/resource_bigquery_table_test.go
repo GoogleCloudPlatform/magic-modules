@@ -949,6 +949,8 @@ func TestAccBigQueryTable_emptySchema(t *testing.T) {
 
 func TestAccBigQueryTable_invalidSchemas(t *testing.T) {
 	t.Parallel()
+	// Not an acceptance test.
+	acctest.SkipIfVcr(t)
 
 	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
