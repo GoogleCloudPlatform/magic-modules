@@ -310,6 +310,9 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 							Type:          schema.TypeInt,
 							Optional:      true,
 							ConflictsWith: []string{"update_policy.0.max_surge_fixed"},
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								return (old == "1" && new == "0")
+							},
 							Description:   `The maximum number of instances(calculated as percentage) that can be created above the specified targetSize during the update process. Conflicts with max_surge_fixed. Percent value is only allowed for regional managed instance groups with size at least 10.`,
 							ValidateFunc:  validation.IntBetween(0, 100),
 						},
@@ -349,7 +352,7 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"RECREATE", "SUBSTITUTE", ""}, false),
-							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("SUBSTITUTE"),
+							DiffSuppressFunc: EmptyOrAllowedListSuppress([]string{"RECREATE", "SUBSTITUTE"}),
 							Description:      `The instance replacement method for regional managed instance groups. Valid values are: "RECREATE", "SUBSTITUTE". If SUBSTITUTE (default), the group replaces VM instances with new instances that have randomly generated names. If RECREATE, instance names are preserved.  You must also set max_unavailable_fixed or max_unavailable_percent to be greater than 0.`,
 						},
 					},
@@ -1005,8 +1008,12 @@ func expandRegionUpdatePolicy(configured []interface{}) *compute.InstanceGroupMa
 				NullFields: []string{"Fixed"},
 			}
 		} else {
+			v := 1 // conditioanl default
+			if data["max_surge_fixed"] != nil {
+				v = data["max_surge_fixed"].(int)
+			}
 			updatePolicy.MaxSurge = &compute.FixedOrPercent{
-				Fixed: int64(data["max_surge_fixed"].(int)),
+				Fixed: int64(v),
 				// allow setting this value to 0
 				ForceSendFields: []string{"Fixed"},
 				NullFields:      []string{"Percent"},
