@@ -111,9 +111,8 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'address'
     description: |
-      The static external IP address represented by this resource. Only
-      IPv4 is supported. An address may only be specified for INTERNAL
-      address types. The IP address must be inside the specified subnetwork,
+      The static external IP address represented by this resource.
+      The IP address must be inside the specified subnetwork,
       if any. Set by the API if undefined.
     default_from_api: true
   - !ruby/object:Api::Type::Enum
@@ -223,3 +222,21 @@ properties:
     name: prefixLength
     description: |
       The prefix length if the resource represents an IP range.
+    default_from_api: true
+  - !ruby/object:Api::Type::Enum
+    name: 'ipVersion'
+    description: |
+      The IP Version that will be used by this address. The default value is `IPV4`.
+    values:
+      - :IPV4
+      - :IPV6
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("IPV4")'
+  - !ruby/object:Api::Type::Enum
+    name: 'ipv6EndpointType'
+    description: |
+      The endpoint type of this address, which should be VM or NETLB. This is 
+      used for deciding which type of endpoint this address can be used after 
+      the external IPv6 address reservation.
+    values:
+      - :VM
+      - :NETLB
