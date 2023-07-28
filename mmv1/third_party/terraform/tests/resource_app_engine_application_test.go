@@ -36,7 +36,7 @@ func TestAccAppEngineApplication_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccAppEngineApplication_update(pid, org),
+				Config: testAccAppEngineApplication_update(pid, org, billingAccount),
 			},
 			{
 				ResourceName:      "google_app_engine_application.acceptance",
@@ -71,7 +71,7 @@ func TestAccAppEngineApplication_withIAP(t *testing.T) {
 	})
 }
 
-func testAccAppEngineApplication_withIAP(pid, org string) string {
+func testAccAppEngineApplication_withIAP(pid, org, billingAccount string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id = "%s"
@@ -95,7 +95,7 @@ resource "google_app_engine_application" "acceptance" {
 `, pid, pid, org, billingAccount)
 }
 
-func testAccAppEngineApplication_basic(pid, org string) string {
+func testAccAppEngineApplication_basic(pid, org, billingAccount string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id = "%s"
@@ -114,7 +114,7 @@ resource "google_app_engine_application" "acceptance" {
 `, pid, pid, org, billingAccount)
 }
 
-func testAccAppEngineApplication_update(pid, org string) string {
+func testAccAppEngineApplication_update(pid, org, billingAccount string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id = "%s"
