@@ -49,7 +49,7 @@ examples:
     test_vars_overrides:
       # Set quota start time for the following day.
       quota_start_time: 'time.Now().AddDate(0, 0, 1).Format(time.RFC3339)'
-    #skip_vcr: true
+    skip_vcr: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_create: 'templates/terraform/custom_create/identity_platform_config.go'
 properties:
