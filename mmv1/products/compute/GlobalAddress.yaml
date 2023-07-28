@@ -152,8 +152,8 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: 'ipv6EndpointType'
     description: |
-      The endpoint type of this address, which should be VM or NETLB. This is 
-      used for deciding which type of endpoint this address can be used after 
+      The endpoint type of this address, which should be VM or NETLB. This is
+      used for deciding which type of endpoint this address can be used after
       the external IPv6 address reservation.
     values:
       - :VM
