@@ -815,6 +815,14 @@ func ResourceBigQueryTable() *schema.Resource {
 				},
 			},
 
+			// MaxStaleness: [Optional] Max staleness of data that could be returned
+			// when table or materialized view is queried (formatted as Google SQL Interval type).
+			"max_staleness": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Description: `Max staleness of data that could be returned when table or materialized view is queries (formatted as Google SQL Interval type)`,
+			},
+
 			// TimePartitioning: [Experimental] If specified, configures time-based
 			// partitioning for this table.
 			"time_partitioning": {
@@ -1057,6 +1065,10 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 		table.MaterializedView = expandMaterializedView(v)
 	}
 
+	if v, ok := d.GetOk("max_staleness"); ok {
+		table.max_staleness = v.(string)
+	}
+
 	if v, ok := d.GetOk("description"); ok {
 		table.Description = v.(string)
 	}
@@ -1251,6 +1263,9 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	if err := d.Set("type", res.Type); err != nil {
 		return fmt.Errorf("Error setting type: %s", err)
+	}
+	if err := d.Set("max_staleness", res.MaxStaleness); err != nil {
+		return fmt.Errorf("Error setting max_staleness: %s", err)
 	}
 
 	if res.ExternalDataConfiguration != nil {
