@@ -102,6 +102,13 @@ examples:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'workstation_config_accelerators'
+    min_version: beta
+    primary_resource_id: 'default'
+    vars:
+      workstation_cluster_name: 'workstation-cluster'
+      workstation_config_name: 'workstation-config'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'workstation_config_encryption_key'
     min_version: beta
     primary_resource_id: 'default'
@@ -263,6 +270,19 @@ properties:
                 description: |
                   Whether the instance has confidential compute enabled.
                 send_empty_value: true
+          - !ruby/object:Api::Type::NestedObject
+            name: 'accelerators'
+            description: |
+              An accelerator card attached to the instance.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'type'
+                description: |
+                  Type of accelerator resource to attach to the instance, for example, "nvidia-tesla-p100".
+              - !ruby/object:Api::Type::Integer
+                name: 'count'
+                description: |
+                  Number of accelerator cards exposed to the instance.
   - !ruby/object:Api::Type::Array
     name: 'persistentDirectories'
     description: |
