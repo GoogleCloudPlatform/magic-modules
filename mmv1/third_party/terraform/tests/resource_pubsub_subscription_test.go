@@ -131,7 +131,16 @@ func TestAccPubsubSubscription_noWrap(t *testing.T) {
 		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPubsubSubscription_noWrap(topicFoo, saAccount, subscription),
+				Config: testAccPubsubSubscription_noWrap(topicFoo, saAccount, subscription, false),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscription,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPubsubSubscription_noWrap(topicFoo, saAccount, subscription, true),
 			},
 			{
 				ResourceName:      "google_pubsub_subscription.foo",
@@ -260,7 +269,7 @@ resource "google_pubsub_subscription" "foo" {
 `, topic, subscription, label, deadline, exactlyOnceDelivery)
 }
 
-func testAccPubsubSubscription_noWrap(topicFoo, saAccount, subscription string) string {
+func testAccPubsubSubscription_noWrap(topicFoo, saAccount, subscription string, write_metadata bool) string {
 	return fmt.Sprintf(`
 data "google_project" "project" { }
 
@@ -293,10 +302,10 @@ resource "google_pubsub_subscription" "foo" {
     }
   }
  no_wrapper {
-  write_metadata = true
+  write_metadata = %T
  }
 }
-`, saAccount, topicFoo, subscription)
+`, saAccount, topicFoo, subscription, write_metadata)
 }
 
 func testAccPubsubSubscription_topicOnly(topic string) string {
