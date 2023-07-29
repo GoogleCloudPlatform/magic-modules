@@ -6,18 +6,21 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccNetworkConnectivityServiceConnectionPolicy_update(t *testing.T) {
 	t.Parallel()
 
-  context := map[string]interface{}{
-    "networkName" : fmt.Sprintf("tf-test-network-%s", RandString(t, 10)),
-    "networkProducerName" : fmt.Sprintf("tf-test-network-%s", RandString(t, 10)),
-    "subnetworkConsumerName" : fmt.Sprintf("tf-test-subnet-consumer-%s", RandString(t, 10)),
-    "subnetworkProducerName" : fmt.Sprintf("tf-test-subnet-producer-%s", RandString(t, 10)),
-    "serviceConnectionPolicyName" : fmt.Sprintf("tf-test-service-connection-policy-%s", RandString(t, 10)),
-  }
+	context := map[string]interface{}{
+		"networkName" : fmt.Sprintf("tf-test-network-%s", RandString(t, 10)),
+		"networkProducerName" : fmt.Sprintf("tf-test-network-%s", RandString(t, 10)),
+		"subnetworkConsumerName" : fmt.Sprintf("tf-test-subnet-consumer-%s", RandString(t, 10)),
+		"subnetworkProducerName1" : fmt.Sprintf("tf-test-subnet-producer-%s", RandString(t, 10)),
+		"subnetworkProducerName2" : fmt.Sprintf("tf-test-subnet-producer-%s", RandString(t, 10)),
+		"serviceConnectionPolicyName" : fmt.Sprintf("tf-test-service-connection-policy-%s", RandString(t, 10)),
+		"serviceClassName": envvar.GetTestServiceClassFromEnv(t),
+	}
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -72,8 +75,15 @@ func testAccNetworkConnectivityServiceConnectionPolicy_basic(context map[string]
   }
   
   resource "google_compute_subnetwork" "producer_subnet" {
-    name          = "%{subnetworkProducerName}"
+    name          = "%{subnetworkProducerName1}"
     ip_cidr_range = "10.0.0.0/16"
+    region        = "us-central1"
+    network       = google_compute_network.producer_net.id
+  }
+
+  resource "google_compute_subnetwork" "producer_subnet1" {
+    name          = "%{subnetworkProducerName2}"
+    ip_cidr_range = "10.1.0.0/16"
     region        = "us-central1"
     network       = google_compute_network.producer_net.id
   }
@@ -81,7 +91,7 @@ func testAccNetworkConnectivityServiceConnectionPolicy_basic(context map[string]
   resource "google_network_connectivity_service_connection_policy" "default" {
     name = "%{serviceConnectionPolicyName}"
     location = "us-central1"
-    service_class = "gcp-memorystore-redis"
+    service_class = "%{serviceClassName}"
     network = google_compute_network.producer_net.id
     psc_config {
       subnetworks = [google_compute_subnetwork.producer_subnet.id]
@@ -111,8 +121,15 @@ resource "google_compute_network" "producer_net" {
 }
 
 resource "google_compute_subnetwork" "producer_subnet" {
-  name          = "%{subnetworkProducerName}"
+  name          = "%{subnetworkProducerName1}"
   ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.producer_net.id
+}
+
+resource "google_compute_subnetwork" "producer_subnet1" {
+  name          = "%{subnetworkProducerName2}"
+  ip_cidr_range = "10.1.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.producer_net.id
 }
@@ -120,11 +137,11 @@ resource "google_compute_subnetwork" "producer_subnet" {
 resource "google_network_connectivity_service_connection_policy" "default" {
   name = "%{serviceConnectionPolicyName}"
   location = "us-central1"
-  service_class = "gcp-memorystore-redis"
+  service_class = "%{serviceClassName}"
   network = google_compute_network.producer_net.id
   psc_config {
     subnetworks = [google_compute_subnetwork.producer_subnet.id]
-    limit = 2
+    limit = 4
   }
   labels      = {
     foo = "bar"

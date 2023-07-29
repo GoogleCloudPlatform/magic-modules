@@ -56,7 +56,10 @@ examples:
       consumer_network_name: 'consumer-net'
       consumer_subnetwork_name: 'consumer-subnet'
       producer_network_name: 'producer-net'
-      producer_subnetwork_name: 'producer-subnet'
+      producer_subnetwork1_name: 'producer-subnet1'
+      producer_subnetwork2_name: 'producer-subnet2'
+    test_vars_overrides:
+      service_class_name: 'envvar.GetTestServiceClassFromEnv(t)'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -68,6 +71,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
     required: true
+    immutable: true
     url_param_only: true
     description: |
       The location of the ServiceConnectionPolicy.
@@ -85,6 +89,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'serviceClass'
     required: true
+    immutable: true
     description: |
       The service class identifier for which this ServiceConnectionPolicy is for. The service class identifier is a unique, symbolic representation of a ServiceClass.
       It is provided by the Service Producer. Google services have a prefix of gcp. For example, gcp-cloud-sql. 3rd party services do not. For example, test-service-a3dfcx.
@@ -95,6 +100,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'network'
     required: true
+    immutable: true
     description: |
       The resource path of the consumer network. Example: - projects/{projectNumOrId}/global/networks/{resourceId}.
   - !ruby/object:Api::Type::NestedObject
