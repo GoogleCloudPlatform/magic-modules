@@ -65,6 +65,12 @@ examples:
       subscription_name: 'example-subscription'
       dataset_id: 'example_dataset'
       table_id: 'example_table'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'pubsub_subscription_push_payload_nowrapping'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+      subscription_name: 'example-subscription'
 docs: !ruby/object:Provider::Terraform::Docs
   note: |
     You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding
