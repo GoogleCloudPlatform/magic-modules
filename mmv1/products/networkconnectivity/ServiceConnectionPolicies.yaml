@@ -58,6 +58,7 @@ examples:
       producer_network_name: 'producer-net'
       producer_subnetwork1_name: 'producer-subnet1'
       producer_subnetwork2_name: 'producer-subnet2'
+      service_class_name: 'my-basic-service-class'
     test_vars_overrides:
       service_class_name: 'envvar.GetTestServiceClassFromEnv(t)'
 parameters:
