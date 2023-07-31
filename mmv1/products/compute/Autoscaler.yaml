@@ -84,6 +84,7 @@ parameters:
       URL of the zone where the instance group resides.
     required: false
     immutable: true
+    ignore_read: true
     default_from_api: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:

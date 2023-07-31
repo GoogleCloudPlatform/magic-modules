@@ -77,6 +77,7 @@ parameters:
     description: 'A reference to the zone where the disk resides.'
     required: false
     url_param_only: true
+    ignore_read: true
     default_from_api: true
 properties:
   - !ruby/object:Api::Type::String

@@ -85,6 +85,7 @@ parameters:
     description: Region where resource policy resides.
     immutable: true
     required: false
+    ignore_read: true
     default_from_api: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
