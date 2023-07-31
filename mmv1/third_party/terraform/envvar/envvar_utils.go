@@ -91,11 +91,6 @@ var PapDescriptionEnvVars = []string{
 	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
 }
 
-// This value is the resource name used for test ServiceClassEnvVars setup to run the tests.
-var ServiceClassEnvVars = []string{
-	"GOOGLE_SERVICE_CLASS",
-}
-
 // AccTestPreCheck ensures at least one of the project env variables is set.
 func GetTestProjectNumberFromEnv() string {
 	return transport_tpg.MultiEnvSearch(ProjectNumberEnvVars)
@@ -186,11 +181,6 @@ func GetTestServiceAccountFromEnv(t *testing.T) string {
 func GetTestPublicAdvertisedPrefixDescriptionFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, PapDescriptionEnvVars...)
 	return transport_tpg.MultiEnvSearch(PapDescriptionEnvVars)
-}
-
-func GetTestServiceClassFromEnv(t *testing.T) string {
-	SkipIfEnvNotSet(t, ServiceClassEnvVars...)
-	return transport_tpg.MultiEnvSearch(ServiceClassEnvVars)
 }
 
 func SkipIfEnvNotSet(t *testing.T, envs ...string) {
