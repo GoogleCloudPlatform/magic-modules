@@ -56,6 +56,10 @@ func ResourceSqlUser() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+		),
+
 		SchemaVersion: 1,
 		MigrateState:  resourceSqlUserMigrateState,
 
