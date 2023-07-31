@@ -204,6 +204,7 @@ module "project-services" {
     "containeranalysis.googleapis.com",
     "containerfilesystem.googleapis.com",
     "containerregistry.googleapis.com",
+    "contentwarehouse.googleapis.com",
     "daily-serviceconsumermanagement.sandbox.googleapis.com",
     "daily-serviceusage.sandbox.googleapis.com",
     "datacatalog.googleapis.com",
