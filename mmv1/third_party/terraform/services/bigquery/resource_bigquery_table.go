@@ -1086,7 +1086,7 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 	}
 
 	if v, ok := d.GetOk("max_staleness"); ok {
-		table.max_staleness = v.(string)
+		table.MaxStaleness = v.(string)
 	}
 
 	if v, ok := d.GetOk("encryption_configuration.0.kms_key_name"); ok {
