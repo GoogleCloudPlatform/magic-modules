@@ -812,7 +812,7 @@ func ResourceBigQueryTable() *schema.Resource {
 						},
 
 						// Query: [Required] A query whose result is persisted
-						"query": 
+						"query": {
 							Type:        schema.TypeString,
 							Required:    true,
 							ForceNew:    true,
