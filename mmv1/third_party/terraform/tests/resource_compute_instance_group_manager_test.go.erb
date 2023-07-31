@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccInstanceGroupManager_basic(t *testing.T) {
@@ -995,106 +996,6 @@ resource "google_compute_instance_group_manager" "igm-rolling-update-policy" {
 `, igm)
 }
 
-func testAccInstanceGroupManager_rollingUpdatePolicy6(igm string) string {
-	return fmt.Sprintf(`
-data "google_compute_image" "my_image" {
-  family  = "debian-11"
-  project = "debian-cloud"
-}
-
-resource "google_compute_instance_template" "igm-rolling-update-policy" {
-  machine_type   = "e2-medium"
-  can_ip_forward = false
-  tags           = ["terraform-testing"]
-
-  disk {
-    source_image = data.google_compute_image.my_image.self_link
-    auto_delete  = true
-    boot         = true
-  }
-
-  network_interface {
-    network = "default"
-  }
-
-  service_account {
-    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "google_compute_instance_group_manager" "igm-rolling-update-policy" {
-  description = "Terraform test instance group manager"
-  name        = "%s"
-  version {
-    name              = "prod"
-    instance_template = google_compute_instance_template.igm-rolling-update-policy.self_link
-  }
-  base_instance_name = "tf-test-igm-rolling-update-policy"
-  zone               = "us-central1-c"
-  target_size        = 3
-  update_policy {
-    type                    = "PROACTIVE"
-    minimal_action          = "REPLACE"
-  }
-  named_port {
-    name = "customhttp"
-    port = 8080
-  }
-}
-`, igm)
-}
-
-resource "google_compute_instance_template" "igm-rolling-update-policy" {
-  machine_type   = "e2-medium"
-  can_ip_forward = false
-  tags           = ["terraform-testing"]
-
-  disk {
-    source_image = data.google_compute_image.my_image.self_link
-    auto_delete  = true
-    boot         = true
-  }
-
-  network_interface {
-    network = "default"
-  }
-
-  service_account {
-    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "google_compute_instance_group_manager" "igm-rolling-update-policy" {
-  description = "Terraform test instance group manager"
-  name        = "%s"
-  version {
-    name              = "prod"
-    instance_template = google_compute_instance_template.igm-rolling-update-policy.self_link
-  }
-  base_instance_name = "tf-test-igm-rolling-update-policy"
-  zone               = "us-central1-c"
-  target_size        = 3
-  update_policy {
-    type                    = "PROACTIVE"
-    minimal_action          = "REPLACE"
-    max_surge_fixed         = 0
-  }
-  named_port {
-    name = "customhttp"
-    port = 8080
-  }
-}
-`, igm)
-}
-
 func testAccInstanceGroupManager_rollingUpdatePolicy2(igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1286,6 +1187,113 @@ resource "google_compute_instance_group_manager" "igm-rolling-update-policy" {
     max_surge_fixed       = 0
     max_unavailable_fixed = 2
     replacement_method    = "RECREATE"
+  }
+  named_port {
+    name = "customhttp"
+    port = 8080
+  }
+}
+`, igm)
+}
+
+func testAccInstanceGroupManager_rollingUpdatePolicy6(igm string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-rolling-update-policy" {
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["terraform-testing"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_compute_instance_group_manager" "igm-rolling-update-policy" {
+  description = "Terraform test instance group manager"
+  name        = "%s"
+  version {
+    name              = "prod"
+    instance_template = google_compute_instance_template.igm-rolling-update-policy.self_link
+  }
+  base_instance_name = "tf-test-igm-rolling-update-policy"
+  zone               = "us-central1-c"
+  target_size        = 3
+  update_policy {
+    type                    = "PROACTIVE"
+    minimal_action          = "REPLACE"
+  }
+  named_port {
+    name = "customhttp"
+    port = 8080
+  }
+}
+`, igm)
+}
+
+func testAccInstanceGroupManager_rollingUpdatePolicy7(igm string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-rolling-update-policy" {
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["terraform-testing"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_compute_instance_group_manager" "igm-rolling-update-policy" {
+  description = "Terraform test instance group manager"
+  name        = "%s"
+  version {
+    name              = "prod"
+    instance_template = google_compute_instance_template.igm-rolling-update-policy.self_link
+  }
+  base_instance_name = "tf-test-igm-rolling-update-policy"
+  zone               = "us-central1-c"
+  target_size        = 3
+  update_policy {
+    type                    = "PROACTIVE"
+    minimal_action          = "REPLACE"
+    max_surge_fixed         = 0
   }
   named_port {
     name = "customhttp"
@@ -1930,4 +1938,101 @@ resource "google_compute_per_instance_config" "per-instance" {
 	}
 }
 `, template, target, igm, perInstanceConfig)
+}
+
+func TestEmptyOrAllowedListSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		Key                []string
+		ExpectDiffSuppress bool
+	}{
+		"empty with 1st of the list": {
+			Old:                "",
+			New:                "v1",
+			Key:                []string{"v1", "v2"},
+			ExpectDiffSuppress: true,
+		},
+		"empty with 2nd of the list": {
+			Old:                "",
+			New:                "v2",
+			Key:                []string{"v1", "v2"},
+			ExpectDiffSuppress: true,
+		},
+		"same values": {
+			Old:                "v1",
+			New:                "v1",
+			Key:                []string{"v1", "v2"},
+			ExpectDiffSuppress: true,
+		},
+		"1st of the list with empty": {
+			Old:                "",
+			New:                "v1",
+			Key:                []string{"v1", "v2"},
+			ExpectDiffSuppress: true,
+		},
+		"2nd of the list with empty": {
+			Old:                "",
+			New:                "v2",
+			Key:                []string{"v1", "v2"},
+			ExpectDiffSuppress: true,
+		},
+		"empty with none of the list": {
+			Old:                "",
+			New:                "v3",
+			Key:                []string{"v1", "v2"},
+			ExpectDiffSuppress: false,
+		},
+		"none of the list with empty": {
+			Old:                "v3",
+			New:                "",
+			Key:                []string{"v1", "v2"},
+			ExpectDiffSuppress: false,
+		},
+		"differnt ones in the list": {
+			Old:                "v1",
+			New:                "v2",
+			Key:                []string{"v1", "v2"},
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if tpgcompute.EmptyOrAllowedListSuppress(tc.Key)("", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
+
+func TestEmptyNewSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"1 with 0": {
+			Old:                "1",
+			New:                "0",
+			ExpectDiffSuppress: true,
+		},
+		"0 with 1": {
+			Old:                "0",
+			New:                "1",
+			ExpectDiffSuppress: false,
+		},
+		"same cases": {
+			Old:                "1",
+			New:                "1",
+			ExpectDiffSuppress: true,
+		},
+		"none 1 with 0": {
+			Old:                "2",
+			New:                "0",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if tpgcompute.EmptyNewSuppress("key", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
 }

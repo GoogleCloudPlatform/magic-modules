@@ -310,9 +310,7 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 							Type:          schema.TypeInt,
 							Optional:      true,
 							ConflictsWith: []string{"update_policy.0.max_surge_fixed"},
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								return (old == "1" && new == "0")
-							},
+							DiffSuppressFunc: EmptyNewSuppress,
 							Description:   `The maximum number of instances(calculated as percentage) that can be created above the specified targetSize during the update process. Conflicts with max_surge_fixed. Percent value is only allowed for regional managed instance groups with size at least 10.`,
 							ValidateFunc:  validation.IntBetween(0, 100),
 						},

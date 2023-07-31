@@ -23,7 +23,7 @@ import (
 )
 func EmptyOrAllowedListSuppress(vals []string) schema.SchemaDiffSuppressFunc {
 	return func(k, old, new string, d *schema.ResourceData) bool {
-		return (old == "" && contains(vals, new)) || (new == "" && contains(vals, old))
+		return (old == "" && contains(vals, new)) || (new == "" && contains(vals, old)) || (new == old)
 	}
 }
 
@@ -34,6 +34,10 @@ func contains(s []string, e string) bool {
 		}
 	}
 	return false
+}
+
+func EmptyNewSuppress(k, old, new string, d *schema.ResourceData) bool {
+	return (old == "1" && new == "0") || (old == new)
 }
 
 func ResourceComputeInstanceGroupManager() *schema.Resource {
@@ -253,9 +257,7 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 							Type:          schema.TypeInt,
 							Optional:      true,
 							Computed:      true,
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								return (old == "1" && new == "0")
-							},
+							DiffSuppressFunc: EmptyNewSuppress,
 							ConflictsWith: []string{"update_policy.0.max_surge_percent"},
 							Description:   `The maximum number of instances that can be created above the specified targetSize during the update process. Conflicts with max_surge_percent. If neither is set, defaults to 1`,
 						},
