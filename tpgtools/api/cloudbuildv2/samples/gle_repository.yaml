@@ -15,7 +15,7 @@ name: gle_repository
 description: Creates a GLE repository.
 type: repository
 versions:
-- beta
+- ga
 resource: samples/gle.repository.json
 dependencies:
 - samples/gle.connection.json

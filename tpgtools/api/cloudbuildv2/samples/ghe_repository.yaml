@@ -15,7 +15,7 @@ name: ghe_repository
 description: Creates a GitHub repository.
 type: repository
 versions:
-- beta
+- ga
 resource: samples/ghe.repository.json
 dependencies:
 - samples/ghe_complete.connection.json

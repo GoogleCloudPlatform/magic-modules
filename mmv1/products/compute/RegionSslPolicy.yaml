@@ -18,14 +18,13 @@ base_url: projects/{{project}}/regions/{{region}}/sslPolicies
 collection_url_key: 'items'
 update_verb: :PATCH
 has_self_link: true
-min_version: beta
 description: |
   Represents a Regional SSL policy. SSL policies give you the ability to control the
   features of SSL that your SSL proxy or HTTPS load balancer negotiates.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Using SSL Policies': 'https://cloud.google.com/compute/docs/load-balancing/ssl-policies'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionSslPolicies'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionSslPolicies'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
@@ -58,6 +57,7 @@ parameters:
     immutable: true
     description: |
       The region where the regional SSL policy resides.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'

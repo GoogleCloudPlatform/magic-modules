@@ -14,7 +14,8 @@
 --- !ruby/object:Api::Resource
 name: 'Database'
 base_url: projects/{{project}}/instances/{{instance}}/databases
-immutable: true
+update_verb: :PATCH
+update_mask: true
 description: |
   A Cloud Spanner Database which is hosted on a Spanner instance.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -71,8 +72,8 @@ virtual_fields:
     name: 'deletion_protection'
     default_value: true
     description: |
-      Whether or not to allow Terraform to destroy the instance. Unless this field is set to false
-      in Terraform state, a `terraform destroy` or `terraform apply` that would delete the instance will fail.
+      Whether or not to allow Terraform to destroy the database. Defaults to true. Unless this field is set to false
+      in Terraform state, a `terraform destroy` or `terraform apply` that would delete the database will fail.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/spanner_database.go.erb'
   encoder: templates/terraform/encoders/spanner_database.go.erb
@@ -90,7 +91,9 @@ parameters:
     resource: 'Instance'
     imports: 'name'
     description: 'The instance to create the database on.'
+    immutable: true
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   # This resource returns only one attribute ("name") from which we parse
   # "instance", "name", and "project".  You will need custom code handling
@@ -139,17 +142,20 @@ properties:
       - :CREATING
   - !ruby/object:Api::Type::NestedObject
     name: 'encryptionConfig'
+    immutable: true
     description: |
       Encryption configuration for the database
     properties:
       - !ruby/object:Api::Type::String
         name: 'kmsKeyName'
+        immutable: true
         required: true
         description: |
           Fully qualified name of the KMS key to use to encrypt this database. This key must exist
           in the same location as the Spanner Database.
   - !ruby/object:Api::Type::Enum
     name: 'databaseDialect'
+    immutable: true
     description: |
       The dialect of the Cloud Spanner Database.
       If it is not provided, "GOOGLE_STANDARD_SQL" will be used.
@@ -157,3 +163,14 @@ properties:
       - :GOOGLE_STANDARD_SQL
       - :POSTGRESQL
     default_from_api: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'enableDropProtection'
+    default_value: false
+    description: |
+      Whether drop protection is enabled for this database. Defaults to false.
+      Drop protection is different from
+      the "deletion_protection" attribute in the following ways:
+      (1) "deletion_protection" only protects the database from deletions in Terraform.
+      whereas setting “enableDropProtection” to true protects the database from deletions in all interfaces.
+      (2) Setting "enableDropProtection" to true also prevents the deletion of the parent instance containing the database.
+      "deletion_protection" attribute does not provide protection against the deletion of the parent instance.

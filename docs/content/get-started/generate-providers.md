@@ -128,7 +128,7 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
 1. Set up application default credentials for Terraform
    ```bash
    gcloud auth application-default login
-   export GOOGLE_USE_DEFAULT_CREDENTIALS=TRUE
+   export GOOGLE_USE_DEFAULT_CREDENTIALS=true
    ```
 1. Set required environment variables
    ```bash
@@ -162,9 +162,9 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
 
    ```bash
    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-   make testacc TEST=./google TESTARGS='-run=TestAccPubsubTopic'
+   make testacc TEST=./google TESTARGS='-run=TestAccPubsubTopic_'
    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-   make testacc TEST=./google-beta TESTARGS='-run=TestAccPubsubTopic'
+   make testacc TEST=./google-beta TESTARGS='-run=TestAccPubsubTopic_'
    ```
 
 ## Troubleshoot
