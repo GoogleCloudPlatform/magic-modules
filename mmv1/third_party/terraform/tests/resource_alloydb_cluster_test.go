@@ -1,6 +1,7 @@
 package google
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -1004,9 +1005,14 @@ resource "google_compute_network" "default" {
 func TestAccAlloydbCluster_continuousBackup_CMEKIsUpdatable(t *testing.T) {
 	t.Parallel()
 
+	kms := acctest.BootstrapKMSKey(t)
+	// Name in the KMS client is in the format projects/<project>/locations/<location>/keyRings/<keyRingName>/cryptoKeys/<keyId>
+	keyParts := strings.Split(kms.CryptoKey.Name, "/")
+	keyID := keyParts[len(keyParts)-1]
+
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"key_name":      "tf-test-key-" + acctest.RandString(t, 10),
+		"key_name":      keyID,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

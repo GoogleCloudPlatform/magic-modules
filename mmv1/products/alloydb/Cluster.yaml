@@ -208,6 +208,7 @@ properties:
       - !ruby/object:Api::Type::Boolean
         name: enabled
         send_empty_value: true
+        default_value: true
         description: |
           Whether continuous backup recovery is enabled. If not set, defaults to true.
       - !ruby/object:Api::Type::Integer
