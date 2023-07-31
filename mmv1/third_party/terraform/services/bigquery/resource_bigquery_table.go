@@ -812,7 +812,7 @@ func ResourceBigQueryTable() *schema.Resource {
 						},
 
 						// Query: [Required] A query whose result is persisted
-						"query": {
+						"query": 
 							Type:        schema.TypeString,
 							Required:    true,
 							ForceNew:    true,
@@ -820,14 +820,6 @@ func ResourceBigQueryTable() *schema.Resource {
 						},
 					},
 				},
-			},
-
-			// MaxStaleness: [Optional] Max staleness of data that could be returned
-			// when table or materialized view is queried (formatted as Google SQL Interval type).
-			"max_staleness": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Description: `Max staleness of data that could be returned when table or materialized view is queries (formatted as Google SQL Interval type)`,
 			},
 
 			// TimePartitioning: [Experimental] If specified, configures time-based
