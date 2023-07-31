@@ -140,7 +140,7 @@ resource "google_network_connectivity_service_connection_policy" "default" {
   service_class = "%{serviceClassName}"
   network = google_compute_network.producer_net.id
   psc_config {
-    subnetworks = [google_compute_subnetwork.producer_subnet.id]
+    subnetworks = [google_compute_subnetwork.producer_subnet1.id]
     limit = 4
   }
   labels      = {
