@@ -184,6 +184,33 @@ properties:
       - :DEVELOPER
       - :ENTERPRISE
     default_from_api: true
+    conflicts:
+      - scalingConfig
+
+  - !ruby/object:Api::Type::NestedObject
+    name: 'scalingConfig'
+    description: |
+      Represents the scaling configuration of a metastore service.
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'instanceSize'
+        description: |
+          Metastore instance sizes.
+        required: false
+        conflicts:
+          - tier
+        values:
+          - :INSTANCE_SIZE_UNSPECIFIED
+          - :EXTRA_SMALL
+          - :SMALL
+          - :MEDIUM
+          - :LARGE
+          - :EXTRA_LARGE
+      - !ruby/object:Api::Type::Integer
+        name: 'scalingFactor'
+        description: |
+          Scaling factor, in increments of 0.1 for values less than 1.0, and increments of 1.0 for values greater than 1.0.
+        required: false
   - !ruby/object:Api::Type::NestedObject
     name: 'maintenanceWindow'
     description: |
