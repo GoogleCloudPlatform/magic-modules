@@ -18,8 +18,8 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
 	if len(l) == 0 || l[0] == nil {
 		purpose, ok := d.GetOkExists("purpose")
 
-		if ok &&(purpose.(string) == "REGIONAL_MANAGED_PROXY" || purpose.(string) == "INTERNAL_HTTPS_LOAD_BALANCER") {
-			// Subnetworks for regional L7 ILB/XLB do not accept any values for logConfig
+		if ok &&(purpose.(string) == "REGIONAL_MANAGED_PROXY" || purpose.(string) == "GLOBAL_MANAGED_PROXY" || purpose.(string) == "INTERNAL_HTTPS_LOAD_BALANCER") {
+			// Subnetworks for regional L7 ILB/XLB or cross-regional L7 ILB do not accept any values for logConfig
 			return nil, nil
 		}
 		// send enable = false to ensure logging is disabled if there is no config
