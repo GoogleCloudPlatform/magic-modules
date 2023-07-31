@@ -35,6 +35,10 @@ func ResourceComputeProjectMetadataItem() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"key": {
 				Type:        schema.TypeString,

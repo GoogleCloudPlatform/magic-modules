@@ -34,6 +34,10 @@ func ResourceComputeProjectDefaultNetworkTier() *schema.Resource {
 			Create: schema.DefaultTimeout(4 * time.Minute),
 		},
 
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+		),
+
 		SchemaVersion: 0,
 
 		Schema: map[string]*schema.Schema{
