@@ -1064,10 +1064,6 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 		table.MaterializedView = expandMaterializedView(v)
 	}
 
-	if v, ok := d.GetOk("max_staleness"); ok {
-		table.max_staleness = v.(string)
-	}
-
 	if v, ok := d.GetOk("description"); ok {
 		table.Description = v.(string)
 	}
