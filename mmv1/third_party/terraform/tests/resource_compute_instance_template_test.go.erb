@@ -1069,7 +1069,6 @@ func TestAccComputeInstanceTemplate_spot_maxRunDuration(t *testing.T) {
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func TestAccComputeInstanceTemplate_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
 
@@ -1100,8 +1099,6 @@ func TestAccComputeInstanceTemplate_localSsdRecoveryTimeout(t *testing.T) {
 		},
 	})
 }
-<% end -%>
-
 
 func TestAccComputeInstanceTemplate_sourceSnapshotEncryptionKey(t *testing.T) {
 	t.Parallel()
@@ -1417,7 +1414,7 @@ func testAccCheckComputeInstanceTemplateMaxRunDuration(instanceTemplate *compute
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
+
 func testAccCheckComputeInstanceTemplateLocalSsdRecoveryTimeout(instanceTemplate *compute.InstanceTemplate, instance_local_ssd_recovery_timeout_want compute.Duration) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if !reflect.DeepEqual(*instanceTemplate.Properties.Scheduling.LocalSsdRecoveryTimeout, instance_local_ssd_recovery_timeout_want) {
@@ -1426,7 +1423,6 @@ func testAccCheckComputeInstanceTemplateLocalSsdRecoveryTimeout(instanceTemplate
 		return nil
 	}
 }
-<% end -%>
 
 func testAccCheckComputeInstanceTemplateAutomaticRestart(instanceTemplate *compute.InstanceTemplate, automaticRestart bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -3238,7 +3234,6 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeInstanceTemplate_localSsdRecoveryTimeout(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -3280,7 +3275,6 @@ resource "google_compute_instance_template" "foobar" {
 }
 `, suffix)
 }
-<% end -%>
 
 func testAccComputeInstanceTemplate_sourceSnapshotEncryptionKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`
