@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -37,7 +39,7 @@ func resourceBigtableGCPolicyCustomizeDiffFunc(diff tpgresource.TerraformResourc
 	if oldDuration == "" && newDuration != "" {
 		// flatten the old days and the new duration to duration... if they are
 		// equal then do nothing.
-		do, err := time.ParseDuration(newDuration.(string))
+		do, err := parseDuration(newDuration.(string))
 		if err != nil {
 			return err
 		}
@@ -302,7 +304,7 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 		// Only set `gc_rules`` when the legacy fields are not set. We are not planning to support legacy fields.
 		maxAge := d.Get("max_age")
 		maxVersion := d.Get("max_version")
-		if d.Get("mode") == "" && len(maxAge.([]interface{})) == 0 && len(maxVersion.([]interface{})) == 0 {
+		if len(maxAge.([]interface{})) == 0 && len(maxVersion.([]interface{})) == 0 {
 			gcRuleString, err := GcPolicyToGCRuleString(fi.FullGCPolicy, true)
 			if err != nil {
 				return err
@@ -504,7 +506,7 @@ func getGCPolicyFromJSON(inputPolicy map[string]interface{}, isTopLevel bool) (b
 
 		if childPolicy["max_age"] != nil {
 			maxAge := childPolicy["max_age"].(string)
-			duration, err := time.ParseDuration(maxAge)
+			duration, err := parseDuration(maxAge)
 			if err != nil {
 				return nil, fmt.Errorf("invalid duration string: %v", maxAge)
 			}
@@ -586,10 +588,24 @@ func validateNestedPolicy(p map[string]interface{}, isTopLevel bool) error {
 func getMaxAgeDuration(values map[string]interface{}) (time.Duration, error) {
 	d := values["duration"].(string)
 	if d != "" {
-		return time.ParseDuration(d)
+		return parseDuration(d)
 	}
 
 	days := values["days"].(int)
 
 	return time.Hour * 24 * time.Duration(days), nil
+}
+
+func parseDuration(duration string) (time.Duration, error) {
+	duration, err := time.ParseDuration(maxAge)
+	if err != nil {
+		// Support for Xd for X days.
+		re := regexp.MustCompile(`^(\d+)d$`)
+		if re.MatchString(maxAge) {
+			numDays, _ := strconv.Atoi(re.FindStringSubmatch(maxAge)[1])
+			duration = time.Duration(numDays) * 24 * time.Hour
+		}
+		return nil, fmt.Errorf("invalid duration string: %v", maxAge)
+	}
+	return duration, nil
 }
