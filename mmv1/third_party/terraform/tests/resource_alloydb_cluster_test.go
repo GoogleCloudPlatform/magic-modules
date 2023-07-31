@@ -1,7 +1,6 @@
 package google
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -1005,14 +1004,19 @@ resource "google_compute_network" "default" {
 func TestAccAlloydbCluster_continuousBackup_CMEKIsUpdatable(t *testing.T) {
 	t.Parallel()
 
-	kms := acctest.BootstrapKMSKey(t)
-	// Name in the KMS client is in the format projects/<project>/locations/<location>/keyRings/<keyRingName>/cryptoKeys/<keyId>
-	keyParts := strings.Split(kms.CryptoKey.Name, "/")
-	keyID := keyParts[len(keyParts)-1]
-
+	suffix := acctest.RandString(t, 10)
+	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"key_name":      keyID,
+		"random_suffix": suffix,
+		"key_ring":      kms.KeyRing.Name,
+		"key_name":      kms.CryptoKey.Name,
+	}
+
+	kms2 := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+	context2 := map[string]interface{}{
+		"random_suffix": suffix,
+		"key_ring":      kms2.KeyRing.Name,
+		"key_name":      kms2.CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1030,7 +1034,7 @@ func TestAccAlloydbCluster_continuousBackup_CMEKIsUpdatable(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"cluster_id", "location"},
 			},
 			{
-				Config: testAccAlloydbCluster_updateCMEKInContinuousBackup(context),
+				Config: testAccAlloydbCluster_usingCMEKInClusterAndContinuousBackup(context2),
 			},
 			{
 				ResourceName:            "google_alloydb_cluster.default",
@@ -1039,7 +1043,7 @@ func TestAccAlloydbCluster_continuousBackup_CMEKIsUpdatable(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"cluster_id", "location"},
 			},
 			{
-				Config: testAccAlloydbCluster_continuousBackupUsingCMEKAllowDeletion(context),
+				Config: testAccAlloydbCluster_continuousBackupUsingCMEKAllowDeletion(context2),
 			},
 			{
 				ResourceName:            "google_alloydb_cluster.default",
@@ -1058,19 +1062,18 @@ resource "google_alloydb_cluster" "default" {
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   encryption_config {
-    kms_key_name = google_kms_crypto_key.key.id
+    kms_key_name = "%{key_name}"
   }
   continuous_backup_config {
     enabled       		 = true
 	recovery_window_days = 20
     encryption_config {
-      kms_key_name = google_kms_crypto_key.key.id
+      kms_key_name = "%{key_name}"
     }
   }
   lifecycle {
 	prevent_destroy = true
   }
-  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
 }
 
 resource "google_compute_network" "default" {
@@ -1078,85 +1081,6 @@ resource "google_compute_network" "default" {
 }
 
 data "google_project" "project" {}
-
-resource "google_kms_key_ring" "keyring" {
-  name     = "%{key_name}"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "key" {
-  name     = "%{key_name}"
-  key_ring = google_kms_key_ring.keyring.id
-}
-
-resource "google_kms_crypto_key_iam_binding" "crypto_key" {
-  crypto_key_id = google_kms_crypto_key.key.id
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  members = [
-	"serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-  ]
-}
-`, context)
-}
-
-func testAccAlloydbCluster_updateCMEKInContinuousBackup(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_alloydb_cluster" "default" {
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "us-central1"
-  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  encryption_config {
-    kms_key_name = google_kms_crypto_key.key.id
-  }
-  continuous_backup_config {
-    enabled       		 = true
-	recovery_window_days = 20
-    encryption_config {
-      kms_key_name = google_kms_crypto_key.key2.id
-    }
-  }
-  lifecycle {
-	prevent_destroy = true
-  }
-  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
-}
-
-resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
-}
-
-data "google_project" "project" {}
-
-resource "google_kms_key_ring" "keyring" {
-  name     = "%{key_name}"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "key" {
-  name     = "%{key_name}"
-  key_ring = google_kms_key_ring.keyring.id
-}
-
-resource "google_kms_crypto_key" "key2" {
-	name     = "%{key_name}-2"
-	key_ring = google_kms_key_ring.keyring.id
-}
-
-resource "google_kms_crypto_key_iam_binding" "crypto_key" {
-  crypto_key_id = google_kms_crypto_key.key.id
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  members = [
-	"serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-  ]
-}
-
-resource "google_kms_crypto_key_iam_binding" "crypto_key2" {
-	crypto_key_id = google_kms_crypto_key.key2.id
-	role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-	members = [
-	  "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-	]
-}
 `, context)
 }
 
@@ -1167,16 +1091,15 @@ resource "google_alloydb_cluster" "default" {
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   encryption_config {
-    kms_key_name = google_kms_crypto_key.key.id
+    kms_key_name = "%{key_name}"
   }
   continuous_backup_config {
     enabled       		 = true
 	recovery_window_days = 20
     encryption_config {
-      kms_key_name = google_kms_crypto_key.key2.id
+      kms_key_name = "%{key_name}"
     }
   }
-  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
 }
 
 resource "google_compute_network" "default" {
@@ -1184,36 +1107,5 @@ resource "google_compute_network" "default" {
 }
 
 data "google_project" "project" {}
-
-resource "google_kms_key_ring" "keyring" {
-  name     = "%{key_name}"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "key" {
-  name     = "%{key_name}"
-  key_ring = google_kms_key_ring.keyring.id
-}
-
-resource "google_kms_crypto_key" "key2" {
-	name     = "%{key_name}-2"
-	key_ring = google_kms_key_ring.keyring.id
-}
-
-resource "google_kms_crypto_key_iam_binding" "crypto_key" {
-  crypto_key_id = google_kms_crypto_key.key.id
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  members = [
-	"serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-  ]
-}
-
-resource "google_kms_crypto_key_iam_binding" "crypto_key2" {
-	crypto_key_id = google_kms_crypto_key.key2.id
-	role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-	members = [
-	  "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-	]
-}
 `, context)
 }
