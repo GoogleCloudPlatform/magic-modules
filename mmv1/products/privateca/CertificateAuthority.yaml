@@ -306,14 +306,12 @@ properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'keyUsage'
             immutable: true
-            required: true
             description: |
               Indicates the intended use for keys that correspond to a certificate.
             properties:
               - !ruby/object:Api::Type::NestedObject
                 name: 'baseKeyUsage'
                 immutable: true
-                required: true
                 description: |
                   Describes high-level ways in which a key may be used.
                 properties:
@@ -365,7 +363,6 @@ properties:
               - !ruby/object:Api::Type::NestedObject
                 name: 'extendedKeyUsage'
                 immutable: true
-                required: true
                 description: |
                   Describes high-level ways in which a key may be used.
                 properties:
@@ -511,7 +508,6 @@ properties:
             description:
               Contains distinguished name fields such as the location and
               organization.
-            required: true
             properties:
               - !ruby/object:Api::Type::String
                 name: 'countryCode'
@@ -521,7 +517,6 @@ properties:
                 name: 'organization'
                 description: The organization of the subject.
                 immutable: true
-                required: true
               - !ruby/object:Api::Type::String
                 name: 'organizationalUnit'
                 description: The organizational unit of the subject.
@@ -547,7 +542,6 @@ properties:
                 name: 'commonName'
                 description: The common name of the distinguished name.
                 immutable: true
-                required: true
           - !ruby/object:Api::Type::NestedObject
             name: 'subjectAltName'
             description: The subject alternative name fields.

@@ -130,8 +130,7 @@ properties:
                 - !ruby/object:Api::Type::Enum
                   name: 'signatureAlgorithm'
                   description: |
-                    The algorithm used.
-                  required: true
+                    A signature algorithm that must be used. If this is omitted, any EC-based signature algorithm will be allowed.
                   values:
                     - ECDSA_P256
                     - ECDSA_P384
@@ -148,12 +147,10 @@ properties:
         properties:
           - !ruby/object:Api::Type::Boolean
             name: 'allowCsrBasedIssuance'
-            required: true
             description: |
               When true, allows callers to create Certificates by specifying a CSR.
           - !ruby/object:Api::Type::Boolean
             name: 'allowConfigBasedIssuance'
-            required: true
             description: |
               When true, allows callers to create Certificates by specifying a CertificateConfig.
       - !ruby/object:Api::Type::NestedObject
@@ -259,7 +256,6 @@ properties:
               "Authority Information Access" extension in the certificate.
           - !ruby/object:Api::Type::NestedObject
             name: 'caOptions'
-            required: true
             description: |
               Describes values that are relevant in a CA certificate.
             properties:
@@ -287,13 +283,11 @@ properties:
                   the max path length will be omitted from the CA certificate.
           - !ruby/object:Api::Type::NestedObject
             name: 'keyUsage'
-            required: true
             description: |
               Indicates the intended use for keys that correspond to a certificate.
             properties:
               - !ruby/object:Api::Type::NestedObject
                 name: 'baseKeyUsage'
-                required: true
                 description: |
                   Describes high-level ways in which a key may be used.
                 properties:
@@ -335,7 +329,6 @@ properties:
                       The key may be used to decipher only.
               - !ruby/object:Api::Type::NestedObject
                 name: 'extendedKeyUsage'
-                required: true
                 description: |
                   Describes high-level ways in which a key may be used.
                 properties:
@@ -458,14 +451,12 @@ properties:
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'publishCaCert'
-        required: true
         description: |
           When true, publishes each CertificateAuthority's CA certificate and includes its URL in the "Authority Information Access"
           X.509 extension in all issued Certificates. If this is false, the CA certificate will not be published and the corresponding
           X.509 extension will not be written in issued certificates.
       - !ruby/object:Api::Type::Boolean
         name: 'publishCrl'
-        required: true
         description: |
           When true, publishes each CertificateAuthority's CRL and includes its URL in the "CRL Distribution Points" X.509 extension
           in all issued Certificates. If this is false, CRLs will not be published and the corresponding X.509 extension will not
