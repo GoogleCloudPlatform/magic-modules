@@ -429,6 +429,7 @@ func ResourceComputeInstance() *schema.Resource {
 									"name": {
 										Type:        schema.TypeString,
 										Optional:    true,
+										Computed:    true,
 										ForceNew:    true,
 										Description: `The name of this access configuration. In ipv6AccessConfigs, the recommended name is External IPv6.`,
 									},
