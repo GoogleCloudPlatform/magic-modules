@@ -180,6 +180,20 @@ var testUnitBigtableGCPolicyCustomizeDiffTestcases = []testUnitBigtableGCPolicyC
 		cleared:     true,
 	},
 	{
+		testName:    "DaysToDurationEqUsingDayDuration",
+		arraySize:   1,
+		oldDays:     3,
+		newDuration: "3d",
+		cleared:     true,
+	},
+	{
+		testName:    "DaysToDurationEqUsingCompoundWeekDayDuration",
+		arraySize:   1,
+		oldDays:     8,
+		newDuration: "1w1d",
+		cleared:     true,
+	},
+	{
 		testName:    "DaysToDurationNotEq",
 		arraySize:   1,
 		oldDays:     3,
