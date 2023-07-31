@@ -1,15 +1,3 @@
-resource "google_compute_network" "consumer_net" {
-  name                    = "<%= ctx[:vars]['consumer_network_name'] %>"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "consumer_subnet" {
-  name          = "<%= ctx[:vars]['consumer_subnetwork_name'] %>"
-  ip_cidr_range = "10.0.0.0/16"
-  region        = "us-central1"
-  network       = google_compute_network.consumer_net.id
-}
-
 resource "google_compute_network" "producer_net" {
   name                    = "<%= ctx[:vars]['producer_network_name'] %>"
   auto_create_subnetworks = false

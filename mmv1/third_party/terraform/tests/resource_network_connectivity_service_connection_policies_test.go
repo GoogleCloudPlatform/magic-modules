@@ -55,18 +55,6 @@ func TestAccNetworkConnectivityServiceConnectionPolicy_update(t *testing.T) {
 
 func testAccNetworkConnectivityServiceConnectionPolicy_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-  resource "google_compute_network" "consumer_net" {
-    name                    = "%{networkName}"
-    auto_create_subnetworks = false
-  }
-  
-  resource "google_compute_subnetwork" "consumer_subnet" {
-    name          = "%{subnetworkConsumerName}"
-    ip_cidr_range = "10.0.0.0/16"
-    region        = "us-central1"
-    network       = google_compute_network.consumer_net.id
-  }
-  
   resource "google_compute_network" "producer_net" {
     name                    = "%{networkProducerName}"
     auto_create_subnetworks = false
@@ -101,18 +89,6 @@ func testAccNetworkConnectivityServiceConnectionPolicy_basic(context map[string]
 
 func testAccNetworkConnectivityServiceConnectionPolicy_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_compute_network" "consumer_net" {
-  name                    = "%{networkName}"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "consumer_subnet" {
-  name          = "%{subnetworkConsumerName}"
-  ip_cidr_range = "10.0.0.0/16"
-  region        = "us-central1"
-  network       = google_compute_network.consumer_net.id
-}
-
 resource "google_compute_network" "producer_net" {
   name                    = "%{networkProducerName}"
   auto_create_subnetworks = false
