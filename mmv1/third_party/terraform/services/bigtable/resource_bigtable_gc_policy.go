@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -39,7 +37,7 @@ func resourceBigtableGCPolicyCustomizeDiffFunc(diff tpgresource.TerraformResourc
 	if oldDuration == "" && newDuration != "" {
 		// flatten the old days and the new duration to duration... if they are
 		// equal then do nothing.
-		do, err := parseDuration(newDuration.(string))
+		do, err := ParseDuration(newDuration.(string))
 		if err != nil {
 			return err
 		}
@@ -506,7 +504,7 @@ func getGCPolicyFromJSON(inputPolicy map[string]interface{}, isTopLevel bool) (b
 
 		if childPolicy["max_age"] != nil {
 			maxAge := childPolicy["max_age"].(string)
-			duration, err := parseDuration(maxAge)
+			duration, err := ParseDuration(maxAge)
 			if err != nil {
 				return nil, fmt.Errorf("invalid duration string: %v", maxAge)
 			}
@@ -588,24 +586,10 @@ func validateNestedPolicy(p map[string]interface{}, isTopLevel bool) error {
 func getMaxAgeDuration(values map[string]interface{}) (time.Duration, error) {
 	d := values["duration"].(string)
 	if d != "" {
-		return parseDuration(d)
+		return ParseDuration(d)
 	}
 
 	days := values["days"].(int)
 
 	return time.Hour * 24 * time.Duration(days), nil
-}
-
-func parseDuration(duration string) (time.Duration, error) {
-	duration, err := time.ParseDuration(duration)
-	if err != nil {
-		// Support for Xd for X days.
-		re := regexp.MustCompile(`^(\d+)d$`)
-		if re.MatchString(duration) {
-			numDays, _ := strconv.Atoi(re.FindStringSubmatch(duration)[1])
-			duration = time.Duration(numDays) * 24 * time.Hour
-		}
-		return nil, fmt.Errorf("invalid duration string: %v", duration)
-	}
-	return duration, nil
 }
