@@ -30,7 +30,7 @@ func ResourceRuntimeconfigConfig() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 		),
-		
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,

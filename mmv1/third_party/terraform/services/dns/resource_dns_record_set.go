@@ -84,7 +84,7 @@ func ResourceDnsRecordSet() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 		),
-		
+
 		Schema: map[string]*schema.Schema{
 			"managed_zone": {
 				Type:             schema.TypeString,

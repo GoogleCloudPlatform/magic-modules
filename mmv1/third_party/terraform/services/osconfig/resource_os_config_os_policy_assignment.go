@@ -33,7 +33,7 @@ func ResourceOSConfigOSPolicyAssignment() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 		),
-		
+
 		Schema: map[string]*schema.Schema{
 			"instance_filter": {
 				Type:        schema.TypeList,

@@ -29,7 +29,7 @@ func ResourceProjectServiceIdentity() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 		),
-		
+
 		Schema: map[string]*schema.Schema{
 			"service": {
 				Type:     schema.TypeString,

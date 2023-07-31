@@ -19,7 +19,7 @@ func ResourceContainerRegistry() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 		),
-		
+
 		Schema: map[string]*schema.Schema{
 			"location": {
 				Type:     schema.TypeString,

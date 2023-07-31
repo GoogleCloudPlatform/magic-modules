@@ -36,7 +36,7 @@ func ResourceDialogflowCXVersion() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 		),
-		
+
 		Schema: map[string]*schema.Schema{
 			"display_name": {
 				Type:         schema.TypeString,
