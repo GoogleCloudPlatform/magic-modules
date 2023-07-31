@@ -597,15 +597,15 @@ func getMaxAgeDuration(values map[string]interface{}) (time.Duration, error) {
 }
 
 func parseDuration(duration string) (time.Duration, error) {
-	duration, err := time.ParseDuration(maxAge)
+	duration, err := time.ParseDuration(duration)
 	if err != nil {
 		// Support for Xd for X days.
 		re := regexp.MustCompile(`^(\d+)d$`)
-		if re.MatchString(maxAge) {
-			numDays, _ := strconv.Atoi(re.FindStringSubmatch(maxAge)[1])
+		if re.MatchString(duration) {
+			numDays, _ := strconv.Atoi(re.FindStringSubmatch(duration)[1])
 			duration = time.Duration(numDays) * 24 * time.Hour
 		}
-		return nil, fmt.Errorf("invalid duration string: %v", maxAge)
+		return nil, fmt.Errorf("invalid duration string: %v", duration)
 	}
 	return duration, nil
 }
