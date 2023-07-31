@@ -553,6 +553,44 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
+func TestAccComputeDisk_pdHyperDiskEnableConfidentialCompute(t *testing.T) {
+	t.Skip()
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix":        acctest.RandString(t, 10),
+		"kms":                  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"disk_size":            64,
+		"confidential_compute": true,
+	}
+
+	var disk compute.Disk
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeDisk_pdHyperDiskEnableConfidentialCompute(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeDiskExists(
+						t, "google_compute_disk.foobar", envvar.GetTestProjectFromEnv(), &disk),
+					testAccCheckEncryptionKey(
+						t, "google_compute_disk.foobar", &disk),
+				),
+			},
+			{
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+<% end -%>
+
 func TestAccComputeDisk_deleteDetach(t *testing.T) {
 	t.Parallel()
 
@@ -693,7 +731,7 @@ func TestAccComputeDisk_resourcePolicies(t *testing.T) {
 func TestAccComputeDisk_multiWriter(t *testing.T) {
 	t.Parallel()
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	diskName := fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1024,6 +1062,24 @@ resource "google_compute_instance_group_manager" "manager" {
 `, diskName, mgrName)
 }
 
+func testAccComputeDisk_pdHyperDiskEnableConfidentialCompute(context map[string]interface{}) string {
+	return Nprintf(`
+	resource "google_compute_disk" "foobar" {
+		name                        = "tf-test-ecc-%{random_suffix}"
+		size                        = %{disk_size}
+		type                        = "hyperdisk-balanced"
+		zone                        = "us-central1-a"
+		enable_confidential_compute = %{confidential_compute}
+
+		disk_encryption_key {
+			kms_key_self_link       = "%{kms}"
+		}
+
+	}
+`, context)
+}
+
+
 func testAccComputeDisk_pdHyperDiskProvisionedIopsLifeCycle(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_compute_disk" "foobar" {
@@ -1098,7 +1154,7 @@ resource "google_compute_disk" "foobar" {
 <% end -%>
 
 <% unless version == 'ga' -%>
-func testAccComputeDisk_multiWriter(instance string,  diskName string, enableMultiwriter bool) string {
+func testAccComputeDisk_multiWriter(instance string, diskName string, enableMultiwriter bool) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"

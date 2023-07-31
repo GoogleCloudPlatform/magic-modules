@@ -12,6 +12,9 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
+name := d.Get("name").(string)
+name = tpgresource.GetResourceNameFromSelfLink(name)
+d.Set("name", name)
 metricsScope := d.Get("metrics_scope").(string)
 metricsScope = tpgresource.GetResourceNameFromSelfLink(metricsScope)
 d.Set("metrics_scope", metricsScope)

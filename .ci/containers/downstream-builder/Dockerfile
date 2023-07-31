@@ -1,3 +1,17 @@
+# Stage 1: Building Go dependencies
+FROM golang:1.19-bullseye AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Download go.mod and go.sum from your repository
+RUN curl -o go.mod "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/tpgtools/go.mod"
+RUN curl -o go.sum "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/tpgtools/go.sum"
+
+# Install the go dependencies
+RUN go mod download
+
+# Stage 2: Creating the final imag
 FROM ruby:3.1-bullseye
 
 # golang
@@ -33,6 +47,9 @@ ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mm
 ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mmv1/Gemfile.lock" Gemfile.lock
 RUN bundle install
 RUN rm Gemfile Gemfile.lock
+
+# Copy Go dependencies from builder stage
+COPY --from=builder /go/pkg /go/pkg
 
 ADD generate_downstream.sh /generate_downstream.sh
 
