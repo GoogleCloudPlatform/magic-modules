@@ -541,6 +541,9 @@ func TestAccBigQueryExternalDataTable_objectTable(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 	connectionID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	// including an optional field. Should work without specifiying.
+	// Has to follow google sql IntervalValue encoding
+	maxStaleness := "0-0 0 10:00:00.000"
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -548,13 +551,13 @@ func TestAccBigQueryExternalDataTable_objectTable(t *testing.T) {
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigQueryTableFromGCSObjectTable(connectionID, datasetID, tableID, bucketName, objectName),
+				Config: testAccBigQueryTableFromGCSObjectTable(connectionID, datasetID, tableID, bucketName, objectName, maxStaleness),
 			},
 			{
-				Config: testAccBigQueryTableFromGCSObjectTableMetadata(connectionID, datasetID, tableID, bucketName, objectName),
+				Config: testAccBigQueryTableFromGCSObjectTableMetadata(connectionID, datasetID, tableID, bucketName, objectName, maxStaleness),
 			},
 			{
-				Config: testAccBigQueryTableFromGCSObjectTable(connectionID, datasetID, tableID, bucketName, objectName),
+				Config: testAccBigQueryTableFromGCSObjectTable(connectionID, datasetID, tableID, bucketName, objectName, maxStaleness),
 			},
 		},
 	})
@@ -1673,7 +1676,7 @@ resource "google_bigquery_table" "test" {
 `, datasetID, bucketName, objectName, tableID, enum, list)
 }
 
-func testAccBigQueryTableFromGCSObjectTable(connectionID, datasetID, tableID, bucketName, objectName string) string {
+func testAccBigQueryTableFromGCSObjectTable(connectionID, datasetID, tableID, bucketName, objectName, maxStaleness string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_connection" "test" {
    connection_id = "%s"
@@ -1723,11 +1726,12 @@ resource "google_bigquery_table" "test" {
       "gs://${google_storage_bucket.test.name}/*",
     ]
   }
+  max_staleness = "%s"
 }
-`, connectionID, datasetID, bucketName, objectName, tableID)
+`, connectionID, datasetID, bucketName, objectName, tableID, maxStaleness)
 }
 
-func testAccBigQueryTableFromGCSObjectTableMetadata(connectionID, datasetID, tableID, bucketName, objectName string) string {
+func testAccBigQueryTableFromGCSObjectTableMetadata(connectionID, datasetID, tableID, bucketName, objectName, maxStaleness string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_connection" "test" {
    connection_id = "%s"
@@ -1777,9 +1781,11 @@ resource "google_bigquery_table" "test" {
     source_uris = [
       "gs://${google_storage_bucket.test.name}/*",
     ]
+
+	maxStaleness = "%s"
   }
 }
-`, connectionID, datasetID, bucketName, objectName, tableID)
+`, connectionID, datasetID, bucketName, objectName, tableID, maxStaleness)
 }
 
 func testAccBigQueryTableFromGCSWithSchemaWithConnectionId(datasetID, tableID, connectionID, projectID, bucketName, objectName, content, schema string) string {
