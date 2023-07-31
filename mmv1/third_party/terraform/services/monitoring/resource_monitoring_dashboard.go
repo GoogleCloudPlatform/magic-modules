@@ -54,7 +54,7 @@ func ResourceMonitoringDashboard() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 		),
-		
+
 		Schema: map[string]*schema.Schema{
 			"dashboard_json": {
 				Type:             schema.TypeString,
