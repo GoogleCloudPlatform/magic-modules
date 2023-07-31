@@ -367,27 +367,8 @@ func TestAccBigQueryTable_WithViewAndSchema(t *testing.T) {
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-<<<<<<< HEAD
-				Config: testAccBigQueryTableWithViewAndSchema(datasetID, tableID, "table description1"),
-			},
-			{
-				ResourceName:            "google_bigquery_table.test",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-			},
-			{
-				Config: testAccBigQueryTableWithViewAndSchema(datasetID, tableID, "table description2"),
-			},
-			{
-				ResourceName:            "google_bigquery_table.test",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-=======
 				Config:      testAccBigQueryTableWithViewAndSchema(datasetID, tableID, "table description"),
 				ExpectError: regexp.MustCompile("\"view\": conflicts with schema"),
->>>>>>> 5471308bd (add ConflictsWith to resource_bigquery_table)
 			},
 		},
 	})
@@ -492,8 +473,6 @@ func TestAccBigQueryTable_MaterializedView_DailyTimePartioning_Update(t *testing
 	})
 }
 
-<<<<<<< HEAD
-=======
 func TestAccBigQueryTable_MaterializedView_WithSchema(t *testing.T) {
 	t.Parallel()
 
@@ -536,7 +515,6 @@ func TestAccBigQueryTable_MaterializedView_WithView(t *testing.T) {
 	})
 }
 
->>>>>>> 5471308bd (add ConflictsWith to resource_bigquery_table)
 func TestAccBigQueryExternalDataTable_parquet(t *testing.T) {
 	t.Parallel()
 
