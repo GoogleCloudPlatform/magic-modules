@@ -1661,6 +1661,7 @@ resource "google_bigquery_table" "test" {
 
 	metadata_cache_mode = "%s"
   }
+  max_staleness = "%s"
 }
 `, datasetID, bucketName, objectName, tableID, metadataCacheMode, maxStaleness)
 }
