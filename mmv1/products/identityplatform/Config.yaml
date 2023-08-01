@@ -46,6 +46,9 @@ examples:
       billing_acct:
         :BILLING_ACCT
         # Resource creation race
+    test_vars_overrides:
+      # Set quota start time for the following day.
+      quota_start_time: 'time.Now().AddDate(0, 0, 1).Format(time.RFC3339)'
     skip_vcr: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_create: 'templates/terraform/custom_create/identity_platform_config.go'
@@ -59,3 +62,70 @@ properties:
     name: 'autodeleteAnonymousUsers'
     description: |
       Whether anonymous users will be auto-deleted after a period of 30 days
+  - !ruby/object:Api::Type::NestedObject
+    name: 'blockingFunctions'
+    description: |
+      Configuration related to blocking functions.
+    properties:
+      - !ruby/object:Api::Type::Map
+        name: 'triggers'
+        required: true
+        description: |
+          Map of Trigger to event type. Key should be one of the supported event types: "beforeCreate", "beforeSignIn".
+        key_name: event_type
+        value_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'functionUri'
+              required: true
+              description: |
+                HTTP URI trigger for the Cloud Function.
+            - !ruby/object:Api::Type::Time
+              name: 'updateTime'
+              output: true
+              description: |
+                When the trigger was changed.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'forwardInboundCredentials'
+        description: |
+          The user credentials to include in the JWT payload that is sent to the registered Blocking Functions.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'idToken'
+            description: |
+              Whether to pass the user's OIDC identity provider's ID token.
+          - !ruby/object:Api::Type::Boolean
+            name: 'accessToken'
+            description: |
+              Whether to pass the user's OAuth identity provider's access token.
+          - !ruby/object:Api::Type::Boolean
+            name: 'refreshToken'
+            description: |
+              Whether to pass the user's OAuth identity provider's refresh token.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'quota'
+    description: |
+      Configuration related to quotas.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'signUpQuotaConfig'
+        description: |
+          Quota for the Signup endpoint, if overwritten. Signup quota is measured in sign ups per project per hour per IP.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'quota'
+            description: |
+              A sign up APIs quota that customers can override temporarily.
+          - !ruby/object:Api::Type::Time
+            name: 'startTime'
+            description: |
+              When this quota will take affect.
+          - !ruby/object:Api::Type::String
+            name: 'quotaDuration'
+            description: |
+              How long this quota will be active for. It is measurred in seconds, e.g., Example: "9.615s".
+  - !ruby/object:Api::Type::Array
+    name: authorizedDomains
+    description: |
+      List of domains authorized for OAuth redirects.
+    item_type: Api::Type::String
