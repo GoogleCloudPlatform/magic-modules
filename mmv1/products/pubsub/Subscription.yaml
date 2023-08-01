@@ -178,6 +178,16 @@ properties:
           - :PERMISSION_DENIED
           - :NOT_FOUND
       - !ruby/object:Api::Type::NestedObject
+        name: 'textConfig'
+        description: |
+          If set, message data will be written to Cloud Storage in text format.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'writeMetadata'
+            description: |
+              Message payloads will be written to files as raw text, seperated by a newline.
+            default_from_api: true
+      - !ruby/object:Api::Type::NestedObject
         name: 'avroConfig'
         description: |
           If set, message data will be written to Cloud Storage in Avro format.
