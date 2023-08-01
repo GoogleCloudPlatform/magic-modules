@@ -46,7 +46,6 @@ func TestAccComputeInstanceFromMachineImage_basic(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeInstanceFromMachineImage_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
 
@@ -100,7 +99,6 @@ func TestAccComputeInstanceFromMachineImageWithOverride_localSsdRecoveryTimeout(
 		},
 	})
 }
-<% end -%>
 
 func TestAccComputeInstanceFromMachineImage_overrideMetadataDotStartupScript(t *testing.T) {
 	t.Parallel()
@@ -232,7 +230,6 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 `, instance, instance, newInstance)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeInstanceFromMachineImage_localSsdRecoveryTimeout(instance, newInstance string) string {
 	return fmt.Sprintf(`
 resource "google_compute_instance" "vm" {
@@ -344,7 +341,6 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 }
 `, instance, instance, newInstance)
 }
-<% end -%>
 
 func testAccComputeInstanceFromMachineImage_overrideMetadataDotStartupScript(instanceName, generatedInstanceName string) string {
 	return fmt.Sprintf(`

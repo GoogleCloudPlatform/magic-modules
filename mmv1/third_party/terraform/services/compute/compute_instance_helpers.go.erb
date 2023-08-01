@@ -149,6 +149,7 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 	if v, ok := original["maintenance_interval"]; ok {
 		scheduling.MaintenanceInterval = v.(string)
 	}
+<% end -%>
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
 		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeout(v)
 		if err != nil {
@@ -157,7 +158,6 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		scheduling.LocalSsdRecoveryTimeout = transformedLocalSsdRecoveryTimeout
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "LocalSsdRecoveryTimeout")
 	}
-<% end -%>
 	return scheduling, nil
 }
 
@@ -195,6 +195,7 @@ func expandComputeMaxRunDurationNanos(v interface{}) (interface{}, error) {
 func expandComputeMaxRunDurationSeconds(v interface{}) (interface{}, error) {
 	return v, nil
 }
+<% end -%>
 
 func expandComputeLocalSsdRecoveryTimeout(v interface{}) (*compute.Duration, error) {
 	l := v.([]interface{})
@@ -228,8 +229,6 @@ func expandComputeLocalSsdRecoveryTimeoutNanos(v interface{}) (interface{}, erro
 func expandComputeLocalSsdRecoveryTimeoutSeconds(v interface{}) (interface{}, error) {
 	return v, nil
 }
-<% end -%>
-
 
 func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	schedulingMap := map[string]interface{}{
@@ -251,10 +250,11 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	if resp.MaintenanceInterval != "" {
 		schedulingMap["maintenance_interval"] = resp.MaintenanceInterval
 	}
+<% end -%>
+
 	if resp.LocalSsdRecoveryTimeout != nil {
 		schedulingMap["local_ssd_recovery_timeout"] = flattenComputeLocalSsdRecoveryTimeout(resp.LocalSsdRecoveryTimeout)
 	}
-<% end -%>
 
 	nodeAffinities := schema.NewSet(schema.HashResource(instanceSchedulingNodeAffinitiesElemSchema()), nil)
 	for _, na := range resp.NodeAffinities {
@@ -279,6 +279,8 @@ func flattenComputeMaxRunDuration(v *compute.Duration) []interface{} {
 	transformed["seconds"] = v.Seconds
 	return []interface{}{transformed}
 }
+<% end -%>
+
 func flattenComputeLocalSsdRecoveryTimeout(v *compute.Duration) []interface{} {
 	if v == nil {
 		return nil
@@ -288,7 +290,6 @@ func flattenComputeLocalSsdRecoveryTimeout(v *compute.Duration) []interface{} {
 	transformed["seconds"] = v.Seconds
 	return []interface{}{transformed}
 }
-<% end -%>
 
 func flattenAccessConfigs(accessConfigs []*compute.AccessConfig) ([]map[string]interface{}, string) {
 	flattened := make([]map[string]interface{}, len(accessConfigs))
