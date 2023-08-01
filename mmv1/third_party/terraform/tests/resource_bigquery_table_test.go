@@ -1769,7 +1769,6 @@ resource "google_storage_bucket" "test" {
   name          = "%s"
   location      = "US"
   force_destroy = true
-  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_object" "test" {
@@ -1826,7 +1825,6 @@ resource "google_storage_bucket" "test" {
   name          = "%s"
   location      = "US"
   force_destroy = true
-  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_object" "test" {
