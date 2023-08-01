@@ -197,6 +197,31 @@ properties:
           The initial password for the user.
         required: true
         sensitive: true
+  - !ruby/object:Api::Type::String
+    name: 'restoreSourceBackup'
+    conflicts: 
+      - restore_source_cluster
+      - restore_source_point_in_time
+    description: |
+      The name of the backup that this cluster should be restored from. Conflicts with 'restore_source_cluster' and 'restore_source_point_in_time', both can't be set together.
+  - !ruby/object:Api::Type::String
+    name: 'restoreSourceCluster'
+    conflicts: 
+      - restore_source_backup
+    description: |
+      The name of the source cluster that this cluster should be restored from. The source cluster must have continuous
+      backup enabled for restore to succeed.
+
+      Requires `restore_source_point_in_time` to also be set. 
+      Conflicts with 'restore_source_backup', both can't be set together.
+  - !ruby/object:Api::Type::String
+    name: 'restoreSourcePointInTime'
+    conflicts: 
+      - restore_source_backup
+    description: |
+      The point in time that this cluster should be restored to. Requires `restore_source_cluster` to also be set.
+      
+      Conflicts with 'restore_source_backup', both can't be set together.
   - !ruby/object:Api::Type::NestedObject
     name: 'continuousBackupConfig'
     default_from_api: true
