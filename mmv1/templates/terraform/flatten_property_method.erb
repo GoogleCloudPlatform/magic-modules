@@ -95,15 +95,16 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
   }
   return transformed
 <% elsif property.is_a?(Api::Type::KeyValueLabels) -%>
+<% puts property.access_path -%>
   if v == nil {
     return v
   }
 
-  l := v.(map[string]interface{})
   transformed := make(map[string]interface{})
-
-  for k, _ := range l {
-    transformed[k] = l[k]
+  if l, ok := d.Get("<%= property.access_path -%>").(map[string]interface{}); ok {
+    for k, _ := range l {
+      transformed[k] = l[k]
+    }
   }
 
   return transformed

@@ -138,6 +138,9 @@ module Api
       # For a TypeMap, the DSF to apply to the key.
       attr_reader :key_diff_suppress_func
 
+      # Ignore expand the "effectcive_labels" and "effective_annotations" fields
+      attr_reader :ignore_expand
+
       # ====================
       # Schema Modifications
       # ====================
@@ -264,6 +267,12 @@ module Api
       return name&.underscore if __parent.nil?
 
       "#{__parent.lineage}.#{name&.underscore}"
+    end
+
+    def access_path
+      return name&.underscore if __parent.nil?
+
+      "#{__parent.access_path}.0.#{name&.underscore}"
     end
 
     def to_json(opts = nil)
