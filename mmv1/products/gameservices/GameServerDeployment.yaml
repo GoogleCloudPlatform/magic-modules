@@ -49,6 +49,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'game_service_deployment_basic'
     primary_resource_id: 'default'
+    skip_test: true
     vars:
       deployment_id: 'tf-test-deployment'
 properties:

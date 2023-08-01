@@ -54,11 +54,11 @@ func TestAccSecurityScannerScanConfig_scanConfigUpdate(t *testing.T) {
 func testAccSecurityScannerScanConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_address" "scanner_static_ip" {
-  name     = "scan-static-ip-%{random_suffix}"
+  name     = "tf-test-scan-static-ip-%{random_suffix}"
 }
 
 resource "google_compute_address" "scanner_static_ip_update" {
-  name     = "scan-static-ip-%{random_suffix2}"
+  name     = "tf-test-scan-static-ip-%{random_suffix2}"
 }
 
 resource "google_security_scanner_scan_config" "terraform-scan-config" {

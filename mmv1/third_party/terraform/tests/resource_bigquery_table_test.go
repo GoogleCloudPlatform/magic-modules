@@ -246,6 +246,34 @@ func TestAccBigQueryTable_AvroPartitioning(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryExternalDataTable_json(t *testing.T) {
+	t.Parallel()
+	bucketName := testBucketName(t)
+	resourceName := "google_bigquery_table.test"
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableJson(datasetID, tableID, bucketName, "UTF-8"),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"external_data_configuration.0.schema", "deletion_protection"},
+			},
+			{
+				Config: testAccBigQueryTableJson(datasetID, tableID, bucketName, "UTF-16BE"),
+			},
+		},
+	})
+}
+
 func TestAccBigQueryTable_RangePartitioning(t *testing.T) {
 	t.Parallel()
 	resourceName := "google_bigquery_table.test"
@@ -475,6 +503,58 @@ func TestAccBigQueryExternalDataTable_parquet(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryTableFromGCSParquet(datasetID, tableID, bucketName, objectName),
+			},
+		},
+	})
+}
+
+func TestAccBigQueryExternalDataTable_parquetOptions(t *testing.T) {
+	t.Parallel()
+
+	bucketName := testBucketName(t)
+	objectName := fmt.Sprintf("tf_test_%s.gz.parquet", acctest.RandString(t, 10))
+
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableFromGCSParquetOptions(datasetID, tableID, bucketName, objectName, true, true),
+			},
+			{
+				Config: testAccBigQueryTableFromGCSParquetOptions(datasetID, tableID, bucketName, objectName, false, false),
+			},
+		},
+	})
+}
+
+func TestAccBigQueryExternalDataTable_objectTable(t *testing.T) {
+	t.Parallel()
+
+	bucketName := testBucketName(t)
+	objectName := fmt.Sprintf("tf_test_%s.csv", RandString(t, 10))
+
+	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	connectionID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableFromGCSObjectTable(connectionID, datasetID, tableID, bucketName, objectName),
+			},
+			{
+				Config: testAccBigQueryTableFromGCSObjectTableMetadata(connectionID, datasetID, tableID, bucketName, objectName),
+			},
+			{
+				Config: testAccBigQueryTableFromGCSObjectTable(connectionID, datasetID, tableID, bucketName, objectName),
 			},
 		},
 	})
@@ -1553,6 +1633,155 @@ resource "google_bigquery_table" "test" {
 `, datasetID, bucketName, objectName, tableID)
 }
 
+func testAccBigQueryTableFromGCSParquetOptions(datasetID, tableID, bucketName, objectName string, enum, list bool) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_storage_bucket" "test" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_storage_bucket_object" "test" {
+  name    = "%s"
+  source = "./test-fixtures/bigquerytable/test.parquet.gzip"
+  bucket = google_storage_bucket.test.name
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+  external_data_configuration {
+    autodetect    = false
+    source_format = "PARQUET"
+    reference_file_schema_uri = "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}"
+
+    parquet_options {
+      enum_as_string        = "%t"
+      enable_list_inference = "%t"
+    }
+
+    source_uris = [
+      "gs://${google_storage_bucket.test.name}/*",
+    ]
+  }
+}
+`, datasetID, bucketName, objectName, tableID, enum, list)
+}
+
+func testAccBigQueryTableFromGCSObjectTable(connectionID, datasetID, tableID, bucketName, objectName string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_connection" "test" {
+   connection_id = "%s"
+   location = "US"
+   cloud_resource {}
+}
+
+locals {
+   connection_id_split = split("/", google_bigquery_connection.test.name)
+   connection_id_reformatted = "${local.connection_id_split[1]}.${local.connection_id_split[3]}.${local.connection_id_split[5]}"
+}
+
+data "google_project" "project" {}
+
+resource "google_project_iam_member" "test" {
+   role = "roles/storage.objectViewer"
+   project = data.google_project.project.id
+   member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_storage_bucket" "test" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_storage_bucket_object" "test" {
+  name    = "%s"
+  source = "./test-fixtures/bigquerytable/test.parquet.gzip"
+  bucket = google_storage_bucket.test.name
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+  external_data_configuration {
+	connection_id   = local.connection_id_reformatted
+    autodetect      = false
+	object_metadata = "SIMPLE"
+
+    source_uris = [
+      "gs://${google_storage_bucket.test.name}/*",
+    ]
+  }
+}
+`, connectionID, datasetID, bucketName, objectName, tableID)
+}
+
+func testAccBigQueryTableFromGCSObjectTableMetadata(connectionID, datasetID, tableID, bucketName, objectName string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_connection" "test" {
+   connection_id = "%s"
+   location = "US"
+   cloud_resource {}
+}
+
+locals {
+   connection_id_split = split("/", google_bigquery_connection.test.name)
+   connection_id_reformatted = "${local.connection_id_split[1]}.${local.connection_id_split[3]}.${local.connection_id_split[5]}"
+}
+
+data "google_project" "project" {}
+
+resource "google_project_iam_member" "test" {
+   role = "roles/storage.objectViewer"
+   project = data.google_project.project.id
+   member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_storage_bucket" "test" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_storage_bucket_object" "test" {
+  name    = "%s"
+  source = "./test-fixtures/bigquerytable/test.parquet.gzip"
+  bucket = google_storage_bucket.test.name
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+  external_data_configuration {
+	connection_id       = local.connection_id_reformatted
+    autodetect          = false
+	object_metadata     = "SIMPLE"
+	metadata_cache_mode = "MANUAL"
+
+    source_uris = [
+      "gs://${google_storage_bucket.test.name}/*",
+    ]
+  }
+}
+`, connectionID, datasetID, bucketName, objectName, tableID)
+}
+
 func testAccBigQueryTableFromGCSWithSchemaWithConnectionId(datasetID, tableID, connectionID, projectID, bucketName, objectName, content, schema string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "test" {
@@ -1658,6 +1887,62 @@ resource "google_bigquery_table" "test" {
   }
 }
 `, datasetID, bucketName, objectName, content, connectionID, projectID, tableID, schema)
+}
+
+func testAccBigQueryTableJson(bucketName, datasetID, tableID, encoding string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "test" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_storage_bucket_object" "test" {
+  name    = "key1=20200330/data.json"
+  content = "{\"name\":\"test\", \"last_modification\":\"2020-04-01\"}"
+  bucket  = google_storage_bucket.test.name
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+
+  external_data_configuration {
+    source_format = "NEWLINE_DELIMITED_JSON"
+    autodetect = false
+    source_uris= ["gs://${google_storage_bucket.test.name}/*"]
+
+    json_options {
+      encoding = "%s"
+    }
+
+    hive_partitioning_options {
+      mode = "CUSTOM"
+      source_uri_prefix = "gs://${google_storage_bucket.test.name}/{key1:STRING}"
+      require_partition_filter = true
+    }
+
+    schema = <<EOH
+[
+  {
+    "name": "name",
+    "type": "STRING"
+  },
+  {
+    "name": "last_modification",
+    "type": "DATE"
+  }
+]
+EOH
+  }
+  depends_on = ["google_storage_bucket_object.test"]
+}
+`, datasetID, bucketName, tableID, encoding)
 }
 
 func testAccBigQueryTableFromGCSWithSchema(datasetID, tableID, bucketName, objectName, content, schema string) string {
