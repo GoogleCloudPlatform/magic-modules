@@ -505,6 +505,7 @@ properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'subject'
             immutable: true
+            required: true
             description:
               Contains distinguished name fields such as the location and
               organization.
