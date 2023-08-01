@@ -35,7 +35,7 @@ A create test is a test that creates the target resource and immediately destroy
 
 > **Note:** All resources should have a "basic" create test, which uses the smallest possible number of fields. Additional create tests can be used to ensure all fields on the resource are used in at least one test.
 
-{{< tabs "standard" >}}
+{{< tabs "create" >}}
 {{< tab "MMv1" >}}
 1. Using an editor of your choice, create a `*.tf.erb` file in [`mmv1/templates/terraform/examples/`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform/examples). The name of the file should include the service name, resource name, and a descriptor. For example, `compute_subnetwork_basic.tf.erb`.
 2. Write the Terraform configuration for your test. This should include all of the required dependencies. For example, `google_compute_subnetwork` has a dependency on `google_compute_network`:
@@ -92,7 +92,7 @@ This section assumes you've used the [Add a resource]({{< ref "/develop/resource
 
 > **Note:** If not, you can create one now, or skip this guide and construct the test by hand. Writing tests by hand can sometimes be a better option if there is a similar test you can copy from.
 
-1. Add the test in MMv1. Repeat for all the standard tests you will need.
+1. Add the test in MMv1. Repeat for all the create tests you will need.
 2. [Generate the providers]({{< ref "/get-started/generate-providers.md" >}}).
 3. From the provider, copy and paste the generated `*_generated_test.go` file into [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests) as a new file call `*_test.go`.
 4. Modify the tests as needed.
@@ -134,7 +134,7 @@ An update test is a test that creates the target resource and then makes updates
      - Wrap the beta-only tests in a version guard: `<% unless version = 'ga' -%>...<% else -%>...<% end -%>`.
 {{< /tab >}}
 {{< tab "Handwritten" >}}
-1. Using an editor of your choice, open the existing `*_test.go` or `*_test.go.erb` file in [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests) which contains your standard tests.
+1. Using an editor of your choice, open the existing `*_test.go` or `*_test.go.erb` file in [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests) which contains your create tests.
 2. Copy the `TestAcc*` test function for the existing "full" test. If there is no "full" test, use the "basic" test. This will be the starting point for your new update test.
 3. Modify the `TestAcc*` test function to support updates.
    - Change the suffix of `TestAcc*` to `_update`.
@@ -155,4 +155,4 @@ An update test is a test that creates the target resource and then makes updates
 
 ## What's next?
 
-- [Run your tests]({{< ref "/get-started/run-provider-tests.md" >}})
+- [Run your tests]({{< ref "/develop/run-tests.md" >}})
