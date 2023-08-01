@@ -149,13 +149,9 @@ properties:
           Output only. The encryption information for the WALs and backups required for ContinuousBackup.
         output: true
         properties:
-          - !ruby/object:Api::Type::Enum
+          - !ruby/object:Api::Type::String
             name: 'encryptionType'
             description: 'Output only. Type of encryption.'
-            values:
-              - :TYPE_UNSPECIFIED
-              - :GOOGLE_DEFAULT_ENCRYPTION
-              - :CUSTOMER_MANAGED_ENCRYPTION
             output: true
           - !ruby/object:Api::Type::Array
             name: kmsKeyVersions
