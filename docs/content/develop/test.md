@@ -18,9 +18,9 @@ For more information about testing, see the [official Terraform documentation](h
 
 ## Before you begin
 
-1. Determine whether your resources is using MMv1 generation or handwritten.
-2. Ensure that your `magic-modules`, `terraform-provider-google`, and `terraform-provider-google-beta` repositories are up to date.
-   ```
+1. Determine whether your resources is using [MMv1 generation or handwritten]({{<ref "/get-started/how-magic-modules-works.md" >}}).
+2. If you are not adding tests to an in-progress PR, ensure that your `magic-modules`, `terraform-provider-google`, and `terraform-provider-google-beta` repositories are up to date.
+   ```bash
    cd ~/magic-modules
    git checkout main && git clean -f . && git checkout -- . && git pull
    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
@@ -29,16 +29,16 @@ For more information about testing, see the [official Terraform documentation](h
    git checkout main && git clean -f . && git checkout -- . && git pull
    ```
 
-## Add a standard test
+## Add a create test
 
-In this section, you will start by creating a "basic" test, which means it tests the simplest possible configuration of your resource (often only required fields). After the basic test is created, you will then optionally create a "full" test, which means it tests a configuration with all possible fields. As an alternative to a single full test, you can create multiple tests based on advanced use-cases.
+A create test is a test that creates the target resource and immediately destroys it.
 
-> **Note:** All fields must be covered by at least one test.
+> **Note:** All resources should have a "basic" create test, which uses the smallest possible number of fields. Additional create tests can be used to ensure all fields on the resource are used in at least one test.
 
 {{< tabs "standard" >}}
 {{< tab "MMv1" >}}
 1. Using an editor of your choice, create a `*.tf.erb` file in [`mmv1/templates/terraform/examples/`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform/examples). The name of the file should include the service name, resource name, and a descriptor. For example, `compute_subnetwork_basic.tf.erb`.
-2. Write the Terraform configuration for your test. This will need to include all of the required dependencies. For example:
+2. Write the Terraform configuration for your test. This should include all of the required dependencies. For example, `google_compute_subnetwork` has a dependency on `google_compute_network`:
    ```tf
    resource "google_compute_subnetwork" "primary" {
      name          = "my-subnet"
@@ -52,8 +52,12 @@ In this section, you will start by creating a "basic" test, which means it tests
      auto_create_subnetworks = false
    }
    ```
-3. Replace the id of the primary resource you are testing with `<%= ctx[:primary_resource_id] %>`.
-4. Replace fields that are identifiers, like `id` or `name`, with an appropriately named variable. For example, `<%= ctx[:vars]['subnetwork_name'] %>`. The resulting configuration for the above example would look like this:
+3. If beta-only fields are being tested:
+   - Add `provider = google-beta` to every resource in the file.
+4. Modify the configuration to use templated values.
+   - Replace the id of the primary resource you are testing with `<%= ctx[:primary_resource_id] %>`.
+   - Replace fields that are identifiers, like `id` or `name`, with an appropriately named variable. For example, `<%= ctx[:vars]['subnetwork_name'] %>`.
+   The resulting configuration for the above example would look like this:
    ```tf
    resource "google_compute_subnetwork" "<%= ctx[:primary_resource_id] %>" {
      name          = "<%= ctx[:vars]['subnetwork_name'] %>"
@@ -67,7 +71,7 @@ In this section, you will start by creating a "basic" test, which means it tests
      auto_create_subnetworks = false
    }
    ```
-5. Modify the relevant `RESOURCE_NAME.yaml` file under [magic-modules/mmv1/products](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/products) to include an [`examples`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/provider/terraform/examples.rb) block with your test. For example:
+5. Modify the relevant `RESOURCE_NAME.yaml` file under [magic-modules/mmv1/products](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/products) to include an [`examples`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/provider/terraform/examples.rb) block with your test. The `name` must match the name of your `*.tf.erb` file. For example:
    ```yaml
    examples:
      - !ruby/object:Provider::Terraform::Examples
@@ -77,10 +81,10 @@ In this section, you will start by creating a "basic" test, which means it tests
          subnetwork_name: "example-subnet"
          network_name: "example-network"
    ```
-
-> **Warning:** Values in `vars` must include a `-` (or `_`). They [trigger the addition of a `tf-test` prefix](https://github.com/GoogleCloudPlatform/magic-modules/blob/6858338f013f5dc57729ec037883a3594441ea62/mmv1/provider/terraform/examples.rb#L244), which the sweeper uses to clean them up after tests run.
+   {{< hint warning >}}
+   **Warning:** Values in `vars` must include a `-` (or `_`). They [trigger the addition of a `tf-test` prefix](https://github.com/GoogleCloudPlatform/magic-modules/blob/6858338f013f5dc57729ec037883a3594441ea62/mmv1/provider/terraform/examples.rb#L244), which the sweeper uses to clean them up after tests run.
+   {{< /hint >}}
 6. If beta-only fields are being tested:
-   - Add `provider = google-beta` to every resource in the `*.tf.erb` config file.
    - Add `min_version: beta` to the `examples` block in `RESOURCE_NAME.yaml`.
 {{< /tab >}}
 {{< tab "Handwritten" >}}
@@ -91,9 +95,9 @@ This section assumes you've used the [Add a resource]({{< ref "/develop/resource
 1. Add the test in MMv1. Repeat for all the standard tests you will need.
 2. [Generate the providers]({{< ref "/get-started/generate-providers.md" >}}).
 3. From the provider, copy and paste the generated `*_generated_test.go` file into [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests) as a new file call `*_test.go`.
-4. Using an editor of your choice, remove the `Example` suffix from all function names.
-5. Modify the tests as needed.
+4. Modify the tests as needed.
    - Remove the comments at the top of the file.
+   - Remove the `Example` suffix from all function names.
    - If beta-only fields are being tested, do the following:
      - Change the file suffix to `.go.erb`.
      - Add `<% autogen_exception -%>` to the top of the file.
@@ -103,9 +107,9 @@ This section assumes you've used the [Add a resource]({{< ref "/develop/resource
 
 ## Add an update test
 
-In this section, you will create an update test, which will make sure that updatable fields can be properly updated. Updatable fields are fields that can be updated without recreating the entire resource, ie. they are not marked `immutable`. In most cases, only a single update test is needed to test all fields at once.
+An update test is a test that creates the target resource and then makes updates to fields that are updatable. Updatable fields are fields that can be updated without recreating the entire resource; that is, they are not marked `immutable` in MMv1 or `ForceNew` in handwritten code.
 
-> **Note:** All updatable fields must be covered by at least one update test.
+> **Note:** All updatable fields must be covered by at least one update test. In most cases, only a single update test is needed to test all fields at once.
 
 {{< tabs "update" >}}
 {{< tab "MMv1" >}}
@@ -151,4 +155,4 @@ In this section, you will create an update test, which will make sure that updat
 
 ## What's next?
 
-- [Test your changes]({{< ref "/get-started/run-provider-tests.md" >}})
+- [Run your tests]({{< ref "/get-started/run-provider-tests.md" >}})

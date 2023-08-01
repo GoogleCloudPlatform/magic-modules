@@ -203,8 +203,10 @@ For more information about types of resources and the generation process overall
    - If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.erb` and wrap the beta-only code in a version guard: `<% unless version = 'ga' -%>...<% else -%>...<% end -%>`.
 5. Register the resource in [`magic-modules/mmv1/third_party/terraform/utils/provider.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/utils/provider.go.erb) under "START handwritten resources"
    - Add a version guard for any beta-only resources.
-
-> **Note:** If you plan to use the [Add resource tests]({{< ref "/develop/test.md" >}}) guide to add your tests, make sure to keep the MMv1 configuration file.
+6. Optional: Complete other handwritten tasks that require the MMv1 configuration file.
+    - [Add resource tests]({{< ref "/develop/test.md" >}})
+    - [Add IAM support]({{<ref "#add-iam-support" >}})
+7. Delete the MMv1 configuration file.
 {{< /tab >}}
 {{< /tabs >}}
 
