@@ -1789,6 +1789,7 @@ resource "google_bigquery_table" "test" {
     source_uris = [
       "gs://${google_storage_bucket.test.name}/*",
     ]
+	metadata_cache_mode = "AUTOMATIC"
   }
   max_staleness = "%s"
 }
@@ -1845,9 +1846,9 @@ resource "google_bigquery_table" "test" {
     source_uris = [
       "gs://${google_storage_bucket.test.name}/*",
     ]
-
-	max_staleness = "%s"
+	metadata_cache_mode = "AUTOMATIC"
   }
+  max_staleness = "%s"
 }
 `, connectionID, datasetID, bucketName, objectName, tableID, maxStaleness)
 }
