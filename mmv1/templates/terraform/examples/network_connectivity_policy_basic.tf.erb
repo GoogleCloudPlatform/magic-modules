@@ -4,7 +4,7 @@ resource "google_compute_network" "producer_net" {
 }
 
 resource "google_compute_subnetwork" "producer_subnet" {
-  name          = "<%= ctx[:vars]['producer_subnetwork1_name'] %>"
+  name          = "<%= ctx[:vars]['producer_subnetwork_name'] %>"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.producer_net.id

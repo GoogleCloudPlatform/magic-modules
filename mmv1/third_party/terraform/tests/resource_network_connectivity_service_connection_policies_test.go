@@ -12,12 +12,10 @@ func TestAccNetworkConnectivityServiceConnectionPolicy_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"networkName" : fmt.Sprintf("tf-test-network-%s", RandString(t, 10)),
-		"networkProducerName" : fmt.Sprintf("tf-test-network-%s", RandString(t, 10)),
-		"subnetworkConsumerName" : fmt.Sprintf("tf-test-subnet-consumer-%s", RandString(t, 10)),
-		"subnetworkProducerName1" : fmt.Sprintf("tf-test-subnet-producer-%s", RandString(t, 10)),
-		"subnetworkProducerName2" : fmt.Sprintf("tf-test-subnet-producer-%s", RandString(t, 10)),
-		"serviceConnectionPolicyName" : fmt.Sprintf("tf-test-service-connection-policy-%s", RandString(t, 10)),
+		"networkProducerName":         fmt.Sprintf("tf-test-network-%s", RandString(t, 10)),
+		"subnetworkProducerName1":     fmt.Sprintf("tf-test-subnet-producer-%s", RandString(t, 10)),
+		"subnetworkProducerName2":     fmt.Sprintf("tf-test-subnet-producer-%s", RandString(t, 10)),
+		"serviceConnectionPolicyName": fmt.Sprintf("tf-test-service-connection-policy-%s", RandString(t, 10)),
 	}
 
 	VcrTest(t, resource.TestCase{
