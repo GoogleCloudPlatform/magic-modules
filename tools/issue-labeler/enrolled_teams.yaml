@@ -18,12 +18,16 @@ service/billingbudgets:
 - google_billing_budget
 service/certificatemanager:
 - google_certificate_manager_
+service/cloudasset:
+- google_cloud_asset_
 service/cloudbilling:
 - google_billing_account
 - google_billing_subaccount
 service/cloudbuild:
 - google_cloudbuild_
 - google_cloudbuildv2_
+service/clouddeploy:
+- google_clouddeploy_
 service/cloudfunctions:
 - google_cloudfunctions_
 - google_cloudfunctions2_
@@ -40,16 +44,22 @@ service/compute-nat:
 service/compute-regional-l7-load-balancer:
 - google_compute_region_target_http_proxy
 - google_compute_region_target_https_proxy
+service/compute-security-policy:
+- google_compute_security_policy
 service/container:
 - google_container_cluster
 - google_container_engine_versions
 - google_container_node_pool
+service/datacatalog:
+- google_data_catalog_
 service/dataproc:
 - google_dataproc_cluster
 - google_dataproc_autoscaling_policy
 - google_dataproc_job
 - google_dataproc_workflow_template
 - google_dataproc_batch
+service/datastream:
+- google_datastream_
 service/dlp:
 - google_data_loss_prevention_
 service/edgenetwork:
@@ -64,6 +74,7 @@ service/firebase:
 service/firestore-controlplane:
 - google_firestore_database
 service/firestore-dataplane:
+- google_datastore_index
 - google_firestore_document
 - google_firestore_index
 - google_firestore_ttl
@@ -94,6 +105,8 @@ service/iam-wlid:
 - google_iam_workload_identity_pool_provider
 service/iam-workforce:
 - google_iam_workforce_pool
+service/iap:
+- google_iap_
 service/identitytoolkit:
 - google_identity_platform_
 service/ids:
@@ -102,6 +115,8 @@ service/logging:
 - google_logging_
 service/looker-core:
 - google_looker_instance
+service/metastore:
+- google_dataproc_metastore_
 service/monitoring-alerting:
 - google_monitoring_notification_channel
 - google_monitoring_alert_policy
@@ -109,13 +124,23 @@ service/monitoring-services:
 - google_monitoring_custom_service
 - google_monitoring_dashboard
 - google_monitoring_monitored_project
-- google_monitoring_service_
 - google_monitoring_slo
+- google_monitoring_service
+- google_monitoring_app_engine_service
+- google_monitoring_cluster_istio_service
 - google_monitoring_istio_canonical_service
+- google_monitoring_mesh_istio_service
+- google_monitoring_istio_canonical_service
+service/monitoring-uptime:
+- google_monitoring_uptime_
 service/orgpolicy:
 - google_org_policy_
 service/privateca:
 - google_privateca_
+service/pubsub:
+- google_pubsub_schema
+- google_pubsub_subscription
+- google_pubsub_topic
 service/pubsublite:
 - google_pubsub_lite_
 service/redis-instance:
@@ -136,3 +161,9 @@ service/storage:
 - google_storage_notification
 - google_storage_object_
 - google_storage_project_service_account
+service/vmwareengine:
+- google_vmwareengine_network
+- google_vmwareengine_private_cloud
+- google_vmwareengine_cluster
+service/workstations:
+- google_workstations_
