@@ -976,14 +976,14 @@ func TestAccAlloydbCluster_continuousBackup_CMEKIsUpdatable(t *testing.T) {
 	t.Parallel()
 
 	suffix := acctest.RandString(t, 10)
-	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+	kms := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-alloydb-key1")
 	context := map[string]interface{}{
 		"random_suffix": suffix,
 		"key_ring":      kms.KeyRing.Name,
 		"key_name":      kms.CryptoKey.Name,
 	}
 
-	kms2 := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+	kms2 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-alloydb-key2")
 	context2 := map[string]interface{}{
 		"random_suffix": suffix,
 		"key_ring":      kms2.KeyRing.Name,
