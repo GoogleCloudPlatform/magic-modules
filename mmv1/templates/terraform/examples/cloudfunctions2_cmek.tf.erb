@@ -32,17 +32,26 @@ resource "google_artifact_registry_repository_iam_binding" "binding" {
   ]
 }
 
-resource "google_kms_crypto_key_iam_binding" "cmek_keyuser" {
+# resource "time_sleep" "wait_120_seconds" {
+#   depends_on = [google_project.project]
+#   create_duration = "120s"
+# }
+
+resource "google_kms_crypto_key_iam_binding" "gcf_cmek_keyuser" {
   crypto_key_id = "<%= ctx[:vars]['kms_key_name'] %>"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
   members = [
-    "servinceAccount:service-${data.google_project.project.number}@gcf-admin-robot.iam.gserviceaccount.com",
+    "serviceAccount:service-${data.google_project.project.number}@gcf-admin-robot.iam.gserviceaccount.com",
     "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com",
     "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com",
     "serviceAccount:service-${data.google_project.project.number}@serverless-robot-prod.iam.gserviceaccount.com",
-    "serviceAccount:service-${data.google_project.project.number}@gcp-sa-eventarc.iam.gserviceaccount.com"
+    "serviceAccount:service-${data.google_project.project.number}@gcp-sa-eventarc.iam.gserviceaccount.com",
   ]
+
+  # depends_on = [
+  #     time_sleep.wait_120_seconds
+  # ]
 }
 
 resource "google_artifact_registry_repository" "encoded-ar-repo" {
@@ -50,8 +59,12 @@ resource "google_artifact_registry_repository" "encoded-ar-repo" {
     repository_id = "cmek-repo"
     format = "DOCKER"
     kms_key_name = "<%= ctx[:vars]['kms_key_name'] %>"
+    # depends_on = [
+    #   google_kms_crypto_key_iam_binding.gcf_cmek_keyuser
+    # ]
+    # time_sleep = [time_sleep.wait_120_seconds]
     depends_on = [
-      google_kms_crypto_key_iam_binding.cmek_keyuser
+      google_kms_crypto_key_iam_binding.gcf_cmek_keyuser
     ]
 }
 
@@ -104,7 +117,9 @@ resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
 			timeout_seconds     = 60
 	}
 
-	depends_on = [
-    google_kms_crypto_key_iam_binding.cmek_keyuser,
+  # time_sleep = [time_sleep.wait_120_seconds]
+  depends_on = [
+    google_kms_crypto_key_iam_binding.gcf_cmek_keyuser
   ]
+
 }
