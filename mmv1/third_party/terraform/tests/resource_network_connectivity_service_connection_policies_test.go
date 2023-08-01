@@ -64,13 +64,6 @@ func testAccNetworkConnectivityServiceConnectionPolicy_basic(context map[string]
     region        = "us-central1"
     network       = google_compute_network.producer_net.id
   }
-
-  resource "google_compute_subnetwork" "producer_subnet1" {
-    name          = "%{subnetworkProducerName2}"
-    ip_cidr_range = "10.1.0.0/16"
-    region        = "us-central1"
-    network       = google_compute_network.producer_net.id
-  }
   
   resource "google_network_connectivity_service_connection_policy" "default" {
     name = "%{serviceConnectionPolicyName}"
@@ -90,13 +83,6 @@ func testAccNetworkConnectivityServiceConnectionPolicy_update(context map[string
 resource "google_compute_network" "producer_net" {
   name                    = "%{networkProducerName}"
   auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "producer_subnet" {
-  name          = "%{subnetworkProducerName1}"
-  ip_cidr_range = "10.0.0.0/16"
-  region        = "us-central1"
-  network       = google_compute_network.producer_net.id
 }
 
 resource "google_compute_subnetwork" "producer_subnet1" {

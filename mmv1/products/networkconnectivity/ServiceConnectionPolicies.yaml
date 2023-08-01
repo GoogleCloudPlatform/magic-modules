@@ -98,6 +98,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'network'
     required: true
+    immutable: true
     description: |
       The resource path of the consumer network. Example: - projects/{projectNumOrId}/global/networks/{resourceId}.
   - !ruby/object:Api::Type::NestedObject
