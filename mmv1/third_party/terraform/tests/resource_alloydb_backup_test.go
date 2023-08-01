@@ -11,13 +11,13 @@ func TestAccAlloydbBackup_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  BootstrapSharedTestNetwork(t, "alloydb-update"),
-		"random_suffix": RandString(t, 10),
+		"network_name":  acctest.BootstrapSharedTestNetwork(t, "alloydb-update"),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlloydbBackupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -44,7 +44,7 @@ func TestAccAlloydbBackup_update(t *testing.T) {
 
 // Updates "label" field from testAccAlloydbBackup_alloydbBackupFullExample
 func testAccAlloydbBackup_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_alloydb_backup" "default" {
   location     = "us-central1"
   backup_id    = "tf-test-alloydb-backup%{random_suffix}"
@@ -97,12 +97,13 @@ func TestAccAlloydbBackup_createBackupWithMandatoryFields(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
+		"network_name":  acctest.BootstrapSharedTestNetwork(t, "alloydbbackup-mandatory"),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlloydbBackupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -113,7 +114,7 @@ func TestAccAlloydbBackup_createBackupWithMandatoryFields(t *testing.T) {
 }
 
 func testAccAlloydbBackup_createBackupWithMandatoryFields(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_alloydb_backup" "default" {
   backup_id    = "tf-test-alloydb-backup%{random_suffix}"
   location = "us-central1"
@@ -124,13 +125,13 @@ resource "google_alloydb_backup" "default" {
 resource "google_alloydb_cluster" "default" {
   location = "us-central1"
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  network    = google_compute_network.default.id
+  network    = data.google_compute_network.default.id
 }
 
 data "google_project" "project" { }
 
-resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
+data "google_compute_network" "default" {
+  name = "%{network_name}"
 }
 
 resource "google_alloydb_instance" "default" {
@@ -146,7 +147,7 @@ resource "google_compute_global_address" "private_ip_alloc" {
   address_type  = "INTERNAL"
   purpose       = "VPC_PEERING"
   prefix_length = 16
-  network       = google_compute_network.default.id
+  network       = data.google_compute_network.default.id
   lifecycle {
 	ignore_changes = [
 		address,
@@ -160,7 +161,7 @@ resource "google_compute_global_address" "private_ip_alloc" {
 }
 
 resource "google_service_networking_connection" "vpc_connection" {
-  network                 = google_compute_network.default.id
+  network                 = data.google_compute_network.default.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
@@ -171,14 +172,14 @@ func TestAccAlloydbBackup_usingCMEK(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  BootstrapSharedTestNetwork(t, "alloydb-cmek"),
-		"random_suffix": RandString(t, 10),
-		"key_name":      "tf-test-key-" + RandString(t, 10),
+		"network_name":  acctest.BootstrapSharedTestNetwork(t, "alloydb-cmek"),
+		"random_suffix": acctest.RandString(t, 10),
+		"key_name":      "tf-test-key-" + acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlloydbBackupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -195,7 +196,7 @@ func TestAccAlloydbBackup_usingCMEK(t *testing.T) {
 }
 
 func testAccAlloydbBackup_usingCMEK(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_alloydb_backup" "default" {
 	location     = "us-central1"
 	backup_id    = "tf-test-alloydb-backup%{random_suffix}"

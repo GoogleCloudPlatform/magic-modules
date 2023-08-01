@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -19,12 +20,12 @@ func TestAccProjectService_basic(t *testing.T) {
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
 
-	org := acctest.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := envvar.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	services := []string{"iam.googleapis.com", "cloudresourcemanager.googleapis.com"}
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectService_basic(services, pid, org),
@@ -74,14 +75,14 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
-	billingId := acctest.GetTestBillingAccountFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := envvar.GetTestOrgFromEnv(t)
+	billingId := envvar.GetTestBillingAccountFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	services := []string{"cloudbuild.googleapis.com", "containerregistry.googleapis.com"}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectService_disableDependentServices(services, pid, org, billingId, "false"),
@@ -116,12 +117,12 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 func TestAccProjectService_handleNotFound(t *testing.T) {
 	t.Parallel()
 
-	org := acctest.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := envvar.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	service := "iam.googleapis.com"
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectService_handleNotFound(service, pid, org),
@@ -150,11 +151,11 @@ func TestAccProjectService_renamedService(t *testing.T) {
 		newName = new
 	}
 
-	org := acctest.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
-	VcrTest(t, resource.TestCase{
+	org := envvar.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectService_single(newName, pid, org),
@@ -171,7 +172,7 @@ func TestAccProjectService_renamedService(t *testing.T) {
 
 func testAccCheckProjectService(t *testing.T, services []string, pid string, expectEnabled bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		currentlyEnabled, err := ListCurrentlyEnabledServices(pid, "", config.UserAgent, config, time.Minute*10)
 		if err != nil {
 			return fmt.Errorf("Error listing services for project %q: %v", pid, err)

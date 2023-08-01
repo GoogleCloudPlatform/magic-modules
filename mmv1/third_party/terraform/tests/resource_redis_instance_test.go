@@ -6,16 +6,17 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccRedisInstance_update(t *testing.T) {
 	t.Parallel()
 
-	name := fmt.Sprintf("tf-test-%d", RandInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckRedisInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -45,11 +46,11 @@ func TestAccRedisInstance_update(t *testing.T) {
 func TestAccRedisInstance_updateReadReplicasMode(t *testing.T) {
 	t.Parallel()
 
-	name := fmt.Sprintf("tf-test-%d", RandInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckRedisInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -80,11 +81,11 @@ func TestAccRedisInstance_updateReadReplicasMode(t *testing.T) {
 func TestAccRedisInstance_updateReadReplicasModeWithAutoSecondaryIp(t *testing.T) {
 	t.Parallel()
 
-	name := fmt.Sprintf("tf-test-%d", RandInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckRedisInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -189,20 +190,20 @@ resource "google_redis_instance" "test" {
 func TestAccRedisInstance_regionFromLocation(t *testing.T) {
 	t.Parallel()
 
-	name := fmt.Sprintf("tf-test-%d", RandInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	// Pick a zone that isn't in the provider-specified region so we know we
 	// didn't fall back to that one.
 	region := "us-west1"
 	zone := "us-west1-a"
-	if acctest.GetTestRegionFromEnv() == "us-west1" {
+	if envvar.GetTestRegionFromEnv() == "us-west1" {
 		region = "us-central1"
 		zone = "us-central1-a"
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckRedisInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -222,12 +223,12 @@ func TestAccRedisInstance_redisInstanceAuthEnabled(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckRedisInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -255,11 +256,11 @@ func TestAccRedisInstance_redisInstanceAuthEnabled(t *testing.T) {
 func TestAccRedisInstance_downgradeRedisVersion(t *testing.T) {
 	t.Parallel()
 
-	name := fmt.Sprintf("tf-test-%d", RandInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckRedisInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -352,7 +353,7 @@ resource "google_redis_instance" "test" {
 }
 
 func testAccRedisInstance_redisInstanceAuthEnabled(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_redis_instance" "cache" {
   name           = "tf-test-memory-cache%{random_suffix}"
   memory_size_gb = 1
@@ -362,7 +363,7 @@ resource "google_redis_instance" "cache" {
 }
 
 func testAccRedisInstance_redisInstanceAuthDisabled(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_redis_instance" "cache" {
   name           = "tf-test-memory-cache%{random_suffix}"
   memory_size_gb = 1

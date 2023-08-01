@@ -41,7 +41,7 @@ examples:
     primary_resource_id: 'my-consent'
     primary_resource_name:
       ' fmt.Sprintf("projects/%s/locations/%s/datasets/tf-test-my-dataset%s",
-      acctest.GetTestProjectFromEnv(), acctest.GetTestRegionFromEnv(),
+      envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(),
       context["random_suffix"]), fmt.Sprintf("tf-test-my-consent-store%s",
       context["random_suffix"])'
     vars:

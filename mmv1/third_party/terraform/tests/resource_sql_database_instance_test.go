@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -34,9 +35,9 @@ func TestAccSqlDatabaseInstance_basicInferredName(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -58,11 +59,11 @@ func TestAccSqlDatabaseInstance_basicInferredName(t *testing.T) {
 func TestAccSqlDatabaseInstance_basicSecondGen(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -83,12 +84,12 @@ func TestAccSqlDatabaseInstance_basicSecondGen(t *testing.T) {
 func TestAccSqlDatabaseInstance_basicMSSQL(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
-	rootPassword := RandString(t, 15)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	rootPassword := acctest.RandString(t, 15)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -118,15 +119,15 @@ func TestAccSqlDatabaseInstance_basicMSSQL(t *testing.T) {
 func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "sql-instance-test-" + RandString(t, 10)
-	failoverName := "sql-instance-test-failover-" + RandString(t, 10)
+	databaseName := "sql-instance-test-" + acctest.RandString(t, 10)
+	failoverName := "sql-instance-test-failover-" + acctest.RandString(t, 10)
 	// 1. Create an instance.
 	// 2. Add a root@'%' user.
 	// 3. Create a replica and assert it succeeds (it'll fail if we try to delete the root user thinking it's a
 	//    default user)
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -141,11 +142,11 @@ func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
 			{
 				PreConfig: func() {
 					// Add a root user
-					config := GoogleProviderConfig(t)
+					config := acctest.GoogleProviderConfig(t)
 					user := sqladmin.User{
 						Name:     "root",
 						Host:     "%",
-						Password: RandString(t, 26),
+						Password: acctest.RandString(t, 26),
 					}
 					op, err := config.NewSqlAdminClient(config.UserAgent).Users.Insert(config.Project, databaseName, &user).Do()
 					if err != nil {
@@ -175,17 +176,17 @@ func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *tes
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
-	addressName := "tf-test-" + RandString(t, 10)
-	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private-clone-2")
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	addressName := "tf-test-" + acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-clone-2")
 
 	// 1. Create an instance.
 	// 2. Add a root@'%' user.
 	// 3. Create a clone with settings and assert it fails after the instance creation API call.
 	// 4. Check root user was deleted.
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -194,11 +195,11 @@ func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *tes
 			{
 				PreConfig: func() {
 					// Add a root user
-					config := GoogleProviderConfig(t)
+					config := acctest.GoogleProviderConfig(t)
 					user := sqladmin.User{
 						Name:     "root",
 						Host:     "%",
-						Password: RandString(t, 26),
+						Password: acctest.RandString(t, 26),
 					}
 					op, err := config.NewSqlAdminClient(config.UserAgent).Users.Insert(config.Project, databaseName, &user).Do()
 					if err != nil {
@@ -234,11 +235,11 @@ func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *tes
 func TestAccSqlDatabaseInstance_settings_basic(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -258,11 +259,11 @@ func TestAccSqlDatabaseInstance_settings_basic(t *testing.T) {
 func TestAccSqlDatabaseInstance_settings_secondary(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -282,11 +283,11 @@ func TestAccSqlDatabaseInstance_settings_secondary(t *testing.T) {
 func TestAccSqlDatabaseInstance_settings_deletionProtection(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -316,11 +317,11 @@ func TestAccSqlDatabaseInstance_settings_deletionProtection(t *testing.T) {
 func TestAccSqlDatabaseInstance_maintenanceVersion(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -356,11 +357,11 @@ func TestAccSqlDatabaseInstance_maintenanceVersion(t *testing.T) {
 func TestAccSqlDatabaseInstance_settings_deletionProtectionEnabled(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -396,11 +397,11 @@ func TestAccSqlDatabaseInstance_settings_deletionProtectionEnabled(t *testing.T)
 func TestAccSqlDatabaseInstance_settings_checkServiceNetworking(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -415,11 +416,11 @@ func TestAccSqlDatabaseInstance_settings_checkServiceNetworking(t *testing.T) {
 func TestAccSqlDatabaseInstance_replica(t *testing.T) {
 	t.Parallel()
 
-	databaseID := RandInt(t)
+	databaseID := acctest.RandInt(t)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -456,12 +457,12 @@ func TestAccSqlDatabaseInstance_replica(t *testing.T) {
 func TestAccSqlDatabaseInstance_slave(t *testing.T) {
 	t.Parallel()
 
-	masterID := RandInt(t)
-	slaveID := RandInt(t)
+	masterID := acctest.RandInt(t)
+	slaveID := acctest.RandInt(t)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -487,11 +488,11 @@ func TestAccSqlDatabaseInstance_slave(t *testing.T) {
 func TestAccSqlDatabaseInstance_highAvailability(t *testing.T) {
 	t.Parallel()
 
-	instanceID := RandInt(t)
+	instanceID := acctest.RandInt(t)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -511,11 +512,11 @@ func TestAccSqlDatabaseInstance_highAvailability(t *testing.T) {
 func TestAccSqlDatabaseInstance_diskspecs(t *testing.T) {
 	t.Parallel()
 
-	masterID := RandInt(t)
+	masterID := acctest.RandInt(t)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -535,11 +536,11 @@ func TestAccSqlDatabaseInstance_diskspecs(t *testing.T) {
 func TestAccSqlDatabaseInstance_maintenance(t *testing.T) {
 	t.Parallel()
 
-	masterID := RandInt(t)
+	masterID := acctest.RandInt(t)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -559,11 +560,11 @@ func TestAccSqlDatabaseInstance_maintenance(t *testing.T) {
 func TestAccSqlDatabaseInstance_settings_upgrade(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -593,11 +594,11 @@ func TestAccSqlDatabaseInstance_settings_upgrade(t *testing.T) {
 func TestAccSqlDatabaseInstance_settingsDowngrade(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -628,11 +629,11 @@ func TestAccSqlDatabaseInstance_settingsDowngrade(t *testing.T) {
 func TestAccSqlDatabaseInstance_authNets(t *testing.T) {
 	t.Parallel()
 
-	databaseID := RandInt(t)
+	databaseID := acctest.RandInt(t)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -674,11 +675,11 @@ func TestAccSqlDatabaseInstance_authNets(t *testing.T) {
 func TestAccSqlDatabaseInstance_multipleOperations(t *testing.T) {
 	t.Parallel()
 
-	databaseID, instanceID, userID := RandString(t, 8), RandString(t, 8), RandString(t, 8)
+	databaseID, instanceID, userID := acctest.RandString(t, 8), acctest.RandString(t, 8), acctest.RandString(t, 8)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -698,11 +699,11 @@ func TestAccSqlDatabaseInstance_multipleOperations(t *testing.T) {
 func TestAccSqlDatabaseInstance_basic_with_user_labels(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -733,13 +734,13 @@ func TestAccSqlDatabaseInstance_basic_with_user_labels(t *testing.T) {
 func TestAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
-	addressName := "tf-test-" + RandString(t, 10)
-	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private")
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	addressName := "tf-test-" + acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private")
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -787,15 +788,15 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(t *testi
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
-	addressName := "tf-test-" + RandString(t, 10)
-	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private-allocated-ip-range")
-	addressName_update := "tf-test-" + RandString(t, 10) + "update"
-	networkName_update := BootstrapSharedTestNetwork(t, "sql-instance-private-allocated-ip-range-update")
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	addressName := "tf-test-" + acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-allocated-ip-range")
+	addressName_update := "tf-test-" + acctest.RandString(t, 10) + "update"
+	networkName_update := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-allocated-ip-range-update")
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -825,13 +826,13 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(t
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
-	addressName := "tf-test-" + RandString(t, 10)
-	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private-replica")
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	addressName := "tf-test-" + acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-replica")
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -858,13 +859,13 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(t *
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
-	addressName := "tf-test-" + RandString(t, 10)
-	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private-clone")
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	addressName := "tf-test-" + acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-clone")
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -892,13 +893,13 @@ func TestAccSqlDatabaseInstance_createFromBackup(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":    RandString(t, 10),
-		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
+		"random_suffix":    acctest.RandString(t, 10),
+		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -920,13 +921,13 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":    RandString(t, 10),
-		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
+		"random_suffix":    acctest.RandString(t, 10),
+		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -957,13 +958,13 @@ func TestAccSqlDatabaseInstance_basicClone(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":    RandString(t, 10),
-		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
+		"random_suffix":    acctest.RandString(t, 10),
+		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -985,13 +986,13 @@ func TestAccSqlDatabaseInstance_cloneWithSettings(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":    RandString(t, 10),
-		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
+		"random_suffix":    acctest.RandString(t, 10),
+		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1013,13 +1014,13 @@ func TestAccSqlDatabaseInstance_cloneWithDatabaseNames(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":    RandString(t, 10),
-		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
+		"random_suffix":    acctest.RandString(t, 10),
+		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1038,7 +1039,7 @@ func TestAccSqlDatabaseInstance_cloneWithDatabaseNames(t *testing.T) {
 func testAccSqlDatabaseInstanceDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 			if rs.Type != "google_sql_database_instance" {
 				continue
 			}
@@ -1056,7 +1057,7 @@ func testAccSqlDatabaseInstanceDestroyProducer(t *testing.T) func(s *terraform.S
 
 func testAccCheckGoogleSqlDatabaseRootUserDoesNotExist(t *testing.T, instance string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		users, err := config.NewSqlAdminClient(config.UserAgent).Users.List(config.Project, instance).Do()
 
@@ -1077,11 +1078,11 @@ func testAccCheckGoogleSqlDatabaseRootUserDoesNotExist(t *testing.T, instance st
 func TestAccSqlDatabaseInstance_BackupRetention(t *testing.T) {
 	t.Parallel()
 
-	masterID := RandInt(t)
+	masterID := acctest.RandInt(t)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1100,11 +1101,11 @@ func TestAccSqlDatabaseInstance_BackupRetention(t *testing.T) {
 func TestAccSqlDatabaseInstance_PointInTimeRecoveryEnabled(t *testing.T) {
 	t.Parallel()
 
-	masterID := RandInt(t)
+	masterID := acctest.RandInt(t)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1132,11 +1133,11 @@ func TestAccSqlDatabaseInstance_PointInTimeRecoveryEnabled(t *testing.T) {
 func TestAccSqlDatabaseInstance_PointInTimeRecoveryEnabledForSqlServer(t *testing.T) {
 	t.Parallel()
 
-	masterID := RandInt(t)
+	masterID := acctest.RandInt(t)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1164,11 +1165,11 @@ func TestAccSqlDatabaseInstance_PointInTimeRecoveryEnabledForSqlServer(t *testin
 func TestAccSqlDatabaseInstance_insights(t *testing.T) {
 	t.Parallel()
 
-	masterID := RandInt(t)
+	masterID := acctest.RandInt(t)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1189,18 +1190,18 @@ func TestAccSqlDatabaseInstance_encryptionKey(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    acctest.GetTestProjectFromEnv(),
-		"key_name":      "tf-test-key-" + RandString(t, 10),
-		"instance_name": "tf-test-sql-" + RandString(t, 10),
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"key_name":      "tf-test-key-" + acctest.RandString(t, 10),
+		"instance_name": "tf-test-sql-" + acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: Nprintf(
+				Config: acctest.Nprintf(
 					testGoogleSqlDatabaseInstance_encryptionKey, context),
 			},
 			{
@@ -1223,18 +1224,18 @@ func TestAccSqlDatabaseInstance_encryptionKey_replicaInDifferentRegion(t *testin
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    acctest.GetTestProjectFromEnv(),
-		"key_name":      "tf-test-key-" + RandString(t, 10),
-		"instance_name": "tf-test-sql-" + RandString(t, 10),
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"key_name":      "tf-test-key-" + acctest.RandString(t, 10),
+		"instance_name": "tf-test-sql-" + acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: Nprintf(
+				Config: acctest.Nprintf(
 					testGoogleSqlDatabaseInstance_encryptionKey_replicaInDifferentRegion, context),
 			},
 			{
@@ -1259,15 +1260,15 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 	t.Skip()
 
 	t.Parallel()
-	databaseName := "tf-test-" + RandString(t, 10)
-	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private-test-ad")
-	addressName := "tf-test-" + RandString(t, 10)
-	rootPassword := RandString(t, 15)
-	adDomainName := BootstrapSharedTestADDomain(t, "test-domain", networkName)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-test-ad")
+	addressName := "tf-test-" + acctest.RandString(t, 10)
+	rootPassword := acctest.RandString(t, 15)
+	adDomainName := acctest.BootstrapSharedTestADDomain(t, "test-domain", networkName)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1285,13 +1286,13 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 
 func TestAccSQLDatabaseInstance_DenyMaintenancePeriod(t *testing.T) {
 	t.Parallel()
-	databaseName := "tf-test-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	endDate := "2022-12-5"
 	startDate := "2022-10-5"
 	time := "00:00:00"
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1307,22 +1308,76 @@ func TestAccSQLDatabaseInstance_DenyMaintenancePeriod(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_Edition(t *testing.T) {
+	t.Parallel()
+	enterprisePlusName := "tf-test-enterprise-plus" + acctest.RandString(t, 10)
+	enterprisePlusTier := "db-perf-optimized-N-2"
+	enterpriseName := "tf-test-enterprise-" + acctest.RandString(t, 10)
+	enterpriseTier := "db-custom-2-13312"
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_EditionConfig(enterprisePlusName, enterprisePlusTier, "ENTERPRISE_PLUS"),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_EditionConfig(enterpriseName, enterpriseTier, "ENTERPRISE"),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSQLDatabaseInstance_sqlMysqlDataCacheConfig(t *testing.T) {
+	t.Parallel()
+	instanceName := "tf-test-enterprise-plus" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(instanceName),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_SqlServerAuditConfig(t *testing.T) {
 	// Service Networking
 	acctest.SkipIfVcr(t)
 	t.Parallel()
-	databaseName := "tf-test-" + RandString(t, 10)
-	rootPassword := RandString(t, 15)
-	bucketName := fmt.Sprintf("%s-%d", "tf-test-bucket", RandInt(t))
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	rootPassword := acctest.RandString(t, 15)
+	bucketName := fmt.Sprintf("%s-%d", "tf-test-bucket", acctest.RandInt(t))
 	uploadInterval := "900s"
 	retentionInterval := "86400s"
-	bucketNameUpdate := fmt.Sprintf("%s-%d", "tf-test-bucket", RandInt(t)) + "update"
+	bucketNameUpdate := fmt.Sprintf("%s-%d", "tf-test-bucket", acctest.RandInt(t)) + "update"
 	uploadIntervalUpdate := "1200s"
 	retentionIntervalUpdate := "172800s"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1349,14 +1404,14 @@ func TestAccSqlDatabaseInstance_SqlServerAuditConfig(t *testing.T) {
 
 func TestAccSqlDatabaseInstance_SqlServerAuditOptionalBucket(t *testing.T) {
 	t.Parallel()
-	databaseName := "tf-test-" + RandString(t, 10)
-	rootPassword := RandString(t, 15)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	rootPassword := acctest.RandString(t, 15)
 	uploadInterval := "900s"
 	retentionInterval := "86400s"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1375,12 +1430,12 @@ func TestAccSqlDatabaseInstance_SqlServerAuditOptionalBucket(t *testing.T) {
 func TestAccSqlDatabaseInstance_Smt(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
-	rootPassword := RandString(t, 15)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	rootPassword := acctest.RandString(t, 15)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1417,12 +1472,12 @@ func TestAccSqlDatabaseInstance_Smt(t *testing.T) {
 func TestAccSqlDatabaseInstance_Timezone(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
-	rootPassword := RandString(t, 15)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	rootPassword := acctest.RandString(t, 15)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1443,12 +1498,12 @@ func TestAccSqlDatabaseInstance_sqlMysqlInstancePvpExample(t *testing.T) {
 
 	context := map[string]interface{}{
 		"deletion_protection": false,
-		"random_suffix":       RandString(t, 10),
+		"random_suffix":       acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_sqlMysqlInstancePvpExample(context),
@@ -1466,11 +1521,11 @@ func TestAccSqlDatabaseInstance_sqlMysqlInstancePvpExample(t *testing.T) {
 func TestAccSqlDatabaseInstance_updateReadReplicaWithBinaryLogEnabled(t *testing.T) {
 	t.Parallel()
 
-	instance := "tf-test-" + RandString(t, 10)
+	instance := "tf-test-" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1498,14 +1553,14 @@ func TestAccSqlDatabaseInstance_updateReadReplicaWithBinaryLogEnabled(t *testing
 func TestAccSqlDatabaseInstance_rootPasswordShouldBeUpdatable(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "tf-test-" + RandString(t, 10)
-	rootPwd := "rootPassword-1-" + RandString(t, 10)
-	newRootPwd := "rootPassword-2-" + RandString(t, 10)
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	rootPwd := "rootPassword-1-" + acctest.RandString(t, 10)
+	newRootPwd := "rootPassword-2-" + acctest.RandString(t, 10)
 	databaseVersion := "SQLSERVER_2017_STANDARD"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1538,11 +1593,11 @@ func TestAccSqlDatabaseInstance_rootPasswordShouldBeUpdatable(t *testing.T) {
 func TestAccSqlDatabaseInstance_activationPolicy(t *testing.T) {
 	t.Parallel()
 
-	instanceName := "tf-test-" + RandString(t, 10)
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1597,11 +1652,11 @@ func TestAccSqlDatabaseInstance_activationPolicy(t *testing.T) {
 func TestAccSqlDatabaseInstance_ReplicaPromoteSuccessful(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "sql-instance-test-" + RandString(t, 10)
-	failoverName := "sql-instance-test-failover-" + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	databaseName := "sql-instance-test-" + acctest.RandString(t, 10)
+	failoverName := "sql-instance-test-failover-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1641,11 +1696,11 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteSuccessful(t *testing.T) {
 
 func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithMasterInstanceNamePresent(t *testing.T) {
 	t.Parallel()
-	databaseName := "sql-instance-test-" + RandString(t, 10)
-	failoverName := "sql-instance-test-failover-" + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	databaseName := "sql-instance-test-" + acctest.RandString(t, 10)
+	failoverName := "sql-instance-test-failover-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1687,11 +1742,11 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithMasterInstanceNamePresen
 func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithReplicaConfigurationPresent(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "sql-instance-test-" + RandString(t, 10)
-	failoverName := "sql-instance-test-failover-" + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	databaseName := "sql-instance-test-" + acctest.RandString(t, 10)
+	failoverName := "sql-instance-test-failover-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1733,11 +1788,11 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithReplicaConfigurationPres
 func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithMasterInstanceNameAndReplicaConfigurationPresent(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "sql-instance-test-" + RandString(t, 10)
-	failoverName := "sql-instance-test-failover-" + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	databaseName := "sql-instance-test-" + acctest.RandString(t, 10)
+	failoverName := "sql-instance-test-failover-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1778,11 +1833,11 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithMasterInstanceNameAndRep
 func TestAccSqlDatabaseInstance_ReplicaPromoteSkippedWithNoMasterInstanceNameAndNoReplicaConfigurationPresent(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "sql-instance-test-" + RandString(t, 10)
-	failoverName := "sql-instance-test-failover-" + RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	databaseName := "sql-instance-test-" + acctest.RandString(t, 10)
+	failoverName := "sql-instance-test-failover-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1821,7 +1876,7 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteSkippedWithNoMasterInstanceNameAnd
 }
 
 func testAccSqlDatabaseInstance_sqlMysqlInstancePvpExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_sql_database_instance" "mysql_pvp_instance_name" {
   name             = "tf-test-mysql-pvp-instance-name%{random_suffix}"
   region           = "asia-northeast1"
@@ -1965,6 +2020,39 @@ resource "google_sql_database_instance" "instance" {
     }
   }
 }`, databaseName, endDate, startDate, time)
+}
+
+func testGoogleSqlDatabaseInstance_EditionConfig(databaseName, tier, edition string) string {
+	return fmt.Sprintf(`
+
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  region           = "us-east1"
+  database_version    = "POSTGRES_14"
+  deletion_protection = false
+  settings {
+    tier = "%s"
+    edition = "%s"
+  }
+}`, databaseName, tier, edition)
+}
+
+func testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(instanceName string) string {
+	return fmt.Sprintf(`
+
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  region           = "us-east1"
+  database_version    = "MYSQL_8_0_31"
+  deletion_protection = false
+  settings {
+    tier = "db-perf-optimized-N-2"
+    edition = "ENTERPRISE_PLUS"
+    data_cache_config {
+        data_cache_enabled = true
+    }
+  }
+}`, instanceName)
 }
 
 func testGoogleSqlDatabaseInstance_SqlServerAuditConfig(databaseName, rootPassword, bucketName, uploadInterval, retentionInterval string) string {
@@ -3162,7 +3250,7 @@ resource "google_sql_database_instance" "instance" {
 }
 
 func testAccSqlDatabaseInstance_beforeBackup(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
   database_version = "POSTGRES_11"
@@ -3181,7 +3269,7 @@ resource "google_sql_database_instance" "instance" {
 }
 
 func testAccSqlDatabaseInstance_restoreFromBackup(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
   database_version = "POSTGRES_11"
@@ -3215,7 +3303,7 @@ data "google_sql_backup_run" "backup" {
 }
 
 func testAccSqlDatabaseInstance_basicClone(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
   database_version = "POSTGRES_11"
@@ -3242,7 +3330,7 @@ data "google_sql_backup_run" "backup" {
 }
 
 func testAccSqlDatabaseInstance_cloneWithSettings(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
   database_version = "POSTGRES_11"
@@ -3276,7 +3364,7 @@ data "google_sql_backup_run" "backup" {
 }
 
 func testAccSqlDatabaseInstance_cloneWithDatabaseNames(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
   database_version = "POSTGRES_11"

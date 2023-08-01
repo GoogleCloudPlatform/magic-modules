@@ -61,7 +61,9 @@ examples:
       network_name: 'test-network'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/router.go.erb
-  resource_definition: templates/terraform/resource_definition/router.go.erb
+custom_diff: [
+  'resourceComputeRouterCustomDiff',
+]
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: region
@@ -72,6 +74,7 @@ parameters:
     required: false
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -110,6 +113,7 @@ properties:
   # these fields to the Terraform resource (and then within that, decide
   # whether to deprecate router_interface and router_peer or leave them
   # alone).
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: bgp
     description: |

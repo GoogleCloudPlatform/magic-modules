@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -48,13 +49,13 @@ func TestAccTags(t *testing.T) {
 
 func testAccTagsTagKey_tagKeyBasic(t *testing.T) {
 	context := map[string]interface{}{
-		"org_id":        acctest.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckTagsTagKeyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -65,7 +66,7 @@ func testAccTagsTagKey_tagKeyBasic(t *testing.T) {
 }
 
 func testAccTagsTagKey_tagKeyBasicExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -77,13 +78,13 @@ resource "google_tags_tag_key" "key" {
 
 func testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewall(t *testing.T) {
 	context := map[string]interface{}{
-		"org_id":        acctest.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckTagsTagKeyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -94,7 +95,7 @@ func testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewall(t *testing.T) {
 }
 
 func testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewallExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_network" "tag_network" {
 	name = "vpc-%{random_suffix}"
 	auto_create_subnetworks = false
@@ -115,13 +116,13 @@ resource "google_tags_tag_key" "key" {
 
 func testAccTagsTagKey_tagKeyUpdate(t *testing.T) {
 	context := map[string]interface{}{
-		"org_id":        acctest.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckTagsTagKeyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -145,7 +146,7 @@ func testAccTagsTagKey_tagKeyUpdate(t *testing.T) {
 }
 
 func testAccTagsTagKey_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -156,7 +157,7 @@ resource "google_tags_tag_key" "key" {
 }
 
 func testAccTagsTagKey_basicUpdated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -176,7 +177,7 @@ func testAccCheckTagsTagKeyDestroyProducer(t *testing.T) func(s *terraform.State
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{TagsBasePath}}tagKeys/{{name}}")
 			if err != nil {
@@ -207,13 +208,13 @@ func testAccCheckTagsTagKeyDestroyProducer(t *testing.T) func(s *terraform.State
 
 func testAccTagsTagValue_tagValueBasic(t *testing.T) {
 	context := map[string]interface{}{
-		"org_id":        acctest.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckTagsTagValueDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -224,7 +225,7 @@ func testAccTagsTagValue_tagValueBasic(t *testing.T) {
 }
 
 func testAccTagsTagValue_tagValueBasicExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -243,13 +244,13 @@ resource "google_tags_tag_value" "value" {
 
 func testAccTagsTagValue_tagValueUpdate(t *testing.T) {
 	context := map[string]interface{}{
-		"org_id":        acctest.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckTagsTagValueDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -273,7 +274,7 @@ func testAccTagsTagValue_tagValueUpdate(t *testing.T) {
 }
 
 func testAccTagsTagValue_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -291,7 +292,7 @@ resource "google_tags_tag_value" "value" {
 }
 
 func testAccTagsTagValue_basicUpdated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -318,7 +319,7 @@ func testAccCheckTagsTagValueDestroyProducer(t *testing.T) func(s *terraform.Sta
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{TagsBasePath}}tagValues/{{name}}")
 			if err != nil {
@@ -351,14 +352,14 @@ func testAccTagsTagBinding_tagBindingBasic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        acctest.GetTestOrgFromEnv(t),
-		"project_id":    "tf-test-" + RandString(t, 10),
-		"random_suffix": RandString(t, 10),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"project_id":    "tf-test-" + acctest.RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 		},
@@ -372,7 +373,7 @@ func testAccTagsTagBinding_tagBindingBasic(t *testing.T) {
 }
 
 func testAccTagsTagBinding_tagBindingBasicExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "project" {
 	project_id = "%{project_id}"
 	name       = "%{project_id}"
@@ -408,7 +409,7 @@ func testAccCheckTagsTagBindingDestroyProducer(t *testing.T) func(s *terraform.S
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{TagsBasePath}}tagBindings/{{name}}")
 			if err != nil {
@@ -441,16 +442,16 @@ func testAccTagsTagKeyIamBinding(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"role":          "roles/viewer",
-		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 
-		"short_name": "tf-test-key-" + RandString(t, 10),
+		"short_name": "tf-test-key-" + acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccTagsTagKeyIamBinding_basicGenerated(context),
@@ -467,16 +468,16 @@ func testAccTagsTagKeyIamMember(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"role":          "roles/viewer",
-		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 
-		"short_name": "tf-test-key-" + RandString(t, 10),
+		"short_name": "tf-test-key-" + acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
@@ -490,16 +491,16 @@ func testAccTagsTagKeyIamPolicy(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"role":          "roles/viewer",
-		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 
-		"short_name": "tf-test-key-" + RandString(t, 10),
+		"short_name": "tf-test-key-" + acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccTagsTagKeyIamPolicy_basicGenerated(context),
@@ -512,7 +513,7 @@ func testAccTagsTagKeyIamPolicy(t *testing.T) {
 }
 
 func testAccTagsTagKeyIamMember_basicGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -529,7 +530,7 @@ resource "google_tags_tag_key_iam_member" "foo" {
 }
 
 func testAccTagsTagKeyIamPolicy_basicGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -552,7 +553,7 @@ resource "google_tags_tag_key_iam_policy" "foo" {
 }
 
 func testAccTagsTagKeyIamPolicy_emptyBinding(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -571,7 +572,7 @@ resource "google_tags_tag_key_iam_policy" "foo" {
 }
 
 func testAccTagsTagKeyIamBinding_basicGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -588,7 +589,7 @@ resource "google_tags_tag_key_iam_binding" "foo" {
 }
 
 func testAccTagsTagKeyIamBinding_updateGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 
   parent = "organizations/%{org_id}"
@@ -608,17 +609,17 @@ func testAccTagsTagValueIamBinding(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"role":          "roles/viewer",
-		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 
-		"key_short_name":   "tf-test-key-" + RandString(t, 10),
-		"value_short_name": "tf-test-value-" + RandString(t, 10),
+		"key_short_name":   "tf-test-key-" + acctest.RandString(t, 10),
+		"value_short_name": "tf-test-value-" + acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccTagsTagValueIamBinding_basicGenerated(context),
@@ -635,17 +636,17 @@ func testAccTagsTagValueIamMember(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"role":          "roles/viewer",
-		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 
-		"key_short_name":   "tf-test-key-" + RandString(t, 10),
-		"value_short_name": "tf-test-value-" + RandString(t, 10),
+		"key_short_name":   "tf-test-key-" + acctest.RandString(t, 10),
+		"value_short_name": "tf-test-value-" + acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
@@ -659,17 +660,17 @@ func testAccTagsTagValueIamPolicy(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"role":          "roles/viewer",
-		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 
-		"key_short_name":   "tf-test-key-" + RandString(t, 10),
-		"value_short_name": "tf-test-value-" + RandString(t, 10),
+		"key_short_name":   "tf-test-key-" + acctest.RandString(t, 10),
+		"value_short_name": "tf-test-value-" + acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccTagsTagValueIamPolicy_basicGenerated(context),
@@ -682,7 +683,7 @@ func testAccTagsTagValueIamPolicy(t *testing.T) {
 }
 
 func testAccTagsTagValueIamMember_basicGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 	parent = "organizations/%{org_id}"
 	short_name = "%{key_short_name}"
@@ -704,7 +705,7 @@ resource "google_tags_tag_value_iam_member" "foo" {
 }
 
 func testAccTagsTagValueIamPolicy_basicGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 	parent = "organizations/%{org_id}"
 	short_name = "%{key_short_name}"
@@ -732,7 +733,7 @@ resource "google_tags_tag_value_iam_policy" "foo" {
 }
 
 func testAccTagsTagValueIamPolicy_emptyBinding(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 	parent = "organizations/%{org_id}"
 	short_name = "%{key_short_name}"
@@ -756,7 +757,7 @@ resource "google_tags_tag_value_iam_policy" "foo" {
 }
 
 func testAccTagsTagValueIamBinding_basicGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 	parent = "organizations/%{org_id}"
 	short_name = "%{key_short_name}"
@@ -778,7 +779,7 @@ resource "google_tags_tag_value_iam_binding" "foo" {
 }
 
 func testAccTagsTagValueIamBinding_updateGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
 	parent = "organizations/%{org_id}"
 	short_name = "%{key_short_name}"
@@ -803,14 +804,14 @@ func testAccTagsLocationTagBinding_locationTagBindingbasic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		// "org_id":        acctest.GetTestOrgFromEnv(t),
-		// "project_id":    "tf-test-" + RandString(t, 10),
-		"random_suffix": RandString(t, 10),
+		// "org_id":        envvar.GetTestOrgFromEnv(t),
+		// "project_id":    "tf-test-" + acctest.RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 		},
@@ -829,7 +830,7 @@ func testAccTagsLocationTagBinding_locationTagBindingbasic(t *testing.T) {
 }
 
 func testAccTagsLocationTagBinding_locationTagBindingBasicExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {
 }
 
@@ -881,7 +882,7 @@ func testAccCheckTagsLocationTagBindingDestroyProducer(t *testing.T) func(s *ter
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{TagsLocationBasePath}}{{name}}")
 			if err != nil {
@@ -913,13 +914,13 @@ func TestAccTagsLocationTagBinding_locationTagBindingzonal(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        acctest.GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 		},
@@ -938,7 +939,7 @@ func TestAccTagsLocationTagBinding_locationTagBindingzonal(t *testing.T) {
 }
 
 func testAccTagsLocationTagBinding_locationTagBindingZonalExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {
 }
 resource "google_tags_tag_key" "key" {

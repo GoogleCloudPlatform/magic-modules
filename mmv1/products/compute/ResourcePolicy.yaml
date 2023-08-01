@@ -20,6 +20,8 @@ has_self_link: true
 collection_url_key: 'items'
 description: |
   A policy that can be attached to a resource to specify or schedule actions on that resource.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/resourcePolicies'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
@@ -72,7 +74,6 @@ examples:
       name: 'gce-policy'
   - !ruby/object:Provider::Terraform::Examples
     name: 'resource_policy_consistency_group'
-    min_version: 'beta'
     primary_resource_id: 'cgroup'
     vars:
       name: 'gce-policy'
@@ -85,6 +86,7 @@ parameters:
     immutable: true
     required: false
     default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -152,7 +154,7 @@ properties:
               - !ruby/object:Api::Type::Integer
                 name: 'daysInCycle'
                 description: |
-                  The number of days between snapshots.
+                  Defines a schedule with units measured in days. The value determines how many days pass between the start of each cycle. Days in cycle for snapshot schedule policy must be 1.
                 required: true
               - !ruby/object:Api::Type::String
                 name: 'startTime'
@@ -345,7 +347,6 @@ properties:
           The expiration time of the schedule. The timestamp is an RFC3339 string.
   - !ruby/object:Api::Type::NestedObject
     name: 'diskConsistencyGroupPolicy'
-    min_version: 'beta'
     conflicts:
       - 'snapshot_schedule_policy'
       - 'group_placement_policy'

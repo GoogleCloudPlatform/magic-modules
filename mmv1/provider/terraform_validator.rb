@@ -365,6 +365,8 @@ module Provider
                         'third_party/terraform/services/privateca/privateca_utils.go'],
                        ['converters/google/resources/utils.go',
                         'third_party/terraform/utils/utils.go'],
+                       ['converters/google/resources/acctest/test_utils.go',
+                        'third_party/validator/test_utils.go'],
                        ['converters/google/resources/tpgresource/utils.go',
                         'third_party/terraform/tpgresource/utils.go'],
                        ['converters/google/resources/iam_bigquery_dataset.go',
@@ -383,17 +385,17 @@ module Provider
                         'third_party/validator/project_iam_custom_role.go'],
                        ['converters/google/resources/organization_iam_custom_role.go',
                         'third_party/validator/organization_iam_custom_role.go'],
-                       ['converters/google/resources/iam_pubsub_subscription.go',
-                        'third_party/terraform/utils/iam_pubsub_subscription.go'],
-                       ['converters/google/resources/pubsub_subscription_iam.go',
+                       ['converters/google/resources/services/pubsub/iam_pubsub_subscription.go',
+                        'third_party/terraform/services/pubsub/iam_pubsub_subscription.go'],
+                       ['converters/google/resources/services/pubsub/pubsub_subscription_iam.go',
                         'third_party/validator/pubsub_subscription_iam.go'],
-                       ['converters/google/resources/iam_spanner_database.go',
-                        'third_party/terraform/utils/iam_spanner_database.go'],
-                       ['converters/google/resources/spanner_database_iam.go',
+                       ['converters/google/resources/services/spanner/iam_spanner_database.go',
+                        'third_party/terraform/services/spanner/iam_spanner_database.go'],
+                       ['converters/google/resources/services/spanner/spanner_database_iam.go',
                         'third_party/validator/spanner_database_iam.go'],
-                       ['converters/google/resources/iam_spanner_instance.go',
-                        'third_party/terraform/utils/iam_spanner_instance.go'],
-                       ['converters/google/resources/spanner_instance_iam.go',
+                       ['converters/google/resources/services/spanner/iam_spanner_instance.go',
+                        'third_party/terraform/services/spanner/iam_spanner_instance.go'],
+                       ['converters/google/resources/services/spanner/spanner_instance_iam.go',
                         'third_party/validator/spanner_instance_iam.go'],
                        ['converters/google/resources/storage_bucket_iam.go',
                         'third_party/validator/storage_bucket_iam.go'],
@@ -468,6 +470,10 @@ module Provider
       # rubocop:disable Layout/LineLength
       data = data.gsub(
         %r{(?<!provider ")github.com/hashicorp/terraform-provider-google/google},
+        'github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources'
+      )
+      data = data.gsub(
+        %r{(?<!provider ")github.com/hashicorp/terraform-provider-google-beta/google-beta},
         'github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources'
       )
       # rubocop:enable Layout/LineLength

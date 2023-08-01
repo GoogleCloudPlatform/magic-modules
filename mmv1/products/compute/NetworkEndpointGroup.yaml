@@ -78,6 +78,7 @@ parameters:
       Zone where the network endpoint group is located.
     required: false
     default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -126,6 +127,7 @@ properties:
       The network to which all network endpoints in the NEG belong.
       Uses "default" project network if unspecified.
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'subnetwork'
     resource: 'Subnetwork'
@@ -133,6 +135,7 @@ properties:
     description: |
       Optional subnetwork to which all network endpoints in the NEG belong.
     diff_suppress_func: 'tpgresource.CompareOptionalSubnet'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Integer
     name: 'defaultPort'
     description: |

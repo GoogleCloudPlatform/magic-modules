@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/privateca"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
@@ -16,13 +17,13 @@ import (
 func TestAccPrivatecaCaPoolIamMemberAllAuthenticatedUsersCasing(t *testing.T) {
 	t.Parallel()
 
-	capool := "tf-test-pool-iam-" + RandString(t, 10)
-	project := acctest.GetTestProjectFromEnv()
-	region := acctest.GetTestRegionFromEnv()
+	capool := "tf-test-pool-iam-" + acctest.RandString(t, 10)
+	project := envvar.GetTestProjectFromEnv()
+	region := envvar.GetTestRegionFromEnv()
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPrivatecaCaPoolIamMember_allAuthenticatedUsers(capool, region, project),
@@ -45,7 +46,7 @@ func testAccCheckPrivatecaCaPoolIam(t *testing.T, capool, region, project, role 
 			},
 		}
 		u := &privateca.PrivatecaCaPoolIamUpdater{
-			Config: GoogleProviderConfig(t),
+			Config: acctest.GoogleProviderConfig(t),
 		}
 		u.SetProject(project)
 		u.SetLocation(region)

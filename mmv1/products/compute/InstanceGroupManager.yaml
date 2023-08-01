@@ -53,6 +53,7 @@ parameters:
     imports: 'name'
     description: 'The zone the managed instance group resides.'
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'baseInstanceName'
@@ -154,6 +155,7 @@ properties:
     imports: 'selfLink'
     description: 'The instance group being managed'
     output: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'instanceTemplate'
     resource: 'InstanceTemplate'
@@ -164,6 +166,7 @@ properties:
       managed instance group.
     required: true
   # kind is internal transport detail
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -195,6 +198,7 @@ properties:
       The region this managed instance group resides
       (for regional resources).
     output: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Array
     name: 'targetPools'
     description: |
@@ -206,6 +210,7 @@ properties:
       description: 'The targetPool to receive managed instances.'
       resource: 'TargetPool'
       imports: 'selfLink'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Integer
     name: 'targetSize'
     description: |

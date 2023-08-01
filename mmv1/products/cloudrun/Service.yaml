@@ -149,7 +149,10 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: 'templates/terraform/encoders/cloud_run_service.go.erb'
   decoder: 'templates/terraform/decoders/cloud_run.go.erb'
   constants: templates/terraform/constants/cloud_run_service.go.erb
-  resource_definition: templates/terraform/resource_definition/cloud_run_service.go.erb
+custom_diff: [
+  'revisionNameCustomizeDiff',
+]
+schema_version: 1
 parameters:
   - !ruby/object:Api::Type::String
     name: location
@@ -241,6 +244,8 @@ properties:
                 description: |-
                   Map of string keys and values that can be used to organize and categorize
                   (scope and select) objects.
+                default_from_api: true
+                diff_suppress_func: 'cloudrunTemplateLabelDiffSuppress'
               - !ruby/object:Api::Type::Integer
                 name: generation
                 description: |-
@@ -917,6 +922,44 @@ properties:
           stamped out from this Service's Configuration that has had its "Ready" condition become
           "True".
         output: true
+      - !ruby/object:Api::Type::Array
+        name: traffic
+        description: |-
+          Traffic specifies how to distribute traffic over a collection of Knative Revisions
+          and Configurations
+        output: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: revisionName
+              description: |-
+                RevisionName of a specific revision to which to send this portion of traffic.
+              output: true
+            - !ruby/object:Api::Type::Integer
+              name: percent
+              output: true
+              description: |-
+                Percent specifies percent of the traffic to this Revision or Configuration.
+            - !ruby/object:Api::Type::String
+              name: tag
+              output: true
+              description: |-
+                Tag is optionally used to expose a dedicated url for referencing this target exclusively.
+            - !ruby/object:Api::Type::Boolean
+              name: latestRevision
+              output: true
+              description: |-
+                LatestRevision may be optionally provided to indicate that the latest ready
+                Revision of the Configuration should be used for this traffic target. When
+                provided LatestRevision must be true if RevisionName is empty; it must be
+                false when RevisionName is non-empty.
+            - !ruby/object:Api::Type::String
+              name: url
+              output: true
+              description: |-
+                URL displays the URL for accessing tagged traffic targets. URL is displayed in status,
+                and is disallowed on spec. URL must contain a scheme (e.g. http://) and a hostname,
+                but may not contain anything else (e.g. basic auth, url path, etc.)
 
   - !ruby/object:Api::Type::NestedObject
     name: metadata

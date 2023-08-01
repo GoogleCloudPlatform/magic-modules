@@ -28,32 +28,26 @@ taint_resource_on_failed_create: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "gkeonprem_bare_metal_cluster_basic"
-    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14417
-    skip_test: true
     min_version: beta
     primary_resource_id: "cluster-basic"
     vars:
-      name: "basic"
+      name: "my-cluster"
     test_env_vars:
       project: "fake-backend-360322"
   - !ruby/object:Provider::Terraform::Examples
     name: "gkeonprem_bare_metal_cluster_manuallb"
-    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14417
-    skip_test: true
     min_version: beta
     primary_resource_id: "cluster-manuallb"
     vars:
-      name: "manuallb"
+      name: "cluster-manuallb"
     test_env_vars:
       project: "fake-backend-360322"
   - !ruby/object:Provider::Terraform::Examples
     name: "gkeonprem_bare_metal_cluster_bgplb"
-    # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14417
-    skip_test: true
     min_version: beta
     primary_resource_id: "cluster-bgplb"
     vars:
-      name: "bgplb"
+      name: "cluster-bgplb"
     test_env_vars:
       project: "fake-backend-360322"
 parameters:
