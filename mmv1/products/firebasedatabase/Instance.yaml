@@ -97,7 +97,7 @@ properties:
       Learn more about using project identifiers in Google's [AIP 2510 standard](https://google.aip.dev/cloud/2510).
     output: true
   - !ruby/object:Api::Type::String
-    name: database_url
+    name: databaseUrl
     description: |
       The database URL in the form of https://{instance-id}.firebaseio.com for us-central1 instances
       or https://{instance-id}.{region}.firebasedatabase.app in other regions.

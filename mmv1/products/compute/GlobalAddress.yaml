@@ -115,8 +115,9 @@ properties:
       The prefix length of the IP range. If not present, it means the
       address field is a single IP address.
 
-      This field is not applicable to addresses with addressType=EXTERNAL,
-      or addressType=INTERNAL when purpose=PRIVATE_SERVICE_CONNECT
+      This field is not applicable to addresses with addressType=INTERNAL
+      when purpose=PRIVATE_SERVICE_CONNECT
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'addressType'
     description: |
@@ -147,5 +148,4 @@ properties:
       any reserved IP ranges referring to it.
 
       This should only be set when using an Internal address.
-  # status is not useful for state convergence
-  # users[] is not useful for state convergence
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'

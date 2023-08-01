@@ -37,6 +37,7 @@ parameters:
     imports: 'name'
     description: 'A reference to the zone where the disk type resides.'
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'

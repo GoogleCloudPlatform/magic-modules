@@ -180,14 +180,14 @@ func TestAccBigqueryDataTransferConfig(t *testing.T) {
 func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
 	// Uses time.Now
 	acctest.SkipIfVcr(t)
-	random_suffix := RandString(t, 10)
+	random_suffix := acctest.RandString(t, 10)
 	now := time.Now().UTC()
 	start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
 	end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -206,17 +206,17 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
 func testAccBigqueryDataTransferConfig_scheduledQuery_update(t *testing.T) {
 	// Uses time.Now
 	acctest.SkipIfVcr(t)
-	random_suffix := RandString(t, 10)
+	random_suffix := acctest.RandString(t, 10)
 	now := time.Now().UTC()
 	first_start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
 	first_end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
 	second_start_time := now.Add(2 * time.Hour).Format(time.RFC3339)
 	second_end_time := now.AddDate(0, 2, 0).Format(time.RFC3339)
-	random_suffix2 := RandString(t, 10)
+	random_suffix2 := acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -247,14 +247,14 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_update(t *testing.T) {
 func testAccBigqueryDataTransferConfig_scheduledQuery_no_destination(t *testing.T) {
 	// Uses time.Now
 	acctest.SkipIfVcr(t)
-	random_suffix := RandString(t, 10)
+	random_suffix := acctest.RandString(t, 10)
 	now := time.Now().UTC()
 	start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
 	end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -271,11 +271,11 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_no_destination(t *testing.
 }
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_with_service_account(t *testing.T) {
-	random_suffix := RandString(t, 10)
+	random_suffix := acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -292,11 +292,11 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_with_service_account(t *te
 }
 
 func testAccBigqueryDataTransferConfig_copy_booleanParam(t *testing.T) {
-	random_suffix := RandString(t, 10)
+	random_suffix := acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -313,11 +313,11 @@ func testAccBigqueryDataTransferConfig_copy_booleanParam(t *testing.T) {
 }
 
 func testAccBigqueryDataTransferConfig_force_new_update_params(t *testing.T) {
-	random_suffix := RandString(t, 10)
+	random_suffix := acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -361,7 +361,7 @@ func testAccCheckBigqueryDataTransferConfigDestroyProducer(t *testing.T) func(s 
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{BigqueryDataTransferBasePath}}{{name}}")
 			if err != nil {
@@ -384,18 +384,16 @@ func testAccCheckBigqueryDataTransferConfigDestroyProducer(t *testing.T) func(s 
 }
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_update_service_account(t *testing.T) {
-	random_suffix1 := RandString(t, 10)
-	random_suffix2 := RandString(t, 10)
-	transferConfigID := ""
+	random_suffix1 := acctest.RandString(t, 10)
+	random_suffix2 := acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryDataTransferConfig_scheduledQuery_updateServiceAccount(random_suffix1, random_suffix1),
-				Check:  testAccCheckDataTransferConfigID("google_bigquery_data_transfer_config.query_config", &transferConfigID),
 			},
 			{
 				ResourceName:            "google_bigquery_data_transfer_config.query_config",
@@ -405,7 +403,7 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_update_service_account(t *
 			},
 			{
 				Config: testAccBigqueryDataTransferConfig_scheduledQuery_updateServiceAccount(random_suffix1, random_suffix2),
-				Check:  testAccCheckDataTransferConfigIDChange("google_bigquery_data_transfer_config.query_config", &transferConfigID),
+				Check:  testAccCheckDataTransferServiceAccountNamePrefix("google_bigquery_data_transfer_config.query_config", random_suffix2),
 			},
 			{
 				ResourceName:            "google_bigquery_data_transfer_config.query_config",
@@ -417,8 +415,8 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_update_service_account(t *
 	})
 }
 
-// Retrieve transfer config ID and stores it in transferConfigID
-func testAccCheckDataTransferConfigID(resourceName string, transferConfigID *string) resource.TestCheckFunc {
+// Check if transfer config service account name starts with given prefix
+func testAccCheckDataTransferServiceAccountNamePrefix(resourceName string, prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 
 		rs, ok := s.RootModule().Resources[resourceName]
@@ -426,31 +424,10 @@ func testAccCheckDataTransferConfigID(resourceName string, transferConfigID *str
 			return fmt.Errorf("Not found: %s", resourceName)
 		}
 
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("Transfer config ID is not set")
+		if !strings.HasPrefix(rs.Primary.Attributes["service_account_name"], "bqwriter"+prefix) {
+			return fmt.Errorf("Transfer config service account not updated")
 		}
 
-		*transferConfigID = rs.Primary.ID
-		return nil
-	}
-}
-
-// Check if transfer config ID matches the one stored in transferConfigID
-func testAccCheckDataTransferConfigIDChange(resourceName string, transferConfigID *string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("Not found: %s", resourceName)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("Transfer config ID is not set")
-		}
-
-		if *transferConfigID != rs.Primary.ID {
-			return fmt.Errorf("Transfer config was recreated after changing service account")
-		}
 		return nil
 	}
 }

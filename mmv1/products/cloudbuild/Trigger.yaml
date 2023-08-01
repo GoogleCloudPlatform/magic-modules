@@ -64,7 +64,6 @@ examples:
     skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_repo'
-    min_version: beta
     primary_resource_id: 'repo-trigger'
     vars:
       installation_id: '123123'
@@ -92,7 +91,6 @@ examples:
     primary_resource_id: 'allow-exit-codes-trigger'
   - !ruby/object:Provider::Terraform::Examples
     name: "cloudbuild_trigger_pubsub_with_repo"
-    min_version: beta
     primary_resource_id: "pubsub-with-repo-trigger"
     vars:
       installation_id: "123123"
@@ -209,7 +207,6 @@ properties:
           invocation originated is assumed to be the repo from which to read the specified path.
       - !ruby/object:Api::Type::String
         name: 'repository'
-        min_version: beta
         description: |
           The fully qualified resource name of the Repo API repository. The fully qualified resource name of the Repo API repository.
           If unspecified, the repo from which the trigger invocation originated is assumed to be the repo from which to read the specified path.
@@ -237,7 +234,6 @@ properties:
           Format: projects/{project}/locations/{location}/githubEnterpriseConfigs/{id}. projects/{project}/githubEnterpriseConfigs/{id}.
   - !ruby/object:Api::Type::NestedObject
     name: 'repositoryEventConfig'
-    min_version: beta
     description: |
       The configuration of a trigger that creates a build whenever an event from Repo API is received.
     at_least_one_of:
@@ -338,7 +334,6 @@ properties:
           The URI of the repo.
       - !ruby/object:Api::Type::String
         name: 'repository'
-        min_version: beta
         description: |
           The qualified resource name of the Repo API repository.
           Either uri or repository can be specified and is required.
@@ -1113,16 +1108,10 @@ properties:
             values:
               - :NOT_VERIFIED
               - :VERIFIED
-          - !ruby/object:Api::Type::Enum
+          - !ruby/object:Api::Type::String
             name: 'machineType'
             description: |
               Compute Engine machine type on which to run the build.
-            values:
-              - :UNSPECIFIED
-              - :N1_HIGHCPU_8
-              - :N1_HIGHCPU_32
-              - :E2_HIGHCPU_8
-              - :E2_HIGHCPU_32
           - !ruby/object:Api::Type::Integer
             name: 'diskSizeGb'
             description: |
