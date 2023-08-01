@@ -1769,6 +1769,7 @@ resource "google_storage_bucket" "test" {
   name          = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_object" "test" {
@@ -1785,11 +1786,11 @@ resource "google_bigquery_table" "test" {
 	connection_id   = local.connection_id_reformatted
     autodetect      = false
 	object_metadata = "SIMPLE"
+	metadata_cache_mode = "MANUAL"
 
     source_uris = [
       "gs://${google_storage_bucket.test.name}/*",
     ]
-	metadata_cache_mode = "AUTOMATIC"
   }
   max_staleness = "%s"
 }
@@ -1825,6 +1826,7 @@ resource "google_storage_bucket" "test" {
   name          = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_object" "test" {
@@ -1846,7 +1848,6 @@ resource "google_bigquery_table" "test" {
     source_uris = [
       "gs://${google_storage_bucket.test.name}/*",
     ]
-	metadata_cache_mode = "AUTOMATIC"
   }
   max_staleness = "%s"
 }
