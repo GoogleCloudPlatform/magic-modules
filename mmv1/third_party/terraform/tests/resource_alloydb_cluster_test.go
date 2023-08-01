@@ -1032,9 +1032,6 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  encryption_config {
-    kms_key_name = "%{key_name}"
-  }
   continuous_backup_config {
     enabled       		 = true
 	recovery_window_days = 20
@@ -1045,6 +1042,7 @@ resource "google_alloydb_cluster" "default" {
   lifecycle {
 	prevent_destroy = true
   }
+  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
 }
 
 resource "google_compute_network" "default" {
@@ -1052,6 +1050,14 @@ resource "google_compute_network" "default" {
 }
 
 data "google_project" "project" {}
+
+resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+  crypto_key_id = "%{key_name}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  members = [
+    "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
+  ]
+}
 `, context)
 }
 
@@ -1061,9 +1067,6 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  encryption_config {
-    kms_key_name = "%{key_name}"
-  }
   continuous_backup_config {
     enabled       		 = true
 	recovery_window_days = 20
@@ -1071,6 +1074,7 @@ resource "google_alloydb_cluster" "default" {
       kms_key_name = "%{key_name}"
     }
   }
+  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
 }
 
 resource "google_compute_network" "default" {
@@ -1078,5 +1082,13 @@ resource "google_compute_network" "default" {
 }
 
 data "google_project" "project" {}
+
+resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+	crypto_key_id = "%{key_name}"
+	role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+	members = [
+	  "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
+	]
+  }
 `, context)
 }
