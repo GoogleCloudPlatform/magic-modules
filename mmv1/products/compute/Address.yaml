@@ -106,6 +106,7 @@ parameters:
     required: false
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'address'
@@ -188,6 +189,7 @@ properties:
       This field can only be used with INTERNAL type with
       GCE_ENDPOINT/DNS_RESOLVER purposes.
     default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Array
     name: 'users'
     description: 'The URLs of the resources that are using this address.'
@@ -216,6 +218,7 @@ properties:
       The URL of the network in which to reserve the address. This field
       can only be used with INTERNAL type with the VPC_PEERING and
       IPSEC_INTERCONNECT purposes.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Integer
     name: prefixLength
     description: |

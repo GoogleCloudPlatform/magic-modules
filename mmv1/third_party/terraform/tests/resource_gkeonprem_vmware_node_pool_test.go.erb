@@ -5,16 +5,19 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccGkeonpremVmwareNodePool_vmwareNodePoolUpdate(t *testing.T) {
   t.Parallel()
 
-  context := map[string]interface{}{}
+  context := map[string]interface{}{
+    "random_suffix": acctest.RandString(t, 10),
+  }
 
-  VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
     CheckDestroy:             testAccCheckGkeonpremVmwareNodePoolDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -38,11 +41,12 @@ func TestAccGkeonpremVmwareNodePool_vmwareNodePoolUpdate(t *testing.T) {
 }
 
 func testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdateStart(context map[string]interface{}) string {
-  return Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
-    provider = google-beta  
-    name = "cluster"
+    provider = google-beta
+
+    name = "tf-test-cluster-%{random_suffix}"
     location = "us-west1"
     admin_cluster_membership = "projects/870316890899/locations/global/memberships/gkeonprem-terraform-test"
     description = "test cluster"
@@ -84,8 +88,9 @@ func testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdateStart(context map[string
 
   resource "google_gkeonprem_vmware_node_pool" "nodepool" {
     provider = google-beta
+
+    name = "tf-test-nodepool-%{random_suffix}"
     location = "us-west1"
-    name = "nodepool"
     vmware_cluster = google_gkeonprem_vmware_cluster.cluster.name
     annotations = {}
     config {
@@ -111,11 +116,12 @@ func testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdateStart(context map[string
 }
 
 func testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdate(context map[string]interface{}) string {
-  return Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
-    provider = google-beta  
-    name = "cluster"
+    provider = google-beta
+
+    name = "tf-test-cluster-%{random_suffix}"
     location = "us-west1"
     admin_cluster_membership = "projects/870316890899/locations/global/memberships/gkeonprem-terraform-test"
     description = "test cluster"
@@ -157,8 +163,9 @@ func testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdate(context map[string]inte
 
   resource "google_gkeonprem_vmware_node_pool" "nodepool" {
     provider = google-beta
+
+    name = "tf-test-nodepool-%{random_suffix}"
     location = "us-west1"
-    name = "nodepool"
     vmware_cluster = google_gkeonprem_vmware_cluster.cluster.name
     annotations = {}
     config {

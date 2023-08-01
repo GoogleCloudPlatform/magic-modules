@@ -105,7 +105,7 @@ func TestAcc{{$.PathType}}_{{$s.TestSlug}}(t *testing.T) {
 {{- range $s := $.TestSamples -}}
 {{ range $se := $s.EnumerateWithUpdateSamples }}
 func testAcc{{$.PathType}}_{{$se.TestSlug}}(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 {{ $se.GenerateHCL false }}
 `, context)
 }

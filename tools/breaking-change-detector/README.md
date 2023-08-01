@@ -10,18 +10,7 @@ Specifically protects customer expectations between [minor version](https://www.
 
 ### Program:mode-default
 ```bash
-go run . -providerVersion="google"
-```
-
-### Program:mode-docs
-output to console
-```bash
-go run . -docs
-```
-
-output to provider folder
-```bash
-go run . -docs -providerFolder="/go/src/github.com/hashicorp/terraform-provider-google"
+go run .
 ```
 
 ### Tests

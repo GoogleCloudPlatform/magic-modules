@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func documentationReference(version, identifier string) string {
-	return fmt.Sprintf(" - [reference](%s)", constants.GetFileUrl(version, identifier))
+func documentationReference(identifier string) string {
+	return fmt.Sprintf(" - [reference](%s)", constants.GetFileUrl(identifier))
 }
 
 func getValueType(valueType schema.ValueType) string {

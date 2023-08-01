@@ -22,12 +22,12 @@ func TestAccApigeeKeystoresAliasesKeyCertFile_apigeeKeystoresAliasesKeyCertFileT
 	context := map[string]interface{}{
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
-		"random_suffix":   RandString(t, 10),
+		"random_suffix":   acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckApigeeKeystoresAliasesKeyCertFileDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -53,7 +53,7 @@ func TestAccApigeeKeystoresAliasesKeyCertFile_apigeeKeystoresAliasesKeyCertFileT
 }
 
 func testAccApigeeKeystoresAliasesKeyCertFile_apigeeKeystoresAliasesKeyCertFileTestExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
@@ -85,7 +85,7 @@ resource "google_compute_network" "apigee_network" {
 }
 
 resource "google_compute_global_address" "apigee_range" {
-  name          = "apigee-range"
+  name          = "tf-test-apigee-range%{random_suffix}"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
@@ -144,7 +144,7 @@ func testAccCheckApigeeKeystoresAliasesKeyCertFileDestroyProducer(t *testing.T) 
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}")
 			if err != nil {
@@ -174,7 +174,7 @@ func testAccCheckApigeeKeystoresAliasesKeyCertFileDestroyProducer(t *testing.T) 
 }
 
 func testAccApigeeKeystoresAliasesKeyCertFile_apigeeKeystoresAliasesKeyCertFileTestExampleUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
@@ -206,7 +206,7 @@ resource "google_compute_network" "apigee_network" {
 }
 
 resource "google_compute_global_address" "apigee_range" {
-  name          = "apigee-range"
+  name          = "tf-test-apigee-range%{random_suffix}"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16

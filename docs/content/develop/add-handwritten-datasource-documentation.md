@@ -1,21 +1,21 @@
 ---
-title: "Add documentation for a handwritten data source"
+title: "Add datasource documentation"
 summary: "New handwritten datasources require new handwritten documentation to be created."
-weight: 25
+weight: 61
 aliases:
   - /docs/how-to/add-handwritten-datasource-documentation
   - /how-to/add-handwritten-datasource-documentation
 ---
 
-# Add documentation for a handwritten data source
+# Add data source documentation
 
 {{< hint info >}}
-**Note:** If you want to find information about documentation for a generated resource, look at the [MMv1 resource documentation](/magic-modules/docs/how-to/mmv1-resource-documentation) page instead. The information on this page will not be relevant for resources that have generated documentation.
+**Note:** If you want to find information about documentation for a generated resource, look at the [MMv1 resource documentation]({{< ref "/develop/resource" >}}) page instead. The information on this page will not be relevant for resources that have generated documentation.
 {{< /hint >}}
 
 ## How provider documentation works
 
-For general information about how provider documentation works, see [Provider Documentation](/magic-modules/docs/getting-started/provider-documentation).
+For general information about how provider documentation works, see [Provider Documentation]({{< ref "/get-started/provider-documentation" >}}).
 That page contains information about how documentation should be structured and how you can test changes to documentation.
 
 This page includes only instructions on how to add documentation for a new handwritten data source, with minimal background info.
@@ -73,7 +73,7 @@ It should contain:
 - the page title, as an H1 header
 - a description general information about the data source
 
-The description can be as long or as short as necessary. The minimum information that's included in this section are links to official documentation and the API reference pages. Other guidance, warnings, or explanations of concepts can be included here. To create pronounced warning or info sections, see the [provider documentation](/magic-modules/docs/getting-started/provider-documentation/#what-formatting-is-available) page for info.
+The description can be as long or as short as necessary. The minimum information that's included in this section are links to official documentation and the API reference pages. Other guidance, warnings, or explanations of concepts can be included here. To create pronounced warning or info sections, see the [provider documentation]({{< ref "/get-started/provider-documentation#what-formatting-is-available" >}}) page for info.
 
 For example, here's the title and opening description of `/website/docs/d/cloud_run_locations.html.markdown` ([link to generated page](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/cloud_run_locations)):
 

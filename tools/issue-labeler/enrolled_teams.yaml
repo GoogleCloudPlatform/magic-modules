@@ -1,0 +1,138 @@
+service/accesscontextmanager:
+- google_access_context_manager_
+service/alloydb:
+- google_alloydb_
+service/apigateway:
+- google_api_gateway_
+service/apigee:
+- google_apigee_
+service/artifactregistry:
+- google_artifact_registry_
+service/beyondcorp:
+- google_beyondcorp_
+service/bigquery:
+- google_bigquery_
+service/bigtableadmin:
+- google_bigtable_
+service/billingbudgets:
+- google_billing_budget
+service/certificatemanager:
+- google_certificate_manager_
+service/cloudbilling:
+- google_billing_account
+- google_billing_subaccount
+service/cloudbuild:
+- google_cloudbuild_
+- google_cloudbuildv2_
+service/cloudfunctions:
+- google_cloudfunctions_
+- google_cloudfunctions2_
+service/cloudkms:
+- google_kms_
+service/cloudscheduler:
+- google_cloud_scheduler_
+service/cloudtasks:
+- google_cloud_tasks_
+service/composer:
+- google_composer_
+service/compute-nat:
+- google_compute_router_nat
+service/compute-regional-l7-load-balancer:
+- google_compute_region_target_http_proxy
+- google_compute_region_target_https_proxy
+service/container:
+- google_container_cluster
+- google_container_engine_versions
+- google_container_node_pool
+service/dataproc:
+- google_dataproc_cluster
+- google_dataproc_autoscaling_policy
+- google_dataproc_job
+- google_dataproc_workflow_template
+- google_dataproc_batch
+service/dlp:
+- google_data_loss_prevention_
+service/edgenetwork:
+- google_edgenetwork_
+service/eventarc:
+- google_eventarc_
+service/filestore:
+- google_filestore_
+service/firebase:
+- google_firebase_
+- google_firebaserules_
+service/firestore-controlplane:
+- google_firestore_database
+service/firestore-dataplane:
+- google_firestore_document
+- google_firestore_index
+- google_firestore_ttl
+service/gkebackup:
+- google_gke_backup_
+service/gkehub:
+- google_gke_hub_
+service/gkemulticloud:
+- google_container_aws_
+- google_container_azure_
+- google_container_attached_
+service/gkeonprem:
+- google_gkeonprem_
+service/healthcare:
+- google_healthcare_
+service/iam-core:
+- google_organization_iam_custom_role
+- google_project_iam_custom_role
+- google_iam_deny_policy
+- google_iam_policy
+- google_iam_role
+- google_iam_testable_permissions
+service/iam-serviceaccount:
+- google_service_account
+service/iam-wlid:
+- google_iam_access_boundary_policy
+- google_iam_workload_identity_pool
+- google_iam_workload_identity_pool_provider
+service/iam-workforce:
+- google_iam_workforce_pool
+service/identitytoolkit:
+- google_identity_platform_
+service/ids:
+- google_cloud_ids_
+service/logging:
+- google_logging_
+service/looker-core:
+- google_looker_instance
+service/monitoring-alerting:
+- google_monitoring_notification_channel
+- google_monitoring_alert_policy
+service/monitoring-services:
+- google_monitoring_custom_service
+- google_monitoring_dashboard
+- google_monitoring_monitored_project
+- google_monitoring_service_
+- google_monitoring_slo
+- google_monitoring_istio_canonical_service
+service/orgpolicy:
+- google_org_policy_
+service/privateca:
+- google_privateca_
+service/pubsublite:
+- google_pubsub_lite_
+service/redis-instance:
+- google_redis_instance
+service/run:
+- google_cloud_run_
+- google_cloud_run_v2_
+service/secretmanager:
+- google_secret_manager_
+service/spanner:
+- google_spanner_
+service/sqladmin:
+- google_sql_
+service/storage:
+- google_storage_bucket_
+- google_storage_default_object_
+- google_storage_hmac_key
+- google_storage_notification
+- google_storage_object_
+- google_storage_project_service_account

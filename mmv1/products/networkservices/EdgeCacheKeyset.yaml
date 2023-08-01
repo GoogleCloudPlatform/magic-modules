@@ -20,15 +20,19 @@ update_verb: :PATCH
 update_mask: true
 description: |
   EdgeCacheKeyset represents a collection of public keys used for validating signed requests.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Create keysets': 'https://cloud.google.com/media-cdn/docs/create-keyset'
+  api: 'https://cloud.google.com/media-cdn/docs/reference/rest/v1/projects.locations.edgeCacheKeysets'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 60
-      update_minutes: 60
-      delete_minutes: 60
+      insert_minutes: 90
+      update_minutes: 90
+      delete_minutes: 90
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
   status: !ruby/object:Api::OpAsync::Status

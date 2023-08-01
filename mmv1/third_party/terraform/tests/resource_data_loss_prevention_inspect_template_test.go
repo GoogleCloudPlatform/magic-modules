@@ -13,12 +13,12 @@ func TestAccDataLossPreventionInspectTemplate_dlpInspectTemplateUpdate(t *testin
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionInspectTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -42,7 +42,7 @@ func TestAccDataLossPreventionInspectTemplate_dlpInspectTemplateUpdate(t *testin
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplateBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent = "projects/%{project}"
 	description = "Description"
@@ -152,7 +152,7 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplateUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent = "projects/%{project}"
 	description = "Updated"
@@ -247,12 +247,12 @@ func TestAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withInfoTypesVe
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionInspectTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -276,7 +276,7 @@ func TestAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withInfoTypesVe
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withInfoTypesVersionBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent = "projects/%{project}"
 	description = "Description"
@@ -409,7 +409,7 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withInfoTypesVersionUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent = "projects/%{project}"
 	description = "Description"
@@ -543,12 +543,12 @@ func TestAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withExcludeByHo
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionInspectTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -572,7 +572,7 @@ func TestAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withExcludeByHo
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withExcludeByHotwordBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent = "projects/%{project}"
 	description = "Description"
@@ -717,7 +717,7 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withExcludeByHotwordUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent = "projects/%{project}"
 	description = "Description"
@@ -869,9 +869,9 @@ func TestAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withSensitivity
 		"project": envvar.GetTestProjectFromEnv(),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionInspectTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -903,7 +903,7 @@ func TestAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withSensitivity
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withSensitivityScoreBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent       = "projects/%{project}"
 	description  = "Description"
@@ -1020,7 +1020,7 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withSensitivityScoreUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent       = "projects/%{project}"
 	description  = "Description"
@@ -1128,7 +1128,7 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplate_withSensitivityScoreUpdate2(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent       = "projects/%{project}"
 	description  = "Description"

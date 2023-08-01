@@ -39,6 +39,7 @@ examples:
       project_id: 'ae-project'
     test_env_vars:
       org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
 parameters:
   - !ruby/object:Api::Type::Integer
     name: 'priority'

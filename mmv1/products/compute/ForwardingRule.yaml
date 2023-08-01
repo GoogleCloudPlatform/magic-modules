@@ -179,6 +179,23 @@ examples:
       - 'target'
       - 'ip_address'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'forwarding_rule_vpc_psc_no_automate_dns'
+    primary_resource_id: 'default'
+    vars:
+      forwarding_rule_name: 'psc-endpoint'
+      consumer_network_name: 'consumer-net'
+      ip_name: 'website-ip'
+      producer_network_name: 'producer-net'
+      producer_psc_network_name: 'producer-psc-net'
+      service_attachment_name: 'producer-service'
+      producer_forwarding_rule_name: 'producer-forwarding-rule'
+      producer_backend_name: 'producer-service-backend'
+      producer_healthcheck_name: 'producer-service-health-check'
+    ignore_read_extra:
+      - 'port_range'
+      - 'target'
+      - 'ip_address'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'forwarding_rule_regional_steering'
     primary_resource_id: 'steering'
     vars:
@@ -200,6 +217,7 @@ parameters:
     required: false
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -361,6 +379,7 @@ properties:
     # manifest input from a single value to a range of form NN-NN. The API
     # accepts a single value, e.g. '80', but the API stores and returns
     # '80-80'. This causes idempotency false positive.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'portRange'
     description: |
@@ -433,6 +452,7 @@ properties:
     # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
     # TargetInstance)
     default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'target'
     description: |
@@ -589,3 +609,11 @@ properties:
       This is used in PSC consumer ForwardingRule to control whether the PSC
       endpoint can be accessed from another region.
     send_empty_value: true
+  - !ruby/object:Api::Type::Boolean
+    name: noAutomateDnsZone
+    description:
+      This is used in PSC consumer ForwardingRule to control whether it should try to auto-generate a DNS zone or not.
+      Non-PSC forwarding rules do not use this field.
+    send_empty_value: true
+    immutable: true
+    ignore_read: true

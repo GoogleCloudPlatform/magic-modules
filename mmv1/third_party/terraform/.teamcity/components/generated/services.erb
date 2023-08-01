@@ -1,0 +1,20 @@
+<% autogen_exception -%>
+/*
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
+// this file is auto-generated with mmv1, any changes made here will be overwritten
+<% 
+    service_names = []
+    version_string = "-" + version unless version == 'ga' 
+    Dir["google#{version_string}/services/**"].each do |service|
+      service_names.push service.split('/')[-1]
+    end
+-%>
+
+var services = mapOf(
+<%  service_names.each_with_index do |service, i| -%>
+        "<%= service -%>" to "<%= service.space_separated -%>"<%= ',' if i < (service_names.size - 1) %>
+<%  end -%>
+)

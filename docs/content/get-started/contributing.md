@@ -19,18 +19,18 @@ aliases:
    
    If it exists, check the header of the downstream file to identify the type of tools used to generate the resource.
    For some resources, the code file, the test file and the documentation file might not be generated via the same tools.
-      * Generated resources like [`google_compute_address`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address) can be identified by looking in their [`Go source`](https://github.com/hashicorp/terraform-provider-google/blob/main/google/resource_compute_address.go) for an `AUTO GENERATED CODE` header as well as a `Type`. "Generated resources" typically refers to just the `MMv1` type, and `DCL` type resources are considered "DCL-based". (Currently DCL-related contribution are not supported)
+      * Generated resources like [`google_compute_address`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address) can be identified by looking in their [`Go source`](https://github.com/hashicorp/terraform-provider-google/blob/main/google/services/compute/resource_compute_address.go) for an `AUTO GENERATED CODE` header as well as a `Type`. "Generated resources" typically refers to just the `MMv1` type, and `DCL` type resources are considered "DCL-based". (Currently DCL-related contribution are not supported)
       * Handwritten resources like [`google_container_cluster`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster) can be identified if they have source code present under the [`mmv1/third_party/terraform/resources`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/resources) folder or by the absence of the `AUTO GENERATED CODE header` in their [`Go source`](https://github.com/hashicorp/terraform-provider-google/blob/main/google/resource_container_cluster.go).
    
    If not, decide which tool you would like to use to implement the resource:
       * MMv1 is strongly preferred over handwriting the resource unless the resource cannot be generated.
       * Currently, only handwritten datasources are supported.
 1. Make the code change.
-   * The [How To](/magic-modules/docs/how-to) section provides detailed instructions on how to make your change.
-1. [Generate the providers](/magic-modules/docs/getting-started/generate-providers/) that include your change.
-1. [Run provider tests locally](/magic-modules/docs/getting-started/run-provider-tests/) that are relevant to the change you made. (Testing the PR locally and pushing the commit to the PR only after the tests pass locally may significantly reduce back-and-forth in review.)
+   * The Develop section provides detailed instructions on how to make your change.
+1. [Generate the providers]({{< ref "/get-started/generate-providers" >}}) that include your change.
+1. [Run provider tests locally]({{< ref "/develop/run-tests" >}}) that are relevant to the change you made. (Testing the PR locally and pushing the commit to the PR only after the tests pass locally may significantly reduce back-and-forth in review.)
 1. Push your changes to your `magic-modules` repo fork and send a pull request from that branch to the main branch on `magic-modules`. A reviewer will be assigned automatically to your PR.
-1. Get approval to start Clould Builder jobs from the reviewer if you're an community contributor
+1. Get approval to start Cloud Builder jobs from the reviewer if you're an community contributor
 1. Wait for the the modules magician to generate downstream diff (which should take about 15 mins after creating the PR) to make sure all changes are generated correctly in downstream repos.
 1. Wait for the VCR test results.
 {{< details "Get to know general workflow for VCR tests" >}}
@@ -48,5 +48,5 @@ aliases:
 
    Where possible, take a look at the logs and see if you can figure out what needs to be fixed related to your change.
    The false positive rate on these tests is extremely high between changes in the API, Cloud Build bugs, and eventual consistency issues in test recordings so we don't expect contributors to wholly interpret the results — that's the responsibility of your reviewer.
-1. If your assigned reviewer does not reply / review within a week, gently ping them on GitHub.
+1. If your assigned reviewer does not respond to changes on a pull request within two US business days, ping them on the pull request.
 1. After your PR is merged, it will be released to customers in around one to two weeks.

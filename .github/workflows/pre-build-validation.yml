@@ -39,6 +39,7 @@ jobs:
       run: |
         cd repo
         git config user.name "modular-magician"
+        git config user.email "magic-modules@google.com"
         git merge --no-ff origin/main
         yamlfiles=$(git diff --name-only origin/main -- mmv1/products)
         if [ ! -z "$yamlfiles" ]; then

@@ -33,7 +33,7 @@ var FieldRules = []FieldRule{
 var fieldRule_ChangingFieldDataFormat = FieldRule{
 	name:       "Changing field data format",
 	definition: "Modification of the data format (either by the API or manually) will cause a diff in subsequent plans if that field is not Computed. This results in a breakage. API breaking changes are out of scope with respect to provider responsibility but we may make changes in response to API breakages in some instances to provide more customer stability.",
-	identifier: "field-changing-type",
+	identifier: "field-changing-data-format",
 }
 
 var fieldRule_ChangingType = FieldRule{
@@ -147,7 +147,7 @@ var fieldRule_GrowingMin = FieldRule{
 	name:        "Growing Minimum Items",
 	definition:  "MinItems cannot grow. Otherwise existing terraform configurations that don't satisfy this rule will break.",
 	message:     "Field {{field}} MinItems went from {{oldMin}} to {{newMin}} on {{resource}}",
-	identifier:  "field-certain-min-max",
+	identifier:  "field-growing-min",
 	isRuleBreak: fieldRule_GrowingMin_func,
 }
 
@@ -167,7 +167,7 @@ var fieldRule_ShrinkingMax = FieldRule{
 	name:        "Shrinking Maximum Items",
 	definition:  "MaxItems cannot shrink. Otherwise existing terraform configurations that don't satisfy this rule will break.",
 	message:     "Field {{field}} MinItems went from {{oldMax}} to {{newMax}} on {{resource}}",
-	identifier:  "field-certain-min-max",
+	identifier:  "field-shrinking-max",
 	isRuleBreak: fieldRule_ShrinkingMax_func,
 }
 
@@ -208,13 +208,13 @@ func (fr FieldRule) Identifier() string {
 
 // Message - a message to to inform the user
 // of a breakage.
-func (fr FieldRule) messages(version, resource, field string) string {
+func (fr FieldRule) messages(resource, field string) string {
 	msg := fr.message
 	resource = fmt.Sprintf("`%s`", resource)
 	field = fmt.Sprintf("`%s`", field)
 	msg = strings.ReplaceAll(msg, "{{resource}}", resource)
 	msg = strings.ReplaceAll(msg, "{{field}}", field)
-	return msg + documentationReference(version, fr.identifier)
+	return msg + documentationReference(fr.identifier)
 }
 
 // IsRuleBreak - compares the fields and returns

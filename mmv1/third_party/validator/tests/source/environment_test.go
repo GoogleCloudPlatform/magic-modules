@@ -5,8 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-
-	google "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources"
 )
 
 const (
@@ -25,10 +23,6 @@ const (
 	defaultRegion             = "us-central1"
 	defaultServiceAccount     = "meep@foobar.iam.gserviceaccount.com"
 )
-
-func Nprintf(format string, params map[string]interface{}) string {
-	return google.Nprintf(format, params)
-}
 
 // AccTestPreCheck ensures at least one of the project env variables is set.
 func getTestProjectFromEnv() string {
