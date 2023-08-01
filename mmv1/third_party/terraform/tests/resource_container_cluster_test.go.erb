@@ -4819,6 +4819,19 @@ resource "google_container_cluster" "with_enable_private_endpoint" {
 `, clusterName, flag)
 }
 
+func testAccContainerCluster_regionalWithNodePool(cluster, nodePool string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "regional" {
+  name     = "%s"
+  location = "us-central1"
+
+  node_pool {
+    name = "%s"
+  }
+}
+`, cluster, nodePool)
+}
+
 func testAccContainerCluster_regionalNodeLocations(clusterName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_node_locations" {
