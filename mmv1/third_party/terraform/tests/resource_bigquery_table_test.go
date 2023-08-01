@@ -541,7 +541,7 @@ func TestAccBigQueryExternalDataTable_queryAcceleration(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 
-	metadataCacheMode = "AUTOMATIC"
+	metadataCacheMode := "AUTOMATIC"
 	// including an optional field. Should work without specifiying.
 	// Has to follow google sql IntervalValue encoding
 	maxStaleness := "0-0 0 10:00:00.000"
