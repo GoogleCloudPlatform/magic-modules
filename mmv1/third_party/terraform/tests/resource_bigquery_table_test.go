@@ -1649,7 +1649,6 @@ resource "google_bigquery_table" "test" {
   deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
-  max_staleness = "%s"
   external_data_configuration {
     autodetect    = false
     source_format = "PARQUET"
