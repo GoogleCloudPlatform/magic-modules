@@ -73,7 +73,6 @@ func TestAccComputeInstanceFromTemplate_self_link_unique(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeInstanceFromTemplate_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
 
@@ -133,7 +132,6 @@ func TestAccComputeInstanceFromTemplateWithOverride_localSsdRecoveryTimeout(t *t
 		},
 	})
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 
@@ -438,7 +436,6 @@ resource "google_compute_instance_from_template" "foobar" {
 `, template, template, instance)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeInstanceFromTemplate_localSsdRecoveryTimeout(instance, template string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -598,7 +595,6 @@ resource "google_compute_instance_from_template" "foobar" {
 }
 `, template, template, instance)
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 

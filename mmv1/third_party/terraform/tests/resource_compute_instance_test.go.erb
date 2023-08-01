@@ -3,9 +3,7 @@ package google
 
 import (
 	"fmt"
-<% unless version == 'ga' -%>
 	"reflect"
-<% end -%>
 	"regexp"
 	"sort"
 	"strconv"
@@ -2446,7 +2444,6 @@ func TestAccComputeInstance_spotVM_maxRunDuration_update(t *testing.T) {
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func TestAccComputeInstance_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
 
@@ -2509,7 +2506,6 @@ func TestAccComputeInstance_localSsdRecoveryTimeout_update(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccComputeInstance_metadataStartupScript_update(t *testing.T) {
 	t.Parallel()
@@ -2748,7 +2744,6 @@ func testAccCheckComputeInstanceMaxRunDuration(instance *compute.Instance, insta
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func testAccCheckComputeInstanceLocalSsdRecoveryTimeout(instance *compute.Instance, instanceLocalSsdRecoveryTiemoutWant compute.Duration) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if instance == nil {
@@ -2765,8 +2760,6 @@ func testAccCheckComputeInstanceLocalSsdRecoveryTimeout(instance *compute.Instan
 		return nil
 	}
 }
-<% end -%>
-
 
 func testAccCheckComputeInstanceTerminationAction(instance *compute.Instance, instanceTerminationActionWant string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -6695,7 +6688,6 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeInstance_localSsdRecoveryTimeout(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -6728,7 +6720,6 @@ resource "google_compute_instance" "foobar" {
 }
 `, instance)
 }
-<% end -%>
 
 func testAccComputeInstance_metadataStartupScript(instance, machineType, metadata string) string {
 	return fmt.Sprintf(`
