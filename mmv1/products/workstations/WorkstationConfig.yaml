@@ -280,10 +280,12 @@ properties:
                   name: 'type'
                   description: |
                     Type of accelerator resource to attach to the instance, for example, "nvidia-tesla-p100".
+                  required: true
                 - !ruby/object:Api::Type::Integer
                   name: 'count'
                   description: |
                     Number of accelerator cards exposed to the instance.
+                  required: true
   - !ruby/object:Api::Type::Array
     name: 'persistentDirectories'
     description: |
