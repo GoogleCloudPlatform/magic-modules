@@ -1649,6 +1649,7 @@ resource "google_bigquery_table" "test" {
   deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
+  max_staleness = "%s"
   external_data_configuration {
     autodetect    = false
     source_format = "PARQUET"
@@ -1659,7 +1660,6 @@ resource "google_bigquery_table" "test" {
     ]
 
 	metadata_cache_mode = "%s"
-	max_staleness = "%s"
   }
 }
 `, datasetID, bucketName, objectName, tableID, metadataCacheMode, maxStaleness)
