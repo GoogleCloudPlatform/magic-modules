@@ -1,0 +1,110 @@
+locals {
+  project = "<%= ctx[:test_env_vars]['project'] %>" # Google Cloud Platform Project ID
+}
+
+data "google_project" "project" {
+}
+
+resource "google_storage_bucket" "bucket" {
+  name     = "${local.project}-<%= ctx[:vars]['bucket_name'] %>"  # Every bucket name must be globally unique
+  location = "US"
+  uniform_bucket_level_access = true
+}
+ 
+resource "google_storage_bucket_object" "object" {
+  name   = "function-source.zip"
+  bucket = google_storage_bucket.bucket.name
+  source = "<%= ctx[:vars]['zip_path'] %>"  # Add path to the zipped function source code
+}
+
+resource "google_artifact_registry_repository" "unencoded-ar-repo" {
+  repository_id = "unencoded-ar-repo-to-generate-p4sa"
+  location = "us-central1"
+  format = "DOCKER"
+}
+
+resource "google_artifact_registry_repository_iam_binding" "binding" {
+  location = google_artifact_registry_repository.encoded-ar-repo.location
+  repository = google_artifact_registry_repository.encoded-ar-repo.name
+  role = "roles/artifactregistry.admin"
+  members = [
+    "serviceAccount:service-${data.google_project.project.number}@gcf-admin-robot.iam.gserviceaccount.com",
+  ]
+}
+
+resource "google_kms_crypto_key_iam_binding" "cmek_keyuser" {
+  crypto_key_id = "<%= ctx[:vars]['kms_key_name'] %>"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+
+  members = [
+    "servinceAccount:service-${data.google_project.project.number}@gcf-admin-robot.iam.gserviceaccount.com",
+    "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com",
+    "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com",
+    "serviceAccount:service-${data.google_project.project.number}@serverless-robot-prod.iam.gserviceaccount.com",
+    "serviceAccount:service-${data.google_project.project.number}@gcp-sa-eventarc.iam.gserviceaccount.com"
+  ]
+}
+
+resource "google_artifact_registry_repository" "encoded-ar-repo" {
+    location = "us-central1"
+    repository_id = "cmek-repo"
+    format = "DOCKER"
+    kms_key_name = "<%= ctx[:vars]['kms_key_name'] %>"
+    depends_on = [
+      google_kms_crypto_key_iam_binding.cmek_keyuser
+    ]
+}
+
+# resource "google_project_service" "kms" {
+#   project = local.project
+#   service = "cloudkms.googleapis.com"
+# }
+
+# resource "google_kms_crypto_key_iam_member" "crypto_key" {
+#   # crypto_key_id = "<%= ctx[:vars]['kms_key_name'] %>"
+# 	crypto_key_id = google_kms_crypto_key.cryptokey.id
+#   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+#   member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
+# }
+
+# resource "google_kms_key_ring" "keyring" {
+#   name = "key"
+#   location = "us-central1"
+#   project = local.project
+#   depends_on = [google_project_service.kms]
+# }
+
+# resource "google_kms_crypto_key" "cryptokey" {
+#   name = "<%= ctx[:vars]['cryptokey_name'] %>"
+#   key_ring = google_kms_key_ring.keyring.id
+# }
+
+resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['function'] %>"
+  location = "us-central1"
+  description = "CMEK function"
+  kms_key_name = "<%= ctx[:vars]['kms_key_name'] %>"
+
+  build_config {
+    runtime = "nodejs16"
+    entry_point = "helloHttp"  # Set the entry point
+    docker_repository = google_artifact_registry_repository.encoded-ar-repo.id
+
+    source {
+      storage_source {
+        bucket = google_storage_bucket.bucket.name
+        object = google_storage_bucket_object.object.name
+      }
+    }
+  }
+
+	service_config {
+			max_instance_count  = 1
+			available_memory    = "256M"
+			timeout_seconds     = 60
+	}
+
+	depends_on = [
+    google_kms_crypto_key_iam_binding.cmek_keyuser,
+  ]
+}
