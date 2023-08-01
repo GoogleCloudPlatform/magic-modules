@@ -1,0 +1,34 @@
+resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
+  name  = "<%= ctx[:vars]['bucket_name'] %>"
+  location = "us-central1"
+}
+
+resource "google_pubsub_topic" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['topic_name'] %>"
+}
+
+resource "google_pubsub_subscription" "<%= ctx[:primary_resource_id] %>" {
+  name  = "<%= ctx[:vars]['subscription_name'] %>"
+  topic = google_pubsub_topic.<%= ctx[:primary_resource_id] %>.name
+
+  cloud_storage_config {
+    bucket = "<%= ctx[:vars]['bucket_name'] %>"
+  }
+
+  depends_on = [google_storage_bucket.<%= ctx[:primary_resource_id] %>]
+}
+
+data "google_project" "project" {
+}
+
+resource "google_storage_bucket_iam_member" "viewer" {
+  bucket = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
+  role   = "roles/storage.legacyBucketReader"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+}
+
+resource "google_storage_bucket_iam_member" "editor" {
+  bucket = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
+  role   = "roles/storage.objectCreator"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+}
