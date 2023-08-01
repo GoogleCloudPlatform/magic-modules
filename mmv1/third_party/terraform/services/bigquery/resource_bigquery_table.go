@@ -1266,9 +1266,6 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("type", res.Type); err != nil {
 		return fmt.Errorf("Error setting type: %s", err)
 	}
-	if err := d.Set("max_staleness", res.MaxStaleness); err != nil {
-		return fmt.Errorf("Error setting max_staleness: %s", err)
-	}
 
 	if res.ExternalDataConfiguration != nil {
 		externalDataConfiguration, err := flattenExternalDataConfiguration(res.ExternalDataConfiguration)
