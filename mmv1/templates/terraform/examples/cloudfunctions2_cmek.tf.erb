@@ -3,27 +3,43 @@ locals {
 }
 
 data "google_project" "project" {
+  provider = google-beta
 }
 
 resource "google_storage_bucket" "bucket" {
+  provider = google-beta
+
   name     = "${local.project}-<%= ctx[:vars]['bucket_name'] %>"  # Every bucket name must be globally unique
   location = "US"
   uniform_bucket_level_access = true
 }
  
 resource "google_storage_bucket_object" "object" {
+  provider = google-beta
+
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
   source = "<%= ctx[:vars]['zip_path'] %>"  # Add path to the zipped function source code
 }
 
+resource "google_project_service_identity" "ea_sa" {
+  provider = google-beta
+
+  project = data.google_project.project.project_id
+  service = "eventarc.googleapis.com"
+}
+
 resource "google_artifact_registry_repository" "unencoded-ar-repo" {
+  provider = google-beta
+
   repository_id = "unencoded-ar-repo-to-generate-p4sa"
   location = "us-central1"
   format = "DOCKER"
 }
 
 resource "google_artifact_registry_repository_iam_binding" "binding" {
+  provider = google-beta
+
   location = google_artifact_registry_repository.encoded-ar-repo.location
   repository = google_artifact_registry_repository.encoded-ar-repo.name
   role = "roles/artifactregistry.admin"
@@ -32,12 +48,9 @@ resource "google_artifact_registry_repository_iam_binding" "binding" {
   ]
 }
 
-# resource "time_sleep" "wait_120_seconds" {
-#   depends_on = [google_project.project]
-#   create_duration = "120s"
-# }
-
 resource "google_kms_crypto_key_iam_binding" "gcf_cmek_keyuser" {
+  provider = google-beta
+
   crypto_key_id = "<%= ctx[:vars]['kms_key_name'] %>"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
@@ -46,53 +59,29 @@ resource "google_kms_crypto_key_iam_binding" "gcf_cmek_keyuser" {
     "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com",
     "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com",
     "serviceAccount:service-${data.google_project.project.number}@serverless-robot-prod.iam.gserviceaccount.com",
-    "serviceAccount:service-${data.google_project.project.number}@gcp-sa-eventarc.iam.gserviceaccount.com",
+    "serviceAccount:${google_project_service_identity.ea_sa.email}",
   ]
 
-  # depends_on = [
-  #     time_sleep.wait_120_seconds
-  # ]
+  depends_on = [
+    google_project_service_identity.ea_sa
+  ]
 }
 
 resource "google_artifact_registry_repository" "encoded-ar-repo" {
-    location = "us-central1"
-    repository_id = "cmek-repo"
-    format = "DOCKER"
-    kms_key_name = "<%= ctx[:vars]['kms_key_name'] %>"
-    # depends_on = [
-    #   google_kms_crypto_key_iam_binding.gcf_cmek_keyuser
-    # ]
-    # time_sleep = [time_sleep.wait_120_seconds]
-    depends_on = [
-      google_kms_crypto_key_iam_binding.gcf_cmek_keyuser
-    ]
+  provider = google-beta
+
+  location = "us-central1"
+  repository_id = "cmek-repo"
+  format = "DOCKER"
+  kms_key_name = "<%= ctx[:vars]['kms_key_name'] %>"
+  depends_on = [
+    google_kms_crypto_key_iam_binding.gcf_cmek_keyuser
+  ]
 }
 
-# resource "google_project_service" "kms" {
-#   project = local.project
-#   service = "cloudkms.googleapis.com"
-# }
-
-# resource "google_kms_crypto_key_iam_member" "crypto_key" {
-#   # crypto_key_id = "<%= ctx[:vars]['kms_key_name'] %>"
-# 	crypto_key_id = google_kms_crypto_key.cryptokey.id
-#   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-#   member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
-# }
-
-# resource "google_kms_key_ring" "keyring" {
-#   name = "key"
-#   location = "us-central1"
-#   project = local.project
-#   depends_on = [google_project_service.kms]
-# }
-
-# resource "google_kms_crypto_key" "cryptokey" {
-#   name = "<%= ctx[:vars]['cryptokey_name'] %>"
-#   key_ring = google_kms_key_ring.keyring.id
-# }
-
 resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+
   name = "<%= ctx[:vars]['function'] %>"
   location = "us-central1"
   description = "CMEK function"
@@ -117,7 +106,6 @@ resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
 			timeout_seconds     = 60
 	}
 
-  # time_sleep = [time_sleep.wait_120_seconds]
   depends_on = [
     google_kms_crypto_key_iam_binding.gcf_cmek_keyuser
   ]

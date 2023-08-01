@@ -218,6 +218,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudfunctions2_cmek'
     primary_resource_id: 'function'
+    min_version: beta
     vars:
       function: 'function-cmek'
       bucket_name: 'gcf-source'
