@@ -1846,7 +1846,7 @@ resource "google_bigquery_table" "test" {
       "gs://${google_storage_bucket.test.name}/*",
     ]
 
-	maxStaleness = "%s"
+	max_staleness = "%s"
   }
 }
 `, connectionID, datasetID, bucketName, objectName, tableID, maxStaleness)
