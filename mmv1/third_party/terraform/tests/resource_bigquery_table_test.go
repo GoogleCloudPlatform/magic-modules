@@ -1658,8 +1658,8 @@ resource "google_bigquery_table" "test" {
       "gs://${google_storage_bucket.test.name}/*",
     ]
 
-	metadata_cache_mode: "%s"
-	max_staleness: "%s"
+	metadata_cache_mode = "%s"
+	max_staleness = "%s"
   }
 }
 `, datasetID, bucketName, objectName, tableID, metadataCacheMode, maxStaleness)
