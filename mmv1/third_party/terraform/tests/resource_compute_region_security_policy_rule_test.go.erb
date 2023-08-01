@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleBasicUpdateExample(t *testing.T) {
+func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleBasicUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -22,7 +22,7 @@ func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleBasicUpdateE
 		CheckDestroy:             testAccCheckComputeRegionSecurityPolicyRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePreUpdateExample(context),
+				Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePreUpdate(context),
 			},
       {
         ResourceName:      "google_compute_region_security_policy_rule.policy_rule",
@@ -30,7 +30,7 @@ func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleBasicUpdateE
         ImportStateVerify: true,
       },
       {
-        Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePostUpdateExample(context),
+        Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePostUpdate(context),
       },
       {
         ResourceName:      "google_compute_region_security_policy_rule.policy_rule",
@@ -41,7 +41,7 @@ func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleBasicUpdateE
 	})
 }
 
-func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePreUpdateExample(context map[string]interface{}) string {
+func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePreUpdate(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_compute_region_security_policy" "default" {
   region      = "asia-southeast1"
@@ -67,7 +67,7 @@ resource "google_compute_region_security_policy_rule" "policy_rule" {
 `, context)
 }
 
-func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePostUpdateExample(context map[string]interface{}) string {
+func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePostUpdate(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_compute_region_security_policy" "default" {
   region      = "asia-southeast1"
@@ -93,7 +93,7 @@ resource "google_compute_region_security_policy_rule" "policy_rule" {
 `, context)
 }
 
-func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdateExample(t *testing.T) {
+func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdate(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": RandString(t, 10),
 	}
@@ -104,7 +104,7 @@ func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatch
 		CheckDestroy:             testAccCheckComputeRegionSecurityPolicyRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchBasicExample(context),
+				Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchBasic(context),
 			},
       {
         ResourceName:      "google_compute_region_security_policy_rule.policy_rule_network_match",
@@ -112,7 +112,7 @@ func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatch
         ImportStateVerify: true,
       },
       {
-        Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdateExample(context),
+        Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdate(context),
       },
       {
         ResourceName:      "google_compute_region_security_policy_rule.policy_rule_network_match",
@@ -120,7 +120,7 @@ func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatch
         ImportStateVerify: true,
       },
       {
-        Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdate2Example(context),
+        Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdate2(context),
       },
       {
         ResourceName:      "google_compute_region_security_policy_rule.policy_rule_network_match",
@@ -128,7 +128,7 @@ func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatch
         ImportStateVerify: true,
       },
       {
-				Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchBasicExample(context),
+				Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchBasic(context),
 			},
       {
         ResourceName:      "google_compute_region_security_policy_rule.policy_rule_network_match",
@@ -139,7 +139,7 @@ func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatch
 	})
 }
 
-func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchBasicExample(context map[string]interface{}) string {
+func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchBasic(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_compute_region_security_policy" "policyddosprotection" {
   region      = "asia-southeast1"
@@ -182,7 +182,6 @@ resource "google_compute_region_security_policy" "policynetworkmatch" {
   
 resource "google_compute_region_security_policy_rule" "policy_rule_network_match" {
   region          = "asia-southeast1"
-  project         = "ciandt-cloudarmor-gcam"
   security_policy = google_compute_region_security_policy.policynetworkmatch.name
   priority = 100
   network_match {
@@ -194,7 +193,7 @@ resource "google_compute_region_security_policy_rule" "policy_rule_network_match
 `, context)
 }
 
-func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdateExample(context map[string]interface{}) string {
+func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdate(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_compute_region_security_policy" "policyddosprotection" {
   region      = "asia-southeast1"
@@ -237,7 +236,6 @@ resource "google_compute_region_security_policy" "policynetworkmatch" {
   
 resource "google_compute_region_security_policy_rule" "policy_rule_network_match" {
   region          = "asia-southeast1"
-  project         = "ciandt-cloudarmor-gcam"
   security_policy = google_compute_region_security_policy.policynetworkmatch.name
   priority = 100
   network_match {
@@ -259,7 +257,7 @@ resource "google_compute_region_security_policy_rule" "policy_rule_network_match
 `, context)
 }
 
-func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdate2Example(context map[string]interface{}) string {
+func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdate2(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_compute_region_security_policy" "policyddosprotection" {
   region      = "asia-southeast1"
@@ -302,7 +300,6 @@ resource "google_compute_region_security_policy" "policynetworkmatch" {
   
 resource "google_compute_region_security_policy_rule" "policy_rule_network_match" {
   region          = "asia-southeast1"
-  project         = "ciandt-cloudarmor-gcam"
   security_policy = google_compute_region_security_policy.policynetworkmatch.name
   priority = 100
   network_match {
