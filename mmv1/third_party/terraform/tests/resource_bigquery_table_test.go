@@ -544,7 +544,7 @@ func TestAccBigQueryExternalDataTable_queryAcceleration(t *testing.T) {
 	metadataCacheMode := "AUTOMATIC"
 	// including an optional field. Should work without specifiying.
 	// Has to follow google sql IntervalValue encoding
-	maxStaleness := "0-0 0 10:00:00.000"
+	maxStaleness := "0-0 0 10:0:0"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -569,7 +569,7 @@ func TestAccBigQueryExternalDataTable_objectTable(t *testing.T) {
 	connectionID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 	// including an optional field. Should work without specifiying.
 	// Has to follow google sql IntervalValue encoding
-	maxStaleness := "0-0 0 10:00:00.000"
+	maxStaleness := "0-0 0 10:0:0"
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
