@@ -47,7 +47,7 @@ func GetFolderOrgPolicyApiObject(d tpgresource.TerraformResourceData, config *tr
 	}
 
 	policy := tpgresource.OrgPolicy{
-		Constraint:     canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
+		Constraint:     CanonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 		BooleanPolicy:  expandBooleanOrganizationPolicy(d.Get("boolean_policy").([]interface{})),
 		ListPolicy:     listPolicy,
 		RestoreDefault: restoreDefault,

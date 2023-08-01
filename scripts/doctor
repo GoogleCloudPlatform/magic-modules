@@ -39,24 +39,6 @@ if [ $found -eq 0 ] || ! ruby -e "exit Gem::Version.new(RUBY_VERSION) >= Gem::Ve
     warn "yel" "   ruby version needs to be at least 3.1.0. See https://github.com/rbenv/rbenv for information on installing it."
 else
     warn "grn" "   found!"
-
-    count_in_path "bundle"
-    if [ $found -eq 0 ]; then
-        exitcode=1
-        warn "yel" "   bundler not found. Run 'gem install bundler' to install it."
-    else
-        if grep -qi "^Bundler" <<< "$(bundle version)"; then
-            if cd mmv1 && bundle check &> /dev/null; then
-                warn "grn" "   found!"
-            else
-                exitcode=1
-                warn "yel" "   bundle gems outdated. Run 'bundle install' from the mmv1 directory to correct"
-            fi
-        else
-            exitcode=1
-            warn "yel" "   wrong bundle found. You may have something incompatible overriding 'bundle'."
-        fi
-    fi
 fi
 
 count_in_path "go"

@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 <% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
@@ -21,13 +22,13 @@ func TestAccComputeInstanceFromMachineImage_basic(t *testing.T) {
 	t.Parallel()
 
 	var instance compute.Instance
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -45,17 +46,73 @@ func TestAccComputeInstanceFromMachineImage_basic(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
+func TestAccComputeInstanceFromMachineImage_localSsdRecoveryTimeout(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
+	resourceName := "google_compute_instance_from_machine_image.foobar"
+	var expectedLocalSsdRecoveryTimeout = compute.Duration{}
+	expectedLocalSsdRecoveryTimeout.Nanos = 0
+	expectedLocalSsdRecoveryTimeout.Seconds = 3600
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromMachineImage_localSsdRecoveryTimeout(instanceName, generatedInstanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, resourceName, &instance),
+					testAccCheckComputeInstanceLocalSsdRecoveryTimeout(&instance, expectedLocalSsdRecoveryTimeout),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstanceFromMachineImageWithOverride_localSsdRecoveryTimeout(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
+	resourceName := "google_compute_instance_from_machine_image.foobar"
+	var expectedLocalSsdRecoveryTimeout = compute.Duration{}
+	expectedLocalSsdRecoveryTimeout.Nanos = 0
+	expectedLocalSsdRecoveryTimeout.Seconds = 7200
+	
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromMachineImageWithOverride_localSsdRecoveryTimeout(instanceName, generatedInstanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, resourceName, &instance),
+					testAccCheckComputeInstanceLocalSsdRecoveryTimeout(&instance, expectedLocalSsdRecoveryTimeout),
+				),
+			},
+		},
+	})
+}
+<% end -%>
+
 func TestAccComputeInstanceFromMachineImage_overrideMetadataDotStartupScript(t *testing.T) {
 	t.Parallel()
 
 	var instance compute.Instance
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -74,16 +131,16 @@ func TestAccComputeInstanceFromMachineImage_diffProject(t *testing.T) {
 	t.Parallel()
 
 	var instance compute.Instance
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
-	org := acctest.GetTestOrgFromEnv(t)
-	billingId := acctest.GetTestBillingAccountFromEnv(t)
-	projectID := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := envvar.GetTestOrgFromEnv(t)
+	billingId := envvar.GetTestBillingAccountFromEnv(t)
+	projectID := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -103,7 +160,7 @@ func TestAccComputeInstanceFromMachineImage_diffProject(t *testing.T) {
 
 func testAccCheckComputeInstanceFromMachineImageDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_compute_instance_from_machine_image" {
@@ -174,6 +231,120 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 }
 `, instance, instance, newInstance)
 }
+
+<% unless version == 'ga' -%>
+func testAccComputeInstanceFromMachineImage_localSsdRecoveryTimeout(instance, newInstance string) string {
+	return fmt.Sprintf(`
+resource "google_compute_instance" "vm" {
+  provider     = google-beta
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-10"
+    }
+  }
+
+  name         = "%s"
+  machine_type = "n1-standard-1"
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  scheduling {
+    automatic_restart = true
+    local_ssd_recovery_timeout {
+			nanos = 0
+			seconds = 3600
+		}
+  }
+}
+
+resource "google_compute_machine_image" "foobar" {
+  provider        = google-beta
+  name            = "%s"
+  source_instance = google_compute_instance.vm.self_link
+}
+
+resource "google_compute_instance_from_machine_image" "foobar" {
+  provider = google-beta
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_machine_image = google_compute_machine_image.foobar.self_link
+
+  labels = {
+    my_key = "my_value"
+  }
+  scheduling {
+    automatic_restart = false
+  }
+}
+`, instance, instance, newInstance)
+}
+
+func testAccComputeInstanceFromMachineImageWithOverride_localSsdRecoveryTimeout(instance, newInstance string) string {
+	return fmt.Sprintf(`
+resource "google_compute_instance" "vm" {
+  provider     = google-beta
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-10"
+    }
+  }
+
+  name         = "%s"
+  machine_type = "n1-standard-1"
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  scheduling {
+    automatic_restart = true
+    local_ssd_recovery_timeout {
+			nanos = 0
+			seconds = 3600
+		}
+  }
+}
+
+resource "google_compute_machine_image" "foobar" {
+  provider        = google-beta
+  name            = "%s"
+  source_instance = google_compute_instance.vm.self_link
+}
+
+resource "google_compute_instance_from_machine_image" "foobar" {
+  provider = google-beta
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_machine_image = google_compute_machine_image.foobar.self_link
+
+  labels = {
+    my_key = "my_value"
+  }
+  scheduling {
+    automatic_restart = false
+    local_ssd_recovery_timeout {
+			nanos = 0
+			seconds = 7200
+		}
+  }
+}
+`, instance, instance, newInstance)
+}
+<% end -%>
 
 func testAccComputeInstanceFromMachineImage_overrideMetadataDotStartupScript(instanceName, generatedInstanceName string) string {
 	return fmt.Sprintf(`

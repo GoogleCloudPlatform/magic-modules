@@ -58,6 +58,8 @@ examples:
       provider_id: 'example-prvdr'
     test_env_vars:
       org_id: :ORG_ID
+    ignore_read_extra:
+      - 'oidc.0.client_secret.0.value.0.plain_text'
   - !ruby/object:Provider::Terraform::Examples
     name: 'iam_workforce_pool_provider_oidc_full'
     primary_resource_id: 'example'
@@ -66,9 +68,13 @@ examples:
       provider_id: 'example-prvdr'
     test_env_vars:
       org_id: :ORG_ID
+    ignore_read_extra:
+      - 'oidc.0.client_secret.0.value.0.plain_text'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/iam_workforce_pool_provider.go.erb
   decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
+  post_create: templates/terraform/post_create/iam_workforce_pool_provider.go.erb
+  post_update: templates/terraform/post_update/iam_workforce_pool_provider.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -253,6 +259,32 @@ properties:
           identity provider.
         required: true
       - !ruby/object:Api::Type::NestedObject
+        name: 'clientSecret'
+        description: |
+          The optional client secret. Required to enable Authorization Code flow for web sign-in.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'value'
+            exactly_one_of:
+              - oidc.0.client_secret.0.value
+            description: |
+              The value of the client secret.
+            custom_flatten: templates/terraform/custom_flatten/iam_workforce_pool_provider_oidc_client_secret_value.go.erb
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'plainText'
+                description: |
+                  The plain text of the client secret value.
+                sensitive: true
+                required: true
+                validation: !ruby/object:Provider::Terraform::Validation
+                  function: 'validation.StringIsNotEmpty'
+              - !ruby/object:Api::Type::String
+                name: 'thumbprint'
+                description: |
+                  A thumbprint to represent the current client secret value.
+                output: true
+      - !ruby/object:Api::Type::NestedObject
         name: 'webSsoConfig'
         description: |
           Configuration for web single sign-on for the OIDC provider. Here, web sign-in refers to console sign-in and gcloud sign-in through the browser.
@@ -262,15 +294,21 @@ properties:
             name: 'responseType'
             description: |
               The Response Type to request for in the OIDC Authorization Request for web sign-in.
+
+              The `CODE` Response Type is recommended to avoid the Implicit Flow, for security reasons.
+              * CODE: The `response_type=code` selection uses the Authorization Code Flow for web sign-in. Requires a configured client secret.
               * ID_TOKEN: The `response_type=id_token` selection uses the Implicit Flow for web sign-in.
             required: true
             values:
+              - :CODE
               - :ID_TOKEN
           - !ruby/object:Api::Type::Enum
             name: assertionClaimsBehavior
             description: |
               The behavior for how OIDC Claims are included in the `assertion` object used for attribute mapping and attribute condition.
+              * MERGE_USER_INFO_OVER_ID_TOKEN_CLAIMS: Merge the UserInfo Endpoint Claims with ID Token Claims, preferring UserInfo Claim Values for the same Claim Name. This option is available only for the Authorization Code Flow.
               * ONLY_ID_TOKEN_CLAIMS: Only include ID Token Claims.
             required: true
             values:
+              - :MERGE_USER_INFO_OVER_ID_TOKEN_CLAIMS
               - :ONLY_ID_TOKEN_CLAIMS

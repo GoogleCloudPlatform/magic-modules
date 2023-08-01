@@ -19,6 +19,7 @@ package google
 import (
 	"sort"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/services/compute"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/services/spanner"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 )
 
@@ -62,22 +63,22 @@ func ResourceConverters() map[string][]tpgresource.ResourceConverter {
 		"google_org_policy_policy":                        {resourceConverterOrgPolicyPolicy()},
 		"google_redis_instance":                           {redis.ResourceConverterRedisInstance()},
 		"google_spanner_database":                         {spanner.ResourceConverterSpannerDatabase()},
-		"google_spanner_database_iam_policy":              {resourceConverterSpannerDatabaseIamPolicy()},
-		"google_spanner_database_iam_binding":             {resourceConverterSpannerDatabaseIamBinding()},
-		"google_spanner_database_iam_member":              {resourceConverterSpannerDatabaseIamMember()},
+		"google_spanner_database_iam_policy":              {spanner.ResourceConverterSpannerDatabaseIamPolicy()},
+		"google_spanner_database_iam_binding":             {spanner.ResourceConverterSpannerDatabaseIamBinding()},
+		"google_spanner_database_iam_member":              {spanner.ResourceConverterSpannerDatabaseIamMember()},
 		"google_spanner_instance":                         {spanner.ResourceConverterSpannerInstance()},
-		"google_spanner_instance_iam_policy":              {resourceConverterSpannerInstanceIamPolicy()},
-		"google_spanner_instance_iam_binding":             {resourceConverterSpannerInstanceIamBinding()},
-		"google_spanner_instance_iam_member":              {resourceConverterSpannerInstanceIamMember()},
+		"google_spanner_instance_iam_policy":              {spanner.ResourceConverterSpannerInstanceIamPolicy()},
+		"google_spanner_instance_iam_binding":             {spanner.ResourceConverterSpannerInstanceIamBinding()},
+		"google_spanner_instance_iam_member":              {spanner.ResourceConverterSpannerInstanceIamMember()},
 		"google_project_service":                          {resourceConverterServiceUsage()},
 		"google_pubsub_lite_reservation":                  {pubsublite.ResourceConverterPubsubLiteReservation()},
 		"google_pubsub_lite_subscription":                 {pubsublite.ResourceConverterPubsubLiteSubscription()},
 		"google_pubsub_lite_topic":                        {pubsublite.ResourceConverterPubsubLiteTopic()},
 		"google_pubsub_schema":                            {pubsub.ResourceConverterPubsubSchema()},
 		"google_pubsub_subscription":                      {pubsub.ResourceConverterPubsubSubscription()},
-		"google_pubsub_subscription_iam_policy":           {resourceConverterPubsubSubscriptionIamPolicy()},
-		"google_pubsub_subscription_iam_binding":          {resourceConverterPubsubSubscriptionIamBinding()},
-		"google_pubsub_subscription_iam_member":           {resourceConverterPubsubSubscriptionIamMember()},
+		"google_pubsub_subscription_iam_policy":           {pubsub.ResourceConverterPubsubSubscriptionIamPolicy()},
+		"google_pubsub_subscription_iam_binding":          {pubsub.ResourceConverterPubsubSubscriptionIamBinding()},
+		"google_pubsub_subscription_iam_member":           {pubsub.ResourceConverterPubsubSubscriptionIamMember()},
 		"google_storage_bucket_iam_policy":                {resourceConverterStorageBucketIamPolicy()},
 		"google_storage_bucket_iam_binding":               {resourceConverterStorageBucketIamBinding()},
 		"google_storage_bucket_iam_member":                {resourceConverterStorageBucketIamMember()},

@@ -10,7 +10,6 @@ import (
 type MessageContext struct {
 	Resource   string
 	Field      string
-	Version    string
 	identifier string
 	message    string
 }
@@ -20,5 +19,5 @@ func populateMessageContext(message string, mc MessageContext) string {
 	field := fmt.Sprintf("`%s`", mc.Field)
 	message = strings.ReplaceAll(message, "{{resource}}", resource)
 	message = strings.ReplaceAll(message, "{{field}}", field)
-	return message + documentationReference(mc.Version, mc.identifier)
+	return message + documentationReference(mc.identifier)
 }

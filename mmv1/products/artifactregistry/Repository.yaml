@@ -66,7 +66,7 @@ examples:
       repository_id: 'my-repository'
       kms_key_name: 'kms-key'
     test_vars_overrides:
-      kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
   - !ruby/object:Provider::Terraform::Examples
     name: 'artifact_registry_repository_virtual'
     primary_resource_id: 'my-repo'
@@ -163,6 +163,7 @@ properties:
       MavenRepositoryConfig is maven related repository details.
       Provides additional configuration details for repositories of the maven
       format type.
+    allow_empty_object: true
     properties:
       # Maven properties.
       - !ruby/object:Api::Type::Boolean
@@ -181,6 +182,7 @@ properties:
           - :RELEASE
           - :SNAPSHOT
         default_value: :VERSION_POLICY_UNSPECIFIED
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   - !ruby/object:Api::Type::Enum
     name: 'mode'
     description: |-

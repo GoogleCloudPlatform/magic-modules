@@ -1,4 +1,4 @@
-package google
+package pubsub
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
-func resourceConverterPubsubSubscriptionIamPolicy() tpgresource.ResourceConverter {
+func ResourceConverterPubsubSubscriptionIamPolicy() tpgresource.ResourceConverter {
 	return tpgresource.ResourceConverter{
 		AssetType:         "pubsub.googleapis.com/Subscription",
 		Convert:           GetPubsubSubscriptionIamPolicyCaiObject,
@@ -16,7 +16,7 @@ func resourceConverterPubsubSubscriptionIamPolicy() tpgresource.ResourceConverte
 	}
 }
 
-func resourceConverterPubsubSubscriptionIamBinding() tpgresource.ResourceConverter {
+func ResourceConverterPubsubSubscriptionIamBinding() tpgresource.ResourceConverter {
 	return tpgresource.ResourceConverter{
 		AssetType:         "pubsub.googleapis.com/Subscription",
 		Convert:           GetPubsubSubscriptionIamBindingCaiObject,
@@ -26,7 +26,7 @@ func resourceConverterPubsubSubscriptionIamBinding() tpgresource.ResourceConvert
 	}
 }
 
-func resourceConverterPubsubSubscriptionIamMember() tpgresource.ResourceConverter {
+func ResourceConverterPubsubSubscriptionIamMember() tpgresource.ResourceConverter {
 	return tpgresource.ResourceConverter{
 		AssetType:         "pubsub.googleapis.com/Subscription",
 		Convert:           GetPubsubSubscriptionIamMemberCaiObject,

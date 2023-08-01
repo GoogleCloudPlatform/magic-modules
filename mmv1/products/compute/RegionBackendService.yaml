@@ -110,7 +110,12 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/region_backend_service.go.erb
   encoder: templates/terraform/encoders/region_backend_service.go.erb
   decoder: templates/terraform/decoders/region_backend_service.go.erb
-  resource_definition: 'templates/terraform/resource_definition/region_backend_service.go.erb'
+  post_create: 'templates/terraform/post_create/compute_region_backend_service_security_policy.go.erb'
+custom_diff: [
+  'customDiffRegionBackendService',
+]
+migrate_state: 'tpgresource.MigrateStateNoop'
+schema_version: 1
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -122,6 +127,7 @@ parameters:
     required: false
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'affinityCookieTtlSec'
@@ -1124,6 +1130,14 @@ properties:
       - :GRPC
       - :UNSPECIFIED
     default_from_api: true
+  - !ruby/object:Api::Type::String
+    name: 'securityPolicy'
+    min_version: beta
+    description: |
+      The security policy associated with this backend service.
+    update_verb: :POST
+    update_url: 'projects/{{project}}/regions/{{region}}/backendServices/{{name}}/setSecurityPolicy'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Enum
     name: 'sessionAffinity'
     description: |
@@ -1194,6 +1208,9 @@ properties:
           - :DEFAULT_FOR_PROTOCOL
           - :NEVER_PERSIST
           - :ALWAYS_PERSIST
+      - !ruby/object:Api::Type::Boolean
+        name: enableStrongAffinity
+        description: Enable Strong Session Affinity for Network Load Balancing. This option is not available publicly.
   - !ruby/object:Api::Type::Integer
     name: 'timeoutSec'
     description: |
@@ -1234,6 +1251,7 @@ properties:
     description: |
       The URL of the network to which this backend service belongs.
       This field can only be specified when the load balancing scheme is set to INTERNAL.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'subsetting'
     min_version: beta

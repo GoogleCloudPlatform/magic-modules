@@ -113,8 +113,8 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 specified, the provider zone is used. Each cluster must have a different zone in the same region. Zones that support
 Bigtable instances are noted on the [Cloud Bigtable locations page](https://cloud.google.com/bigtable/docs/locations).
 
-* `num_nodes` - (Optional) The number of nodes in your Cloud Bigtable cluster.
-Required, with a minimum of `1` for each cluster in an instance.
+* `num_nodes` - (Optional) The number of nodes in the cluster.
+If no value is set, Cloud Bigtable automatically allocates nodes based on your data footprint and optimized for 50% storage utilization.
 
 * `autoscaling_config` - (Optional) [Autoscaling](https://cloud.google.com/bigtable/docs/autoscaling#parameters) config for the cluster, contains the following arguments:
 
@@ -148,8 +148,10 @@ In addition to the arguments listed above, the following computed attributes are
 This resource provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
 
-- `create` - Default is 20 minutes.
-- `update` - Default is 20 minutes.
+- `create` - Default is 60 minutes.
+- `update` - Default is 60 minutes.
+
+Adding clusters to existing instances can take a long time. Consider setting a higher value to timeouts if you plan on doing that.
 
 ## Import
 

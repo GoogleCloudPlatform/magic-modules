@@ -29,12 +29,13 @@ func ResourceBigtableInstance() *schema.Resource {
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(20 * time.Minute),
-			Update: schema.DefaultTimeout(20 * time.Minute),
+			Create: schema.DefaultTimeout(60 * time.Minute),
+			Update: schema.DefaultTimeout(60 * time.Minute),
 		},
 
 		CustomizeDiff: customdiff.All(
 			resourceBigtableInstanceClusterReorderTypeList,
+			resourceBigtableInstanceUniqueClusterID,
 		),
 
 		SchemaVersion: 1,
@@ -79,7 +80,7 @@ func ResourceBigtableInstance() *schema.Resource {
 							// so mark as computed.
 							Computed:     true,
 							ValidateFunc: validation.IntAtLeast(1),
-							Description:  `The number of nodes in your Cloud Bigtable cluster. Required, with a minimum of 1 for each cluster in an instance.`,
+							Description:  `The number of nodes in the cluster. If no value is set, Cloud Bigtable automatically allocates nodes based on your data footprint and optimized for 50% storage utilization.`,
 						},
 						"storage_type": {
 							Type:         schema.TypeString,
@@ -492,6 +493,23 @@ func getBigtableZone(z string, config *transport_tpg.Config) (string, error) {
 		return "", fmt.Errorf("cannot determine zone: set in cluster.0.zone, or set provider-level zone")
 	}
 	return tpgresource.GetResourceNameFromSelfLink(z), nil
+}
+
+// resourceBigtableInstanceUniqueClusterID asserts cluster ID uniqueness.
+func resourceBigtableInstanceUniqueClusterID(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	_, newCount := diff.GetChange("cluster.#")
+	clusters := map[string]bool{}
+
+	for i := 0; i < newCount.(int); i++ {
+		_, newId := diff.GetChange(fmt.Sprintf("cluster.%d.cluster_id", i))
+		clusterID := newId.(string)
+		if clusters[clusterID] {
+			return fmt.Errorf("duplicated cluster_id: %q", clusterID)
+		}
+		clusters[clusterID] = true
+	}
+
+	return nil
 }
 
 // resourceBigtableInstanceClusterReorderTypeList causes the cluster block to

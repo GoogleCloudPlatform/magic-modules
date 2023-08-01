@@ -9,3 +9,12 @@ To view locally:
 
 If you are having deployment issues, try to reset your hugo module cache.
 * `hugo mod clean`
+
+To upgrade the theme version:
+1. find the version you want at https://github.com/alex-shpak/hugo-book/commits/master
+2. Run the following
+```bash
+go get github.com/alex-shpak/hugo-book@{{commit_hash}}
+## example
+## go get github.com/alex-shpak/hugo-book@d86d5e70c7c0d787675b13d9aee749c1a8b34776
+```

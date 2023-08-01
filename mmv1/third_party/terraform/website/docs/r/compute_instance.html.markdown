@@ -148,6 +148,8 @@ is desired, you will need to modify your state file manually using
 `Intel Haswell` or `Intel Skylake`. See the complete list [here](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform).
     **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
+* `params` - (Optional) Additional instance parameters.
+.
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
@@ -236,6 +238,8 @@ is desired, you will need to modify your state file manually using
 
 * `labels` - (Optional) A set of key/value label pairs assigned to the disk. This  
     field is only applicable for persistent disks.
+
+* `resource_manager_tags` - (Optional) A tag is a key-value pair that can be attached to a Google Cloud resource. You can use tags to conditionally allow or deny policies based on whether a resource has a specific tag. This value is not returned by the API. In Terraform, this value cannot be updated and changing it will recreate the resource.
 
 <a name="nested_scratch_disk"></a>The `scratch_disk` block supports:
 
@@ -398,6 +402,18 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `maintenance_interval` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`.
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
+* `local_ssd_recovery_timeout` -  (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the maximum amount of time a Local Ssd Vm should wait while recovery of the Local Ssd state is attempted. Its value should be in between 0 and 168 hours with hour granularity and the default value being 1 hour. Structure is [documented below](#nested_local_ssd_recovery_timeout).
+<a name="nested_local_ssd_recovery_timeout"></a>The `local_ssd_recovery_timeout` block supports:
+
+* `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
+    resolution. Durations less than one second are represented with a 0
+    `seconds` field and a positive `nanos` field. Must be from 0 to
+     999,999,999 inclusive.
+
+* `seconds` - (Required) Span of time at a resolution of a second. Must be from 0 to
+   315,576,000,000 inclusive. Note: these bounds are computed from: 60
+   sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
+
 * `type` (Required) - The accelerator type resource to expose to this instance. E.g. `nvidia-tesla-k80`.
 
 * `count` (Required) - The number of the guest accelerator cards exposed to this instance.
@@ -410,6 +426,10 @@ specified, then this instance will have no external IPv6 Internet access. Struct
     or `NOT_IN` for anti-affinities.
 
 * `values` (Required) - The values for the node affinity label.
+
+<a name="nested_params"></a>The `params` block supports:
+
+* `resource_manager_tags` (Optional) - A tag is a key-value pair that can be attached to a Google Cloud resource. You can use tags to conditionally allow or deny policies based on whether a resource has a specific tag. This value is not returned by the API. In Terraform, this value cannot be updated and changing it will recreate the resource.
 
 <a name="nested_shielded_instance_config"></a>The `shielded_instance_config` block supports:
 

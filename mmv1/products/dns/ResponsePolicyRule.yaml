@@ -22,7 +22,6 @@ description: |
 base_url: 'projects/{{project}}/responsePolicies/{{response_policy}}/rules'
 self_link: 'projects/{{project}}/responsePolicies/{{response_policy}}/rules/{{rule_name}}'
 update_verb: :PATCH
-min_version: beta
 identity:
   - ruleName
 id_format: 'projects/{{project}}/responsePolicies/{{response_policy}}/rules/{{rule_name}}'

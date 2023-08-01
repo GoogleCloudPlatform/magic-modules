@@ -27,13 +27,13 @@ module Api
 
       # [Required] A description of the resource that's surfaced in provider
       # documentation.
-      attr_reader :description
+      attr_accessor :description
       # [Required] (Api::Resource::ReferenceLinks) Reference links provided in
       # downstream documentation.
       attr_reader :references
       # [Required] The GCP "relative URI" of a resource, relative to the product
       # base URL. It can often be inferred from the `create` path.
-      attr_reader :base_url
+      attr_accessor :base_url
 
       # ====================
       # Common Configuration
@@ -44,10 +44,10 @@ module Api
       # [Optional] If set to true, don't generate the resource.
       attr_reader :exclude
       # [Optional] If set to true, the resource is not able to be updated.
-      attr_reader :immutable
+      attr_accessor :immutable
       # [Optional] If set to true, this resource uses an update mask to perform
       # updates. This is typical of newer GCP APIs.
-      attr_reader :update_mask
+      attr_accessor :update_mask
       # [Optional] If set to true, the object has a `self_link` field. This is
       # typical of older GCP APIs.
       attr_reader :has_self_link
@@ -63,23 +63,23 @@ module Api
       # [Optional] The "identity" URL of the resource. Defaults to:
       # * base_url when the create_verb is :POST
       # * self_link when the create_verb is :PUT  or :PATCH
-      attr_reader :self_link
+      attr_accessor :self_link
       # [Optional] The URL used to creating the resource. Defaults to:
       # * collection url when the create_verb is :POST
       # * self_link when the create_verb is :PUT or :PATCH
-      attr_reader :create_url
+      attr_accessor :create_url
       # [Optional] The URL used to delete the resource. Defaults to the self
       # link.
-      attr_reader :delete_url
+      attr_accessor :delete_url
       # [Optional] The URL used to update the resource. Defaults to the self
       # link.
-      attr_reader :update_url
+      attr_accessor :update_url
       # [Optional] The HTTP verb used during create. Defaults to :POST.
       attr_reader :create_verb
       # [Optional] The HTTP verb used during read. Defaults to :GET.
       attr_reader :read_verb
       # [Optional] The HTTP verb used during update. Defaults to :PUT.
-      attr_reader :update_verb
+      attr_accessor :update_verb
       # [Optional] The HTTP verb used during delete. Defaults to :DELETE.
       attr_reader :delete_verb
       # [Optional] Additional Query Parameters to append to GET. Defaults to ""
@@ -157,6 +157,11 @@ module Api
       attr_reader :custom_code
       attr_reader :docs
 
+      # This block inserts entries into the customdiff.All() block in the
+      # resource schema -- the code for these custom diff functions must
+      # be included in the resource constants or come from tpgresource
+      attr_reader :custom_diff
+
       # Lock name for a mutex to prevent concurrent API calls for a given
       # resource.
       attr_reader :mutex
@@ -171,7 +176,7 @@ module Api
 
       # TODO(alexstephen): Deprecate once all resources using autogen async.
       # If true, generates product operation handling logic.
-      attr_reader :autogen_async
+      attr_accessor :autogen_async
 
       # If true, resource is not importable
       attr_reader :exclude_import
@@ -191,15 +196,36 @@ module Api
       # An array of function names that determine whether an error is not retryable.
       attr_reader :error_abort_predicates
 
+      # Optional attributes for declaring a resource's current version and generating
+      # state_upgrader code to the output .go file from files stored at
+      # mmv1/templates/terraform/state_migrations/
+      # used for maintaining state stability with resources first provisioned on older api versions.
       attr_reader :schema_version
+      attr_reader :state_upgraders
+      # This block inserts the named function and its attribute into the
+      # resource schema -- the code for the migrate_state function must
+      # be included in the resource constants or come from tpgresource
+      # included for backwards compatibility as an older state migration method
+      # and should not be used for new resources.
+      attr_reader :migrate_state
 
       # Set to true for resources that are unable to be deleted, such as KMS keyrings or project
       # level resources such as firebase project
       attr_reader :skip_delete
 
+      # Set to true for resources that are unable to be read from the API, such as
+      # public ca external account keys
+      attr_reader :skip_read
+
       # This enables resources that get their project via a reference to a different resource
       # instead of a project field to use User Project Overrides
       attr_reader :supports_indirect_user_project_override
+
+      # If true, the resource's project field can be specified as either the short form project
+      # id or the long form projects/project-id. The extra projects/ string will be removed from
+      # urls and ids. This should only be used for resources that previously supported long form
+      # project ids for backwards compatibility.
+      attr_reader :legacy_long_form_project
 
       # Function to transform a read error so that handleNotFound recognises
       # it as a 404. This should be added as a handwritten fn that takes in
@@ -284,13 +310,17 @@ module Api
       check :import_format, type: Array, item_type: String, default: []
       check :autogen_async, type: :boolean, default: false
       check :exclude_import, type: :boolean, default: false
-
+      check :custom_diff, type: Array, item_type: String, default: []
       check :timeouts, type: Api::Timeouts
       check :error_retry_predicates, type: Array, item_type: String
       check :error_abort_predicates, type: Array, item_type: String
       check :schema_version, type: Integer
+      check :state_upgraders, type: :boolean, default: false
+      check :migrate_state, type: String
       check :skip_delete, type: :boolean, default: false
+      check :skip_read, type: :boolean, default: false
       check :supports_indirect_user_project_override, type: :boolean, default: false
+      check :legacy_long_form_project, type: :boolean, default: false
       check :read_error_transform, type: String
       check :taint_resource_on_failed_create, type: :boolean, default: false
       check :skip_sweeper, type: :boolean, default: false
@@ -299,7 +329,7 @@ module Api
     end
 
     # ====================
-    # Custom Getters
+    # Custom Getters and Setters
     # ====================
 
     # Returns all properties and parameters including the ones that are
@@ -312,9 +342,13 @@ module Api
       (@properties || []).reject(&:exclude)
     end
 
+    attr_writer :properties
+
     def parameters
       (@parameters || []).reject(&:exclude)
     end
+
+    attr_writer :parameters
 
     # Return the user-facing properties in client tools; this ends up meaning
     # both properties and parameters but without any that are excluded due to
@@ -345,7 +379,7 @@ module Api
     # All settable properties in the resource.
     # Fingerprints aren't *really" settable properties, but they behave like one.
     # At Create, they have no value but they can just be read in anyways, and after a Read
-    # they will need ot be set in every Update.
+    # they will need to be set in every Update.
     def settable_properties
       all_user_properties.reject { |v| v.output && !v.is_a?(Api::Type::Fingerprint) }
                          .reject(&:url_param_only)
@@ -375,6 +409,8 @@ module Api
 
       @async
     end
+
+    attr_writer :async
 
     # Return the resource-specific identity properties, or a best guess of the
     # `name` value for the resource.

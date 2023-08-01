@@ -45,6 +45,7 @@ var (
 		"boot_disk.0.initialize_params.0.type",
 		"boot_disk.0.initialize_params.0.image",
 		"boot_disk.0.initialize_params.0.labels",
+		"boot_disk.0.initialize_params.0.resource_manager_tags",
 	}
 
 	schedulingKeys = []string{
@@ -58,8 +59,8 @@ var (
 <% unless version == 'ga' -%>
 		"scheduling.0.max_run_duration",
 		"scheduling.0.maintenance_interval",
+		"scheduling.0.local_ssd_recovery_timeout",
 <% end -%>
-
 	}
 
 	shieldedInstanceConfigKeys = []string{
@@ -99,6 +100,14 @@ func forceNewIfNetworkIPNotUpdatableFunc(d tpgresource.TerraformResourceDiff) er
 	}
 
 	return nil
+}
+
+// User may specify AUTOMATIC using any case; the API will accept it and return an empty string.
+func ComputeInstanceMinCpuPlatformEmptyOrAutomaticDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	old = strings.ToLower(old)
+	new = strings.ToLower(new)
+	defaultVal := "automatic"
+	return (old == "" && new == defaultVal) || (new == "" && old == defaultVal)
 }
 
 func ResourceComputeInstance() *schema.Resource {
@@ -223,6 +232,14 @@ func ResourceComputeInstance() *schema.Resource {
 										Computed:     true,
 										ForceNew:     true,
 										Description:  `A set of key/value label pairs assigned to the disk.`,
+									},
+
+									"resource_manager_tags": {
+										Type:         schema.TypeMap,
+										Optional:     true,
+										AtLeastOneOf: initializeParamsKeys,
+										ForceNew:     true,
+										Description:  `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
 									},
 								},
 							},
@@ -546,6 +563,25 @@ func ResourceComputeInstance() *schema.Resource {
 				},
 			},
 
+	        	"params": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				ForceNew:    true,
+				Description: `Stores additional params passed with the request, but not persisted as part of resource payload.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"resource_manager_tags": {
+							Type:         schema.TypeMap,
+							Optional:     true,
+							// This field is intentionally not updatable. The API overrides all existing tags on the field when updated.  See go/gce-tags-terraform-support for details.
+							ForceNew:     true,
+							Description:  `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
+						},
+					},
+				},
+			},
+
 			"labels": {
 				Type:        schema.TypeMap,
 				Optional:    true,
@@ -568,10 +604,11 @@ func ResourceComputeInstance() *schema.Resource {
 			},
 
 			"min_cpu_platform": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: `The minimum CPU platform specified for the VM instance.`,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				Description:      `The minimum CPU platform specified for the VM instance.`,
+				DiffSuppressFunc: ComputeInstanceMinCpuPlatformEmptyOrAutomaticDiffSuppress,
 			},
 
 			"project": {
@@ -682,6 +719,36 @@ be from 0 to 999,999,999 inclusive.`,
 							Optional:      true,
 							AtLeastOneOf:  schedulingKeys,
 							Description:   `Specifies the frequency of planned maintenance events. The accepted values are: PERIODIC`,
+						},
+						"local_ssd_recovery_timeout" : {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: `Specifies the maximum amount of time a Local Ssd Vm should wait while
+  recovery of the Local Ssd state is attempted. Its value should be in
+  between 0 and 168 hours with hour granularity and the default value being 1
+  hour.`,
+							MaxItems:    1,
+					        ForceNew:    true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"seconds": {
+										Type:     schema.TypeInt,
+										Required:    true,
+						                ForceNew:    true,
+										Description: `Span of time at a resolution of a second.
+Must be from 0 to 315,576,000,000 inclusive.`,
+									},
+									"nanos": {
+										Type:     schema.TypeInt,
+										Optional:    true,
+								        ForceNew:    true,
+										Description: `Span of time that's a fraction of a second at nanosecond
+resolution. Durations less than one second are represented
+with a 0 seconds field and a positive nanos field. Must
+be from 0 to 999,999,999 inclusive.`,
+									},
+								},
+							},
 						},
 <% end -%>
 
@@ -1057,6 +1124,11 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		return nil, fmt.Errorf("Error creating scheduling: %s", err)
 	}
 
+	params, err := expandParams(d)
+	if err != nil {
+		return nil, fmt.Errorf("Error creating params: %s", err)
+	}
+
 	metadata, err := resourceInstanceMetadata(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating metadata: %s", err)
@@ -1091,6 +1163,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		NetworkInterfaces:          networkInterfaces,
 		NetworkPerformanceConfig:   networkPerformanceConfig,
 		Tags:                       resourceInstanceTags(d),
+		Params:                     params,
 		Labels:                     tpgresource.ExpandLabels(d),
 		ServiceAccounts:            expandServiceAccounts(d.Get("service_account").([]interface{})),
 		GuestAccelerators:          accels,
@@ -1986,6 +2059,21 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			}
 		}
 
+		if d.HasChange("min_cpu_platform") {
+			minCpuPlatform := d.Get("min_cpu_platform")
+			req := &compute.InstancesSetMinCpuPlatformRequest{
+				MinCpuPlatform: minCpuPlatform.(string),
+			}
+			op, err := config.NewComputeClient(userAgent).Instances.SetMinCpuPlatform(project, zone, instance.Name, req).Do()
+			if err != nil {
+				return err
+			}
+			opErr := ComputeOperationWaitTime(config, op, project, "updating min cpu platform", userAgent, d.Timeout(schema.TimeoutUpdate))
+			if opErr != nil {
+				return opErr
+			}
+		}
+
 		if d.HasChange("machine_type") {
 			mt, err := tpgresource.ParseMachineTypesFieldValue(d.Get("machine_type").(string), d, config)
 			if err != nil {
@@ -1999,27 +2087,6 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				return err
 			}
 			opErr := ComputeOperationWaitTime(config, op, project, "updating machinetype", userAgent, d.Timeout(schema.TimeoutUpdate))
-			if opErr != nil {
-				return opErr
-			}
-		}
-
-		if d.HasChange("min_cpu_platform") {
-			minCpuPlatform, ok := d.GetOk("min_cpu_platform")
-			// Even though you don't have to set minCpuPlatform on create, you do have to set it to an
-			// actual value on update. "Automatic" is the default. This will be read back from the API as empty,
-			// so we don't need to worry about diffs.
-			if !ok {
-				minCpuPlatform = "Automatic"
-			}
-			req := &compute.InstancesSetMinCpuPlatformRequest{
-				MinCpuPlatform: minCpuPlatform.(string),
-			}
-			op, err := config.NewComputeClient(userAgent).Instances.SetMinCpuPlatform(project, zone, instance.Name, req).Do()
-			if err != nil {
-				return err
-			}
-			opErr := ComputeOperationWaitTime(config, op, project, "updating min cpu platform", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
 				return opErr
 			}
@@ -2416,6 +2483,17 @@ func resourceComputeInstanceImportState(d *schema.ResourceData, meta interface{}
 	return []*schema.ResourceData{d}, nil
 }
 
+func expandParams(d *schema.ResourceData) (*compute.InstanceParams, error) {
+	params := &compute.InstanceParams{
+	}
+
+	if _, ok := d.GetOk("params.0.resource_manager_tags"); ok {
+		params.ResourceManagerTags = tpgresource.ExpandStringMap(d, "params.0.resource_manager_tags")
+	}
+
+	return params, nil
+}
+
 func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, project string) (*compute.AttachedDisk, error) {
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -2484,6 +2562,10 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 		if _, ok := d.GetOk("boot_disk.0.initialize_params.0.labels"); ok {
 			disk.InitializeParams.Labels = tpgresource.ExpandStringMap(d, "boot_disk.0.initialize_params.0.labels")
 		}
+
+		if _, ok := d.GetOk("boot_disk.0.initialize_params.0.resource_manager_tags"); ok {
+			disk.InitializeParams.ResourceManagerTags = tpgresource.ExpandStringMap(d, "boot_disk.0.initialize_params.0.resource_manager_tags")
+		}
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.mode"); ok {
@@ -2522,6 +2604,7 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 			"image":  diskDetails.SourceImage,
 			"size":   diskDetails.SizeGb,
 			"labels": diskDetails.Labels,
+			"resource_manager_tags": d.Get("boot_disk.0.initialize_params.0.resource_manager_tags"),
 		}}
 	}
 
