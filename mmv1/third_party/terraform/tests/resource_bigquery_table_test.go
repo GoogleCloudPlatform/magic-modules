@@ -1684,6 +1684,10 @@ resource "google_bigquery_table" "test" {
   }
 
   max_staleness = "%s"
+
+  depends_on = [
+	google_project_iam_member.test
+  ]
 }
 `, connectionID, datasetID, bucketName, objectName, tableID, metadataCacheMode, maxStaleness)
 }
