@@ -205,7 +205,6 @@ properties:
         conflicts:
           - tier
         values:
-          - :INSTANCE_SIZE_UNSPECIFIED
           - :EXTRA_SMALL
           - :SMALL
           - :MEDIUM
