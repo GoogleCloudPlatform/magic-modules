@@ -99,33 +99,6 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: 'User-defined labels for the alloydb cluster.'
-   - !ruby/object:Api::Type::Boolean
-    name: 'createSecondary'
-    input: true
-    default: false
-    url_param_only: true
-    description: |
-      Set to true if the cluster should be created as a secondary cluster.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'secondaryCluster'
-    description: |
-      Creates a cluster of type SECONDARY in the given location using the primary cluster as the source.
-    url_param_only: true
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'location'
-        description: |
-          The location where the secondary alloydb cluster should reside.       
-        url_param_only: true
-        immutable: true
-        required: true
-      - !ruby/object:Api::Type::String
-        name: 'clusterId'
-        url_param_only: true
-        description: |
-          The ID of the secondary alloydb cluster.       
-        immutable: true
-        required: true
   - !ruby/object:Api::Type::NestedObject
     name: 'secondaryCluster'
     description: |
@@ -299,34 +272,6 @@ properties:
             name: 'kmsKeyName'
             description: |
               The fully-qualified resource name of the KMS key. Each Cloud KMS key is regionalized and has the following format: projects/[PROJECT]/locations/[REGION]/keyRings/[RING]/cryptoKeys/[KEY_NAME].
-   - name: "secondaryConfig"
-    description: |
-      Cross Region replication config specific to SECONDARY cluster.
-    properties:
-      - !ruby/object:Api::Type::String
-        name: "primaryClusterName"
-        description: |
-          The name of the primary cluster name with the format: projects/{project}/locations/{region}/clusters/{clusterId}.
-  - !ruby/object:Api::Type::NestedObject
-    name: "primaryConfig"
-    description: |
-      Cross Region replication config specific to PRIMARY cluster.
-    properties:
-      - !ruby/object:Api::Type::Array
-        name: "secondaryClusterNames"
-        item_type: Api::Type::String
-        description: |
-          Names of the clusters that are replicating from this cluster.
-        output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: "secondaryConfig"
-    description: |
-      Cross Region replication config specific to SECONDARY cluster.
-    properties:
-      - !ruby/object:Api::Type::String
-        name: "primaryClusterName"
-        description: |
-          The name of the primary cluster name with the format: projects/{project}/locations/{region}/clusters/{clusterId}.
   - !ruby/object:Api::Type::NestedObject
     name: 'automatedBackupPolicy'
     description: |
@@ -457,3 +402,4 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'sourceType'
         description: 'Type of migration source.'
+        
