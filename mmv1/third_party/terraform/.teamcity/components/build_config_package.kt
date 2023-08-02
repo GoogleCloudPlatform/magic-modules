@@ -8,12 +8,11 @@
 import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.AbsoluteId
 
-class packageDetails(packageName: String, displayName: String, providerName: String, environment: String, branchRef: String) {
+class packageDetails(packageName: String, displayName: String, providerName: String, environment: String) {
     val packageName = packageName
     val displayName = displayName
     val providerName = providerName
     val environment = environment
-    val branchRef = branchRef
 
     // buildConfiguration returns a BuildType for a service package
     // For BuildType docs, see https://teamcity.jetbrains.com/app/dsl-documentation/root/build-type/index.html
@@ -64,7 +63,7 @@ class packageDetails(packageName: String, displayName: String, providerName: Str
         }
     }
 
-    fun uniqueID(provider : String) : String {
+    fun uniqueID(provider: String) : String {
         // Replacing chars can be necessary, due to limitations on IDs
         // "ID should start with a latin letter and contain only latin letters, digits and underscores (at most 225 characters)." 
         var pv = provider.replace("-", "").toUpperCase()
