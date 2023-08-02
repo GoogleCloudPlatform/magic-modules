@@ -159,7 +159,6 @@ resource "google_compute_network_edge_security_service" "edge_sec_service" {
   
 resource "google_compute_region_security_policy" "policynetworkmatch" {
   region      = "asia-southeast1"
-  project     = "ciandt-cloudarmor-gcam"
   name        = "tf-test-polnetmatch%{random_suffix}"
   description = "region security policy for network match"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -213,7 +212,6 @@ resource "google_compute_network_edge_security_service" "edge_sec_service" {
   
 resource "google_compute_region_security_policy" "policynetworkmatch" {
   region      = "asia-southeast1"
-  project     = "ciandt-cloudarmor-gcam"
   name        = "tf-test-polnetmatch%{random_suffix}"
   description = "region security policy for network match"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -277,7 +275,6 @@ resource "google_compute_network_edge_security_service" "edge_sec_service" {
   
 resource "google_compute_region_security_policy" "policynetworkmatch" {
   region      = "asia-southeast1"
-  project     = "ciandt-cloudarmor-gcam"
   name        = "tf-test-polnetmatch%{random_suffix}"
   description = "region security policy for network match"
   type        = "CLOUD_ARMOR_NETWORK"
