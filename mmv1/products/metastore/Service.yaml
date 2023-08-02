@@ -115,6 +115,11 @@ examples:
     primary_resource_id: 'telemetry'
     vars:
       metastore_service_name: 'telemetry'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_metastore_service_dpms2'
+    primary_resource_id: 'dpms2'
+    vars:
+      metastore_service_name: 'dpms2'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'serviceId'
