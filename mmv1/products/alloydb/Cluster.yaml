@@ -60,8 +60,14 @@ examples:
     primary_resource_id: 'full'
     vars:
       alloydb_cluster_name: 'alloydb-cluster-full'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_cluster_cross_region_replication'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster-full'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/alloydb_secondary_cluster_create.go.erb
+  pre_delete: templates/terraform/pre_delete/alloydb_secondary_cluster_delete.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'clusterId'
@@ -91,13 +97,24 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: 'User-defined labels for the alloydb cluster.'
-   - !ruby/object:Api::Type::Boolean
-    name: 'createSecondary'
-    input: true
-    default: false
-    url_param_only: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'secondaryCluster'
     description: |
-      Set to true if the cluster should be created as a secondary cluster.
+      Creates a cluster of type SECONDARY in the given location using the primary cluster as the source.
+    url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        description: |
+          The location where the secondary alloydb cluster should reside.       
+        url_param_only: true
+        immutable: true
+      - !ruby/object:Api::Type::String
+        name: 'clusterId'
+        url_param_only: true
+        description: |
+          The ID of the secondary alloydb cluster.       
+        immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'encryptionConfig'
     description: |

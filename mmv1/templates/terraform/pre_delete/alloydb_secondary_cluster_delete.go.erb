@@ -1,0 +1,38 @@
+if d.Get("secondary_cluster") != nil {
+
+	url, err := tpgresource.ReplaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations/{{secondary_cluster['location']}}/clusters/{{secondary_cluster['cluster_id']}}")
+	if err != nil {
+		return err
+	}
+
+	var obj map[string]interface{}
+	log.Printf("[DEBUG] Deleting Secondary Cluster %q", d.Id() + "secondary")
+
+	// err == nil indicates that the billing_project value was found
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutDelete),
+	})
+	if err != nil {
+		return transport_tpg.HandleNotFoundError(err, d, "Cluster")
+	}
+
+	err = AlloydbOperationWaitTime(
+		config, res, project, "Deleting Secondary Cluster", userAgent,
+		d.Timeout(schema.TimeoutDelete))
+
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[DEBUG] Finished deleting Secondary Cluster %q: %#v", d.Id(), res)
+}
