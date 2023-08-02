@@ -224,10 +224,9 @@ examples:
       bucket_name: 'gcf-source'
       zip_path: 'function-source.zip'
       kms_service_name: 'cloudkms.googleapis.com'
-      repository_name: 'cmek-repo'
+      cmek-repo: 'cmek-repo'
+      unencoded-ar-repo: 'ar-repo'
       kms_key_name: 'cmek-key'
-      keryring_name: 'cmek-keyring'
-      cryptokey_name: 'cmek-cryptokey'
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
