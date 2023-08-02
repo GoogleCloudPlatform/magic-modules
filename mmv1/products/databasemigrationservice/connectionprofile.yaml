@@ -87,6 +87,8 @@ examples:
       profile: 'my-profileid'
       global_address_name: 'private-ip-alloc'
       network_name: 'vpc-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "profile-alloydb")'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'connectionProfileId'
