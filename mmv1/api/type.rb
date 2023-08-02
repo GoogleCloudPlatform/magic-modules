@@ -270,6 +270,8 @@ module Api
       "#{__parent.lineage}.#{name&.underscore}"
     end
 
+    # Prints the access path of the field in the configration eg: metadata.0.labels
+    # The only intended purpose is to get the value of the labes field by calling d.Get().
     def access_path
       return name&.underscore if __parent.nil?
 

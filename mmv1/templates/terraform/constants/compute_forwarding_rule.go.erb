@@ -1,4 +1,3 @@
-<% unless version == "ga" -%>
 func resourceComputeForwardingRuleLabelFingerprintRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -42,4 +41,3 @@ func resourceComputeForwardingRuleLabelFingerprintRead(d *schema.ResourceData, m
 
 	return nil
 }
-<% end -%>
