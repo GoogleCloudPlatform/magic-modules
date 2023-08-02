@@ -7,8 +7,8 @@
 
 import jetbrains.buildServer.configs.kotlin.ParametrizedWithType
 
-class ClientConfiguration(var custId: String,
-                          var org: String,
+class ClientConfiguration(val custId: String,
+                          val org: String,
                           val org2 : String,
                           val billingAccount : String,
                           val billingAccount2: String,
