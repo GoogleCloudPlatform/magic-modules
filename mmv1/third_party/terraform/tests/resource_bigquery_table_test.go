@@ -540,6 +540,7 @@ func TestAccBigQueryExternalDataTable_queryAcceleration(t *testing.T) {
 
 	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	connectionID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 
 	metadataCacheMode := "AUTOMATIC"
 	// including an optional field. Should work without specifiying.
@@ -552,7 +553,7 @@ func TestAccBigQueryExternalDataTable_queryAcceleration(t *testing.T) {
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigQueryTableFromGCSParquetWithQueryAcceleration(datasetID, tableID, bucketName, objectName, metadataCacheMode, maxStaleness),
+				Config: testAccBigQueryTableFromGCSParquetWithQueryAcceleration(connectionID, datasetID, tableID, bucketName, objectName, metadataCacheMode, maxStaleness),
 			},
 		},
 	})
@@ -1627,8 +1628,27 @@ resource "google_bigquery_table" "test" {
 `, datasetID, bucketName, objectName, content, tableID, format, quoteChar)
 }
 
-func testAccBigQueryTableFromGCSParquetWithQueryAcceleration(datasetID, tableID, bucketName, objectName, metadataCacheMode, maxStaleness string) string {
+func testAccBigQueryTableFromGCSParquetWithQueryAcceleration(connectionID, datasetID, tableID, bucketName, objectName, metadataCacheMode, maxStaleness string) string {
 	return fmt.Sprintf(`
+resource "google_bigquery_connection" "test" {
+	connection_id = "%s"
+	location = "US"
+	cloud_resource {}
+}
+
+locals {
+	connection_id_split = split("/", google_bigquery_connection.test.name)
+	connection_id_reformatted = "${local.connection_id_split[1]}.${local.connection_id_split[3]}.${local.connection_id_split[5]}"
+ }
+
+ data "google_project" "project" {}
+
+ resource "google_project_iam_member" "test" {
+	role = "roles/storage.objectViewer"
+	project = data.google_project.project.id
+	member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
+ }
+
 resource "google_bigquery_dataset" "test" {
   dataset_id = "%s"
 }
@@ -1650,19 +1670,22 @@ resource "google_bigquery_table" "test" {
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
   external_data_configuration {
+	connection_id   = local.connection_id_reformatted
     autodetect    = false
     source_format = "PARQUET"
-	reference_file_schema_uri = "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}"
 
     source_uris = [
       "gs://${google_storage_bucket.test.name}/*",
     ]
-
 	metadata_cache_mode = "%s"
+	hive_partitioning_options {
+		source_uri_prefix = "gs://${google_storage_bucket.test.name}/"
+	}
   }
+
   max_staleness = "%s"
 }
-`, datasetID, bucketName, objectName, tableID, metadataCacheMode, maxStaleness)
+`, connectionID, datasetID, bucketName, objectName, tableID, metadataCacheMode, maxStaleness)
 }
 
 func testAccBigQueryTableFromGCSParquet(datasetID, tableID, bucketName, objectName string) string {
