@@ -1,2 +1,5 @@
 doc_hide:
   - beta_basic.tf.tmpl
+test_hide:
+  # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14085
+  - beta_basic.tf.tmpl
