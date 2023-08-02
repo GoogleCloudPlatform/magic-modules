@@ -8,7 +8,7 @@ resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   all_ports             = true
   network               = google_compute_network.default.name
   subnetwork            = google_compute_subnetwork.default.name
-  ip_version            = "IPV4"
+  ip_version            = "IPV6"
 }
 
 resource "google_compute_region_backend_service" "backend" {
@@ -30,11 +30,14 @@ resource "google_compute_health_check" "hc" {
 resource "google_compute_network" "default" {
   name                    = "<%= ctx[:vars]['network_name'] %>"
   auto_create_subnetworks = false
+  enable_ula_internal_ipv6 = true
 }
 
 resource "google_compute_subnetwork" "default" {
-  name          = "<%= ctx[:vars]['network_name'] %>"
+  name          = "<%= ctx[:vars]['subnet_name'] %>"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
+  stack_type       = "IPV4_IPV6"
+  ipv6_access_type = "INTERNAL"
   network       = google_compute_network.default.id
 }
