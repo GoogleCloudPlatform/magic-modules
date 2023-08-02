@@ -59,6 +59,7 @@ examples:
       display_name: 'Example Billing Budget'
     test_env_vars:
       billing_acct: :MASTER_BILLING_ACCT
+      org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
     name: 'billing_budget_notify'
     primary_resource_id: 'budget'
