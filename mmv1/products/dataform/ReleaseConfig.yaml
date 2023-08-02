@@ -107,7 +107,7 @@ properties:
         name: 'tablePrefix'
         description: Optional. The prefix that should be prepended to all table names.
   - !ruby/object:Api::Type::Array
-    name: status
+    name: 'recentScheduledReleaseRecords'
     description:
       Records of the 10 most recent scheduled release attempts, 
       ordered in in descending order of releaseTime. 
