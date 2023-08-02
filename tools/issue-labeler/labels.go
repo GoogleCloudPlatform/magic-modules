@@ -7,7 +7,7 @@ import (
 	"github.com/golang/glog"
 )
 
-func labels(issueBody string, enrolledTeams map[string][]string, quoted bool) []string {
+func serviceLabels(issueBody string, enrolledTeams map[string][]string) []string {
 	sectionRegexp := regexp.MustCompile(`### (New or )?Affected Resource\(s\)[^#]+`)
 	affectedResources := sectionRegexp.FindString(issueBody)
 	var results []string
@@ -15,11 +15,7 @@ func labels(issueBody string, enrolledTeams map[string][]string, quoted bool) []
 		for _, resource := range resources {
 			if strings.Contains(affectedResources, resource) {
 				glog.Infof("found resource %q, applying label %q", resource, label)
-				if quoted {
-					results = append(results, `"`+label+`"`)
-				} else {
-					results = append(results, label)
-				}
+				results = append(results, label)
 				break
 			}
 		}

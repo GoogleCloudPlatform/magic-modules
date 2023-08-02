@@ -13,9 +13,11 @@ import (
 )
 
 type Issue struct {
-	Number int
-	Body   string
-	Labels []Label
+	HTMLURL     string `json:"html_url"`
+	Number      int
+	Body        string
+	Labels      []Label
+	PullRequest map[string]any `json:"pull_request"`
 }
 
 type Label struct {
@@ -59,18 +61,36 @@ func backfill(since string, enrolledTeams map[string][]string, dryRun bool) {
 		}
 	}
 	for _, issue := range issues {
+		if len(issue.PullRequest) > 0 {
+			continue
+		}
+
 		desired := make(map[string]struct{})
 		for _, existing := range issue.Labels {
 			desired[existing.Name] = struct{}{}
 		}
-		oldLength := len(desired)
 
-		for _, needed := range labels(issue.Body, enrolledTeams, false) {
+		_, terraform := desired["service/terraform"]
+		_, linked := desired["forward/linked"]
+		_, exempt := desired["forward/exempt"]
+		if terraform || exempt {
+			continue
+		}
+
+		var oldLabels []string
+		for label := range desired {
+			oldLabels = append(oldLabels, label)
+		}
+
+		for _, needed := range serviceLabels(issue.Body, enrolledTeams) {
 			desired[needed] = struct{}{}
 		}
 
-		if len(desired) > oldLength {
-			desiredSlice := []string{"forward/review"}
+		if len(desired) > len(oldLabels) {
+			var desiredSlice []string
+			if !linked {
+				desiredSlice = append(desiredSlice, "forward/review")
+			}
 			for label := range desired {
 				desiredSlice = append(desiredSlice, label)
 			}
@@ -79,24 +99,29 @@ func backfill(since string, enrolledTeams map[string][]string, dryRun bool) {
 			update := IssueUpdate{Labels: desiredSlice}
 			body, err := json.Marshal(update)
 			if err != nil {
-				glog.Exitf("Error marshalling json: %v", err)
+				glog.Errorf("Error marshalling json: %v", err)
+				continue
 			}
 			buf := bytes.NewReader(body)
 			req, err := http.NewRequest("PATCH", url, buf)
 			if err != nil {
-				glog.Exitf("Error creating request: %v", err)
+				glog.Errorf("Error creating request: %v", err)
+				continue
 			}
-			if dryRun {
-				fmt.Printf("%s %s\n", req.Method, req.URL)
-				b, err := json.MarshalIndent(update, "", "  ")
-				if err != nil {
-					glog.Exitf("Error marshalling json: %v", err)
-				}
-				fmt.Println(string(b))
-			} else {
+			fmt.Printf("%s %s (%s)\n", req.Method, req.URL, issue.HTMLURL)
+			b, err := json.MarshalIndent(update, "", "  ")
+			if err != nil {
+				glog.Errorf("Error marshalling json: %v", err)
+				continue
+			}
+			fmt.Println(string(b))
+			fmt.Printf("Existing labels: %v\n", oldLabels)
+			fmt.Printf("New labels: %v\n", desiredSlice)
+			if !dryRun {
 				_, err = client.Do(req)
 				if err != nil {
-					glog.Exitf("Error updating issue: %v", err)
+					glog.Errorf("Error updating issue: %v", err)
+					continue
 				}
 			}
 		}
