@@ -17,7 +17,7 @@ var flagDryRun = flag.Bool("backfill-dry-run", false, "when combined with backfi
 func main() {
 	flag.Parse()
 
-	file, err := os.ReadFile("enrolled_teams.yaml")
+	file, err := os.ReadFile("enrolled_teams.yml")
 	if err != nil {
 		glog.Exitf("Error reading enrolled teams yaml: %v", err)
 	}

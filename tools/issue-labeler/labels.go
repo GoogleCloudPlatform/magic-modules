@@ -2,7 +2,7 @@ package main
 
 import (
 	"regexp"
-	"strings"
+	"sort"
 
 	"github.com/golang/glog"
 )
@@ -13,13 +13,16 @@ func serviceLabels(issueBody string, enrolledTeams map[string][]string) []string
 	var results []string
 	for label, resources := range enrolledTeams {
 		for _, resource := range resources {
-			if strings.Contains(affectedResources, resource) {
+			resourceRegexp := regexp.MustCompile(resource)
+			if resourceRegexp.MatchString(affectedResources) {
 				glog.Infof("found resource %q, applying label %q", resource, label)
 				results = append(results, label)
 				break
 			}
 		}
 	}
+
+	sort.Strings(results)
 
 	return results
 }

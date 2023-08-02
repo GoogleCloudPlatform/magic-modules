@@ -10,7 +10,7 @@ import (
 )
 
 func TestLabels(t *testing.T) {
-	file, err := os.ReadFile("enrolled_teams.yaml")
+	file, err := os.ReadFile("enrolled_teams.yml")
 	if err != nil {
 		glog.Exitf("Error reading enrolled teams yaml: %v", err)
 	}
