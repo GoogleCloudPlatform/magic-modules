@@ -109,12 +109,14 @@ properties:
           The location where the secondary alloydb cluster should reside.       
         url_param_only: true
         immutable: true
+        required: true
       - !ruby/object:Api::Type::String
         name: 'clusterId'
         url_param_only: true
         description: |
           The ID of the secondary alloydb cluster.       
         immutable: true
+        required: true
   - !ruby/object:Api::Type::NestedObject
     name: 'encryptionConfig'
     description: |

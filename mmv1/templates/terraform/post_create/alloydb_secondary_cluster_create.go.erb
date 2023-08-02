@@ -1,6 +1,13 @@
 if d.Get("secondary_cluster") != nil {
+    
+    rawSecondaryCluster := d.Get("secondary_cluster").([]interface{})
+	if len(rawSecondaryCluster) == 0 || rawSecondaryCluster[0] == nil {
+		return nil
+	}
+	secondaryCluster := rawSecondaryCluster[0].(map[string]interface{})
 
-    url, err := tpgresource.ReplaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations/{{secondary_cluster['location'}}/clusters:createsecondary?clusterId={{secondary_cluster['cluster_id'}}")
+    link := fmt.Sprintf("{{AlloydbBasePath}}projects/{{project}}/locations/%s/clusters:createsecondary?clusterId=%s", secondaryCluster["location"], secondaryCluster["cluster_id"])
+    url, err := tpgresource.ReplaceVars(d, config, link)
 	if err != nil {
 		return err
 	}
