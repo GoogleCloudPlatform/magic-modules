@@ -3,7 +3,7 @@ resource "google_service_account" "service_account" {
   display_name = "Service Account"
 }
 
-resource "google_data_pipeline_pipeline" "primay" {
+resource "google_data_pipeline_pipeline" "primary" {
   name         = "<%= ctx[:vars]["pipeline_name"] %>"
   display_name = "my-pipeline"
   type         = "PIPELINE_TYPE_BATCH"
