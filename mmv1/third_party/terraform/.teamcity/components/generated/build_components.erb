@@ -57,19 +57,6 @@ fun servicePath(path : String, packageName: String) : String {
     return "./%s/%s".format(path, packageName)
 }
 
-// DetermineWorkingDirectory updates the `PACKAGE_PATH` parameter between build steps using Service Messages
-// See https://www.jetbrains.com/help/teamcity/2018.1/build-script-interaction-with-teamcity.html
-fun BuildSteps.DetermineWorkingDirectory(path : String, packageName: String) {
-    var packagePath = servicePath(path, packageName)
-    var withTestsDirectoryPath = "##teamcity[setParameter name='PACKAGE_PATH' value='%s/tests']".format(packagePath)
-
-    // some packages use a ./tests folder, others don't - conditionally append that if needed
-    step(ScriptBuildStep {
-        name          = "Determine Working Directory for this Package"
-        scriptContent = "if [ -d \"%s/tests\" ]; then echo \"%s\"; fi".format(packagePath, withTestsDirectoryPath)
-    })
-}
-
 // RunSweepers runs sweepers, and relies on set build configuration parameters
 fun BuildSteps.RunSweepers(sweeperStepName : String) {
     step(ScriptBuildStep{
