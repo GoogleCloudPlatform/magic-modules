@@ -1379,7 +1379,7 @@ func expandPscConfig(configured []interface{}) *sqladmin.PscConfig {
 		_entry := _pscConfig.(map[string]interface{})
 		return &sqladmin.PscConfig{
 			PscEnabled:              _entry["psc_enabled"].(bool),
-			AllowedConsumerProjects: convertStringArr(_entry["allowed_consumer_projects"].(*schema.Set).List()),
+			AllowedConsumerProjects: tpgresource.ConvertStringArr(_entry["allowed_consumer_projects"].(*schema.Set).List()),
 		}
 	}
 
@@ -2194,7 +2194,7 @@ func flattenIpConfiguration(ipConfiguration *sqladmin.IpConfiguration) interface
 func flattenPscConfigs(pscConfig *sqladmin.PscConfig) interface{} {
 	data := map[string]interface{}{
 		"psc_enabled":               pscConfig.PscEnabled,
-		"allowed_consumer_projects": schema.NewSet(schema.HashString, convertStringArrToInterface(pscConfig.AllowedConsumerProjects)),
+		"allowed_consumer_projects": schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(pscConfig.AllowedConsumerProjects)),
 	}
 
 	return []map[string]interface{}{data}

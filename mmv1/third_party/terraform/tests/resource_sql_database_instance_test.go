@@ -796,6 +796,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(t 
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName),
+				Check: resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil)),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -819,6 +820,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withEmptyAllowedConsumerProjects(
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withEmptyAllowedConsumerProjects(instanceName),
+				Check: resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, [])),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -842,6 +844,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withAllowedConsumerProjects(t *te
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withAllowedConsumerProjects(instanceName),
+				Check: resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, [envvar.GetTestProjectFromEnv()])),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -865,6 +868,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddAllowedConsumerProjects_th
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName),
+				Check: resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil)),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -874,6 +878,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddAllowedConsumerProjects_th
 			},
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withAllowedConsumerProjects(instanceName),
+				Check: resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, [envvar.GetTestProjectFromEnv()])),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -883,6 +888,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddAllowedConsumerProjects_th
 			},
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName),
+				Check: resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, [])),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -915,12 +921,7 @@ func TestAccSqlDatabaseInstance_basicInstance_thenPSCEnabled(t *testing.T) {
 			},
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName),
-			},
-			{
-				ResourceName:            "google_sql_database_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ExpectError: regexp.MustCompile("Can not enable PSC"),
 			},
 		},
 	})
@@ -937,23 +938,9 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withIpV4Enabled(t *testing.T) {
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSqlDatabaseInstance_basicInstanceForPsc(instanceName),
-			},
-			{
-				ResourceName:            "google_sql_database_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-			},
-			{
-				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName),
-			},
-			{
-				ResourceName:            "google_sql_database_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-			},
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withIpV4Enable(instanceName),
+				ExpectError: regexp.MustCompile("Can not enable PSC"),
+			}
 		},
 	})
 }
@@ -2578,6 +2565,26 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
   settings {
     tier = "db-f1-micro"
+  }
+}
+`, instanceName)
+}
+
+func testAccSqlDatabaseInstance_withPSCEnabled_withIpV4Enable(instanceName string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+		psc_config {
+			psc_enabled = true
+		}
+		ipv4_enabled = true
+    }
   }
 }
 `, instanceName)
