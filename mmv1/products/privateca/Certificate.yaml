@@ -891,6 +891,7 @@ properties:
                 immutable: true
           - !ruby/object:Api::Type::NestedObject
             name: 'keyUsage'
+            required: true
             description: |
               Indicates the intended use for keys that correspond to a certificate.
             immutable: true
