@@ -438,10 +438,10 @@ module Api
     def add_labels_related_fields(props)
       props.each do |p|
         if p.is_a? Api::Type::KeyValueLabels
-          props << build_effective_field("labels")
+          props << build_effective_field('labels')
         elsif p.is_a? Api::Type::KeyValueAnnotations
-          props << build_effective_field("annotations")
-        elsif (p.is_a? Api::Type::NestedObject) && (!p.all_properties.nil?)
+          props << build_effective_field('annotations')
+        elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
           transformed = add_labels_related_fields(p.all_properties)
           p.instance_variable_set(:@properties, transformed)
         end
@@ -454,10 +454,12 @@ module Api
       effective_field.instance_variable_set(:@name, "effective_#{name}")
       effective_field.instance_variable_set(:@output, true)
       effective_field.instance_variable_set(:@api_name, name)
-      effective_field.instance_variable_set(:@description, "All of #{name} (key/value pairs) present on the resource in GCP, including the #{name} configured through Terraform, other clients and services.")
+      effective_field.instance_variable_set(:@description, "All of #{name} (key/value pairs)\
+ present on the resource in GCP, including the #{name} configured through Terraform,\
+ other clients and services.")
       effective_field.instance_variable_set(:@min_version, p.instance_variable_get(:@min_version))
       effective_field.instance_variable_set(:@ignore_write, true)
-      return effective_field
+      effective_field
     end
 
     # ====================
