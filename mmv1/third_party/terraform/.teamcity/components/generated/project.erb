@@ -38,8 +38,8 @@ fun buildConfigurationsForPackages(packages: Map<String, String>, providerName :
             // other folders assumed to be packages
             var testConfig = testConfiguration(environment)
 
-            var pkg = packageDetails(packageName, displayName, environment, branchRef)
-            var buildConfig = pkg.buildConfiguration(providerName, path, manualVcsRoot, true, testConfig.startHour, testConfig.parallelism, testConfig.daysOfWeek, testConfig.daysOfMonth)
+            var pkg = packageDetails(packageName, displayName, providerName, environment, branchRef)
+            var buildConfig = pkg.buildConfiguration(path, manualVcsRoot, true, testConfig.startHour, testConfig.parallelism, testConfig.daysOfWeek, testConfig.daysOfMonth)
 
             buildConfig.params.ConfigureGoogleSpecificTestParameters(config)
 

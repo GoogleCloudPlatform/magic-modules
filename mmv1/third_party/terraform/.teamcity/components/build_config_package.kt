@@ -8,15 +8,16 @@
 import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.AbsoluteId
 
-class packageDetails(name: String, displayName: String, environment: String, branchRef: String) {
-    val packageName = name
+class packageDetails(packageName: String, displayName: String, providerName: String, environment: String, branchRef: String) {
+    val packageName = packageName
     val displayName = displayName
+    val providerName = providerName
     val environment = environment
     val branchRef = branchRef
 
     // buildConfiguration returns a BuildType for a service package
     // For BuildType docs, see https://teamcity.jetbrains.com/app/dsl-documentation/root/build-type/index.html
-    fun buildConfiguration(providerName : String, path : String, manualVcsRoot: AbsoluteId, nightlyTestsEnabled: Boolean, startHour: Int, parallelism: Int, daysOfWeek: String, daysOfMonth: String) : BuildType {
+    fun buildConfiguration(path : String, manualVcsRoot: AbsoluteId, nightlyTestsEnabled: Boolean, startHour: Int, parallelism: Int, daysOfWeek: String, daysOfMonth: String) : BuildType {
         return BuildType {
             // TC needs a consistent ID for dynamically generated packages
             id(uniqueID(providerName))
