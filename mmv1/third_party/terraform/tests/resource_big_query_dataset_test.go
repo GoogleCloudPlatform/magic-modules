@@ -49,6 +49,9 @@ func TestAccBigQueryDataset_basic(t *testing.T) {
 				ResourceName:      "google_bigquery_dataset.test",
 				ImportState:       true,
 				ImportStateVerify: true,
+				// The labels field in the state is decided by the configuration.
+				// During importing, the configuration is unavailable, so the labels field in the state after importing is empty.
+				ImportStateVerifyIgnore: []string{"labels"},
 			},
 			{
 				Config: testAccBigQueryDatasetUpdated(datasetID),
@@ -63,17 +66,19 @@ func TestAccBigQueryDataset_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_bigquery_dataset.test",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels"},
 			},
 			{
 				Config: testAccBigQueryDatasetUpdated2(datasetID),
 			},
 			{
-				ResourceName:      "google_bigquery_dataset.test",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels"},
 			},
 			{
 				Config: testAccBigQueryDataset_withoutLabels(datasetID),
@@ -92,6 +97,7 @@ func TestAccBigQueryDataset_basic(t *testing.T) {
 }
 
 func TestAccBigQueryDataset_withProvider5(t *testing.T) {
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
@@ -150,7 +156,7 @@ func TestAccBigQueryDataset_datasetWithContents(t *testing.T) {
 				ResourceName:            "google_bigquery_dataset.contents_test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"delete_contents_on_destroy"},
+				ImportStateVerifyIgnore: []string{"delete_contents_on_destroy", "labels"},
 			},
 		},
 	})
@@ -172,33 +178,37 @@ func TestAccBigQueryDataset_access(t *testing.T) {
 				Config: testAccBigQueryDatasetWithOneAccess(datasetID),
 			},
 			{
-				ResourceName:      "google_bigquery_dataset.access_test",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_bigquery_dataset.access_test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels"},
 			},
 			{
 				Config: testAccBigQueryDatasetWithTwoAccess(datasetID),
 			},
 			{
-				ResourceName:      "google_bigquery_dataset.access_test",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_bigquery_dataset.access_test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels"},
 			},
 			{
 				Config: testAccBigQueryDatasetWithOneAccess(datasetID),
 			},
 			{
-				ResourceName:      "google_bigquery_dataset.access_test",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_bigquery_dataset.access_test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels"},
 			},
 			{
 				Config: testAccBigQueryDatasetWithViewAccess(datasetID, otherDatasetID, otherTableID),
 			},
 			{
-				ResourceName:      "google_bigquery_dataset.access_test",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_bigquery_dataset.access_test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels"},
 			},
 		},
 	})
@@ -218,9 +228,10 @@ func TestAccBigQueryDataset_regionalLocation(t *testing.T) {
 				Config: testAccBigQueryRegionalDataset(datasetID1, "asia-south1"),
 			},
 			{
-				ResourceName:      "google_bigquery_dataset.test",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels"},
 			},
 		},
 	})
@@ -263,9 +274,10 @@ func TestAccBigQueryDataset_storageBillModel(t *testing.T) {
 				Config: testAccBigQueryDatasetStorageBillingModel(datasetID),
 			},
 			{
-				ResourceName:      "google_bigquery_dataset.test",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels"},
 			},
 		},
 	})
