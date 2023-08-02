@@ -31,9 +31,7 @@ class packageDetails(packageName: String, displayName: String, providerName: Str
             steps {
                 ConfigureGoEnv()
                 DownloadTerraformBinary()
-                RunSweepers("Pre-Sweeper")
                 RunAcceptanceTests()
-                RunSweepers("Post-Sweeper")
             }
 
             failureConditions {
