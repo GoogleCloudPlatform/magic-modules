@@ -398,7 +398,7 @@ func ResourceComputeInstance() *schema.Resource {
 						"ipv6_access_config": {
 							Type:        schema.TypeList,
 							Optional:    true,
-							Description: `An array of IPv6 access configurations for this interface. Currently, only one IPv6 access config, DIRECT_IPV6, is supported. If there is no ipv6AccessConfig specified, then this instance will have no external IPv6 Internet access.`,
+							Description: `An array of IPv6 access configurations for this interface.. Currently, only one IPv6 access config, DIRECT_IPV6, is supported. If there is no ipv6AccessConfig specified, then this instance will have no external IPv6 Internet access.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"network_tier": {
@@ -1494,7 +1494,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	}
 <% unless version == 'ga' -%>
 	// Add extra check on Scheduling to prevent STOP instance setting MaxRunDuration.
-	// When Instance being stopped, GCE will wipe out the MaxRunDuration field. 
+	// When Instance being stopped, GCE will wipe out the MaxRunDuration field.
 	// And Terraform has no visiblity on this field after then. Given the infrastructure
 	// constraint, MaxRunDuration will only be supported with instance has
 	// DELETE InstanceTerminationAction
