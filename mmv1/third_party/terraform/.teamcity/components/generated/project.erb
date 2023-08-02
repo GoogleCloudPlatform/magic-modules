@@ -36,10 +36,10 @@ fun buildConfigurationsForPackages(packages: Map<String, String>, providerName :
             list.addAll(serviceList)
         } else {
             // other folders assumed to be packages
-            var testConfig = testConfiguration(environment)
+            var triggerConfig = NightlyTriggerConfiguration(environment, branchRef)
 
-            var pkg = packageDetails(packageName, displayName, providerName, environment, branchRef)
-            var buildConfig = pkg.buildConfiguration(path, manualVcsRoot, true, testConfig.startHour, testConfig.parallelism, testConfig.daysOfWeek, testConfig.daysOfMonth)
+            var pkg = packageDetails(packageName, displayName, providerName, environment)
+            var buildConfig = pkg.buildConfiguration(path, manualVcsRoot, defaultParallelism, triggerConfig)
 
             buildConfig.params.ConfigureGoogleSpecificTestParameters(config)
 
@@ -50,10 +50,13 @@ fun buildConfigurationsForPackages(packages: Map<String, String>, providerName :
     return list
 }
 
-class testConfiguration(environment: String, parallelism: Int = defaultParallelism, startHour: Int = defaultStartHour, daysOfWeek: String = defaultDaysOfWeek, daysOfMonth: String = defaultDaysOfMonth) {
+class NightlyTriggerConfiguration(environment: String, branchRef: String, nightlyTestsEnabled: Boolean = true, startHour: Int = defaultStartHour, daysOfWeek: String = defaultDaysOfWeek, daysOfMonth: String = defaultDaysOfMonth) {
 
-    // Default values are present if init doesn't change them
-    var parallelism = parallelism
+    // Default values are used below unless
+    // - alternatives passed in as arguments
+    // - logic in `init` changes them based on environment
+    var branchRef = branchRef
+    var nightlyTestsEnabled = nightlyTestsEnabled
     var startHour = startHour
     var daysOfWeek = daysOfWeek
     var daysOfMonth = daysOfMonth
