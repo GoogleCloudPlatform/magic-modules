@@ -8,7 +8,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func DataSourceArtifactRegistryRepository() *schema.Resource {
+func DataSourceDataprocCluster() *schema.Resource {
 	// Generate datasource schema from resource
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceDataprocCluster().Schema)
 
