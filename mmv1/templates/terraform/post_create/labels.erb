@@ -1,13 +1,14 @@
 <% if properties.any?{ |p| p.name == "labels" } -%>
 if v, ok := d.GetOkExists("labels"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, labelsProp)) {
 	// Labels cannot be set in a create.  We'll have to set them here.
-	err = resource<%= resource_name -%>Read(d, meta)
+	// Only labelFingerprint is needed in the request to set labels.
+	err = resource<%= resource_name -%>LabelFingerprintRead(d, meta)
 	if err != nil {
 		return err
 	}
 
 	obj := make(map[string]interface{})
-	// d.Get("labels") will have been overridden by the Read call.
+	// d.Get("labels") will not have been overridden by the Read call.
 	labelsProp, err := expand<%= resource_name -%>Labels(v, d, config)
 	if err != nil {
 		return err

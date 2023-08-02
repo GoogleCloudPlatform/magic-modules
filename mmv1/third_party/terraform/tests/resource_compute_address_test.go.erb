@@ -96,6 +96,9 @@ func TestAccComputeAddress_networkTier_withLabels(t *testing.T) {
 				ResourceName:      "google_compute_address.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
+				// The labels field in the state is decided by the configuration.
+				// During importing, the configuration is unavailable, so the labels field in the state after importing is empty.
+				ImportStateVerifyIgnore: []string{"labels"},
 			},
 			{
 				Config: testAccComputeAddress_networkTier_withLabelsUpdate(acctest.RandString(t, 10)),
@@ -113,6 +116,7 @@ func TestAccComputeAddress_networkTier_withLabels(t *testing.T) {
 				ResourceName:      "google_compute_address.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"labels"},
 			},
 			{
 				Config: testAccComputeAddress_networkTier(acctest.RandString(t, 10)),
@@ -131,6 +135,7 @@ func TestAccComputeAddress_networkTier_withLabels(t *testing.T) {
 }
 
 func TestAccComputeAddress_networkTier_withProvider5(t *testing.T) {
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	oldVersion := map[string]resource.ExternalProvider{

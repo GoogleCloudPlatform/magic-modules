@@ -95,6 +95,7 @@ examples:
       network_name: 'test-network'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
+  constants: templates/terraform/constants/compute_address.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
