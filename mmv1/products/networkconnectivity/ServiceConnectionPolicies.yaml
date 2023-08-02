@@ -58,6 +58,8 @@ examples:
       service_class_name: 'my-basic-service-class'
     test_vars_overrides:
       service_class_name: '"gcp-memorystore-redis"'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  update_encoder: templates/terraform/encoders/service_connection_policy.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
