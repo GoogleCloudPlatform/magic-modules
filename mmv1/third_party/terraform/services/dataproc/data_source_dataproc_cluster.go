@@ -13,7 +13,7 @@ func DataSourceDataprocCluster() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceDataprocCluster().Schema)
 
 	// Set 'Required' schema elements
-	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name", "region")
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "cluster_name", "region")
 
 	// Set 'Optional' schema elements
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
@@ -37,8 +37,8 @@ func dataSourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	name := d.Get("name").(string)
-	d.SetId(fmt.Sprintf("projects/%s/regions/%s/clusters/%s", project, region, name))
+	cluster_name := d.Get("cluster_name").(string)
+	d.SetId(fmt.Sprintf("projects/%s/regions/%s/clusters/%s", project, region, cluster_name))
 
 	err = resourceDataprocClusterRead(d, meta)
 	if err != nil {

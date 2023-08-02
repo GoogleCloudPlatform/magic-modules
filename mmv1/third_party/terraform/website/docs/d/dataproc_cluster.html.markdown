@@ -14,8 +14,8 @@ and [API](https://cloud.google.com/dataproc/docs/apis).
 
 ```hcl
 data "google_dataproc_cluster" "my_cluster" {
-  name    = "my-cluster"
-  region  = "us-central1"
+  cluster_name  = "my-cluster"
+  region        = "us-central1"
 }
 ```
 
@@ -23,7 +23,7 @@ data "google_dataproc_cluster" "my_cluster" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the dataproc cluster.
+* `cluster_name` - (Required) The name of the dataproc cluster.
 
 * `region` - (Required) The location of the dataproc cluster. eg us-central1
 
