@@ -37,8 +37,8 @@ func dataSourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	cluster_name := d.Get("cluster_name").(string)
-	d.SetId(fmt.Sprintf("projects/%s/regions/%s/clusters/%s", project, region, cluster_name))
+	clusterName := d.Get("cluster_name").(string)
+	d.SetId(fmt.Sprintf("projects/%s/regions/%s/clusters/%s", project, region, clusterName))
 
 	err = resourceDataprocClusterRead(d, meta)
 	if err != nil {
