@@ -521,6 +521,33 @@ func TestAccContainerNodePool_withNetworkConfig(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
+func TestAccContainerNodePool_withMultiNicNetworkConfig(t *testing.T) {
+	t.Parallel()
+
+	randstr := acctest.RandString(t, 10)
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randstr)
+	np := fmt.Sprintf("tf-test-np-%s", randstr)
+	network := fmt.Sprintf("tf-test-net-%s", randstr)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withMultiNicNetworkConfig(cluster, np, network),
+			},
+			{
+				ResourceName:            "google_container_cluster.cluster",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"network_config.0.create_pod_range"},
+			},
+		},
+	})
+}
+<% end -%>
 
 func TestAccContainerNodePool_withEnablePrivateNodesToggle(t *testing.T) {
 	t.Parallel()
@@ -1229,6 +1256,8 @@ func TestAccContainerNodePool_withSoleTenantConfig(t *testing.T) {
        })
 }
 
+
+
 <% unless version == 'ga' -%>
 func TestAccContainerNodePool_ephemeralStorageConfig(t *testing.T) {
 	t.Parallel()
@@ -1527,6 +1556,68 @@ resource "google_container_node_pool" "np" {
   }
 }
 `, cluster, np, placementType)
+}
+
+func TestAccContainerNodePool_customPlacementPolicy(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
+	policy := fmt.Sprintf("tf-test-policy-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_customPlacementPolicy(cluster, np, policy),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.machine_type", "c2-standard-4"),
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "placement_policy.0.policy_name", policy),
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "placement_policy.0.type", "COMPACT"),
+				),
+			},
+			{
+				ResourceName:      "google_container_node_pool.np",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccContainerNodePool_customPlacementPolicy(cluster, np, policyName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+}
+
+resource "google_compute_resource_policy" "policy" {
+  name = "%s"
+  region = "us-central1"
+  group_placement_policy {
+    collocation = "COLLOCATED"
+  }
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 2
+
+  node_config {
+    machine_type = "c2-standard-4"
+  }
+  placement_policy {
+	type = "COMPACT"
+    policy_name = google_compute_resource_policy.policy.name
+  }
+}
+`, cluster, policyName, np)
 }
 
 func TestAccContainerNodePool_threadsPerCore(t *testing.T) {
@@ -2605,6 +2696,115 @@ resource "google_container_node_pool" "with_pco_disabled" {
 `, network, cluster, np, np, np)
 }
 
+<% unless version.nil? || version == 'ga' -%>
+func testAccContainerNodePool_withMultiNicNetworkConfig(cluster, np, network string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "container_network" {
+  name                    = "%s-1"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_network" "addn_net_1" {
+  name                    = "%s-2"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_network" "addn_net_2" {
+  name                    = "%s-3"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "container_subnetwork" {
+  name                     = "%s-subnet-1"
+  network                  = google_compute_network.container_network.name
+  ip_cidr_range            = "10.0.36.0/24"
+  region                   = "us-central1"
+  private_ip_google_access = true
+
+  secondary_ip_range {
+    range_name    = "pod"
+    ip_cidr_range = "10.0.0.0/19"
+  }
+
+  secondary_ip_range {
+    range_name    = "svc"
+    ip_cidr_range = "10.0.32.0/22"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      # The auto nodepool creates a secondary range which diffs this resource.
+      secondary_ip_range,
+    ]
+  }
+}
+
+resource "google_compute_subnetwork" "subnet1" {
+  name                     = "%s-subnet-2"
+  network                  = google_compute_network.addn_net_1.name
+  ip_cidr_range            = "10.0.37.0/24"
+  region                   = "us-central1"
+}
+
+resource "google_compute_subnetwork" "subnet2" {
+  name                     = "%s-subnet-3"
+  network                  = google_compute_network.addn_net_2.name
+  ip_cidr_range            = "10.0.38.0/24"
+  region                   = "us-central1"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1"
+  initial_node_count = 1
+
+  network    = google_compute_network.container_network.name
+  subnetwork = google_compute_subnetwork.container_subnetwork.name
+  ip_allocation_policy {
+    cluster_secondary_range_name  = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
+    services_secondary_range_name = google_compute_subnetwork.container_subnetwork.secondary_ip_range[1].range_name
+  }
+  private_cluster_config {
+    enable_private_nodes    = true
+    master_ipv4_cidr_block  = "10.42.0.0/28"
+  }
+  release_channel {
+	channel = "RAPID"
+  }
+  enable_multi_networking = true
+  datapath_provider = "ADVANCED_DATAPATH"
+}
+
+resource "google_container_node_pool" "with_multi_nic" {
+  name               = "%s-mutli-nic"
+  location           = "us-central1"
+  cluster            = google_container_cluster.cluster.name
+  node_count = 1
+  network_config {
+    create_pod_range = false
+    enable_private_nodes = true
+    pod_range = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
+	additional_node_network_configs {
+	  network    = google_compute_network.addn_net_1.name
+      subnetwork = google_compute_subnetwork.subnet1.name
+    }
+    additional_node_network_configs {
+	  network    = google_compute_network.addn_net_2.name
+	  subnetwork = google_compute_subnetwork.subnet2.name
+    }
+  }
+  node_config {
+    machine_type = "n2-standard-8"
+	oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform",
+    ]
+    image_type = "COS_CONTAINERD"
+  }
+}
+
+`, network, network, network, network, network, network, cluster, np)
+}
+<% end -%>
 
 <% unless version.nil? || version == 'ga' -%>
 func testAccContainerNodePool_withBootDiskKmsKey(cluster, np string) string {
@@ -3018,16 +3218,16 @@ resource "google_container_node_pool" "np1" {
   location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 2
-  version 		       = "1.25.10-gke.1400"
+  version            = "1.27.3-gke.1700"
 }
 
 resource "google_container_node_pool" "np2" {
-	name               = "%s"
-	location           = "us-central1-a"
-	cluster            = google_container_cluster.cluster.name
-	initial_node_count = 2
-	version 		       = "1.25.10-gke.1400"
-  }
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 2
+  version            = "1.27.3-gke.1700"
+}
 `, cluster, np1, np2)
 }
 
@@ -3148,5 +3348,57 @@ resource "google_container_node_pool" "with_tpu_topology" {
   }
 }
 `, cluster, np1, np2, tpuTopology)
+}
+
+func TestAccContainerNodePool_withHostMaintenancePolicy(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
+
+	VcrTest(t, resource.TestCase{
+			PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+			ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+			CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
+			Steps: []resource.TestStep{
+					{
+							Config: testAccContainerNodePool_withHostMaintenancePolicy(cluster, np),
+					},
+					{
+							ResourceName:      "google_container_node_pool.np",
+							ImportState:       true,
+							ImportStateVerify: true,
+					},
+			},
+	})
+}
+
+func testAccContainerNodePool_withHostMaintenancePolicy(cluster, np string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "asia-east1-c"
+  initial_node_count = 1
+  node_config {
+    host_maintenance_policy {
+		maintenance_interval = "PERIODIC"
+	}
+    machine_type = "n2-standard-2"
+  }
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "asia-east1-c"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    host_maintenance_policy {
+		maintenance_interval = "PERIODIC"
+	}
+    machine_type = "n2-standard-2"
+  }
+}
+`, cluster, np)
 }
 <% end -%>
