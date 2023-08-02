@@ -1,0 +1,55 @@
+[
+    {
+        "name": "//orgpolicy.googleapis.com/v2/organizations/placeholder-D5qaQmpE/customConstraints/placeholder-Q5Zz1Xhl",
+        "asset_type": "orgpolicy.googleapis.com/CustomConstraint",
+        "resource": {
+            "version": "v2",
+            "discovery_document_uri": "https://orgpolicy.googleapis.com/$discovery/rest?version=v2",
+            "discovery_name": "GoogleCloudOrgpolicyV2CustomConstraint",
+            "parent": "//cloudresourcemanager.googleapis.com/organizations/{{.OrgID}}",
+            "data": {
+                "actionType": "ALLOW",
+                "condition": "resource.management.autoUpgrade == false",
+                "description": "Only allow GKE NodePool resource to be created or updated if AutoUpgrade is not enabled where this custom constraint is enforced.",
+                "displayName": "Disable GKE auto upgrade",
+                "methodTypes": [
+                    "CREATE",
+                    "UPDATE"
+                ],
+                "name": "custom.disableGkeAutoUpgrade",
+                "resourceTypes": [
+                    "container.googleapis.com/NodePool"
+                ]
+            }
+        },
+        "ancestry_path": [
+            "organizations/{{.OrgID}}"
+        ]
+    },
+    {
+        "name": "//orgpolicy.googleapis.com/v2/organizations/placeholder-fecrG4i8/customConstraints/placeholder-CKVsBfUw",
+        "asset_type": "orgpolicy.googleapis.com/CustomConstraint",
+        "resource": {
+            "version": "v2",
+            "discovery_document_uri": "https://orgpolicy.googleapis.com/$discovery/rest?version=v2",
+            "discovery_name": "GoogleCloudOrgpolicyV2CustomConstraint",
+            "parent": "//cloudresourcemanager.googleapis.com/organizations/{{.OrgID}}",
+            "data": {
+                "actionType": "ALLOW",
+                "condition": "(\"dataproc:am.primary_only\" in resource.config.softwareConfig.properties) \u0026\u0026 (resource.config.softwareConfig.properties[\"dataproc:am.primary_only\"]==\"true\")",
+                "description": "Property \"dataproc:am.primary_only\" must be \"true\".",
+                "displayName": "Application master cannot run on preemptible workers",
+                "methodTypes": [
+                    "CREATE"
+                ],
+                "name": "custom.dataprocAmPrimaryOnlyEnforced",
+                "resourceTypes": [
+                    "dataproc.googleapis.com/Cluster"
+                ]
+            }
+        },
+        "ancestry_path": [
+            "organizations/{{.OrgID}}"
+        ]
+    }
+]
