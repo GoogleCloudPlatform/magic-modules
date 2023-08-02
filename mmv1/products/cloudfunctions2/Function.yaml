@@ -315,6 +315,7 @@ properties:
                 custom_flatten: 'templates/terraform/custom_flatten/cloudfunctions2_function_source_object.go.erb'
               - !ruby/object:Api::Type::Integer
                 name: 'generation'
+                default_from_api: true
                 description: |
                   Google Cloud Storage generation for the object. If the generation
                   is omitted, the latest generation will be used.

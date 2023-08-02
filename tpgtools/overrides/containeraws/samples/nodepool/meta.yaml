@@ -2,3 +2,7 @@ ignore_read:
   - fleet.0.project
 doc_hide:
   - beta_basic.tf.tmpl
+test_hide:
+  # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14085
+  # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14392
+  - beta_basic.tf.tmpl
