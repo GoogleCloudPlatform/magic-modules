@@ -338,6 +338,10 @@ module Api
       ((@properties || []) + (@parameters || []))
     end
 
+    def properities_with_excluded
+      @properties || []
+    end
+
     def properties
       (@properties || []).reject(&:exclude)
     end
@@ -441,8 +445,8 @@ module Api
           props << build_effective_field('labels', p.field_min_version)
         elsif p.is_a? Api::Type::KeyValueAnnotations
           props << build_effective_field('annotations', p.field_min_version)
-        elsif (p.is_a? Api::Type::NestedObject) && !p.properties.nil?
-          p.properties = add_labels_related_fields(p.properties)
+        elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
+          p.properties = add_labels_related_fields(p.all_properties)
         end
       end
       props
