@@ -15,8 +15,15 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
   data_quality_spec {
     rules {
       dimension = "VALIDITY"
+      name = "rule1"
+      description = "rule 1 for validity dimension"
       table_condition_expectation {
         sql_expression = "COUNT(*) > 0"
+      }
+    }
+    post_scan_actions {
+      bigquery_export {
+        results_table: "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/quality_export"
       }
     }
   }

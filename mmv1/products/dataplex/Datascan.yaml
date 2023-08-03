@@ -557,6 +557,19 @@ properties:
                   name: 'threshold'
                   description: |
                     The minimum ratio of passing_rows / total_rows required to pass this rule, with a range of [0.0, 1.0]. 0 indicates default value (i.e. 1.0).
+                - !ruby/object:Api::Type::String
+                  name: 'name'
+                  description: |
+                    A mutable name for the rule.
+                    The name must contain only letters (a-z, A-Z), numbers (0-9), or hyphens (-).
+                    The maximum length is 63 characters.
+                    Must start with a letter.
+                    Must end with a number or a letter.
+                - !ruby/object:Api::Type::String
+                  name: 'description'
+                  description: |
+                    Description of the rule.
+                    The maximum length is 1,024 characters.
                 - !ruby/object:Api::Type::NestedObject
                   name: 'rangeExpectation'
                   output: true
