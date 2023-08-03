@@ -15,30 +15,29 @@ if val, ok := obj["restorePointInTime"]; ok {
 	delete(obj, "restorePointInTime")
 }
 
-// Copy obj which contains the cluster into a cluster map
-cluster := make(map[string]interface{})
-for k,v := range obj {
-	cluster[k] = v
-}
-
 restoreClusterRequestBody := make(map[string]interface{})
 if restoreBackup != nil {
 	// If restoring from a backup, set the backupSource
-	backupSource := map[string]interface{}{"name": restoreBackup}
-	restoreClusterRequestBody["cluster"] = cluster
-	restoreClusterRequestBody["backupSource"] = backupSource
+	backupSource := map[string]interface{}{"backup_name": restoreBackup}
+	restoreClusterRequestBody["backup_source"] = backupSource
 } else if restoreSourceCluster != nil {
 	// Otherwise if restoring via PITR, set the continuousBackupSource
 	continuousBackupSource := map[string]interface{}{
 		"cluster": restoreSourceCluster,
 		"point_in_time": restorePointInTime,
 	}
-	restoreClusterRequestBody["cluster"] = cluster
-	restoreClusterRequestBody["continousBackupSource"] = continuousBackupSource
+	restoreClusterRequestBody["continuous_backup_source"] = continuousBackupSource
 }
 
 if restoreBackup != nil || restoreSourceCluster != nil {
 	// Use restore API if this is a restore instead of a create cluster call
 	url = strings.Replace(url, "clusters?clusterId", "clusters:restore?clusterId", 1)
+
+	// Copy obj which contains the cluster into a cluster map
+	cluster := make(map[string]interface{})
+	for k,v := range obj {
+		cluster[k] = v
+	}
+	restoreClusterRequestBody["cluster"] = cluster
 	obj = restoreClusterRequestBody
 }
