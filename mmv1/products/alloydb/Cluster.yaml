@@ -67,9 +67,9 @@ examples:
     primary_resource_id: 'default'
     vars:
       alloydb_cluster_name: 'alloydb-cluster-full'
+      alloydb_cluster_secondary_name: 'alloydb-cluster-secondary-full'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_create: templates/terraform/post_create/alloydb_secondary_cluster_create.go.erb
-  pre_delete: templates/terraform/pre_delete/alloydb_secondary_cluster_delete.go.erb
+  pre_create: templates/terraform/pre_create/alloydb_secondary_cluster_create.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'clusterId'
@@ -99,26 +99,11 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: 'User-defined labels for the alloydb cluster.'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'secondaryCluster'
+  - !ruby/object:Api::Type::Boolean
+    name: 'create_secondary'
     description: |
-      Creates a cluster of type SECONDARY in the given location using the primary cluster as the source.
+      Creates cluster as a secondary cluster
     url_param_only: true
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'location'
-        description: |
-          The location where the secondary alloydb cluster should reside.       
-        url_param_only: true
-        immutable: true
-        required: true
-      - !ruby/object:Api::Type::String
-        name: 'clusterId'
-        url_param_only: true
-        description: |
-          The ID of the secondary alloydb cluster.       
-        immutable: true
-        required: true
   - !ruby/object:Api::Type::NestedObject
     name: 'encryptionConfig'
     description: |
@@ -238,10 +223,13 @@ properties:
     description: |
       Cross Region replication config specific to SECONDARY cluster.
     properties:
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
         name: "primaryClusterName"
         description: |
           The name of the primary cluster name with the format: projects/{project}/locations/{region}/clusters/{clusterId}.
+        required: true
+        resource: 'Cluster'
+        imports: 'name'
   - !ruby/object:Api::Type::NestedObject
     name: 'continuousBackupConfig'
     default_from_api: true
@@ -402,4 +390,3 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'sourceType'
         description: 'Type of migration source.'
-        

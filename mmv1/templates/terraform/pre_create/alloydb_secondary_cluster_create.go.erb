@@ -1,0 +1,6 @@
+if d.Get("create_secondary").(bool) {
+    url, err = tpgresource.ReplaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations/{{location}}/clusters:createsecondary?clusterId={{cluster_id}}")
+    if err != nil {
+        return err
+    }
+}

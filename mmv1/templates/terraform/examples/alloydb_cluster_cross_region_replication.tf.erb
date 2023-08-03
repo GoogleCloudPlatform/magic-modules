@@ -8,11 +8,6 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
     password = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
   }
 
-  secondary_cluster {
-    cluster_id = "<%= ctx[:vars]['alloydb_cluster_name'] %>-secondary"
-    location   = "us-east1"
-  }
-
   automated_backup_policy {
     location      = "us-central1"
     backup_window = "1800s"
@@ -41,6 +36,24 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
   labels = {
     test = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
   }
+}
+
+resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>-secondary" {
+  cluster_id   = "<%= ctx[:vars]['alloydb_instance_secondary_name'] %>"
+  location     = "us-east1"
+  network      = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+
+  create_secondary = true
+
+  secondary_config {
+    primary_cluster_name = google_alloydb_cluster.<%= ctx[:primary_resource_id] %>.name
+  }
+
+  labels = {
+    test = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
+  }
+
+  depends_on [google_alloydb_cluster.<%= ctx[:primary_resource_id] %>]
 }
 
 data "google_project" "project" {}

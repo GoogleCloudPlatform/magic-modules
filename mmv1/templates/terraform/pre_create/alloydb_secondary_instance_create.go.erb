@@ -1,0 +1,6 @@
+if d.Get("instance_type").(string) == "SECONDARY" {
+    url, err = tpgresource.ReplaceVars(d, config, "{{AlloydbBasePath}}{{cluster}}/instances:createsecondary?instanceId={{instance_id}}")
+    if err != nil {
+        return err
+    }
+}

@@ -49,6 +49,7 @@ skip_sweeper: true
 autogen_async: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/alloydb_instance.go.erb
+  pre_create: templates/terraform/pre_create/alloydb_secondary_instance_create.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_instance_basic'
@@ -59,6 +60,18 @@ examples:
       network_name: 'alloydb-network'
     test_vars_overrides:
       network_name: 'acctest.BootstrapSharedTestNetwork(t, "alloydb-instance-basic")'
+    ignore_read_extra:
+      - 'reconciling'
+      - 'update_time'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_instance_cross_region_replication'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      alloydb_instance_secondary_name: 'alloydb-instance-secondary'
+      alloydb_cluster_secondary_name: 'alloydb-cluster-secondary'
+      network_name: 'alloydb-network'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
