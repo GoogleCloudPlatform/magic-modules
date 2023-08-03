@@ -62,6 +62,8 @@ examples:
     primary_resource_id: 'full'
     vars:
       alloydb_cluster_name: 'alloydb-cluster-full'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_create: templates/terraform/pre_create/alloydb_restore_cluster.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'clusterId'
@@ -199,27 +201,27 @@ properties:
         sensitive: true
   - !ruby/object:Api::Type::String
     name: 'restoreSourceBackup'
+    # custom_expand: 'templates/terraform/custom_expand/alloydb_restore_backup_expand.go.erb'
     conflicts: 
       - restore_source_cluster
-      - restore_source_point_in_time
+      - restore_point_in_time
     description: |
-      The name of the backup that this cluster should be restored from. Conflicts with 'restore_source_cluster' and 'restore_source_point_in_time', both can't be set together.
+      The name of the backup that this cluster should be restored from. Conflicts with 'restore_source_cluster' and 'restore_point_in_time', both can't be set together.
   - !ruby/object:Api::Type::String
     name: 'restoreSourceCluster'
     conflicts: 
       - restore_source_backup
     description: |
       The name of the source cluster that this cluster should be restored from. The source cluster must have continuous
-      backup enabled for restore to succeed.
+      backup enabled for restore to succeed. Requires `restore_point_in_time` to also be set.
 
-      Requires `restore_source_point_in_time` to also be set. 
       Conflicts with 'restore_source_backup', both can't be set together.
   - !ruby/object:Api::Type::String
-    name: 'restoreSourcePointInTime'
+    name: 'restorePointInTime'
     conflicts: 
       - restore_source_backup
     description: |
-      The point in time that this cluster should be restored to. Requires `restore_source_cluster` to also be set.
+      The point in time that this cluster should be restored to, in RFC 3339 format. Requires `restore_source_cluster` to also be set.
       
       Conflicts with 'restore_source_backup', both can't be set together.
   - !ruby/object:Api::Type::NestedObject
