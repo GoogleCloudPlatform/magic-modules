@@ -1841,7 +1841,7 @@ resource "google_bigquery_table" "test" {
 `, datasetID, bucketName, tableID)
 }
 
-func testAccBigQueryTableFromGCSObjectTable(connectionID, datasetID, tableID, bucketName, objectName string) string {
+func testAccBigQueryTableFromGCSObjectTable(connectionID, datasetID, tableID, bucketName, objectName, maxStaleness string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_connection" "test" {
    connection_id = "%s"
