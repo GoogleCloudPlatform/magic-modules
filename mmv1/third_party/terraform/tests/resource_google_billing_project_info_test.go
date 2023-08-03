@@ -15,8 +15,7 @@ func TestAccBillingProjectInfo_update(t *testing.T) {
 
 	projectId := "tf-test-" + acctest.RandString(t, 10)
 	orgId := envvar.GetTestOrgFromEnv(t)
-	billingAccount1 := envvar.GetTestBillingAccountFromEnv(t)
-	billingAccount2 := envvar.GetTestMasterBillingAccountFromEnv(t)
+	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -24,7 +23,7 @@ func TestAccBillingProjectInfo_update(t *testing.T) {
 		CheckDestroy:             testAccCheckCoreBillingProjectInfoDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBillingProjectInfo_basic(projectId, orgId, billingAccount1),
+				Config: testAccBillingProjectInfo_basic(projectId, orgId, billingAccount),
 			},
 			{
 				ResourceName:      "google_billing_project_info.info",
@@ -32,7 +31,15 @@ func TestAccBillingProjectInfo_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccBillingProjectInfo_basic(projectId, orgId, billingAccount2),
+				Config: testAccBillingProjectInfo_basic(projectId, orgId, ""),
+			},
+			{
+				ResourceName:      "google_billing_project_info.info",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBillingProjectInfo_basic(projectId, orgId, billingAccount),
 			},
 			{
 				ResourceName:      "google_billing_project_info.info",
