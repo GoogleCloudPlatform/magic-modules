@@ -18,6 +18,10 @@ resource "google_pubsub_subscription" "<%= ctx[:primary_resource_id] %>" {
     filename_suffix = "-%{random_suffix}"
   
     max_bytes = 1000
+  
+    avro_config {
+      write_metadata = true
+    }
   }
 
   depends_on = [

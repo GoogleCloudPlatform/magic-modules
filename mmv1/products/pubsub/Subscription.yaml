@@ -72,6 +72,13 @@ examples:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
       bucket_name: 'example-bucket'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'pubsub_subscription_push_cloudstorage_avro'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+      subscription_name: 'example-subscription'
+      bucket_name: 'example-bucket'
 docs: !ruby/object:Provider::Terraform::Docs
   note: |
     You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding
@@ -168,6 +175,8 @@ properties:
         description: |
           The maximum bytes that can be written to a Cloud Storage file before a new file is created. Min 1 KB, max 10 GiB. 
           The maxBytes limit may be exceeded in cases where messages are larger than the limit.
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(1000, 10737418240)'
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: |
