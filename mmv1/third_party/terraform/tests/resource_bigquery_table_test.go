@@ -1824,7 +1824,6 @@ resource "google_bigquery_table" "test" {
   dataset_id = google_bigquery_dataset.test.dataset_id
   external_data_configuration {
     autodetect    = false
-	file_set_spec_type = "FILE_SYSTEM_MATCH"
     source_format = "ICEBERG"
 	# Specify URI is a manifest.
 	# Point to metadata.json.
