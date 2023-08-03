@@ -161,7 +161,7 @@ properties:
         item_type: Api::Type::String
         default_from_api: true
         description: |
-          Additional project IDs that are allowed to attach to the workstation cluster's service attachment. 
+          Additional project IDs that are allowed to attach to the workstation cluster's service attachment.
           By default, the workstation cluster's project and the VPC host project (if different) are allowed.
   - !ruby/object:Api::Type::Array
     name: "conditions"
