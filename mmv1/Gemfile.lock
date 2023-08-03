@@ -63,6 +63,7 @@ DEPENDENCIES
   activesupport
   binding_of_caller
   mocha (~> 1.3.0)
+  parallel
   rake
   rspec
   rubocop (>= 0.77.0)
