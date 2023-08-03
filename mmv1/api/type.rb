@@ -138,9 +138,6 @@ module Api
       # For a TypeMap, the DSF to apply to the key.
       attr_reader :key_diff_suppress_func
 
-      # Ignore writing the "effectcive_labels" and "effective_annotations" fields to API.
-      attr_reader :ignore_write
-
       # ====================
       # Schema Modifications
       # ====================
@@ -215,7 +212,6 @@ module Api
       check :url_param_only, type: :boolean
       check :read_query_params, type: ::String
       check :immutable, type: :boolean
-      check :ignore_write, type: :boolean, default: false
 
       raise 'Property cannot be output and required at the same time.' \
         if @output && @required
@@ -740,6 +736,8 @@ module Api
         @properties.reject(&:exclude)
       end
 
+      attr_writer :properties
+
       def nested_properties
         properties
       end
@@ -767,6 +765,29 @@ module Api
     # simpler property to generate and means we can avoid conditional logic
     # in Map.
     class KeyValuePairs < Composite
+      # Ignore writing the "effectcive_labels" and "effective_annotations" fields to API.
+      attr_reader :ignore_write
+
+      def initialize(name = nil, output = nil, api_name = nil, description = nil, min_version = nil,
+                     ignore_write = nil)
+        super()
+
+        @name = name
+        @output = output
+        @api_name = api_name
+        @description = description
+        @min_version = min_version
+        @ignore_write = ignore_write
+      end
+
+      def validate
+        super
+        check :ignore_write, type: :boolean, default: false
+      end
+
+      def field_min_version
+        @min_version
+      end
     end
 
     # An array of string -> string key -> value pairs used specifcally for the "labels" field.

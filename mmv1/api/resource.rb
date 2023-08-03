@@ -17,6 +17,8 @@ require 'api/resource/nested_query'
 require 'api/resource/reference_links'
 require 'google/string_utils'
 
+require 'google/logger'
+
 module Api
   # An object available in the product
   class Resource < Api::Object::Named
@@ -438,28 +440,29 @@ module Api
     def add_labels_related_fields(props)
       props.each do |p|
         if p.is_a? Api::Type::KeyValueLabels
-          props << build_effective_field('labels')
+          props << build_effective_field('labels', p.field_min_version)
         elsif p.is_a? Api::Type::KeyValueAnnotations
-          props << build_effective_field('annotations')
-        elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
-          transformed = add_labels_related_fields(p.all_properties)
-          p.instance_variable_set(:@properties, transformed)
+          props << build_effective_field('annotations', p.field_min_version)
+        elsif (p.is_a? Api::Type::NestedObject) && !p.properties.nil?
+          p.properties = add_labels_related_fields(p.properties)
         end
       end
       props
     end
 
-    def build_effective_field(name)
-      effective_field = Api::Type::KeyValuePairs.new
-      effective_field.instance_variable_set(:@name, "effective_#{name}")
-      effective_field.instance_variable_set(:@output, true)
-      effective_field.instance_variable_set(:@api_name, name)
-      effective_field.instance_variable_set(:@description, "All of #{name} (key/value pairs)\
+    def build_effective_field(name, min_version)
+      description = "All of #{name} (key/value pairs)\
  present on the resource in GCP, including the #{name} configured through Terraform,\
- other clients and services.")
-      effective_field.instance_variable_set(:@min_version, p.instance_variable_get(:@min_version))
-      effective_field.instance_variable_set(:@ignore_write, true)
-      effective_field
+ other clients and services."
+
+      Api::Type::KeyValuePairs.new(
+        "effective_#{name}", # name,
+        true,                # output,
+        name,                # api_name,
+        description,
+        min_version,
+        true                 # ignore_write
+      )
     end
 
     # ====================
