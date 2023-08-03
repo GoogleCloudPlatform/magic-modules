@@ -12,13 +12,13 @@ func TestAccContainerAwsCluster_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"service_account":        GetTestServiceAccountFromEnv(t),
-    "service_account_update": "fake_user",
+		"service_account_update": "fake_user",
 		"aws_acct_id":            "111111111111",
 		"aws_key":                "00000000-0000-0000-0000-17aad2f0f61f",
-    "aws_key_update":         "00000000-0000-0000-0000-998877665544",
+		"aws_key_update":         "00000000-0000-0000-0000-998877665544",
 		"aws_region":             "us-west-2",
 		"aws_sg":                 "sg-0b3f63cb91b247628",
-    "aws_sg_update":          "sg-9EEEE00001111FFFF",
+		"aws_sg_update":          "sg-9EEEE00001111FFFF",
 		"aws_subnet":             "subnet-0b3f63cb91b247628",
 		"aws_vpc":                "vpc-0b3f63cb91b247628",
 		"byo_prefix":             "mmv1",
@@ -66,13 +66,13 @@ func TestAccContainerAwsCluster_betaUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
 		"service_account":        GetTestServiceAccountFromEnv(t),
-    "service_account_update": "fake_user",
+		"service_account_update": "fake_user",
 		"aws_acct_id":            "111111111111",
 		"aws_key":                "00000000-0000-0000-0000-17aad2f0f61f",
-    "aws_key_update":         "00000000-0000-0000-0000-998877665544",
+		"aws_key_update":         "00000000-0000-0000-0000-998877665544",
 		"aws_region":             "us-west-2",
 		"aws_sg":                 "sg-0b3f63cb91b247628",
-    "aws_sg_update":          "sg-9EEEE00001111FFFF",
+		"aws_sg_update":          "sg-9EEEE00001111FFFF",
 		"aws_subnet":             "subnet-0b3f63cb91b247628",
 		"aws_vpc":                "vpc-0b3f63cb91b247628",
 		"byo_prefix":             "mmv1",
