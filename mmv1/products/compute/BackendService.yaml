@@ -769,12 +769,10 @@ properties:
       load balancing cannot be used with the other. For more information, refer to
       [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service).
     default_value: :EXTERNAL
-    # If you're modifying this value, it probably means Global ILB is now
-    # an option. If that's the case, all of the documentation is based on
-    # this resource supporting external load balancing only.
     values:
       - :EXTERNAL
       - :INTERNAL_SELF_MANAGED
+      - :INTERNAL_MANAGED
       - :EXTERNAL_MANAGED
   - !ruby/object:Api::Type::Enum
     name: 'localityLbPolicy'
