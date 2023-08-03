@@ -3,7 +3,7 @@ package google
 import (
 	"fmt"
 	"regexp"
-	"strings"
+	"strconv"
 	"testing"
 	"time"
 
@@ -796,7 +796,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(t 
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName),
-				Check: resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil)),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil)),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -820,7 +820,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withEmptyAllowedConsumerProjects(
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withEmptyAllowedConsumerProjects(instanceName),
-				Check: resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, [])),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{})),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -844,7 +844,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withAllowedConsumerProjects(t *te
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withAllowedConsumerProjects(instanceName),
-				Check: resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, [envvar.GetTestProjectFromEnv()])),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{envvar.GetTestProjectFromEnv()})),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -868,7 +868,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddAllowedConsumerProjects_th
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName),
-				Check: resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil)),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil)),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -878,7 +878,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddAllowedConsumerProjects_th
 			},
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withAllowedConsumerProjects(instanceName),
-				Check: resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, [envvar.GetTestProjectFromEnv()])),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{envvar.GetTestProjectFromEnv()})),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -888,7 +888,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddAllowedConsumerProjects_th
 			},
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName),
-				Check: resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, [])),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{})),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -920,8 +920,8 @@ func TestAccSqlDatabaseInstance_basicInstance_thenPSCEnabled(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName),
-				ExpectError: regexp.MustCompile("Can not enable PSC"),
+				Config:      testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName),
+				ExpectError: regexp.MustCompile("PSC connectivity can not be enabled"),
 			},
 		},
 	})
@@ -938,9 +938,9 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withIpV4Enabled(t *testing.T) {
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSqlDatabaseInstance_withPSCEnabled_withIpV4Enable(instanceName),
-				ExpectError: regexp.MustCompile("Can not enable PSC"),
-			}
+				Config:      testAccSqlDatabaseInstance_withPSCEnabled_withIpV4Enable(instanceName),
+				ExpectError: regexp.MustCompile("PSC connectivity cannot be enabled together with public IP"),
+			},
 		},
 	})
 }
@@ -2565,6 +2565,11 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
   settings {
     tier = "db-f1-micro"
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	}
+	availability_type = "REGIONAL"
   }
 }
 `, instanceName)
@@ -2585,6 +2590,11 @@ resource "google_sql_database_instance" "instance" {
 		}
 		ipv4_enabled = true
     }
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	}
+	availability_type = "REGIONAL"
   }
 }
 `, instanceName)
@@ -2603,7 +2613,13 @@ resource "google_sql_database_instance" "instance" {
 		psc_config {
 			psc_enabled = true
 		}
+		ipv4_enabled = false
     }
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	  }
+	availability_type = "REGIONAL"
   }
 }
 `, instanceName)
@@ -2623,7 +2639,13 @@ resource "google_sql_database_instance" "instance" {
 			psc_enabled = true
 			allowed_consumer_projects = []
 		}
+		ipv4_enabled = false
     }
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	}
+	availability_type = "REGIONAL"
   }
 }
 `, instanceName)
@@ -2644,14 +2666,19 @@ resource "google_sql_database_instance" "instance" {
 			psc_enabled = true
 			allowed_consumer_projects = ["%s"]
 		}
+		ipv4_enabled = false
     }
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	}
+	availability_type = "REGIONAL"
   }
 }
 `, instanceName, project_id)
 }
 
-func verifyPscOperation(resourceName string, isPscConfigExpected bool, expectedPscEnabled bool, expectedAllowedConsumerProjects []string) func(*terraform.State) error
-{
+func verifyPscOperation(resourceName string, isPscConfigExpected bool, expectedPscEnabled bool, expectedAllowedConsumerProjects []string) func(*terraform.State) error {
 	return func(s *terraform.State) error {
 		resource, ok := s.RootModule().Resources[resourceName]
 		if !ok {
@@ -2659,40 +2686,27 @@ func verifyPscOperation(resourceName string, isPscConfigExpected bool, expectedP
 		}
 
 		resourceAttributes := resource.Primary.Attributes
-		settings, ok := resourceAttributes["settings"]
+		_, ok = resourceAttributes["settings.0.ip_configuration.#"]
 		if !ok {
-			return fmt.Errorf("settings block is not present in state for %s", resourceName)
-		}
-
-		ipConfiguration, ok := settings["ip_configuration"]
-		if !ok {
-			return fmt.Errorf("ip_configuration block is not present in state of %s", resourceName)
+			return fmt.Errorf("settings.0.ip_configuration.# block is not present in state for %s", resourceName)
 		}
 
 		if isPscConfigExpected {
-			pscConfig, ok := ipConfiguration["psc_config"]
+			_, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.#"]
 			if !ok {
-				return fmt.Errorf("psc_config block is not present in state of %s", resourceName)
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config property is not present or set in state of %s", resourceName)
 			}
 
-			pscEnabled, ok := pscConfig["psc_enabled"]
-			if !ok && expectedPscEnabled {
-				return fmt.Errorf("psc_enabled property is not present or set in state of %s", resourceName)
+			pscEnabledStr, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.psc_enabled"]
+			pscEnabled, err := strconv.ParseBool(pscEnabledStr)
+			if err != nil || pscEnabled != expectedPscEnabled {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_enabled property value is not set as expected in state of %s, expected %v, actual %v", resourceName, expectedPscEnabled, pscEnabled)
 			}
 
-			if bool(pscEnabled) != expectedPscEnabled {
-				return fmt.Errorf("psc_enabled property value is not set as expected in state of %s, expected %v, actual %v", resourceName, expectedPscEnabled, pscEnabled)
-			}
-
-			allowedConsumerProjects, ok := pscConfig["allowed_consumer_projects"]
-			if !ok && (allowedConsumerProjects != nil && len(expectedAllowedConsumerProjects) != 0) {
-				return fmt.Errorf("psc_enabled property is not present or set in state of %s", resourceName)
-			}
-
-			sort.Strings(allowedConsumerProjects)
-			sort.Strings(expectedAllowedConsumerProjects)
-			if len(allowedConsumerProjects) != len(expectedAllowedConsumerProjects) || allowedConsumerProjects != expectedAllowedConsumerProjects {
-				return fmt.Errorf("psc_enabled property value is not set as expected in state of %s, expected %v, actual %v", resourceName, expectedAllowedConsumerProjects, allowedConsumerProjects)
+			allowedConsumerProjectsStr, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.allowed_consumer_projects.#"]
+			allowedConsumerProjects, err := strconv.Atoi(allowedConsumerProjectsStr)
+			if !ok || allowedConsumerProjects != len(expectedAllowedConsumerProjects) {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.allowed_consumer_projects property is not present or set as expected in state of %s", resourceName)
 			}
 		}
 
