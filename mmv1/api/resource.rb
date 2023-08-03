@@ -17,8 +17,6 @@ require 'api/resource/nested_query'
 require 'api/resource/reference_links'
 require 'google/string_utils'
 
-require 'google/logger'
-
 module Api
   # An object available in the product
   class Resource < Api::Object::Named
