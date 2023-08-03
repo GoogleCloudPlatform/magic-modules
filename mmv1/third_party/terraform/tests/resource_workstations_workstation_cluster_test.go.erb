@@ -84,11 +84,11 @@ data "google_project" "project" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider   		      	 = google-beta
+  provider   		     = google-beta
   workstation_cluster_id = "tf-test-workstation-cluster%{random_suffix}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
-  location   		        = "us-central1"
+  location   		     = "us-central1"
 
   labels = {
     foo = "bar"
@@ -118,11 +118,11 @@ data "google_project" "project" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider   		      	 = google-beta
+  provider   		     = google-beta
   workstation_cluster_id = "tf-test-workstation-cluster%{random_suffix}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
-  location   		        = "us-central1"
+  location   		     = "us-central1"
 
   private_cluster_config {
     allowed_projects        = ["${data.google_project.project.project_id}"]
