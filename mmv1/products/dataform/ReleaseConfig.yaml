@@ -59,7 +59,7 @@ properties:
     name: 'gitCommitish'
     required: true
     description:
-      Git commit/tag/branch name at which the repository should be compiled. 
+      Git commit/tag/branch name at which the repository should be compiled.
       Must exist in the remote repository.
   - !ruby/object:Api::Type::String
     name: 'cronSchedule'
@@ -68,13 +68,13 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'timeZone'
     description:
-      Optional. Specifies the time zone to be used when interpreting cronSchedule. 
-      Must be a time zone name from the time zone database (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). 
+      Optional. Specifies the time zone to be used when interpreting cronSchedule.
+      Must be a time zone name from the time zone database (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
       If left unspecified, the default is UTC.
   - !ruby/object:Api::Type::NestedObject
     name: 'codeCompilationConfig'
     description:
-      Optional. If set, fields of codeCompilationConfig override the default compilation 
+      Optional. If set, fields of codeCompilationConfig override the default compilation
       settings that are specified in dataform.json.
     properties:
       - !ruby/object:Api::Type::String
@@ -86,7 +86,7 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'defaultLocation'
         description: |-
-          Optional. The default BigQuery location to use. Defaults to "US". 
+          Optional. The default BigQuery location to use. Defaults to "US".
           See the BigQuery docs for a full list of locations: https://cloud.google.com/bigquery/docs/locations.
       - !ruby/object:Api::Type::String
         name: 'assertionSchema'
@@ -95,7 +95,7 @@ properties:
         name: 'vars'
         description: |-
           Optional. User-defined variables that are made available to project code during compilation.
-          An object containing a list of "key": value pairs. 
+          An object containing a list of "key": value pairs.
           Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
       - !ruby/object:Api::Type::String
         name: 'databaseSuffix'
@@ -109,8 +109,8 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'recentScheduledReleaseRecords'
     description:
-      Records of the 10 most recent scheduled release attempts, 
-      ordered in in descending order of releaseTime. 
+      Records of the 10 most recent scheduled release attempts,
+      ordered in in descending order of releaseTime.
       Updated whenever automatic creation of a compilation result is triggered by cronSchedule.
     output: true
     item_type: !ruby/object:Api::Type::NestedObject
@@ -123,13 +123,13 @@ properties:
           name: 'compilationResult'
           output: true
           description:
-            The name of the created compilation result, if one was successfully created. 
+            The name of the created compilation result, if one was successfully created.
             Must be in the format projects/*/locations/*/repositories/*/compilationResults/*.
         - !ruby/object:Api::Type::NestedObject
           name: 'errorStatus'
           output: true
           description:
-            The error status encountered upon this attempt to create the compilation 
+            The error status encountered upon this attempt to create the compilation
             result, if the attempt was unsuccessful.
           properties:
             - !ruby/object:Api::Type::Integer
@@ -140,6 +140,6 @@ properties:
               name: 'message'
               output: true
               description:
-                A developer-facing error message, which should be in English. 
-                Any user-facing error message should be localized and sent in 
+                A developer-facing error message, which should be in English.
+                Any user-facing error message should be localized and sent in
                 the google.rpc.Status.details field, or localized by the client.
