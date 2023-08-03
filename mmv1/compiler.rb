@@ -276,6 +276,7 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
     override_providers = {
       'oics' => Provider::TerraformOiCS,
       'validator' => Provider::TerraformGoogleConversion,
+      'tgc' => Provider::TerraformGoogleConversion,
       'kcc' => Provider::TerraformKCC
     }
 
