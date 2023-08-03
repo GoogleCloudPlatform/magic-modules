@@ -97,7 +97,8 @@ export GOOGLE_TEST_DIRECTORY=$(go list ./... | grep -v github.com/hashicorp/terr
 echo "checking terraform version"
 terraform version
 
-
+go build ./...
+add_comment "build status: $?"
 TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test $GOOGLE_TEST_DIRECTORY -parallel $ACCTEST_PARALLELISM -v -run=TestAcc -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > replaying_test.log
 
 test_exit_code=$?
