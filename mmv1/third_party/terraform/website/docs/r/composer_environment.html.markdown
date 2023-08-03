@@ -471,11 +471,8 @@ See [documentation](https://cloud.google.com/composer/docs/how-to/managing/confi
 
 * `connection_type` -
   (Optional, Cloud Composer 2 only)
-  Configuration options for networking connections in the Composer 2 
-  environment. Indicates the user requested specific connection type between
-  Tenant and Customer projects. You cannot set networking connection type in
-  public IP environment. Must be either: `"VPC_PEERING"` or
-  `"PRIVATE_SERVICE_CONNECT"`.
+  Mode of internal communication within the Composer environment. Must be one
+  of `"VPC_PEERING"` or `"PRIVATE_SERVICE_CONNECT"`.
  
 * `enable_private_endpoint` -
   If true, access to the public endpoint of the GKE cluster is denied.

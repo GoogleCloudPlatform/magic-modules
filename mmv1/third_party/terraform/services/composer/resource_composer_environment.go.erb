@@ -486,7 +486,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 										AtLeastOneOf: composerPrivateEnvironmentConfig,
 										ForceNew: true,
 										ValidateFunc: validation.StringInSlice([]string{"VPC_PEERING", "PRIVATE_SERVICE_CONNECT"}, false),
-										Description: `Configuration options for networking connections in the Composer 2 environment. Indicates the user requested specific connection type between Tenant and Customer projects. You cannot set networking connection type in public IP environment. Must be either: "VPC_PEERING" or "PRIVATE_SERVICE_CONNECT".`,
+										Description: `Mode of internal communication within the Composer environment. Must be one of "VPC_PEERING" or "PRIVATE_SERVICE_CONNECT".`,
 									},
 									"enable_private_endpoint": {
 										Type:     schema.TypeBool,
