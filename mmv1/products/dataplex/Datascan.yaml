@@ -265,11 +265,10 @@ properties:
               If set, results will be exported to the provided BigQuery table.
             properties:
               - !ruby/object:Api::Type::String
-              name: 'resultsTable'
-              description: |
-                The BigQuery table to export DataQualityScan results to.
-                Format:
-                projects/{project}/datasets/{dataset}/tables/{table}
+                name: 'resultsTable'
+                description: |
+                  The BigQuery table to export DataQualityScan results to.
+                  Format:projects/{project}/datasets/{dataset}/tables/{table}
       - !ruby/object:Api::Type::Array
         name: 'rules'
         min_size: 1
@@ -453,11 +452,10 @@ properties:
               If set, results will be exported to the provided BigQuery table.
             properties:
               - !ruby/object:Api::Type::String
-              name: 'resultsTable'
-              description: |
-                The BigQuery table to export DataProfileScan results to.
-                Format:
-                projects/{project}/datasets/{dataset}/tables/{table}
+                name: 'resultsTable'
+                description: |
+                  The BigQuery table to export DataProfileScan results to.
+                  Format:projects/{project}/datasets/{dataset}/tables/{table}
       - !ruby/object:Api::Type::NestedObject
         name: 'includeFields'
         description: |
