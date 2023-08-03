@@ -472,6 +472,10 @@ module Provider
         %r{(?<!provider ")github.com/hashicorp/terraform-provider-google/google},
         'github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources'
       )
+      data = data.gsub(
+        %r{(?<!provider ")github.com/hashicorp/terraform-provider-google-beta/google-beta},
+        'github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources'
+      )
       # rubocop:enable Layout/LineLength
       File.write("#{output_folder}/#{target}", data)
     end

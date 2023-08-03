@@ -23,8 +23,10 @@ ENV['TZ'] = 'UTC'
 
 require 'active_support/inflector'
 require 'api/compiler'
+require 'openapi_generate/parser'
 require 'google/logger'
 require 'optparse'
+require 'parallel'
 require 'pathname'
 require 'provider/terraform'
 require 'provider/terraform_kcc'
@@ -42,6 +44,7 @@ force_provider = nil
 types_to_generate = []
 version = 'ga'
 override_dir = nil
+openapi_generate = false
 
 ARGV << '-h' if ARGV.empty?
 Google::LOGGER.level = Logger::INFO
@@ -88,6 +91,9 @@ OptionParser.new do |opt|
   opt.on('-g', '--no-docs', 'Do not generate documentation') do
     generate_docs = false
   end
+  opt.on('--openapi-generate', 'Generate MMv1 YAML from openapi directory (Experimental)') do
+    openapi_generate = true
+  end
 end.parse!
 # rubocop:enable Metrics/BlockLength
 
@@ -97,6 +103,13 @@ raise 'Either -p/--products OR -a/--all must be present' \
   if products_to_generate.nil? && !all_products
 raise 'Option -o/--output is a required parameter' if output_path.nil?
 raise 'Option -e/--engine is a required parameter' if provider_name.nil?
+
+if openapi_generate
+  # Test write OpenAPI --> YAML
+  # This writes to a fake demo product currently. In the future this should
+  # produce the entire product folder including product.yaml for a single OpenAPI spec
+  OpenAPIGenerate::Parser.new('openapi_generate/openapi/*', 'products/demo').run
+end
 
 all_product_files = []
 Dir['products/**/api.yaml'].each do |file_path|
@@ -127,12 +140,14 @@ Google::LOGGER.info "Using #{version} version"
 
 allowed_classes = Google::YamlValidator.allowed_classes
 
+# Building compute takes a long time and can't be parallelized within the product
+# so lets build it first
+all_product_files = all_product_files.sort_by { |product| product == 'products/compute' ? 0 : 1 }
+
 # products_for_version entries are a hash of product definitions (:definitions)
 # and provider config (:overrides) for the product
-products_for_version = []
-provider = nil
 # rubocop:disable Metrics/BlockLength
-all_product_files.each do |product_name|
+products_for_version = Parallel.map(all_product_files, in_processes: 8) do |product_name|
   product_override_path = ''
   product_override_path = File.join(override_dir, product_name, 'product.yaml') if override_dir
   product_yaml_path = File.join(product_name, 'product.yaml')
@@ -255,7 +270,8 @@ all_product_files.each do |product_name|
   pp provider_config if ENV['COMPILER_DEBUG']
 
   if force_provider.nil?
-    provider = provider_config.provider.new(provider_config, product_api, version, start_time)
+    provider = \
+      provider_config.provider.new(provider_config, product_api, version, start_time)
   else
     override_providers = {
       'oics' => Provider::TerraformOiCS,
@@ -273,12 +289,9 @@ all_product_files.each do |product_name|
       override_providers[force_provider].new(provider_config, product_api, version, start_time)
   end
 
-  # provider_config is mutated by instantiating a provider
-  products_for_version.push(definitions: product_api, overrides: provider_config)
-
   unless products_to_generate.include?(product_name)
     Google::LOGGER.info "#{product_name}: Not specified, skipping generation"
-    next
+    next { definitions: product_api, overrides: provider_config, provider: provider } # rubocop:disable Style/HashSyntax
   end
 
   Google::LOGGER.info \
@@ -291,11 +304,20 @@ all_product_files.each do |product_name|
     generate_code,
     generate_docs
   )
+
+  # provider_config is mutated by instantiating a provider.
+  # we need to preserve a single provider instance to use outside of this loop.
+  { definitions: product_api, overrides: provider_config, provider: provider } # rubocop:disable Style/HashSyntax
 end
+
+products_for_version = products_for_version.compact # remove any nil values
 
 # In order to only copy/compile files once per provider this must be called outside
 # of the products loop. This will get called with the provider from the final iteration
 # of the loop
+final_product = products_for_version.compact.last
+provider = final_product[:provider]
+
 provider&.copy_common_files(output_path, generate_code, generate_docs)
 Google::LOGGER.info "Compiling common files for #{provider_name}"
 common_compile_file = "provider/#{provider_name}/common~compile.yaml"

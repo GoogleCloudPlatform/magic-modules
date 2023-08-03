@@ -187,6 +187,9 @@ func readConfigFunc(configFunc *ast.FuncDecl) (Step, error) {
 	for _, stmt := range configFunc.Body.List {
 		if returnStmt, ok := stmt.(*ast.ReturnStmt); ok {
 			for _, result := range returnStmt.Results {
+				if basicLit, ok := result.(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
+					return readConfigBasicLit(basicLit)
+				}
 				if callExpr, ok := result.(*ast.CallExpr); ok {
 					return readConfigFuncCallExpr(callExpr)
 				}
@@ -203,10 +206,8 @@ func readConfigFuncCallExpr(configFuncCallExpr *ast.CallExpr) (Step, error) {
 	if len(configFuncCallExpr.Args) == 0 {
 		return nil, fmt.Errorf("no arguments found for call expression %v", configFuncCallExpr)
 	}
-	if basicLit, ok := configFuncCallExpr.Args[0].(*ast.BasicLit); ok {
-		if basicLit.Kind == token.STRING {
-			return readConfigBasicLit(basicLit)
-		}
+	if basicLit, ok := configFuncCallExpr.Args[0].(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
+		return readConfigBasicLit(basicLit)
 	} else if nestedCallExpr, ok := configFuncCallExpr.Args[0].(*ast.CallExpr); ok {
 		return readConfigFuncCallExpr(nestedCallExpr)
 	}
