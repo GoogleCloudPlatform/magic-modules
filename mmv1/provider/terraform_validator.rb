@@ -185,6 +185,8 @@ module Provider
            'third_party/terraform/services/kms/iam_kms_crypto_key.go.erb'],
           ['converters/google/resources/services/compute/metadata.go',
            'third_party/terraform/services/compute/metadata.go.erb'],
+          ['converters/google/resources/services/compute/compute_flatten_functions.go',
+           'third_party/validator/compute_flatten_functions.go.erb'],
           ['converters/google/resources/services/compute/compute_instance.go',
            'third_party/validator/compute_instance.go.erb']
         ],
