@@ -29,6 +29,7 @@ class packageDetails(packageName: String, displayName: String, providerName: Str
             }
 
             steps {
+                SetGitCommitBuildId()
                 ConfigureGoEnv()
                 DownloadTerraformBinary()
                 RunAcceptanceTests()
