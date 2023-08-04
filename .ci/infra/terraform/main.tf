@@ -222,7 +222,6 @@ module "project-services" {
     "dns.googleapis.com",
     "documentai.googleapis.com",
     "edgecache.googleapis.com",
-    "edgecontainer.googleapis.com",
     "essentialcontacts.googleapis.com",
     "eventarc.googleapis.com",
     "eventarcpublishing.googleapis.com",
