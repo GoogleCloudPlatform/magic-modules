@@ -29,7 +29,7 @@ var (
 	trustedContributors = []string{}
 
 	// This is for reviewers who are "on vacation": will not receive new review assignments but will still receive re-requests for assigned PRs.
-	onVacationReviewers = []string{"SarahFrench"}
+	onVacationReviewers = []string{"SarahFrench", "roaks3"}
 )
 
 // Check if a user is team member to not request a random reviewer
