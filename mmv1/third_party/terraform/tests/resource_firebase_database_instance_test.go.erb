@@ -45,6 +45,9 @@ func TestAccFirebaseDatabaseInstance_firebaseDatabaseInstanceStateChange(t *test
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"region", "instance_id", "desired_state"},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_firebase_database_instance.updated", "database_url"),
+				),
 			},
 			{
 				Config: testAccFirebaseDatabaseInstance_firebaseDatabaseInstanceInState(context, "DISABLED"),
