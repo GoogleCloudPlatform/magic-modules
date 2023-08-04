@@ -28,6 +28,7 @@ fun Google<%= version.capitalize unless version == 'ga' -%>(environment: String,
 
 fun buildConfigurationsForPackages(packages: Map<String, String>, providerName : String, path : String, environment: String, manualVcsRoot: AbsoluteId, branchRef: String, config: ClientConfiguration): List<BuildType> {
     var list = ArrayList<BuildType>()
+    var postSweeperConfig: BuildType? = null
 
     packages.forEach { (packageName, displayName) ->
         if (packageName == "services") {
@@ -43,6 +44,9 @@ fun buildConfigurationsForPackages(packages: Map<String, String>, providerName :
             // Pre-Sweeper
             var preSweeperConfig = s.preSweeperBuildConfig(path, manualVcsRoot, defaultParallelism, triggerConfig)
             list.add(preSweeperConfig)
+
+            // Post-Sweeper - this is added to list later, after dependencies created dynamically below
+            postSweeperConfig = s.postSweeperBuildConfig(path, manualVcsRoot, defaultParallelism, triggerConfig)
         } else {
             // other folders assumed to be packages
             var triggerConfig = NightlyTriggerConfiguration(environment, branchRef)
@@ -54,6 +58,16 @@ fun buildConfigurationsForPackages(packages: Map<String, String>, providerName :
 
             list.add(buildConfig)
         }
+    }
+
+    if (postSweeperConfig != null) {
+        // Make Post-Sweeper dependent on all other build configuration finishing
+        var allDependencyIds = ArrayList<String>()
+        list.forEach { config ->
+            allDependencyIds.add(config.id.toString())
+        }
+        postSweeperConfig!!.addDependencies(allDependencyIds)
+        list.add(postSweeperConfig!!)
     }
 
     return list

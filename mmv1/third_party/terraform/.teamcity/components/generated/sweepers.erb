@@ -23,6 +23,18 @@ class sweeperBuildConfigs(packageName: String, environment: String, branchRef: S
         return createBuildConfig(manualVcsRoot, preSweeperBuildConfigId, configName, sweeperStepName, parallelism, testPrefix, timeout, sweeperRegions, sweeperRun, path, packageName, triggerConfig)
    }
 
+    fun postSweeperBuildConfig(path: String, manualVcsRoot: AbsoluteId, parallelism: Int, triggerConfig: NightlyTriggerConfiguration) : BuildType {
+        val testPrefix = "TestAcc"
+        val timeout = "12"
+        val sweeperRegions = "us-central1"
+        val sweeperRun = "" // Empty string means all sweepers run
+
+        val configName = "Post-Sweeper"
+        val sweeperStepName = "Post-Sweeper"
+
+        return createBuildConfig(manualVcsRoot, postSweeperBuildConfigId, configName, sweeperStepName, parallelism, testPrefix, timeout, sweeperRegions, sweeperRun, path, packageName, triggerConfig)
+    }
+
     fun createBuildConfig(
         manualVcsRoot: AbsoluteId,
         configId: String,

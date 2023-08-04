@@ -163,3 +163,15 @@ fun Triggers.RunNightly(config: NightlyTriggerConfiguration) {
         }
     }
 }
+
+fun BuildType.addDependencies(list: ArrayList<String>){
+    dependencies {
+        list.forEach{ configId ->
+            snapshot(AbsoluteId(configId)) {
+                reuseBuilds = ReuseBuilds.ANY
+                onDependencyFailure = FailureAction.IGNORE
+                onDependencyCancel = FailureAction.ADD_PROBLEM
+            }
+        }
+    }
+}
