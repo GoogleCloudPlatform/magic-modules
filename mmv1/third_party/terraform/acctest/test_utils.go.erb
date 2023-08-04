@@ -88,7 +88,7 @@ func MuxedProviders(testName string) (func() tfprotov5.ProviderServer, error) {
 
 func RandString(t *testing.T, length int) string {
 	if !IsVcrEnabled() {
-		return acctest.RandString(length)
+		return RandString(t, length)
 	}
 	envPath := os.Getenv("VCR_PATH")
 	vcrMode := os.Getenv("VCR_MODE")
