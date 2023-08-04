@@ -107,3 +107,9 @@ Description of the change and how users should adjust their configuration (if ne
 ### Resource-level change example header
 
 Description of the change and how users should adjust their configuration (if needed).
+
+## Resource: `google_identity_platform_project_default_config`
+
+### Deprecated
+
+Use the `google_identity_platform_config` resource instead.
