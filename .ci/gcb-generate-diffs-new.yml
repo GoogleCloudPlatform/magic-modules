@@ -64,17 +64,19 @@ steps:
           - --no-ff
           - head/$_HEAD_BRANCH
 
-    - name: 'gcr.io/graphite-docker-images/pre-build-validator'
+    - name: 'gcr.io/graphite-docker-images/bash-plus'
       id: pre-build-validate
+      entrypoint: '/workspace/.ci/scripts/bash-plus/pre-build-validator/validate.sh'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       env:
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
-      secretEnv: ["GITHUB_TOKEN"]
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
       id: tpg-head
+      secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
@@ -84,7 +86,8 @@ steps:
           - 'ga'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
       id: tpg-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
@@ -96,7 +99,8 @@ steps:
           - 'ga'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
       secretEnv: ["GITHUB_TOKEN"]
       id: tpgb-head
       waitFor: ["merged"]
@@ -108,7 +112,8 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
       id: tpgb-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
@@ -120,7 +125,8 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
       id: tgc-head
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged", "tpg-head"]
@@ -129,10 +135,11 @@ steps:
       args:
           - 'head'
           - 'terraform-google-conversion'
-          - 'ga'
+          - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
       id: tgc-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged", "tpg-base"]
@@ -141,10 +148,12 @@ steps:
       args:
           - 'base'
           - 'terraform-google-conversion'
-          - 'ga'
+          - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
+      id: tf-oics-head
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       env:
@@ -155,7 +164,9 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
+      id: tf-oics-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       env:
@@ -166,7 +177,8 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/github-differ'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/github-differ/generate_comment.sh'
       id: diff
       secretEnv: ["GITHUB_TOKEN"]
       env:
@@ -178,7 +190,8 @@ steps:
       args:
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/terraform-validator-tester/test_terraform_validator.sh'
       id: tgc-test
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
@@ -196,8 +209,9 @@ steps:
           - "17"  # Build step
           - terraform-google-conversion
 
-    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tgc-test-integration-0.12.31
+      entrypoint: '/workspace/.ci/scripts/go-plus/terraform-validator-tester-integration/test_terraform_validator_integration.sh'
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tgc-head", "tgc-base"]
@@ -215,8 +229,9 @@ steps:
           - "18"  # Build step
           - terraform-google-conversion
 
-    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tgc-test-integration-0.13.7
+      entrypoint: '/workspace/.ci/scripts/go-plus/terraform-validator-tester-integration/test_terraform_validator_integration.sh'
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tgc-head", "tgc-base"]
@@ -234,25 +249,19 @@ steps:
           - "19"  # Build step
           - terraform-google-conversion
 
-    - name: 'gcr.io/graphite-docker-images/terraform-tester'
+    - name: 'gcr.io/graphite-docker-images/bash-plus'
       id: tpgb-test
+      entrypoint: '/workspace/.ci/scripts/bash-plus/terraform-tester/test_terraform.sh'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tpgb-head", "tpgb-base"]
-      args:
-          - 'beta'                            # remove after 07/2023
-          - $_PR_NUMBER                       # remove after 07/2023
-          - $COMMIT_SHA                       # remove after 07/2023
-          - $BUILD_ID                         # remove after 07/2023
-          - $PROJECT_ID                       # remove after 07/2023
-          - GoogleCloudPlatform/magic-modules # remove after 07/2023
-          - "20"                              # remove after 07/2023
       env:
         - VERSION=beta
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/terraform-tester'
+    - name: 'gcr.io/graphite-docker-images/bash-plus'
       id: tpg-test
+      entrypoint: '/workspace/.ci/scripts/bash-plus/terraform-tester/test_terraform.sh'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tpg-head", "tpg-base"]
       args:
@@ -268,8 +277,9 @@ steps:
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/gcb-terraform-vcr-tester'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       id: gcb-tpg-vcr-test
+      entrypoint: '/workspace/.ci/scripts/go-plus/gcb-terraform-vcr-tester/test_terraform_vcr.sh'
       secretEnv: ["GITHUB_TOKEN", "GOOGLE_BILLING_ACCOUNT", "GOOGLE_CUST_ID", "GOOGLE_FIRESTORE_PROJECT", "GOOGLE_IDENTITY_USER", "GOOGLE_MASTER_BILLING_ACCOUNT", "GOOGLE_ORG", "GOOGLE_ORG_2", "GOOGLE_ORG_DOMAIN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_SERVICE_ACCOUNT", "SA_KEY", "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION"]
       waitFor: ["diff"]
       env:

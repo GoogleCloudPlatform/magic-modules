@@ -4,8 +4,8 @@
     "asset_type": "compute.googleapis.com/SslPolicy",
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "resource": {
-      "version": "v1",
-      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+      "version": "beta",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
       "discovery_name": "SslPolicy",
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {

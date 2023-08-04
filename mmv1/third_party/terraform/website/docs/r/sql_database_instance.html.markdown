@@ -325,7 +325,7 @@ The optional `settings.backup_configuration` subblock supports:
 
 * `location` - (Optional) The region where the backup will be stored
 
-* `transaction_log_retention_days` - (Optional) The number of days of transaction logs we retain for point in time restore, from 1-7.
+* `transaction_log_retention_days` - (Optional) The number of days of transaction logs we retain for point in time restore, from 1-7. For PostgreSQL Enterprise Plus instances, the number of days of retained transaction logs can be set from 1 to 35. 
 
 * `backup_retention_settings` - (Optional) Backup retention settings. The configuration is detailed below.
 
@@ -434,6 +434,7 @@ to work, cannot be updated, and supports:
     If the field is set to true the replica will be designated as a failover replica.
     If the master instance fails, the replica instance will be promoted as
     the new master instance.
+  ~> **NOTE:** Not supported for Postgres database.
 
 * `master_heartbeat_period` - (Optional) Time in ms between replication
     heartbeats.

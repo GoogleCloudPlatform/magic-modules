@@ -43,6 +43,29 @@ func TestAccComputeRegionBackendService_basic(t *testing.T) {
 	})
 }
 
+func TestAccComputeRegionBackendService_ilbBasic_withUnspecifiedProtocol(t *testing.T) {
+	t.Parallel()
+
+	serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	checkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeRegionBackendService_ilbBasic_withUnspecifiedProtocol(serviceName, checkName),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccComputeRegionBackendService_withBackendInternal(t *testing.T) {
   t.Parallel()
 
@@ -334,6 +357,25 @@ func TestAccComputeRegionBackendService_subsettingUpdate(t *testing.T) {
 	})
 }
 <% end -%>
+
+func testAccComputeRegionBackendService_ilbBasic_withUnspecifiedProtocol(serviceName, checkName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_backend_service" "foobar" {
+  name                  = "%s"
+  health_checks         = [google_compute_health_check.health_check.self_link]
+  protocol              = "UNSPECIFIED"
+  load_balancing_scheme = "INTERNAL"
+  region        = "us-central1"
+}
+
+resource "google_compute_health_check" "health_check" {
+  name     = "%s"
+  http_health_check {
+    port = 80
+  }
+}
+`, serviceName, checkName)
+}
 
 func testAccComputeRegionBackendService_ilbBasic(serviceName, checkName string) string {
 	return fmt.Sprintf(`
@@ -1053,5 +1095,56 @@ resource "google_compute_health_check" "health_check" {
   }
 }
 `, serviceName, checkName)
+}
+<% end -%>
+
+<% unless version == 'ga' -%>
+func TestAccComputeRegionBackendService_withSecurityPolicy(t *testing.T) {
+	t.Parallel()
+
+	serviceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	polName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionBackendService_withSecurityPolicy(serviceName, polName, "google_compute_region_security_policy.policy.self_link"),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionBackendService_withSecurityPolicy(serviceName, polName, "\"\""),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeRegionBackendService_withSecurityPolicy(serviceName, polName, polLink string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_backend_service" "foobar" {
+  name                  = "%s"
+  region                = "us-central1"
+  security_policy       = %s
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+}
+
+resource "google_compute_region_security_policy" "policy" {
+  name        = "%s"
+  region      = "us-central1"
+  description = "basic security policy"
+  type        = "CLOUD_ARMOR"
+}
+`, serviceName, polLink, polName)
 }
 <% end -%>
