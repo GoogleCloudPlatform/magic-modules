@@ -171,6 +171,7 @@ module "project-services" {
     "artifactregistry.googleapis.com",
     "assuredworkloads.googleapis.com",
     "autoscaling.googleapis.com",
+    "backupdr.googleapis.com",
     "beyondcorp.googleapis.com",
     "bigquery.googleapis.com",
     "bigqueryconnection.googleapis.com",
