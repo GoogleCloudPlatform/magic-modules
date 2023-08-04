@@ -268,10 +268,10 @@ module Api
 
     # Prints the access path of the field in the configration eg: metadata.0.labels
     # The only intended purpose is to get the value of the labes field by calling d.Get().
-    def access_path
+    def terraform_lineage
       return name&.underscore if __parent.nil?
 
-      "#{__parent.access_path}.0.#{name&.underscore}"
+      "#{__parent.terraform_lineage}.0.#{name&.underscore}"
     end
 
     def to_json(opts = nil)
@@ -765,11 +765,11 @@ module Api
     # simpler property to generate and means we can avoid conditional logic
     # in Map.
     class KeyValuePairs < Composite
-      # Ignore writing the "effectcive_labels" and "effective_annotations" fields to API.
+      # Ignore writing the "effective_labels" and "effective_annotations" fields to API.
       attr_reader :ignore_write
 
-      def initialize(name = nil, output = nil, api_name = nil, description = nil, min_version = nil,
-                     ignore_write = nil)
+      def initialize(name: nil, output: nil, api_name: nil, description: nil, min_version: nil,
+                     ignore_write: nil)
         super()
 
         @name = name
@@ -790,7 +790,7 @@ module Api
       end
     end
 
-    # An array of string -> string key -> value pairs used specifcally for the "labels" field.
+    # An array of string -> string key -> value pairs used specifically for the "labels" field.
     # The field name with this type should be "labels" literally.
     class KeyValueLabels < KeyValuePairs
       def validate
@@ -801,7 +801,7 @@ module Api
       end
     end
 
-    # An array of string -> string key -> value pairs used specifcally for the "annotations" field.
+    # An array of string -> string key -> value pairs used specifically for the "annotations" field.
     # The field name with this type should be "annotations" literally.
     class KeyValueAnnotations < KeyValuePairs
       def validate

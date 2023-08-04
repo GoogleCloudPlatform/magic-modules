@@ -338,7 +338,7 @@ module Api
       ((@properties || []) + (@parameters || []))
     end
 
-    def properities_with_excluded
+    def properties_with_excluded
       @properties || []
     end
 
@@ -442,9 +442,9 @@ module Api
     def add_labels_related_fields(props)
       props.each do |p|
         if p.is_a? Api::Type::KeyValueLabels
-          props << build_effective_field('labels', p.field_min_version)
+          props << build_effective_labels_field('labels', p.field_min_version)
         elsif p.is_a? Api::Type::KeyValueAnnotations
-          props << build_effective_field('annotations', p.field_min_version)
+          props << build_effective_labels_field('annotations', p.field_min_version)
         elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
           p.properties = add_labels_related_fields(p.all_properties)
         end
@@ -452,18 +452,18 @@ module Api
       props
     end
 
-    def build_effective_field(name, min_version)
+    def build_effective_labels_field(name, min_version)
       description = "All of #{name} (key/value pairs)\
  present on the resource in GCP, including the #{name} configured through Terraform,\
  other clients and services."
 
       Api::Type::KeyValuePairs.new(
-        "effective_#{name}", # name,
-        true,                # output,
-        name,                # api_name,
-        description,
-        min_version,
-        true                 # ignore_write
+        name: "effective_#{name}",
+        output: true,
+        api_name: name,
+        description: description,
+        min_version: min_version,
+        ignore_write: true
       )
     end
 

@@ -33,8 +33,6 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
-    ignore_read_extra:
-      - 'labels'
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_dataset_with_max_time_travel_hours'
     primary_resource_id: 'dataset'
@@ -42,8 +40,6 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
-    ignore_read_extra:
-      - 'labels'
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_dataset_cmek'
     skip_test: true
@@ -59,8 +55,6 @@ examples:
       private: 'private'
       public: 'public'
       account_name: 'bqowner'
-    ignore_read_extra:
-      - 'labels'
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_dataset_authorized_routine'
     primary_resource_id: 'private'
@@ -77,8 +71,6 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
-    ignore_read_extra:
-      - 'labels'
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_dataset_default_collation_set'
     primary_resource_id: 'dataset'
@@ -86,8 +78,6 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
-    ignore_read_extra:
-      - 'labels'
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'delete_contents_on_destroy'
@@ -306,7 +296,7 @@ properties:
       The labels associated with this dataset. You can use these to
       organize and group your datasets
 
-      **Note**: This field does not list all labels present on the resource in GCP.
+      **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
       Please refer to the field `effective_labels` for all of the labels present on the resource.
   - !ruby/object:Api::Type::Integer
     name: 'lastModifiedTime'

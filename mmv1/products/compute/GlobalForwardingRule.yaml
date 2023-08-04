@@ -184,7 +184,6 @@ examples:
       - 'ip_address'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
-  constants: templates/terraform/constants/compute_global_forwarding_rule.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'pscConnectionId'
