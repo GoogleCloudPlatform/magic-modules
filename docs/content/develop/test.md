@@ -101,7 +101,7 @@ This section assumes you've used the [Add a resource]({{< ref "/develop/resource
    - If beta-only fields are being tested, do the following:
      - Change the file suffix to `.go.erb`.
      - Add `<% autogen_exception -%>` to the top of the file.
-     - Wrap the beta-only tests in a version guard: `<% unless version = 'ga' -%>...<% else -%>...<% end -%>`.
+     - Wrap the beta-only tests in a version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`.
 {{< /tab >}}
 {{< /tabs >}}
 
@@ -164,7 +164,7 @@ An update test is a test that creates the target resource and then makes updates
    - If beta-only fields are being tested, do the following:
      - Change the file suffix to `.go.erb`.
      - Add `<% autogen_exception -%>` to the top of the file.
-     - Wrap the beta-only tests in a version guard: `<% unless version = 'ga' -%>...<% else -%>...<% end -%>`.
+     - Wrap the beta-only tests in a version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`.
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 1. Using an editor of your choice, open the existing `*_test.go` or `*_test.go.erb` file in [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests) which contains your create tests.
@@ -211,7 +211,7 @@ An update test is a test that creates the target resource and then makes updates
    - If beta-only fields are being tested, do the following:
      - Change the file suffix to `.go.erb`.
      - Add `<% autogen_exception -%>` to the top of the file.
-     - Wrap the beta-only tests in a version guard: `<% unless version = 'ga' -%>...<% else -%>...<% end -%>`.
+     - Wrap the beta-only tests in a version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`.
 {{< /tab >}}
 {{< /tabs >}}
 
