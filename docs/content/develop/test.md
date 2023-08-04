@@ -57,7 +57,7 @@ A create test is a test that creates the target resource and immediately destroy
 4. Modify the configuration to use templated values.
    - Replace the id of the primary resource you are testing with `<%= ctx[:primary_resource_id] %>`.
    - Replace fields that are identifiers, like `id` or `name`, with an appropriately named variable. For example, `<%= ctx[:vars]['subnetwork_name'] %>`.
-   The resulting configuration for the above example would look like this:
+   - The resulting configuration for the above example would look like this:
    ```tf
    resource "google_compute_subnetwork" "<%= ctx[:primary_resource_id] %>" {
      name          = "<%= ctx[:vars]['subnetwork_name'] %>"
@@ -116,17 +116,50 @@ An update test is a test that creates the target resource and then makes updates
 1. [Generate the providers]({{< ref "/get-started/generate-providers.md" >}}).
 2. From the provider, copy and paste the generated `*_generated_test.go` file into [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests) as a new file call `*_test.go`.
 3. Using an editor of your choice, delete the `*DestroyProducer` function, and all but one test. The remaining test should be the "full" test, or if there is no "full" test, the "basic" test. This will be the starting point for your new update test.
-4. Modify the `TestAcc*` test function to support updates.
-   - Change the suffix of `TestAcc*` to `_update`.
+4. Modify the `TestAcc*` *test function* to support updates.
+   - Change the suffix of the test function to `_update`.
    - Copy the 2 `TestStep` blocks and paste them immediately after, so that there are 4 total test steps.
    - Change the suffix of the first `Config` value to `_full` (or `_basic`).
    - Change the suffix of the second `Config` value to `_update`.
-5. Modify the `testAcc*` Terraform template function to support updates.
-   - Copy the `testAcc*` template function and paste it immediately after so that there are 2 template functions.
-   - Change the suffix of the first `testAcc*` function to `_full` (or `_basic`).
-   - Change the suffix of the second `testAcc*` function to `_update`.
+   - The resulting test function would look similar to this:
+   ```go
+   func TestAccPubsubTopic_update(t *testing.T) {
+      ...
+      acctest.VcrTest(t, resource.TestCase{
+         ...
+         Steps: []resource.TestStep{
+            {
+               Config: testAccPubsubTopic_full(...),
+            },
+            {
+               ...
+            },
+            {
+               Config: testAccPubsubTopic_update(...),
+            },
+            {
+               ...
+            },
+         },
+      })
+   }
+   ```
+5. Modify the `testAcc*` Terraform *template function* to support updates.
+   - Copy the template function and paste it immediately after so that there are 2 template functions.
+   - Change the suffix of the first template function to `_full` (or `_basic`).
+   - Change the suffix of the second template function to `_update`.
+   - The resulting template functions would look similar to this:
+   ```go
+   func testAccPubsubTopic_full(...) string {
+       ...
+   }
+
+   func testAccPubsubTopic_update(...) string {
+       ...
+   }
+   ```
 6. Modify the test as needed.
-   - Modify the `testAcc*_update` Terraform template function so that updatable fields are changed or removed. This may require additions to the `context` map in `TestAcc*_update`.
+   - Modify the template function ending in `_update` so that updatable fields are changed or removed. This may require additions to the `context` map in the test function.
    - Remove the comments at the top of the file.
    - If beta-only fields are being tested, do the following:
      - Change the file suffix to `.go.erb`.
@@ -135,16 +168,45 @@ An update test is a test that creates the target resource and then makes updates
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 1. Using an editor of your choice, open the existing `*_test.go` or `*_test.go.erb` file in [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests) which contains your create tests.
-2. Copy the `TestAcc*` test function for the existing "full" test. If there is no "full" test, use the "basic" test. This will be the starting point for your new update test.
-3. Modify the `TestAcc*` test function to support updates.
-   - Change the suffix of `TestAcc*` to `_update`.
+2. Copy the `TestAcc*` *test function* for the existing "full" test. If there is no "full" test, use the "basic" test. This will be the starting point for your new update test.
+3. Modify the test function to support updates.
+   - Change the suffix of the test function to `_update`.
    - Copy the 2 `TestStep` blocks and paste them immediately after, so that there are 4 total test steps.
    - Change the suffix of the second `Config` value to `_update`.
-4. Add a `testAcc*` Terraform template function to support updates.
+   - The resulting test function would look similar to this:
+   ```go
+   func TestAccPubsubTopic_update(t *testing.T) {
+      ...
+      acctest.VcrTest(t, resource.TestCase{
+         ...
+         Steps: []resource.TestStep{
+            {
+               Config: testAccPubsubTopic_full(...),
+            },
+            {
+               ...
+            },
+            {
+               Config: testAccPubsubTopic_update(...),
+            },
+            {
+               ...
+            },
+         },
+      })
+   }
+   ```
+4. Add a Terraform *template function* to support updates.
    - Copy the full (or basic) `testAcc*` template function.
-   - Change the suffix of the new `testAcc*` function to `_update`.
+   - Change the suffix of the new template function to `_update`.
+   - The new template function would look similar to this:
+   ```go
+   func testAccPubsubTopic_update(...) string {
+       ...
+   }
+   ```
 5. Modify the test as needed.
-   - Modify the new `testAcc*` Terraform template function so that updatable fields are changed or removed. This may require additions to the `context` map in `TestAcc*_update`.
+   - Modify the new template function so that updatable fields are changed or removed. This may require additions to the `context` map in the test function.
    - Remove the comments at the top of the file.
    - If beta-only fields are being tested, do the following:
      - Change the file suffix to `.go.erb`.
