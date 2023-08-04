@@ -36,6 +36,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/monitoring_monitored_project.go.erb
   pre_read: templates/terraform/pre_read/monitoring_monitored_project.go.erb
   test_check_destroy: templates/terraform/custom_check_destroy/monitoring_monitored_project.go.erb
+  constants: templates/terraform/constants/monitoring_monitored_project.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'monitoring_monitored_project_basic'
@@ -67,7 +68,7 @@ properties:
     name: name
     description: 'Immutable. The resource name of the `MonitoredProject`. On input, the resource name includes the scoping project ID and monitored project ID. On output, it contains the equivalent project numbers. Example: `locations/global/metricsScopes/{SCOPING_PROJECT_ID_OR_NUMBER}/projects/{MONITORED_PROJECT_ID_OR_NUMBER}`'
     required: true
-    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    diff_suppress_func: 'resourceMonitoringMonitoredProjectNameDiffSuppress'
   - !ruby/object:Api::Type::String
     name: createTime
     description: Output only. The time when this `MonitoredProject` was created.

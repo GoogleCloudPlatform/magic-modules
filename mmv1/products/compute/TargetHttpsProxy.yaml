@@ -106,16 +106,15 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'sslCertificates'
     description: |
-      A list of SslCertificate resources that are used to authenticate
-      connections between users and the load balancer. At least one SSL
-      certificate must be specified.
+      A list of SslCertificate resource URLs or Certificate Manager certificate URLs that are used to authenticate
+      connections between users and the load balancer. At least one resource must be specified.
     update_verb: :POST
     update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setSslCertificates'
     item_type: !ruby/object:Api::Type::ResourceRef
       name: 'sslCertificate'
       resource: 'SslCertificate'
       imports: 'selfLink'
-      description: 'The SSL certificates used by this TargetHttpsProxy'
+      description: 'The SSL certificate URL or Certificate Manager certificate resource URL used by this TargetHttpsProxy'
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'certificateMap'

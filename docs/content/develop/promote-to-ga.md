@@ -71,4 +71,4 @@ For handwritten resources, modify the documentation as appropriate for your chan
 
 ## What's next?
 
-- [Test your changes]({{< ref "/get-started/run-provider-tests.md" >}}) 
+- [Test your changes]({{< ref "/develop/run-tests.md" >}}) 
