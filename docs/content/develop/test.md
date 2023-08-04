@@ -81,9 +81,9 @@ A create test is a test that creates the target resource and immediately destroy
          subnetwork_name: "example-subnet"
          network_name: "example-network"
    ```
-   {{< hint warning >}}
-   **Warning:** Values in `vars` must include a `-` (or `_`). They [trigger the addition of a `tf-test` prefix](https://github.com/GoogleCloudPlatform/magic-modules/blob/6858338f013f5dc57729ec037883a3594441ea62/mmv1/provider/terraform/examples.rb#L244), which the sweeper uses to clean them up after tests run.
-   {{< /hint >}}
+{{< hint warning >}}
+**Warning:** Values in `vars` must include a `-` (or `_`). They [trigger the addition of a `tf-test` prefix](https://github.com/GoogleCloudPlatform/magic-modules/blob/6858338f013f5dc57729ec037883a3594441ea62/mmv1/provider/terraform/examples.rb#L244), which the sweeper uses to clean them up after tests run.
+{{< /hint >}}
 6. If beta-only fields are being tested:
    - Add `min_version: beta` to the `examples` block in `RESOURCE_NAME.yaml`.
 {{< /tab >}}
