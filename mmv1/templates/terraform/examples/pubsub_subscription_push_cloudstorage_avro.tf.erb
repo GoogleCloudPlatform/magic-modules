@@ -1,6 +1,7 @@
 resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
   name  = "<%= ctx[:vars]['bucket_name'] %>"
-  location = "us-central1"
+  location = "US"
+  uniform_bucket_level_access = true
 }
 
 resource "google_pubsub_topic" "<%= ctx[:primary_resource_id] %>" {
@@ -18,28 +19,36 @@ resource "google_pubsub_subscription" "<%= ctx[:primary_resource_id] %>" {
     filename_suffix = "-%{random_suffix}"
   
     max_bytes = 1000
+    max_duration = "300s"
   
     avro_config {
       write_metadata = true
     }
   }
-
-  depends_on = [
-    google_storage_bucket_iam_member.viewer, 
-    google_storage_bucket_iam_member.editor
+  depends_on = [ 
+    google_storage_bucket.<%= ctx[:primary_resource_id] %>,
+    google_storage_bucket_iam_member.reader,
+    google_storage_bucket_iam_member.viewer,
+    google_storage_bucket_iam_member.creator,
   ]
 }
 
 data "google_project" "project" {
 }
 
-resource "google_storage_bucket_iam_member" "viewer" {
+resource "google_storage_bucket_iam_member" "reader" {
   bucket = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
   role   = "roles/storage.legacyBucketReader"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
 }
 
-resource "google_storage_bucket_iam_member" "editor" {
+resource "google_storage_bucket_iam_member" "viewer" {
+  bucket = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+}
+
+resource "google_storage_bucket_iam_member" "creator" {
   bucket = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
   role   = "roles/storage.objectCreator"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
