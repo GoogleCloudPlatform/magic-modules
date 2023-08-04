@@ -212,6 +212,8 @@ properties:
     name: 'restoreSourceCluster'
     ignore_read: true
     immutable: true
+    required_with:
+      - restore_point_in_time
     conflicts: 
       - restore_source_backup
     description: |
@@ -223,6 +225,8 @@ properties:
     name: 'restorePointInTime'
     ignore_read: true
     immutable: true
+    required_with:
+      - restore_source_cluster
     conflicts: 
       - restore_source_backup
     description: |
