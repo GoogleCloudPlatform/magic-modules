@@ -311,6 +311,10 @@ func (p Property) DefaultStateSetter() string {
 	case SchemaTypeFloat:
 		fallthrough
 	case SchemaTypeMap:
+		if p.IsResourceLabels() || p.IsResourceAnnotations() {
+			return fmt.Sprintf("d.Set(%q, flatten%s%s(res.%s, d))", p.Name(), p.resource.PathType(), p.PackagePath(), p.PackageName)
+		}
+
 		return fmt.Sprintf("d.Set(%q, res.%s)", p.Name(), p.PackageName)
 	case SchemaTypeList, SchemaTypeSet:
 		if p.typ.Items != nil && ((p.typ.Items.Type == "string" && len(p.typ.Items.Enum) == 0) || p.typ.Items.Type == "integer") {
@@ -438,6 +442,14 @@ func (p Property) Objects() (props []Property) {
 	}
 
 	return props
+}
+
+func (p Property) IsResourceLabels() bool {
+	return p.Name() == "labels" && p.parent == nil
+}
+
+func (p Property) IsResourceAnnotations() bool {
+	return p.Name() == "annotations" && p.parent == nil
 }
 
 // collapsedProperties returns the input list of properties with nested objects collapsed if needed.
@@ -879,6 +891,12 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		}
 
 		props = append(props, p)
+
+		// Add the "effective_labels" property when the current property is top level "labels" or
+		// add the "effective_annotations" property when the current property is top level "annotations"
+		if p.IsResourceLabels() || p.IsResourceAnnotations() {
+			props = append(props, build_effective_field(p, resource, parent))
+		}
 	}
 
 	// handle conflict fields
@@ -900,4 +918,21 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 	sort.SliceStable(props, propComparator(props))
 
 	return props, nil
+}
+
+func build_effective_field(p Property, resource *Resource, parent *Property) Property {
+	title := fmt.Sprintf("effective_%s", p.title)
+	description := fmt.Sprintf("All of %s (key/value pairs) present on the resource in GCP, including the %s configured through Terraform, other clients and services.", p.title, p.title)
+	stateSetter := fmt.Sprintf("d.Set(%q, res.%s)", title, p.PackageName)
+
+	return Property{
+		title:       title,
+		Type:        p.Type,
+		Description: description,
+		resource:    resource,
+		parent:      parent,
+		Optional:    true,
+		Computed:    true,
+		StateSetter: &stateSetter,
+	}
 }
