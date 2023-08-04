@@ -2160,6 +2160,11 @@ resource "google_bigquery_connection" "test" {
 	cloud_resource {}
 }
 
+locals {
+	connection_id_split = split("/", google_bigquery_connection.test.name)
+	connection_id_reformatted = "${local.connection_id_split[1]}.${local.connection_id_split[3]}.${local.connection_id_split[5]}"
+ }
+
 resource "google_project_iam_member" "test" {
 	role = "roles/storage.objectViewer"
 	project = data.google_project.project.id
