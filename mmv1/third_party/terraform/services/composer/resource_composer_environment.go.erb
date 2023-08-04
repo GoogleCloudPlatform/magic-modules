@@ -1520,7 +1520,9 @@ func flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg *composer.P
 	}
 
 	transformed := make(map[string]interface{})
-	transformed["connection_type"] = envCfg.NetworkingConfig.ConnectionType
+	if envCfg.NetworkingConfig != nil{
+		transformed["connection_type"] = envCfg.NetworkingConfig.ConnectionType
+	}
 	transformed["enable_private_endpoint"] = envCfg.PrivateClusterConfig.EnablePrivateEndpoint
 	transformed["master_ipv4_cidr_block"] = envCfg.PrivateClusterConfig.MasterIpv4CidrBlock
 	transformed["cloud_sql_ipv4_cidr_block"] = envCfg.CloudSqlIpv4CidrBlock
