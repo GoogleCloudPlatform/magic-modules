@@ -81,7 +81,7 @@ properties:
       - :STATE_ARCHIVED
       - :STATE_PAUSED
   - !ruby/object:Api::Type::String
-    name: 'createtTime'
+    name: 'createTime'
     description: |
       The timestamp when the pipeline was initially created. Set by the Data Pipelines service.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
@@ -171,6 +171,7 @@ properties:
                     name: 'network'
                     description: |
                       Network to which VMs will be assigned. If empty or unspecified, the service will use the network "default".
+                    default_from_api: true
                   - !ruby/object:Api::Type::String
                     name: 'subnetwork'
                     description: |
@@ -261,7 +262,6 @@ properties:
                 description: |
                   The runtime environment for the Flex Template job.
                   https://cloud.google.com/dataflow/docs/reference/data-pipelines/rest/v1/projects.locations.pipelines#FlexTemplateRuntimeEnvironment
-                required: true
                 properties:
                   - !ruby/object:Api::Type::Integer
                     name: 'numWorkers'
