@@ -55,6 +55,15 @@ class packageDetails(packageName: String, displayName: String, providerName: Str
             triggers {
                 RunNightly(triggerConfig)
             }
+
+            dependencies {
+                // Acceptance tests need the Pre-Sweeper step to have completed first
+                snapshot(RelativeId(preSweeperBuildConfigId)) {
+                    reuseBuilds = ReuseBuilds.ANY
+                    onDependencyFailure = FailureAction.IGNORE
+                    onDependencyCancel = FailureAction.ADD_PROBLEM
+                }
+            }
         }
     }
 

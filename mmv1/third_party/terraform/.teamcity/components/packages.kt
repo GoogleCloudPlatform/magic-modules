@@ -10,6 +10,7 @@ var packages = mapOf(
         "provider" to "SDK Provider",
         "fwprovider" to "Framework Plugin Provider",
         "services" to "Services",
+        "sweeper" to "Sweeper",
         "tpgdclresource" to "TPG DCL Resource",
         "tpgiamresource" to "TPG IAM Resource",
         "tpgresource" to "TPG Resource",
