@@ -53,8 +53,8 @@ fun BuildSteps.SetGitCommitBuildId() {
             GIT_HASH_SHORT=${'$'}{GIT_HASH:0:7}
             echo "##teamcity[buildNumber '${'$'}{GIT_HASH_SHORT}']"
         """.trimIndent()
-        // ${'$'} is required to allow creating a script in TeamCity that contains parts like ${GIT_HASH_SHORT},
-        // while both mitigating Kotlin syntax issues and TeamCity script issues. For more info see:
+        // ${'$'} is required to allow creating a script in TeamCity that contains
+        // parts like ${GIT_HASH_SHORT} without having Kotlin syntax issues. For more info see:
         // https://youtrack.jetbrains.com/issue/KT-2425/Provide-a-way-for-escaping-the-dollar-sign-symbol-in-multiline-strings-and-string-templates
     })
 }
@@ -64,7 +64,13 @@ fun BuildSteps.DownloadTerraformBinary() {
     var terraformUrl = "https://releases.hashicorp.com/terraform/%env.TERRAFORM_CORE_VERSION%/terraform_%env.TERRAFORM_CORE_VERSION%_linux_amd64.zip"
     step(ScriptBuildStep {
         name = "Download Terraform Core v%env.TERRAFORM_CORE_VERSION%.."
-        scriptContent = "mkdir -p tools && wget -O tf.zip %s && unzip tf.zip && mv terraform tools/".format(terraformUrl)
+        scriptContent = """
+        #!/bin/bash
+        mkdir -p tools
+        wget -O tf.zip %s
+        unzip tf.zip
+        mv terraform tools/
+        """.format(terraformUrl).trimIndent()
     })
 }
 
