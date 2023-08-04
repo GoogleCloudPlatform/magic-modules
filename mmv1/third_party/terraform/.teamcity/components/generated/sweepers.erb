@@ -47,7 +47,8 @@ class sweeperBuildConfigs(packageName: String, environment: String, branchRef: S
         sweeperRun: String,
         path: String,
         packageName: String,
-        triggerConfig: NightlyTriggerConfiguration
+        triggerConfig: NightlyTriggerConfiguration,
+        timeout: Int = defaultTimeoutDuration
         ) : BuildType {
         return BuildType {
 
@@ -86,6 +87,10 @@ class sweeperBuildConfigs(packageName: String, environment: String, branchRef: S
 
             triggers {
                 RunNightly(triggerConfig)
+            }
+
+            failureConditions {
+                executionTimeoutMin = timeout
             }
         }
     }

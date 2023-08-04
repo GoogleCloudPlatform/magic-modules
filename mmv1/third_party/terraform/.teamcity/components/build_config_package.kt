@@ -16,7 +16,7 @@ class packageDetails(packageName: String, displayName: String, providerName: Str
 
     // buildConfiguration returns a BuildType for a service package
     // For BuildType docs, see https://teamcity.jetbrains.com/app/dsl-documentation/root/build-type/index.html
-    fun buildConfiguration(path: String, manualVcsRoot: AbsoluteId, parallelism: Int, triggerConfig: NightlyTriggerConfiguration) : BuildType {
+    fun buildConfiguration(path: String, manualVcsRoot: AbsoluteId, parallelism: Int, triggerConfig: NightlyTriggerConfiguration, timeout: Int = defaultTimeoutDuration) : BuildType {
         return BuildType {
             // TC needs a consistent ID for dynamically generated packages
             id(uniqueID())
@@ -63,6 +63,10 @@ class packageDetails(packageName: String, displayName: String, providerName: Str
                     onDependencyFailure = FailureAction.IGNORE
                     onDependencyCancel = FailureAction.ADD_PROBLEM
                 }
+            }
+
+            failureConditions {
+                executionTimeoutMin = timeout
             }
         }
     }
