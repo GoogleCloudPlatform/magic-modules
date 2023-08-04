@@ -246,6 +246,26 @@ func TestAccBigQueryTable_AvroPartitioning(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryBigLakeManagedTable(t *testing.T) {
+	t.Parallel()
+	bucketName := testBucketName(t)
+	connectionID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigLakeManagedTable(bucketName, connectionID, datasetID, tableID),
+			},
+		},
+	})
+}
+
 func TestAccBigQueryExternalDataTable_json(t *testing.T) {
 	t.Parallel()
 	bucketName := testBucketName(t)
@@ -2124,6 +2144,48 @@ resource "google_bigquery_table" "test" {
   }
 }
 `, datasetID, bucketName, objectName, content, connectionID, projectID, tableID, schema)
+}
+
+func testAccBigLakeManagedTable(bucketName, connectionID, datasetID, tableID string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "test" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_bigquery_connection" "test" {
+	connection_id = "%s"
+	location = "US"
+	cloud_resource {}
+}
+
+resource "google_project_iam_member" "test" {
+	role = "roles/storage.objectViewer"
+	project = data.google_project.project.id
+	member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+	deletion_protection = false
+	table_id   = "%s"
+	dataset_id = google_bigquery_dataset.test.dataset_id
+	biglake_configuration {
+	  connection_id   = local.connection_id_reformatted
+	  storage_uri = "gs://${google_storage_bucket.test.name}/data",
+	  file_format = "PARQUET"
+	  table_format = "ICEBERG"
+	}
+  
+	depends_on = [
+	  google_project_iam_member.test
+	]
+}
+`, bucketName, connectionID, datasetID, tableID)
 }
 
 func testAccBigQueryTableJson(bucketName, datasetID, tableID, encoding string) string {
