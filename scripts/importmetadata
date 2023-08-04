@@ -52,8 +52,8 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 		importable=$(ggrep -Pzo 'return ResourceLoggingBucketConfig' $file)
 		if [ -z "$importable"  ]
     	then
-#			echo -n \	\"$resource\"\: >> importmetadata.txt
-#			echo \	not importable >> importmetadata.txt
+			echo -n \	\"$resource\"\: >> importmetadata.txt
+			echo \	not importable >> importmetadata.txt
 
 # NOT IMPORTABLE RESOURCES
 			continue
