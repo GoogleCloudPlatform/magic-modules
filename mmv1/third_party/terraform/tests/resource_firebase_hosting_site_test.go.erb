@@ -52,7 +52,6 @@ resource "google_firebase_web_app" "before" {
   provider = google-beta
   project  = "%{project_id}"
   display_name = "tf-test Test web app before for Firebase Hosting"
-  deletion_policy = "DELETE"
 }
 
 resource "google_firebase_hosting_site" "update" {
@@ -70,7 +69,6 @@ resource "google_firebase_web_app" "after" {
   provider = google-beta
   project  = "%{project_id}"
   display_name = "tf-test Test web app after for Firebase Hosting"
-  deletion_policy = "DELETE"
 }
 
 resource "google_firebase_hosting_site" "update" {
