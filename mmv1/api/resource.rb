@@ -461,8 +461,8 @@ module Api
         name: "effective_#{name}",
         output: true,
         api_name: name,
-        description: description,
-        min_version: min_version,
+        description:,
+        min_version:,
         ignore_write: true
       )
     end
