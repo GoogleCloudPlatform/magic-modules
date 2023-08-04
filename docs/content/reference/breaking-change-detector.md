@@ -22,7 +22,7 @@ rules.
 
 This page covers the analyses of the detector and is used to provide context for
 contributors. If you're making a breaking change,
-see [make a breaking change](/magic-modules/docs/develop/make-a-breaking-change)
+see [make a breaking change]({{< ref "/develop/make-a-breaking-change" >}})
 for details on making a breaking change during a major release development
 period.
 

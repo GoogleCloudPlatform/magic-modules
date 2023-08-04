@@ -15,9 +15,8 @@
 name: 'Config'
 base_url: projects/{{project}}/locations/{{location}}/transferConfigs?serviceAccountName={{service_account_name}}
 self_link: '{{name}}'
-update_url: "{{name}}?serviceAccountName={{service_account_name}}"
+update_url: "{{name}}?serviceAccountName={{service_account_name}}&updateMask=serviceAccountName,displayName,destinationDatasetId,schedule,scheduleOptions,emailPreferences,notificationPubsubTopic,dataRefreshWindowDays,disabled,params"
 update_verb: :PATCH
-update_mask: true
 description: |
   Represents a data transfer configuration. A transfer configuration
   contains all metadata needed to perform a data transfer.

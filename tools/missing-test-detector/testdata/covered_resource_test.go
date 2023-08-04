@@ -36,7 +36,7 @@ resource "covered_resource" "resource" {
 }
 
 func testAccCoveredResource_update() string {
-	return acctest.Nprintf(`
+	return `
 resource "covered_resource" "resource" {
   field_two {
     field_three = "value-two"
@@ -47,5 +47,5 @@ resource "covered_resource" "resource" {
     }
   }
 }
-`, context)
+`
 }

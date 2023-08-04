@@ -8,6 +8,11 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
     password = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
   }
 
+  continuous_backup_config {
+    enabled              = true
+    recovery_window_days = 14
+  }
+
   automated_backup_policy {
     location      = "us-central1"
     backup_window = "1800s"
