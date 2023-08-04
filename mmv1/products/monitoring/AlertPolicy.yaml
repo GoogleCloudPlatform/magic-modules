@@ -852,7 +852,6 @@ properties:
                 default value is zero. Must be zero or positive.
             - !ruby/object:Api::Type::String
               name: evaluationInterval
-              required: true
               description: |
                 How often this rule should be evaluated. Must be a positive multiple
                 of 30 seconds or missing. The default value is 30 seconds. If this
