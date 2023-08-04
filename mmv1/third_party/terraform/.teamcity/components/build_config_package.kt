@@ -19,7 +19,7 @@ class packageDetails(packageName: String, displayName: String, providerName: Str
     fun buildConfiguration(path: String, manualVcsRoot: AbsoluteId, parallelism: Int, triggerConfig: NightlyTriggerConfiguration) : BuildType {
         return BuildType {
             // TC needs a consistent ID for dynamically generated packages
-            id(uniqueID(providerName))
+            id(uniqueID())
 
             name = "%s - Acceptance Tests".format(displayName)
 
@@ -58,12 +58,12 @@ class packageDetails(packageName: String, displayName: String, providerName: Str
         }
     }
 
-    fun uniqueID(provider: String) : String {
+    fun uniqueID() : String {
         // Replacing chars can be necessary, due to limitations on IDs
         // "ID should start with a latin letter and contain only latin letters, digits and underscores (at most 225 characters)." 
-        var pv = provider.replace("-", "").toUpperCase()
-        var env = environment.toUpperCase().replace("-", "").replace(".", "").toUpperCase()
-        var pkg = packageName.toUpperCase()
+        var pv = this.providerName.replace("-", "").toUpperCase()
+        var env = this.environment.toUpperCase().replace("-", "").replace(".", "").toUpperCase()
+        var pkg = this.packageName.toUpperCase()
 
         return "%s_SERVICE_%s_%s".format(pv, env, pkg)
     }
