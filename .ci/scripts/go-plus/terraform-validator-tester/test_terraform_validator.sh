@@ -44,6 +44,9 @@ curl \
 
 set +e
 
+go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/$github_username/terraform-provider-google-beta@$new_branch
+go mod tidy
+
 make test
 exit_code=$?
 
