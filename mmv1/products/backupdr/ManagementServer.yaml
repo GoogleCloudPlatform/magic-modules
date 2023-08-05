@@ -25,6 +25,9 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/backup-disaster-recovery/docs'
   api: 'https://cloud.google.com/backup-disaster-recovery/docs/deployment/deployment-plan'
 autogen_async: true
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 40
+  delete_minutes: 40
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'backup_dr_management_server'
