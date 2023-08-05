@@ -23,29 +23,15 @@ resource "google_pubsub_subscription" "<%= ctx[:primary_resource_id] %>" {
   }
   depends_on = [ 
     google_storage_bucket.<%= ctx[:primary_resource_id] %>,
-    google_storage_bucket_iam_member.reader,
-    google_storage_bucket_iam_member.viewer,
-    google_storage_bucket_iam_member.creator,
+    google_storage_bucket_iam_member.admin,
   ]
 }
 
 data "google_project" "project" {
 }
 
-resource "google_storage_bucket_iam_member" "reader" {
+resource "google_storage_bucket_iam_member" "admin" {
   bucket = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
-  role   = "roles/storage.legacyBucketReader"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-}
-
-resource "google_storage_bucket_iam_member" "viewer" {
-  bucket = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
-  role   = "roles/storage.objectViewer"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-}
-
-resource "google_storage_bucket_iam_member" "creator" {
-  bucket = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
-  role   = "roles/storage.objectCreator"
+  role   = "roles/storage.admin"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
 }
