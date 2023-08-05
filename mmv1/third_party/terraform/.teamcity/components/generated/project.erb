@@ -27,9 +27,22 @@ fun Google<%= version.capitalize unless version == 'ga' -%>(environment: String,
 }
 
 fun buildConfigurationsForPackages(packages: Map<String, String>, providerName : String, path : String, environment: String, manualVcsRoot: AbsoluteId, branchRef: String, config: ClientConfiguration): List<BuildType> {
-    var list = ArrayList<BuildType>()
     var postSweeperConfig: BuildType? = null
+    var triggerConfig = NightlyTriggerConfiguration(environment, branchRef)
 
+    var list = ArrayList<BuildType>()
+
+    // build configuration for the google package, i.e. files directly inside ./google(-beta)
+    // TODO(SarahFrench): refactor code so buildConfigurationsForPackages isn't called by buildConfigurationsForPackages
+    // if below only necessary due to that problem
+    if (!path.contains("services")){
+        var rootPkg = packageDetails(providerName, providerName, providerName, environment)
+        var rootBuildConfig = rootPkg.buildConfiguration(".", manualVcsRoot, defaultParallelism, triggerConfig)
+        rootBuildConfig.params.ConfigureGoogleSpecificTestParameters(config)
+        list.add(rootBuildConfig)
+    }
+
+    // build configurations for the tests in packages nested within ./google(-beta)
     packages.forEach { (packageName, displayName) ->
         if (packageName == "services") {
             // `services` is a folder containing packages, not a package itself; call buildConfigurationsForPackages to iterate through directories found within `services`
@@ -37,8 +50,6 @@ fun buildConfigurationsForPackages(packages: Map<String, String>, providerName :
             list.addAll(serviceList)
         } else if (packageName == "sweeper") {
             // `sweepers` is the folder containing `resource.TestMain`, which allows sweeper tests to be invoked
-            var triggerConfig = NightlyTriggerConfiguration(environment, branchRef)
-            
             var s = sweeperBuildConfigs(packageName, environment, branchRef, config)
 
             // Pre-Sweeper
@@ -51,8 +62,6 @@ fun buildConfigurationsForPackages(packages: Map<String, String>, providerName :
             postSweeperConfig.params.ConfigureGoogleSpecificTestParameters(config)
         } else {
             // other folders assumed to be packages
-            var triggerConfig = NightlyTriggerConfiguration(environment, branchRef)
-
             var pkg = packageDetails(packageName, displayName, providerName, environment)
             var buildConfig = pkg.buildConfiguration(path, manualVcsRoot, defaultParallelism, triggerConfig)
 
@@ -62,6 +71,7 @@ fun buildConfigurationsForPackages(packages: Map<String, String>, providerName :
         }
     }
 
+    // TODO(SarahFrench): refactor code so buildConfigurationsForPackages isn't called by buildConfigurationsForPackages
     if (postSweeperConfig != null) {
         // Make Post-Sweeper dependent on all other build configuration finishing
         var allDependencyIds = ArrayList<String>()
