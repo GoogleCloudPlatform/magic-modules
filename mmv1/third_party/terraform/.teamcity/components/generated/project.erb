@@ -43,10 +43,12 @@ fun buildConfigurationsForPackages(packages: Map<String, String>, providerName :
 
             // Pre-Sweeper
             var preSweeperConfig = s.preSweeperBuildConfig(path, manualVcsRoot, defaultParallelism, triggerConfig)
+            preSweeperConfig.params.ConfigureGoogleSpecificTestParameters(config)
             list.add(preSweeperConfig)
 
             // Post-Sweeper - this is added to list later, after dependencies created dynamically below
             postSweeperConfig = s.postSweeperBuildConfig(path, manualVcsRoot, defaultParallelism, triggerConfig)
+            postSweeperConfig.params.ConfigureGoogleSpecificTestParameters(config)
         } else {
             // other folders assumed to be packages
             var triggerConfig = NightlyTriggerConfiguration(environment, branchRef)
