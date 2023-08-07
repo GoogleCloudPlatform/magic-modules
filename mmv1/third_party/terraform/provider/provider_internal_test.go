@@ -688,3 +688,74 @@ func TestProvider_providerConfigure_project(t *testing.T) {
 		})
 	}
 }
+
+func TestProvider_providerConfigure_requestTimeout(t *testing.T) {
+	cases := map[string]struct {
+		ConfigValues        map[string]interface{}
+		ExpectedValue       string
+		ExpectedSchemaValue string
+		ExpectError         bool
+		ExpectFieldUnset    bool
+	}{
+		"Invalid timeout value set": {
+			ConfigValues: map[string]interface{}{
+				"request_timeout": "timeout",
+			},
+			ExpectedValue:       "timeout",
+			ExpectedSchemaValue: "timeout",
+			ExpectError:         true,
+			ExpectFieldUnset:    false,
+		},
+		"when config is unset, the default timeout will be 30s": {
+			ExpectedValue:    "0s", // TODO: check why default value is not 30s
+			ExpectFieldUnset: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			ctx := context.Background()
+			unsetTestProviderConfigEnvs(t)
+			p := Provider()
+			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
+
+			// Act
+			c, diags := providerConfigure(ctx, d, p)
+
+			// Assert
+			if diags.HasError() && !tc.ExpectError {
+				t.Fatalf("unexpected error(s): %#v", diags)
+			}
+			if !diags.HasError() && tc.ExpectError {
+				t.Fatal("expected error(s) but got none")
+			}
+			if diags.HasError() && tc.ExpectError {
+				v, ok := d.GetOk("request_timeout")
+				if ok {
+					val := v.(string)
+					if val != tc.ExpectedSchemaValue {
+						t.Fatalf("expected request_timeout value set in provider data to be %s, got %s", tc.ExpectedSchemaValue, val)
+					}
+					if tc.ExpectFieldUnset {
+						t.Fatalf("expected request_timeout value to not be set in provider data, got %s", val)
+					}
+				}
+				// Return early in tests where errors expected
+				return
+			}
+
+			v := d.Get("request_timeout")
+			val := v.(string)
+			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+
+			if val != tc.ExpectedSchemaValue {
+				t.Fatalf("expected request_timeout value set in provider data to be %s, got %s", tc.ExpectedSchemaValue, val)
+			}
+			if config.RequestTimeout.String() != tc.ExpectedValue {
+				t.Fatalf("expected request_timeout value in provider struct to be %s, got %v", tc.ExpectedValue, config.RequestTimeout.String())
+			}
+		})
+	}
+}
