@@ -32,7 +32,7 @@ fun buildConfigurationsForPackages(packages: Map<String, String>, providerName :
 
     var list = ArrayList<BuildType>()
 
-    // build configuration for the google package, i.e. files directly inside ./google(-beta)
+    // build configuration for the google(-beta) package, i.e. files directly inside ./google(-beta)
     // TODO(SarahFrench): refactor code so buildConfigurationsForPackages isn't called by buildConfigurationsForPackages
     // if below only necessary due to that problem
     if (!path.contains("services")){

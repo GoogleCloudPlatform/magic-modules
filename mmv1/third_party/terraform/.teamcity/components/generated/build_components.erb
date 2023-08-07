@@ -39,7 +39,7 @@ fun BuildFeatures.Golang() {
 
 fun BuildSteps.ConfigureGoEnv() {
     step(ScriptBuildStep {
-        name = "Configure Go Version"
+        name = "Configure Go version using .go-version file"
         scriptContent = "goenv install -s \$(goenv local) && goenv rehash"
     })
 }
@@ -63,7 +63,7 @@ fun BuildSteps.DownloadTerraformBinary() {
     // https://releases.hashicorp.com/terraform/0.12.28/terraform_0.12.28_linux_amd64.zip
     var terraformUrl = "https://releases.hashicorp.com/terraform/%env.TERRAFORM_CORE_VERSION%/terraform_%env.TERRAFORM_CORE_VERSION%_linux_amd64.zip"
     step(ScriptBuildStep {
-        name = "Download Terraform Core v%env.TERRAFORM_CORE_VERSION%.."
+        name = "Download Terraform version %s".format(defaultTerraformCoreVersion)
         scriptContent = """
         #!/bin/bash
         mkdir -p tools
