@@ -931,7 +931,7 @@ func build_effective_field(p Property, resource *Resource, parent *Property) Pro
 		Description: description,
 		resource:    resource,
 		parent:      parent,
-		Optional:    true,
+		Optional:    false,
 		Computed:    true,
 		StateSetter: &stateSetter,
 	}
