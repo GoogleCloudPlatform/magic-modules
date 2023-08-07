@@ -41,6 +41,7 @@ func ResourceGoogleServiceNetworkingPeeredDNSDomain() *schema.Resource {
 				Computed:    true,
 				Optional:    true,
 				ForceNew:    true,
+				DiffSuppressFunc: tpgresource.ProjectNumberDiffSuppress,
 				Description: `The ID of the project that the service account will be created in. Defaults to the provider project configuration.`,
 			},
 			"name": {
