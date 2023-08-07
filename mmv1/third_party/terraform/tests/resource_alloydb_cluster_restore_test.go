@@ -1,8 +1,8 @@
 package google
 
 import (
+	"regexp"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -16,7 +16,9 @@ import (
 // we condense everything into individual test cases.
 // 1. Create the source cluster, instance, and backup
 // 2. Restore from the backup directly
-// 3. Determine the
+// 3. Restore via PITR
+// 4. Update the restored clusters inline
+// 5. Allow destruction
 func TestAccAlloydbCluster_restore(t *testing.T) {
 	t.Parallel()
 
@@ -24,8 +26,6 @@ func TestAccAlloydbCluster_restore(t *testing.T) {
 		"random_suffix": acctest.RandString(t, 10),
 		"network_name":  acctest.BootstrapSharedTestNetwork(t, "alloydbinstance-mandatory"),
 	}
-
-	time.Sleep(10000 * time.Millisecond)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -42,6 +42,17 @@ func TestAccAlloydbCluster_restore(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
 			},
 			{
+				// Invalid input check - cannot pass in both sources
+				Config:      testAccAlloydbClusterAndInstanceAndBackup_OnlyOneSourceAllowed(context),
+				ExpectError: regexp.MustCompile("\"restore_source_cluster\": conflicts with restore_source_backup"),
+			},
+			{
+				// Invalid input check - both source cluster and point in time are required
+				Config:      testAccAlloydbClusterAndInstanceAndBackup_SourceClusterAndPointInTimeRequired(context),
+				ExpectError: regexp.MustCompile("`restore_point_in_time,restore_source_cluster` must be specified"),
+			},
+			{
+				// Validate backup restore succeeds
 				Config: testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackup(context),
 			},
 			{
@@ -51,6 +62,7 @@ func TestAccAlloydbCluster_restore(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "restore_source_backup"},
 			},
 			{
+				// Validate PITR succeeds
 				Config: testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime(context),
 			},
 			{
@@ -58,6 +70,14 @@ func TestAccAlloydbCluster_restore(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "restore_source_cluster", "restore_point_in_time"},
+			},
+			{
+				// Make sure updates work without recreating the clusters
+				Config: testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime_AllowedUpdate(context),
+			},
+			{
+				Config:      testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime_NotAllowedUpdate(context),
+				ExpectError: regexp.MustCompile("the plan calls for this resource to be\ndestroyed"),
 			},
 			{
 				Config: testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime_AllowDestroy(context),
@@ -88,6 +108,124 @@ resource "google_alloydb_backup" "default" {
   cluster_name = google_alloydb_cluster.source.name
 
   depends_on = [google_alloydb_instance.source]
+}
+
+data "google_project" "project" {}
+
+data "google_compute_network" "default" {
+  name = "%{network_name}"
+}
+
+resource "google_compute_global_address" "private_ip_alloc" {
+  name          =  "tf-test-alloydb-cluster%{random_suffix}"
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  prefix_length = 16
+  network       = data.google_compute_network.default.id
+}
+
+resource "google_service_networking_connection" "vpc_connection" {
+  network                 = data.google_compute_network.default.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+}
+`, context)
+}
+
+// Cannot restore if multiple sources are present
+func testAccAlloydbClusterAndInstanceAndBackup_OnlyOneSourceAllowed(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "source" {
+  cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
+  location     = "us-central1"
+  network      = data.google_compute_network.default.id
+}
+
+resource "google_alloydb_instance" "source" {
+  cluster       = google_alloydb_cluster.source.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+
+  depends_on = [google_service_networking_connection.vpc_connection]
+}
+
+resource "google_alloydb_backup" "default" {
+  location     = "us-central1"
+  backup_id    = "tf-test-alloydb-backup%{random_suffix}"
+  cluster_name = google_alloydb_cluster.source.name
+
+  depends_on = [google_alloydb_instance.source]
+}
+
+resource "google_alloydb_cluster" "restored" {
+  cluster_id             = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
+  location               = "us-central1"
+  network                = data.google_compute_network.default.id
+  restore_source_backup  = google_alloydb_backup.default.name
+  restore_source_cluster = google_alloydb_cluster.source.name
+  restore_point_in_time  = google_alloydb_backup.default.update_time
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+data "google_project" "project" {}
+
+data "google_compute_network" "default" {
+  name = "%{network_name}"
+}
+
+resource "google_compute_global_address" "private_ip_alloc" {
+  name          =  "tf-test-alloydb-cluster%{random_suffix}"
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  prefix_length = 16
+  network       = data.google_compute_network.default.id
+}
+
+resource "google_service_networking_connection" "vpc_connection" {
+  network                 = data.google_compute_network.default.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+}
+`, context)
+}
+
+// Cannot restore if multiple sources are present
+func testAccAlloydbClusterAndInstanceAndBackup_SourceClusterAndPointInTimeRequired(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "source" {
+  cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
+  location     = "us-central1"
+  network      = data.google_compute_network.default.id
+}
+
+resource "google_alloydb_instance" "source" {
+  cluster       = google_alloydb_cluster.source.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+
+  depends_on = [google_service_networking_connection.vpc_connection]
+}
+
+resource "google_alloydb_backup" "default" {
+  location     = "us-central1"
+  backup_id    = "tf-test-alloydb-backup%{random_suffix}"
+  cluster_name = google_alloydb_cluster.source.name
+
+  depends_on = [google_alloydb_instance.source]
+}
+
+resource "google_alloydb_cluster" "restored" {
+  cluster_id             = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
+  location               = "us-central1"
+  network                = data.google_compute_network.default.id
+  restore_source_cluster = google_alloydb_cluster.source.name
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 data "google_project" "project" {}
@@ -240,6 +378,178 @@ resource "google_service_networking_connection" "vpc_connection" {
 `, context)
 }
 
+// This updates the PITR and backup restored clusters by adding a continuous backup configuration. This can be done in place
+// and does not require re-creating the cluster from scratch.
+func testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime_AllowedUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "source" {
+  cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
+  location     = "us-central1"
+  network      = data.google_compute_network.default.id
+}
+
+resource "google_alloydb_instance" "source" {
+  cluster       = google_alloydb_cluster.source.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+
+  depends_on = [google_service_networking_connection.vpc_connection]
+}
+
+resource "google_alloydb_backup" "default" {
+  location     = "us-central1"
+  backup_id    = "tf-test-alloydb-backup%{random_suffix}"
+  cluster_name = google_alloydb_cluster.source.name
+
+  depends_on = [google_alloydb_instance.source]
+}
+
+resource "google_alloydb_cluster" "restored_from_backup" {
+  cluster_id            = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
+  location              = "us-central1"
+  network               = data.google_compute_network.default.id
+  restore_source_backup = google_alloydb_backup.default.name
+
+  continuous_backup_config {
+    enabled              = true
+    recovery_window_days = 20
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "google_alloydb_cluster" "restored_from_point_in_time" {
+  cluster_id             = "tf-test-alloydb-pitr-restored-cluster-%{random_suffix}"
+  location               = "us-central1"
+  network                = data.google_compute_network.default.id
+  restore_source_cluster = google_alloydb_cluster.source.name
+  restore_point_in_time  = google_alloydb_backup.default.update_time
+  
+  continuous_backup_config {
+    enabled              = true
+    recovery_window_days = 20
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+data "google_project" "project" {}
+
+data "google_compute_network" "default" {
+  name = "%{network_name}"
+}
+
+resource "google_compute_global_address" "private_ip_alloc" {
+  name          =  "tf-test-alloydb-cluster%{random_suffix}"
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  prefix_length = 16
+  network       = data.google_compute_network.default.id
+}
+
+resource "google_service_networking_connection" "vpc_connection" {
+  network                 = data.google_compute_network.default.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+}
+`, context)
+}
+
+// Updating the source cluster, point in time, or source backup are not allowed. This type of operation would
+// require deleting and recreating the cluster
+func testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime_NotAllowedUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "source" {
+  cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
+  location     = "us-central1"
+  network      = data.google_compute_network.default.id
+}
+
+resource "google_alloydb_instance" "source" {
+  cluster       = google_alloydb_cluster.source.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+
+  depends_on = [google_service_networking_connection.vpc_connection]
+}
+
+resource "google_alloydb_backup" "default" {
+  location     = "us-central1"
+  backup_id    = "tf-test-alloydb-backup%{random_suffix}"
+  cluster_name = google_alloydb_cluster.source.name
+
+  depends_on = [google_alloydb_instance.source]
+}
+
+resource "google_alloydb_backup" "default2" {
+  location     = "us-central1"
+  backup_id    = "tf-test-alloydb-backup2-%{random_suffix}"
+  cluster_name = google_alloydb_cluster.source.name
+
+  depends_on = [google_alloydb_instance.source]
+}
+
+resource "google_alloydb_cluster" "restored_from_backup" {
+  cluster_id            = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
+  location              = "us-central1"
+  network               = data.google_compute_network.default.id
+  restore_source_backup = google_alloydb_backup.default2.name
+
+  continuous_backup_config {
+    enabled              = true
+    recovery_window_days = 20
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+
+  depends_on = [google_alloydb_backup.default2]
+}
+
+resource "google_alloydb_cluster" "restored_from_point_in_time" {
+  cluster_id             = "tf-test-alloydb-pitr-restored-cluster-%{random_suffix}"
+  location               = "us-central1"
+  network                = data.google_compute_network.default.id
+  restore_source_cluster = google_alloydb_cluster.restored_from_backup.name
+  restore_point_in_time  = google_alloydb_backup.default.update_time
+  
+  continuous_backup_config {
+    enabled              = true
+    recovery_window_days = 20
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+data "google_project" "project" {}
+
+data "google_compute_network" "default" {
+  name = "%{network_name}"
+}
+
+resource "google_compute_global_address" "private_ip_alloc" {
+  name          =  "tf-test-alloydb-cluster%{random_suffix}"
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  prefix_length = 16
+  network       = data.google_compute_network.default.id
+}
+
+resource "google_service_networking_connection" "vpc_connection" {
+  network                 = data.google_compute_network.default.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+}
+`, context)
+}
+
 // The source cluster, instance, and backup should all exist prior to this being invoked. Otherwise the PITR restore will not succeed
 // due to the time being too early.
 func testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime_AllowDestroy(context map[string]interface{}) string {
@@ -302,20 +612,3 @@ resource "google_service_networking_connection" "vpc_connection" {
 }
 `, context)
 }
-
-// // Validates that updating fields on a restored cluster works fine and doesn't require re-creating the cluster
-// func TestAccAlloydbCluster_restore_updateRestoredCluster(t *testing.T) {
-// }
-
-// // Validates that updating the restore source or point in time requires re-creating the cluster.
-// // This encompasses both updates to the fields and removing the fields entirely.
-// func TestAccAlloydbCluster_restore_cannotUpdateRestoreSource(t *testing.T) {
-// }
-
-// // Validates that only one restore source can be provided
-// func TestAccAlloydbCluster_restore_onlyOneSourceAllowed(t *testing.T) {
-// }
-
-// // Validates that pointInTime and sourceCluster must come together
-// func TestAccAlloydbCluster_restore_sourceClusterAndPointInTimeRequired(t *testing.T) {
-// }
