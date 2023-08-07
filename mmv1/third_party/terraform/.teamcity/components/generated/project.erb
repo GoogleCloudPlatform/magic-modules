@@ -17,15 +17,22 @@ const val providerName = "google<%= "-" + version unless version == 'ga' -%>"
 // See https://teamcity.jetbrains.com/app/dsl-documentation/root/project/index.html
 fun Google<%= version.capitalize unless version == 'ga' -%>(environment: String, manualVcsRoot: AbsoluteId, branchRef: String, configuration: ClientConfiguration) : Project {
 
-    var packageList = packages2 + services2
-
     return Project{
 
         // Create build configs for each package defined in packages.kt
-        var buildConfigs = buildConfigurationsForPackages(packages, providerName, environment, manualVcsRoot, branchRef, configuration)
-        buildConfigs.forEach { buildConfiguration ->
+        var packageConfigs = buildConfigurationsForPackages(packages2, providerName, environment, manualVcsRoot, branchRef, configuration)
+        packageConfigs.forEach { buildConfiguration ->
             buildType(buildConfiguration)
         }
+
+        // Create build configs for each service package defined in services.kt
+        var servicePackageConfigs = buildConfigurationsForPackages(services2, providerName, environment, manualVcsRoot, branchRef, configuration)
+        servicePackageConfigs.forEach { buildConfiguration ->
+            buildType(buildConfiguration)
+        }
+
+        // Create build configs for sweepers
+        // TODO
     }
 }
 

@@ -33,6 +33,17 @@ var packages = mapOf(
 
 var packages2 = mapOf(
 <%  packages.each_with_index do |package, i| -%>
+<%  next if package["name"] == "sweeper" -%>
+    "<%= package["name"] -%>" to mapOf(
+        "name" to "<%= package["name"] -%>",
+        "path" to "<%= package["path"] -%>"
+    )<%= ',' if i < (packages.length - 1) %>
+<%  end -%>
+)
+
+var sweepers = mapOf(
+<%  packages.each_with_index do |package, i| -%>
+<%  next if package["name"] != "sweeper" -%>
     "<%= package["name"] -%>" to mapOf(
         "name" to "<%= package["name"] -%>",
         "path" to "<%= package["path"] -%>"
