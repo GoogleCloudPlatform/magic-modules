@@ -55,7 +55,7 @@ steps:
           - |
             if [ "$BRANCH_NAME" == "main" ]; then
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpg-sync
-            else 
+            else
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpg-sync-$BRANCH_NAME
             fi
 
@@ -90,7 +90,7 @@ steps:
           - |
             if [ "$BRANCH_NAME" == "main" ]; then
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpgb-sync
-            else 
+            else
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpgb-sync-$BRANCH_NAME
             fi
 
@@ -107,7 +107,7 @@ steps:
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
       id: tgc-push
-      waitFor: ["tgc-sync", "tpg-push"]
+      waitFor: ["tgc-sync", "tpgb-push"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
       args:
@@ -125,7 +125,7 @@ steps:
           - |
             if [ "$BRANCH_NAME" == "main" ]; then
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tgc-sync
-            else 
+            else
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tgc-sync-$BRANCH_NAME
             fi
 
@@ -160,7 +160,7 @@ steps:
           - |
             if [ "$BRANCH_NAME" == "main" ]; then
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-oics-sync
-            else 
+            else
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-oics-sync-$BRANCH_NAME
             fi
 

@@ -31,7 +31,7 @@ require 'pathname'
 require 'provider/terraform'
 require 'provider/terraform_kcc'
 require 'provider/terraform_oics'
-require 'provider/terraform_validator'
+require 'provider/terraform_tgc'
 
 products_to_generate = nil
 all_products = false
@@ -275,7 +275,8 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
   else
     override_providers = {
       'oics' => Provider::TerraformOiCS,
-      'validator' => Provider::TerraformValidator,
+      'validator' => Provider::TerraformGoogleConversion,
+      'tgc' => Provider::TerraformGoogleConversion,
       'kcc' => Provider::TerraformKCC
     }
 
