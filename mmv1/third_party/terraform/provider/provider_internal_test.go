@@ -759,3 +759,71 @@ func TestProvider_providerConfigure_requestTimeout(t *testing.T) {
 		})
 	}
 }
+
+func TestProvider_providerConfigure_requestReason(t *testing.T) {
+
+	cases := map[string]struct {
+		ConfigValues        map[string]interface{}
+		EnvVariables        map[string]string
+		ExpectError         bool
+		ExpectFieldUnset    bool
+		ExpectedSchemaValue string
+		ExpectedConfigValue string
+	}{
+		"request_reason set in the config are not overridden by environment variables": {
+			EnvVariables: map[string]string{
+				"CLOUDSDK_CORE_REQUEST_REASON": "test",
+			},
+			ExpectedSchemaValue: "test",
+			ExpectedConfigValue: "test",
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			ctx := context.Background()
+			unsetTestProviderConfigEnvs(t)
+			setupTestEnvs(t, tc.EnvVariables)
+			p := Provider()
+			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
+
+			// Act
+			c, diags := providerConfigure(ctx, d, p)
+
+			// Assert
+			if diags.HasError() && !tc.ExpectError {
+				t.Fatalf("unexpected error(s): %#v", diags)
+			}
+			if !diags.HasError() && tc.ExpectError {
+				t.Fatal("expected error(s) but got none")
+			}
+			if diags.HasError() && tc.ExpectError {
+				v, ok := d.GetOk("request_reason")
+				if ok {
+					val := v.(string)
+					if val != tc.ExpectedSchemaValue {
+						t.Fatalf("expected request_reason value set in provider data to be %s, got %s", tc.ExpectedSchemaValue, val)
+					}
+					if tc.ExpectFieldUnset {
+						t.Fatalf("expected request_reason value to not be set in provider data, got %s", val)
+					}
+				}
+				// Return early in tests where errors expected
+				return
+			}
+
+			v := d.Get("request_reason")
+			val := v.(string)
+			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+
+			if v != tc.ExpectedSchemaValue {
+				t.Fatalf("expected request_reason value set in provider data to be %s, got %s", tc.ExpectedSchemaValue, val)
+			}
+			if config.RequestReason != tc.ExpectedConfigValue {
+				t.Fatalf("expected request_reason value in provider struct to be %s, got %s", tc.ExpectedConfigValue, config.Credentials)
+			}
+		})
+	}
+}
