@@ -13,26 +13,26 @@ class sweeperBuildConfigs(packageName: String, environment: String, branchRef: S
     val branchRef = branchRef
     fun preSweeperBuildConfig(path: String, manualVcsRoot: AbsoluteId, parallelism: Int, triggerConfig: NightlyTriggerConfiguration) : BuildType {
         val testPrefix = "TestAcc"
-        val timeout = "12"
+        val testTimeout = "12"
         val sweeperRegions = "us-central1"
         val sweeperRun = "" // Empty string means all sweepers run
 
         val configName = "Pre-Sweeper"
         val sweeperStepName = "Pre-Sweeper"
 
-        return createBuildConfig(manualVcsRoot, preSweeperBuildConfigId, configName, sweeperStepName, parallelism, testPrefix, timeout, sweeperRegions, sweeperRun, path, packageName, triggerConfig)
+        return createBuildConfig(manualVcsRoot, preSweeperBuildConfigId, configName, sweeperStepName, parallelism, testPrefix, testTimeout, sweeperRegions, sweeperRun, path, packageName, triggerConfig)
    }
 
     fun postSweeperBuildConfig(path: String, manualVcsRoot: AbsoluteId, parallelism: Int, triggerConfig: NightlyTriggerConfiguration) : BuildType {
         val testPrefix = "TestAcc"
-        val timeout = "12"
+        val testTimeout = "12"
         val sweeperRegions = "us-central1"
         val sweeperRun = "" // Empty string means all sweepers run
 
         val configName = "Post-Sweeper"
         val sweeperStepName = "Post-Sweeper"
 
-        return createBuildConfig(manualVcsRoot, postSweeperBuildConfigId, configName, sweeperStepName, parallelism, testPrefix, timeout, sweeperRegions, sweeperRun, path, packageName, triggerConfig)
+        return createBuildConfig(manualVcsRoot, postSweeperBuildConfigId, configName, sweeperStepName, parallelism, testPrefix, testTimeout, sweeperRegions, sweeperRun, path, packageName, triggerConfig)
     }
 
     fun createBuildConfig(
@@ -42,13 +42,13 @@ class sweeperBuildConfigs(packageName: String, environment: String, branchRef: S
         sweeperStepName: String,
         parallelism: Int,
         testPrefix: String,
-        timeout: String,
+        testTimeout: String,
         sweeperRegions: String,
         sweeperRun: String,
         path: String,
         packageName: String,
         triggerConfig: NightlyTriggerConfiguration,
-        timeout: Int = defaultTimeoutDuration
+        buildTimeout: Int = defaultBuildTimeoutDuration
         ) : BuildType {
         return BuildType {
 
@@ -77,7 +77,7 @@ class sweeperBuildConfigs(packageName: String, environment: String, branchRef: S
             }
 
             params {
-                TerraformAcceptanceTestParameters(parallelism, testPrefix, timeout, sweeperRegions, sweeperRun)
+                TerraformAcceptanceTestParameters(parallelism, testPrefix, testTimeout, sweeperRegions, sweeperRun)
                 TerraformAcceptanceTestsFlag()
                 TerraformCoreBinaryTesting()
                 TerraformShouldPanicForSchemaErrors()
@@ -90,7 +90,7 @@ class sweeperBuildConfigs(packageName: String, environment: String, branchRef: S
             }
 
             failureConditions {
-                executionTimeoutMin = timeout
+                executionTimeoutMin = buildTimeout
             }
         }
     }
