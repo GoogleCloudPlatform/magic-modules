@@ -154,6 +154,8 @@ fun Triggers.RunNightly(config: NightlyTriggerConfiguration) {
         enabled = config.nightlyTestsEnabled
         branchFilter = filter
         triggerBuild = always() // Run build even if no new commits/pending changes
+        withPendingChangesOnly = false
+        enforceCleanCheckout = true
 
         schedulingPolicy = cron {
             hours = config.startHour.toString()
