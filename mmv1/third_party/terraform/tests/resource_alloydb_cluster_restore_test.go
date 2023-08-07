@@ -14,11 +14,6 @@ import (
 
 // Restore tests depend on instances and backups being taken, which can take up to 10 minutes. Since the instance doesn't change in between tests,
 // we condense everything into individual test cases.
-// 1. Create the source cluster, instance, and backup
-// 2. Restore from the backup directly
-// 3. Restore via PITR
-// 4. Update the restored clusters inline
-// 5. Allow destruction
 func TestAccAlloydbCluster_restore(t *testing.T) {
 	t.Parallel()
 
