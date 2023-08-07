@@ -894,8 +894,8 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		// add the "effective_annotations" property when the current property is top level "annotations"
 
 		if p.IsResourceLabels() || p.IsResourceAnnotations() {
-			note := `**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
-			Please refer to the field 'effective_labels' for all of the labels present on the resource.`
+			note := "**Note**: This field is non-authoritative, and will only manage the labels present in your configuration. " +
+				"Please refer to the field `effective_labels` for all of the labels present on the resource."
 			p.Description = fmt.Sprintf("%s\n\n%s", p.Description, note)
 			props = append(props, build_effective_labels_field(p, resource, parent))
 		}
