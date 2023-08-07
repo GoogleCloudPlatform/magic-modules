@@ -3353,12 +3353,12 @@ resource "google_container_node_pool" "with_tpu_topology" {
 func TestAccContainerNodePool_withHostMaintenancePolicy(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 			PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-			ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+			ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 			CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 			Steps: []resource.TestStep{
 					{
