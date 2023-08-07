@@ -1,0 +1,41 @@
+<% autogen_exception -%>
+/*
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
+// this file is auto-generated with mmv1, any changes made here will be overwritten
+<%
+    version_string = "-" + version unless version == 'ga'
+
+    packages = []
+    Dir["google#{version_string}/**"].each do |package|
+        next if File.directory?(package) == false # ignore files
+        next if package.split('/')[-1] == "services" # ignore services folder; handled seperately
+
+        info = {"name" => package.split('/')[-1], "path" => package}
+        packages.push info
+    end
+-%>
+
+var packages = mapOf(
+        "acctest" to "AccTest",
+        "provider" to "SDK Provider",
+        "fwprovider" to "Framework Plugin Provider",
+        "services" to "Services",
+        "sweeper" to "Sweeper",
+        "tpgdclresource" to "TPG DCL Resource",
+        "tpgiamresource" to "TPG IAM Resource",
+        "tpgresource" to "TPG Resource",
+        "transport" to "Transport",
+        "verify" to "Verify"
+)
+
+var packages2 = mapOf(
+<%  packages.each_with_index do |package, i| -%>
+    "<%= package["name"] -%>" to mapOf(
+        "name" to "<%= package["name"] -%>",
+        "path" to "<%= package["path"] -%>"
+    )<%= ',' if i < (packages.length - 1) %>
+<%  end -%>
+)

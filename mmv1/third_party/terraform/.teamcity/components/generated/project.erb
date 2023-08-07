@@ -16,71 +16,63 @@ const val providerName = "google<%= "-" + version unless version == 'ga' -%>"
 // which has multiple build configurations defined within it.
 // See https://teamcity.jetbrains.com/app/dsl-documentation/root/project/index.html
 fun Google<%= version.capitalize unless version == 'ga' -%>(environment: String, manualVcsRoot: AbsoluteId, branchRef: String, configuration: ClientConfiguration) : Project {
+
+    var packageList = packages2 + services2
+
     return Project{
 
         // Create build configs for each package defined in packages.kt
-        var buildConfigs = buildConfigurationsForPackages(packages, providerName, "google<%= "-" + version unless version == 'ga' -%>", environment, manualVcsRoot, branchRef, configuration)
+        var buildConfigs = buildConfigurationsForPackages(packages, providerName, environment, manualVcsRoot, branchRef, configuration)
         buildConfigs.forEach { buildConfiguration ->
             buildType(buildConfiguration)
         }
     }
 }
 
-fun buildConfigurationsForPackages(packages: Map<String, String>, providerName : String, path : String, environment: String, manualVcsRoot: AbsoluteId, branchRef: String, config: ClientConfiguration): List<BuildType> {
-    var postSweeperConfig: BuildType? = null
-    var triggerConfig = NightlyTriggerConfiguration(environment, branchRef)
-
+fun buildConfigurationsForPackages(packages: Map<String, Map<String, String>>, providerName : String, environment: String, manualVcsRoot: AbsoluteId, branchRef: String, config: ClientConfiguration): List<BuildType> {
+    val triggerConfig = NightlyTriggerConfiguration(environment, branchRef)
     var list = ArrayList<BuildType>()
 
-    // build configuration for the google(-beta) package, i.e. files directly inside ./google(-beta)
-    // TODO(SarahFrench): refactor code so buildConfigurationsForPackages isn't called by buildConfigurationsForPackages
-    // if below only necessary due to that problem
-    if (!path.contains("services")){
-        var rootPkg = packageDetails(providerName, providerName, providerName, environment)
-        var rootBuildConfig = rootPkg.buildConfiguration(".", manualVcsRoot, defaultParallelism, triggerConfig)
-        rootBuildConfig.params.ConfigureGoogleSpecificTestParameters(config)
-        list.add(rootBuildConfig)
+    // Create build configurations for all packages, except sweeper
+    packages.forEach { (packageName, info) ->
+        if (packageName.toString() == "sweeper") { return@forEach } // Skip
+
+        val path: String = info.getValue("path").toString()
+        val name: String = info.getValue("name").toString()
+
+
+        val pkg = packageDetails(packageName, name, providerName, environment)
+        val buildConfig = pkg.buildConfiguration(path, manualVcsRoot, defaultParallelism, triggerConfig)
+
+        buildConfig.params.ConfigureGoogleSpecificTestParameters(config)
+
+        list.add(buildConfig)
     }
 
-    // build configurations for the tests in packages nested within ./google(-beta)
-    packages.forEach { (packageName, displayName) ->
-        if (packageName == "services") {
-            // `services` is a folder containing packages, not a package itself; call buildConfigurationsForPackages to iterate through directories found within `services`
-            var serviceList = buildConfigurationsForPackages(services, providerName, path+"/"+packageName, environment, manualVcsRoot, branchRef, config)
-            list.addAll(serviceList)
-        } else if (packageName == "sweeper") {
-            // `sweepers` is the folder containing `resource.TestMain`, which allows sweeper tests to be invoked
-            var s = sweeperBuildConfigs(packageName, environment, branchRef, config)
+    // Create Pre-Sweeper & Post-Sweeper build configurations
+    val sweeperPackage : Map<String, String> = packages.getValue("sweeper")
+    val sweeperName : String = sweeper.getValue("name")!!.toString()
+    val sweeperPath : String = sweeper.getValue("path")!!.toString()
+    val s = sweeperBuildConfigs(sweeperName, environment, branchRef, config)
 
-            // Pre-Sweeper
-            var preSweeperConfig = s.preSweeperBuildConfig(path, manualVcsRoot, defaultParallelism, triggerConfig)
-            preSweeperConfig.params.ConfigureGoogleSpecificTestParameters(config)
-            list.add(preSweeperConfig)
+    // Pre
+    val preSweeperConfig = s.preSweeperBuildConfig(sweeperPath, manualVcsRoot, defaultParallelism, triggerConfig)
+    preSweeperConfig.params.ConfigureGoogleSpecificTestParameters(config)
 
-            // Post-Sweeper - this is added to list later, after dependencies created dynamically below
-            postSweeperConfig = s.postSweeperBuildConfig(path, manualVcsRoot, defaultParallelism, triggerConfig)
-            postSweeperConfig.params.ConfigureGoogleSpecificTestParameters(config)
-        } else {
-            // other folders assumed to be packages
-            var pkg = packageDetails(packageName, displayName, providerName, environment)
-            var buildConfig = pkg.buildConfiguration(path, manualVcsRoot, defaultParallelism, triggerConfig)
+    list.add(preSweeperConfig)
 
-            buildConfig.params.ConfigureGoogleSpecificTestParameters(config)
+    // Post
+    val postSweeperConfig = s.postSweeperBuildConfig(sweeperPath, manualVcsRoot, defaultParallelism, triggerConfig)
+    postSweeperConfig.params.ConfigureGoogleSpecificTestParameters(config)
 
-            list.add(buildConfig)
-        }
+    // Make Post-Sweeper dependent on all other build configuration finishing
+    val allDependencyIds = ArrayList<String>()
+    list.forEach { config ->
+        allDependencyIds.add(config.id.toString())
     }
+    postSweeperConfig.addDependencies(allDependencyIds)
 
-    // TODO(SarahFrench): refactor code so buildConfigurationsForPackages isn't called by buildConfigurationsForPackages
-    if (postSweeperConfig != null) {
-        // Make Post-Sweeper dependent on all other build configuration finishing
-        var allDependencyIds = ArrayList<String>()
-        list.forEach { config ->
-            allDependencyIds.add(config.id.toString())
-        }
-        postSweeperConfig!!.addDependencies(allDependencyIds)
-        list.add(postSweeperConfig!!)
-    }
+    list.add(postSweeperConfig)
 
     return list
 }
