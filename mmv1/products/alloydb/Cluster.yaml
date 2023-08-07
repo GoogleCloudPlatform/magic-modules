@@ -62,6 +62,16 @@ examples:
     primary_resource_id: 'full'
     vars:
       alloydb_cluster_name: 'alloydb-cluster-full'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_cluster_restore'
+    primary_resource_id: 'source'
+    vars:
+      alloydb_cluster_name: 'alloydb-source-cluster'
+      alloydb_backup_restored_cluster_name: 'alloydb-backup-restored'
+      alloydb_pitr_restored_cluster_name: 'alloydb-pitr-restored'
+      alloydb_backup_id: 'alloydb-backup'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_create: templates/terraform/pre_create/alloydb_restore_cluster.go.erb
 parameters:
