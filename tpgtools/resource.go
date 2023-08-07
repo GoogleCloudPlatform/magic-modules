@@ -516,13 +516,6 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	}
 
 	props, err := createPropertiesFromSchema(schema, typeFetcher, overrides, &res, nil, location)
-
-	if res.TitleCaseFullName() == "DataplexLake" {
-		glog.Infof("[WARNING] Generating from resource %s %s", res.Name(), res.TitleCaseFullName())
-
-		glog.Infof("[WARNING] Generating from props %#v", props)
-	}
-
 	if err != nil {
 		return nil, err
 	}

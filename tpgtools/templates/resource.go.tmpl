@@ -727,7 +727,6 @@ func flatten{{$.PathType}}Labels(v map[string]string, d *schema.ResourceData) in
 		}
 	}
 
-	log.Printf("[DEBUG] flattenDataplexLakeLabels %#v", transformed)
 	return transformed
 }
 {{ end }}
@@ -745,7 +744,6 @@ func flatten{{$.PathType}}Annotations(v map[string]string, d *schema.ResourceDat
 		}
 	}
 
-	log.Printf("[DEBUG] flattenDataplexLakeAnnotations %#v", transformed)
 	return transformed
 }
 {{ end }}

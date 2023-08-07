@@ -895,7 +895,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		// Add the "effective_labels" property when the current property is top level "labels" or
 		// add the "effective_annotations" property when the current property is top level "annotations"
 		if p.IsResourceLabels() || p.IsResourceAnnotations() {
-			props = append(props, build_effective_field(p, resource, parent))
+			props = append(props, build_effective_labels_field(p, resource, parent))
 		}
 	}
 
@@ -920,7 +920,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 	return props, nil
 }
 
-func build_effective_field(p Property, resource *Resource, parent *Property) Property {
+func build_effective_labels_field(p Property, resource *Resource, parent *Property) Property {
 	title := fmt.Sprintf("effective_%s", p.title)
 	description := fmt.Sprintf("All of %s (key/value pairs) present on the resource in GCP, including the %s configured through Terraform, other clients and services.", p.title, p.title)
 	stateSetter := fmt.Sprintf("d.Set(%q, res.%s)", title, p.PackageName)
