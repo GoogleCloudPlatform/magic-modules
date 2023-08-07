@@ -767,12 +767,13 @@ func DefaultProviderProject(_ context.Context, diff *schema.ResourceDiff, meta i
 	config := meta.(*transport_tpg.Config)
 
 	//project
-	project, err := GetProjectFromDiff(diff, config)
-	if err != nil {
-		return fmt.Errorf("Failed to retrieve project, pid: %s, err: %s", project, err)
+	if project := diff.Get("project"); project != nil {
+		project, err := GetProjectFromDiff(diff, config)
+		if err != nil {
+			return fmt.Errorf("Failed to retrieve project, pid: %s, err: %s", project, err)
+		}
+		diff.SetNew("project", project)
 	}
-	diff.SetNew("project", project)
-
 	return nil
 }
 
