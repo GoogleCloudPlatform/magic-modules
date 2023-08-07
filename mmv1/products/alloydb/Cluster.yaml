@@ -161,48 +161,6 @@ properties:
           Output only. The encryption information for the WALs and backups required for ContinuousBackup.
         output: true
         properties:
-          - !ruby/object:Api::Type::Enum
-            name: 'encryptionType'
-            description: 'Output only. Type of encryption.'
-            values:
-              - :TYPE_UNSPECIFIED
-              - :GOOGLE_DEFAULT_ENCRYPTION
-              - :CUSTOMER_MANAGED_ENCRYPTION
-            output: true
-          - !ruby/object:Api::Type::Array
-            name: kmsKeyVersions
-            item_type: Api::Type::String
-            description: |
-              Output only. Cloud KMS key versions that are being used to protect the database or the backup.
-            output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'continuousBackupInfo'
-    description: |
-      ContinuousBackupInfo describes the continuous backup properties of a cluster.
-    output: true
-    properties:
-      - !ruby/object:Api::Type::String
-        name: enabledTime
-        description: |
-          When ContinuousBackup was most recently enabled. Set to null if ContinuousBackup is not enabled.
-        output: true
-      - !ruby/object:Api::Type::Array
-        name: schedule
-        item_type: Api::Type::String
-        description: |
-          Days of the week on which a continuous backup is taken. Output only field. Ignored if passed into the request.
-        output: true
-      - !ruby/object:Api::Type::String
-        name: earliestRestorableTime
-        description: |
-          The earliest restorable time that can be restored to. Output only field.
-        output: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'encryptionInfo'
-        description: |
-          Output only. The encryption information for the WALs and backups required for ContinuousBackup.
-        output: true
-        properties:
           - !ruby/object:Api::Type::String
             name: 'encryptionType'
             description: 'Output only. Type of encryption.'
