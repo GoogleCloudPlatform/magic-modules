@@ -784,6 +784,9 @@ func TestProvider_providerConfigure_requestReason(t *testing.T) {
 			ExpectedSchemaValue: "test",
 			ExpectedConfigValue: "test",
 		},
+		"when no request_reason is provided via config or environment variables, the field remains unset without error": {
+			ExpectedConfigValue: "",
+		},
 	}
 
 	for tn, tc := range cases {
