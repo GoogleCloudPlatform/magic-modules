@@ -54,15 +54,41 @@ func main() {
 		os.Exit(1)
 	}
 
-	if target == "auto_run" {
-		err = requestReviewer(author, prNumber, GITHUB_TOKEN)
+	authorUserType := getUserType(author, GITHUB_TOKEN)
+	trusted := authorUserType == coreContributorUserType || authorUserType == googlerUserType
+
+	if target == "auto_run" && authorUserType != coreContributorUserType {
+		fmt.Println("Not core contributor - assigning reviewer")
+
+		firstRequestedReviewer, err := getPullRequestRequestedReviewer(prNumber, GITHUB_TOKEN)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		previouslyInvolvedReviewers, err := getPullRequestPreviousAssignedReviewers(prNumber, GITHUB_TOKEN)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		reviewersToRequest, newPrimaryReviewer := chooseReviewers(firstRequestedReviewer, previouslyInvolvedReviewers)
+
+		for _, reviewer := range reviewersToRequest {
+			err = requestPullRequestReviewer(prNumber, reviewer, GITHUB_TOKEN)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+
+		comment := formatReviewerComment(newPrimaryReviewer, authorUserType, trusted)
+		err = postComment(prNumber, comment, GITHUB_TOKEN, authorUserType)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 	}
-
-	trusted := isTrustedUser(author, GITHUB_TOKEN)
 
 	// auto_run(contributor-membership-checker) will be run on every commit or /gcbrun:
 	// only triggers builds for trusted users

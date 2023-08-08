@@ -32,6 +32,25 @@ var (
 	onVacationReviewers = []string{"SarahFrench", "roaks3", "rileykarson"}
 )
 
+type userType int64
+
+const (
+	communityUserType userType = iota
+	googlerUserType
+	coreContributorUserType
+)
+
+func (ut userType) String() string {
+	switch ut {
+	case googlerUserType:
+		return "Googler"
+	case coreContributorUserType:
+		return "Core Contributor"
+	default:
+		return "Community Contributor"
+	}
+}
+
 // Check if a user is team member to not request a random reviewer
 func isTeamMember(author string) bool {
 	return slices.Contains(reviewerRotation, author) || slices.Contains(trustedContributors, author)
@@ -41,24 +60,23 @@ func isTeamReviewer(reviewer string) bool {
 	return slices.Contains(reviewerRotation, reviewer)
 }
 
-// Check if a user is safe to run tests automatically
-func isTrustedUser(author, GITHUB_TOKEN string) bool {
-	if isTeamMember(author) {
+func getUserType(user, GITHUB_TOKEN string) userType {
+	if isTeamMember(user) {
 		fmt.Println("User is a team member")
-		return true
+		return coreContributorUserType
 	}
 
-	if isOrgMember(author, "GoogleCloudPlatform", GITHUB_TOKEN) {
+	if isOrgMember(user, "GoogleCloudPlatform", GITHUB_TOKEN) {
 		fmt.Println("User is a GCP org member")
-		return true
+		return googlerUserType
 	}
 
-	if isOrgMember(author, "googlers", GITHUB_TOKEN) {
+	if isOrgMember(user, "googlers", GITHUB_TOKEN) {
 		fmt.Println("User is a googlers org member")
-		return true
+		return googlerUserType
 	}
 
-	return false
+	return communityUserType
 }
 
 func isOrgMember(author, org, GITHUB_TOKEN string) bool {
