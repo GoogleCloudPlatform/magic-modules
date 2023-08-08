@@ -72,6 +72,11 @@ examples:
       alloydb_backup_id: 'alloydb-backup'
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "alloydb-instance-basic")'
+    ignore_read_extra:
+      - 'reconciling'
+      - 'update_time'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_create: templates/terraform/pre_create/alloydb_restore_cluster.go.erb
 parameters:

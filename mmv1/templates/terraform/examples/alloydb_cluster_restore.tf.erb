@@ -40,7 +40,7 @@ resource "google_alloydb_cluster" "restored_via_pitr" {
   location               = "us-central1"
   network                = data.google_compute_network.default.id
   restore_source_cluster = google_alloydb_cluster.<%= ctx[:primary_resource_id] %>.name
-  restore_point_in_time  = "2023-08-03T19:19:00.094Z"
+  restore_point_in_time  = google_alloydb_backup.<%= ctx[:primary_resource_id] %>.update_time
 }
 
 data "google_project" "project" {}
