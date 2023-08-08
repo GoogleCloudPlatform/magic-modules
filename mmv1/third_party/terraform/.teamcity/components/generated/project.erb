@@ -16,69 +16,68 @@ const val providerName = "google<%= "-" + version unless version == 'ga' -%>"
 // which has multiple build configurations defined within it.
 // See https://teamcity.jetbrains.com/app/dsl-documentation/root/project/index.html
 fun Google<%= version.capitalize unless version == 'ga' -%>(environment: String, manualVcsRoot: AbsoluteId, branchRef: String, configuration: ClientConfiguration) : Project {
-
     return Project{
 
         // Create build configs for each package defined in packages.kt
-        var packageConfigs = buildConfigurationsForPackages(packages2, providerName, environment, manualVcsRoot, branchRef, configuration)
+        val packageConfigs = buildConfigurationsForPackages(packages, providerName, environment, manualVcsRoot, branchRef, configuration)
         packageConfigs.forEach { buildConfiguration ->
             buildType(buildConfiguration)
         }
 
         // Create build configs for each service package defined in services.kt
-        var servicePackageConfigs = buildConfigurationsForPackages(services2, providerName, environment, manualVcsRoot, branchRef, configuration)
+        val servicePackageConfigs = buildConfigurationsForPackages(services, providerName, environment, manualVcsRoot, branchRef, configuration)
         servicePackageConfigs.forEach { buildConfiguration ->
             buildType(buildConfiguration)
         }
 
-        // Create build configs for sweepers
-        // TODO
+        // Create build configs for sweepers, including dependencies on all builds made above
+        val allDependencyIds = ArrayList<String>()
+        (packageConfigs + servicePackageConfigs).forEach { config ->
+            allDependencyIds.add(config.id.toString())
+        }
+        val sweeperPackageConfigs = buildConfigurationsForSweepers(sweepers, providerName, environment, manualVcsRoot, branchRef, configuration, allDependencyIds)
+        sweeperPackageConfigs.forEach { buildConfiguration ->
+            buildType(buildConfiguration)
+        }
     }
 }
 
-fun buildConfigurationsForPackages(packages: Map<String, Map<String, String>>, providerName : String, environment: String, manualVcsRoot: AbsoluteId, branchRef: String, config: ClientConfiguration): List<BuildType> {
+fun buildConfigurationsForPackages(packages: Map<String, Map<String, String>>, providerName : String, environment: String, manualVcsRoot: AbsoluteId, branchRef: String, environmentVariables: ClientConfiguration): List<BuildType> {
     val triggerConfig = NightlyTriggerConfiguration(environment, branchRef)
     var list = ArrayList<BuildType>()
 
     // Create build configurations for all packages, except sweeper
     packages.forEach { (packageName, info) ->
-        if (packageName.toString() == "sweeper") { return@forEach } // Skip
 
         val path: String = info.getValue("path").toString()
         val name: String = info.getValue("name").toString()
+        val displayName: String = info.getValue("displayName").toString()
 
-
-        val pkg = packageDetails(packageName, name, providerName, environment)
-        val buildConfig = pkg.buildConfiguration(path, manualVcsRoot, defaultParallelism, triggerConfig)
-
-        buildConfig.params.ConfigureGoogleSpecificTestParameters(config)
+        val pkg = packageDetails(packageName, displayName, providerName, environment)
+        val buildConfig = pkg.buildConfiguration(path, manualVcsRoot, defaultParallelism, triggerConfig, environmentVariables)
 
         list.add(buildConfig)
     }
 
-    // Create Pre-Sweeper & Post-Sweeper build configurations
+    return list
+}
+
+fun buildConfigurationsForSweepers(packages: Map<String, Map<String, String>>, providerName : String, environment: String, manualVcsRoot: AbsoluteId, branchRef: String, environmentVariables: ClientConfiguration, dependencies: ArrayList<String> ): List<BuildType> {
+
+    val triggerConfig = NightlyTriggerConfiguration(environment, branchRef)
+    var list = ArrayList<BuildType>()
+
     val sweeperPackage : Map<String, String> = packages.getValue("sweeper")
-    val sweeperName : String = sweeper.getValue("name")!!.toString()
-    val sweeperPath : String = sweeper.getValue("path")!!.toString()
-    val s = sweeperBuildConfigs(sweeperName, environment, branchRef, config)
+    val sweeperName : String = sweeperPackage.getValue("name")!!.toString()
+    val sweeperPath : String = sweeperPackage.getValue("path")!!.toString()
+    val s = sweeperBuildConfigs(sweeperName)
 
-    // Pre
-    val preSweeperConfig = s.preSweeperBuildConfig(sweeperPath, manualVcsRoot, defaultParallelism, triggerConfig)
-    preSweeperConfig.params.ConfigureGoogleSpecificTestParameters(config)
-
+    // Pre-Sweeper
+    val preSweeperConfig = s.preSweeperBuildConfig(sweeperPath, manualVcsRoot, defaultParallelism, triggerConfig, environmentVariables)
     list.add(preSweeperConfig)
 
-    // Post
-    val postSweeperConfig = s.postSweeperBuildConfig(sweeperPath, manualVcsRoot, defaultParallelism, triggerConfig)
-    postSweeperConfig.params.ConfigureGoogleSpecificTestParameters(config)
-
-    // Make Post-Sweeper dependent on all other build configuration finishing
-    val allDependencyIds = ArrayList<String>()
-    list.forEach { config ->
-        allDependencyIds.add(config.id.toString())
-    }
-    postSweeperConfig.addDependencies(allDependencyIds)
-
+    // Post-Sweeper
+    val postSweeperConfig = s.postSweeperBuildConfig(sweeperPath, manualVcsRoot, defaultParallelism, triggerConfig, environmentVariables, dependencies)
     list.add(postSweeperConfig)
 
     return list

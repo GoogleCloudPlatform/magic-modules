@@ -74,10 +74,6 @@ fun BuildSteps.DownloadTerraformBinary() {
     })
 }
 
-fun servicePath(path : String, packageName: String) : String {
-    return "./%s/%s".format(path, packageName)
-}
-
 // RunSweepers runs sweepers, and relies on set build configuration parameters
 fun BuildSteps.RunSweepers(sweeperStepName : String) {
     step(ScriptBuildStep{
@@ -135,8 +131,8 @@ fun ParametrizedWithType.TerraformShouldPanicForSchemaErrors() {
     hiddenVariable("env.TF_SCHEMA_PANIC_ON_ERROR", "1", "Panic if unknown/unmatched fields are set into the state")
 }
 
-fun ParametrizedWithType.WorkingDirectory(path : String, packageName: String) {
-    text("PACKAGE_PATH", servicePath(path, packageName), "", "The path at which to run - automatically updated", ParameterDisplay.HIDDEN)
+fun ParametrizedWithType.WorkingDirectory(path : String) {
+    text("PACKAGE_PATH", path, "", "The path at which to run - automatically updated", ParameterDisplay.HIDDEN)
 }
 
 fun ParametrizedWithType.hiddenVariable(name: String, value: String, description: String) {

@@ -6,38 +6,25 @@
 
 // this file is auto-generated with mmv1, any changes made here will be overwritten
 <% 
-    service_packages = []
     version_string = "-" + version unless version == 'ga' 
+    
+    service_packages = []
     Dir["google#{version_string}/services/**"].each do |service|
       next if File.directory?(service) == false # ignore files
-      service_packages.push service.split('/')[-1]
+
+      name = service.split('/')[-1]
+      path = "./" + service
+      info = {"name" => name, "path" => path}
+      service_packages.push info
     end
 -%>
 
 var services = mapOf(
 <%  service_packages.each_with_index do |service, i| -%>
-        "<%= service -%>" to "<%= service.space_separated -%>"<%= ',' if i < (service_packages.size - 1) %>
-<%  end -%>
-)
-
-<% 
-    version_string = "-" + version unless version == 'ga' 
-    
-    service_packages2 = []
-    Dir["google#{version_string}/services/**"].each do |service|
-      next if File.directory?(service) == false # ignore files
-
-      info = {"name" => service.split('/')[-1], "path" => service}
-      service_packages2.push info
-    end
--%>
-
-var services2 = mapOf(
-<%  service_packages2.each_with_index do |service2, i| -%>
-    "<%= service2["name"] -%>" to mapOf(
-        "name" to "<%= service2["name"] -%>",
-        "path" to "<%= service2["path"] -%>",
-        "displayName" to "<%= service.space_separated -%>"
-    )<%= ',' if i < (service_packages2.length - 1) %>
+    "<%= service["name"] -%>" to mapOf(
+        "name" to "<%= service["name"] -%>",
+        "displayName" to "<%= service["name"].space_separated -%>",
+        "path" to "<%= service["path"] -%>"
+    )<%= ',' if i < (service_packages.length - 1) %>
 <%  end -%>
 )

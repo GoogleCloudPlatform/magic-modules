@@ -16,7 +16,7 @@ class packageDetails(packageName: String, displayName: String, providerName: Str
 
     // buildConfiguration returns a BuildType for a service package
     // For BuildType docs, see https://teamcity.jetbrains.com/app/dsl-documentation/root/build-type/index.html
-    fun buildConfiguration(path: String, manualVcsRoot: AbsoluteId, parallelism: Int, triggerConfig: NightlyTriggerConfiguration, buildTimeout: Int = defaultBuildTimeoutDuration) : BuildType {
+    fun buildConfiguration(path: String, manualVcsRoot: AbsoluteId, parallelism: Int, triggerConfig: NightlyTriggerConfiguration, environmentVariables: ClientConfiguration, buildTimeout: Int = defaultBuildTimeoutDuration) : BuildType {
         return BuildType {
             // TC needs a consistent ID for dynamically generated packages
             id(uniqueID())
@@ -44,12 +44,13 @@ class packageDetails(packageName: String, displayName: String, providerName: Str
             }
 
             params {
+                ConfigureGoogleSpecificTestParameters(environmentVariables)
                 TerraformAcceptanceTestParameters(parallelism, "TestAcc", "12", "", "")
                 TerraformAcceptanceTestsFlag()
                 TerraformCoreBinaryTesting()
                 TerraformShouldPanicForSchemaErrors()
                 ReadOnlySettings()
-                WorkingDirectory(path, packageName)
+                WorkingDirectory(path)
             }
 
             triggers {

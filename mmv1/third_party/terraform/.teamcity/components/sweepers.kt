@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 /*
  * Copyright (c) HashiCorp, Inc.
  * SPDX-License-Identifier: MPL-2.0
@@ -7,11 +6,10 @@
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.AbsoluteId
 
-class sweeperBuildConfigs(packageName: String, environment: String, branchRef: String, clientConfig: ClientConfiguration) {
+class sweeperBuildConfigs(packageName: String) {
     val packageName = packageName
-    val environment = environment
-    val branchRef = branchRef
-    fun preSweeperBuildConfig(path: String, manualVcsRoot: AbsoluteId, parallelism: Int, triggerConfig: NightlyTriggerConfiguration) : BuildType {
+
+    fun preSweeperBuildConfig(path: String, manualVcsRoot: AbsoluteId, parallelism: Int, triggerConfig: NightlyTriggerConfiguration, environmentVariables: ClientConfiguration) : BuildType {
         val testPrefix = "TestAcc"
         val testTimeout = "12"
         val sweeperRegions = "us-central1"
@@ -20,10 +18,10 @@ class sweeperBuildConfigs(packageName: String, environment: String, branchRef: S
         val configName = "Pre-Sweeper"
         val sweeperStepName = "Pre-Sweeper"
 
-        return createBuildConfig(manualVcsRoot, preSweeperBuildConfigId, configName, sweeperStepName, parallelism, testPrefix, testTimeout, sweeperRegions, sweeperRun, path, packageName, triggerConfig)
+        return createBuildConfig(manualVcsRoot, preSweeperBuildConfigId, configName, sweeperStepName, parallelism, testPrefix, testTimeout, sweeperRegions, sweeperRun, path, packageName, triggerConfig, environmentVariables)
    }
 
-    fun postSweeperBuildConfig(path: String, manualVcsRoot: AbsoluteId, parallelism: Int, triggerConfig: NightlyTriggerConfiguration) : BuildType {
+    fun postSweeperBuildConfig(path: String, manualVcsRoot: AbsoluteId, parallelism: Int, triggerConfig: NightlyTriggerConfiguration, environmentVariables: ClientConfiguration, dependencies: ArrayList<String>) : BuildType {
         val testPrefix = "TestAcc"
         val testTimeout = "12"
         val sweeperRegions = "us-central1"
@@ -32,7 +30,10 @@ class sweeperBuildConfigs(packageName: String, environment: String, branchRef: S
         val configName = "Post-Sweeper"
         val sweeperStepName = "Post-Sweeper"
 
-        return createBuildConfig(manualVcsRoot, postSweeperBuildConfigId, configName, sweeperStepName, parallelism, testPrefix, testTimeout, sweeperRegions, sweeperRun, path, packageName, triggerConfig)
+        val build = createBuildConfig(manualVcsRoot, postSweeperBuildConfigId, configName, sweeperStepName, parallelism, testPrefix, testTimeout, sweeperRegions, sweeperRun, path, packageName, triggerConfig, environmentVariables)
+        build.addDependencies(dependencies)
+
+        return build
     }
 
     fun createBuildConfig(
@@ -48,6 +49,7 @@ class sweeperBuildConfigs(packageName: String, environment: String, branchRef: S
         path: String,
         packageName: String,
         triggerConfig: NightlyTriggerConfiguration,
+        environmentVariables: ClientConfiguration,
         buildTimeout: Int = defaultBuildTimeoutDuration
         ) : BuildType {
         return BuildType {
@@ -77,12 +79,13 @@ class sweeperBuildConfigs(packageName: String, environment: String, branchRef: S
             }
 
             params {
+                ConfigureGoogleSpecificTestParameters(environmentVariables)
                 TerraformAcceptanceTestParameters(parallelism, testPrefix, testTimeout, sweeperRegions, sweeperRun)
                 TerraformAcceptanceTestsFlag()
                 TerraformCoreBinaryTesting()
                 TerraformShouldPanicForSchemaErrors()
                 ReadOnlySettings()
-                WorkingDirectory(path, packageName)
+                WorkingDirectory(path)
             }
 
             triggers {

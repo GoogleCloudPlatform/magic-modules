@@ -7,6 +7,7 @@
 
 import jetbrains.buildServer.configs.kotlin.ParametrizedWithType
 
+// TODO(SarahFrench) Refactor this - ENVs stored here aren't all client configuration
 class ClientConfiguration(val custId: String,
                           val org: String,
                           val org2 : String,
