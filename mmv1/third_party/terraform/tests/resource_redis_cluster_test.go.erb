@@ -1,5 +1,6 @@
 package google
 
+<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"testing"
@@ -16,7 +17,7 @@ func TestAccRedisCluster_updateReplicaCount(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -53,7 +54,7 @@ func TestAccRedisCluster_updateShardCount(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -106,3 +107,4 @@ data "google_project" "project" {
 }
 `, name, replicaCount, shardCount, lifecycleBlock)
 }
+<% end -%>

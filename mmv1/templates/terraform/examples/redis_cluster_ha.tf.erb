@@ -3,16 +3,13 @@ resource "google_redis_cluster" "<%= ctx[:primary_resource_id] %>" {
   name           = "<%= ctx[:vars]['cluster_name'] %>"
   shard_count    = 3
   psc_configs {
-    network = data.google_compute_network.redis-network.id
+    network = "projects/${data.google_project.project.number}/global/networks/default"
   }
   region = "us-central1"
   replica_count = 1
   transit_encryption_mode = "TRANSIT_ENCRYPTION_MODE_DISABLED"
 }
 
-data "google_compute_network" "redis-network" {
-  name = "projects/${data.google_project.project.project_id}/global/networks/default"
-}
-
 data "google_project" "project" {
+  provider = google-beta
 }
