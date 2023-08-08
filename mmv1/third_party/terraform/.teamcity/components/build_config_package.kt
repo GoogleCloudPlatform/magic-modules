@@ -16,7 +16,7 @@ class packageDetails(packageName: String, displayName: String, providerName: Str
 
     // buildConfiguration returns a BuildType for a service package
     // For BuildType docs, see https://teamcity.jetbrains.com/app/dsl-documentation/root/build-type/index.html
-    fun buildConfiguration(path: String, manualVcsRoot: AbsoluteId, parallelism: Int, triggerConfig: NightlyTriggerConfiguration, environmentVariables: ClientConfiguration, buildTimeout: Int = defaultBuildTimeoutDuration) : BuildType {
+    fun buildConfiguration(path: String, manualVcsRoot: AbsoluteId, parallelism: Int, environmentVariables: ClientConfiguration, buildTimeout: Int = defaultBuildTimeoutDuration) : BuildType {
         return BuildType {
             // TC needs a consistent ID for dynamically generated packages
             id(uniqueID())
@@ -53,9 +53,10 @@ class packageDetails(packageName: String, displayName: String, providerName: Str
                 WorkingDirectory(path)
             }
 
-            triggers {
-                RunNightly(triggerConfig)
-            }
+            // triggers are not set here because the dependent Post-Sweeper build causes these builds
+            // to be triggered; if these have their own trigger as well then they will run twice.
+            // This problem can be migitated via `reuseBuilds` in dependencies on Post-Sweeper
+            // but that mitigation doesn't appear to scale well as there are more packages
 
             dependencies {
                 // Acceptance tests need the Pre-Sweeper step to have completed first

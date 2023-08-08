@@ -68,15 +68,14 @@ fun buildConfigurationsForSweepers(packages: Map<String, Map<String, String>>, p
     var list = ArrayList<BuildType>()
 
     val sweeperPackage : Map<String, String> = packages.getValue("sweeper")
-    val sweeperName : String = sweeperPackage.getValue("name")!!.toString()
     val sweeperPath : String = sweeperPackage.getValue("path")!!.toString()
-    val s = sweeperBuildConfigs(sweeperName)
+    val s = sweeperBuildConfigs()
 
     // Pre-Sweeper
-    val preSweeperConfig = s.preSweeperBuildConfig(sweeperPath, manualVcsRoot, defaultParallelism, triggerConfig, environmentVariables)
+    val preSweeperConfig = s.preSweeperBuildConfig(sweeperPath, manualVcsRoot, defaultParallelism, environmentVariables)
     list.add(preSweeperConfig)
 
-    // Post-Sweeper
+    // Post-Sweeper + dependencies + trigger
     val postSweeperConfig = s.postSweeperBuildConfig(sweeperPath, manualVcsRoot, defaultParallelism, triggerConfig, environmentVariables, dependencies)
     list.add(postSweeperConfig)
 

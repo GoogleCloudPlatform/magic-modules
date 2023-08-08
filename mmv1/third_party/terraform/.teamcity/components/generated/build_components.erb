@@ -174,3 +174,9 @@ fun BuildType.addDependencies(list: ArrayList<String>){
         }
     }
 }
+
+fun BuildType.addTrigger(triggerConfig: NightlyTriggerConfiguration){
+    triggers {
+        RunNightly(triggerConfig)
+    }
+}
