@@ -50,14 +50,14 @@ parameters:
     description: |
       The name of the region of the Redis cluster.
     ignore_read: true
-    default_from_api: true      
+    default_from_api: true    
 examples:
   - !ruby/object:Provider::Terraform::Examples
-     name: "redis_cluster_ha"
-     min_version: beta
-     primary_resource_id: "cluster-ha"
-     vars:
-       cluster_name: "ha-cluster"
+    name: "redis_cluster_ha"
+    min_version: beta
+    primary_resource_id: "cluster-ha"
+    vars:
+      cluster_name: "ha-cluster"
 properties:
   - !ruby/object:Api::Type::Time
     name: createTime
