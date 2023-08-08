@@ -214,7 +214,7 @@ properties:
     name: 'restoreSourceBackup'
     ignore_read: true
     immutable: true
-    conflicts: 
+    conflicts:
       - restore_source_cluster
       - restore_point_in_time
     description: |
@@ -225,7 +225,7 @@ properties:
     immutable: true
     required_with:
       - restore_point_in_time
-    conflicts: 
+    conflicts:
       - restore_source_backup
     description: |
       The name of the source cluster that this cluster should be restored from. The source cluster must have continuous
@@ -238,11 +238,11 @@ properties:
     immutable: true
     required_with:
       - restore_source_cluster
-    conflicts: 
+    conflicts:
       - restore_source_backup
     description: |
       The point in time that this cluster should be restored to, in RFC 3339 format. Requires `restore_source_cluster` to also be set.
-      
+
       Conflicts with 'restore_source_backup', both can't be set together.
   - !ruby/object:Api::Type::NestedObject
     name: 'continuousBackupConfig'
