@@ -279,7 +279,7 @@ properties:
           add another `networks` block while keeping the old block, Terraform will see an incorrect diff
           and apply an incorrect update to the resource. If you encounter this issue, remove all `networks`
           blocks in an update and then apply another update adding all of them back simultaneously.
-        required: true
+        required: false
         is_set: true
         set_hash_func: |-
           func(v interface{}) int {
