@@ -398,7 +398,7 @@ resource "google_compute_target_http_proxy" "prod" {
 
 resource "google_compute_url_map" "prod" {
   name            = "prod-url-map"
-  default_service = google_compute_region_backend_service.prod.id
+  default_service = google_compute_backend_service.prod.id
 }
 
 resource "google_compute_backend_service" "prod" {
