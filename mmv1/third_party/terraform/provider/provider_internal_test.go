@@ -707,9 +707,15 @@ func TestProvider_providerConfigure_requestTimeout(t *testing.T) {
 			ExpectError:         true,
 			ExpectFieldUnset:    false,
 		},
-		"when config is unset, the default timeout will be 30s": {
+		"when config is unset, the value will be 0s in order to set the default value": {
 			ExpectedValue:    "0s", // TODO: check why default value is not 30s
 			ExpectFieldUnset: true,
+		},
+		"when value is empty, the value will be 0s in order to set the default value": {
+			ConfigValues: map[string]interface{}{
+				"request_timeout": "",
+			},
+			ExpectedValue: "0s", // TODO: check why default value is not 30s
 		},
 	}
 
@@ -747,7 +753,7 @@ func TestProvider_providerConfigure_requestTimeout(t *testing.T) {
 				return
 			}
 
-			v := d.Get("request_timeout")
+			v := d.Get("request_timeout") // checks for an empty or "0" string in order to set the default value
 			val := v.(string)
 			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
 
@@ -896,7 +902,7 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 			// 	t.Fatalf("expected batching value in provider struct to be %s, got %v", tc.ExpectedValue, config.RequestTimeout.String())
 			// }
 
-			v = d.Get("batching.0.send_after")
+			v = d.Get("batching.0.send_after") // checks for an empty string in order to set the default value
 			//v := d.Get("batching")
 			sendAfter := v.(string)
 			// config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
