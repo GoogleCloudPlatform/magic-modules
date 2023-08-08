@@ -93,7 +93,6 @@ func createOrUpdateRedisCluster(name string, replicaCount int, shardCount int, p
 	return fmt.Sprintf(`
 resource "google_redis_cluster" "test" {
         name           = "%s"
-        region = "us-central1"
 	replica_count = %d
 	shard_count = %d
   region         = "us-central1"
