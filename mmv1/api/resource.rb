@@ -17,6 +17,8 @@ require 'api/resource/nested_query'
 require 'api/resource/reference_links'
 require 'google/string_utils'
 
+require 'google/logger'
+
 module Api
   # An object available in the product
   class Resource < Api::Object::Named
@@ -389,8 +391,10 @@ module Api
     # At Create, they have no value but they can just be read in anyways, and after a Read
     # they will need to be set in every Update.
     def settable_properties
-      all_user_properties.reject { |v| v.output && !v.is_a?(Api::Type::Fingerprint) }
-                         .reject(&:url_param_only)
+      all_user_properties
+        .reject { |v| v.output && !v.is_a?(Api::Type::Fingerprint) && v.name != 'terraform_labels' }
+        .reject(&:url_param_only)
+        .reject { |v| v.is_a?(Api::Type::KeyValueLabels) }
     end
 
     # Properties that will be returned in the API body
@@ -443,14 +447,23 @@ module Api
       !@transport&.decoder.nil?
     end
 
-    def add_labels_related_fields(props)
+    def add_labels_related_fields(props, parent)
       props.each do |p|
         if p.is_a? Api::Type::KeyValueLabels
+          @custom_diff ||= []
+          if parent.nil?
+            @custom_diff.append('tpgresource.SetTerraformLabelsDiff')
+          elsif parent == 'metadata'
+            @custom_diff.append('tpgresource.SetMetadataTerraformLabelsDiff')
+          end
+
+          props << build_terraform_labels_field('labels', p.field_min_version, p.update_verb,
+                                                p.update_url)
           props << build_effective_labels_field('labels', p.field_min_version)
         elsif p.is_a? Api::Type::KeyValueAnnotations
           props << build_effective_labels_field('annotations', p.field_min_version)
         elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
-          p.properties = add_labels_related_fields(p.all_properties)
+          p.properties = add_labels_related_fields(p.all_properties, p.name)
         end
       end
       props
@@ -468,6 +481,22 @@ module Api
         description:,
         min_version:,
         ignore_write: true
+      )
+    end
+
+    def build_terraform_labels_field(name, min_version, update_verb, update_url)
+      description = "The combination of #{name} configured directly on the resource
+ and default #{name} configured on the provider."
+
+      Api::Type::KeyValuePairs.new(
+        name: "terraform_#{name}",
+        output: true,
+        api_name: name,
+        description:,
+        min_version:,
+        ignore_write: true,
+        update_verb:,
+        update_url:
       )
     end
 

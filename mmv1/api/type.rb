@@ -769,7 +769,7 @@ module Api
       attr_reader :ignore_write
 
       def initialize(name: nil, output: nil, api_name: nil, description: nil, min_version: nil,
-                     ignore_write: nil)
+                     ignore_write: nil, update_verb: nil, update_url: nil)
         super()
 
         @name = name
@@ -778,6 +778,8 @@ module Api
         @description = description
         @min_version = min_version
         @ignore_write = ignore_write
+        @update_verb = update_verb
+        @update_url = update_url
       end
 
       def validate

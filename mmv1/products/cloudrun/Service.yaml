@@ -970,7 +970,7 @@ properties:
       and annotations.
     default_from_api: true
     properties:
-      - !ruby/object:Api::Type::KeyValuePairs
+      - !ruby/object:Api::Type::KeyValueLabels
         name: labels
         description: |-
           Map of string keys and values that can be used to organize and categorize
