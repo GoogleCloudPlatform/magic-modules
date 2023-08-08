@@ -912,7 +912,7 @@ func TestAccBigQueryDataTable_jsonEquivalency(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "labels"},
 			},
 			{
 				Config: testAccBigQueryTable_jsonEqModeRemoved(datasetID, tableID),
@@ -921,7 +921,7 @@ func TestAccBigQueryDataTable_jsonEquivalency(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "labels"},
 			},
 		},
 	})
@@ -1004,7 +1004,7 @@ func TestAccBigQueryTable_allowDestroy(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "labels"},
 			},
 			{
 				Config:      testAccBigQueryTable_noAllowDestroy(datasetID, tableID),
