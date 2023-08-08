@@ -690,19 +690,20 @@ properties:
                       name: 'distinctRatio'
                       description: |
                         Ratio of rows with distinct values against total scanned rows. Not available for complex non-groupable field type RECORD and fields with REPEATABLE mode.
-                    - !ruby/object:Api::Type::NestedObject
+                    - !ruby/object:Api::Type::Array
                       name: 'topNValues'
                       description: |
                         The list of top N non-null values and number of times they occur in the scanned data. N is 10 or equal to the number of distinct values in the field, whichever is smaller. Not available for complex non-groupable field type RECORD and fields with REPEATABLE mode.
-                      properties:
-                        - !ruby/object:Api::Type::String
-                          name: 'value'
-                          description: |
-                            String value of a top N non-null value.
-                        - !ruby/object:Api::Type::String
-                          name: 'count'
-                          description: |
-                            Count of the corresponding value in the scanned data.
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: 'value'
+                            description: |
+                              String value of a top N non-null value.
+                          - !ruby/object:Api::Type::String
+                            name: 'count'
+                            description: |
+                              Count of the corresponding value in the scanned data.
                     - !ruby/object:Api::Type::NestedObject
                       name: 'stringProfile'
                       output: true
