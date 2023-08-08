@@ -475,6 +475,8 @@ func TestAccBigQueryTable_MaterializedView_DailyTimePartioning_Update(t *testing
 
 func TestAccBigQueryTable_MaterializedView_WithSchema(t *testing.T) {
 	t.Parallel()
+	// Pending VCR support in https://github.com/hashicorp/terraform-provider-google/issues/15427.
+	acctest.SkipIfVcr(t)
 
 	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
@@ -977,7 +979,7 @@ func TestAccBigQueryTable_emptySchema(t *testing.T) {
 
 func TestAccBigQueryTable_invalidSchemas(t *testing.T) {
 	t.Parallel()
-	// Not an acceptance test.
+	// Pending VCR support in https://github.com/hashicorp/terraform-provider-google/issues/15427.
 	acctest.SkipIfVcr(t)
 
 	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))

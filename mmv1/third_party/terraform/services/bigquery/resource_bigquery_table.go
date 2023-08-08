@@ -492,7 +492,6 @@ func ResourceBigQueryTable() *schema.Resource {
 						// Schema: Optional] The schema for the  data.
 						// Schema is required for CSV and JSON formats if autodetect is not on.
 						// Schema is disallowed for Google Cloud Bigtable, Cloud Datastore backups, Avro, Iceberg, ORC, and Parquet formats.
-						// Schema is mutually exclusive with View and Materialized View.
 						"schema": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -503,8 +502,7 @@ func ResourceBigQueryTable() *schema.Resource {
 								json, _ := structure.NormalizeJsonString(v)
 								return json
 							},
-							Description:   `A JSON schema for the external table. Schema is required for CSV and JSON formats and is disallowed for Google Cloud Bigtable, Cloud Datastore backups, and Avro formats when using external tables.`,
-							ConflictsWith: []string{"view", "materialized_view"},
+							Description: `A JSON schema for the external table. Schema is required for CSV and JSON formats and is disallowed for Google Cloud Bigtable, Cloud Datastore backups, and Avro formats when using external tables.`,
 						},
 						// CsvOptions: [Optional] Additional properties to set if
 						// sourceFormat is set to CSV.
@@ -763,6 +761,7 @@ func ResourceBigQueryTable() *schema.Resource {
 			},
 
 			// Schema: [Optional] Describes the schema of this table.
+			// Schema is mutually exclusive with View and Materialized View.
 			"schema": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -774,6 +773,7 @@ func ResourceBigQueryTable() *schema.Resource {
 				},
 				DiffSuppressFunc: bigQueryTableSchemaDiffSuppress,
 				Description:      `A JSON schema for the table.`,
+				ConflictsWith:    []string{"view", "materialized_view"},
 			},
 			// View: [Optional] If specified, configures this table as a view.
 			// View is mutually exclusive with Schema and Materialized View.
