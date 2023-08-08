@@ -50,7 +50,7 @@ parameters:
     description: |
       The name of the region of the Redis cluster.
     ignore_read: true
-    default_from_api: true    
+    default_from_api: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "redis_cluster_ha"
