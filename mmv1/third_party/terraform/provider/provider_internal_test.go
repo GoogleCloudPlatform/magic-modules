@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -824,6 +825,88 @@ func TestProvider_providerConfigure_requestReason(t *testing.T) {
 			if config.RequestReason != tc.ExpectedConfigValue {
 				t.Fatalf("expected request_reason value in provider struct to be %s, got %s", tc.ExpectedConfigValue, config.Credentials)
 			}
+		})
+	}
+}
+
+func TestProvider_providerConfigure_batching(t *testing.T) {
+	var batch []interface{}
+	cases := map[string]struct {
+		ConfigValues           map[string]interface{}
+		EnvVariables           map[string]string
+		ExpectError            bool
+		ExpectFieldUnset       bool
+		ExpectedSchemaValue    string
+		ExpectedConfigValue    string
+		ExpectedSendAfterValue string
+	}{
+		"batching block test": {
+			ConfigValues: map[string]interface{}{
+				"batching": batch,
+			},
+			ExpectedSchemaValue:    "false",
+			ExpectedConfigValue:    "false",
+			ExpectedSendAfterValue: "",
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			ctx := context.Background()
+			unsetTestProviderConfigEnvs(t)
+			p := Provider()
+			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
+
+			// Act
+			_, diags := providerConfigure(ctx, d, p)
+
+			// Assert
+			if diags.HasError() && !tc.ExpectError {
+				t.Fatalf("unexpected error(s): %#v", diags)
+			}
+			if !diags.HasError() && tc.ExpectError {
+				t.Fatal("expected error(s) but got none")
+			}
+			if diags.HasError() && tc.ExpectError {
+				v, ok := d.GetOk("batching")
+				if ok {
+					val := v.(string)
+					if val != tc.ExpectedSchemaValue {
+						t.Fatalf("expected request_timeout value set in provider data to be %s, got %s", tc.ExpectedSchemaValue, val)
+					}
+					if tc.ExpectFieldUnset {
+						t.Fatalf("expected request_timeout value to not be set in provider data, got %s", val)
+					}
+				}
+				// Return early in tests where errors expected
+				return
+			}
+
+			v := d.Get("batching.0.enable_batching")
+			//v := d.Get("batching")
+			enableBatching := strconv.FormatBool(v.(bool))
+			// config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+
+			if enableBatching != tc.ExpectedSchemaValue {
+				t.Fatalf("expected batching value set in provider data to be %s, got %s", tc.ExpectedSchemaValue, enableBatching)
+			}
+			// if config.Batching != tc.ExpectedValue {
+			// 	t.Fatalf("expected batching value in provider struct to be %s, got %v", tc.ExpectedValue, config.RequestTimeout.String())
+			// }
+
+			v = d.Get("batching.0.send_after")
+			//v := d.Get("batching")
+			sendAfter := v.(string)
+			// config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+
+			if sendAfter != tc.ExpectedSendAfterValue {
+				t.Fatalf("expected batching value set in provider data to be %s, got %s", tc.ExpectedSendAfterValue, sendAfter)
+			}
+			// if config.Batching != tc.ExpectedValue {
+			// 	t.Fatalf("expected batching value in provider struct to be %s, got %v", tc.ExpectedValue, config.RequestTimeout.String())
+			// }
 		})
 	}
 }
