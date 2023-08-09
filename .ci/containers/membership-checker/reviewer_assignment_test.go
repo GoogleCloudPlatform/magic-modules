@@ -117,6 +117,12 @@ func TestFormatReviewerComment(t *testing.T) {
 			if strings.Contains(comment, fmt.Sprintf("~%s~", tc.AuthorUserType.String())) {
 				t.Errorf("wanted user type (%s) in comment to not be crossed out, but it is", tc.AuthorUserType.String())
 			}
+			for _, ut := range []userType{communityUserType, googlerUserType, coreContributorUserType} {
+				if ut != tc.AuthorUserType && !strings.Contains(comment, fmt.Sprintf("~%s~", ut .String())) {
+					t.Errorf("wanted other user type (%s) in comment to be crossed out, but it is not", ut)
+				}
+			}
+
 			if tc.Trusted && !strings.Contains(comment, "Tests will run automatically") {
 				t.Errorf("wanted comment to say tests will run automatically; does not")
 			}
