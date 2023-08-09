@@ -67,10 +67,6 @@ class sweeperBuildConfigs() {
                 RunSweepers(sweeperStepName)
             }
 
-            failureConditions {
-                errorMessage = true
-            }
-
             features {
                 Golang()
             }
@@ -86,6 +82,7 @@ class sweeperBuildConfigs() {
             }
 
             failureConditions {
+                errorMessage = true
                 executionTimeoutMin = buildTimeout
             }
 
