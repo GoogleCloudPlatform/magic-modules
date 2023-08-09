@@ -74,7 +74,8 @@ func (ld *LocationDescription) GetRegion() (types.String, error) {
 	}
 	// Region from zone in resource config
 	if !ld.ResourceZone.IsNull() && !ld.ResourceZone.IsUnknown() && !ld.ResourceZone.Equal(types.StringValue("")) {
-		region := tpgresource.GetRegionFromZone(ld.ResourceZone.ValueString())
+		regionSelfLink := tpgresource.GetRegionFromZone(ld.ResourceZone.ValueString())
+		region := tpgresource.GetResourceNameFromSelfLink(regionSelfLink) // Region could be a self link
 		return types.StringValue(region), nil
 	}
 	// Region from provider config
