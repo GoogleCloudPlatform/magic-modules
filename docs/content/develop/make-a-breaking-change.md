@@ -77,7 +77,7 @@ Meanwhile, the following are allowed in a minor version:
 * Adding update support for a field
 * Removing update support from a field that returned an error in **all cases** a
   user attempted to update it
-* Marking a field required if *all configurations** that did not specify the
+* Marking a field required if **all configurations** that did not specify the
   field returned an error
 * Major behavioural changes guarded by a flag where the **previous** behaviour
   is the default
@@ -106,7 +106,7 @@ All breaking changes targeting `5.0.0` must be committed to this branch.
 
 A downstream branch with the same name `FEATURE-BRANCH-major-release-5.0.0` will be used to track the generated `5.0.0` changes in both [`google`](https://github.com/hashicorp/terraform-provider-google/tree/FEATURE-BRANCH-major-release-5.0.0) and [`google-beta`](https://github.com/hashicorp/terraform-provider-google-beta/tree/FEATURE-BRANCH-major-release-5.0.0) provider repos.
 
-The process of contributing to the major release `5.0.0` follows most of the [General contributing steps]({{< ref "/get-started/contributing" >}}), with the following exceptions
+The process of contributing to the major release `5.0.0` follows most of the [General contributing steps]({{< ref "/get-started/contribution-process" >}}), with the following exceptions
 
 1. Use `FEATURE-BRANCH-major-release-5.0.0` branch instead of the `main` branch as the base branch when you
    * checkout your working branch where you make your code changes.
