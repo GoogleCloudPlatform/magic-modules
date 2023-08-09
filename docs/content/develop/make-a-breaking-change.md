@@ -116,7 +116,7 @@ The process of contributing to the major release `5.0.0` follows most of the [Ge
 3. Create a [separate pull request](https://github.com/GoogleCloudPlatform/magic-modules/edit/main/mmv1/third_party/terraform/website/docs/guides/version_5_upgrade.html.markdown) in the `main` branch to add an entry to the [upgrade guide](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/website/docs/guides/version_5_upgrade.html.markdown).
    * Refer to the 4.0.0 upgrade guide as a reference for your type of change.
    * Your reviewer will require this to be made before merging your code changes in the `FEATURE-BRANCH-major-release-5.0.0` branch.
-4. If your change is a follow-up to a recent commit to main that is not yet contained in the released branch, it is strongly encouraged to wait until the branch sync and resolve any merge conflicts in the PR. 
+4. If your change is a follow-up to a recent code change commit to `main` that is not yet contained in the released branch, it is strongly encouraged to wait until the branch sync and resolve any merge conflicts in the PR. 
    For example, if you are removing a field that has been recently deprecated in main. 
 
 The release branch is synced with main on a weekly basis every Monday.
