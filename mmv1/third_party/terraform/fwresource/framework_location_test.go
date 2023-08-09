@@ -259,10 +259,16 @@ func TestLocationDescription_GetLocation(t *testing.T) {
 			},
 			ExpectedLocation: types.StringValue("resource-zone-a"),
 		},
+		"returns the region value from the provider config when none of location/region/zone are set in the resource config": {
+			ld: LocationDescription{
+				ProviderRegion: types.StringValue("provider-region"), // Preferred to use region value over zone value if both are set
+				ProviderZone:   types.StringValue("provider-zone-a"),
+			},
+			ExpectedLocation: types.StringValue("provider-region"),
+		},
 		"returns the zone value from the provider config when none of location/region/zone are set in the resource config": {
 			ld: LocationDescription{
-				ProviderRegion: types.StringValue("provider-region"), // unused
-				ProviderZone:   types.StringValue("provider-zone-a"),
+				ProviderZone: types.StringValue("provider-zone-a"),
 			},
 			ExpectedLocation: types.StringValue("provider-zone-a"),
 		},
@@ -297,13 +303,13 @@ func TestLocationDescription_GetLocation(t *testing.T) {
 			},
 			ExpectedLocation: types.StringValue("provider-zone-a"),
 		},
-		// Error states
-		"does not use the region value set in the provider config": {
-			ld: LocationDescription{
-				ProviderRegion: types.StringValue("provider-region"),
-			},
-			ExpectedError: true,
-		},
+		// // Error states - TODO: What is the purpose of this error catch???
+		// "does not use the region value set in the provider config": {
+		// 	ld: LocationDescription{
+		// 		ProviderRegion: types.StringValue("provider-region"),
+		// 	},
+		// 	ExpectedError: true,
+		// },
 		"returns an error when none of location/region/zone are set on the resource, and neither region or zone is set on the provider": {
 			ExpectedError: true,
 		},

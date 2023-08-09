@@ -48,6 +48,12 @@ func (ld *LocationDescription) GetLocation() (types.String, error) {
 		return types.StringValue(location), nil
 	}
 
+	// Location from region in provider config
+	if !ld.ProviderRegion.IsNull() && !ld.ProviderRegion.IsUnknown() && !ld.ProviderRegion.Equal(types.StringValue("")) {
+		location := tpgresource.GetResourceNameFromSelfLink(ld.ProviderRegion.ValueString()) // Zone could be a self link
+		return types.StringValue(location), nil
+	}
+
 	// Location from zone in provider config
 	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() && !ld.ProviderZone.Equal(types.StringValue("")) {
 		location := tpgresource.GetResourceNameFromSelfLink(ld.ProviderZone.ValueString()) // Zone could be a self link
