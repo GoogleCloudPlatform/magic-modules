@@ -32,12 +32,14 @@ type LocationDescription struct {
 func (ld *LocationDescription) GetLocation() (types.String, error) {
 	// Location from resource config
 	if !ld.ResourceLocation.IsNull() && !ld.ResourceLocation.IsUnknown() && !ld.ResourceLocation.Equal(types.StringValue("")) {
-		return ld.ResourceLocation, nil
+		location := tpgresource.GetResourceNameFromSelfLink(ld.ResourceLocation.ValueString()) // Location could be a self link
+		return types.StringValue(location), nil
 	}
 
 	// Location from region in resource config
 	if !ld.ResourceRegion.IsNull() && !ld.ResourceRegion.IsUnknown() && !ld.ResourceRegion.Equal(types.StringValue("")) {
-		return ld.ResourceRegion, nil
+		region := tpgresource.GetResourceNameFromSelfLink(ld.ResourceRegion.ValueString()) // Region could be a self link
+		return types.StringValue(region), nil
 	}
 
 	// Location from zone in resource config
@@ -48,7 +50,8 @@ func (ld *LocationDescription) GetLocation() (types.String, error) {
 
 	// Location from zone in provider config
 	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() && !ld.ProviderZone.Equal(types.StringValue("")) {
-		return ld.ProviderZone, nil
+		location := tpgresource.GetResourceNameFromSelfLink(ld.ProviderZone.ValueString()) // Zone could be a self link
+		return types.StringValue(location), nil
 	}
 
 	var err error

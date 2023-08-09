@@ -232,7 +232,7 @@ func TestLocationDescription_GetLocation(t *testing.T) {
 			ld: LocationDescription{
 				ResourceLocation: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location"),
 			},
-			ExpectedLocation: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location"),
+			ExpectedLocation: types.StringValue("resource-location"),
 		},
 		"returns the region value set in the resource config when location is not in the schema": {
 			ld: LocationDescription{
@@ -245,7 +245,7 @@ func TestLocationDescription_GetLocation(t *testing.T) {
 			ld: LocationDescription{
 				ResourceRegion: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/regions/resource-region"),
 			},
-			ExpectedLocation: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/regions/resource-region"),
+			ExpectedLocation: types.StringValue("resource-region"),
 		},
 		"returns the zone value set in the resource config when neither location nor region in the schema": {
 			ld: LocationDescription{
@@ -270,7 +270,7 @@ func TestLocationDescription_GetLocation(t *testing.T) {
 			ld: LocationDescription{
 				ProviderZone: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/provider-zone-a"),
 			},
-			ExpectedLocation: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/provider-zone-a"),
+			ExpectedLocation: types.StringValue("provider-zone-a"),
 		},
 		// Handling of empty strings
 		"returns the region value set in the resource config when location is an empty string": {
