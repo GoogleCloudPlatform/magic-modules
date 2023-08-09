@@ -161,8 +161,6 @@ module Provider
            'third_party/terraform/utils/compute_operation.go.erb'],
           ['converters/google/resources/services/compute/compute_operation.go',
            'third_party/terraform/services/compute/compute_operation.go.erb'],
-          ['converters/google/resources/transport/config.go',
-           'third_party/terraform/transport/config.go.erb'],
           ['converters/google/resources/config_test_utils.go',
            'third_party/terraform/utils/config_test_utils.go.erb'],
           ['converters/google/resources/iam.go',
@@ -173,8 +171,6 @@ module Provider
            'third_party/terraform/tpgresource/common_diff_suppress.go.erb'],
           ['converters/google/resources/services/compute/compute_instance_helpers.go',
            'third_party/terraform/services/compute/compute_instance_helpers.go.erb'],
-          ['converters/google/resources/transport/provider_handwritten_endpoint.go',
-           'third_party/terraform/transport/provider_handwritten_endpoint.go.erb'],
           ['converters/google/resources/resource_converters.go',
            'templates/tgc/resource_converters.go.erb'],
           ['converters/google/resources/mappers.go',
@@ -225,8 +221,6 @@ module Provider
                         'third_party/tgc/folder.go'],
                        ['converters/google/resources/getconfig_test.go',
                         'third_party/tgc/getconfig_test.go'],
-                       ['converters/google/resources/transport/config_test_utils.go',
-                        'third_party/terraform/transport/config_test_utils.go'],
                        ['converters/google/resources/tpgresource/json_map.go',
                         'third_party/tgc/tpgresource/json_map.go'],
                        ['converters/google/resources/json_map.go',
@@ -239,8 +233,6 @@ module Provider
                         'third_party/tgc/storage_bucket.go'],
                        ['converters/google/resources/cloudfunctions_function.go',
                         'third_party/tgc/cloudfunctions_function.go'],
-                       ['converters/google/resources/transport/dcl.go',
-                        'third_party/tgc/dcl.go'],
                        ['converters/google/resources/cloudfunctions_cloud_function.go',
                         'third_party/tgc/cloudfunctions_cloud_function.go'],
                        ['converters/google/resources/bigquery_table.go',
@@ -297,10 +289,6 @@ module Provider
                         'third_party/terraform/utils/self_link_helpers.go'],
                        ['converters/google/resources/tpgresource/self_link_helpers.go',
                         'third_party/terraform/tpgresource/self_link_helpers.go'],
-                       ['converters/google/resources/transport/header_transport.go',
-                        'third_party/terraform/transport/header_transport.go'],
-                       ['converters/google/resources/transport/bigtable_client_factory.go',
-                        'third_party/terraform/transport/bigtable_client_factory.go'],
                        ['converters/google/resources/tpgresource/common_operation.go',
                         'third_party/terraform/tpgresource/common_operation.go'],
                        ['converters/google/resources/common_operation.go',
@@ -317,20 +305,10 @@ module Provider
                         'third_party/terraform/tpgresource/service_scope.go'],
                        ['converters/google/resources/services/kms/kms_utils.go',
                         'third_party/terraform/services/kms/kms_utils.go'],
-                       ['converters/google/resources/transport/batcher.go',
-                        'third_party/terraform/transport/batcher.go'],
-                       ['converters/google/resources/transport/retry_utils.go',
-                        'third_party/terraform/transport/retry_utils.go'],
                        ['converters/google/resources/retry_utils.go',
                         'third_party/terraform/utils/retry_utils.go'],
                        ['converters/google/resources/services/sourcerepo/source_repo_utils.go',
                         'third_party/terraform/services/sourcerepo/source_repo_utils.go'],
-                       ['converters/google/resources/transport/retry_transport.go',
-                        'third_party/terraform/transport/retry_transport.go'],
-                       ['converters/google/resources/transport/transport.go',
-                        'third_party/terraform/transport/transport.go'],
-                       ['converters/google/resources/transport/error_retry_predicates.go',
-                        'third_party/terraform/transport/error_retry_predicates.go'],
                        ['converters/google/resources/error_retry_predicates.go',
                         'third_party/terraform/utils/error_retry_predicates.go'],
                        ['converters/google/resources/services/pubsub/pubsub_utils.go',
@@ -343,8 +321,6 @@ module Provider
                         'third_party/terraform/verify/path_or_contents.go'],
                        ['converters/google/resources/path_or_contents.go',
                         'third_party/terraform/utils/path_or_contents.go'],
-                       ['converters/google/resources/transport/mutexkv.go',
-                        'third_party/terraform/transport/mutexkv.go'],
                        ['converters/google/resources/hashcode.go',
                         'third_party/terraform/utils/hashcode.go'],
                        ['converters/google/resources/tpgresource/hashcode.go',
@@ -468,13 +444,25 @@ module Provider
       # Replace import paths to reference the resources dir instead of the google provider
       data = File.read("#{output_folder}/#{target}")
       # rubocop:disable Layout/LineLength
+      # replace google to google-beta
       data = data.gsub(
         %r{(?<!provider ")github.com/hashicorp/terraform-provider-google/google},
-        'github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources'
+        'github.com/hashicorp/terraform-provider-google-beta/google-beta'
       )
+      # replace tpgresource
       data = data.gsub(
-        %r{(?<!provider ")github.com/hashicorp/terraform-provider-google-beta/google-beta},
-        'github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources'
+        %r{(?<!provider ")github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource},
+        'github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource'
+      )
+      # replace tpgiamresource
+      data = data.gsub(
+        %r{(?<!provider ")github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgiamresource},
+        'github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgiamresource'
+      )
+      # replace services
+      data = data.gsub(
+        %r{(?<!provider ")github.com/hashicorp/terraform-provider-google-beta/google-beta/services},
+        'github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/services'
       )
       # rubocop:enable Layout/LineLength
       File.write("#{output_folder}/#{target}", data)
