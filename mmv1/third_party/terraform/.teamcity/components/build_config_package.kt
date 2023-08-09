@@ -40,7 +40,7 @@ class packageDetails(packageName: String, displayName: String, providerName: Str
 
             params {
                 ConfigureGoogleSpecificTestParameters(environmentVariables)
-                TerraformAcceptanceTestParameters(parallelism, "TestAccCloudBuild", "12", "", "")
+                TerraformAcceptanceTestParameters(parallelism, "TestAcc", "12", "", "")
                 TerraformAcceptanceTestsFlag()
                 TerraformCoreBinaryTesting()
                 TerraformShouldPanicForSchemaErrors()
