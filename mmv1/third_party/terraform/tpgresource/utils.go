@@ -98,6 +98,9 @@ func GetProjectFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (s
 	if ok {
 		return res.(string), nil
 	}
+	if d.GetRawConfig().GetAttr("project") == cty.UnknownVal(cty.String) {
+		return res.(string), nil
+	}
 	if config.Project != "" {
 		return config.Project, nil
 	}
@@ -112,6 +115,9 @@ func GetRegionFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (st
 	if ok {
 		return res.(string), nil
 	}
+	if d.GetRawConfig().GetAttr("region") == cty.UnknownVal(cty.String) {
+		return res.(string), nil
+	}
 	if config.Region != "" {
 		return config.Region, nil
 	}
@@ -124,6 +130,9 @@ func GetRegionFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (st
 func GetZoneFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (string, error) {
 	res, ok := d.GetOk("zone")
 	if ok {
+		return res.(string), nil
+	}
+	if d.GetRawConfig().GetAttr("zone") == cty.UnknownVal(cty.String) {
 		return res.(string), nil
 	}
 	if config.Zone != "" {
@@ -767,12 +776,13 @@ func DefaultProviderProject(_ context.Context, diff *schema.ResourceDiff, meta i
 	config := meta.(*transport_tpg.Config)
 
 	//project
-	project, err := GetProjectFromDiff(diff, config)
-	if err != nil {
-		return fmt.Errorf("Failed to retrieve project, pid: %s, err: %s", project, err)
+	if project := diff.Get("project"); project != nil {
+		project, err := GetProjectFromDiff(diff, config)
+		if err != nil {
+			return fmt.Errorf("Failed to retrieve project, pid: %s, err: %s", project, err)
+		}
+		diff.SetNew("project", project)
 	}
-	diff.SetNew("project", project)
-
 	return nil
 }
 
