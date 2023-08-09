@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -675,7 +676,9 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	}
 
 	if v, ok := d.GetOk("universe_domain"); ok {
-		config.UniverseDomain = v.(string)
+		for key, bp := range transport_tpg.DefaultBasePaths {
+			transport_tpg.DefaultBasePaths[key] = strings.ReplaceAll(bp, "googleapis.com", v.(string))
+		}
 	}
 	
 	// Check for primary credentials in config. Note that if neither is set, ADCs
