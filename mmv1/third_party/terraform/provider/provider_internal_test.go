@@ -841,35 +841,61 @@ func TestProvider_providerConfigure_requestReason(t *testing.T) {
 func TestProvider_providerConfigure_batching(t *testing.T) {
 	//var batch []interface{}
 	cases := map[string]struct {
-		ConfigValues           map[string]interface{}
-		EnvVariables           map[string]string
-		ExpectError            bool
-		ExpectFieldUnset       bool
-		ExpectedSchemaValue    string
-		ExpectedConfigValue    string
-		ExpectedSendAfterValue string
+		ConfigValues                map[string]interface{}
+		EnvVariables                map[string]string
+		ExpectError                 bool
+		ExpectFieldUnset            bool
+		ExpectedEnableBatchingValue string
+		ExpectedSendAfterValue      string
 	}{
 		"if batch is an empty block, it will set the default values": {
-			// ConfigValues: map[string]interface{}{
-			// 	"batching": batch,
-			// },
-			ExpectedSchemaValue:    "false",
-			ExpectedConfigValue:    "false",
-			ExpectedSendAfterValue: "",
-			ExpectFieldUnset:       true,
+			ExpectedEnableBatchingValue: "false",
+			ExpectedSendAfterValue:      "", // uses "" value to be able to set the default value of 30s
+			ExpectFieldUnset:            true,
 		},
-		"test": {
+		"if batch is configured with both enable_batching and send_after": {
 			ConfigValues: map[string]interface{}{
 				"batching": []interface{}{
 					map[string]interface{}{
-						"request_after": "true",
-						"send_after":    "10s",
+						"enable_batching": true,
+						"send_after":      "10s",
 					},
 				},
 			},
-			ExpectedSchemaValue:    "false",
-			ExpectedConfigValue:    "false",
-			ExpectedSendAfterValue: "",
+			ExpectedEnableBatchingValue: "true",
+			ExpectedSendAfterValue:      "10s",
+		},
+		"if batch is configured with only enable_batching": {
+			ConfigValues: map[string]interface{}{
+				"batching": []interface{}{
+					map[string]interface{}{
+						"enable_batching": true,
+					},
+				},
+			},
+			ExpectedEnableBatchingValue: "true",
+		},
+		"if batch is configured with only send_after": {
+			ConfigValues: map[string]interface{}{
+				"batching": []interface{}{
+					map[string]interface{}{
+						"send_after": "10s",
+					},
+				},
+			},
+			ExpectedEnableBatchingValue: "false",
+			ExpectedSendAfterValue:      "10s",
+		},
+		"if batch is configured with invalid value for send_after": {
+			ConfigValues: map[string]interface{}{
+				"batching": []interface{}{
+					map[string]interface{}{
+						"send_after": "invalid value",
+					},
+				},
+			},
+			ExpectedSendAfterValue: "invalid value",
+			ExpectError:            true,
 		},
 	}
 
@@ -893,11 +919,22 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 				t.Fatal("expected error(s) but got none")
 			}
 			if diags.HasError() && tc.ExpectError {
-				v, ok := d.GetOk("batching")
+				v, ok := d.GetOk("batching.0.enable_batching")
 				if ok {
 					val := v.(string)
-					if val != tc.ExpectedSchemaValue {
-						t.Fatalf("expected request_timeout value set in provider data to be %s, got %s", tc.ExpectedSchemaValue, val)
+					if val != tc.ExpectedEnableBatchingValue {
+						t.Fatalf("expected request_timeout value set in provider data to be %s, got %s", tc.ExpectedEnableBatchingValue, val)
+					}
+					if tc.ExpectFieldUnset {
+						t.Fatalf("expected request_timeout value to not be set in provider data, got %s", val)
+					}
+				}
+
+				v, ok = d.GetOk("batching.0.send_after")
+				if ok {
+					val := v.(string)
+					if val != tc.ExpectedSendAfterValue {
+						t.Fatalf("expected request_timeout value set in provider data to be %s, got %s", tc.ExpectedSendAfterValue, val)
 					}
 					if tc.ExpectFieldUnset {
 						t.Fatalf("expected request_timeout value to not be set in provider data, got %s", val)
@@ -908,28 +945,16 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 			}
 
 			v := d.Get("batching.0.enable_batching")
-			//v := d.Get("batching")
 			enableBatching := strconv.FormatBool(v.(bool))
-			// config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
-
-			if enableBatching != tc.ExpectedSchemaValue {
-				t.Fatalf("expected batching value set in provider data to be %s, got %s", tc.ExpectedSchemaValue, enableBatching)
+			if enableBatching != tc.ExpectedEnableBatchingValue {
+				t.Fatalf("expected enable_batching value set in provider data to be %s, got %s", tc.ExpectedEnableBatchingValue, enableBatching)
 			}
-			// if config.Batching != tc.ExpectedValue {
-			// 	t.Fatalf("expected batching value in provider struct to be %s, got %v", tc.ExpectedValue, config.RequestTimeout.String())
-			// }
 
 			v = d.Get("batching.0.send_after") // checks for an empty string in order to set the default value
-			//v := d.Get("batching")
 			sendAfter := v.(string)
-			// config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
-
 			if sendAfter != tc.ExpectedSendAfterValue {
-				t.Fatalf("expected batching value set in provider data to be %s, got %s", tc.ExpectedSendAfterValue, sendAfter)
+				t.Fatalf("expected send_after value set in provider data to be %s, got %s", tc.ExpectedSendAfterValue, sendAfter)
 			}
-			// if config.Batching != tc.ExpectedValue {
-			// 	t.Fatalf("expected batching value in provider struct to be %s, got %v", tc.ExpectedValue, config.RequestTimeout.String())
-			// }
 		})
 	}
 }
