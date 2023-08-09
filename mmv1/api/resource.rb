@@ -217,6 +217,10 @@ module Api
       # public ca external account keys
       attr_reader :skip_read
 
+      # Set to true for resources that wish to disable automatic generation of default provider
+      # value customdiff functions
+      attr_reader :skip_default_cdiff
+
       # This enables resources that get their project via a reference to a different resource
       # instead of a project field to use User Project Overrides
       attr_reader :supports_indirect_user_project_override
@@ -319,6 +323,7 @@ module Api
       check :migrate_state, type: String
       check :skip_delete, type: :boolean, default: false
       check :skip_read, type: :boolean, default: false
+      check :skip_default_cdiff, type: :boolean, default: false
       check :supports_indirect_user_project_override, type: :boolean, default: false
       check :legacy_long_form_project, type: :boolean, default: false
       check :read_error_transform, type: String
