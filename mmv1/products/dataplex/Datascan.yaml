@@ -416,7 +416,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'dataQualityResult'
     output: true
-    deprecated: "dataQualityResult removed from Terraform output fields"
+    deprecated: "dataQualityResult will be removed from Terraform output fields in 5.0.0"
     description: |
       The result of the data quality scan.
     properties:
@@ -643,7 +643,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'dataProfileResult'
     output: true
-    deprecated: "dataProfileResult removed from Terraform output fields"
+    deprecated: "dataProfileResult will be removed from Terraform output fields in 5.0.0"
     description: |
       The result of the data profile scan.
     properties:
