@@ -57,7 +57,7 @@ func main() {
 	authorUserType := getUserType(author, GITHUB_TOKEN)
 	trusted := authorUserType == coreContributorUserType || authorUserType == googlerUserType
 
-	if target == "auto_run" && authorUserType != coreContributorUserType {
+	if target == "auto_run" {
 		fmt.Println("Not core contributor - assigning reviewer")
 
 		firstRequestedReviewer, err := getPullRequestRequestedReviewer(prNumber, GITHUB_TOKEN)
