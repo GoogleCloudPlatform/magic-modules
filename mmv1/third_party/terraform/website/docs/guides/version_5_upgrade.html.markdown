@@ -116,6 +116,6 @@ Previously, `google_firebase_web_app` deletions default to `ABANDON`, which mean
 
 ## Resource: `google_dataplex_datascan`
 
-### `dataQualityResult` and `dataProfileResult` output fields are nowremoved 
+### `dataQualityResult` and `dataProfileResult` output fields are now removed 
 
 `dataQualityResult` and `dataProfileResult` were output-only fields which listed results for the latest job created under a Datascan. This is unlikely to be relevant in a Terraform context.
