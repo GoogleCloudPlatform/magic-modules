@@ -113,3 +113,9 @@ Description of the change and how users should adjust their configuration (if ne
 ### `deletion_policy` now defaults to `DELETE`
 
 Previously, `google_firebase_web_app` deletions default to `ABANDON`, which means to only stop tracking the WebApp in Terraform. The actual app is not deleted from the Firebase project. If you are relying on this behavior, set `deletion_policy` to `ABANDON` explicitly in the new version.
+
+## Resource: `google_dataplex_datascan`
+
+### `dataQualityResult` and `dataProfileResult` output fields are nowremoved 
+
+`dataQualityResult` and `dataProfileResult` were output-only fields which listed results for the latest job created under a Datascan. This is unlikely to be relevant in a Terraform context.
