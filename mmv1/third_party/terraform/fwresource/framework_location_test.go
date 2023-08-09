@@ -126,7 +126,7 @@ func TestLocationDescription_GetRegion(t *testing.T) {
 			},
 			ExpectedRegion: types.StringValue("provider-zone"), // is truncated
 		},
-		"does not shorten region values when derived from a zone self link set in the resource config": {
+		"shortens region values when derived from a zone self link set in the resource config": {
 			ld: LocationDescription{
 				ResourceZone: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a"),
 			},
@@ -228,7 +228,7 @@ func TestLocationDescription_GetLocation(t *testing.T) {
 			},
 			ExpectedLocation: types.StringValue("resource-location"),
 		},
-		"does not shorten the location value when it is set as a self link in the resource config": {
+		"shortens the location value when it is set as a self link in the resource config": {
 			ld: LocationDescription{
 				ResourceLocation: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location"),
 			},
@@ -241,7 +241,7 @@ func TestLocationDescription_GetLocation(t *testing.T) {
 			},
 			ExpectedLocation: types.StringValue("resource-region"),
 		},
-		"does not shorten the region value when it is set as a self link in the resource config": {
+		"shortens the region value when it is set as a self link in the resource config": {
 			ld: LocationDescription{
 				ResourceRegion: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/regions/resource-region"),
 			},
@@ -272,7 +272,7 @@ func TestLocationDescription_GetLocation(t *testing.T) {
 			},
 			ExpectedLocation: types.StringValue("provider-zone-a"),
 		},
-		"does not shorten the zone value when it is set as a self link in the provider config": {
+		"shortens the zone value when it is set as a self link in the provider config": {
 			ld: LocationDescription{
 				ProviderZone: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/provider-zone-a"),
 			},
