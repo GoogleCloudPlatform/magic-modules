@@ -292,7 +292,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
       # check for any uncaught errors in RECORDING mode
       comment+="$\textcolor{red}{\textsf{Errors occurred during RECORDING mode. Please fix them to complete your PR.}}$ ${NEWLINE}"
     else
-      comment+="$\textcolor{green}{\textsf{All tests passed!}} ${NEWLINE}"
+      comment+="$\textcolor{green}{\textsf{All tests passed!}}$ ${NEWLINE}"
     fi
   fi
 
