@@ -837,10 +837,18 @@ resource "google_dns_record_set" "foobar" {
 `, networkName, proxySubnetName, healthCheckName, backendName, urlMapName, httpProxyName, forwardingRuleName, zoneName, zoneName, zoneName, ttl)
 }
 
-func testAccDnsRecordSet_routingPolicyCrossRegionL7PrimaryBackup(networkName, proxySubnetName, healthCheckName, backendName, urlMapName, httpProxyName, forwardingRuleName, zoneName string, ttl int) string {
+func testAccDnsRecordSet_routingPolicyCrossRegionL7PrimaryBackup(networkName, backendSubnetName, proxySubnetName, healthCheckName, backendName, urlMapName, httpProxyName, forwardingRuleName, zoneName string, ttl int) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "default" {
   name = "%s"
+}
+
+resource "google_compute_subnetwork" "backend_subnet" {
+  name          = "%s"
+  provider      = google-beta
+  ip_cidr_range = "10.0.1.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.default.id
 }
 
 resource "google_compute_subnetwork" "proxy_subnet" {
@@ -884,6 +892,7 @@ resource "google_compute_global_forwarding_rule" "default" {
   target                = google_compute_target_http_proxy.http_proxy.id
   port_range            = "80"
   network               = google_compute_network.default.name
+  subnetwork            = google_compute_subnetwork.backend_subnet.name
   ip_protocol           = "TCP"
 }
 
@@ -928,7 +937,7 @@ resource "google_dns_record_set" "foobar" {
     }
   }
 }
-`, networkName, proxySubnetName, healthCheckName, backendName, urlMapName, httpProxyName, forwardingRuleName, zoneName, zoneName, zoneName, ttl)
+`, networkName, backendSubnetName, proxySubnetName, healthCheckName, backendName, urlMapName, httpProxyName, forwardingRuleName, zoneName, zoneName, zoneName, ttl)
 }
 
 func testAccDnsRecordSet_interpolated(zoneName string) string {
