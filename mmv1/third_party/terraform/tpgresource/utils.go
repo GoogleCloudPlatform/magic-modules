@@ -98,6 +98,9 @@ func GetProjectFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (s
 	if ok {
 		return res.(string), nil
 	}
+	if d.GetRawConfig().GetAttr("project") == cty.UnknownVal(cty.String) {
+		return res.(string), nil
+	}
 	if config.Project != "" {
 		return config.Project, nil
 	}
@@ -112,6 +115,9 @@ func GetRegionFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (st
 	if ok {
 		return res.(string), nil
 	}
+	if d.GetRawConfig().GetAttr("region") == cty.UnknownVal(cty.String) {
+		return res.(string), nil
+	}
 	if config.Region != "" {
 		return config.Region, nil
 	}
@@ -124,6 +130,9 @@ func GetRegionFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (st
 func GetZoneFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (string, error) {
 	res, ok := d.GetOk("zone")
 	if ok {
+		return res.(string), nil
+	}
+	if d.GetRawConfig().GetAttr("zone") == cty.UnknownVal(cty.String) {
 		return res.(string), nil
 	}
 	if config.Zone != "" {
