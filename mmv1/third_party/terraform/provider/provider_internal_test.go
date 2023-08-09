@@ -839,7 +839,7 @@ func TestProvider_providerConfigure_requestReason(t *testing.T) {
 }
 
 func TestProvider_providerConfigure_batching(t *testing.T) {
-	var batch []interface{}
+	//var batch []interface{}
 	cases := map[string]struct {
 		ConfigValues           map[string]interface{}
 		EnvVariables           map[string]string
@@ -849,9 +849,23 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 		ExpectedConfigValue    string
 		ExpectedSendAfterValue string
 	}{
-		"batching block test": {
+		"if batch is an empty block, it will set the default values": {
+			// ConfigValues: map[string]interface{}{
+			// 	"batching": batch,
+			// },
+			ExpectedSchemaValue:    "false",
+			ExpectedConfigValue:    "false",
+			ExpectedSendAfterValue: "",
+			ExpectFieldUnset:       true,
+		},
+		"test": {
 			ConfigValues: map[string]interface{}{
-				"batching": batch,
+				"batching": []interface{}{
+					map[string]interface{}{
+						"request_after": "true",
+						"send_after":    "10s",
+					},
+				},
 			},
 			ExpectedSchemaValue:    "false",
 			ExpectedConfigValue:    "false",
