@@ -119,31 +119,15 @@ if [ "$REPO" == "terraform-google-conversion" ]; then
 
     bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH/tfplan2cai -v $VERSION
 
-    pushd $LOCAL_PATH
-
     if [ "$COMMAND" == "downstream" ]; then
+      pushd $LOCAL_PATH
       go get -d github.com/hashicorp/terraform-provider-google-beta@$BASE_BRANCH
-    else
-      go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/$SCRATCH_OWNER/terraform-provider-google-beta@$BRANCH
-    fi
-
-
-    go mod tidy
-
-    # the following build can fail which results in a subsequent failure to push to tfv repository.
-    # due to the uncertainty of tpg being able to build we will ignore errors here
-    # as these files are not critical to operation of tfv and not worth blocking the GA pipeline
-    if [ "$COMMAND" == "downstream" ]; then
+      go mod tidy
       set +e
-    fi
-
-    make build
-
-    if [ "$COMMAND" == "downstream" ]; then
+      make build
       set -e
+      popd
     fi
-
-    popd
 elif [ "$REPO" == "tf-oics" ]; then
     # use terraform generator with oics override
     bundle exec compiler.rb -a -e terraform -f oics -o $LOCAL_PATH -v $VERSION

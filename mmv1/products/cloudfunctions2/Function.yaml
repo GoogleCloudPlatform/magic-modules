@@ -49,6 +49,7 @@ async: !ruby/object:Api::OpAsync
 id_format: 'projects/{{project}}/locations/{{location}}/functions/{{name}}'
 import_format:
   ['projects/{{project}}/locations/{{location}}/functions/{{name}}']
+taint_resource_on_failed_create: true
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
