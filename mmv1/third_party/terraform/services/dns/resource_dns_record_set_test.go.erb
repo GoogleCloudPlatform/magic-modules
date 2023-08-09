@@ -913,7 +913,6 @@ resource "google_dns_record_set" "foobar" {
           ip_protocol        = "tcp"
           network_url        = google_compute_network.default.id
           project            = google_compute_global_forwarding_rule.default.project
-          region             = google_compute_global_forwarding_rule.default.region
         }
       }
 
