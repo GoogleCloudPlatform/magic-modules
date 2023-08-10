@@ -2154,6 +2154,8 @@ resource "google_storage_bucket" "test" {
   force_destroy = true
 }
 
+data "google_project" "project" {}
+
 resource "google_bigquery_connection" "test" {
 	connection_id = "%s"
 	location = "US"
