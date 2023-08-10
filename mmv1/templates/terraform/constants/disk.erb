@@ -1,5 +1,5 @@
 
-<% unless compiler == "terraformvalidator-codegen" -%>
+<% unless compiler == "terraformgoogleconversion-codegen" -%>
 // diffsupress for hyperdisk provisioned_iops
 func hyperDiskIopsUpdateDiffSupress(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	if !strings.Contains(d.Get("type").(string), "hyperdisk") {
