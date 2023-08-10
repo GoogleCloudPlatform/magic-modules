@@ -114,6 +114,10 @@ Description of the change and how users should adjust their configuration (if ne
 
 The provider will now enforce at plan time that at most one of these fields be set.
 
+### `schema` can only be represented as a JSON array with non-null elements.
+
+The provider will now enforce at plan time that `schema` can be unmarshalled into a valid JSON array with non-null elements.
+
 ## Resource: `google_firebase_web_app`
 
 ### `deletion_policy` now defaults to `DELETE`
