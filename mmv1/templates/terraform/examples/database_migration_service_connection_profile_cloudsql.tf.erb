@@ -65,22 +65,21 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
       user_labels = { 
         cloudfoo = "cloudbar"
       }
-    tier = "db-n1-standard-1"
-    storage_auto_resize_limit = "0"
-    activation_policy = "ALWAYS"
-    ip_config {
-      enable_ipv4 = true
-      require_ssl = "true"
+      tier = "db-n1-standard-1"
+      edition = "ENTERPRISE"
+      storage_auto_resize_limit = "0"
+      activation_policy = "ALWAYS"
+      ip_config {
+        enable_ipv4 = true
+        require_ssl = "true"
+      }
+      auto_storage_increase = true
+      data_disk_type = "PD_HDD"
+      data_disk_size_gb = "11"
+      zone = "us-central1-b"
+      source_id = "projects/${data.google_project.project.project_id}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["from_profile"] %>"
+      root_password = "testpasscloudsql"
     }
-    auto_storage_increase = true
-    data_disk_type = "PD_HDD"
-    data_disk_size_gb = "11"
-    zone = "us-central1-b"
-    source_id = "projects/${data.google_project.project.project_id}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["from_profile"] %>"
-    root_password = "testpasscloudsql"
-    }
-
-
   }
   depends_on = [google_database_migration_service_connection_profile.<%= ctx[:primary_resource_id] %>]
 }
