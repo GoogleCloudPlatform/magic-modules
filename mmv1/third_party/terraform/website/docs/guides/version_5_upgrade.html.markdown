@@ -86,6 +86,28 @@ terraform {
 }
 ```
 
+## Lables Rework
+
+### Labels
+
+The new labels model will be applied to all of the resources with the resource `labels` field. Some `labels` fields are for child resources, so the new model will not be applied to the `labels` fields for child resources.
+
+The default labels configured on the provider through the new `default_lables` field will be supported. The default labels configured on the provider will be applied to all of the resources with the resource `labels` field.
+
+There will be three labels related fields on the resources with resource `labels` field.
+
+* The `labels` field will be non-authoritative and only manage the labels defined by the users on the resource through Terraform.
+* The output-only `effective_labels` will list all of labels present on the resource in GCP, including the labels configured through Terraform, other clients and services.
+* The output-only `terraform_labels` will merge the labels defined by the users on the resource through Terraform and the default labels configured on the provider. When the same label exists on both the resource labels and provider default labels, the lable on the resource will override the label on the provider.
+
+After upgrading to `5.0.0`, and then running `terraform refresh` or `terraform apply`, these three fields should show in the state file if the resources have resource "labels" field.
+
+### Annotations
+
+The new annotations model is similar to the new labels model. 
+
+There will be two annotations related fields on resources with resource `annotations` field, the `annotaitons` and the output-only `effective_annotations` fields. `terraform_annotations` field is not supported, as the default annotations configured on the provider will not be supported.
+
 ## Provider
 
 ### Provider-level change example header
