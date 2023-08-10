@@ -1703,7 +1703,7 @@ resource "google_storage_bucket" "test" {
 
 resource "google_storage_bucket_object" "test" {
   name    = "%s"
-  source = "./test-fixtures/bigquerytable/test.parquet.gzip"
+  source = "./test-fixtures/test.parquet.gzip"
   bucket = google_storage_bucket.test.name
 }
 
@@ -1836,7 +1836,7 @@ resource "google_storage_bucket_object" "empty_data_folder" {
 // Upload Metadata File.
 resource "google_storage_bucket_object" "metadata" {
 	name    = "simple/metadata/00000-1114da6b-bb88-4b5a-94bd-370f286c858a.metadata.json"
-	source = "./test-fixtures/bigquerytable/simple/metadata/00000-1114da6b-bb88-4b5a-94bd-370f286c858a.metadata.json"
+	source = "./test-fixtures/simple/metadata/00000-1114da6b-bb88-4b5a-94bd-370f286c858a.metadata.json"
 	bucket = google_storage_bucket.test.name
 }
 
@@ -1877,7 +1877,7 @@ resource "google_storage_bucket" "test" {
 # Upload Data File.
 resource "google_storage_bucket_object" "datafile" {
 	name = "%s"
-	source = "./test-fixtures/bigquerytable/simple/data/00000-0-4e4a11ad-368c-496b-97ae-e3ac28051a4d-00001.parquet"
+	source = "./test-fixtures/simple/data/00000-0-4e4a11ad-368c-496b-97ae-e3ac28051a4d-00001.parquet"
 	bucket = google_storage_bucket.test.name
 }
 

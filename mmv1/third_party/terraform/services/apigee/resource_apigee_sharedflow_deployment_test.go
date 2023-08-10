@@ -30,7 +30,7 @@ func TestAccApigeeSharedflowDeployment_apigeeSharedflowDeploymentTestExample(t *
 		CheckDestroy:             testAccCheckApigeeSharedflowDeploymentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccApigeeSharedflowDeployment_apigeeSharedflowDeploymentTestExample(context, "./test-fixtures/apigee/apigee_sharedflow_bundle.zip"),
+				Config: testAccApigeeSharedflowDeployment_apigeeSharedflowDeploymentTestExample(context, "./test-fixtures/apigee_sharedflow_bundle.zip"),
 			},
 			{
 				ResourceName:            "google_apigee_sharedflow_deployment.sharedflow_deployment_test",
@@ -39,7 +39,7 @@ func TestAccApigeeSharedflowDeployment_apigeeSharedflowDeploymentTestExample(t *
 				ImportStateVerifyIgnore: []string{},
 			},
 			{
-				Config: testAccApigeeSharedflowDeployment_apigeeSharedflowDeploymentTestExample(context, "./test-fixtures/apigee/apigee_sharedflow_bundle2.zip"),
+				Config: testAccApigeeSharedflowDeployment_apigeeSharedflowDeploymentTestExample(context, "./test-fixtures/apigee_sharedflow_bundle2.zip"),
 			},
 			{
 				ResourceName:            "google_apigee_sharedflow_deployment.sharedflow_deployment_test",

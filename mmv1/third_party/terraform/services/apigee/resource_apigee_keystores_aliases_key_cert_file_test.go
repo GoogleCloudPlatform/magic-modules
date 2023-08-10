@@ -126,8 +126,8 @@ resource "google_apigee_keystores_aliases_key_cert_file" "test-alias" {
 	alias = "tf-test%{random_suffix}"
 	org_id =  google_apigee_organization.apigee_org.name
 	environment = google_apigee_environment.apigee_environment_keystore_alias.name
-	cert = file("./test-fixtures/apigee/apigee_keystore_alias_test_cert.pem")
-	key = sensitive(file("./test-fixtures/apigee/apigee_keystore_alias_test_key.pem"))
+	cert = file("./test-fixtures/apigee_keystore_alias_test_cert.pem")
+	key = sensitive(file("./test-fixtures/apigee_keystore_alias_test_key.pem"))
 	password = sensitive("password")
 	keystore = google_apigee_env_keystore.apigee_environment_keystore.name
 }
@@ -247,8 +247,8 @@ resource "google_apigee_keystores_aliases_key_cert_file" "test-alias" {
 	alias = "tf-test%{random_suffix}"
 	org_id =  google_apigee_organization.apigee_org.name
 	environment = google_apigee_environment.apigee_environment_keystore_alias.name
-	cert = file("./test-fixtures/apigee/apigee_keystore_alias_test_cert2.pem")
-	key = sensitive(file("./test-fixtures/apigee/apigee_keystore_alias_test_key.pem"))
+	cert = file("./test-fixtures/apigee_keystore_alias_test_cert2.pem")
+	key = sensitive(file("./test-fixtures/apigee_keystore_alias_test_key.pem"))
 	password = sensitive("password")
 	keystore = google_apigee_env_keystore.apigee_environment_keystore.name
 }  
