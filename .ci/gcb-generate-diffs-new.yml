@@ -129,7 +129,7 @@ steps:
       entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
       id: tgc-head
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged", "tpg-head"]
+      waitFor: ["merged"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
       args:
@@ -142,7 +142,7 @@ steps:
       entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
       id: tgc-base
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged", "tpg-base"]
+      waitFor: ["merged"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
       args:
@@ -184,7 +184,7 @@ steps:
       env:
         - BUILD_ID=$BUILD_ID
         - PROJECT_ID=$PROJECT_ID
-        - BUILD_STEP="17"
+        - BUILD_STEP=17
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
       args:
@@ -195,7 +195,7 @@ steps:
       id: tgc-test
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tgc-head", "tgc-base"]
+      waitFor: ["tpgb-head", "tpgb-base", "tgc-head", "tgc-base"]
       env:
         - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
         - TEST_FOLDER_ID=$_VALIDATOR_TEST_FOLDER
@@ -214,7 +214,7 @@ steps:
       entrypoint: '/workspace/.ci/scripts/go-plus/terraform-validator-tester-integration/test_terraform_validator_integration.sh'
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tgc-head", "tgc-base"]
+      waitFor: ["tpgb-head", "tpgb-base", "tgc-head", "tgc-base"]
       env:
         - TERRAFORM_VERSION=0.12.31
         - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
@@ -234,7 +234,7 @@ steps:
       entrypoint: '/workspace/.ci/scripts/go-plus/terraform-validator-tester-integration/test_terraform_validator_integration.sh'
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tgc-head", "tgc-base"]
+      waitFor: ["tpgb-head", "tpgb-base", "tgc-head", "tgc-base"]
       env:
         - TERRAFORM_VERSION=0.13.7
         - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT

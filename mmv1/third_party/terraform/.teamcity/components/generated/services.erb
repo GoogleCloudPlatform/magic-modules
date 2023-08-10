@@ -6,15 +6,25 @@
 
 // this file is auto-generated with mmv1, any changes made here will be overwritten
 <% 
-    service_names = []
     version_string = "-" + version unless version == 'ga' 
+    
+    service_packages = []
     Dir["google#{version_string}/services/**"].each do |service|
-      service_names.push service.split('/')[-1]
+      next if File.directory?(service) == false # ignore files
+
+      name = service.split('/')[-1]
+      path = "./" + service
+      info = {"name" => name, "path" => path}
+      service_packages.push info
     end
 -%>
 
 var services = mapOf(
-<%  service_names.each_with_index do |service, i| -%>
-        "<%= service -%>" to "<%= service.space_separated -%>"<%= ',' if i < (service_names.size - 1) %>
+<%  service_packages.each_with_index do |service, i| -%>
+    "<%= service["name"] -%>" to mapOf(
+        "name" to "<%= service["name"] -%>",
+        "displayName" to "<%= service["name"].space_separated -%>",
+        "path" to "<%= service["path"] -%>"
+    )<%= ',' if i < (service_packages.length - 1) %>
 <%  end -%>
 )
