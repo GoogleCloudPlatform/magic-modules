@@ -127,11 +127,13 @@ func ResourceComputeTargetPool() *schema.Resource {
 				Description: `How to distribute load. Options are "NONE" (no affinity). "CLIENT_IP" (hash of the source/dest addresses / ports), and "CLIENT_IP_PROTO" also includes the protocol (default "NONE").`,
 			},
 
+			<% unless version == 'ga' -%>
 			"security_policy": {
 				Type: schema.TypeString,
 				Optional: true,
 				Description: `The resource URL for the security policy associated with this target pool.`,
 			},
+			<% end -%>
 		},
 		UseJSONNumber: true,
 	}
@@ -255,6 +257,7 @@ func resourceComputeTargetPoolCreate(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
+	<% unless version == 'ga' -%>
 	// security_policy isn't set by Create
 	if o, n := d.GetChange("security_policy"); o.(string) != n.(string) {
 		pol, err := tpgresource.ParseSecurityPolicyRegionalFieldValue(n.(string), d, config)
@@ -280,6 +283,7 @@ func resourceComputeTargetPoolCreate(d *schema.ResourceData, meta interface{}) e
 			return waitErr
 		}
 	}
+	<% end -%>
 
 	return resourceComputeTargetPoolRead(d, meta)
 }
@@ -417,6 +421,7 @@ func resourceComputeTargetPoolUpdate(d *schema.ResourceData, meta interface{}) e
 		}
 	}
 
+	<% unless version == 'ga' -%>
 	if d.HasChange("security_policy") {
 		sp := d.Get("security_policy").(string)
 		pol, err := tpgresource.ParseSecurityPolicyRegionalFieldValue(sp, d, config)
@@ -442,6 +447,7 @@ func resourceComputeTargetPoolUpdate(d *schema.ResourceData, meta interface{}) e
 			return waitErr
 		}
 	}
+	<% end -%>
 
 	d.Partial(false)
 
@@ -517,9 +523,11 @@ func resourceComputeTargetPoolRead(d *schema.ResourceData, meta interface{}) err
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
+	<% unless version == 'ga' -%>
 	if err := d.Set("security_policy", tpool.SecurityPolicy); err != nil {
 		return fmt.Errorf("Error setting security_policy: %s", err)
 	}
+	<% end -%>
 	return nil
 }
 

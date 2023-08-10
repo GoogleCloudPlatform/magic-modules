@@ -82,6 +82,7 @@ func TestAccComputeTargetPool_update(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccComputeTargetPool_withSecurityPolicy(t *testing.T) {
 	tpname := fmt.Sprintf("tf-tp-test-%s", acctest.RandString(t, 10))
 	ddosPolicy := fmt.Sprintf("tf-tp-ddos-pol-test-%s", acctest.RandString(t, 10))
@@ -136,6 +137,7 @@ func TestAccComputeTargetPool_withSecurityPolicy(t *testing.T) {
 	})
 }
 
+<% end -%>
 func testAccCheckComputeTargetPoolDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
@@ -294,6 +296,7 @@ resource "google_compute_instance" "bar" {
 `, tpname, instances, name1, name2)
 }
 
+<% unless version == 'ga' -%>
 func testAccComputeTargetPool_withSecurityPolicy(ddosPolicy, edgeSecService, pol1, pol2, tpname, polToSet string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_security_policy" "policyddosprotection" {
@@ -337,3 +340,5 @@ resource "google_compute_target_pool" "foo" {
 }
 `, ddosPolicy, edgeSecService, pol1, pol2, tpname, polToSet)
 }
+
+<% end -%>
