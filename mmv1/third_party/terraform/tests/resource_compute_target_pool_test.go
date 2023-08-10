@@ -82,6 +82,60 @@ func TestAccComputeTargetPool_update(t *testing.T) {
 	})
 }
 
+func TestAccComputeTargetPool_withSecurityPolicy(t *testing.T) {
+	tpname := fmt.Sprintf("tf-tp-test-%s", acctest.RandString(t, 10))
+	ddosPolicy := fmt.Sprintf("tf-tp-ddos-pol-test-%s", acctest.RandString(t, 10))
+	edgeSecService := fmt.Sprintf("tf-tp-edge-sec-test-%s", acctest.RandString(t, 10))
+	pol1 := fmt.Sprintf("tf-tp-pol1-test-%s", acctest.RandString(t, 10))
+	pol2 := fmt.Sprintf("tf-tp-pol2-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeTargetPoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Create target pool with no security policy attached
+				Config: testAccComputeTargetPool_withSecurityPolicy(ddosPolicy, edgeSecService, pol1, pol2, tpname, "\"\""),
+			},
+			{
+				ResourceName:      "google_compute_target_pool.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Add the first security policy to the pool
+				Config: testAccComputeTargetPool_withSecurityPolicy(ddosPolicy, edgeSecService, pol1, pol2, tpname,
+					`google_compute_region_security_policy.policytargetpool1.self_link`),
+			},
+			{
+				ResourceName:      "google_compute_target_pool.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Change to the second security policy in the pool
+				Config: testAccComputeTargetPool_withSecurityPolicy(ddosPolicy, edgeSecService, pol1, pol2, tpname,
+					`google_compute_region_security_policy.policytargetpool2.self_link`),
+			},
+			{
+				ResourceName:      "google_compute_target_pool.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Clean the security policy from the pool
+				Config: testAccComputeTargetPool_withSecurityPolicy(ddosPolicy, edgeSecService, pol1, pol2, tpname, "\"\""),
+			},
+			{
+				ResourceName:      "google_compute_target_pool.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccCheckComputeTargetPoolDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
@@ -238,4 +292,48 @@ resource "google_compute_instance" "bar" {
   }
 }
 `, tpname, instances, name1, name2)
+}
+
+func testAccComputeTargetPool_withSecurityPolicy(ddosPolicy, edgeSecService, pol1, pol2, tpname, polToSet string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_security_policy" "policyddosprotection" {
+  region      = "asia-southeast1"
+  name        = "%s"
+  description = "region security policy for load balancers target pool"
+  type        = "CLOUD_ARMOR_NETWORK"
+  ddos_protection_config {
+    ddos_protection = "ADVANCED_PREVIEW"
+  }
+}
+
+resource "google_compute_network_edge_security_service" "edge_sec_service" {
+  name            = "%s"
+  region          = "asia-southeast1"
+  description     = "edge security service with security policy"
+  security_policy = google_compute_region_security_policy.policyddosprotection.self_link
+}
+
+resource "google_compute_region_security_policy" "policytargetpool1" {
+  region      = "asia-southeast1"
+  name        = "%s"
+  description = "region security policy one"
+  type        = "CLOUD_ARMOR_NETWORK"
+  depends_on  = [google_compute_network_edge_security_service.edge_sec_service]
+}
+
+resource "google_compute_region_security_policy" "policytargetpool2" {
+  region      = "asia-southeast1"
+  name        = "%s"
+  description = "region security policy two"
+  type        = "CLOUD_ARMOR_NETWORK"
+  depends_on  = [google_compute_network_edge_security_service.edge_sec_service]
+}
+
+resource "google_compute_target_pool" "foo" {
+  region          = "asia-southeast1"
+  description     = "Setting SecurityPolicy to targetPool"
+  name            = "%s"
+  security_policy = %s
+}
+`, ddosPolicy, edgeSecService, pol1, pol2, tpname, polToSet)
 }
