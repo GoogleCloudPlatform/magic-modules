@@ -116,6 +116,6 @@ Previously, `google_firebase_web_app` deletions default to `ABANDON`, which mean
 
 ## Resource: `google_identity_platform_project_default_config`
 
-### Deprecated
+### 
 
-Use the `google_identity_platform_config` resource instead.
+Use the `google_identity_platform_config` resource instead. It contains a more comprehensive list of fields, and was created before `google_identity_platform_project_default_config` was added.

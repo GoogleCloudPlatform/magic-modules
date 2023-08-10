@@ -74,6 +74,7 @@ properties:
         properties:
           - !ruby/object:Api::Type::Boolean
             name: enabled
+            required: true
             description: |
               Whether email auth is enabled for the project or not.
           - !ruby/object:Api::Type::Boolean
@@ -89,6 +90,7 @@ properties:
         properties:
           - !ruby/object:Api::Type::Boolean
             name: enabled
+            required: true
             description: |
               Whether phone number auth is enabled for the project or not.
           - !ruby/object:Api::Type::KeyValuePairs
