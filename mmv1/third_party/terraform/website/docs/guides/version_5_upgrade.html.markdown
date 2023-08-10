@@ -88,19 +88,19 @@ terraform {
 
 ## Provider-level Labels Rework
 
-The labels and annotations are key-value pairs attached on Google cloud resources. Cloud labels are used for organizing resources, filtering resources, breaking down billing, and so on. The users, GCP clients, and API services can manage those fields. Annotations are used to attach metadata to Kubernetes resources.
+The labels and annotations are key-value pairs attached on Google cloud resources. Cloud labels are used for organizing resources, filtering resources, breaking down billing, and so on. Annotations are used to attach metadata to Kubernetes resources.
 
 Not all of Google cloud resources support labels and annotations. Please check the Terraform Google provider resource documentation to figure out if the resource supports the `labels` and `annotations` fields.
 
 ### Provider default labels
 
-Default labels configured on the provider through the new `default_labels` field are now supported. The default labels configured on the provider will be applied to all of the resources with the resource `labels` field.
+Default labels configured on the provider through the new `default_labels` field are now supported. The default labels configured on the provider will be applied to all of the resources with the top level `labels` field or the nested `labels` field inside the `metadata` field.
 
 Provider-level default annotations are not supported.
 
 ### Resource labels
 
-The new labels model will be applied to all of the resources with the resource `labels` field. Currently there are two kinds of resource `labels` fields, the top level `labels` field and the nested `labels` field inside the `metadata` field. Some `labels` fields are for child resources, so the new model will not be applied to the `labels` fields for child resources.
+The new labels model will be applied to all of the resources with the top level `labels` field or the nested `labels` field inside the `metadata` field. Some labels fields are for child resources, so the new model will not be applied to the `labels` field for child resources.
 
 There are now three label-related fields with the new model:
 
