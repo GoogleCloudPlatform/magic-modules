@@ -65,6 +65,7 @@ parameters:
     description: |
       The Certificate Manager location. If not specified, "global" is used.
     default_value: global
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
