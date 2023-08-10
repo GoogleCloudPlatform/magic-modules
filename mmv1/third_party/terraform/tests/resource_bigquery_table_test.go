@@ -260,7 +260,7 @@ func TestAccBigQueryBigLakeManagedTable(t *testing.T) {
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigLakeManagedTable(bucketName, connectionID, datasetID, tableID),
+				Config: testAccBigLakeManagedTable(bucketName, connectionID, datasetID, tableID, TEST_SIMPLE_CSV_SCHEMA),
 			},
 		},
 	})
@@ -2146,7 +2146,7 @@ resource "google_bigquery_table" "test" {
 `, datasetID, bucketName, objectName, content, connectionID, projectID, tableID, schema)
 }
 
-func testAccBigLakeManagedTable(bucketName, connectionID, datasetID, tableID string) string {
+func testAccBigLakeManagedTable(bucketName, connectionID, datasetID, tableID, schema string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "test" {
   name          = "%s"
@@ -2184,16 +2184,18 @@ resource "google_bigquery_table" "test" {
 	dataset_id = google_bigquery_dataset.test.dataset_id
 	biglake_configuration {
 	  connection_id   = local.connection_id_reformatted
-	  storage_uri = "gs://${google_storage_bucket.test.name}/data"
+	  storage_uri = "gs://${google_storage_bucket.test.name}/data/"
 	  file_format = "PARQUET"
 	  table_format = "ICEBERG"
 	}
+
+	schema = jsonencode(%s)
   
 	depends_on = [
 	  google_project_iam_member.test
 	]
 }
-`, bucketName, connectionID, datasetID, tableID)
+`, bucketName, connectionID, datasetID, tableID, schema)
 }
 
 func testAccBigQueryTableJson(bucketName, datasetID, tableID, encoding string) string {
