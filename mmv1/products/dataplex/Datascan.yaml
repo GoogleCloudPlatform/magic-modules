@@ -250,6 +250,8 @@ properties:
         name: 'samplingPercent'
         description: |
           The percentage of the records to be selected from the dataset for DataScan.
+          Value can range between 0.0 and 100.0 with up to 3 significant decimal digits.
+          Sampling is not applied if `sampling_percent` is not specified, 0 or 100.
       - !ruby/object:Api::Type::String
         name: 'rowFilter'
         description: |
@@ -268,7 +270,7 @@ properties:
                 name: 'resultsTable'
                 description: |
                   The BigQuery table to export DataQualityScan results to.
-                  Format:projects/{project}/datasets/{dataset}/tables/{table}
+                  Format://bigquery.googleapis.com/projects/PROJECT_ID/datasets/DATASET_ID/tables/TABLE_ID
       - !ruby/object:Api::Type::Array
         name: 'rules'
         min_size: 1
@@ -364,7 +366,7 @@ properties:
               allow_empty_object: true
               send_empty_value: true
               description: |
-                ColumnAggregate rule which evaluates whether the column has duplicates.
+                Row-level rule which evaluates whether each column value is unique.
               properties: []
             - !ruby/object:Api::Type::NestedObject
               name: 'statisticRangeExpectation'
@@ -437,6 +439,8 @@ properties:
         name: 'samplingPercent'
         description: |
           The percentage of the records to be selected from the dataset for DataScan.
+          Value can range between 0.0 and 100.0 with up to 3 significant decimal digits.
+          Sampling is not applied if `sampling_percent` is not specified, 0 or 100.
       - !ruby/object:Api::Type::String
         name: 'rowFilter'
         description: |
@@ -455,7 +459,7 @@ properties:
                 name: 'resultsTable'
                 description: |
                   The BigQuery table to export DataProfileScan results to.
-                  Format:projects/{project}/datasets/{dataset}/tables/{table}
+                  Format://bigquery.googleapis.com/projects/PROJECT_ID/datasets/DATASET_ID/tables/TABLE_ID
       - !ruby/object:Api::Type::NestedObject
         name: 'includeFields'
         description: |
@@ -468,7 +472,7 @@ properties:
               Expected input is a list of fully qualified names of fields as in the schema.
               Only top-level field names for nested fields are supported.
               For instance, if 'x' is of nested field type, listing 'x' is supported but 'x.y.z' is not supported. Here 'y' and 'y.z' are nested fields of 'x'.
-            item_type: !ruby/object:Api::Type::String
+            item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: 'excludeFields'
         description: |
@@ -481,7 +485,7 @@ properties:
               Expected input is a list of fully qualified names of fields as in the schema.
               Only top-level field names for nested fields are supported.
               For instance, if 'x' is of nested field type, listing 'x' is supported but 'x.y.z' is not supported. Here 'y' and 'y.z' are nested fields of 'x'.
-            item_type: !ruby/object:Api::Type::String
+            item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: 'dataQualityResult'
     output: true
@@ -493,29 +497,6 @@ properties:
         output: true
         description: |
           Overall data quality result -- true if all rules passed.
-      - !ruby/object:Api::Type::NestedObject
-        name: 'postScanActionsResult'
-        decription: |
-           The result of post scan actions.
-        properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: 'bigQueryExportResult'
-            description: |
-              The result of BigQuery export post scan action.
-            properties:
-              - !ruby/object:Api::Type::Enum
-                name: 'state'
-                decription: |
-                  Execution state for the BigQuery exporting.
-                values:
-                  - STATE_UNSPECIFIED
-                  - SUCCEEDED
-                  - FAILED
-                  - SKIPPED
-              - !ruby/object:Api::Type::String
-                name: 'message'
-                description: |
-                  Additional information about the BigQuery exporting.
       - !ruby/object:Api::Type::Array
         name: 'dimensions'
         description: |
@@ -555,19 +536,6 @@ properties:
                   name: 'threshold'
                   description: |
                     The minimum ratio of passing_rows / total_rows required to pass this rule, with a range of [0.0, 1.0]. 0 indicates default value (i.e. 1.0).
-                - !ruby/object:Api::Type::String
-                  name: 'name'
-                  description: |
-                    A mutable name for the rule.
-                    The name must contain only letters (a-z, A-Z), numbers (0-9), or hyphens (-).
-                    The maximum length is 63 characters.
-                    Must start with a letter.
-                    Must end with a number or a letter.
-                - !ruby/object:Api::Type::String
-                  name: 'description'
-                  description: |
-                    Description of the rule.
-                    The maximum length is 1,024 characters.
                 - !ruby/object:Api::Type::NestedObject
                   name: 'rangeExpectation'
                   output: true
@@ -899,26 +867,3 @@ properties:
               - !ruby/object:Api::Type::String
                 name: 'end'
                 description: Value that marks the end of the range.
-      - !ruby/object:Api::Type::NestedObject
-        name: 'postScanActionsResult'
-        decription: |
-           The result of post scan actions.
-        properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: 'bigQueryExportResult'
-            description: |
-              The result of BigQuery export post scan action.
-            properties:
-              - !ruby/object:Api::Type::Enum
-                name: 'state'
-                decription: |
-                  Execution state for the BigQuery exporting.
-                values:
-                  - STATE_UNSPECIFIED
-                  - SUCCEEDED
-                  - FAILED
-                  - SKIPPED
-              - !ruby/object:Api::Type::String
-                name: 'message'
-                description: |
-                  Additional information about the BigQuery exporting.
