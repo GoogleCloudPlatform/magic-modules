@@ -644,6 +644,7 @@ properties:
     name: 'dataProfileResult'
     output: true
     deprecated: "dataProfileResult will be removed from Terraform output fields in 5.0.0"
+    custom_flatten: templates/terraform/custom_flatten/dataplex_datascan_ignore_profile_result.go.erb
     description: |
       The result of the data profile scan.
     properties:
