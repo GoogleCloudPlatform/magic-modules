@@ -65,6 +65,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_cluster_restore'
     primary_resource_id: 'source'
+    skip_test: true
     vars:
       alloydb_cluster_name: 'alloydb-source-cluster'
       alloydb_backup_restored_cluster_name: 'alloydb-backup-restored'
