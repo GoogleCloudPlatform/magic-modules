@@ -642,6 +642,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'dataProfileResult'
     output: true
+    custom_flatten: templates/terraform/custom_flatten/dataplex_datascan_ignore_profile_result.go.erb
     description: |
       The result of the data profile scan.
     properties:
@@ -692,7 +693,6 @@ properties:
                         Ratio of rows with distinct values against total scanned rows. Not available for complex non-groupable field type RECORD and fields with REPEATABLE mode.
                     - !ruby/object:Api::Type::NestedObject
                       name: 'topNValues'
-                      custom_flatten: templates/terraform/custom_flatten/dataplex_datascan_ignore_topn.go.erb
                       description: |
                         The list of top N non-null values and number of times they occur in the scanned data. N is 10 or equal to the number of distinct values in the field, whichever is smaller. Not available for complex non-groupable field type RECORD and fields with REPEATABLE mode.
                       properties:
