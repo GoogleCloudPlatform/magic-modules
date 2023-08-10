@@ -21,11 +21,6 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
         sql_expression = "COUNT(*) > 0"
       }
     }
-    post_scan_actions {
-      bigquery_export {
-        results_table = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/quality_export"
-      }
-    }
   }
 
   project = "<%= ctx[:test_env_vars]['project_name'] %>"
