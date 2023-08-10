@@ -112,9 +112,9 @@ After upgrading to `5.0.0`, and then running `terraform refresh` or `terraform a
 
 ### Resource annotations
 
-The new annotations model is similar to the new labels model. 
+The new annotations model is similar to the new labels model and will be applied to all of the resources with the top level `annotations` field or the nested `annotations` field inside the top level`metadata` field.
 
-There are now two annotation-related fields on resources with the new model, the `annotations` and the output-only `effective_annotations` fields.
+There are now two annotation-related fields with the new model, the `annotations` and the output-only `effective_annotations` fields.
 
 ## Provider
 
