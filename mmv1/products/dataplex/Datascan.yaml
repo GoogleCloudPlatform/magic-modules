@@ -262,7 +262,7 @@ properties:
           Actions to take upon job completion.
         properties:
           - !ruby/object:Api::Type::NestedObject
-            name: 'bigQueryExport'
+            name: 'bigqueryExport'
             description: |
               If set, results will be exported to the provided BigQuery table.
             properties:
@@ -451,7 +451,7 @@ properties:
           Actions to take upon job completion.
         properties:
           - !ruby/object:Api::Type::NestedObject
-            name: 'bigQueryExport'
+            name: 'bigqueryExport'
             description: |
               If set, results will be exported to the provided BigQuery table.
             properties:

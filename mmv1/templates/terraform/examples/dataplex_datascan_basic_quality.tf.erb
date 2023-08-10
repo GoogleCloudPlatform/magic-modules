@@ -22,7 +22,7 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
       }
     }
     post_scan_actions {
-      big_query_export {
+      bigquery_export {
         results_table = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/quality_export"
       }
     }
