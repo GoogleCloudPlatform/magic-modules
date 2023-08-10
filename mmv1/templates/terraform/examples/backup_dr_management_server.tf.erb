@@ -18,7 +18,7 @@ resource "google_service_networking_connection" "default" {
 
 resource "google_backup_dr_management_server" "<%= ctx[:primary_resource_id] %>" {
   location = "us-central1"
-  name     = "<%= ctx[:vars]['managementserver_name'] %>"
+  name     = "<%= ctx[:vars]['ms_name'] %>"
   type     = "BACKUP_RESTORE" 
   networks {
     network      = google_compute_network.default.id
