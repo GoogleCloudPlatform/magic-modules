@@ -82,11 +82,13 @@ func main() {
 			}
 		}
 
-		comment := formatReviewerComment(newPrimaryReviewer, authorUserType, trusted)
-		err = postComment(prNumber, comment, GITHUB_TOKEN, authorUserType)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+		if newPrimaryReviewer != "" {
+			comment := formatReviewerComment(newPrimaryReviewer, authorUserType, trusted)
+			err = postComment(prNumber, comment, GITHUB_TOKEN, authorUserType)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		}
 	}
 
