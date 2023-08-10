@@ -34,6 +34,7 @@ var (
 		"roaks3",
 		"rileykarson",
 		"shuyama1",
+		"NickElliot",
 	}
 )
 
