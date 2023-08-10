@@ -56,21 +56,21 @@ func testAccDialogflowCXPage_basic(context map[string]interface{}) string {
 	}
 
 	resource "google_dialogflow_cx_agent" "agent_page" {
-		display_name = "tf-test-%{random_suffix}"
-		location = "global"
-		default_language_code = "en"
-		supported_language_codes = ["fr","de","es"]
-		time_zone = "America/New_York"
-		description = "Description 1."
-		avatar_uri = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
-		depends_on = [google_project_iam_member.agent_create]
+		display_name             = "tf-test-%{random_suffix}"
+		location                 = "global"
+		default_language_code    = "en"
+		supported_language_codes = ["fr", "de", "es"]
+		time_zone                = "America/New_York"
+		description              = "Description 1."
+		avatar_uri               = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
+		depends_on               = [google_project_iam_member.agent_create]
 	}
-    
+
 	resource "google_dialogflow_cx_page" "my_page" {
-        parent       = google_dialogflow_cx_agent.agent_page.start_flow
-        display_name  = "MyPage"
-    } 
-    `, context)
+		parent       = google_dialogflow_cx_agent.agent_page.start_flow
+		display_name = "MyPage"
+	}
+`, context)
 }
 
 func testAccDialogflowCXPage_full(context map[string]interface{}) string {
@@ -88,24 +88,24 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 	}
 
 	resource "google_dialogflow_cx_agent" "agent_page" {
-		display_name = "tf-test-%{random_suffix}update"
-		location = "global"
-		default_language_code = "en"
-		supported_language_codes = ["no"]
-		time_zone = "Europe/London"
-		description = "Description 2!"
-		avatar_uri = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo-2.png"
+		display_name               = "tf-test-%{random_suffix}update"
+		location                   = "global"
+		default_language_code      = "en"
+		supported_language_codes   = ["no"]
+		time_zone                  = "Europe/London"
+		description                = "Description 2!"
+		avatar_uri                 = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo-2.png"
 		enable_stackdriver_logging = true
-        enable_spell_correction    = true
+		enable_spell_correction    = true
 		speech_to_text_settings {
 			enable_speech_adaptation = true
 		}
 		depends_on = [google_project_iam_member.agent_create]
 	}
-    
+
 	resource "google_dialogflow_cx_page" "my_page" {
-        parent       = google_dialogflow_cx_agent.agent_page.start_flow
-        display_name  = "MyPage"
+		parent       = google_dialogflow_cx_agent.agent_page.start_flow
+		display_name = "MyPage"
 
 		entry_fulfillment {
 			messages {
@@ -141,14 +141,64 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 						text = ["information completed, navigating to page 2"]
 					}
 				}
+	
+				messages {
+					output_audio_text {
+						ssml = <<EOF
+							<speak>Some example <say-as interpret-as="characters">SSML XML</say-as></speak>
+						EOF
+					}
+				}
+	
+				tag = "some-tag"
+	
+				set_parameter_actions {
+					parameter = "some-param"
+					value     = "123.45"
+				}
+	
+				conditional_cases {
+					cases = [
+						jsonencode({
+							condition = "$sys.func.RAND() < 0.5",
+							caseContent = [
+								{
+									message = { text = ["First case"] }
+								},
+								{
+									additionalCases = {
+										cases = [
+											{
+												condition = "$sys.func.RAND() < 0.2"
+												caseContent = [
+													{
+														message = { text = ["Nested case"] }
+													}
+												]
+											}
+										]
+									}
+								}
+							]
+						}),
+						jsonencode({
+							condition = "",
+							caseContent = [
+								{
+									message = { text = ["Final case"] }
+								}
+							]
+						}),
+					]
+				}
 			}
 			target_page = google_dialogflow_cx_page.my_page2.id
 		}
-    } 
-
+	}
+	
 	resource "google_dialogflow_cx_page" "my_page2" {
-        parent       = google_dialogflow_cx_agent.agent_page.start_flow
-        display_name  = "MyPage2"
-    } 
-	  `, context)
+		parent       = google_dialogflow_cx_agent.agent_page.start_flow
+		display_name = "MyPage2"
+	}
+`, context)
 }
