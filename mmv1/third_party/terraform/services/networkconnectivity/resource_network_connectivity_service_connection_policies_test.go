@@ -1,4 +1,4 @@
-package google
+package networkconnectivity_test
 
 import (
 	"fmt"
@@ -12,15 +12,15 @@ func TestAccNetworkConnectivityServiceConnectionPolicy_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"networkProducerName":         fmt.Sprintf("tf-test-network-%s", RandString(t, 10)),
-		"subnetworkProducerName1":     fmt.Sprintf("tf-test-subnet-producer-%s", RandString(t, 10)),
-		"subnetworkProducerName2":     fmt.Sprintf("tf-test-subnet-producer-%s", RandString(t, 10)),
-		"serviceConnectionPolicyName": fmt.Sprintf("tf-test-service-connection-policy-%s", RandString(t, 10)),
+		"networkProducerName":         fmt.Sprintf("tf-test-network-%s", acctest.RandString(t, 10)),
+		"subnetworkProducerName1":     fmt.Sprintf("tf-test-subnet-producer-%s", acctest.RandString(t, 10)),
+		"subnetworkProducerName2":     fmt.Sprintf("tf-test-subnet-producer-%s", acctest.RandString(t, 10)),
+		"serviceConnectionPolicyName": fmt.Sprintf("tf-test-service-connection-policy-%s", acctest.RandString(t, 10)),
 	}
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkConnectivityServiceConnectionPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

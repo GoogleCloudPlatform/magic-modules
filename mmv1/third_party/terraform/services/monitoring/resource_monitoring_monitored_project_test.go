@@ -1,4 +1,4 @@
-package google
+package monitoring_test
 
 import (
 	"fmt"

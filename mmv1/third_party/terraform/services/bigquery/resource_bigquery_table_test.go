@@ -535,7 +535,7 @@ func TestAccBigQueryExternalDataTable_parquetOptions(t *testing.T) {
 func TestAccBigQueryExternalDataTable_iceberg(t *testing.T) {
 	t.Parallel()
 
-	bucketName := testBucketName(t)
+	bucketName := acctest.TestBucketName(t)
 
 	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
@@ -555,7 +555,7 @@ func TestAccBigQueryExternalDataTable_iceberg(t *testing.T) {
 func TestAccBigQueryExternalDataTable_parquetFileSetSpecType(t *testing.T) {
 	t.Parallel()
 
-	bucketName := testBucketName(t)
+	bucketName := acctest.TestBucketName(t)
 
 	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
@@ -577,12 +577,12 @@ func TestAccBigQueryExternalDataTable_parquetFileSetSpecType(t *testing.T) {
 func TestAccBigQueryExternalDataTable_queryAcceleration(t *testing.T) {
 	t.Parallel()
 
-	bucketName := testBucketName(t)
+	bucketName := acctest.TestBucketName(t)
 	objectName := fmt.Sprintf("tf_test_%s.gz.parquet", acctest.RandString(t, 10))
 
 	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	connectionID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	connectionID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 
 	metadataCacheMode := "AUTOMATIC"
 	// including an optional field. Should work without specifiying.

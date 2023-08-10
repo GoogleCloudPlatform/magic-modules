@@ -2448,15 +2448,15 @@ func TestAccComputeInstance_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
 
 	var instance compute.Instance
-	var instanceName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	var expectedLocalSsdRecoveryTimeout = compute.Duration{}
 	// Define in testAccComputeInstance_localSsdRecoveryTimeout
 	expectedLocalSsdRecoveryTimeout.Nanos = 0
 	expectedLocalSsdRecoveryTimeout.Seconds = 3600
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -2476,14 +2476,14 @@ func TestAccComputeInstance_localSsdRecoveryTimeout_update(t *testing.T) {
 	t.Parallel()
 
 	var instance compute.Instance
-	var instanceName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	// Define in testAccComputeInstance_localSsdRecoveryTimeout
 	var expectedLocalSsdRecoveryTimeout = compute.Duration{}
 	expectedLocalSsdRecoveryTimeout.Nanos = 0
 	expectedLocalSsdRecoveryTimeout.Seconds = 3600
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

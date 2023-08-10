@@ -1,4 +1,4 @@
-package resourcemanager_test
+package google
 
 import (
 	"fmt"

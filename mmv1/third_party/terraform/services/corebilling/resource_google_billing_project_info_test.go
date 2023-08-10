@@ -1,4 +1,4 @@
-package google
+package corebilling_test
 
 import (
 	"fmt"
