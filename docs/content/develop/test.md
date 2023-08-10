@@ -96,6 +96,7 @@ This section assumes you've used the [Add a resource]({{< ref "/develop/resource
 2. [Generate the beta provider]({{< ref "/get-started/generate-providers.md" >}}).
 3. From the beta provider, copy and paste the generated `*_generated_test.go` file into [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests) as a new file call `*_test.go`.
 4. Modify the tests as needed.
+   - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
    - Remove the comments at the top of the file.
    - Remove the `Example` suffix from all function names.
    - If beta-only fields are being tested, do the following:
@@ -159,6 +160,7 @@ An update test is a test that creates the target resource and then makes updates
    }
    ```
 6. Modify the test as needed.
+   - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
    - Modify the template function ending in `_update` so that updatable fields are changed or removed. This may require additions to the `context` map in the test function.
    - Remove the comments at the top of the file.
    - If beta-only fields are being tested, do the following:
