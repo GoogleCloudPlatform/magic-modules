@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"path/filepath"
-	"runtime"
 	"strings"
 	"text/template"
 
@@ -130,16 +128,9 @@ func requestPullRequestReviewer(prNumber, assignee, GITHUB_TOKEN string) error {
 }
 
 func formatReviewerComment(newPrimaryReviewer string, authorUserType userType, trusted bool) string {
-	// Get current directory
-	_, filename, _, ok := runtime.Caller(0)
-	if !ok {
-		panic("Unable to determine current filename")
-	}
-	dirname := filepath.Dir(filename)
-	tmplFilename := filepath.Join(dirname, "REVIEWER_ASSIGNMENT_COMMENT.md")
-	tmpl, err := template.ParseFiles(tmplFilename)
+	tmpl, err := template.New("REVIEWER_ASSIGNMENT_COMMENT.md").Parse(reviewerAssignmentComment)
 	if err != nil {
-		panic(fmt.Sprintf("Unable to parse %s: %s", tmplFilename, err))
+		panic(fmt.Sprintf("Unable to parse REVIEWER_ASSIGNMENT_COMMENT.md: %s", err))
 	}
 	sb := new(strings.Builder)
 	tmpl.Execute(sb, map[string]interface{}{
