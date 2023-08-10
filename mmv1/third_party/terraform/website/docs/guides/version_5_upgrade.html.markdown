@@ -94,13 +94,13 @@ Not all of Google cloud resources support labels and annotations. Please check t
 
 ### Provider default labels
 
-Default labels configured on the provider through the new `default_labels` field are now supported. The default labels configured on the provider will be applied to all of the resources with the top level `labels` field or the nested `labels` field inside the `metadata` field.
+Default labels configured on the provider through the new `default_labels` field are now supported. The default labels configured on the provider will be applied to all of the resources with the top level `labels` field or the nested `labels` field inside the top level `metadata` field.
 
 Provider-level default annotations are not supported.
 
 ### Resource labels
 
-The new labels model will be applied to all of the resources with the top level `labels` field or the nested `labels` field inside the `metadata` field. Some labels fields are for child resources, so the new model will not be applied to the `labels` field for child resources.
+The new labels model will be applied to all of the resources with the top level `labels` field or the nested `labels` field inside the top level`metadata` field. Some labels fields are for child resources, so the new model will not be applied to labels fields for child resources.
 
 There are now three label-related fields with the new model:
 
@@ -114,7 +114,7 @@ After upgrading to `5.0.0`, and then running `terraform refresh` or `terraform a
 
 The new annotations model is similar to the new labels model. 
 
-There will be two annotation-related fields on resources with resource `annotations` field, the `annotations` and the output-only `effective_annotations` fields.
+There are now two annotation-related fields on resources with the new model, the `annotations` and the output-only `effective_annotations` fields.
 
 ## Provider
 
