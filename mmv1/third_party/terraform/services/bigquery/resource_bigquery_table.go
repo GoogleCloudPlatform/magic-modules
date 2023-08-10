@@ -147,6 +147,9 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 			return false
 		}
 		return bigQueryTableTypeEq(valA.(string), valB.(string))
+	case "policyTags":
+		eq := bigQueryTableNormalizePolicyTags(valA) == nil && bigQueryTableNormalizePolicyTags(valB) == nil
+		return eq
 	}
 
 	// otherwise rely on default behavior
@@ -155,6 +158,7 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 
 // Compare the JSON strings are equal
 func bigQueryTableSchemaDiffSuppress(name, old, new string, _ *schema.ResourceData) bool {
+	log.Printf("[DEBUG] >>>>>>>>>>>>>>> bigQueryTableSchemaDiffSuppress")
 	// The API can return an empty schema which gets encoded to "null" during read.
 	if old == "null" {
 		old = "[]"
@@ -167,7 +171,7 @@ func bigQueryTableSchemaDiffSuppress(name, old, new string, _ *schema.ResourceDa
 		log.Printf("[DEBUG] unable to unmarshal new json - %v", err)
 	}
 
-	eq, err := jsonCompareWithMapKeyOverride(name, a, b, bigQueryTableMapKeyOverride)
+	eq, err := jsonCompareWithMapKeyOverride(name, a, b, bigQueryTableMapKeyOverride) // a, b are schema jsonLists
 	if err != nil {
 		log.Printf("[DEBUG] %v", err)
 		log.Printf("[DEBUG] Error comparing JSON: %v, %v", old, new)
@@ -221,6 +225,23 @@ func bigQueryTableModeIsForceNew(old, new string) bool {
 	eq := old == new
 	reqToNull := old == "REQUIRED" && new == "NULLABLE"
 	return !eq && !reqToNull
+}
+
+func bigQueryTableNormalizePolicyTags(val interface{}) interface{} {
+	if val == nil {
+		return nil
+	}
+	if policyTags, ok := val.(map[string]interface{}); ok {
+		// policyTags = {} is same as nil.
+		if len(policyTags) == 0 {
+			return nil
+		}
+		// policyTags = {names = []} is same as nil.
+		if names, ok := policyTags["names"].([]interface{}); ok && len(names) == 0 {
+			return nil
+		}
+	}
+	return val
 }
 
 // Compares two existing schema implementations and decides if
@@ -1788,6 +1809,13 @@ func expandSchema(raw interface{}) (*bigquery.TableSchema, error) {
 
 	if err := json.Unmarshal([]byte(raw.(string)), &fields); err != nil {
 		return nil, err
+	}
+
+	// Explicitly set empty PolicyTags unless the PolicyTags field is specified in the schema.
+	for _, field := range fields {
+		if field.PolicyTags == nil {
+			field.PolicyTags = &bigquery.TableFieldSchemaPolicyTags{Names: []string{}}
+		}
 	}
 
 	return &bigquery.TableSchema{Fields: fields}, nil
