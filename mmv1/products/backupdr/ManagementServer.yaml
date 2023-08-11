@@ -57,10 +57,9 @@ properties:
     name: 'type'
     values:
       - :BACKUP_RESTORE
-      - :DR
     default_value: :BACKUP_RESTORE
     description: |
-      Specify the type of management server (management console)
+      The type of management server (management console). 
   - !ruby/object:Api::Type::Array
     name: 'networks'
     description: |
@@ -77,10 +76,9 @@ properties:
         - !ruby/object:Api::Type::Enum
           name: 'peeringMode'
           description: |
-            Specify Network peeringMode
+            Type of Network peeringMode
           values:
             - :PRIVATE_SERVICE_ACCESS
-            - :PEERING_MODE_UNSPECIFIED
           default_value: :PRIVATE_SERVICE_ACCESS
   ## outputs
   - !ruby/object:Api::Type::String
