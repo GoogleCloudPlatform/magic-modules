@@ -13,6 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'ManagementServer'
+min_version: beta
 base_url: projects/{{project}}/locations/{{location}}/managementServers
 create_url: projects/{{project}}/locations/{{location}}/managementServers/?management_server_id={{name}}
 self_link: projects/{{project}}/locations/{{location}}/managementServers/{{name}}
@@ -30,6 +31,7 @@ timeouts: !ruby/object:Api::Timeouts
   delete_minutes: 40
 examples:
   - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
     name: 'backup_dr_management_server'
     primary_resource_id: 'ms-console'
     vars:
