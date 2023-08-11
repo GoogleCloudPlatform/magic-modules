@@ -226,11 +226,13 @@ module Provider
                 end
                     .empty?
 
+      product_name = @api.api_name
+      target_folder = File.join(folder_name(data.version), 'services', product_name)
       FileUtils.mkpath folder_name(data.version)
       data.generate(
         pwd,
         'templates/terraform/examples/base_configs/test_file.go.erb',
-        "#{folder_name(data.version)}/resource_#{full_resource_name(data)}_generated_test.go",
+        "#{target_folder}/resource_#{full_resource_name(data)}_generated_test.go",
         self
       )
     end
@@ -290,7 +292,7 @@ module Provider
           data.generate(
             pwd,
             'templates/terraform/examples/base_configs/iam_test_file.go.erb',
-            "#{folder_name(data.version)}/iam_#{full_resource_name(data)}_generated_test.go",
+            "#{target_folder}/iam_#{full_resource_name(data)}_generated_test.go",
             self
           )
         end
