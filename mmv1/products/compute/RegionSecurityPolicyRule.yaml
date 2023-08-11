@@ -76,6 +76,7 @@ parameters:
     name: 'region'
     description: |
       The Region in which the created Region Security Policy rule should reside.
+    immutable: true
     url_param_only: true
     required: true
   - !ruby/object:Api::Type::String
@@ -111,13 +112,11 @@ properties:
           Available preconfigured expressions along with their requirements are: SRC_IPS_V1 - must specify the corresponding srcIpRange field in config.
         values:
           - :SRC_IPS_V1
-        default_value: :SRC_IPS_V1
       - !ruby/object:Api::Type::NestedObject
         name: 'config'
         description: |
           The configuration options available when specifying versionedExpr.
           This field must be specified if versionedExpr is specified and cannot be specified if versionedExpr is not specified.
-        required: true
         properties:
           - !ruby/object:Api::Type::Array
             name: 'srcIpRanges'
