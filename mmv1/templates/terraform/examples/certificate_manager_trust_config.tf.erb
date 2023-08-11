@@ -11,4 +11,8 @@ resource "google_certificate_manager_trust_config" "<%= ctx[:primary_resource_id
       pem_certificate = file("test-fixtures/certificatemanager/cert.pem") 
     }
   }
+
+  labels = {
+    foo = "bar"
+  }
 }
