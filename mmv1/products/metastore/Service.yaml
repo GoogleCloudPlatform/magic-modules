@@ -213,6 +213,9 @@ properties:
         description: |
           Metastore instance sizes.
         required: false
+        exactly_one_of:
+          - scaling_config.0.instance_size
+          - scaling_config.0.scaling_factor
         conflicts:
           - tier
         values:
