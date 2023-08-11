@@ -1614,10 +1614,9 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		if err := d.Set("labels", tpgresource.FlattenLabels(instanceTemplate.Properties.Labels, d)); err != nil {
 			return fmt.Errorf("Error setting labels: %s", err)
 		}
-
-		if err := d.Set("effective_labels", instanceTemplate.Properties.Labels); err != nil {
-			return fmt.Errorf("Error setting effective_labels: %s", err)
-		}
+	}
+	if err := d.Set("effective_labels", instanceTemplate.Properties.Labels); err != nil {
+		return fmt.Errorf("Error setting effective_labels: %s", err)
 	}
 	if err = d.Set("self_link", instanceTemplate.SelfLink); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
