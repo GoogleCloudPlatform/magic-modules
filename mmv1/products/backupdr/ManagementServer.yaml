@@ -43,13 +43,13 @@ parameters:
     required: true
     url_param_only: true
     description: |
-      Specify location for management server (management console)
+      The location for the management server (management console)
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
     url_param_only: true
     description: |-
-      Specify the name of management server (management console)
+      The name of management server (management console)
     custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 properties:
@@ -59,18 +59,18 @@ properties:
       - :BACKUP_RESTORE
     default_value: :BACKUP_RESTORE
     description: |
-      The type of management server (management console). 
+      The type of management server (management console).
   - !ruby/object:Api::Type::Array
     name: 'networks'
     description: |
-      Specify network details.
+      Network details to create management server (management console).
     required: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
           name: 'network'
           description: |
-            Specify network with format `projects/{{project_id}}/global/networks/{{network_id}}`
+            Network with format `projects/{{project_id}}/global/networks/{{network_id}}`
           required: true
           pattern: projects/{{project}}/global/networks/{{network}}
         - !ruby/object:Api::Type::Enum
