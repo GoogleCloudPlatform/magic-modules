@@ -15,10 +15,8 @@
 name: 'MembershipRBACRoleBinding'
 base_url: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings'
 create_url: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings/?rbacrolebinding_id={{membership_rbac_role_binding_id}}'
-update_url: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings/{{membership_rbac_role_binding_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings/{{membership_rbac_role_binding_id}}'
-update_verb: :PATCH
-update_mask: true
+immutable: true
 description: |
   RBACRoleBinding represents a rbacrolebinding across the Fleet.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -131,18 +129,7 @@ properties:
       is required). Updating one will unset the other automatically.
       user is the name of the user as seen by the kubernetes cluster, example
       "alice" or "alice@domain.tld"
-    exactly_one_of:
-      - user
-      - group
-  - !ruby/object:Api::Type::String
-    name: 'group'
-    description: |
-      Principal that is be authorized in the cluster (at least of one the oneof
-      is required). Updating one will unset the other automatically.
-      group is the group, as seen by the kubernetes cluster.
-    exactly_one_of:
-      - user
-      - group
+    required: true
   - !ruby/object:Api::Type::NestedObject
     name: 'role'
     description: |
@@ -153,6 +140,7 @@ properties:
         name: 'predefinedRole'
         description: |
           PredefinedRole is an ENUM representation of the default Kubernetes Roles
+        required: true
         values:
           - :UNKNOWN
           - :ADMIN
