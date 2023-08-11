@@ -49,6 +49,14 @@ fun Google<%= version.capitalize unless version == 'ga' -%>(environment: String,
 
             buildType(postSweeperConfig)
         }
+
+        // Set the parameter BRANCH_NAME in the project, which controls the branch used by the VCS Root
+        // This is achieved by setting the VCS root's default branch to `%BRANCH_NAME%`
+        // Adding this allows custom builds to use alternative branches. E.g. testing release branches in the downstreams
+
+        params {
+            param("BRANCH_NAME", branchRef)
+        }
     }
 }
 
