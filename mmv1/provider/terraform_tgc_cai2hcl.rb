@@ -1,0 +1,87 @@
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+require 'provider/terraform_oics'
+require 'fileutils'
+
+module Provider
+  # Code generator for a library converting GCP CAI objects to Terraform state.
+  class CaiToTerraformConversion < Provider::Terraform
+    def generating_hashicorp_repo?
+      # This code is not used when generating TPG/TPGB
+      false
+    end
+
+    def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
+      @base_url = @version.cai_base_url || @version.base_url
+      generate_objects(
+        output_folder,
+        types,
+        generate_code,
+        generate_docs
+      )
+    end
+
+    def generate_resource(pwd, data, _generate_code, _generate_docs)
+      product_name = data.object.__product.name.downcase
+      output_folder = File.join(
+        data.output_folder,
+        'cai2hcl',
+        product_name
+      )
+      object_name = data.object.name.underscore
+      target = "#{product_name}_#{object_name}.go"
+      data.generate(pwd,
+                    'templates/cai2hcl/resource_converter.go.erb',
+                    File.join(output_folder, target),
+                    self)
+      replace_import_path(output_folder, target)
+    end
+
+    def compile_common_files(output_folder, products, _common_compile_file) end
+
+    def copy_common_files(output_folder, generate_code, _generate_docs)
+      Google::LOGGER.info 'Copying common files.'
+      return unless generate_code
+
+      copy_file_list(output_folder, [
+                       ['cai2hcl/helper.go',
+                        'third_party/cai2hcl/helper.go'],
+                       ['cai2hcl/config.go',
+                        'third_party/cai2hcl/config.go']
+                     ])
+    end
+
+    def generate_resource_tests(pwd, data) end
+
+    def generate_iam_policy(pwd, data, generate_code, _generate_docs) end
+
+    def generate_resource_sweepers(pwd, data) end
+
+    def replace_import_path(output_folder, target)
+      # Replace import paths to reference the resources dir instead of the google provider
+      data = File.read("#{output_folder}/#{target}")
+      # rubocop:disable Layout/LineLength
+      data = data.gsub(
+        %r{(?<!provider ")github.com/hashicorp/terraform-provider-google/google},
+        'github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources'
+      )
+      data = data.gsub(
+        %r{(?<!provider ")github.com/hashicorp/terraform-provider-google-beta/google-beta},
+        'github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources'
+      )
+      # rubocop:enable Layout/LineLength
+      File.write("#{output_folder}/#{target}", data)
+    end
+  end
+end

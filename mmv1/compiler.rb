@@ -32,6 +32,7 @@ require 'provider/terraform'
 require 'provider/terraform_kcc'
 require 'provider/terraform_oics'
 require 'provider/terraform_tgc'
+require 'provider/terraform_tgc_cai2hcl'
 
 products_to_generate = nil
 all_products = false
@@ -277,6 +278,7 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
       'oics' => Provider::TerraformOiCS,
       'validator' => Provider::TerraformGoogleConversion,
       'tgc' => Provider::TerraformGoogleConversion,
+      'tgc_cai2hcl' => Provider::CaiToTerraformConversion,
       'kcc' => Provider::TerraformKCC
     }
 

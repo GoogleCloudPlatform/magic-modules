@@ -1,0 +1,138 @@
+<%=lines(autogen_notice(:go, pwd))-%>
+
+package <%= product_ns.downcase -%>
+
+<%- # "goimports" is used to remove unreferenced imports. -%>
+import (
+    "fmt"
+    "log"
+    "reflect"
+    "time"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+    "<%= import_path() -%>/tpgresource"
+    transport_tpg "<%= import_path() -%>/transport"
+    "<%= import_path() -%>/verify"
+   "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
+   "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/cai2hcl"
+   cai2hclHelper "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/helper"
+   cai2hclConfig "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/config"
+   tfschema "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+   tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources"
+   apiComputeV1 "google.golang.org/api/compute/v1"
+)
+
+<%
+    resource_name = product_ns + object.name
+    
+	properties = object.all_user_properties
+
+    product_backend_name=@base_url.split('://')[1].split('.googleapis.com')[0]
+
+    converter_name = resource_name + 'Converter'
+
+	api_type = "apiComputeV1." + object.name
+%>
+
+<%=lines(compile(pwd + '/' + object.custom_code.constants)) if object.custom_code.constants-%>
+
+const <%=resource_name-%>AssetType string = "<%=product_backend_name.downcase-%>.googleapis.com/<%=object.name-%>"
+
+type <%=converter_name-%> struct {
+	name   string
+	schema map[string]*tfschema.Schema
+}
+
+func New<%=converter_name-%>(name string) cai2hcl.Converter {
+	schema := tpg.Provider().ResourcesMap[name].Schema
+
+	return &<%=converter_name-%>{
+		name:   name,
+		schema: schema,
+	}
+}
+
+func (c *<%=converter_name-%>) Convert(assets []*caiasset.Asset) ([]*cai2hcl.HCLResourceBlock, error) {
+	var blocks []*cai2hcl.HCLResourceBlock
+	config, error := cai2hclConfig.NewConfig()
+	if error != nil {
+		return nil, error
+	}
+
+	for _, asset := range assets {
+		if asset == nil {
+			continue
+		}
+		if asset.Resource != nil && asset.Resource.Data != nil {
+			block, err := c.convertResourceData(asset, config)
+			if err != nil {
+				return nil, err
+			}
+			blocks = append(blocks, block)
+		}
+	}
+	return blocks, nil
+}
+
+func (c *<%=converter_name-%>) convertResourceData(asset *caiasset.Asset, config *transport_tpg.Config) (*cai2hcl.HCLResourceBlock, error) {
+	if asset == nil || asset.Resource == nil || asset.Resource.Data == nil {
+		return nil, fmt.Errorf("asset resource data is nil")
+	}
+
+	var resource *<%=api_type-%>
+
+	if err := cai2hclHelper.DecodeJSON(asset.Resource.Data, &resource); err != nil {
+		return nil, err
+	}
+	
+    hcl, _ := resource<%=resource_name-%>Read(resource, config)
+
+	ctyVal, err := cai2hclHelper.MapToCtyValWithSchema(hcl, c.schema)
+	if err != nil {
+		return nil, err
+	}
+	return &cai2hcl.HCLResourceBlock{
+		Labels: []string{c.name, resource.Name},
+		Value:  ctyVal,
+	}, nil
+}
+
+func resource<%=resource_name-%>Read(res *<%=api_type-%>, config map[string]*tfschema.Schema) (map[string]interface{}, error) {
+    result := make(map[string]interface{})
+
+<%  object.gettable_properties.reject{|p| p.ignore_read }.each do |prop|-%>
+<%    if prop.flatten_object-%>
+    if flattenedProp := flatten<%="Nested" if object.nested_query-%><%=resource_name-%><%=titlelize_property(prop)-%>(res.<%=titlelize_property(prop)-%>); flattenedProp != nil {
+        if gerr, ok := flattenedProp.(*googleapi.Error); ok {
+			return nil, fmt.Errorf("Error reading <%=object.name-%>: %s", gerr)
+		}
+        casted := flattenedProp.([]interface{})[0]
+        if casted != nil {
+            for k, v := range casted.(map[string]interface{}) {
+                result[k] = v
+            }
+        }
+    }
+<%    else-%>
+    result["<%=prop.name.underscore-%>"] = flatten<%="Nested" if object.nested_query-%><%=resource_name-%><%=titlelize_property(prop)-%>(res.<%=titlelize_property(prop)-%>, config)
+<%    end-%>
+<%  end-%>
+
+<%  if object.has_self_link-%>
+    result["self_link"] = tpgresource.ConvertSelfLinkToV1(res.SelfLink)
+<%  end-%>
+
+    return result, nil
+}
+
+<%- nested_prefix = object.nested_query ? "Nested" : ""-%>
+<% object.gettable_properties.reject(&:ignore_read).each do |prop|-%>
+<%=lines(build_flatten_method(nested_prefix+resource_name, prop, object, pwd), 1)-%>
+<% end-%>
