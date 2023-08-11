@@ -698,7 +698,7 @@ func TestProvider_providerConfigure_requestTimeout(t *testing.T) {
 		ExpectError         bool
 		ExpectFieldUnset    bool
 	}{
-		"Invalid timeout value set": {
+		"if an invalid request_timeout is configured in the provider, an error will occur": {
 			ConfigValues: map[string]interface{}{
 				"request_timeout": "timeout",
 			},
@@ -707,15 +707,18 @@ func TestProvider_providerConfigure_requestTimeout(t *testing.T) {
 			ExpectError:         true,
 			ExpectFieldUnset:    false,
 		},
+		// it's default value is set when RequestTimeout value is 0. 
+		// This can be seen in this part of the config code where the default value is set to 120s
+		// https://github.com/hashicorp/terraform-provider-google/blob/09cb850ee64bcd78e4457df70905530c1ed75f19/google/transport/config.go#L1228-L1233
 		"when config is unset, the value will be 0s in order to set the default value": {
-			ExpectedValue:    "0s", // TODO: check why default value is not 30s
+			ExpectedValue:    "0s", 
 			ExpectFieldUnset: true,
 		},
 		"when value is empty, the value will be 0s in order to set the default value": {
 			ConfigValues: map[string]interface{}{
 				"request_timeout": "",
 			},
-			ExpectedValue: "0s", // TODO: check why default value is not 30s
+			ExpectedValue: "0s",
 		},
 	}
 
@@ -777,12 +780,22 @@ func TestProvider_providerConfigure_requestReason(t *testing.T) {
 		ExpectedSchemaValue string
 		ExpectedConfigValue string
 	}{
-		"request_reason set in the config are not overridden by environment variables": {
+		"when request_reason is unset in the config, environment variable CLOUDSDK_CORE_REQUEST_REASON is used":{
 			EnvVariables: map[string]string{
 				"CLOUDSDK_CORE_REQUEST_REASON": "test",
 			},
 			ExpectedSchemaValue: "test",
 			ExpectedConfigValue: "test",
+		}
+		"request_reason set in the config is not overridden by environment variables": {
+			ConfigValues: map[string]string{
+				"request_reason": "request test"
+			}
+			EnvVariables: map[string]string{
+				"CLOUDSDK_CORE_REQUEST_REASON": "test",
+			},
+			ExpectedSchemaValue: "request test",
+			ExpectedConfigValue: "request test",
 		},
 		"when no request_reason is provided via config or environment variables, the field remains unset without error": {
 			ExpectedConfigValue: "",
