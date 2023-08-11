@@ -94,7 +94,7 @@ This section assumes you've used the [Add a resource]({{< ref "/develop/resource
 
 1. Add the test in MMv1. Repeat for all the create tests you will need.
 2. [Generate the beta provider]({{< ref "/get-started/generate-providers.md" >}}).
-3. From the beta provider, copy and paste the generated `*_generated_test.go` file into [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests) as a new file call `*_test.go`.
+3. From the beta provider, copy and paste the generated `*_generated_test.go` file into the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services/) as a new file call `*_test.go`.
 4. Modify the tests as needed.
    - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
    - Remove the comments at the top of the file.
@@ -115,7 +115,7 @@ An update test is a test that creates the target resource and then makes updates
 {{< tabs "update" >}}
 {{< tab "MMv1" >}}
 1. [Generate the beta provider]({{< ref "/get-started/generate-providers.md" >}}).
-2. From the beta provider, copy and paste the generated `*_generated_test.go` file into [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests) as a new file call `*_test.go`.
+2. From the beta provider, copy and paste the generated `*_generated_test.go` file into the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services) as a new file call `*_test.go`.
 3. Using an editor of your choice, delete the `*DestroyProducer` function, and all but one test. The remaining test should be the "full" test, or if there is no "full" test, the "basic" test. This will be the starting point for your new update test.
 4. Modify the `TestAcc*` *test function* to support updates.
    - Change the suffix of the test function to `_update`.
@@ -171,7 +171,7 @@ An update test is a test that creates the target resource and then makes updates
      - In each beta-only test, ensure that all Terraform resources in all configs have `provider = google-beta` set
 {{< /tab >}}
 {{< tab "Handwritten" >}}
-1. Using an editor of your choice, open the existing `*_test.go` or `*_test.go.erb` file in [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests) which contains your create tests.
+1. Using an editor of your choice, open the existing `*_test.go` or `*_test.go.erb` file in the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services) which contains your create tests.
 2. Copy the `TestAcc*` *test function* for the existing "full" test. If there is no "full" test, use the "basic" test. This will be the starting point for your new update test.
 3. Modify the test function to support updates.
    - Change the suffix of the test function to `_update`.
