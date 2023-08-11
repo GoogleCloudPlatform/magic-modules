@@ -2448,37 +2448,37 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		if err != nil {
 			return errwrap.Wrapf("Error while waiting to enable private endpoint: {{err}}", err)
 		}
+	}
 
-		if names := d.Get("additional_pod_ranges_config.0.pod_range_names").([]interface{}); len(names) > 0 {
-			name := containerClusterFullName(project, location, clusterName)
-			additionalPodRangesConfig := &container.AdditionalPodRangesConfig{
-				PodRangeNames: tpgresource.ConvertStringArr(names),
-			}
-	
-			req := &container.UpdateClusterRequest{
-				Update: &container.ClusterUpdate{
-					AdditionalPodRangesConfig: additionalPodRangesConfig,
-				},
-			}
-	
-			err = transport_tpg.Retry(transport_tpg.RetryOptions{
-				RetryFunc: func() error {
-					clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
-					if config.UserProjectOverride {
-						clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
-					}
-					op, err = clusterUpdateCall.Do()
-					return err
-				},
-			})
-			if err != nil {
-				return errwrap.Wrapf("Error updating AdditionalPodRangesConfig: {{err}}", err)
-			}
-	
-			err = ContainerOperationWait(config, op, project, location, "updating AdditionalPodRangesConfig", userAgent, d.Timeout(schema.TimeoutCreate))
-			if err != nil {
-				return errwrap.Wrapf("Error while waiting to update AdditionalPodRangesConfig: {{err}}", err)
-			}
+	if names := d.Get("additional_pod_ranges_config.0.pod_range_names").([]interface{}); len(names) > 0 {
+		name := containerClusterFullName(project, location, clusterName)
+		additionalPodRangesConfig := &container.AdditionalPodRangesConfig{
+			PodRangeNames: tpgresource.ConvertStringArr(names),
+		}
+
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				AdditionalPodRangesConfig: additionalPodRangesConfig,
+			},
+		}
+
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() error {
+				clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+				if config.UserProjectOverride {
+					clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
+				}
+				op, err = clusterUpdateCall.Do()
+				return err
+			},
+		})
+		if err != nil {
+			return errwrap.Wrapf("Error updating AdditionalPodRangesConfig: {{err}}", err)
+		}
+
+		err = ContainerOperationWait(config, op, project, location, "updating AdditionalPodRangesConfig", userAgent, d.Timeout(schema.TimeoutCreate))
+		if err != nil {
+			return errwrap.Wrapf("Error while waiting to update AdditionalPodRangesConfig: {{err}}", err)
 		}
 	}
 
