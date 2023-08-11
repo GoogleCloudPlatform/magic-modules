@@ -1,5 +1,5 @@
 <% autogen_exception -%>
-package google
+package compute_test
 <% unless version == 'ga' -%>
 
 import (
@@ -13,7 +13,7 @@ func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleBasicUpdate(
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -42,7 +42,7 @@ func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleBasicUpdate(
 }
 
 func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePreUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_region_security_policy" "default" {
   region      = "asia-southeast1"
   name        = "tf-test%{random_suffix}"
@@ -68,7 +68,7 @@ resource "google_compute_region_security_policy_rule" "policy_rule" {
 }
 
 func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePostUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_region_security_policy" "default" {
   region      = "asia-southeast1"
   name        = "tf-test%{random_suffix}"
@@ -95,7 +95,7 @@ resource "google_compute_region_security_policy_rule" "policy_rule" {
 
 func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdate(t *testing.T) {
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -140,7 +140,7 @@ func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatch
 }
 
 func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_region_security_policy" "policyddosprotection" {
   region      = "asia-southeast1"
   name        = "tf-test-policyddos%{random_suffix}"
@@ -193,7 +193,7 @@ resource "google_compute_region_security_policy_rule" "policy_rule_network_match
 }
 
 func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_region_security_policy" "policyddosprotection" {
   region      = "asia-southeast1"
   name        = "tf-test-policyddos%{random_suffix}"
@@ -256,7 +256,7 @@ resource "google_compute_region_security_policy_rule" "policy_rule_network_match
 }
 
 func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdate2(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_region_security_policy" "policyddosprotection" {
   region      = "asia-southeast1"
   name        = "tf-test-policyddos%{random_suffix}"
