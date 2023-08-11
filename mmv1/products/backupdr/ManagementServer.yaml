@@ -36,7 +36,7 @@ examples:
     primary_resource_id: 'ms-console'
     vars:
       network_name: 'vpc-network'
-      ms_name: 'ms-console'
+      managementserver_name: 'ms-console'
     test_env_vars:
       project: :PROJECT_NAME
 parameters:
