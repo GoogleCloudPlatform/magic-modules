@@ -15,10 +15,18 @@ resource "google_gke_hub_membership" "<%= ctx[:primary_resource_id] %>" {
   depends_on = [google_container_cluster.primary]
 }
 
+resource "google_gke_hub_scope" "<%= ctx[:primary_resource_id] %>" {
+  scope_id = "tf-test-scope%{random_suffix}"
+  all_memberships = false
+}
+
 resource "google_gke_hub_membership_binding" "<%= ctx[:primary_resource_id] %>" {
   membership_binding_id = "tf-test-membership-binding%{random_suffix}"
-  fleet = true
+  scope = google_gke_hub_scope.<%= ctx[:primary_resource_id] %>.name
   membership_id = "tf-test-membership%{random_suffix}"
   location = "global"
-  depends_on = [google_gke_hub_membership.<%= ctx[:primary_resource_id] %>]
+  depends_on = [
+    google_gke_hub_membership.<%= ctx[:primary_resource_id] %>,
+    google_gke_hub_scope.<%= ctx[:primary_resource_id] %>
+  ]
 }

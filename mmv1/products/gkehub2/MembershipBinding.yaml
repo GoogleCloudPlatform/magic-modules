@@ -92,22 +92,15 @@ properties:
     output: true
     description: |
       Google-generated UUID for this resource.
-  - !ruby/object:Api::Type::String
+  - !ruby/object:Api::Type::ResourceRef
     name: 'scope'
+    resource: Scope
+    imports: 'name'
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
     description: |
       A Workspace resource name in the format
       `projects/*/locations/*/scopes/*`.
-    exactly_one_of:
-      - scope
-      - fleet
-  - !ruby/object:Api::Type::Boolean
-    name: 'fleet'
-    description: |
-      Whether the membershipbinding is Fleet-wide; true means that this
-      Membership should be bound to all Namespaces in this entire Fleet.
-    exactly_one_of:
-      - scope
-      - fleet
+    required: true
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: |

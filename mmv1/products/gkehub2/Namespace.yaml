@@ -105,6 +105,7 @@ properties:
       The name of the Scope instance.
     resource: 'Scope'
     imports: 'name'
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
     required: true
   - !ruby/object:Api::Type::NestedObject
     name: 'state'
