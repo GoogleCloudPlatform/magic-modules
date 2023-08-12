@@ -109,7 +109,7 @@ func resource<%=resource_name-%>Read(res *<%=api_type-%>, config map[string]*tfs
 
 <%  object.gettable_properties.reject{|p| p.ignore_read }.each do |prop|-%>
 <%    if prop.flatten_object-%>
-    if flattenedProp := flatten<%="Nested" if object.nested_query-%><%=resource_name-%><%=titlelize_property(prop)-%>(res.<%=titlelize_property(prop)-%>); flattenedProp != nil {
+    if flattenedProp := flatten<%="Nested" if object.nested_query-%><%=resource_name-%><%=titlelize_property(prop)-%>(res.<%= prop.api_name.camelize(:upper) -%>); flattenedProp != nil {
         if gerr, ok := flattenedProp.(*googleapi.Error); ok {
 			return nil, fmt.Errorf("Error reading <%=object.name-%>: %s", gerr)
 		}
@@ -121,7 +121,7 @@ func resource<%=resource_name-%>Read(res *<%=api_type-%>, config map[string]*tfs
         }
     }
 <%    else-%>
-    result["<%=prop.name.underscore-%>"] = flatten<%="Nested" if object.nested_query-%><%=resource_name-%><%=titlelize_property(prop)-%>(res.<%=titlelize_property(prop)-%>, config)
+    result["<%=prop.name.underscore-%>"] = flatten<%="Nested" if object.nested_query-%><%=resource_name-%><%=titlelize_property(prop)-%>(res.<%= prop.api_name.camelize(:upper) -%>, config)
 <%    end-%>
 <%  end-%>
 
