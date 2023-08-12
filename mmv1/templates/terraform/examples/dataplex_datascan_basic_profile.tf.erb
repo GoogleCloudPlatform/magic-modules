@@ -1,3 +1,11 @@
+resource "google_bigquery_dataset" "source" {
+  count = 1
+  dataset_id                  = "dataplex-dataset-%{random_suffix}"
+  friendly_name               = "test"
+  description                 = "This is a test description"
+  location                    = "US"
+}
+
 resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
   location     = "us-central1"
   data_scan_id = "tf-test-datascan%{random_suffix}"
@@ -12,7 +20,13 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 
-  data_profile_spec {}
+  data_profile_spec {
+    post_scan_actions {
+      bigquery_export {
+        results_table: "//bigquery.googleapis.com/projects/"<%= ctx[:test_env_vars]['project_name'] %>"/datasets/dataplex-dataset-%{random_suffix}/tables/profile_export"
+      }
+    }
+  }
 
   project = "<%= ctx[:test_env_vars]['project_name'] %>"
 }
