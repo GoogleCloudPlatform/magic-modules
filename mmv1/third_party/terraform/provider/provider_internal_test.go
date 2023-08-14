@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -858,11 +857,11 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 		EnvVariables                map[string]string
 		ExpectError                 bool
 		ExpectFieldUnset            bool
-		ExpectedEnableBatchingValue string
+		ExpectedEnableBatchingValue bool
 		ExpectedSendAfterValue      string
 	}{
 		"if batch is an empty block, it will set the default values": {
-			ExpectedEnableBatchingValue: "false",
+			ExpectedEnableBatchingValue: false,
 			ExpectedSendAfterValue:      "", // uses "" value to be able to set the default value of 30s
 			ExpectFieldUnset:            true,
 		},
@@ -875,7 +874,7 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 					},
 				},
 			},
-			ExpectedEnableBatchingValue: "true",
+			ExpectedEnableBatchingValue: true,
 			ExpectedSendAfterValue:      "10s",
 		},
 		"if batch is configured with only enable_batching": {
@@ -886,7 +885,7 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 					},
 				},
 			},
-			ExpectedEnableBatchingValue: "true",
+			ExpectedEnableBatchingValue: true,
 		},
 		"if batch is configured with only send_after": {
 			ConfigValues: map[string]interface{}{
@@ -896,7 +895,7 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 					},
 				},
 			},
-			ExpectedEnableBatchingValue: "false",
+			ExpectedEnableBatchingValue: false,
 			ExpectedSendAfterValue:      "10s",
 		},
 		"if batch is configured with invalid value for send_after": {
@@ -933,13 +932,13 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 			}
 			if diags.HasError() && tc.ExpectError {
 				v, ok := d.GetOk("batching.0.enable_batching")
+				val := v.(bool)
 				if ok {
-					val := v.(string)
 					if val != tc.ExpectedEnableBatchingValue {
-						t.Fatalf("expected request_timeout value set in provider data to be %s, got %s", tc.ExpectedEnableBatchingValue, val)
+						t.Fatalf("expected request_timeout value set in provider data to be %v, got %v", tc.ExpectedEnableBatchingValue, val)
 					}
 					if tc.ExpectFieldUnset {
-						t.Fatalf("expected request_timeout value to not be set in provider data, got %s", val)
+						t.Fatalf("expected request_timeout value to not be set in provider data, got %v", val)
 					}
 				}
 
@@ -947,7 +946,7 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 				if ok {
 					val := v.(string)
 					if val != tc.ExpectedSendAfterValue {
-						t.Fatalf("expected request_timeout value set in provider data to be %s, got %s", tc.ExpectedSendAfterValue, val)
+						t.Fatalf("expected request_timeout value set in provider data to be %v, got %v", tc.ExpectedSendAfterValue, val)
 					}
 					if tc.ExpectFieldUnset {
 						t.Fatalf("expected request_timeout value to not be set in provider data, got %s", val)
@@ -958,9 +957,9 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 			}
 
 			v := d.Get("batching.0.enable_batching")
-			enableBatching := strconv.FormatBool(v.(bool))
+			enableBatching := v.(bool)
 			if enableBatching != tc.ExpectedEnableBatchingValue {
-				t.Fatalf("expected enable_batching value set in provider data to be %s, got %s", tc.ExpectedEnableBatchingValue, enableBatching)
+				t.Fatalf("expected enable_batching value set in provider data to be %v, got %v", tc.ExpectedEnableBatchingValue, enableBatching)
 			}
 
 			v = d.Get("batching.0.send_after") // checks for an empty string in order to set the default value
