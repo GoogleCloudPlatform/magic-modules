@@ -1,9 +1,6 @@
 name: pre-build-validation
 
-permissions:
-  actions: read
-  contents: read
-  statuses: read
+permissions: read-all
 
 on:
   pull_request:
