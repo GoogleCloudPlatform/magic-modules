@@ -675,6 +675,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		config.RequestReason = v.(string)
 	}
 
+	// Replace hostname by the universe_domain field.
 	if v, ok := d.GetOk("universe_domain"); ok {
 		for key, bp := range transport_tpg.DefaultBasePaths {
 			transport_tpg.DefaultBasePaths[key] = strings.ReplaceAll(bp, "googleapis.com", v.(string))

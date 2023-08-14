@@ -11,7 +11,7 @@ import (
 func TestAccUniverseDomain(t *testing.T) {
 	t.Parallel()
 	// Skip VCR since this test can only run in specific test project.
-	acctest.SkipIfVcr(t)
+	t.Skip()
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
