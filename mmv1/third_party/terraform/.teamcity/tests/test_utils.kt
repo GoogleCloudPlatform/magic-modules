@@ -11,10 +11,10 @@ import jetbrains.buildServer.configs.kotlin.AbsoluteId
 
 import ClientConfiguration
 
-fun TestConfiguration() : ClientConfiguration {
+fun testConfiguration() : ClientConfiguration {
     return ClientConfiguration("custId", "org", "org2", "billingAccount", "billingAccount2", "masterBillingAccount", "credentials", "project", "orgDomain", "projectNumber", "region", "serviceAccount", "zone", "firestoreProject", "identityUser")
 }
 
-fun TestVcsRootId() : AbsoluteId {
+fun testVcsRootId() : AbsoluteId {
     return AbsoluteId("TerraformProviderFoobar")
 }
