@@ -1338,6 +1338,7 @@ type diskCharacteristics struct {
 	diskSizeGb  string
 	autoDelete  bool
 	sourceImage string
+	provisionedIops string
 }
 
 func diskCharacteristicsFromMap(m map[string]interface{}) diskCharacteristics {
@@ -1366,6 +1367,13 @@ func diskCharacteristicsFromMap(m map[string]interface{}) diskCharacteristics {
 	if v := m["source_image"]; v != nil {
 		dc.sourceImage = v.(string)
 	}
+
+	if v := m["provisioned_iops"]; v != nil {
+		// Terraform and GCP return ints as different types (int vs int64), so just
+		// use strings to compare for simplicity.
+		dc.provisionedIops = fmt.Sprintf("%v", v)
+	}
+
 	return dc
 }
 
