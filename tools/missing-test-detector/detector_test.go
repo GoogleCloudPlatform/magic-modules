@@ -6,9 +6,9 @@ import (
 )
 
 func TestDetectMissingTests(t *testing.T) {
-	allTests, err := readAllTests("testdata")
-	if err != nil {
-		t.Errorf("error reading tests before testing detect missing tests: %v", err)
+	allTests, errs := readAllTests("testdata")
+	if len(errs) > 0 {
+		t.Errorf("errors reading tests before testing detect missing tests: %v", errs)
 	}
 	for _, test := range []struct {
 		name                 string

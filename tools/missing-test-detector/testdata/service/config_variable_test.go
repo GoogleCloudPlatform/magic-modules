@@ -1,4 +1,4 @@
-package google
+package service_test
 
 import (
 	"testing"
