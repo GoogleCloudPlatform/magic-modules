@@ -49,6 +49,7 @@ async: !ruby/object:Api::OpAsync
 id_format: 'projects/{{project}}/locations/{{location}}/functions/{{name}}'
 import_format:
   ['projects/{{project}}/locations/{{location}}/functions/{{name}}']
+taint_resource_on_failed_create: true
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -64,7 +65,7 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
+      zip_path: '"./test-fixtures/function-source.zip"'
       location:
         '"us-central1"'
         # ignore these fields during import step
@@ -83,7 +84,7 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/cloudfunctions2/function-source-pubsub.zip"'
+      zip_path: '"./test-fixtures/function-source-pubsub.zip"'
       primary_resource_id: '"terraform-test"'
       location:
         '"us-central1"'
@@ -102,7 +103,7 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
+      zip_path: '"./test-fixtures/function-source.zip"'
       primary_resource_id: '"terraform-test"'
       location:
         '"us-central1"'
@@ -123,7 +124,7 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip"'
+      zip_path: '"./test-fixtures/function-source-eventarc-gcs.zip"'
       primary_resource_id: '"terraform-test"'
       policyChanged:
         "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
@@ -145,7 +146,7 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip"'
+      zip_path: '"./test-fixtures/function-source-eventarc-gcs.zip"'
       primary_resource_id: '"terraform-test"'
       policyChanged:
         "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
@@ -166,7 +167,7 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
+      zip_path: '"./test-fixtures/function-source.zip"'
       location: '"us-central1"'
       policyChanged:
         "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
@@ -187,7 +188,7 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
+      zip_path: '"./test-fixtures/function-source.zip"'
       location: '"us-central1"'
       policyChanged:
         "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
@@ -208,10 +209,33 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
+      zip_path: '"./test-fixtures/function-source.zip"'
       location:
         '"us-central1"'
         # ignore these fields during import step
+    ignore_read_extra:
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudfunctions2_cmek'
+    primary_resource_id: 'function'
+    min_version: beta
+    vars:
+      function: 'function-cmek'
+      bucket_name: 'gcf-source'
+      zip_path: 'function-source.zip'
+      kms_service_name: 'cloudkms.googleapis.com'
+      cmek-repo: 'cmek-repo'
+      unencoded-ar-repo: 'ar-repo'
+      kms_key_name: 'cmek-key'
+    test_env_vars:
+      project: :PROJECT_NAME
+    test_vars_overrides:
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      zip_path: '"./test-fixtures/function-source.zip"'
+      location:
+        '"us-central1"'
+    # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
@@ -315,6 +339,7 @@ properties:
                 custom_flatten: 'templates/terraform/custom_flatten/cloudfunctions2_function_source_object.go.erb'
               - !ruby/object:Api::Type::Integer
                 name: 'generation'
+                default_from_api: true
                 description: |
                   Google Cloud Storage generation for the object. If the generation
                   is omitted, the latest generation will be used.
@@ -608,3 +633,8 @@ properties:
     name: 'labels'
     description: |
       A set of key/value label pairs associated with this Cloud Function.
+  - !ruby/object:Api::Type::String
+    name: 'kmsKeyName'
+    description: |
+      Resource name of a KMS crypto key (managed by the user) used to encrypt/decrypt function resources.
+      It must match the pattern projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}.

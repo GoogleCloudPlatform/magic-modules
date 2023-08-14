@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"text/template"
 
 	_ "embed"
 )
@@ -13,48 +14,30 @@ var (
 	reviewerAssignmentComment string
 )
 
-func requestReviewer(author, prNumber, GITHUB_TOKEN string) error {
-	if isTeamMember(author) {
-		fmt.Println("author is a team member, not assigning")
-		return nil
-	}
-
-	firstRequestedReviewer, err := getPullRequestRequestedReviewer(prNumber, GITHUB_TOKEN)
-	if err != nil {
-		return err
-	}
-
-	previouslyInvolvedReviewers, err := getPullRequestPreviousAssignedReviewers(prNumber, GITHUB_TOKEN)
-	if err != nil {
-		return err
-	}
-
-	foundTeamReviewer := false
+// Returns a list of users to request review from, as well as a new primary reviewer if this is the first run.
+func chooseReviewers(firstRequestedReviewer string, previouslyInvolvedReviewers []string) (reviewersToRequest []string, newPrimaryReviewer string) {
+	hasPrimaryReviewer := false
+	newPrimaryReviewer = ""
 
 	if firstRequestedReviewer != "" {
-		foundTeamReviewer = true
+		hasPrimaryReviewer = true
 	}
 
 	if previouslyInvolvedReviewers != nil {
 		for _, reviewer := range previouslyInvolvedReviewers {
 			if isTeamReviewer(reviewer) {
-				foundTeamReviewer = true
-				err = requestPullRequestReviewer(prNumber, reviewer, GITHUB_TOKEN)
-				if err != nil {
-					return err
-				}
+				hasPrimaryReviewer = true
+				reviewersToRequest = append(reviewersToRequest, reviewer)
 			}
 		}
 	}
 
-	if !foundTeamReviewer {
-		err = requestRandomReviewer(prNumber, GITHUB_TOKEN)
-		if err != nil {
-			return err
-		}
+	if !hasPrimaryReviewer {
+		newPrimaryReviewer = getRandomReviewer()
+		reviewersToRequest = append(reviewersToRequest, newPrimaryReviewer)
 	}
 
-	return nil
+	return reviewersToRequest, newPrimaryReviewer
 }
 
 func getPullRequestAuthor(prNumber, GITHUB_TOKEN string) (string, error) {
@@ -144,24 +127,22 @@ func requestPullRequestReviewer(prNumber, assignee, GITHUB_TOKEN string) error {
 	return nil
 }
 
-func requestRandomReviewer(prNumber, GITHUB_TOKEN string) error {
-	assignee := getRandomReviewer()
-	err := requestPullRequestReviewer(prNumber, assignee, GITHUB_TOKEN)
+func formatReviewerComment(newPrimaryReviewer string, authorUserType userType, trusted bool) string {
+	tmpl, err := template.New("REVIEWER_ASSIGNMENT_COMMENT.md").Parse(reviewerAssignmentComment)
 	if err != nil {
-		return err
+		panic(fmt.Sprintf("Unable to parse REVIEWER_ASSIGNMENT_COMMENT.md: %s", err))
 	}
-	err = postComment(prNumber, assignee, GITHUB_TOKEN)
-	if err != nil {
-		return err
-	}
-	return nil
-
+	sb := new(strings.Builder)
+	tmpl.Execute(sb, map[string]interface{}{
+		"reviewer":       newPrimaryReviewer,
+		"authorUserType": authorUserType.String(),
+		"trusted":        trusted,
+	})
+	return sb.String()
 }
 
-func postComment(prNumber, reviewer, GITHUB_TOKEN string) error {
+func postComment(prNumber, comment, GITHUB_TOKEN string, authorUserType userType) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/comments", prNumber)
-
-	comment := strings.Replace(reviewerAssignmentComment, "{{reviewer}}", reviewer, 1)
 
 	body := map[string]string{
 		"body": comment,
@@ -173,10 +154,10 @@ func postComment(prNumber, reviewer, GITHUB_TOKEN string) error {
 	}
 
 	if reqStatusCode != http.StatusCreated {
-		return fmt.Errorf("Error posting reviewer assignment comment for PR %s", prNumber)
+		return fmt.Errorf("Error posting comment for PR %s", prNumber)
 	}
 
-	fmt.Printf("Successfully posted reviewer assignment comment to pull request %s\n", prNumber)
+	fmt.Printf("Successfully posted comment to pull request %s\n", prNumber)
 
 	return nil
 }
