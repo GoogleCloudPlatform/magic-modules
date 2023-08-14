@@ -7,7 +7,6 @@ require (
 	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.48.0
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/hashicorp/errwrap v1.0.0
-	github.com/hashicorp/hcl v1.0.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.4.0
 	github.com/kylelemons/godebug v1.1.0
 	github.com/nasa9084/go-openapi v0.0.0-20200604141640-2875b7376353
@@ -39,8 +38,8 @@ require (
 	go.opencensus.io v0.22.4 // indirect
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
-	golang.org/x/sys v0.0.0-20200523222454-059865788121 // indirect
-	golang.org/x/text v0.3.3 // indirect
+	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
+	golang.org/x/text v0.3.8 // indirect
 	google.golang.org/api v0.29.0 // indirect
 	google.golang.org/appengine v1.6.6 // indirect
 	google.golang.org/genproto v0.0.0-20200711021454-869866162049 // indirect
