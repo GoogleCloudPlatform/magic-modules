@@ -60,7 +60,7 @@ properties:
     name: 'releaseConfig'
     required: true
     description:
-      The name of the release config whose releaseCompilationResult should be executed. 
+      The name of the release config whose releaseCompilationResult should be executed.
       Must be in the format projects/*/locations/*/repositories/*/releaseConfigs/*.
   - !ruby/object:Api::Type::NestedObject
     name: 'invocationConfig'
@@ -112,7 +112,7 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'recentScheduledExecutionRecords'
     description:
-      Records of the 10 most recent scheduled execution attempts, 
+      Records of the 10 most recent scheduled execution attempts,
       ordered in in descending order of executionTime.
       Updated whenever automatic creation of a workflow invocation is triggered by cronSchedule.
     output: true
@@ -126,13 +126,13 @@ properties:
           name: 'workflowInvocation'
           output: true
           description:
-            The name of the created workflow invocation, if one was successfully created. 
+            The name of the created workflow invocation, if one was successfully created.
             In the format projects/*/locations/*/repositories/*/workflowInvocations/*.
         - !ruby/object:Api::Type::NestedObject
           name: 'errorStatus'
           output: true
           description:
-            The error status encountered upon this attempt to create the workflow invocation, 
+            The error status encountered upon this attempt to create the workflow invocation,
             if the attempt was unsuccessful.
           properties:
             - !ruby/object:Api::Type::Integer
