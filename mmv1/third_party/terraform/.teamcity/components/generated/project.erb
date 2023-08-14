@@ -60,6 +60,9 @@ fun Google<%= version.capitalize unless version == 'ga' -%>(environment: String,
 
         params {
             param("BRANCH_NAME", branchRef)
+            
+            // Not used, but making `environment` a param makes the value visible to non-admins in TeamCity
+            param("ENVIRONMENT", environment)
         }
     }
 }
