@@ -2,10 +2,11 @@
 
 MM_LOCAL_PATH=$1
 TPG_LOCAL_PATH=$2
-mm_commit_sha=$3
-build_id=$4
-build_step=$5
-project_id=$6
+TPGB_LOCAL_PATH=$3
+mm_commit_sha=$4
+build_id=$5
+build_step=$6
+project_id=$7
 
 github_username=modular-magician
 
@@ -38,7 +39,7 @@ curl \
 
 set +e
 pushd $MM_LOCAL_PATH/tools/missing-test-detector
-PROVIDER_DIR=$TPG_LOCAL_PATH go test
+SERVICES_DIR=$TPGB_LOCAL_PATH/google-beta/services go test
 exit_code=$?
 popd
 set -e
