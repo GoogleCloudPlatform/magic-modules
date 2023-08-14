@@ -1,4 +1,4 @@
-name: Pre-Build Validation
+name: pre-build-validation
 
 permissions:
   actions: read
@@ -7,11 +7,9 @@ permissions:
 
 on:
   pull_request:
-    branches:
-      - main # Or whichever branch you want this to run on. Adjust accordingly.
 
 jobs:
-  pre-build-validation:
+  lint-yaml:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repository
@@ -36,53 +34,3 @@ jobs:
     - name: Lint YAML files
       if: ${{ !failure() && steps.pull_request.outputs.yamlfiles != '' }}
       run: yamllint -c repo/.yamllint ${{steps.pull_request.outputs.yamlfiles}}
-  pre-build-validation-2:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
-      with:
-        path: repo
-        fetch-depth: 0
-    - name: Check for mmv1 product file changes
-      id: pull_request
-      run: |
-        cd repo
-        git config user.name "modular-magician"
-        git config user.email "magic-modules@google.com"
-        git merge --no-ff origin/main
-        yamlfiles=$(git diff --name-only origin/main -- mmv1/products)
-        if [ ! -z "$yamlfiles" ]; then
-          echo "yamlfiles=repo/${yamlfiles//$'\n'/ repo/}" >> $GITHUB_OUTPUT
-        fi
-    - name: Install yamllint
-      if: ${{ !failure() && steps.pull_request.outputs.yamlfiles != '' }}
-      run: pip install yamllint
-    - name: Lint YAML files
-      if: ${{ !failure() && steps.pull_request.outputs.yamlfiles != '' }}
-      run: yamllint -c repo/.yamllint ${{steps.pull_request.outputs.yamlfiles}}
-  pre-build-validation-3:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
-      with:
-        path: repo
-        fetch-depth: 0
-    - name: Check for mmv1 product file changes
-      id: pull_request
-      run: |
-        cd repo
-        git config user.name "modular-magician"
-        git config user.email "magic-modules@google.com"
-        git merge --no-ff origin/main
-        yamlfiles=$(git diff --name-only origin/main -- mmv1/products)
-        if [ ! -z "$yamlfiles" ]; then
-          echo "yamlfiles=repo/${yamlfiles//$'\n'/ repo/}" >> $GITHUB_OUTPUT
-        fi
-    - name: Install yamllint
-      if: ${{ !failure() && steps.pull_request.outputs.yamlfiles != '' }}
-      run: pip install yamllint
-    - name: Lint YAML files
-      if: ${{ !failure() && steps.pull_request.outputs.yamlfiles != '' }}
-      run: exit 1
