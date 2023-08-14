@@ -861,6 +861,9 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 		ExpectedSendAfterValue      string
 	}{
 		"if batch is an empty block, it will set the default values": {
+			// Although at the schema level it's shown that by default it's set to false, the actual default value
+			// is true and can be seen in the `ExpanderProviderBatchingConfig` struct
+			// https://github.com/GoogleCloudPlatform/magic-modules/blob/8cd4a506f0ac4db7b07a8cce914449d34df6f20b/mmv1/third_party/terraform/transport/config.go.erb#L504-L508
 			ExpectedEnableBatchingValue: false,
 			ExpectedSendAfterValue:      "", // uses "" value to be able to set the default value of 30s
 			ExpectFieldUnset:            true,
@@ -908,6 +911,17 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 				},
 			},
 			ExpectedSendAfterValue: "invalid value",
+			ExpectError:            true,
+		},
+		"if batch is configured with value without seconds (s) for send_after": {
+			ConfigValues: map[string]interface{}{
+				"batching": []interface{}{
+					map[string]interface{}{
+						"send_after": "10",
+					},
+				},
+			},
+			ExpectedSendAfterValue: "10",
 			ExpectError:            true,
 		},
 	}
