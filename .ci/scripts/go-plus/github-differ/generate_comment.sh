@@ -200,5 +200,5 @@ curl -H "Authorization: token ${GITHUB_TOKEN}" \
 
 if ! git diff --exit-code origin/main tools || [ "$BREAKING_CHANGE_BUILD_FAILURE" -ne 0 ]; then
     ## Run unit tests for breaking change and missing test detector.
-    "$script_dir/test_tools.sh" "$MM_LOCAL_PATH" "$TPG_LOCAL_PATH" "$TPGB_LOCAL_PATH" "$COMMIT_SHA" "$BUILD_ID" "$BUILD_STEP" "$PROJECT_ID"
+    "$script_dir/test_tools.sh" "$MM_LOCAL_PATH" "$TPGB_LOCAL_PATH" "$COMMIT_SHA" "$BUILD_ID" "$BUILD_STEP" "$PROJECT_ID"
 fi

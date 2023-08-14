@@ -1,12 +1,11 @@
 #!/bin/bash
 
 MM_LOCAL_PATH=$1
-TPG_LOCAL_PATH=$2
-TPGB_LOCAL_PATH=$3
-mm_commit_sha=$4
-build_id=$5
-build_step=$6
-project_id=$7
+TPGB_LOCAL_PATH=$2
+mm_commit_sha=$3
+build_id=$4
+build_step=$5
+project_id=$6
 
 github_username=modular-magician
 
