@@ -63,6 +63,11 @@ resource "google_dataform_repository_release_config" "release_config" {
   }
 }
 
+resource "google_service_account" "dataform_sa" {
+  account_id   = "dataform-workflow-sa"
+  display_name = "Dataform Service Account"
+}
+
 resource "google_dataform_repository_workflow_config" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
 
@@ -87,8 +92,9 @@ resource "google_dataform_repository_workflow_config" "<%= ctx[:primary_resource
     transitive_dependencies_included         = true
     transitive_dependents_included           = true
     fully_refresh_incremental_tables_enabled = false
+    service_account                          = google_service_account.dataform_sa.email
   }
 
-  cron_schedule = "0 7 * * *"
-  time_zone     = "America/New_York"
+  cron_schedule   = "0 7 * * *"
+  time_zone       = "America/New_York"
 }
