@@ -104,6 +104,7 @@ properties:
                 description: |
                   PEM root certificate of the PKI used for validation.
                   Each certificate provided in PEM format may occupy up to 5kB.
+                sensitive: true
         - !ruby/object:Api::Type::Array
           name: intermediateCas
           description: |
@@ -116,3 +117,4 @@ properties:
                 description: |
                   PEM intermediate certificate used for building up paths for validation.
                   Each certificate provided in PEM format may occupy up to 5kB.
+                sensitive: true
