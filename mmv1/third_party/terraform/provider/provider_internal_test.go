@@ -886,6 +886,7 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 				},
 			},
 			ExpectedEnableBatchingValue: true,
+			ExpectedSendAfterValue:      "",
 		},
 		"if batch is configured with only send_after": {
 			ConfigValues: map[string]interface{}{
