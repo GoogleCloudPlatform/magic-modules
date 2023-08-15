@@ -989,7 +989,7 @@ func TestAccBigQueryTable_emptySchema(t *testing.T) {
 	})
 }
 
-func TestAccBigQueryTable_Update_SchemaWithoutPolicyTagToWithPolicyTags(t *testing.T) {
+func TestAccBigQueryTable_Update_SchemaWithoutPolicyTagsToWithPolicyTags(t *testing.T) {
 	t.Parallel()
 
 	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
@@ -1211,12 +1211,12 @@ resource "google_bigquery_table" "test" {
   {
     "name": "id",
     "type": "INTEGER",
-		"policyTags": {
-			"names": [
-					"projects/%s/locations/us/taxonomies/123/policyTags/1"
-			]
-		}
-	}
+    "policyTags": {
+      "names": [
+        "projects/%s/locations/us/taxonomies/123/policyTags/1"
+      ]
+    }
+  }
 ]
 EOH
 
@@ -1240,8 +1240,8 @@ resource "google_bigquery_table" "test" {
   {
     "name": "id",
     "type": "INTEGER",
-		"policyTags": {}
-	}
+    "policyTags": {}
+  }
 ]
 EOH
 
@@ -1265,10 +1265,10 @@ resource "google_bigquery_table" "test" {
   {
     "name": "id",
     "type": "INTEGER",
-		"policyTags": {
-			"names": []
-		}
-	}
+    "policyTags": {
+      "names": []
+    }
+  }
 ]
 EOH
 

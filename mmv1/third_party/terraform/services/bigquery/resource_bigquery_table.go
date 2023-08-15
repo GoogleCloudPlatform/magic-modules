@@ -158,7 +158,6 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 
 // Compare the JSON strings are equal
 func bigQueryTableSchemaDiffSuppress(name, old, new string, _ *schema.ResourceData) bool {
-	log.Printf("[DEBUG] >>>>>>>>>>>>>>> bigQueryTableSchemaDiffSuppress")
 	// The API can return an empty schema which gets encoded to "null" during read.
 	if old == "null" {
 		old = "[]"
@@ -171,7 +170,7 @@ func bigQueryTableSchemaDiffSuppress(name, old, new string, _ *schema.ResourceDa
 		log.Printf("[DEBUG] unable to unmarshal new json - %v", err)
 	}
 
-	eq, err := jsonCompareWithMapKeyOverride(name, a, b, bigQueryTableMapKeyOverride) // a, b are schema jsonLists
+	eq, err := jsonCompareWithMapKeyOverride(name, a, b, bigQueryTableMapKeyOverride)
 	if err != nil {
 		log.Printf("[DEBUG] %v", err)
 		log.Printf("[DEBUG] Error comparing JSON: %v, %v", old, new)
