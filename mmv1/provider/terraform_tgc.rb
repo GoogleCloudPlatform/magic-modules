@@ -402,7 +402,19 @@ module Provider
                        ['converters/google/resources/organization_policy.go',
                         'third_party/tgc/organization_policy.go'],
                        ['converters/google/resources/iam_storage_bucket.go',
-                        'third_party/tgc/iam_storage_bucket.go']
+                        'third_party/tgc/iam_storage_bucket.go'],
+                       ['ancestrymanager/ancestrymanager.go',
+                        'third_party/tgc/ancestrymanager/ancestrymanager.go'],
+                       ['ancestrymanager/ancestrymanager_test.go',
+                        'third_party/tgc/ancestrymanager/ancestrymanager_test.go'],
+                       ['ancestrymanager/ancestryutil.go',
+                        'third_party/tgc/ancestrymanager/ancestryutil.go'],
+                       ['ancestrymanager/ancestryutil_test.go',
+                        'third_party/tgc/ancestrymanager/ancestryutil_test.go'],
+                       ['converters/google/convert.go',
+                        'third_party/tgc/convert.go'],
+                       ['converters/google/convert_test.go',
+                        'third_party/tgc/convert_test.go']
                      ])
     end
 
