@@ -11,7 +11,7 @@ import (
 	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
 
-func ParseFieldValue(str string, field string) string {
+func parseFieldValue(str string, field string) string {
 	strList := strings.Split(str, "/")
 	for ix, item := range strList {
 		if item == field && ix+1 < len(strList) {
@@ -21,8 +21,11 @@ func ParseFieldValue(str string, field string) string {
 	return ""
 }
 
-// Decodes the map object into the target struct.
-func DecodeJSON(data map[string]interface{}, v interface{}) error {
+func ParseFieldValue(str string, field string) string {
+	return parseFieldValue(str, field)
+}
+
+func decodeJSON(data map[string]interface{}, v interface{}) error {
 	b, err := json.Marshal(data)
 	if err != nil {
 		return err
@@ -33,7 +36,12 @@ func DecodeJSON(data map[string]interface{}, v interface{}) error {
 	return nil
 }
 
-func MapToCtyValWithSchema(m map[string]interface{}, s map[string]*schema.Schema) (cty.Value, error) {
+// Decodes the map object into the target struct.
+func DecodeJSON(data map[string]interface{}, v interface{}) error {
+	return decodeJSON(data, v)
+}
+
+func mapToCtyValWithSchema(m map[string]interface{}, s map[string]*schema.Schema) (cty.Value, error) {
 	b, err := json.Marshal(&m)
 	if err != nil {
 		return cty.NilVal, fmt.Errorf("error marshaling map as JSON: %v", err)
@@ -47,6 +55,10 @@ func MapToCtyValWithSchema(m map[string]interface{}, s map[string]*schema.Schema
 		return cty.NilVal, fmt.Errorf("error unmarshaling JSON as cty.Value: %v", err)
 	}
 	return ret, nil
+}
+
+func MapToCtyValWithSchema(m map[string]interface{}, s map[string]*schema.Schema) (cty.Value, error) {
+	return mapToCtyValWithSchema(m, s)
 }
 
 func hashicorpCtyTypeToZclconfCtyType(t hashicorpcty.Type) (cty.Type, error) {

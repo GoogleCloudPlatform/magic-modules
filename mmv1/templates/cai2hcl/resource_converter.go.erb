@@ -23,9 +23,7 @@ import (
     transport_tpg "<%= import_path() -%>/transport"
     "<%= import_path() -%>/verify"
    "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
-   "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/cai2hcl"
-    cai2hclHelper "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/helper"
-    cai2hclConfig "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/config"
+   "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl"
 )
 
 <%
@@ -60,10 +58,7 @@ func New<%=converter_name-%>(name string) cai2hcl.Converter {
 
 func (c *<%=converter_name-%>) Convert(assets []*caiasset.Asset) ([]*cai2hcl.HCLResourceBlock, error) {
 	var blocks []*cai2hcl.HCLResourceBlock
-	config, error := cai2hclConfig.NewConfig()
-	if error != nil {
-		return nil, error
-	}
+	config := cai2hcl.NewConfig()
 
 	for _, asset := range assets {
 		if asset == nil {
@@ -87,13 +82,13 @@ func (c *<%=converter_name-%>) convertResourceData(asset *caiasset.Asset, config
 
 	var resource *<%=api_type-%>
 
-	if err := cai2hclHelper.DecodeJSON(asset.Resource.Data, &resource); err != nil {
+	if err := cai2hcl.DecodeJSON(asset.Resource.Data, &resource); err != nil {
 		return nil, err
 	}
 	
     hcl, _ := resource<%=resource_name-%>Read(resource, config)
 
-	ctyVal, err := cai2hclHelper.MapToCtyValWithSchema(hcl, c.schema)
+	ctyVal, err := cai2hcl.MapToCtyValWithSchema(hcl, c.schema)
 	if err != nil {
 		return nil, err
 	}
