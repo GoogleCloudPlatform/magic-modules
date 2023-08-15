@@ -198,6 +198,12 @@ below](#nested_ip_allocation_policy).
 Options are `VPC_NATIVE` or `ROUTES`. `VPC_NATIVE` enables [IP aliasing](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-aliases),
 and requires the `ip_allocation_policy` block to be defined. By default, when this field is unspecified and no `ip_allocation_policy` blocks are set, GKE will create a `ROUTES`-based cluster.
 
+* `additional_pod_ranges_config` - (Optional) The configuration for additional pod secondary ranges at
+the cluster level. Used for Autopilot clusters and Standard clusters with which control of the 
+secondary Pod IP address assignment to node pools isn't needed.
+
+* `pod_range_names` - (Required) The names of the Pod ranges to add to the cluster.
+
 * `logging_config` - (Optional) Logging configuration for the cluster.
     Structure is [documented below](#nested_logging_config).
 

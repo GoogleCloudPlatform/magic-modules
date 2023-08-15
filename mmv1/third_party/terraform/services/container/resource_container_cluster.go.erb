@@ -1588,7 +1588,8 @@ func ResourceContainerCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"pod_range_names": {
-							Type:        schema.TypeList,
+							Type:        schema.TypeSet,
+							MinItems:    1,
 							Required:    true,
 							Elem:        &schema.Schema{Type: schema.TypeString},
 							Description: `Name for pod secondary ipv4 range which has the actual range defined ahead.`,
@@ -2450,10 +2451,10 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
-	if names := d.Get("additional_pod_ranges_config.0.pod_range_names").([]interface{}); len(names) > 0 {
+	if names, ok := d.GetOk("additional_pod_ranges_config.0.pod_range_names"); ok {
 		name := containerClusterFullName(project, location, clusterName)
 		additionalPodRangesConfig := &container.AdditionalPodRangesConfig{
-			PodRangeNames: tpgresource.ConvertStringArr(names),
+			PodRangeNames: tpgresource.ConvertStringSet(names.(*schema.Set)),
 		}
 
 		req := &container.UpdateClusterRequest{
@@ -2655,8 +2656,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
             }
         }
 	}
-	if err := d.Set("additional_pod_ranges_config", flattenAdditionalPodRangesConfig(cluster.IpAllocationPolicy)); err != nil {
-		return fmt.Errorf("Error setting additional_pod_ranges_config: %s", err)
+	if aprc := flattenAdditionalPodRangesConfig(cluster.IpAllocationPolicy); aprc != nil {
+		if err := d.Set("additional_pod_ranges_config", aprc); err != nil {
+			return fmt.Errorf("Error setting additional_pod_ranges_config: %s", err)
+		}
 	}
 	if cluster.ShieldedNodes != nil {
 		if err := d.Set("enable_shielded_nodes", cluster.ShieldedNodes.Enabled); err != nil {
@@ -3409,32 +3412,28 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("additional_pod_ranges_config") {
 		o, n := d.GetChange("additional_pod_ranges_config.0.pod_range_names")
-		old_names := tpgresource.GolangSetFromStringSlice(tpgresource.ConvertStringArr(o.([]interface{})))
-		new_names := tpgresource.GolangSetFromStringSlice(tpgresource.ConvertStringArr(n.([]interface{})))
-
-		// Filter out unchanged names. old_names will contain names to be removed, new_names will contain names to add.
-		for name := range old_names {
-			if _, ok := new_names[name]; ok {
-				delete(old_names, name)
-				delete(new_names, name)
-			}
-		}
+		old_names := o.(*schema.Set)
+		new_names := n.(*schema.Set)
+		
+		// Filter unchanged names.
+		removed_names := old_names.Difference(new_names)
+		added_names := new_names.Difference(old_names)
 
 		var additional_config *container.AdditionalPodRangesConfig
 		var removed_config *container.AdditionalPodRangesConfig
-		if len(new_names) > 0 {
+		if added_names.Len() > 0 {
 			var names []string
-			for name := range new_names {
-				names = append(names, name)
+			for _, name := range added_names.List() {
+				names = append(names, name.(string))
 			}
 			additional_config = &container.AdditionalPodRangesConfig{
 				PodRangeNames: names,
 			}
 		}
-		if len(old_names) > 0 {
+		if removed_names.Len() > 0 {
 			var names []string
-			for name := range old_names {
-				names = append(names, name)
+			for _, name := range removed_names.List() {
+				names = append(names, name.(string))
 			}
 			removed_config = &container.AdditionalPodRangesConfig{
 				PodRangeNames: names,
