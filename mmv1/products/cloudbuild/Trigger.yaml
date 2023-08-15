@@ -71,6 +71,9 @@ examples:
     primary_resource_id: 'manual-ghe-trigger'
     skip_test: true
   - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuild_trigger_manual_bitbucket_server'
+    primary_resource_id: 'manual-bitbucket-trigger'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_repo'
     primary_resource_id: 'repo-trigger'
     vars:
@@ -252,6 +255,11 @@ properties:
         description: |
           The full resource name of the github enterprise config.
           Format: projects/{project}/locations/{location}/githubEnterpriseConfigs/{id}. projects/{project}/githubEnterpriseConfigs/{id}.
+      - !ruby/object:Api::Type::String
+        name: 'bitbucketServerConfig'
+        description: |
+          The full resource name of the bitbucket server config.
+          Format: projects/{project}/locations/{location}/bitbucketServerConfigs/{id}.
   - !ruby/object:Api::Type::NestedObject
     name: 'repositoryEventConfig'
     description: |
@@ -378,6 +386,11 @@ properties:
         description: |
           The full resource name of the github enterprise config.
           Format: projects/{project}/locations/{location}/githubEnterpriseConfigs/{id}. projects/{project}/githubEnterpriseConfigs/{id}.
+      - !ruby/object:Api::Type::String
+        name: 'bitbucketServerConfig'
+        description: |
+          The full resource name of the bitbucket server config.
+          Format: projects/{project}/locations/{location}/bitbucketServerConfigs/{id}.
   - !ruby/object:Api::Type::Array
     name: 'ignoredFiles'
     item_type: Api::Type::String
