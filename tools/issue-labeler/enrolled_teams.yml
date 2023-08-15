@@ -1,173 +1,268 @@
 service/accesscontextmanager:
-- google_access_context_manager_.*
+  resources:
+  - google_access_context_manager_.*
 service/aiplatform-metadata:
-- google_vertex_ai_metadata_store
+  resources:
+  - google_vertex_ai_metadata_store
 service/alloydb:
-- google_alloydb_.*
+  resources:
+  - google_alloydb_.*
 service/apigateway:
-- google_api_gateway_.*
+  resources:
+  - google_api_gateway_.*
 service/apigee:
-- google_apigee_.*
+  resources:
+  - google_apigee_.*
 service/artifactregistry:
-- google_artifact_registry_.*
+  resources:
+  - google_artifact_registry_.*
 service/beyondcorp:
-- google_beyondcorp_.*
+  resources:
+  - google_beyondcorp_.*
 service/bigquery:
-- google_bigquery_.*
+  resources:
+  - google_bigquery_.*
 service/bigtableadmin:
-- google_bigtable_.*
+  resources:
+  - google_bigtable_.*
 service/billingbudgets:
-- google_billing_budget
+  resources:
+  - google_billing_budget
 service/certificatemanager:
-- google_certificate_manager_.*
+  resources:
+  - google_certificate_manager_.*
 service/cloudasset:
-- google_cloud_asset_.*
+  resources:
+  - google_cloud_asset_.*
 service/cloudbilling:
-- google_billing_account.*
-- google_billing_subaccount
+  resources:
+  - google_billing_account.*
+  - google_billing_subaccount
 service/cloudbuild:
-- google_cloudbuild_.*
-- google_cloudbuildv2_.*
+  resources:
+  - google_cloudbuild_.*
+  - google_cloudbuildv2_.*
 service/clouddeploy:
-- google_clouddeploy_.*
+  resources:
+  - google_clouddeploy_.*
 service/cloudfunctions:
-- google_cloudfunctions_.*
-- google_cloudfunctions2_.*
+  resources:
+  - google_cloudfunctions_.*
+  - google_cloudfunctions2_.*
 service/cloudkms:
-- google_kms_.*
+  resources:
+  - google_kms_.*
 service/cloudscheduler:
-- google_cloud_scheduler_.*
+  resources:
+  - google_cloud_scheduler_.*
 service/cloudtasks:
-- google_cloud_tasks_.*
+  resources:
+  - google_cloud_tasks_.*
 service/composer:
-- google_composer_.*
+  resources:
+  - google_composer_.*
 service/compute-nat:
-- google_compute_router_nat
+  resources:
+  - google_compute_router_nat
 service/compute-regional-l7-load-balancer:
-- google_compute_region_target_http_proxy
-- google_compute_region_target_https_proxy
+  resources:
+  - google_compute_region_target_http_proxy
+  - google_compute_region_target_https_proxy
 service/compute-security-policy:
-- google_compute_security_policy
+  resources:
+  - google_compute_security_policy
 service/container:
-- google_container_cluster
-- google_container_engine_versions
-- google_container_node_pool
+  resources:
+  - google_container_cluster
+  - google_container_engine_versions
+  - google_container_node_pool
 service/datacatalog:
-- google_data_catalog_.*
+  resources:
+  - google_data_catalog_.*
 service/dataproc:
-- google_dataproc_cluster
-- google_dataproc_autoscaling_policy
-- google_dataproc_job
-- google_dataproc_workflow_template
-- google_dataproc_batch
+  resources:
+  - google_dataproc_cluster
+  - google_dataproc_autoscaling_policy
+  - google_dataproc_job
+  - google_dataproc_workflow_template
+  - google_dataproc_batch
 service/datastream:
-- google_datastream_.*
+  resources:
+  - google_datastream_.*
+service/dialogflow:
+  resources:
+  - google_dialogflow_.*
 service/dlp:
-- google_data_loss_prevention_.*
+  resources:
+  - google_data_loss_prevention_.*
+service/documentai:
+  resources:
+  - google_document_ai_processor.*
+service/documentaiwarehouse:
+  resources:
+  - google_document_ai_warehouse_.*
 service/edgenetwork:
-- google_edgenetwork_.*
+  resources:
+  - google_edgenetwork_.*
+service/essentialcontacts:
+  resources:
+  - google_essential_contacts_.*
 service/eventarc:
-- google_eventarc_.*
+  resources:
+  - google_eventarc_.*
 service/filestore:
-- google_filestore_.*
+  resources:
+  - google_filestore_.*
 service/firebase:
-- google_firebase_.*
-- google_firebaserules_.*
+  resources:
+  - google_firebase_.*
+  - google_firebaserules_.*
 service/firestore-controlplane:
-- google_firestore_database
+  resources:
+  - google_firestore_database
 service/firestore-dataplane:
-- google_datastore_index
-- google_firestore_document
-- google_firestore_index
-- google_firestore_ttl
+  resources:
+  - google_datastore_index
+  - google_firestore_document
+  - google_firestore_index
+  - google_firestore_ttl
 service/gkebackup:
-- google_gke_backup_.*
+  resources:
+  - google_gke_backup_.*
 service/gkehub:
-- google_gke_hub_.*
+  resources:
+  - google_gke_hub_.*
 service/gkemulticloud:
-- google_container_aws_.*
-- google_container_azure_.*
-- google_container_attached_.*
+  resources:
+  - google_container_aws_.*
+  - google_container_azure_.*
+  - google_container_attached_.*
 service/gkeonprem:
-- google_gkeonprem_.*
+  resources:
+  - google_gkeonprem_.*
 service/healthcare:
-- google_healthcare_.*
+  resources:
+  - google_healthcare_.*
 service/iam-core:
-- google_organization_iam_custom_role
-- google_project_iam_custom_role
-- google_iam_deny_policy
-- google_iam_policy
-- google_iam_role
-- google_iam_testable_permissions
+  resources:
+  - google_organization_iam_custom_role
+  - google_project_iam_custom_role
+  - google_iam_deny_policy
+  - google_iam_policy
+  - google_iam_role
+  - google_iam_testable_permissions
 service/iam-serviceaccount:
-- google_service_account.*
+  resources:
+  - google_service_account.*
 service/iam-wlid:
-- google_iam_access_boundary_policy
-- google_iam_workload_identity_pool
-- google_iam_workload_identity_pool_provider
+  resources:
+  - google_iam_access_boundary_policy
+  - google_iam_workload_identity_pool
+  - google_iam_workload_identity_pool_provider
 service/iam-workforce:
-- google_iam_workforce_pool.*
+  resources:
+  - google_iam_workforce_pool.*
 service/iap:
-- google_iap_.*
+  resources:
+  - google_iap_.*
 service/identitytoolkit:
-- google_identity_platform_.*
+  resources:
+  - google_identity_platform_.*
 service/ids:
-- google_cloud_ids_.*
+  resources:
+  - google_cloud_ids_.*
 service/logging:
-- google_logging_.*
+  resources:
+  - google_logging_.*
 service/looker-core:
-- google_looker_instance
+  resources:
+  - google_looker_instance
+service/managedidentities:
+  resources:
+  - google_active_directory_.*
+service/memcache:
+  resources:
+  - google_memcache_instance
 service/metastore:
-- google_dataproc_metastore_.*
+  resources:
+  - google_dataproc_metastore_.*
 service/monitoring-alerting:
-- google_monitoring_notification_channel
-- google_monitoring_alert_policy
+  resources:
+  - google_monitoring_notification_channel
+  - google_monitoring_alert_policy
 service/monitoring-services:
-- google_monitoring_custom_service
-- google_monitoring_dashboard
-- google_monitoring_monitored_project
-- google_monitoring_slo
-- google_monitoring_service
-- google_monitoring_app_engine_service
-- google_monitoring_cluster_istio_service
-- google_monitoring_istio_canonical_service
-- google_monitoring_mesh_istio_service
-- google_monitoring_istio_canonical_service
+  resources:
+  - google_monitoring_custom_service
+  - google_monitoring_dashboard
+  - google_monitoring_monitored_project
+  - google_monitoring_slo
+  - google_monitoring_service
+  - google_monitoring_app_engine_service
+  - google_monitoring_cluster_istio_service
+  - google_monitoring_istio_canonical_service
+  - google_monitoring_mesh_istio_service
+  - google_monitoring_istio_canonical_service
 service/monitoring-uptime:
-- google_monitoring_uptime_.*
+  resources:
+  - google_monitoring_uptime_.*
 service/notebooks:
-- google_notebooks_.*
+  resources:
+  - google_notebooks_.*
 service/orgpolicy:
-- google_org_policy_.*
+  resources:
+  - google_org_policy_.*
+service/osconfig:
+  resources:
+  - google_os_config_.*
 service/privateca:
-- google_privateca_.*
+  resources:
+  - google_privateca_.*
 service/pubsub:
-- google_pubsub_schema
-- google_pubsub_subscription.*
-- google_pubsub_topic.*
+  resources:
+  - google_pubsub_schema
+  - google_pubsub_subscription.*
+  - google_pubsub_topic.*
 service/pubsublite:
-- google_pubsub_lite_.*
+  resources:
+  - google_pubsub_lite_.*
 service/redis-instance:
-- google_redis_instance
+  resources:
+  - google_redis_instance
 service/run:
-- google_cloud_run_.*
-- google_cloud_run_v2_.*
+  resources:
+  - google_cloud_run_.*
+  - google_cloud_run_v2_.*
 service/secretmanager:
-- google_secret_manager_.*
+  resources:
+  - google_secret_manager_.*
+service/sourcerepo:
+  resources:
+  - google_sourcerepo_.*
 service/spanner:
-- google_spanner_.*
+  resources:
+  - google_spanner_.*
 service/sqladmin:
-- google_sql_.*
+  resources:
+  - google_sql_.*
 service/storage:
-- google_storage_bucket_.*
-- google_storage_default_object_.*
-- google_storage_hmac_key
-- google_storage_notification
-- google_storage_object_.*
-- google_storage_project_service_account
+  resources:
+  - google_storage_bucket_.*
+  - google_storage_default_object_.*
+  - google_storage_hmac_key
+  - google_storage_notification
+  - google_storage_object_.*
+  - google_storage_project_service_account
 service/vmwareengine:
-- google_vmwareengine_network
-- google_vmwareengine_private_cloud
-- google_vmwareengine_cluster
+  resources:
+  - google_vmwareengine_network
+  - google_vmwareengine_private_cloud
+  - google_vmwareengine_cluster
+service/websecurityscanner:
+  resources:
+  - google_security_scanner_.*
+service/workflows:
+  resources:
+  - google_workflows.*
 service/workstations:
-- google_workstations_.*
+  resources:
+  - google_workstations_.*
