@@ -499,7 +499,7 @@ func TestGetRegion(t *testing.T) {
 			ResourceConfig: map[string]interface{}{
 				"zone": "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a",
 			},
-			ExpectedRegion: "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1", // Value is not shortenedfrom URI to name
+			ExpectedRegion: "us-central1", // Value is not shortenedfrom URI to name
 		},
 		"returns the value of the region field in provider config when region/zone is unset in resource config": {
 			ProviderConfig: map[string]string{
