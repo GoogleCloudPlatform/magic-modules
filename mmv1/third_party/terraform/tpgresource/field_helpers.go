@@ -387,7 +387,8 @@ func GetRegionFromSchema(regionSchemaField, zoneSchemaField string, d TerraformR
 		return GetResourceNameFromSelfLink(v.(string)), nil
 	}
 	if v, ok := d.GetOk(zoneSchemaField); ok && zoneSchemaField != "" {
-		return GetRegionFromZone(v.(string)), nil
+		zoneSelfLink := GetRegionFromZone(v.(string))
+		return GetResourceNameFromSelfLink(zoneSelfLink), nil
 	}
 	if config.Region != "" {
 		return config.Region, nil

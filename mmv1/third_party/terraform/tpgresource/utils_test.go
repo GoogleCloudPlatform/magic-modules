@@ -236,11 +236,11 @@ func TestGetLocation(t *testing.T) {
 			},
 			ExpectedLocation: "resource-location",
 		},
-		"does not shorten the location value when it is set as a self link in the resource config": {
+		"shortens the location value when it is set as a self link in the resource config": {
 			ResourceConfig: map[string]interface{}{
 				"location": "https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location",
 			},
-			ExpectedLocation: "https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location", // No shortening takes place
+			ExpectedLocation: "resource-location",
 		},
 		"returns the region value set in the resource config when location is not in the schema": {
 			ResourceConfig: map[string]interface{}{
@@ -249,11 +249,11 @@ func TestGetLocation(t *testing.T) {
 			},
 			ExpectedLocation: "resource-region",
 		},
-		"does not shorten the region value when it is set as a self link in the resource config": {
+		"shortens the region value when it is set as a self link in the resource config": {
 			ResourceConfig: map[string]interface{}{
 				"region": "https://www.googleapis.com/compute/v1/projects/my-project/region/resource-region",
 			},
-			ExpectedLocation: "https://www.googleapis.com/compute/v1/projects/my-project/region/resource-region", // No shortening takes place
+			ExpectedLocation: "resource-region",
 		},
 		"returns the zone value set in the resource config when neither location nor region in the schema": {
 			ResourceConfig: map[string]interface{}{
@@ -495,11 +495,11 @@ func TestGetRegion(t *testing.T) {
 			},
 			ExpectedRegion: "resource-zone", // is truncated
 		},
-		"does not shorten region values when derived from a zone self link set in the resource config": {
+		"shortens region values when derived from a zone self link set in the resource config": {
 			ResourceConfig: map[string]interface{}{
 				"zone": "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a",
 			},
-			ExpectedRegion: "us-central1", // Value is not shortenedfrom URI to name
+			ExpectedRegion: "us-central1",
 		},
 		"returns the value of the region field in provider config when region/zone is unset in resource config": {
 			ProviderConfig: map[string]string{
