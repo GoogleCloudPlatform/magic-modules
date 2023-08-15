@@ -963,6 +963,7 @@ func TestProvider_ProviderConfigure_region(t *testing.T) {
 			// Arrange
 			ctx := context.Background()
 			unsetTestProviderConfigEnvs(t)
+			setupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -1099,6 +1100,7 @@ func TestProvider_ProviderConfigure_zone(t *testing.T) {
 			// Arrange
 			ctx := context.Background()
 			unsetTestProviderConfigEnvs(t)
+			setupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -1222,6 +1224,7 @@ func TestProvider_ProviderConfigure_userProjectOverride(t *testing.T) {
 			// Arrange
 			ctx := context.Background()
 			unsetTestProviderConfigEnvs(t)
+			setupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -1323,6 +1326,7 @@ func TestProvider_ProviderConfigure_scopes(t *testing.T) {
 			// Arrange
 			ctx := context.Background()
 			unsetTestProviderConfigEnvs(t)
+			setupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
