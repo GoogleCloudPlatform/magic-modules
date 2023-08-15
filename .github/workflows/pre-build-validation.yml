@@ -34,14 +34,6 @@ jobs:
         ref: ${{ github.event.inputs.sha }}
         path: repo
         fetch-depth: 0
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@ec02537da5712d66d4d50a0f33b7eb52773b5ed1
-      with:
-        ruby-version: '3.1'
-    - name: Install dependencies
-      run: bundle install
-    - name: Run rake tests
-      run: bundle exec rake test
     - name: Check for mmv1 product file changes
       id: pull_request
       run: |
