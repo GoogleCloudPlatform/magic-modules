@@ -89,7 +89,6 @@ func TestComputeIssueUpdates(t *testing.T) {
 				},
 			},
 		},
-		// We may need to change this behavior later in order to ensure these tickets get forwarded.
 		"don't update issues if all service labels are already present": {
 			issues: []Issue{
 				{
