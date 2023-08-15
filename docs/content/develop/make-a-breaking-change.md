@@ -77,7 +77,7 @@ Meanwhile, the following are allowed in a minor version:
 * Adding update support for a field
 * Removing update support from a field that returned an error in **all cases** a
   user attempted to update it
-* Marking a field required if *all configurations** that did not specify the
+* Marking a field required if **all configurations** that did not specify the
   field returned an error
 * Major behavioural changes guarded by a flag where the **previous** behaviour
   is the default
@@ -87,7 +87,7 @@ Meanwhile, the following are allowed in a minor version:
 {{< hint info >}}
 **Note:** This section of the document refers to several release versions of the
 provider at once. Breaking changes are made in major releases such as 1.0.0,
-4.0.0, or 4.0.0 (referred to as the "major release" or `N` here)  while typical
+4.0.0, or 5.0.0 (referred to as the "major release" or `N` here)  while typical
 provider releases are minor versions, most notably the last minor release of the
 previous major release series such as `2.20.3` for `3.0.0` or `3.90.1`
 for `4.0.0` (referred to as the "last minor release" or `N-1.X` here).
@@ -98,6 +98,29 @@ warnings must be resolvable by end users in the last minor release of the prior
 release series before their removal or change in a major release. Additionally,
 deprecation warnings must be actionable- at the time a deprecation is posted, a
 user must be able to remove the field.
+
+### Contributing to the next major release (`5.0.0`)
+
+For the `5.0.0` major release, the major release branch that you'll contribute your code changes to is [`FEATURE-BRANCH-major-release-5.0.0`](https://github.com/GoogleCloudPlatform/magic-modules/tree/FEATURE-BRANCH-major-release-5.0.0).
+All breaking changes targeting `5.0.0` must be committed to this branch. [Upgrade guide entries](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_5_upgrade) are required to be made to the `main` branch in a separate pull request.
+
+A downstream branch with the same name `FEATURE-BRANCH-major-release-5.0.0` will be used to track the generated `5.0.0` changes in both [`google`](https://github.com/hashicorp/terraform-provider-google/tree/FEATURE-BRANCH-major-release-5.0.0) and [`google-beta`](https://github.com/hashicorp/terraform-provider-google-beta/tree/FEATURE-BRANCH-major-release-5.0.0) provider repos.
+
+The process of contributing to the major release `5.0.0` follows most of the [General contributing steps]({{< ref "/get-started/contribution-process" >}}), with the following exceptions
+
+1. Use `FEATURE-BRANCH-major-release-5.0.0` branch instead of the `main` branch as the base branch when you
+   * checkout your working branch where you make your code changes.
+   * sync your working branch using `git rebase` or `git merge`.
+   * create a pull request in the magic-modules repo.
+2. Make sure that you checkout to the `FEATURE-BRANCH-major-release-5.0.0` branch in your downstream `google` and `google-beta` repos before generating the providers locally.
+3. Create a [separate pull request](https://github.com/GoogleCloudPlatform/magic-modules/edit/main/mmv1/third_party/terraform/website/docs/guides/version_5_upgrade.html.markdown) in the `main` branch to add an entry to the [upgrade guide](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/website/docs/guides/version_5_upgrade.html.markdown).
+   * Refer to the 4.0.0 upgrade guide as a reference for your type of change.
+   * Your reviewer will require this to be made before merging your code changes in the `FEATURE-BRANCH-major-release-5.0.0` branch.
+4. If your change is a follow-up to a recent code change commit to `main` that is not yet contained in the released branch, it is strongly encouraged to wait until the branch sync and resolve any merge conflicts in the PR. 
+   For example, if you are removing a field that has been recently deprecated in main. 
+
+The release branch is synced with main on a weekly basis every Monday.
+
 
 ### Renaming a field
 

@@ -23,6 +23,7 @@ This page provides guidelines for reviewing Magic Modules pull requests
    1. all fields added/updated in the PR appear in at least one test.
       * It is advisable to test updating from a non-zero value to a zero value if feasible.
    1. all mutable fields are tested in at least one update test.
+   1. all resources in the acceptance tests have a `tf-test` or `tf_test` prefix in their primary id field.
    1. all related tests pass in GA for features promoted from beta to GA.
       {{< hint info >}}Note:
       Presubmit VCR tests do not run in GA. Manual testing is required for promoted GA features.

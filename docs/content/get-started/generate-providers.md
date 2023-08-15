@@ -192,5 +192,5 @@ gcloud auth revoke
 ## What's next
 
 - [Learn about Magic Modules]({{< ref "/get-started/how-magic-modules-works.md" >}})
-- [Learn about the contribution process]({{< ref "/get-started/contributing.md" >}})
+- [Learn about the contribution process]({{< ref "/get-started/contribution-process.md" >}})
 - [Learn about make commands]({{< ref "/reference/make-commands.md" >}})
