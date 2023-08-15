@@ -1,4 +1,4 @@
-name: pre-build-validation
+name: pre-build-validations
 
 permissions: read-all
 
@@ -31,3 +31,20 @@ jobs:
     - name: Lint YAML files
       if: ${{ !failure() && steps.pull_request.outputs.yamlfiles != '' }}
       run: yamllint -c repo/.yamllint ${{steps.pull_request.outputs.yamlfiles}}
+  hugo-build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true  # Fetch Hugo themes (true OR recursive)
+          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@16361eb4acea8698b220b76c0d4e84e1fd22c61d # v2.6.0
+        with:
+          hugo-version: '0.115.0'
+          extended: true
+
+      - name: Build
+        working-directory: ./docs
+        run: hugo --minify
