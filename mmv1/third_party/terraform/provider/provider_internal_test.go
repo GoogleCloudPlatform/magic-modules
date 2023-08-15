@@ -724,9 +724,9 @@ func TestProvider_providerConfigure_project(t *testing.T) {
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
 			EnvVariables: map[string]string{
-				"GOOGLE_PROJECT":        "project-from-GOOGLE_PROJECT",
-			}
-			ExpectedValue:    "project-from-GOOGLE_PROJECT",
+				"GOOGLE_PROJECT": "project-from-GOOGLE_PROJECT",
+			},
+			ExpectedValue: "project-from-GOOGLE_PROJECT",
 		},
 	}
 
