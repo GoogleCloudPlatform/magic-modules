@@ -1,11 +1,6 @@
 <% unless version == 'ga' -%>
 // security_policy isn't set by Create
 if v, ok := d.GetOkExists("security_policy"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, securityPolicyProp)) {
-  err = resourceComputeTargetInstanceRead(d, meta)
-  if err != nil {
-    return err
-  }
-
   obj := make(map[string]interface{})
   securityPolicyProp, err := expandComputeTargetInstanceSecurityPolicy(v, d, config)
   if err != nil {
