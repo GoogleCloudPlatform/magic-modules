@@ -716,6 +716,7 @@ func TestProvider_providerConfigure_project(t *testing.T) {
 				"project":     "",
 				"credentials": testFakeCredentialsPath,
 			},
+			ExpectError:      false,
 			ExpectFieldUnset: true,
 			ExpectedValue:    "",
 		},
