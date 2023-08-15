@@ -23,7 +23,7 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
   data_profile_spec {
     post_scan_actions {
       bigquery_export {
-        results_table = "//bigquery.googleapis.com/projects/<%= ctx[:test_env_vars]['project_name'] %>/datasets/google_bigquery_dataset.source.dataset_id/tables/profile_export"
+        results_table = "//bigquery.googleapis.com/projects/<%= ctx[:test_env_vars]['project_name'] %>/datasets/dataplex_dataset_%{random_suffix}/tables/profile_export"
       }
     }
   }
