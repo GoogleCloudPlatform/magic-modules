@@ -184,35 +184,20 @@ properties:
                 description: Runtime config of the pipeline.
                 required: true
                 properties:
-                  - !ruby/object:Api::Type::Map
+                  - !ruby/object:Api::Type::String
                     name: parameters
                     description: |
                       Deprecated. Use RuntimeConfig.parameter_values instead. The runtime parameters of the PipelineJob.
                       The parameters will be passed into PipelineJob.pipeline_spec to replace the placeholders at runtime.
                       This field is used by pipelines built using PipelineJob.pipeline_spec.schema_version 2.0.0 or lower,
-                      such as pipelines built using Kubeflow Pipelines SDK 1.8 or lower.
-                    key_name: key
-                    key_description: |
-                      The name of the pipeline parameter.
-                    value_type: !ruby/object:Api::Type::NestedObject
-                      name: value
-                      exactly_one_of:
-                        - request.0.create_pipeline_job_request.0.pipeline_job.0.runtime_config.0.parameters.intValue
-                        - request.0.create_pipeline_job_request.0.pipeline_job.0.runtime_config.0.parameters.doubleValue
-                        - request.0.create_pipeline_job_request.0.pipeline_job.0.runtime_config.0.parameters.stringValue
-                      properties:
-                        - !ruby/object:Api::Type::String
-                          name: intValue
-                          required: true
-                          description: Integer value
-                        - !ruby/object:Api::Type::Double
-                          name: doubleValue
-                          required: true
-                          description: Double value
-                        - !ruby/object:Api::Type::String
-                          name: stringValue
-                          required: true
-                          description: String value
+                      such as pipelines built using Kubeflow Pipelines SDK 1.8 or lower. Expects a JSON-encoded string.
+                    custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
+                    state_func:
+                      'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
+                      return s }'
+                    validation: !ruby/object:Provider::Terraform::Validation
+                      function: 'validation.StringIsJSON'
                   - !ruby/object:Api::Type::String
                     name: gcsOutputDirectory
                     description: |
@@ -223,53 +208,21 @@ properties:
                       The service account specified in this pipeline must have the storage.objects.get
                       and storage.objects.create permissions for this bucket.
                     required: true
-                  - !ruby/object:Api::Type::Map
+                  - !ruby/object:Api::Type::String
                     name: parameterValues
                     description: |
                       The runtime parameters of the PipelineJob. The parameters will be passed into
                       PipelineJob.pipeline_spec to replace the placeholders at runtime. This field
                       is used by pipelines built using PipelineJob.pipeline_spec.schema_version 2.1.0,
                       such as pipelines built using Kubeflow Pipelines SDK 1.9 or higher and the v2 DSL.
-                    key_name: key
-                    key_description: |
-                      The name of the pipeline parameter.
-                    value_type: !ruby/object:Api::Type::NestedObject
-                      name: value
-                      exactly_one_of:
-                        - request.0.create_pipeline_job_request.0.pipeline_job.0.runtime_config.0.parameterValues.nullValue
-                        - request.0.create_pipeline_job_request.0.pipeline_job.0.runtime_config.0.parameterValues.numberValue
-                        - request.0.create_pipeline_job_request.0.pipeline_job.0.runtime_config.0.parameterValues.stringValue
-                        - request.0.create_pipeline_job_request.0.pipeline_job.0.runtime_config.0.parameterValues.boolValue
-                        # - request.0.create_pipeline_job_request.0.pipeline_job.0.runtime_config.0.parameterValues.structureValue
-                        # - request.0.create_pipeline_job_request.0.pipeline_job.0.runtime_config.0.parameterValues.listValue
-                      properties:
-                        - !ruby/object:Api::Type::String # TODO null type
-                          name: nullValue
-                          required: true
-                          description: Null value
-                        - !ruby/object:Api::Type::Double
-                          name: numberValue
-                          required: true
-                          description: Number value
-                        - !ruby/object:Api::Type::String
-                          name: stringValue
-                          required: true
-                          description: String value
-                        - !ruby/object:Api::Type::Boolean
-                          name: boolValue
-                          required: true
-                          description: Boolean value
-                        # TODO how to allow for arbitrary object?
-                        # - !ruby/object:Api::Object
-                        #   name: structureValue
-                        #   required: true
-                        #   description: Structure value
-                        # TODO how to allow arbitrary type in list?
-                        # - !ruby/object:Api::Type::Array
-                        #   name: listValue
-                        #   required: true
-                        #   description: List value
-                        #   item_type: Api::Type::String
+                      Expects a JSON-encoded string.
+                    custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
+                    state_func:
+                      'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
+                      return s }'
+                    validation: !ruby/object:Provider::Terraform::Validation
+                      function: 'validation.StringIsJSON'
                   - !ruby/object:Api::Type::Enum
                     name: failurePolicy
                     description: |
