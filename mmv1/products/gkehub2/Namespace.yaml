@@ -107,6 +107,7 @@ properties:
     imports: 'name'
     diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
     required: true
+    immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'state'
     description: |

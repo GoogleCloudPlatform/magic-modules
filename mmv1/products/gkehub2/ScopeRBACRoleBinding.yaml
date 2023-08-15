@@ -15,8 +15,10 @@
 name: 'ScopeRBACRoleBinding'
 base_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/rbacrolebindings'
 create_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/rbacrolebindings/?rbacrolebinding_id={{scope_rbac_role_binding_id}}'
+update_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/rbacrolebindings/{{scope_rbac_role_binding_id}}'
 self_link: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/rbacrolebindings/{{scope_rbac_role_binding_id}}'
-immutable: true
+update_verb: :PATCH
+update_mask: true
 description: |
   RBACRoleBinding represents a rbacrolebinding across the Fleet.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -146,4 +148,3 @@ properties:
           - :ADMIN
           - :EDIT
           - :VIEW
-          - :ANTHOS_SUPPORT

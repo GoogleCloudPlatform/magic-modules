@@ -6,12 +6,10 @@ resource "google_gke_hub_scope" "<%= ctx[:primary_resource_id] %>" {
 resource "google_gke_hub_scope_rbac_role_binding" "<%= ctx[:primary_resource_id] %>" {
   scope_rbac_role_binding_id = "tf-test-scope-rbac-role-binding%{random_suffix}"
   scope_id = "tf-test-scope%{random_suffix}"
-  user = "service-${data.google_project.project.number}@gcp-sa-anthossupport.iam.gserviceaccount.com"
+  user = "test-email@gmail.com"
   role {
-    predefined_role = "ANTHOS_SUPPORT"
+    predefined_role = "ADMIN"
   }
   depends_on = [google_gke_hub_scope.<%= ctx[:primary_resource_id] %>]
 }
-
-data "google_project" "project" {}
 
