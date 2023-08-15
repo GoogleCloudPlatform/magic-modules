@@ -8,12 +8,11 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/magic-modules/mmv1/third_party/terraform/envvar"
-	"github.com/hashicorp/magic-modules/mmv1/third_party/terraform/tpgresource"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
