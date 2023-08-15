@@ -17,9 +17,12 @@ base_url: 'projects/{{project}}/locations/{{location}}/trustConfigs'
 create_url: 'projects/{{project}}/locations/{{location}}/trustConfigs?trustConfigId={{name}}'
 self_link: 'projects/{{project}}/locations/{{location}}/trustConfigs/{{name}}'
 update_verb: :PATCH
-update_mask: true
 description: |
   TrustConfig represents a resource that represents your Public Key Infrastructure (PKI) configuration in Certificate Manager for use in mutual TLS authentication scenarios.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/certificate-manager/docs'
+  api: 'https://cloud.google.com/certificate-manager/docs/reference/certificate-manager/rest/v1/projects.locations.trustConfigs/create'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -47,6 +50,8 @@ examples:
     primary_resource_id: 'default'
     vars:
       trust_config_name: 'trust-config'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_update: templates/terraform/pre_update/certificate_manager_trust_config.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -82,6 +87,7 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: 'Set of label tags associated with the trust config.'
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
