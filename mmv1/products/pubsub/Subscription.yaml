@@ -175,8 +175,6 @@ properties:
         description: |
           The maximum bytes that can be written to a Cloud Storage file before a new file is created. Min 1 KB, max 10 GiB.
           The maxBytes limit may be exceeded in cases where messages are larger than the limit.
-        validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validation.IntBetween(1000, 10737418240)'
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: |
