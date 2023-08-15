@@ -136,4 +136,4 @@ This unsupported field was introduced incorrectly. It is now removed.
 
 ### `dataQualityResult` and `dataProfileResult` output fields are now removed 
 
-`dataQualityResult` and `dataProfileResult` were output-only fields which listed results for the latest job created under a Datascan. This is unlikely to be relevant in a Terraform context.
+`dataQualityResult` and `dataProfileResult` were output-only fields which listed results for the latest job created under a Datascan. These were problematic fields that are unlikely to be relevant in a Terraform context. Removing them reduces the likelihood of additional parsing errors, and reduces maintainance overhead for the API surface.
