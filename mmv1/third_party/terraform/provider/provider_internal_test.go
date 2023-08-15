@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"regexp"
 	"testing"
 
@@ -39,7 +39,7 @@ func TestProvider_validateCredentials(t *testing.T) {
 		},
 		"configuring credentials as a credentials JSON string is valid": {
 			ConfigValue: func(t *testing.T) interface{} {
-				contents, err := ioutil.ReadFile(transport_tpg.TestFakeCredentialsPath)
+				contents, err := os.ReadFile(transport_tpg.TestFakeCredentialsPath)
 				if err != nil {
 					t.Fatalf("Unexpected error: %s", err)
 				}
