@@ -65,6 +65,7 @@ examples:
     vars:
       display_name: 'Display Name Basic'
       bucket_name: 'fb-webapp-'
+      project_name: "my-project"
     test_env_vars:
       org_id: :ORG_ID
     test_vars_overrides:

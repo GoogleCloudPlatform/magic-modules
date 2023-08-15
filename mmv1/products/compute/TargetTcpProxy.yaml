@@ -99,6 +99,7 @@ properties:
     required: true
     update_verb: :POST
     update_url: 'projects/{{project}}/global/targetTcpProxies/{{name}}/setBackendService'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Boolean
     name: 'proxyBind'
     description: |

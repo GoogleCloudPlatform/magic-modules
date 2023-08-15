@@ -107,6 +107,8 @@ The following arguments are supported:
 
 * `friendly_name` - (Optional) A descriptive name for the table.
 
+* `max_staleness`: (Optional) The maximum staleness of data that could be returned when the table (or stale MV) is queried. Staleness encoded as a string encoding of sql IntervalValue type.
+
 * `encryption_configuration` - (Optional) Specifies how the table should be encrypted.
     If left blank, the table will be encrypted with a Google-managed key; that process
     is transparent to the user.  Structure is [documented below](#nested_encryption_configuration).
@@ -160,6 +162,12 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 * `csv_options` (Optional) - Additional properties to set if
     `source_format` is set to "CSV". Structure is [documented below](#nested_csv_options).
 
+* `json_options` (Optional) - Additional properties to set if
+    `source_format` is set to "JSON". Structure is [documented below](#nested_json_options).
+
+* `parquet_options` (Optional) - Additional properties to set if
+    `source_format` is set to "PARQUET". Structure is [documented below](#nested_parquet_options).
+
 * `google_sheets_options` (Optional) - Additional options if
     `source_format` is set to "GOOGLE_SHEETS". Structure is
     [documented below](#nested_google_sheets_options).
@@ -171,7 +179,6 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 * `avro_options` (Optional) - Additional options if `source_format` is set to  
     "AVRO".  Structure is [documented below](#nested_avro_options).
-
 
 * `ignore_unknown_values` (Optional) - Indicates if BigQuery should
     allow extra values that are not represented in the table schema.
@@ -202,6 +209,10 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 * `source_uris` - (Required) A list of the fully-qualified URIs that point to
     your data in Google Cloud.
+
+* `file_set_spec_type` - (Optional) Specifies how source URIs are interpreted for constructing the file set to load.
+    By default source URIs are expanded against the underlying storage.
+    Other options include specifying manifest files. Only applicable to object storage systems. [Docs](cloud/bigquery/docs/reference/rest/v2/tables#filesetspectype)
 
 * `reference_file_schema_uri` - (Optional) When creating an external table, the user can provide a reference file with the table schema. This is enabled for the following formats: AVRO, PARQUET, ORC.
 
@@ -234,6 +245,10 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 * `skip_leading_rows` (Optional) - The number of rows at the top of a CSV
     file that BigQuery will skip when reading the data.
 
+<a name="nested_json_options"></a>The `json_options` block supports:
+
+* `encoding` (Optional) - The character encoding of the data. The supported values are UTF-8, UTF-16BE, UTF-16LE, UTF-32BE, and UTF-32LE. The default value is UTF-8.
+
 <a name="nested_google_sheets_options"></a>The `google_sheets_options` block supports:
 
 * `range` (Optional) - Range of a sheet to query from. Only used when
@@ -255,7 +270,7 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
       partitioning on an unsupported format will lead to an error.
       Currently supported formats are: JSON, CSV, ORC, Avro and Parquet.
     * CUSTOM: when set to `CUSTOM`, you must encode the partition key schema within the `source_uri_prefix` by setting `source_uri_prefix` to `gs://bucket/path_to_table/{key1:TYPE1}/{key2:TYPE2}/{key3:TYPE3}`.
-    
+
 * `require_partition_filter` - (Optional) If set to true, queries over this table
     require a partition filter that can be used for partition elimination to be
     specified.
@@ -274,7 +289,12 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 * `use_avro_logical_types` (Optional) - If is set to true, indicates whether  
     to interpret logical types as the corresponding BigQuery data type  
     (for example, TIMESTAMP), instead of using the raw type (for example, INTEGER).
-    
+
+<a name="nested_parquet_options"></a>The `parquet_options` block supports:
+
+* `enum_as_string` (Optional) - Indicates whether to infer Parquet ENUM logical type as STRING instead of BYTES by default.
+
+* `enable_list_inference` (Optional) - Indicates whether to use schema inference specifically for Parquet LIST logical type.
 
 <a name="nested_time_partitioning"></a>The `time_partitioning` block supports:
 

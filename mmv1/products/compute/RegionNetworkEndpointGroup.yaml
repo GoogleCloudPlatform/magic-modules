@@ -56,7 +56,7 @@ examples:
       bucket_name: 'cloudfunctions-function-example-bucket'
       zip_path: 'path/to/index.zip'
     test_vars_overrides:
-      zip_path: 'createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
+      zip_path: 'acctest.CreateZIPArchiveForCloudFunctionSource(t, "./test-fixtures/http_trigger.js")'
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_network_endpoint_group_cloudrun'
     primary_resource_id: 'cloudrun_neg'
@@ -92,6 +92,7 @@ parameters:
     description: |
       A reference to the region where the Serverless NEGs Reside.
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -132,6 +133,7 @@ properties:
       This field is only used for PSC.
       The URL of the network to which all network endpoints in the NEG belong. Uses
       "default" project network if unspecified.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'subnetwork'
     resource: 'Subnetwork'
@@ -139,6 +141,7 @@ properties:
     description: |
       This field is only used for PSC.
       Optional URL of the subnetwork to which all network endpoints in the NEG belong.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'cloudRun'
     conflicts:

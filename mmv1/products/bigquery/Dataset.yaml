@@ -356,3 +356,12 @@ properties:
       - 'und:ci': undetermined locale, case insensitive.
       - '': empty string. Default to case-sensitive behavior.
     default_from_api: true
+  - !ruby/object:Api::Type::String
+    name: 'storageBillingModel'
+    description: |
+      Specifies the storage billing model for the dataset.
+      Set this flag value to LOGICAL to use logical bytes for storage billing,
+      or to PHYSICAL to use physical bytes instead.
+
+      LOGICAL is the default if this flag isn't specified.
+    default_from_api: true

@@ -49,6 +49,7 @@ parameters:
     imports: 'name'
     description: 'A reference to the zone where the instance group resides.'
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Array
     name: 'instances'
     description: |
@@ -63,6 +64,7 @@ parameters:
       description: 'An instance being added to the InstanceGroup'
       resource: 'Instance'
       imports: 'selfLink'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -113,6 +115,7 @@ properties:
     imports: 'selfLink'
     description: |
       The network to which all instances in the instance group belong.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
@@ -120,9 +123,11 @@ properties:
     description: |
       The region where the instance group is located
       (for regional resources).
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'subnetwork'
     resource: 'Subnetwork'
     imports: 'selfLink'
     description: |
       The subnetwork to which all instances in the instance group belong.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'

@@ -17,7 +17,6 @@ name: "AddressGroup"
 base_url: "{{parent}}/locations/{{location}}/addressGroups"
 create_url: "{{parent}}/locations/{{location}}/addressGroups?addressGroupId={{name}}"
 self_link: "{{parent}}/locations/{{location}}/addressGroups/{{name}}"
-min_version: beta
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -32,7 +31,6 @@ autogen_async: false
 import_format: ["{{%parent}}/locations/{{location}}/addressGroups/{{name}}"]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: "network_security_address_groups_basic"
     primary_resource_id: "default"
     vars:
@@ -40,7 +38,6 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: "network_security_address_groups_organization_basic"
     primary_resource_id: "default"
     vars:
@@ -48,7 +45,6 @@ examples:
     test_env_vars:
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: "network_security_address_groups_advanced"
     primary_resource_id: "default"
     vars:

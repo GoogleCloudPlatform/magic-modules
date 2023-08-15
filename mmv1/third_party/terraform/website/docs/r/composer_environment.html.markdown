@@ -469,6 +469,11 @@ The following arguments are supported:
 
 See [documentation](https://cloud.google.com/composer/docs/how-to/managing/configuring-private-ip) for setting up private environments. <a name="nested_private_environment_config"></a>The `private_environment_config` block supports:
 
+* `connection_type` -
+  (Optional, Cloud Composer 2 only)
+  Mode of internal communication within the Composer environment. Must be one
+  of `"VPC_PEERING"` or `"PRIVATE_SERVICE_CONNECT"`.
+ 
 * `enable_private_endpoint` -
   If true, access to the public endpoint of the GKE cluster is denied.
   If this field is set to true, the `ip_allocation_policy.use_ip_aliases` field must
@@ -682,8 +687,9 @@ The `config` block supports:
 * `resilience_mode` -
   (Optional, Cloud Composer 2.1.15 or newer only)
   The resilience mode states whether high resilience is enabled for 
-  the environment or not. Value for resilience mode is `HIGH_RESILIENCE`.
-  If unspecified, defaults to standard resilience.
+  the environment or not. Values for resilience mode are `HIGH_RESILIENCE` 
+  for high resilience and `STANDARD_RESILIENCE` for standard
+  resilience.
 
 * `master_authorized_networks_config` -
   (Optional)
