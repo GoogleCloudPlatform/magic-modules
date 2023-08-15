@@ -8,6 +8,7 @@ import (
     "log"
     "reflect"
     "time"
+    apiComputeV1 "google.golang.org/api/compute/v1"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -17,16 +18,14 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
     "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+    tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta"
     "<%= import_path() -%>/tpgresource"
     transport_tpg "<%= import_path() -%>/transport"
     "<%= import_path() -%>/verify"
    "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
    "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/cai2hcl"
-   cai2hclHelper "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/helper"
-   cai2hclConfig "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/config"
-   tfschema "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-   tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources"
-   apiComputeV1 "google.golang.org/api/compute/v1"
+    cai2hclHelper "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/helper"
+    cai2hclConfig "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/config"
 )
 
 <%
@@ -47,7 +46,7 @@ const <%=resource_name-%>AssetType string = "<%=product_backend_name.downcase-%>
 
 type <%=converter_name-%> struct {
 	name   string
-	schema map[string]*tfschema.Schema
+	schema map[string]*schema.Schema
 }
 
 func New<%=converter_name-%>(name string) cai2hcl.Converter {
@@ -104,12 +103,13 @@ func (c *<%=converter_name-%>) convertResourceData(asset *caiasset.Asset, config
 	}, nil
 }
 
-func resource<%=resource_name-%>Read(res *<%=api_type-%>, config map[string]*tfschema.Schema) (map[string]interface{}, error) {
+func resource<%=resource_name-%>Read(res *<%=api_type-%>, config *transport_tpg.Config) (map[string]interface{}, error) {
     result := make(map[string]interface{})
+	var resource_data *schema.ResourceData = nil
 
 <%  object.gettable_properties.reject{|p| p.ignore_read }.each do |prop|-%>
 <%    if prop.flatten_object-%>
-    if flattenedProp := flatten<%="Nested" if object.nested_query-%><%=resource_name-%><%=titlelize_property(prop)-%>(res.<%= prop.api_name.camelize(:upper) -%>); flattenedProp != nil {
+    if flattenedProp := flatten<%="Nested" if object.nested_query-%><%=resource_name-%><%=titlelize_property(prop)-%>(res.<%= prop.api_name.camelize(:upper) -%>, resource_data, config); flattenedProp != nil {
         if gerr, ok := flattenedProp.(*googleapi.Error); ok {
 			return nil, fmt.Errorf("Error reading <%=object.name-%>: %s", gerr)
 		}
@@ -121,7 +121,7 @@ func resource<%=resource_name-%>Read(res *<%=api_type-%>, config map[string]*tfs
         }
     }
 <%    else-%>
-    result["<%=prop.name.underscore-%>"] = flatten<%="Nested" if object.nested_query-%><%=resource_name-%><%=titlelize_property(prop)-%>(res.<%= prop.api_name.camelize(:upper) -%>, config)
+    result["<%=prop.name.underscore-%>"] = flatten<%="Nested" if object.nested_query-%><%=resource_name-%><%=titlelize_property(prop)-%>(res.<%= prop.api_name.camelize(:upper) -%>, resource_data, config)
 <%    end-%>
 <%  end-%>
 

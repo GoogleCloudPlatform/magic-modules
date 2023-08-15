@@ -45,7 +45,6 @@ module Provider
                     'templates/cai2hcl/resource_converter.go.erb',
                     File.join(output_folder, target),
                     self)
-      replace_import_path(output_folder, target)
     end
 
     def compile_common_files(output_folder, products, _common_compile_file) end
@@ -67,21 +66,5 @@ module Provider
     def generate_iam_policy(pwd, data, generate_code, _generate_docs) end
 
     def generate_resource_sweepers(pwd, data) end
-
-    def replace_import_path(output_folder, target)
-      # Replace import paths to reference the resources dir instead of the google provider
-      data = File.read("#{output_folder}/#{target}")
-      # rubocop:disable Layout/LineLength
-      data = data.gsub(
-        %r{(?<!provider ")github.com/hashicorp/terraform-provider-google/google},
-        'github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources'
-      )
-      data = data.gsub(
-        %r{(?<!provider ")github.com/hashicorp/terraform-provider-google-beta/google-beta},
-        'github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources'
-      )
-      # rubocop:enable Layout/LineLength
-      File.write("#{output_folder}/#{target}", data)
-    end
   end
 end
