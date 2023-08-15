@@ -83,6 +83,13 @@ func GetProject(d TerraformResourceData, config *transport_tpg.Config) (string, 
 	return GetProjectFromSchema("project", d, config)
 }
 
+// GetUniverse reads the "universe_domain" field from the given resource data and falls
+// back to the provider's value if not given. If the provider's value is not
+// given, an error is returned.
+func GetUniverseDomain(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	return GetUniverseDomainFromSchema("universe_domain", d, config)
+}
+
 // GetBillingProject reads the "billing_project" field from the given resource data and falls
 // back to the provider's value if not given. If no value is found, an error is returned.
 func GetBillingProject(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
@@ -602,7 +609,7 @@ func ReplaceVarsRecursive(d TerraformResourceData, config *transport_tpg.Config,
 // It also replaces {{project}}, {{project_id_or_project}}, {{region}}, and {{zone}} with their appropriate values
 // This function supports URL-encoding the result by prepending '%' to the field name e.g. {{%var}}
 func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *transport_tpg.Config, linkTmpl string, shorten bool) (func(string) string, error) {
-	var project, projectID, region, zone string
+	var project, projectID, region, zone, universe_domain string
 	var err error
 
 	if strings.Contains(linkTmpl, "{{project}}") {
@@ -620,6 +627,13 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 		if projectID == "" {
 			project, err = GetProject(d, config)
 		}
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if strings.Contains(linkTmpl, "{{universe_domain}}") {
+		universe_domain, err = GetUniverseDomain(d, config)
 		if err != nil {
 			return nil, err
 		}
@@ -653,6 +667,9 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 		}
 		if m == "region" {
 			return region
+		}
+		if m == "universe_domain" {
+			return universe_domain
 		}
 		if m == "zone" {
 			return zone
