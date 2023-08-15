@@ -160,11 +160,16 @@ properties:
                 description: |
                   The display name of the Pipeline. The name can be up to 128 characters long
                   and can consist of any UTF-8 characters.
-              # TODO how to allow for arbitrary object?
-              # - !ruby/object:Api::Object
-              #   name: pipelineSpec
-              #   description: The spec of the pipeline.
-                # required: true
+              - !ruby/object:Api::Type::String
+                name: pipelineSpec
+                description: The spec of the pipeline. Expects a JSON-encoded string.
+                custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+                custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
+                state_func:
+                  'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
+                  return s }'
+                validation: !ruby/object:Provider::Terraform::Validation
+                  function: 'validation.StringIsJSON'
               - !ruby/object:Api::Type::KeyValuePairs
                 name: labels
                 description: |
