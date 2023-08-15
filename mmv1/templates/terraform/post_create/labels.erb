@@ -46,5 +46,9 @@ if v, ok := d.GetOkExists("labels"); !tpgresource.IsEmptyValue(reflect.ValueOf(v
 		return err
 	}
 
+	// Set back the labels field, as it is needed to decide the value of "labels" in the state in the read function.
+	if err := d.Set("labels", v); err != nil {
+		return fmt.Errorf("Error setting back labels: %s", err)
+	}
 }
 <% end -%>
