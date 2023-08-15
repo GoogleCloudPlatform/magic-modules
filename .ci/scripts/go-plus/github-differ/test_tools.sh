@@ -1,7 +1,7 @@
 #!/bin/bash
 
 MM_LOCAL_PATH=$1
-TPG_LOCAL_PATH=$2
+TPGB_LOCAL_PATH=$2
 mm_commit_sha=$3
 build_id=$4
 build_step=$5
@@ -38,7 +38,7 @@ curl \
 
 set +e
 pushd $MM_LOCAL_PATH/tools/missing-test-detector
-PROVIDER_DIR=$TPG_LOCAL_PATH go test
+SERVICES_DIR=$TPGB_LOCAL_PATH/google-beta/services go test
 exit_code=$?
 popd
 set -e
