@@ -145,6 +145,11 @@ properties:
             name: datastore
             description: The Vsphere datastore used by the Control Plane Node.
             output: true
+          - !ruby/object:Api::Type::String
+            name: 'storagePolicyName'
+            description: |
+              The Vsphere storage policy used by the control plane Node.
+            output: true
   - !ruby/object:Api::Type::NestedObject
     name: antiAffinityGroups
     description: |
@@ -646,6 +651,10 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'address'
         description: The vCenter IP address.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'storagePolicyName'
+        description: The name of the vCenter storage policy for the user cluster.
         output: true
   - !ruby/object:Api::Type::NestedObject
     name: status

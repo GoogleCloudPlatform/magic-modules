@@ -114,6 +114,64 @@ Description of the change and how users should adjust their configuration (if ne
 
 The provider will now enforce at plan time that at most one of these fields be set.
 
+### `schema` can only be represented as a JSON array with non-null elements.
+
+The provider will now enforce at plan time that `schema` is a valid JSON array with non-null elements.
+
+## Resource: `google_firebaserules_release`
+
+### Changing `ruleset_name` now triggers replacement
+
+In 4.X.X, changing the `ruleset_name` in `google_firebaserules_release` updates the `Release` in place, which prevents the old `Ruleset` referred to by `ruleset_name` from being destroyed. A workaround is to use a `replace_triggered_by` lifecycle field on the `google_firebaserules_release`. In version 5.0.0, changing `ruleset_name` will trigger a replacement, which allows the `Ruleset` to be deleted. The `replace_triggered_by` workaround becomes unnecessary.
+
+#### Old Config
+
+```hcl
+resource "google_firebaserules_release" "primary" {
+  name         = "cloud.firestore"
+  ruleset_name = "projects/my-project-name/rulesets/${google_firebaserules_ruleset.firestore.name}"
+  project      = "my-project-name"
+
+  lifecycle {
+    replace_triggered_by = [
+      google_firebaserules_ruleset.firestore
+    ]
+  }
+}
+
+resource "google_firebaserules_ruleset" "firestore" {
+  source {
+    files {
+      content = "service cloud.firestore {match /databases/{database}/documents { match /{document=**} { allow read, write: if false; } } }"
+      name    = "firestore.rules"
+    }
+  }
+
+  project = "my-project-name"
+}
+```
+
+#### New Config
+
+```hcl
+resource "google_firebaserules_release" "primary" {
+  name         = "cloud.firestore"
+  ruleset_name = "projects/my-project-name/rulesets/${google_firebaserules_ruleset.firestore.name}"
+  project      = "my-project-name"
+}
+
+resource "google_firebaserules_ruleset" "firestore" {
+  source {
+    files {
+      content = "service cloud.firestore {match /databases/{database}/documents { match /{document=**} { allow read, write: if false; } } }"
+      name    = "firestore.rules"
+    }
+  }
+
+  project = "my-project-name"
+}
+```
+
 ## Resource: `google_firebase_web_app`
 
 ### `deletion_policy` now defaults to `DELETE`
@@ -137,3 +195,13 @@ This unsupported field was introduced incorrectly. It is now removed.
 ### `dataQualityResult` and `dataProfileResult` output fields are now removed 
 
 `dataQualityResult` and `dataProfileResult` were output-only fields which listed results for the latest job created under a Datascan. These were problematic fields that are unlikely to be relevant in a Terraform context. Removing them reduces the likelihood of additional parsing errors, and reduces maintainance overhead for the API surface.
+
+## Resource: `google_compute_router_nat`
+
+### `enable_endpoint_independent_mapping` now defaults to API's default value which is `FALSE`
+
+Previously, the default value of `enable_endpoint_independent_mapping` was `TRUE`. Now,
+it will use the default value from the API which is `FALSE`. If you want to
+enable endpoint independent mapping, then explicity set the value of
+`enable_endpoint_independent_mapping` field to `TRUE`.
+
