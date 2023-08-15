@@ -5,10 +5,10 @@ resource "google_certificate_manager_trust_config" "<%= ctx[:primary_resource_id
 
   trust_stores {
     trust_anchors { 
-      pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
+      pem_certificate = file("test-fixtures/cert.pem")
     }
     intermediate_cas { 
-      pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
+      pem_certificate = file("test-fixtures/cert.pem")
     }
   }
 
