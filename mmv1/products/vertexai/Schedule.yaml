@@ -13,7 +13,6 @@
 
 --- !ruby/object:Api::Resource
 name: Schedule
-min_version: beta
 base_url: projects/{{project}}/locations/{{region}}/schedules
 self_link: 'projects/{{project}}/locations/{{region}}/schedules/{{name}}'
 update_verb: :PATCH
@@ -150,6 +149,7 @@ properties:
             description: |
               The resource name of the Location to create the PipelineJob in. Format: projects/{project}/locations/{location}
             required: true
+            pattern: projects/{{project}}/locations/{{region}}
           - !ruby/object:Api::Type::NestedObject
             name: pipelineJob
             description: The PipelineJob to create.
