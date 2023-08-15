@@ -7,6 +7,7 @@ import (
 
 	hashicorpcty "github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 	"github.com/zclconf/go-cty/cty"
 	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
@@ -71,4 +72,13 @@ func hashicorpCtyTypeToZclconfCtyType(t hashicorpcty.Type) (cty.Type, error) {
 		return cty.NilType, err
 	}
 	return ret, nil
+}
+
+func NewConfig() *transport_tpg.Config {
+	return &transport_tpg.Config{
+		Project:   "",
+		Zone:      "",
+		Region:    "",
+		UserAgent: "",
+	}
 }
