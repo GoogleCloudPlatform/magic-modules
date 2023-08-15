@@ -697,6 +697,13 @@ func TestProvider_providerConfigure_requestTimeout(t *testing.T) {
 		ExpectError         bool
 		ExpectFieldUnset    bool
 	}{
+		"if a valid request_timeout is configured in the provider, no error will occur": {
+			ConfigValues: map[string]interface{}{
+				"request_timeout": "10s",
+			},
+			ExpectedValue:       "10s",
+			ExpectedSchemaValue: "10s",
+		},
 		"if an invalid request_timeout is configured in the provider, an error will occur": {
 			ConfigValues: map[string]interface{}{
 				"request_timeout": "timeout",
