@@ -44,7 +44,7 @@ func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleBasicUpdate(
 func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePreUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_region_security_policy" "default" {
-  region      = "asia-southeast1"
+  region      = "us-west2"
   name        = "tf-test%{random_suffix}"
   description = "basic region security policy"
   type        = "CLOUD_ARMOR"
@@ -52,7 +52,7 @@ resource "google_compute_region_security_policy" "default" {
 
 resource "google_compute_region_security_policy_rule" "policy_rule" {
   security_policy = google_compute_region_security_policy.default.name
-  region          = "asia-southeast1"
+  region          = "us-west2"
   description     = "basic rule pre update"
   action          = "allow"
   priority        = 100
@@ -70,7 +70,7 @@ resource "google_compute_region_security_policy_rule" "policy_rule" {
 func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePostUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_region_security_policy" "default" {
-  region      = "asia-southeast1"
+  region      = "us-west2"
   name        = "tf-test%{random_suffix}"
   description = "basic region security policy"
   type        = "CLOUD_ARMOR"
@@ -78,7 +78,7 @@ resource "google_compute_region_security_policy" "default" {
 
 resource "google_compute_region_security_policy_rule" "policy_rule" {
   security_policy = google_compute_region_security_policy.default.name
-  region          = "asia-southeast1"
+  region          = "us-west2"
   description     = "basic rule post update"
   action          = "deny(403)"
   priority        = 100
@@ -142,7 +142,7 @@ func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatch
 func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchBasic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_region_security_policy" "policyddosprotection" {
-  region      = "asia-southeast1"
+  region      = "us-west2"
   name        = "tf-test-policyddos%{random_suffix}"
   description = "region security policy for network match"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -152,13 +152,13 @@ resource "google_compute_region_security_policy" "policyddosprotection" {
 }
   
 resource "google_compute_network_edge_security_service" "edge_sec_service" {
-  region          = "asia-southeast1"
+  region          = "us-west2"
   name            = "tf-test-edgesec%{random_suffix}"
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
 }
   
 resource "google_compute_region_security_policy" "policynetworkmatch" {
-  region      = "asia-southeast1"
+  region      = "us-west2"
   name        = "tf-test-polnetmatch%{random_suffix}"
   description = "region security policy for network match"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -180,7 +180,7 @@ resource "google_compute_region_security_policy" "policynetworkmatch" {
 }
   
 resource "google_compute_region_security_policy_rule" "policy_rule_network_match" {
-  region          = "asia-southeast1"
+  region          = "us-west2"
   security_policy = google_compute_region_security_policy.policynetworkmatch.name
   priority = 100
   network_match {
@@ -195,7 +195,7 @@ resource "google_compute_region_security_policy_rule" "policy_rule_network_match
 func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_region_security_policy" "policyddosprotection" {
-  region      = "asia-southeast1"
+  region      = "us-west2"
   name        = "tf-test-policyddos%{random_suffix}"
   description = "region security policy for network match"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -205,13 +205,13 @@ resource "google_compute_region_security_policy" "policyddosprotection" {
 }
   
 resource "google_compute_network_edge_security_service" "edge_sec_service" {
-  region          = "asia-southeast1"
+  region          = "us-west2"
   name            = "tf-test-edgesec%{random_suffix}"
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
 }
   
 resource "google_compute_region_security_policy" "policynetworkmatch" {
-  region      = "asia-southeast1"
+  region      = "us-west2"
   name        = "tf-test-polnetmatch%{random_suffix}"
   description = "region security policy for network match"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -233,7 +233,7 @@ resource "google_compute_region_security_policy" "policynetworkmatch" {
 }
   
 resource "google_compute_region_security_policy_rule" "policy_rule_network_match" {
-  region          = "asia-southeast1"
+  region          = "us-west2"
   security_policy = google_compute_region_security_policy.policynetworkmatch.name
   priority = 100
   network_match {
@@ -258,7 +258,7 @@ resource "google_compute_region_security_policy_rule" "policy_rule_network_match
 func testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdate2(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_region_security_policy" "policyddosprotection" {
-  region      = "asia-southeast1"
+  region      = "us-west2"
   name        = "tf-test-policyddos%{random_suffix}"
   description = "region security policy for network match"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -268,13 +268,13 @@ resource "google_compute_region_security_policy" "policyddosprotection" {
 }
   
 resource "google_compute_network_edge_security_service" "edge_sec_service" {
-  region          = "asia-southeast1"
+  region          = "us-west2"
   name            = "tf-test-edgesec%{random_suffix}"
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
 }
   
 resource "google_compute_region_security_policy" "policynetworkmatch" {
-  region      = "asia-southeast1"
+  region      = "us-west2"
   name        = "tf-test-polnetmatch%{random_suffix}"
   description = "region security policy for network match"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -296,7 +296,7 @@ resource "google_compute_region_security_policy" "policynetworkmatch" {
 }
   
 resource "google_compute_region_security_policy_rule" "policy_rule_network_match" {
-  region          = "asia-southeast1"
+  region          = "us-west2"
   security_policy = google_compute_region_security_policy.policynetworkmatch.name
   priority = 100
   network_match {

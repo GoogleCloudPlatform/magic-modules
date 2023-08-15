@@ -2,7 +2,7 @@
 resource "google_compute_region_security_policy" "policyddosprotection" {
   provider    = google-beta
 
-  region      = "asia-southeast1"
+  region      = "us-west2"
   name        = "policyddosprotection"
   description = "policy for activating network DDoS protection for the desired region"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -14,7 +14,7 @@ resource "google_compute_region_security_policy" "policyddosprotection" {
 resource "google_compute_network_edge_security_service" "edge_sec_service" {
   provider        = google-beta
 
-  region          = "asia-southeast1"
+  region          = "us-west2"
   name            = "edgesecservice"
   description     = "linking policy to edge security service"
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
@@ -24,7 +24,7 @@ resource "google_compute_network_edge_security_service" "edge_sec_service" {
 resource "google_compute_region_security_policy" "policynetworkmatch" {
   provider    = google-beta
 
-  region      = "asia-southeast1"
+  region      = "us-west2"
   name        = "<%= ctx[:vars]['sec_policy_name'] %>"
   description = "region security policy for network match"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -41,7 +41,7 @@ resource "google_compute_region_security_policy" "policynetworkmatch" {
 resource "google_compute_region_security_policy_rule" "<%= ctx[:primary_resource_id] %>" {
   provider        = google-beta
 
-  region          = "asia-southeast1"
+  region          = "us-west2"
   security_policy = google_compute_region_security_policy.policynetworkmatch.name
   description     = "custom rule for network match"
   priority        = 100
