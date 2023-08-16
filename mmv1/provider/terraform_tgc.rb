@@ -38,7 +38,7 @@ module Provider
     end
 
     def generate_object(object, output_folder, version_name, generate_code, generate_docs)
-      if object.exclude_validator
+      if object.exclude_tgc
         Google::LOGGER.info "Skipping fine-grained resource #{object.name}"
         return
       end
@@ -444,7 +444,7 @@ module Provider
     # Docs are generated for the terraform provider, not here.
     def generate_iam_policy(pwd, data, generate_code, _generate_docs)
       return unless generate_code
-      return if data.object.iam_policy.exclude_validator
+      return if data.object.iam_policy.exclude_tgc
 
       name = data.object.filename_override || data.object.name.underscore
       product_name = data.product.name.downcase
