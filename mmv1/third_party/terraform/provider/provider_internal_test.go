@@ -1187,8 +1187,9 @@ func TestProvider_ProviderConfigure_userProjectOverride(t *testing.T) {
 			},
 			ExpectedValue: false,
 		},
-		"user_project_override can be set by environment variable: true": {
+		"user_project_override can be set by environment variable: value = true": {
 			ConfigValues: map[string]interface{}{
+				// user_project_override not set
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
 			EnvVariables: map[string]string{
@@ -1196,8 +1197,9 @@ func TestProvider_ProviderConfigure_userProjectOverride(t *testing.T) {
 			},
 			ExpectedValue: true,
 		},
-		"user_project_override can be set by environment variable: false": {
+		"user_project_override can be set by environment variable: value = false": {
 			ConfigValues: map[string]interface{}{
+				// user_project_override not set
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
 			EnvVariables: map[string]string{
@@ -1205,8 +1207,9 @@ func TestProvider_ProviderConfigure_userProjectOverride(t *testing.T) {
 			},
 			ExpectedValue: false,
 		},
-		"user_project_override can be set by environment variable: 1": {
+		"user_project_override can be set by environment variable: value = 1": {
 			ConfigValues: map[string]interface{}{
+				// user_project_override not set
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
 			EnvVariables: map[string]string{
@@ -1214,8 +1217,9 @@ func TestProvider_ProviderConfigure_userProjectOverride(t *testing.T) {
 			},
 			ExpectedValue: true,
 		},
-		"user_project_override can be set by environment variable: 0": {
+		"user_project_override can be set by environment variable: value = 0": {
 			ConfigValues: map[string]interface{}{
+				// user_project_override not set
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
 			EnvVariables: map[string]string{
