@@ -219,14 +219,19 @@ properties:
               - !ruby/object:Api::Type::Map
                 name: inputArtifacts
                 description: |
-                  The runtime artifacts of the PipelineJob. The key will be the input artifact name and the value would be
-                  an Artifact resource id from MLMD. Which is the last portion of an artifact resource name:
-                  projects/{project}/locations/{location}/metadataStores/default/artifacts/{artifactId}.
-                  The artifact must stay within the same project, location and default metadatastore as the pipeline.
+                  The runtime artifacts of the PipelineJob. The key will be the input artifact name and the value
+                  would be one of the InputArtifact.
                 key_name: key
                 key_description: |
                   The name of the input artifact.
-                value_type: !ruby/object:Api::Type::String
+                value_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: artifactId
+                      description: |
+                        Artifact resource id from MLMD. Which is the last portion of an artifact resource name:
+                        projects/{project}/locations/{location}/metadataStores/default/artifacts/{artifactId}.
+                        The artifact must stay within the same project, location and default metadatastore as the pipeline.
                         
           - !ruby/object:Api::Type::String
             name: serviceAccount
