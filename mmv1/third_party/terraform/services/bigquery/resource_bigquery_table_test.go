@@ -1216,12 +1216,42 @@ resource "google_bigquery_table" "test" {
         "projects/%s/locations/us/taxonomies/123/policyTags/1"
       ]
     }
+  },
+  {
+    "name": "city",
+    "type": "RECORD",
+    "fields": [
+      {
+        "name": "id",
+        "type": "INTEGER",
+        "policyTags": {
+          "names": [
+            "projects/%s/locations/us/taxonomies/123/policyTags/1"
+          ]
+        }
+      },
+      {
+        "name": "coord",
+        "type": "RECORD",
+        "fields": [
+          {
+            "name": "lon",
+            "type": "FLOAT",
+            "policyTags": {
+              "names": [
+                "projects/%s/locations/us/taxonomies/123/policyTags/1"
+              ]
+            }
+          }
+        ]
+      }
+    ]
   }
 ]
 EOH
 
 }
-`, datasetID, tableID, projectID)
+`, datasetID, tableID, projectID, projectID, projectID)
 }
 
 func testAccBigQueryTableBasicSchemaWithEmptyPolicyTags(datasetID, tableID string) string {
