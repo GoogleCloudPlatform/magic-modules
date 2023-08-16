@@ -901,6 +901,7 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 		},
 		"if batch is configured with only enable_batching": {
 			ConfigValues: map[string]interface{}{
+				"credentials": transport_tpg.TestFakeCredentialsPath,
 				"batching": []interface{}{
 					map[string]interface{}{
 						"enable_batching": true,
