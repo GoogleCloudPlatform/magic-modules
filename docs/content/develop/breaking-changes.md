@@ -73,6 +73,7 @@ For more information, see
 * Removing diff suppression from a field.
   * For MMv1 resources, removing `diff_suppress_func` from a field.
   * For handwritten resources, removing `DiffSuppressFunc` from a field.
+* Removing update support from a field.
 
 ### Making validation more strict
 
