@@ -213,7 +213,7 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     datasource, after creation the computed schema will be stored in
     `google_bigquery_table.schema`
 
-    ~>**NOTE:** If you specify `external_data_configuration.connection_id`,
+    ~>**NOTE:** If you set `external_data_configuration.connection_id`, the table schema must be specified using the top-level `schema` field [documented above](#schema).
     Do not use `external_data_configuration.schema` to specify schemas.
     Doing so will return an 400 error. Instead use the top-level
     `google_bigquery_table.schema` field.
