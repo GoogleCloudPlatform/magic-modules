@@ -36,7 +36,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_reservation_bi_reservation_basic'
     pull_external: true
-    skip_docs: true
     primary_resource_id: 'reservation'
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_reservation_bi_reservation_full'
@@ -78,16 +77,13 @@ properties:
       properties:
         - !ruby/object:Api::Type::String
           name: 'projectId'
-          required: true
           description: |
             The assigned project ID of the project.
         - !ruby/object:Api::Type::String
           name: 'datasetId'
-          required: true
           description: |
             The ID of the dataset in the above project.
         - !ruby/object:Api::Type::String
           name: 'tableId'
-          required: true
           description: |
             The ID of the table in the above dataset.

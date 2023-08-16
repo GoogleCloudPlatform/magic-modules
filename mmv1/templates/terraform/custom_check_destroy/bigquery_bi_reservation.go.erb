@@ -1,7 +1,7 @@
 // BI reservation is a singleton resource and can't be deleted.
 // We will check if the reservation info has been cleared
 
-config := GoogleProviderConfig(t)
+config := acctest.GoogleProviderConfig(t)
 
 url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{BigqueryReservationBasePath}}projects/{{project}}/locations/{{location}}/biReservation")
 if err != nil {
