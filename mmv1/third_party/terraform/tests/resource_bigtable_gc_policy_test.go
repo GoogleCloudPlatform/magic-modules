@@ -174,7 +174,7 @@ func TestAccBigtableGCPolicy_gcRulesPolicy(t *testing.T) {
 	familyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	gcRulesOriginal := "{\"mode\":\"intersection\",\"rules\":[{\"max_age\":\"10h\"},{\"max_version\":2}]}"
-	gcRulesUpdate := "{\"mode\":\"intersection\",\"rules\":[{\"max_age\":\"1d16h\"},{\"max_version\":1}]}"
+	gcRulesUpdate := "{\"mode\":\"intersection\",\"rules\":[{\"max_age\":\"40h\"},{\"max_version\":1}]}"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

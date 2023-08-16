@@ -24,6 +24,8 @@ const (
 )
 
 func resourceBigtableGCPolicyCustomizeDiffFunc(diff tpgresource.TerraformResourceDiff) error {
+	oldRules, newRules := diff.GetChange("gc_rules")
+	fmt.Printf(fmt.Sprintf("old: %v, new: %v\n", oldRules, newRules))
 	count := diff.Get("max_age.#").(int)
 	if count < 1 {
 		return nil
@@ -53,7 +55,6 @@ func resourceBigtableGCPolicyCustomizeDiffFunc(diff tpgresource.TerraformResourc
 			}
 		}
 	}
-	panic(fmt.Sprintf("oldDays: %s, newDays: %s, oldDuration: %s, newDuration: %s", oldDays, newDays, oldDuration, newDuration))
 
 	return nil
 }
