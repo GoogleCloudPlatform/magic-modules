@@ -13,30 +13,31 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/cai"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 	"google.golang.org/api/storage/v1"
 )
 
 const StorageBucketAssetType string = "storage.googleapis.com/Bucket"
 
-func resourceConverterStorageBucket() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func resourceConverterStorageBucket() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType: StorageBucketAssetType,
 		Convert:   GetStorageBucketCaiObject,
 	}
 }
 
-func GetStorageBucketCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	name, err := tpgresource.AssetName(d, config, "//storage.googleapis.com/{{name}}")
+func GetStorageBucketCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	name, err := cai.AssetName(d, config, "//storage.googleapis.com/{{name}}")
 	if err != nil {
-		return []tpgresource.Asset{}, err
+		return []cai.Asset{}, err
 	}
 	if obj, err := GetStorageBucketApiObject(d, config); err == nil {
-		return []tpgresource.Asset{{
+		return []cai.Asset{{
 			Name: name,
 			Type: StorageBucketAssetType,
-			Resource: &tpgresource.AssetResource{
+			Resource: &cai.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/storage/v1/rest",
 				DiscoveryName:        "Bucket",
@@ -44,7 +45,7 @@ func GetStorageBucketCaiObject(d tpgresource.TerraformResourceData, config *tran
 			},
 		}}, nil
 	} else {
-		return []tpgresource.Asset{}, err
+		return []cai.Asset{}, err
 	}
 }
 
@@ -105,7 +106,7 @@ func GetStorageBucketApiObject(d tpgresource.TerraformResourceData, config *tran
 		}
 	}
 
-	m, err := tpgresource.JsonMap(sb)
+	m, err := cai.JsonMap(sb)
 	if err != nil {
 		return nil, err
 	}
