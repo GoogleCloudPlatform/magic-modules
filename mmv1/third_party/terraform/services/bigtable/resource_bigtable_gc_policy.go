@@ -53,6 +53,7 @@ func resourceBigtableGCPolicyCustomizeDiffFunc(diff tpgresource.TerraformResourc
 			}
 		}
 	}
+	panic(fmt.Sprintf("oldDays: %s, newDays: %s, oldDuration: %s, newDuration: %s", oldDays, newDays, oldDuration, newDuration))
 
 	return nil
 }
@@ -554,6 +555,10 @@ func validateNestedPolicy(p map[string]interface{}, isTopLevel bool) error {
 
 	if modeOk && len(rules) < 2 {
 		return fmt.Errorf("`rules` need at least 2 GC rule when mode is specified")
+	}
+	
+	if isTopLevel && !modeOk && !rulesOk{
+		return nil
 	}
 
 	if isTopLevel && !rulesOk {
