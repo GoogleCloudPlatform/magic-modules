@@ -3,7 +3,6 @@ package compute_test
 <% unless version == 'ga' -%>
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -12,14 +11,9 @@ import (
 )
 
 func TestAccComputeTargetInstance_withSecurityPolicy(t *testing.T) {
-	net := fmt.Sprintf("tf-test-up-pol-net%s", acctest.RandString(t, 10))
-	subnet := fmt.Sprintf("tf-test-up-pol-subnet%s", acctest.RandString(t, 10))
-	instance := fmt.Sprintf("tf-test-up-pol-target-vm%s", acctest.RandString(t, 10))
-	ddosPolicy := fmt.Sprintf("tf-test-up-pol-policyddos%s", acctest.RandString(t, 10))
-	edgeService := fmt.Sprintf("tf-test-up-pol-edgesec%s", acctest.RandString(t, 10))
-	pol1 := fmt.Sprintf("tf-test-up-pol-region-secpolicy1%s", acctest.RandString(t, 10))
-	pol2 := fmt.Sprintf("tf-test-up-pol-region-secpolicy2%s", acctest.RandString(t, 10))
-	targetInstance := fmt.Sprintf("tf-test-up-pol-target-instance%s", acctest.RandString(t, 10))
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -27,7 +21,7 @@ func TestAccComputeTargetInstance_withSecurityPolicy(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeTargetInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeTargetInstance_withSecurityPolicy(net, subnet, instance, ddosPolicy, edgeService, pol1, pol2, targetInstance, "google_compute_region_security_policy.regionsecuritypolicy1.self_link"),
+				Config: testAccComputeTargetInstance_withSecurityPolicy(context, "google_compute_region_security_policy.regionsecuritypolicy1.self_link", true),
 			},
 			{
 				ResourceName:            "google_compute_target_instance.default",
@@ -36,7 +30,7 @@ func TestAccComputeTargetInstance_withSecurityPolicy(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"instance", "zone"},
 			},
 			{
-				Config: testAccComputeTargetInstance_withSecurityPolicy(net, subnet, instance, ddosPolicy, edgeService, pol1, pol2, targetInstance, "google_compute_region_security_policy.regionsecuritypolicy2.self_link"),
+				Config: testAccComputeTargetInstance_withSecurityPolicy(context, "google_compute_region_security_policy.regionsecuritypolicy2.self_link", true),
 			},
 			{
 				ResourceName:            "google_compute_target_instance.default",
@@ -45,35 +39,47 @@ func TestAccComputeTargetInstance_withSecurityPolicy(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"instance", "zone"},
 			},
 			{
-				Config: testAccComputeTargetInstance_withSecurityPolicy(net, subnet, instance, ddosPolicy, edgeService, pol1, pol2, targetInstance, "\"\""),
+				Config: testAccComputeTargetInstance_withSecurityPolicy(context, "\"\"", true),
 			},
 			{
 				ResourceName:            "google_compute_target_instance.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"instance", "zone"},
+			},
+			{
+				Config: testAccComputeTargetInstance_withSecurityPolicy(context, "\"\"", false),
 			},
 		},
 	})
 }
 
-func testAccComputeTargetInstance_withSecurityPolicy(net, subnet, instance, ddosPolicy, edgeService, pol1, pol2, targetInstance, policySet string) string {
-	return fmt.Sprintf(`
+func testAccComputeTargetInstance_withSecurityPolicy(context map[string]interface{}, policySet string, preventDestroy bool) string {
+	context["policy_set"] = policySet
+	context["lifecycle_block"] = ""
+	if preventDestroy {
+		context["lifecycle_block"] = `
+		lifecycle {
+			prevent_destroy = true
+		}`
+	}
+
+	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
   provider                = google-beta
-  name                    = "%s"
+  name                    = "tf-test-up-pol-net%{random_suffix}"
   auto_create_subnetworks = false
   routing_mode            = "REGIONAL"
 }
       
 resource "google_compute_subnetwork" "default" {
   provider                   = google-beta
-  name                       = "%s"
+  name                       = "tf-test-up-pol-subnet%{random_suffix}"
   ip_cidr_range              = "10.1.2.0/24"
   network                    = google_compute_network.default.id
   private_ipv6_google_access = "DISABLE_GOOGLE_ACCESS"
   purpose                    = "PRIVATE"
-  region                     = "us-east1"
+  region                     = "southamerica-east1"
   stack_type                 = "IPV4_ONLY"
 }
 
@@ -85,9 +91,9 @@ data "google_compute_image" "vmimage" {
 
 resource "google_compute_instance" "target-vm" {
   provider     = google-beta
-  name         = "%s"
+  name         = "tf-test-up-pol-target-vm%{random_suffix}"
   machine_type = "e2-medium"
-  zone         = "us-east1-b"
+  zone         = "southamerica-east1-a"
 
   boot_disk {
     initialize_params {
@@ -105,8 +111,8 @@ resource "google_compute_instance" "target-vm" {
 
 resource "google_compute_region_security_policy" "policyddosprotection" {
   provider    = google-beta
-  region      = "us-east1"
-  name        = "%s"
+  region      = "southamerica-east1"
+  name        = "tf-test-up-pol-policyddos%{random_suffix}"
   description = "ddos protection security policy to set target instance"
   type        = "CLOUD_ARMOR_NETWORK"
   ddos_protection_config {
@@ -116,15 +122,15 @@ resource "google_compute_region_security_policy" "policyddosprotection" {
 
 resource "google_compute_network_edge_security_service" "edge_sec_service" {
   provider        = google-beta
-  region          = "us-east1"
-  name            = "%s"
+  region          = "southamerica-east1"
+  name            = "tf-test-up-pol-edgesec%{random_suffix}"
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
 }
 
 resource "google_compute_region_security_policy" "regionsecuritypolicy1" {
   provider    = google-beta
-  name        = "%s"
-  region      = "us-east1"
+  name        = "tf-test-up-pol-region-secpolicy1%{random_suffix}"
+  region      = "southamerica-east1"
   description = "basic security policy one for target instance"
   type        = "CLOUD_ARMOR_NETWORK"
   depends_on  = [google_compute_network_edge_security_service.edge_sec_service]
@@ -132,8 +138,8 @@ resource "google_compute_region_security_policy" "regionsecuritypolicy1" {
 
 resource "google_compute_region_security_policy" "regionsecuritypolicy2" {
   provider    = google-beta
-  name        = "%s"
-  region      = "us-east1"
+  name        = "tf-test-up-pol-region-secpolicy2%{random_suffix}"
+  region      = "southamerica-east1"
   description = "basic security policy two for target instance"
   type        = "CLOUD_ARMOR_NETWORK"
   depends_on  = [google_compute_network_edge_security_service.edge_sec_service]
@@ -141,11 +147,12 @@ resource "google_compute_region_security_policy" "regionsecuritypolicy2" {
 
 resource "google_compute_target_instance" "default" {
   provider        = google-beta
-  name            = "%s"
-  zone            = "us-east1-b"
+  name            = "tf-test-up-pol-target-instance%{random_suffix}"
+  zone            = "southamerica-east1-a"
   instance        = google_compute_instance.target-vm.id
-  security_policy = %s
+  security_policy = %{policy_set}
+  %{lifecycle_block}
 }
-`, net, subnet, instance, ddosPolicy, edgeService, pol1, pol2, targetInstance, policySet)
+`, context)
 }
 <% end -%>
