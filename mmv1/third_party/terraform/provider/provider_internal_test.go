@@ -812,6 +812,10 @@ func TestProvider_providerConfigure_requestReason(t *testing.T) {
 			ExpectedConfigValue: "request test",
 		},
 		"when no request_reason is provided via config or environment variables, the field remains unset without error": {
+			ConfigValues: map[string]interface{}{
+				// request_reason unset
+				"credentials": transport_tpg.TestFakeCredentialsPath,
+			},
 			ExpectedConfigValue: "",
 		},
 	}
