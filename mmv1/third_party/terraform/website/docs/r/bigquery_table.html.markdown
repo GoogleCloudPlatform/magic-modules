@@ -124,14 +124,11 @@ The following arguments are supported:
     field type, we currently cannot suppress the recurring diff this causes.
     As a workaround, we recommend using the schema as returned by the API.
 
-    ~>**NOTE:**  If you use `external_data_configuration` and do **not** set `external_data_configuration.connection_id`, schemas must be specified with `external_data_configuration.schema`. Otherwise, schemas must be specified with this top-level field.
-    [documented below](#nested_external_data_configuration), please note that
-    schemas should be specifed in `external_data_configuration.schema`,
-    and not this Table level `schema`.
-    However, if `external_data_configuration.connection_id` is specified,
-    please use this Table level `schema`, and NOT
-    `external_data_configuration.schema`.
-    Doing so will return a 400 error code.
+    ~>**NOTE:**  If you use `external_data_configuration`
+    [documented below](#nested_external_data_configuration) and do **not** set
+    `external_data_configuration.connection_id`, schemas must be specified
+    with `external_data_configuration.schema`. Otherwise, schemas must be
+    specified with this top-level field.
 
 * `time_partitioning` - (Optional) If specified, configures time-based
     partitioning for this table. Structure is [documented below](#nested_time_partitioning).
@@ -165,10 +162,9 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     the form `{{project}}.{{location}}.{{connection_id}}`
     or `projects/{{project}}/locations/{{location}}/connections/{{connection_id}}`.
 
-    ~>**NOTE:** If you set `external_data_configuration.connection_id`, the table schema must be specified using the top-level `schema` field [documented above](#schema).
-    `external_data_configuration.schema` to specify schemas. Doing so will
-    return an 400 error. Instead use the top-level
-    `google_bigquery_table.schema` field.
+    ~>**NOTE:** If you set `external_data_configuration.connection_id`, the
+    table schema must be specified using the top-level `schema` field
+    [documented above](#schema).
 
 * `csv_options` (Optional) - Additional properties to set if
     `source_format` is set to "CSV". Structure is [documented below](#nested_csv_options).
@@ -188,7 +184,7 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     partitioning on an unsupported format will lead to an error, as will providing
     an invalid specification. Structure is [documented below](#nested_hive_partitioning_options).
 
-* `avro_options` (Optional) - Additional options if `source_format` is set to  
+* `avro_options` (Optional) - Additional options if `source_format` is set to
     "AVRO".  Structure is [documented below](#nested_avro_options).
 
 * `ignore_unknown_values` (Optional) - Indicates if BigQuery should
@@ -213,10 +209,9 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     datasource, after creation the computed schema will be stored in
     `google_bigquery_table.schema`
 
-    ~>**NOTE:** If you set `external_data_configuration.connection_id`, the table schema must be specified using the top-level `schema` field [documented above](#schema).
-    Do not use `external_data_configuration.schema` to specify schemas.
-    Doing so will return an 400 error. Instead use the top-level
-    `google_bigquery_table.schema` field.
+    ~>**NOTE:** If you set `external_data_configuration.connection_id`, the
+    table schema must be specified using the top-level `schema` field
+    [documented above](#schema).
 
 * `source_format` (Optional) - The data format. Please see sourceFormat under
     [ExternalDataConfiguration](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#externaldataconfiguration)
@@ -302,8 +297,8 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 <a name="nested_avro_options"></a>The `avro_options` block supports:
 
-* `use_avro_logical_types` (Optional) - If is set to true, indicates whether  
-    to interpret logical types as the corresponding BigQuery data type  
+* `use_avro_logical_types` (Optional) - If is set to true, indicates whether
+    to interpret logical types as the corresponding BigQuery data type
     (for example, TIMESTAMP), instead of using the raw type (for example, INTEGER).
 
 <a name="nested_parquet_options"></a>The `parquet_options` block supports:
