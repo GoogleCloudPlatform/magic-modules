@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"reflect"
 	"strings"
 	"time"
 
@@ -24,8 +25,6 @@ const (
 )
 
 func resourceBigtableGCPolicyCustomizeDiffFunc(diff tpgresource.TerraformResourceDiff) error {
-	oldRules, newRules := diff.GetChange("gc_rules")
-	fmt.Printf(fmt.Sprintf("old: %v, new: %v\n", oldRules, newRules))
 	count := diff.Get("max_age.#").(int)
 	if count < 1 {
 		return nil
@@ -57,6 +56,36 @@ func resourceBigtableGCPolicyCustomizeDiffFunc(diff tpgresource.TerraformResourc
 	}
 
 	return nil
+}
+func handleGCRulesDiffs(oldRules, newRules interface{}) bool {
+	var oldPolicyRaw map[string]interface{}
+	if err := json.Unmarshal([]byte(oldRules.(string)), &oldPolicyRaw); err != nil {
+		return false
+	}
+	oldPolicy, err := getGCPolicyFromJSON(oldPolicyRaw /*isTopLevel=*/, true)
+	if err != nil {
+		return false
+	}
+	var newPolicyRaw map[string]interface{}
+	if err := json.Unmarshal([]byte(newRules.(string)), &newPolicyRaw); err != nil {
+		return false
+	}
+	newPolicy, err := getGCPolicyFromJSON(newPolicyRaw /*isTopLevel=*/, true)
+	if err != nil {
+		return false
+	}
+	oldPolicyString, err := GcPolicyToGCRuleString(oldPolicy /*isTopLevel=*/, true)
+	if err != nil {
+		return false
+	}
+	newPolicyString, err := GcPolicyToGCRuleString(newPolicy /*isTopLevel=*/, true)
+	if err != nil {
+		return false
+	}
+	if reflect.DeepEqual(oldPolicyString, newPolicyString) {
+		return true
+	}
+	return false
 }
 
 func resourceBigtableGCPolicyCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
@@ -108,6 +137,9 @@ func ResourceBigtableGCPolicy() *schema.Resource {
 				StateFunc: func(v interface{}) string {
 					json, _ := structure.NormalizeJsonString(v)
 					return json
+				},
+				DiffSuppressFunc: func(k, old, new string, _ *schema.ResourceData) bool {
+					return handleGCRulesDiffs(old, new)
 				},
 			},
 			"mode": {
@@ -557,8 +589,8 @@ func validateNestedPolicy(p map[string]interface{}, isTopLevel bool) error {
 	if modeOk && len(rules) < 2 {
 		return fmt.Errorf("`rules` need at least 2 GC rule when mode is specified")
 	}
-	
-	if isTopLevel && !modeOk && !rulesOk{
+
+	if isTopLevel && !modeOk && !rulesOk {
 		return nil
 	}
 
