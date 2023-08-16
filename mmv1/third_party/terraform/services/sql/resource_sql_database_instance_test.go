@@ -789,6 +789,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(t 
 	t.Parallel()
 
 	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	project_id := "psctestproject" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -796,7 +797,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(t 
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName),
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName, project_id),
 				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil)),
 			},
 			{
@@ -2601,9 +2602,15 @@ resource "google_sql_database_instance" "instance" {
 `, instanceName)
 }
 
-func testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName string) string {
+func testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName string, project_id string) string {
 	return fmt.Sprintf(`
+resource "google_project" "testproject" {
+  name                = "%s"
+  project_id          = "%s"
+}
+
 resource "google_sql_database_instance" "instance" {
+  project             = google_project.testproject.project_id
   name                = "%s"
   region              = "us-central1"
   database_version    = "MYSQL_8_0"
@@ -2623,7 +2630,7 @@ resource "google_sql_database_instance" "instance" {
 	availability_type = "REGIONAL"
   }
 }
-`, instanceName)
+`, project_id, project_id, instanceName)
 }
 
 func testAccSqlDatabaseInstance_withPSCEnabled_withEmptyAllowedConsumerProjects(instanceName string) string {
