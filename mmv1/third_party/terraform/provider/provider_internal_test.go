@@ -708,6 +708,7 @@ func TestProvider_providerConfigure_requestTimeout(t *testing.T) {
 		"if an invalid request_timeout is configured in the provider, an error will occur": {
 			ConfigValues: map[string]interface{}{
 				"request_timeout": "timeout",
+				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
 			ExpectedValue:       "timeout",
 			ExpectedSchemaValue: "timeout",
