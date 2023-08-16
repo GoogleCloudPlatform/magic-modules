@@ -14,7 +14,6 @@ Creates a table resource in a dataset for Google BigQuery. For more information 
 (and run `terraform apply` to write the field to state) in order to destroy an instance.
 It is recommended to not set this field (or set it to true) until you're ready to destroy.
 
-
 ## Example Usage
 
 ```hcl
@@ -115,9 +114,7 @@ The following arguments are supported:
 
 * `labels` - (Optional) A mapping of labels to assign to the resource.
 
-<a name="schema"></a>
-
-* `schema` - (Optional) A JSON schema for the table.
+* <a name="schema"></a>`schema` - (Optional) A JSON schema for the table.
 
     ~>**NOTE:** Because this field expects a JSON string, any changes to the
     string will create a diff, even if the JSON itself hasn't changed.
