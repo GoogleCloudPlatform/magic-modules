@@ -165,7 +165,7 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     the form `{{project}}.{{location}}.{{connection_id}}`
     or `projects/{{project}}/locations/{{location}}/connections/{{connection_id}}`.
 
-    ~>**NOTE:** If you specify `connection_id`, Do not use
+    ~>**NOTE:** If you set `external_data_configuration.connection_id`, the table schema must be specified using the top-level `schema` field [documented above](#schema).
     `external_data_configuration.schema` to specify schemas. Doing so will
     return an 400 error. Instead use the top-level
     `google_bigquery_table.schema` field.
