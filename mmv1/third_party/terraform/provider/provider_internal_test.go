@@ -799,6 +799,7 @@ func TestProvider_providerConfigure_requestReason(t *testing.T) {
 		"request_reason set in the config is not overridden by environment variables": {
 			ConfigValues: map[string]interface{}{
 				"request_reason": "request test",
+				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
 			EnvVariables: map[string]string{
 				"CLOUDSDK_CORE_REQUEST_REASON": "test",
