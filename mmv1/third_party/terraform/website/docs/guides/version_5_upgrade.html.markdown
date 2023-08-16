@@ -204,40 +204,9 @@ enable endpoint independent mapping, then explicity set the value of
 
 ### `google_firebase_project_location` is now removed
 
-In `4.X`, `google_firebase_project_location` would implicitly trigger creation of an App Engine application with a default Cloud Storage bucket and Firestore database, located in the specified `location_id`. With `5.0.0`, these resources should instead be set up explicitly.
+In `4.X`, `google_firebase_project_location` would implicitly trigger creation of an App Engine application with a default Cloud Storage bucket and Firestore database, located in the specified `location_id`. In `5.0.0`, these resources should instead be set up explicitly using `google_app_engine_application` `google_firebase_storage_bucket`, and `google_firestore_database`.
 
-- If you only used `google_firebase_project_location` to create a default Storage bucket, 
-  instead, use `google_firebase_storage_bucket` and `google_app_engine_application` like so
-```hcl
-# Provisions the default Cloud Storage bucket for the project via Google App Engine.
-resource "google_app_engine_application" "default" {
-  provider    = google-beta
-  project     = google_firebase_project.default.project
-  # See available locations: https://firebase.google.com/docs/projects/locations#default-cloud-location
-  # This will set the location for the default Storage bucket and the App Engine App.
-  location_id = "name-of-region-for-default-bucket"
-
-  # If you use Firestore, uncomment this to make sure Firestore is provisioned first.
-  # depends_on = [
-    # google_firestore_database.firestore
-  # ]
-}
-
-# Makes the default Storage bucket accessible for Firebase SDKs, authentication, and Firebase Security Rules.
-resource "google_firebase_storage_bucket" "default-bucket" {
-  provider  = google-beta
-  project   = google_firebase_project.default.project
-  bucket_id = google_app_engine_application.default.default_bucket
-}
-```
-- If you only used `google_firebase_project_location` to create a Firestore instance, use
-  `google_firestore_database` instead and specify the location in the resource block.
-- If you use `google_firebase_project_location` for both a default Storage bucket and Firestore:
-  - Set `database_type = "CLOUD_FIRESTORE"` in your `google_app_engine_application`
-  - Add the `google_firestore_database` resource to the `depends_on` block in `google_app_engine_application`
-- If you use App Engine intentinally, make sure `google_app_engine_application` and `google_firestore_database`
-  are in compatible locations. A quick way to test is to create `google_firestore_database` first, and
-  `google_app_engine_application` will fail if it's in an incompatible location.
+For more information on configuring Firebase resources with Terraform, see [Get started with Terraform and Firebase](https://firebase.google.com/docs/projects/terraform/get-started).
 
 #### Upgrade instructions
 
@@ -289,8 +258,6 @@ resource "google_firestore_database" "default" {
   type        = "FIRESTORE_NATIVE"
 }
 ```
-
-For more information on configuring Firebase resources with Terraform, see [Get started with Terraform and Firebase](https://firebase.google.com/docs/projects/terraform/get-started).
 
 ## Resource: `google_firebase_web_app`
 
