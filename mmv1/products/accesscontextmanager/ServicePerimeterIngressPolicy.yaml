@@ -39,7 +39,7 @@ description: |
   Individual ingress policies can be limited by restricting which services and/
   or actions they match using the ingressTo field.
 autogen_async: true
-exclude_validator: true
+exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
 skip_sweeper: true
 id_format: '{{perimeter}}'

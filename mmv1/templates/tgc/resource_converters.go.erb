@@ -96,12 +96,12 @@ func ResourceConverters() map[string][]tpgresource.ResourceConverter {
         <% products.each do |product| -%>
             <% (product[:definitions].objects || []).each do |object| -%>
                 <% if object.min_version.name == "ga" -%>
-                    <% if !object.exclude && !object.exclude_validator -%>
+                    <% if !object.exclude && !object.exclude_tgc -%>
 						<% tf_product = (object.__product.legacy_name || object.__product.name).underscore -%>
 						<% terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}" -%>
                         <% cai_name =  object.__product.name + object.name -%>
 						<% service = product[:definitions].name.downcase -%>
-                        <% if (!object.iam_policy.nil?) && (!object.iam_policy.exclude) && (!object.iam_policy.exclude_validator) -%>
+                        <% if (!object.iam_policy.nil?) && (!object.iam_policy.exclude) && (!object.iam_policy.exclude_tgc) -%>
                             "<%= terraform_name -%>_iam_policy": {<%= service -%>.ResourceConverter<%= cai_name -%>IamPolicy()},
                             "<%= terraform_name -%>_iam_binding": {<%= service -%>.ResourceConverter<%= cai_name -%>IamBinding()},
                             "<%= terraform_name -%>_iam_member": {<%= service -%>.ResourceConverter<%= cai_name -%>IamMember()},
