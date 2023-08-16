@@ -124,7 +124,7 @@ The following arguments are supported:
     field type, we currently cannot suppress the recurring diff this causes.
     As a workaround, we recommend using the schema as returned by the API.
 
-    ~>**NOTE:**  If you are working with `external_data_configuration`
+    ~>**NOTE:**  If you use `external_data_configuration` and do **not** set `external_data_configuration.connection_id`, schemas must be specified with `external_data_configuration.schema`. Otherwise, schemas must be specified with this top-level field.
     [documented below](#nested_external_data_configuration), please note that
     schemas should be specifed in `external_data_configuration.schema`,
     and not this Table level `schema`.
