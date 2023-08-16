@@ -364,13 +364,6 @@ func TestProvider_ProviderConfigure_accessToken(t *testing.T) {
 			ExpectedSchemaValue: "",
 			ExpectedConfigValue: "value-from-GOOGLE_OAUTH_ACCESS_TOKEN",
 		},
-		// Error states
-		"access_token cannot be set at the same time as credentials": {
-			ConfigValues: map[string]interface{}{
-				"access_token": "",
-				"credentials":  "", // TODO
-			},
-		},
 	}
 
 	for tn, tc := range cases {
