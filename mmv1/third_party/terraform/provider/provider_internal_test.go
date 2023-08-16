@@ -790,6 +790,10 @@ func TestProvider_providerConfigure_requestReason(t *testing.T) {
 		ExpectedConfigValue string
 	}{
 		"when request_reason is unset in the config, environment variable CLOUDSDK_CORE_REQUEST_REASON is used": {
+			ConfigValues: map[string]interface{}{
+				// request_reason unset
+				"credentials": transport_tpg.TestFakeCredentialsPath,
+			},
 			EnvVariables: map[string]string{
 				"CLOUDSDK_CORE_REQUEST_REASON": "test",
 			},
