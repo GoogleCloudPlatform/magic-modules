@@ -28,7 +28,7 @@ description: |
 
   A bucket is always owned by the project team owners group.
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude_validator: true
+  exclude_tgc: true
   allowed_iam_role: 'roles/storage.objectViewer'
   admin_iam_role: 'roles/storage.admin'
   parent_resource_attribute: 'bucket'

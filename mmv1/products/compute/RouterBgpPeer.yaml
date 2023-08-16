@@ -52,7 +52,7 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 legacy_name: 'google_compute_router_peer'
-exclude_validator: true
+exclude_tgc: true
 id_format: 'projects/{{project}}/regions/{{region}}/routers/{{router}}/{{name}}'
 mutex: router/{{region}}/{{router}}
 custom_code: !ruby/object:Provider::Terraform::CustomCode
