@@ -101,7 +101,7 @@ properties:
     description: |
       Whether to backfill missed runs when the schedule is resumed from PAUSED state.
       If set to true, all missed runs will be scheduled. New runs will be scheduled after the
-      backfill is complete. This will also update Schedule.catch_up field. Default to false.
+      backfill is complete. Default to false.
     required: false
     default_from_api: true
   - !ruby/object:Api::Type::Integer
@@ -117,12 +117,6 @@ properties:
       Whether new scheduled runs can be queued when max_concurrent_runs
       limit is reached. If set to true, new runs will be queued instead of skipped.
       Default to false.
-  # - !ruby/object:Api::Type::Boolean
-  #   name: catchUp
-  #   description: |
-  #     Whether to backfill missed runs when the schedule is resumed from
-  #     PAUSED state. If set to true, all missed runs will be scheduled. New runs will
-  #     be scheduled after the backfill is complete. Default to false.
   - !ruby/object:Api::Type::NestedObject
     name: createPipelineJobRequest
     description: |
