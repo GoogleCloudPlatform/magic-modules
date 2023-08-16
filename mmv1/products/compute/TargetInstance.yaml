@@ -140,4 +140,5 @@ properties:
     min_version: beta
     description: |
       The resource URL for the security policy associated with this target instance.
-    immutable: true
+    update_url: projects/{{project}}/zones/{{zone}}/targetInstances/{{name}}/setSecurityPolicy
+    update_verb: :POST

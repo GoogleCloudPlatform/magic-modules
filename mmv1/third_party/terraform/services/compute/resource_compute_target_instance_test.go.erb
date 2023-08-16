@@ -1,0 +1,151 @@
+<% autogen_exception -%>
+package compute_test
+<% unless version == 'ga' -%>
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+)
+
+func TestAccComputeTargetInstance_withSecurityPolicy(t *testing.T) {
+	net := fmt.Sprintf("tf-test-up-pol-net%s", acctest.RandString(t, 10))
+	subnet := fmt.Sprintf("tf-test-up-pol-subnet%s", acctest.RandString(t, 10))
+	instance := fmt.Sprintf("tf-test-up-pol-target-vm%s", acctest.RandString(t, 10))
+	ddosPolicy := fmt.Sprintf("tf-test-up-pol-policyddos%s", acctest.RandString(t, 10))
+	edgeService := fmt.Sprintf("tf-test-up-pol-edgesec%s", acctest.RandString(t, 10))
+	pol1 := fmt.Sprintf("tf-test-up-pol-region-secpolicy1%s", acctest.RandString(t, 10))
+	pol2 := fmt.Sprintf("tf-test-up-pol-region-secpolicy2%s", acctest.RandString(t, 10))
+	targetInstance := fmt.Sprintf("tf-test-up-pol-target-instance%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeTargetInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeTargetInstance_withSecurityPolicy(net, subnet, instance, ddosPolicy, edgeService, pol1, pol2, targetInstance, "google_compute_region_security_policy.regionsecuritypolicy1.self_link"),
+			},
+			{
+				ResourceName:            "google_compute_target_instance.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"instance", "zone"},
+			},
+			{
+				Config: testAccComputeTargetInstance_withSecurityPolicy(net, subnet, instance, ddosPolicy, edgeService, pol1, pol2, targetInstance, "google_compute_region_security_policy.regionsecuritypolicy2.self_link"),
+			},
+			{
+				ResourceName:            "google_compute_target_instance.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"instance", "zone"},
+			},
+			{
+				Config: testAccComputeTargetInstance_withSecurityPolicy(net, subnet, instance, ddosPolicy, edgeService, pol1, pol2, targetInstance, "\"\""),
+			},
+			{
+				ResourceName:            "google_compute_target_instance.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"instance", "zone"},
+			},
+		},
+	})
+}
+
+func testAccComputeTargetInstance_withSecurityPolicy(net, subnet, instance, ddosPolicy, edgeService, pol1, pol2, targetInstance, policySet string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "default" {
+  provider                = google-beta
+  name                    = "%s"
+  auto_create_subnetworks = false
+  routing_mode            = "REGIONAL"
+}
+      
+resource "google_compute_subnetwork" "default" {
+  provider                   = google-beta
+  name                       = "%s"
+  ip_cidr_range              = "10.1.2.0/24"
+  network                    = google_compute_network.default.id
+  private_ipv6_google_access = "DISABLE_GOOGLE_ACCESS"
+  purpose                    = "PRIVATE"
+  region                     = "us-east1"
+  stack_type                 = "IPV4_ONLY"
+}
+
+data "google_compute_image" "vmimage" {
+  provider = google-beta
+  family   = "debian-11"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance" "target-vm" {
+  provider     = google-beta
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-east1-b"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.vmimage.self_link
+    }
+  }
+
+  network_interface {       
+    network = google_compute_network.default.self_link
+    subnetwork = google_compute_subnetwork.default.self_link
+    access_config {
+    }
+  }
+}
+
+resource "google_compute_region_security_policy" "policyddosprotection" {
+  provider    = google-beta
+  region      = "us-east1"
+  name        = "%s"
+  description = "ddos protection security policy to set target instance"
+  type        = "CLOUD_ARMOR_NETWORK"
+  ddos_protection_config {
+    ddos_protection = "ADVANCED_PREVIEW"
+  }
+}
+
+resource "google_compute_network_edge_security_service" "edge_sec_service" {
+  provider        = google-beta
+  region          = "us-east1"
+  name            = "%s"
+  security_policy = google_compute_region_security_policy.policyddosprotection.self_link
+}
+
+resource "google_compute_region_security_policy" "regionsecuritypolicy1" {
+  provider    = google-beta
+  name        = "%s"
+  region      = "us-east1"
+  description = "basic security policy one for target instance"
+  type        = "CLOUD_ARMOR_NETWORK"
+  depends_on  = [google_compute_network_edge_security_service.edge_sec_service]
+}
+
+resource "google_compute_region_security_policy" "regionsecuritypolicy2" {
+  provider    = google-beta
+  name        = "%s"
+  region      = "us-east1"
+  description = "basic security policy two for target instance"
+  type        = "CLOUD_ARMOR_NETWORK"
+  depends_on  = [google_compute_network_edge_security_service.edge_sec_service]
+}
+
+resource "google_compute_target_instance" "default" {
+  provider        = google-beta
+  name            = "%s"
+  zone            = "us-east1-b"
+  instance        = google_compute_instance.target-vm.id
+  security_policy = %s
+}
+`, net, subnet, instance, ddosPolicy, edgeService, pol1, pol2, targetInstance, policySet)
+}
+<% end -%>
