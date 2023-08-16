@@ -124,8 +124,14 @@ The following arguments are supported:
     field type, we currently cannot suppress the recurring diff this causes.
     As a workaround, we recommend using the schema as returned by the API.
 
-    ~>**NOTE:**  When setting `schema` for `external_data_configuration`, please use
-    `external_data_configuration.schema` [documented below](#nested_external_data_configuration).
+    ~>**NOTE:**  If you are working with `external_data_configuration`
+    [documented below](#nested_external_data_configuration), please note that
+    schemas should be specifed in `external_data_configuration.schema`,
+    and not this Table level `schema`.
+    However, if `external_data_configuration.connection_id` is specified,
+    please use this Table level `schema`, and NOT
+    `external_data_configuration.schema`.
+    Doing so will return a 400 error code.
 
 * `time_partitioning` - (Optional) If specified, configures time-based
     partitioning for this table. Structure is [documented below](#nested_time_partitioning).
@@ -158,6 +164,11 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     external storage, such as Azure Blob, Cloud Storage, or S3. The `connection_id` can have
     the form `{{project}}.{{location}}.{{connection_id}}`
     or `projects/{{project}}/locations/{{location}}/connections/{{connection_id}}`.
+
+    ~>**NOTE:** If you specify `connection_id`, Do not use
+    `external_data_configuration.schema` to specify schemas. Doing so will
+    return an 400 error. Instead use the top-level
+    `google_bigquery_table.schema` field.
 
 * `csv_options` (Optional) - Additional properties to set if
     `source_format` is set to "CSV". Structure is [documented below](#nested_csv_options).
@@ -201,6 +212,11 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     This schema is effectively only applied when creating a table from an external
     datasource, after creation the computed schema will be stored in
     `google_bigquery_table.schema`
+
+    ~>**NOTE:** If you specify `external_data_configuration.connection_id`,
+    Do not use `external_data_configuration.schema` to specify schemas.
+    Doing so will return an 400 error. Instead use the top-level
+    `google_bigquery_table.schema` field.
 
 * `source_format` (Optional) - The data format. Please see sourceFormat under
     [ExternalDataConfiguration](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#externaldataconfiguration)
