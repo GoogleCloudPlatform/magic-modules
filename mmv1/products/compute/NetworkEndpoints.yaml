@@ -60,7 +60,7 @@ id_format: '{{project}}/{{zone}}/{{network_endpoint_group}}/endpoints'
 import_format:
   - 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}'
 mutex: networkEndpoint/{{project}}/{{zone}}/{{network_endpoint_group}}
-exclude_validator: true
+exclude_tgc: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'network_endpoints'

@@ -252,9 +252,12 @@ properties:
     custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
   - !ruby/object:Api::Type::NestedObject
     name: 'privateVisibilityConfig'
+    at_least_one_of:
+      - gke_clusters
+      - networks
     description: |
       For privately visible zones, the set of Virtual Private Cloud
-      resources that the zone is visible from.
+      resources that the zone is visible from. At least one of `gke_clusters` or `networks` must be specified.
     send_empty_value: true
     custom_expand: 'templates/terraform/custom_expand/dns_managed_zone_private_visibility_config.go.erb'
     properties:
@@ -279,7 +282,6 @@ properties:
           add another `networks` block while keeping the old block, Terraform will see an incorrect diff
           and apply an incorrect update to the resource. If you encounter this issue, remove all `networks`
           blocks in an update and then apply another update adding all of them back simultaneously.
-        required: true
         is_set: true
         set_hash_func: |-
           func(v interface{}) int {

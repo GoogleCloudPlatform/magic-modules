@@ -80,7 +80,7 @@ For more information about types of resources and the generation process overall
 
    # Inserts styled markdown into the header of the resource's page in the
    # provider documentation.
-   # docs:
+   # docs: !ruby/object:Provider::Terraform::Docs
    #   warning: |
    #     MULTILINE_WARNING_MARKDOWN
    #   note: |
@@ -193,16 +193,22 @@ For more information about types of resources and the generation process overall
 3. From the beta provider, copy the files generated for the resource to the following locations:
    - Resource: Copy to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
    - Documentation: [`magic-modules/mmv1/third_party/terraform/website/docs/r`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r)
-   - Tests: [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests)
+   - Tests: Copy to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services), and remove `_generated` from the filename
    - Sweepers: [`magic-modules/mmv1/third_party/terraform/utils`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/utils)
 4. Modify the Go code as needed.
-   - Replace the comments at the top of the file with the following:
-     ```
-     <% autogen_exception -%>
-     ```
-   - If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.erb` and wrap the beta-only code in a version guard: `<% unless version = 'ga' -%>...<% else -%>...<% end -%>`.
+   - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
+   - Remove the `Example` suffix from all test function names.
+   - Remove the comments at the top of the file.
+   - If beta-only fields are being tested, do the following:
+     - Change the file suffix to `.go.erb`
+     - Add `<% autogen_exception -%>` to the top of the file
+     - Wrap each beta-only test in a separate version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`
 5. Register the resource in [`magic-modules/mmv1/third_party/terraform/utils/provider.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/utils/provider.go.erb) under "START handwritten resources"
    - Add a version guard for any beta-only resources.
+6. Optional: Complete other handwritten tasks that require the MMv1 configuration file.
+    - [Add resource tests]({{< ref "/develop/test.md" >}})
+    - [Add IAM support]({{<ref "#add-iam-support" >}})
+7. Delete the MMv1 configuration file.
 {{< /tab >}}
 {{< /tabs >}}
 
@@ -343,7 +349,7 @@ For more information about types of resources and the generation process overall
    - "Flatteners" convert API response data to Terraform resource data.
    - For top level fields, add a flattener. Call `d.Set()` on the flattened API response value to store it in Terraform state.
    - For other fields, add logic to the parent field's flattener to convert the value from the API response to the Terraform state value. Use a nested flattener for complex logic.
-4. If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.erb` and wrap the beta-only code in a version guard: `<% unless version = 'ga' -%>...<% else -%>...<% end -%>`.
+4. If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.erb` and wrap the beta-only code in a version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`.
    - Add a new guard rather than adding the field to an existing guard; it is easier to read.
 {{< /tab >}}
 {{< /tabs >}}
@@ -416,13 +422,14 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 2. From the beta provider, copy the files generated for the IAM resources to the following locations:
    - Resource: Copy to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
    - Documentation: [`magic-modules/mmv1/third_party/terraform/website/docs/r`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r)
-   - Tests: [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests)
+   - Tests: In the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
 3. Modify the Go code as needed.
-   - Replace the comments at the top of the file with the following:
-     ```
-     <% autogen_exception -%>
-     ```
-   - If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.erb` and wrap the beta-only code in a version guard: `<% unless version = 'ga' -%>...<% else -%>...<% end -%>`.
+   - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
+   - Remove the comments at the top of the file.
+   - If any of the added Go code is beta-only:
+     - Change the file suffix to `.go.erb`
+     - Add `<% autogen_exception -%>` to the top of the file
+     - Wrap each beta-only code block (including any imports) in a separate version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`
 4. Register the binding, member, and policy resources in [`magic-modules/mmv1/third_party/terraform/utils/provider.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/utils/provider.go.erb) under "START non-generated IAM resources"
    - Add a version guard for any beta-only resources.
 {{< /tab >}}
@@ -459,6 +466,5 @@ Documentation is autogenerated based on the resource and field configurations. T
 
 ## What's next?
 
-- [Add MMv1 tests]({{< ref "/develop/add-mmv1-test.md" >}})
-- [Add handwritten tests]({{< ref "/develop/add-handwritten-test.md" >}})
+- [Add tests]({{< ref "/develop/test.md" >}})
 - [Test your changes]({{< ref "/develop/run-tests.md" >}})
