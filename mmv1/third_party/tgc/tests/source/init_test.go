@@ -3,7 +3,6 @@ package test
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -210,7 +209,7 @@ func formatAncestryPath(s string) string {
 }
 
 func readExpectedTestFile(f string) ([]caiasset.Asset, error) {
-	payload, err := ioutil.ReadFile(f)
+	payload, err := os.ReadFile(f)
 	if err != nil {
 		return nil, fmt.Errorf("cannot open %s, got: %s", f, err)
 	}

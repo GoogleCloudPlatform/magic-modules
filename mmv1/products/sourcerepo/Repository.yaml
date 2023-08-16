@@ -25,7 +25,7 @@ collection_url_key: 'repos'
 description: |
   A repository (or repo) is a Git repository storing versioned source content.
 import_format: ['projects/{{project}}/repos/{{%name}}', '{{%name}}']
-exclude_validator: true
+exclude_tgc: true
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   parent_resource_attribute: 'repository'

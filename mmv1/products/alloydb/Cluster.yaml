@@ -283,6 +283,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'backupWindow'
+        default_from_api: true
         description: |
           The length of the time window during which a backup can be taken. If a backup does not succeed within this time window, it will be canceled and considered failed.
 
@@ -291,6 +292,7 @@ properties:
           A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
       - !ruby/object:Api::Type::String
         name: 'location'
+        default_from_api: true
         description: |
           The location where the backup will be stored. Currently, the only supported option is to store the backup in the same region as the cluster.
       - !ruby/object:Api::Type::KeyValuePairs
@@ -378,6 +380,7 @@ properties:
               The number of backups to retain.
       - !ruby/object:Api::Type::Boolean
         name: 'enabled'
+        default_from_api: true
         description: |
           Whether automated backups are enabled.
   - !ruby/object:Api::Type::NestedObject

@@ -52,8 +52,6 @@ function update_status {
     -d "$post_body"
 }
 
-update_status "pending"
-
 # for backwards-compatibility
 if [ -z "$BASE_BRANCH" ]; then
   BASE_BRANCH=main
@@ -97,6 +95,13 @@ export GOOGLE_TEST_DIRECTORY=$(go list ./... | grep -v github.com/hashicorp/terr
 echo "checking terraform version"
 terraform version
 
+go build $GOOGLE_TEST_DIRECTORY
+if [ $? != 0 ]; then
+  echo "Skipping tests: Build failure detected"
+  exit 1
+fi
+
+update_status "pending"
 
 TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test $GOOGLE_TEST_DIRECTORY -parallel $ACCTEST_PARALLELISM -v -run=TestAcc -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > replaying_test.log
 
@@ -292,7 +297,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
       # check for any uncaught errors in RECORDING mode
       comment+="$\textcolor{red}{\textsf{Errors occurred during RECORDING mode. Please fix them to complete your PR.}}$ ${NEWLINE}"
     else
-      comment+="$\textcolor{green}{\textsf{All tests passed!}} ${NEWLINE}"
+      comment+="$\textcolor{green}{\textsf{All tests passed!}}$ ${NEWLINE}"
     fi
   fi
 

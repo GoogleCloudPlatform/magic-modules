@@ -26,11 +26,6 @@
 <% end -%>
 <% end -%>
 
-<%  Dir["third_party/terraform/tests/*.go.erb"].each do |file_path|
-    fname = file_path.split('/')[-1]
--%>
-'<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/tests/<%= fname -%>'
-<% end -%>
 <%
   Dir["third_party/terraform/resources/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
@@ -97,6 +92,13 @@
     fname = file_path.split('/')[-1]
 -%>
 '<%= dir -%>/fwtransport/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/fwtransport/<%= fname -%>'
+<% end -%>
+
+<%
+  Dir["third_party/terraform/sweeper/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/sweeper/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/sweeper/<%= fname -%>'
 <% end -%>
 
 <%
