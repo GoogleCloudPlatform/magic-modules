@@ -1,10 +1,11 @@
-package tpgresource
+package cai
 
 import (
 	"regexp"
 	"testing"
 
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
 func TestAssetName(t *testing.T) {
@@ -12,7 +13,7 @@ func TestAssetName(t *testing.T) {
 		name            string
 		template        string
 		expectedPattern string
-		data            TerraformResourceData
+		data            tpgresource.TerraformResourceData
 	}{
 		{
 			name:            "PresentValues",
@@ -69,7 +70,7 @@ func TestRandString(t *testing.T) {
 
 type mockTerraformResourceData struct {
 	m map[string]interface{}
-	TerraformResourceData
+	tpgresource.TerraformResourceData
 }
 
 func (d *mockTerraformResourceData) GetOkExists(k string) (interface{}, bool) {

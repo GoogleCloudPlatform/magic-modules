@@ -3,24 +3,24 @@ package google
 import (
 	"fmt"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgiamresource"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/cai"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
 // Provide a separate asset type constant so we don't have to worry about name conflicts between IAM and non-IAM converter files
 const StorageBucketIAMAssetType string = "storage.googleapis.com/Bucket"
 
-func resourceConverterStorageBucketIamPolicy() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func resourceConverterStorageBucketIamPolicy() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType:         StorageBucketIAMAssetType,
 		Convert:           GetStorageBucketIamPolicyCaiObject,
 		MergeCreateUpdate: MergeStorageBucketIamPolicy,
 	}
 }
 
-func resourceConverterStorageBucketIamBinding() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func resourceConverterStorageBucketIamBinding() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType:         StorageBucketIAMAssetType,
 		Convert:           GetStorageBucketIamBindingCaiObject,
 		FetchFullResource: FetchStorageBucketIamPolicy,
@@ -29,8 +29,8 @@ func resourceConverterStorageBucketIamBinding() tpgresource.ResourceConverter {
 	}
 }
 
-func resourceConverterStorageBucketIamMember() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func resourceConverterStorageBucketIamMember() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType:         StorageBucketIAMAssetType,
 		Convert:           GetStorageBucketIamMemberCaiObject,
 		FetchFullResource: FetchStorageBucketIamPolicy,
@@ -39,70 +39,70 @@ func resourceConverterStorageBucketIamMember() tpgresource.ResourceConverter {
 	}
 }
 
-func GetStorageBucketIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	return newStorageBucketIamAsset(d, config, tpgiamresource.ExpandIamPolicyBindings)
+func GetStorageBucketIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	return newStorageBucketIamAsset(d, config, cai.ExpandIamPolicyBindings)
 }
 
-func GetStorageBucketIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	return newStorageBucketIamAsset(d, config, tpgiamresource.ExpandIamRoleBindings)
+func GetStorageBucketIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	return newStorageBucketIamAsset(d, config, cai.ExpandIamRoleBindings)
 }
 
-func GetStorageBucketIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	return newStorageBucketIamAsset(d, config, tpgiamresource.ExpandIamMemberBindings)
+func GetStorageBucketIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	return newStorageBucketIamAsset(d, config, cai.ExpandIamMemberBindings)
 }
 
-func MergeStorageBucketIamPolicy(existing, incoming tpgresource.Asset) tpgresource.Asset {
+func MergeStorageBucketIamPolicy(existing, incoming cai.Asset) cai.Asset {
 	existing.IAMPolicy = incoming.IAMPolicy
 	return existing
 }
 
-func MergeStorageBucketIamBinding(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeIamAssets(existing, incoming, tpgiamresource.MergeAuthoritativeBindings)
+func MergeStorageBucketIamBinding(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeIamAssets(existing, incoming, cai.MergeAuthoritativeBindings)
 }
 
-func MergeStorageBucketIamBindingDelete(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeDeleteIamAssets(existing, incoming, tpgiamresource.MergeDeleteAuthoritativeBindings)
+func MergeStorageBucketIamBindingDelete(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeDeleteIamAssets(existing, incoming, cai.MergeDeleteAuthoritativeBindings)
 }
 
-func MergeStorageBucketIamMember(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeIamAssets(existing, incoming, tpgiamresource.MergeAdditiveBindings)
+func MergeStorageBucketIamMember(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeIamAssets(existing, incoming, cai.MergeAdditiveBindings)
 }
 
-func MergeStorageBucketIamMemberDelete(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeDeleteIamAssets(existing, incoming, tpgiamresource.MergeDeleteAdditiveBindings)
+func MergeStorageBucketIamMemberDelete(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeDeleteIamAssets(existing, incoming, cai.MergeDeleteAdditiveBindings)
 }
 
 func newStorageBucketIamAsset(
 	d tpgresource.TerraformResourceData,
 	config *transport_tpg.Config,
-	expandBindings func(d tpgresource.TerraformResourceData) ([]tpgresource.IAMBinding, error),
-) ([]tpgresource.Asset, error) {
+	expandBindings func(d tpgresource.TerraformResourceData) ([]cai.IAMBinding, error),
+) ([]cai.Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
-		return []tpgresource.Asset{}, fmt.Errorf("expanding bindings: %v", err)
+		return []cai.Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
-	name, err := tpgresource.AssetName(d, config, "//storage.googleapis.com/{{bucket}}")
+	name, err := cai.AssetName(d, config, "//storage.googleapis.com/{{bucket}}")
 	if err != nil {
-		return []tpgresource.Asset{}, err
+		return []cai.Asset{}, err
 	}
 
-	return []tpgresource.Asset{{
+	return []cai.Asset{{
 		Name: name,
 		Type: StorageBucketIAMAssetType,
-		IAMPolicy: &tpgresource.IAMPolicy{
+		IAMPolicy: &cai.IAMPolicy{
 			Bindings: bindings,
 		},
 	}}, nil
 }
 
-func FetchStorageBucketIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgresource.Asset, error) {
+func FetchStorageBucketIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (cai.Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("bucket"); !ok {
-		return tpgresource.Asset{}, tpgresource.ErrEmptyIdentityField
+		return cai.Asset{}, cai.ErrEmptyIdentityField
 	}
 
-	return tpgiamresource.FetchIamPolicy(
+	return cai.FetchIamPolicy(
 		StorageBucketIamUpdaterProducer,
 		d,
 		config,
