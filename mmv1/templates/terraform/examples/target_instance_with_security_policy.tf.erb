@@ -12,7 +12,7 @@ resource "google_compute_subnetwork" "default" {
   network                    = google_compute_network.default.id
   private_ipv6_google_access = "DISABLE_GOOGLE_ACCESS"
   purpose                    = "PRIVATE"
-  region                     = "southamerica-east1"
+  region                     = "southamerica-west1"
   stack_type                 = "IPV4_ONLY"
 }
 
@@ -26,7 +26,7 @@ resource "google_compute_instance" "target-vm" {
   provider     = google-beta
   name         = "<%= ctx[:vars]['instance_name'] %>"
   machine_type = "e2-medium"
-  zone         = "southamerica-east1-a"
+  zone         = "southamerica-west1-a"
 
   boot_disk {
     initialize_params {
@@ -44,7 +44,7 @@ resource "google_compute_instance" "target-vm" {
 
 resource "google_compute_region_security_policy" "policyddosprotection" {
   provider    = google-beta
-  region      = "southamerica-east1"
+  region      = "southamerica-west1"
   name        = "tf-test-policyddos%{random_suffix}"
   description = "ddos protection security policy to set target instance"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -55,7 +55,7 @@ resource "google_compute_region_security_policy" "policyddosprotection" {
 
 resource "google_compute_network_edge_security_service" "edge_sec_service" {
   provider        = google-beta
-  region          = "southamerica-east1"
+  region          = "southamerica-west1"
   name            = "tf-test-edgesec%{random_suffix}"
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
 }
@@ -63,7 +63,7 @@ resource "google_compute_network_edge_security_service" "edge_sec_service" {
 resource "google_compute_region_security_policy" "regionsecuritypolicy" {
   provider    = google-beta
   name        = "<%= ctx[:vars]['region_sec_policy'] %>"
-  region      = "southamerica-east1"
+  region      = "southamerica-west1"
   description = "basic security policy for target instance"
   type        = "CLOUD_ARMOR_NETWORK"
   depends_on  = [google_compute_network_edge_security_service.edge_sec_service]
@@ -72,7 +72,7 @@ resource "google_compute_region_security_policy" "regionsecuritypolicy" {
 resource "google_compute_target_instance" "<%= ctx[:primary_resource_id] %>" {
   provider        = google-beta
   name            = "<%= ctx[:vars]['target_name'] %>"
-  zone            = "southamerica-east1-a"
+  zone            = "southamerica-west1-a"
   instance        = google_compute_instance.target-vm.id
   security_policy = google_compute_region_security_policy.regionsecuritypolicy.self_link
 }
