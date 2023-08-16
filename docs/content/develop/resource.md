@@ -80,7 +80,7 @@ For more information about types of resources and the generation process overall
 
    # Inserts styled markdown into the header of the resource's page in the
    # provider documentation.
-   # docs:
+   # docs: !ruby/object:Provider::Terraform::Docs
    #   warning: |
    #     MULTILINE_WARNING_MARKDOWN
    #   note: |
