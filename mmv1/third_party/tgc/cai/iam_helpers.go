@@ -1,20 +1,21 @@
-package tpgiamresource
+package cai
 
 import (
 	"encoding/json"
 	"fmt"
 	"sort"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgiamresource"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
 
 // ExpandIamPolicyBindings is used in google_<type>_iam_policy resources.
-func ExpandIamPolicyBindings(d tpgresource.TerraformResourceData) ([]tpgresource.IAMBinding, error) {
+func ExpandIamPolicyBindings(d tpgresource.TerraformResourceData) ([]IAMBinding, error) {
 	ps := d.Get("policy_data").(string)
-	var bindings []tpgresource.IAMBinding
+	var bindings []IAMBinding
 	// policy_data is (known after apply) in terraform plan, hence an empty string
 	if ps == "" {
 		return bindings, nil
@@ -26,7 +27,7 @@ func ExpandIamPolicyBindings(d tpgresource.TerraformResourceData) ([]tpgresource
 	}
 
 	for _, b := range policy.Bindings {
-		bindings = append(bindings, tpgresource.IAMBinding{
+		bindings = append(bindings, IAMBinding{
 			Role:    b.Role,
 			Members: b.Members,
 		})
@@ -36,12 +37,12 @@ func ExpandIamPolicyBindings(d tpgresource.TerraformResourceData) ([]tpgresource
 }
 
 // ExpandIamRoleBindings is used in google_<type>_iam_binding resources.
-func ExpandIamRoleBindings(d tpgresource.TerraformResourceData) ([]tpgresource.IAMBinding, error) {
+func ExpandIamRoleBindings(d tpgresource.TerraformResourceData) ([]IAMBinding, error) {
 	var members []string
 	for _, m := range d.Get("members").(*schema.Set).List() {
 		members = append(members, m.(string))
 	}
-	return []tpgresource.IAMBinding{
+	return []IAMBinding{
 		{
 			Role:    d.Get("role").(string),
 			Members: members,
@@ -50,8 +51,8 @@ func ExpandIamRoleBindings(d tpgresource.TerraformResourceData) ([]tpgresource.I
 }
 
 // ExpandIamMemberBindings is used in google_<type>_iam_member resources.
-func ExpandIamMemberBindings(d tpgresource.TerraformResourceData) ([]tpgresource.IAMBinding, error) {
-	return []tpgresource.IAMBinding{
+func ExpandIamMemberBindings(d tpgresource.TerraformResourceData) ([]IAMBinding, error) {
+	return []IAMBinding{
 		{
 			Role:    d.Get("role").(string),
 			Members: []string{d.Get("member").(string)},
@@ -60,11 +61,11 @@ func ExpandIamMemberBindings(d tpgresource.TerraformResourceData) ([]tpgresource
 }
 
 // MergeIamAssets merges an existing asset with the IAM bindings of an incoming
-// tpgresource.Asset.
+// Asset.
 func MergeIamAssets(
-	existing, incoming tpgresource.Asset,
-	MergeBindings func(existing, incoming []tpgresource.IAMBinding) []tpgresource.IAMBinding,
-) tpgresource.Asset {
+	existing, incoming Asset,
+	MergeBindings func(existing, incoming []IAMBinding) []IAMBinding,
+) Asset {
 	if existing.IAMPolicy != nil {
 		existing.IAMPolicy.Bindings = MergeBindings(existing.IAMPolicy.Bindings, incoming.IAMPolicy.Bindings)
 	} else {
@@ -75,9 +76,9 @@ func MergeIamAssets(
 
 // incoming is the last known state of an asset prior to deletion
 func MergeDeleteIamAssets(
-	existing, incoming tpgresource.Asset,
-	MergeBindings func(existing, incoming []tpgresource.IAMBinding) []tpgresource.IAMBinding,
-) tpgresource.Asset {
+	existing, incoming Asset,
+	MergeBindings func(existing, incoming []IAMBinding) []IAMBinding,
+) Asset {
 	if existing.IAMPolicy != nil {
 		existing.IAMPolicy.Bindings = MergeBindings(existing.IAMPolicy.Bindings, incoming.IAMPolicy.Bindings)
 	}
@@ -86,7 +87,7 @@ func MergeDeleteIamAssets(
 
 // MergeAdditiveBindings adds members to bindings with the same roles and adds new
 // bindings for roles that dont exist.
-func MergeAdditiveBindings(existing, incoming []tpgresource.IAMBinding) []tpgresource.IAMBinding {
+func MergeAdditiveBindings(existing, incoming []IAMBinding) []IAMBinding {
 	existingIdxs := make(map[string]int)
 	for i, binding := range existing {
 		existingIdxs[binding.Role] = i
@@ -119,7 +120,7 @@ func MergeAdditiveBindings(existing, incoming []tpgresource.IAMBinding) []tpgres
 
 // MergeDeleteAdditiveBindings eliminates listed members from roles in the
 // existing list. incoming is the last known state of the bindings being deleted.
-func MergeDeleteAdditiveBindings(existing, incoming []tpgresource.IAMBinding) []tpgresource.IAMBinding {
+func MergeDeleteAdditiveBindings(existing, incoming []IAMBinding) []IAMBinding {
 	toDelete := make(map[string]struct{})
 	for _, binding := range incoming {
 		for _, m := range binding.Members {
@@ -128,7 +129,7 @@ func MergeDeleteAdditiveBindings(existing, incoming []tpgresource.IAMBinding) []
 		}
 	}
 
-	var newExisting []tpgresource.IAMBinding
+	var newExisting []IAMBinding
 	for _, binding := range existing {
 		var newMembers []string
 		for _, m := range binding.Members {
@@ -139,7 +140,7 @@ func MergeDeleteAdditiveBindings(existing, incoming []tpgresource.IAMBinding) []
 			}
 		}
 		if newMembers != nil {
-			newExisting = append(newExisting, tpgresource.IAMBinding{
+			newExisting = append(newExisting, IAMBinding{
 				Role:    binding.Role,
 				Members: newMembers,
 			})
@@ -151,7 +152,7 @@ func MergeDeleteAdditiveBindings(existing, incoming []tpgresource.IAMBinding) []
 
 // MergeAuthoritativeBindings clobbers members to bindings with the same roles
 // and adds new bindings for roles that dont exist.
-func MergeAuthoritativeBindings(existing, incoming []tpgresource.IAMBinding) []tpgresource.IAMBinding {
+func MergeAuthoritativeBindings(existing, incoming []IAMBinding) []IAMBinding {
 	existingIdxs := make(map[string]int)
 	for i, binding := range existing {
 		existingIdxs[binding.Role] = i
@@ -176,14 +177,14 @@ func MergeAuthoritativeBindings(existing, incoming []tpgresource.IAMBinding) []t
 // MergeDeleteAuthoritativeBindings eliminates any bindings with matching roles
 // in the existing list. incoming is the last known state of the bindings being
 // deleted.
-func MergeDeleteAuthoritativeBindings(existing, incoming []tpgresource.IAMBinding) []tpgresource.IAMBinding {
+func MergeDeleteAuthoritativeBindings(existing, incoming []IAMBinding) []IAMBinding {
 	toDelete := make(map[string]struct{})
 	for _, binding := range incoming {
 		key := binding.Role
 		toDelete[key] = struct{}{}
 	}
 
-	var newExisting []tpgresource.IAMBinding
+	var newExisting []IAMBinding
 	for _, binding := range existing {
 		key := binding.Role
 		_, delete := toDelete[key]
@@ -196,43 +197,43 @@ func MergeDeleteAuthoritativeBindings(existing, incoming []tpgresource.IAMBindin
 }
 
 func FetchIamPolicy(
-	newUpdaterFunc NewResourceIamUpdaterFunc,
+	newUpdaterFunc tpgiamresource.NewResourceIamUpdaterFunc,
 	d tpgresource.TerraformResourceData,
 	config *transport_tpg.Config,
 	assetNameTmpl string,
 	assetType string,
-) (tpgresource.Asset, error) {
+) (Asset, error) {
 	updater, err := newUpdaterFunc(d, config)
 	if err != nil {
-		return tpgresource.Asset{}, err
+		return Asset{}, err
 	}
 
 	iamPolicy, err := updater.GetResourceIamPolicy()
 	if transport_tpg.IsGoogleApiErrorWithCode(err, 403) || transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
-		return tpgresource.Asset{}, tpgresource.ErrResourceInaccessible
+		return Asset{}, ErrResourceInaccessible
 	}
 
 	if err != nil {
-		return tpgresource.Asset{}, err
+		return Asset{}, err
 	}
 
-	var bindings []tpgresource.IAMBinding
+	var bindings []IAMBinding
 	for _, b := range iamPolicy.Bindings {
 		bindings = append(
 			bindings,
-			tpgresource.IAMBinding{
+			IAMBinding{
 				Role:    b.Role,
 				Members: b.Members,
 			},
 		)
 	}
 
-	name, err := tpgresource.AssetName(d, config, assetNameTmpl)
+	name, err := AssetName(d, config, assetNameTmpl)
 
-	return tpgresource.Asset{
+	return Asset{
 		Name: name,
 		Type: assetType,
-		IAMPolicy: &tpgresource.IAMPolicy{
+		IAMPolicy: &IAMPolicy{
 			Bindings: bindings,
 		},
 	}, nil
