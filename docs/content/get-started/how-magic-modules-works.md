@@ -42,7 +42,7 @@ In addition to the core implementation, handwritten resources and datasources wi
 
 - Resource & datasource implementation: In the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
 - Resource documentation: [`magic-modules/mmv1/third_party/terraform/website/docs/r`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r)
-- Datasource documentation: [`magic-modules/mmv1/third_party/terraform/webside/docs/d`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/webside/docs/d)
+- Datasource documentation: [`magic-modules/mmv1/third_party/terraform/website/docs/d`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/d)
 - Tests: In the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
 - Sweepers: [`magic-modules/mmv1/third_party/terraform/utils`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/utils)
 
