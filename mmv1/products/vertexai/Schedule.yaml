@@ -52,6 +52,13 @@ properties:
       characters long and can consist of any UTF-8 characters.
     required: true
   - !ruby/object:Api::Type::String
+    name: cron
+    description: |
+      The scheduled run time based on the user-specified schedule.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+      resolution and up to nine fractional digits. Examples:
+      "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+  - !ruby/object:Api::Type::String
     name: startTime
     description: |
       Timestamp after which the first run can be scheduled. Default to
@@ -117,52 +124,59 @@ properties:
   #     PAUSED state. If set to true, all missed runs will be scheduled. New runs will
   #     be scheduled after the backfill is complete. Default to false.
   - !ruby/object:Api::Type::NestedObject
-    name: timeSpecification
-    description: The time specification to launch scheduled runs.
-    exactly_one_of:
-      - time_specification.0.cron
+    name: createPipelineJobRequest
+    description: |
+      Request for PipelineService.CreatePipelineJob.
+      CreatePipelineJobRequest.parent field is required
+      (format: projects/{project}/locations/{location}).
     properties:
       - !ruby/object:Api::Type::String
-        name: cron
+        name: parent
         description: |
-          The scheduled run time based on the user-specified schedule.
-          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
-          resolution and up to nine fractional digits. Examples:
-          "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-  - !ruby/object:Api::Type::NestedObject
-    name: request
-    description: |
-      The API request template to launch the scheduled runs. 
-      User-specified ID is not supported in the request template.
-    exactly_one_of:
-      - request.0.create_pipeline_job_request
-    properties:
+          The resource name of the Location to create the PipelineJob in. Format: projects/{project}/locations/{location}
+        required: true
+        pattern: projects/{{project}}/locations/{{region}}
       - !ruby/object:Api::Type::NestedObject
-        name: createPipelineJobRequest
-        description: |
-          Request for PipelineService.CreatePipelineJob.
-          CreatePipelineJobRequest.parent field is required
-          (format: projects/{project}/locations/{location}).
+        name: pipelineJob
+        description: The PipelineJob to create.
+        required: true
         properties:
           - !ruby/object:Api::Type::String
-            name: parent
+            name: displayName
             description: |
-              The resource name of the Location to create the PipelineJob in. Format: projects/{project}/locations/{location}
-            required: true
-            pattern: projects/{{project}}/locations/{{region}}
+              The display name of the Pipeline. The name can be up to 128 characters long
+              and can consist of any UTF-8 characters.
+          - !ruby/object:Api::Type::String
+            name: pipelineSpec
+            description: The spec of the pipeline. Expects a JSON-encoded string.
+            custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
+            state_func:
+              'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
+              return s }'
+            validation: !ruby/object:Provider::Terraform::Validation
+              function: 'validation.StringIsJSON'
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: labels
+            description: |
+              The labels with user-defined metadata to organize PipelineJob.
+              Label keys and values can be no longer than 64 characters
+              (Unicode codepoints), can only contain lowercase letters,
+              numeric characters, underscores and dashes. International
+              characters are allowed. See https://goo.gl/xmQnxf for more
+              information and examples of labels.
           - !ruby/object:Api::Type::NestedObject
-            name: pipelineJob
-            description: The PipelineJob to create.
+            name: runtimeConfig
+            description: Runtime config of the pipeline.
             required: true
             properties:
               - !ruby/object:Api::Type::String
-                name: displayName
+                name: parameters
                 description: |
-                  The display name of the Pipeline. The name can be up to 128 characters long
-                  and can consist of any UTF-8 characters.
-              - !ruby/object:Api::Type::String
-                name: pipelineSpec
-                description: The spec of the pipeline. Expects a JSON-encoded string.
+                  Deprecated. Use RuntimeConfig.parameter_values instead. The runtime parameters of the PipelineJob.
+                  The parameters will be passed into PipelineJob.pipeline_spec to replace the placeholders at runtime.
+                  This field is used by pipelines built using PipelineJob.pipeline_spec.schema_version 2.0.0 or lower,
+                  such as pipelines built using Kubeflow Pipelines SDK 1.8 or lower. Expects a JSON-encoded string.
                 custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
                 custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
                 state_func:
@@ -170,110 +184,77 @@ properties:
                   return s }'
                 validation: !ruby/object:Provider::Terraform::Validation
                   function: 'validation.StringIsJSON'
-              - !ruby/object:Api::Type::KeyValuePairs
-                name: labels
+              - !ruby/object:Api::Type::String
+                name: gcsOutputDirectory
                 description: |
-                  The labels with user-defined metadata to organize PipelineJob.
-                  Label keys and values can be no longer than 64 characters
-                  (Unicode codepoints), can only contain lowercase letters,
-                  numeric characters, underscores and dashes. International
-                  characters are allowed. See https://goo.gl/xmQnxf for more
-                  information and examples of labels.
-              - !ruby/object:Api::Type::NestedObject
-                name: runtimeConfig
-                description: Runtime config of the pipeline.
+                  A path in a Cloud Storage bucket, which will be treated as the root
+                  output directory of the pipeline. It is used by the system to generate the paths
+                  of output artifacts. The artifact paths are generated with a sub-path pattern
+                  {job_id}/{taskId}/{output_key} under the specified output directory.
+                  The service account specified in this pipeline must have the storage.objects.get
+                  and storage.objects.create permissions for this bucket.
                 required: true
-                properties:
-                  - !ruby/object:Api::Type::String
-                    name: parameters
-                    description: |
-                      Deprecated. Use RuntimeConfig.parameter_values instead. The runtime parameters of the PipelineJob.
-                      The parameters will be passed into PipelineJob.pipeline_spec to replace the placeholders at runtime.
-                      This field is used by pipelines built using PipelineJob.pipeline_spec.schema_version 2.0.0 or lower,
-                      such as pipelines built using Kubeflow Pipelines SDK 1.8 or lower. Expects a JSON-encoded string.
-                    custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
-                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-                    state_func:
-                      'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-                      return s }'
-                    validation: !ruby/object:Provider::Terraform::Validation
-                      function: 'validation.StringIsJSON'
-                  - !ruby/object:Api::Type::String
-                    name: gcsOutputDirectory
-                    description: |
-                      A path in a Cloud Storage bucket, which will be treated as the root
-                      output directory of the pipeline. It is used by the system to generate the paths
-                      of output artifacts. The artifact paths are generated with a sub-path pattern
-                      {job_id}/{taskId}/{output_key} under the specified output directory.
-                      The service account specified in this pipeline must have the storage.objects.get
-                      and storage.objects.create permissions for this bucket.
-                    required: true
-                  - !ruby/object:Api::Type::String
-                    name: parameterValues
-                    description: |
-                      The runtime parameters of the PipelineJob. The parameters will be passed into
-                      PipelineJob.pipeline_spec to replace the placeholders at runtime. This field
-                      is used by pipelines built using PipelineJob.pipeline_spec.schema_version 2.1.0,
-                      such as pipelines built using Kubeflow Pipelines SDK 1.9 or higher and the v2 DSL.
-                      Expects a JSON-encoded string.
-                    custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
-                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-                    state_func:
-                      'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-                      return s }'
-                    validation: !ruby/object:Provider::Terraform::Validation
-                      function: 'validation.StringIsJSON'
-                  - !ruby/object:Api::Type::Enum
-                    name: failurePolicy
-                    description: |
-                      Represents the failure policy of a pipeline. Currently, the default of a pipeline
-                      is that the pipeline will continue to run until no more tasks can be executed,
-                      also known as PIPELINE_FAILURE_POLICY_FAIL_SLOW. However, if a pipeline is set
-                      to PIPELINE_FAILURE_POLICY_FAIL_FAST, it will stop scheduling any new tasks when
-                      a task has failed. Any scheduled tasks will continue to completion.
-                    values:
-                      - :PIPELINE_FAILURE_POLICY_UNSPECIFIED
-                      - :PIPELINE_FAILURE_POLICY_FAIL_SLOW
-                      - :PIPELINE_FAILURE_POLICY_FAIL_FAST
-                    default_value: :PIPELINE_FAILURE_POLICY_UNSPECIFIED
-                  - !ruby/object:Api::Type::Map
-                    name: inputArtifacts
-                    description: |
-                      The runtime artifacts of the PipelineJob. The key will be the input artifact name and the value would be one of the InputArtifact.
-                    key_name: key
-                    key_description: |
-                      The name of the input artifact.
-                    value_type: !ruby/object:Api::Type::NestedObject
-                      name: value
-                      properties:
-                        - !ruby/object:Api::Type::String
-                          name: artifactId
-                          required: true
-                          description: |
-                            Artifact resource id from MLMD. Which is the last portion of an artifact resource name:
-                            projects/{project}/locations/{location}/metadataStores/default/artifacts/{artifactId}.
-                            The artifact must stay within the same project, location and default metadatastore as the pipeline.
               - !ruby/object:Api::Type::String
-                name: serviceAccount
+                name: parameterValues
                 description: |
-                  The service account that the pipeline workload runs as.
-                  If not specified, the Compute Engine default service account
-                  in the project will be used.
-                  See https://cloud.google.com/compute/docs/access/service-accounts#default_service_account
-                  Users starting the pipeline must have the iam.serviceAccounts.actAs
-                  permission on this service account.
-              - !ruby/object:Api::Type::String
-                name: network
+                  The runtime parameters of the PipelineJob. The parameters will be passed into
+                  PipelineJob.pipeline_spec to replace the placeholders at runtime. This field
+                  is used by pipelines built using PipelineJob.pipeline_spec.schema_version 2.1.0,
+                  such as pipelines built using Kubeflow Pipelines SDK 1.9 or higher and the v2 DSL.
+                  Expects a JSON-encoded string.
+                custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+                custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
+                state_func:
+                  'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
+                  return s }'
+                validation: !ruby/object:Provider::Terraform::Validation
+                  function: 'validation.StringIsJSON'
+              - !ruby/object:Api::Type::Enum
+                name: failurePolicy
                 description: |
-                  The full name of the Compute Engine network to which the Pipeline Job's workload
-                  should be peered. For example, projects/12345/global/networks/myVPC. Format is
-                  of the form projects/{project}/global/networks/{network}. Where {project} is a
-                  project number, as in 12345, and {network} is a network name.
-                  Private services access must already be configured for the network.
-                  Pipeline job will apply the network configuration to the Google Cloud resources
-                  being launched, if applied, such as Vertex AI Training or Dataflow job.
-                  If left unspecified, the workload is not peered with any network.
-              - !ruby/object:Api::Type::String
-                name: templateUri
-                description:
-                  A template uri from where the PipelineJob.pipeline_spec, if empty, will be downloaded.
+                  Represents the failure policy of a pipeline. Currently, the default of a pipeline
+                  is that the pipeline will continue to run until no more tasks can be executed,
+                  also known as PIPELINE_FAILURE_POLICY_FAIL_SLOW. However, if a pipeline is set
+                  to PIPELINE_FAILURE_POLICY_FAIL_FAST, it will stop scheduling any new tasks when
+                  a task has failed. Any scheduled tasks will continue to completion.
+                values:
+                  - :PIPELINE_FAILURE_POLICY_UNSPECIFIED
+                  - :PIPELINE_FAILURE_POLICY_FAIL_SLOW
+                  - :PIPELINE_FAILURE_POLICY_FAIL_FAST
+                default_value: :PIPELINE_FAILURE_POLICY_UNSPECIFIED
+              - !ruby/object:Api::Type::Map
+                name: inputArtifacts
+                description: |
+                  The runtime artifacts of the PipelineJob. The key will be the input artifact name and the value would be
+                  an Artifact resource id from MLMD. Which is the last portion of an artifact resource name:
+                  projects/{project}/locations/{location}/metadataStores/default/artifacts/{artifactId}.
+                  The artifact must stay within the same project, location and default metadatastore as the pipeline.
+                key_name: key
+                key_description: |
+                  The name of the input artifact.
+                value_type: !ruby/object:Api::Type::String
+                        
+          - !ruby/object:Api::Type::String
+            name: serviceAccount
+            description: |
+              The service account that the pipeline workload runs as.
+              If not specified, the Compute Engine default service account
+              in the project will be used.
+              See https://cloud.google.com/compute/docs/access/service-accounts#default_service_account
+              Users starting the pipeline must have the iam.serviceAccounts.actAs
+              permission on this service account.
+          - !ruby/object:Api::Type::String
+            name: network
+            description: |
+              The full name of the Compute Engine network to which the Pipeline Job's workload
+              should be peered. For example, projects/12345/global/networks/myVPC. Format is
+              of the form projects/{project}/global/networks/{network}. Where {project} is a
+              project number, as in 12345, and {network} is a network name.
+              Private services access must already be configured for the network.
+              Pipeline job will apply the network configuration to the Google Cloud resources
+              being launched, if applied, such as Vertex AI Training or Dataflow job.
+              If left unspecified, the workload is not peered with any network.
+          - !ruby/object:Api::Type::String
+            name: templateUri
+            description:
+              A template uri from where the PipelineJob.pipeline_spec, if empty, will be downloaded.
