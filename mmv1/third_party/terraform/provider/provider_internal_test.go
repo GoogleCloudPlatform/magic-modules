@@ -700,6 +700,7 @@ func TestProvider_providerConfigure_requestTimeout(t *testing.T) {
 		"if a valid request_timeout is configured in the provider, no error will occur": {
 			ConfigValues: map[string]interface{}{
 				"request_timeout": "10s",
+				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
 			ExpectedValue:       "10s",
 			ExpectedSchemaValue: "10s",
