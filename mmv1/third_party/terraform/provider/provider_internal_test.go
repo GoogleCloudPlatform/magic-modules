@@ -901,11 +901,12 @@ func TestProvider_ProviderConfigure_billingProject(t *testing.T) {
 func TestProvider_ProviderConfigure_region(t *testing.T) {
 
 	cases := map[string]struct {
-		ConfigValues     map[string]interface{}
-		EnvVariables     map[string]string
-		ExpectedValue    string
-		ExpectError      bool
-		ExpectFieldUnset bool
+		ConfigValues        map[string]interface{}
+		EnvVariables        map[string]string
+		ExpectedSchemaValue string
+		ExpectedConfigValue string
+		ExpectError         bool
+		ExpectFieldUnset    bool
 	}{
 		"region value set in the provider config is not overridden by ENVs": {
 			ConfigValues: map[string]interface{}{
@@ -915,7 +916,16 @@ func TestProvider_ProviderConfigure_region(t *testing.T) {
 			EnvVariables: map[string]string{
 				"GOOGLE_REGION": "region-from-env",
 			},
-			ExpectedValue: "my-region-from-config",
+			ExpectedSchemaValue: "my-region-from-config",
+			ExpectedConfigValue: "my-region-from-config",
+		},
+		"region values can be supplied as a self link": {
+			ConfigValues: map[string]interface{}{
+				"region":      "https://www.googleapis.com/compute/v1/projects/my-project/regions/us-central1",
+				"credentials": transport_tpg.TestFakeCredentialsPath,
+			},
+			ExpectedSchemaValue: "https://www.googleapis.com/compute/v1/projects/my-project/regions/us-central1",
+			ExpectedConfigValue: "us-central1",
 		},
 		"region value can be set by environment variable: GOOGLE_REGION is used": {
 			ConfigValues: map[string]interface{}{
@@ -925,16 +935,18 @@ func TestProvider_ProviderConfigure_region(t *testing.T) {
 			EnvVariables: map[string]string{
 				"GOOGLE_REGION": "region-from-env",
 			},
-			ExpectedValue: "region-from-env",
+			ExpectedSchemaValue: "region-from-env",
+			ExpectedConfigValue: "region-from-env",
 		},
 		"when no values are provided via config or environment variables, the field remains unset without error": {
 			ConfigValues: map[string]interface{}{
 				// region unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
-			ExpectError:      false,
-			ExpectFieldUnset: true,
-			ExpectedValue:    "",
+			ExpectError:         false,
+			ExpectFieldUnset:    true,
+			ExpectedSchemaValue: "",
+			ExpectedConfigValue: "",
 		},
 		// Handling empty strings in config
 		"when region is set as an empty string the field is treated as if it's unset, without error": {
@@ -942,8 +954,9 @@ func TestProvider_ProviderConfigure_region(t *testing.T) {
 				"region":      "",
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
-			ExpectFieldUnset: true,
-			ExpectedValue:    "",
+			ExpectFieldUnset:    true,
+			ExpectedSchemaValue: "",
+			ExpectedConfigValue: "",
 		},
 		"when region is set as an empty string an environment variable will be used": {
 			ConfigValues: map[string]interface{}{
@@ -953,7 +966,8 @@ func TestProvider_ProviderConfigure_region(t *testing.T) {
 			EnvVariables: map[string]string{
 				"GOOGLE_REGION": "region-from-env",
 			},
-			ExpectedValue: "region-from-env",
+			ExpectedSchemaValue: "region-from-env",
+			ExpectedConfigValue: "region-from-env",
 		},
 	}
 
@@ -981,8 +995,8 @@ func TestProvider_ProviderConfigure_region(t *testing.T) {
 				v, ok := d.GetOk("region")
 				if ok {
 					val := v.(string)
-					if val != tc.ExpectedValue {
-						t.Fatalf("expected region value set in provider config data to be %s, got %s", tc.ExpectedValue, val)
+					if val != tc.ExpectedSchemaValue {
+						t.Fatalf("expected region value set in provider config data to be %s, got %s", tc.ExpectedSchemaValue, val)
 					}
 					if tc.ExpectFieldUnset {
 						t.Fatalf("expected region value to not be set in provider config data, got %s", val)
@@ -999,11 +1013,11 @@ func TestProvider_ProviderConfigure_region(t *testing.T) {
 			if ok && tc.ExpectFieldUnset {
 				t.Fatal("expected region value to be unset in provider config data")
 			}
-			if val != tc.ExpectedValue {
-				t.Fatalf("expected region value set in provider config data to be %s, got %s", tc.ExpectedValue, val)
+			if val != tc.ExpectedSchemaValue {
+				t.Fatalf("expected region value set in provider config data to be %s, got %s", tc.ExpectedSchemaValue, val)
 			}
-			if config.Region != tc.ExpectedValue {
-				t.Fatalf("expected region value set in Config struct to be to be %s, got %s", tc.ExpectedValue, config.Region)
+			if config.Region != tc.ExpectedConfigValue {
+				t.Fatalf("expected region value set in Config struct to be to be %s, got %s", tc.ExpectedConfigValue, config.Region)
 			}
 		})
 	}
