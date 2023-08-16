@@ -19,7 +19,7 @@ func TestAccAlloydbCluster_restore(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedTestNetwork(t, "alloydbinstance-mandatory"),
+		"network_name":  acctest.BootstrapSharedTestNetwork(t, "alloydbinstance-restore"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
