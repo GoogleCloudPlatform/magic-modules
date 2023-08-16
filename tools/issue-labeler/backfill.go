@@ -12,6 +12,10 @@ import (
 	"github.com/golang/glog"
 )
 
+type ErrorResponse struct {
+	Message string
+}
+
 type Issue struct {
 	Number      int
 	Body        string
@@ -24,8 +28,9 @@ type Label struct {
 }
 
 type IssueUpdate struct {
-	Number int
-	Labels []string
+	Number    int
+	Labels    []string
+	OldLabels []string
 }
 
 type IssueUpdateBody struct {
@@ -58,6 +63,11 @@ func getIssues(since string) []Issue {
 		var newIssues []Issue
 		json.Unmarshal(body, &newIssues)
 		if len(newIssues) == 0 {
+			var err ErrorResponse
+			json.Unmarshal(body, &err)
+			if err.Message == "Bad credentials" {
+				glog.Exitf("Error from API: Bad credentials")
+			}
 			done = true
 		} else {
 			issues = append(issues, newIssues...)
@@ -87,9 +97,9 @@ func computeIssueUpdates(issues []Issue, regexpLabels []regexpLabel) []IssueUpda
 			continue
 		}
 
-		var oldLabels []string
+		var issueUpdate IssueUpdate
 		for label := range desired {
-			oldLabels = append(oldLabels, label)
+			issueUpdate.OldLabels = append(issueUpdate.OldLabels, label)
 		}
 
 		affectedResources := extractAffectedResources(issue.Body)
@@ -97,22 +107,16 @@ func computeIssueUpdates(issues []Issue, regexpLabels []regexpLabel) []IssueUpda
 			desired[needed] = struct{}{}
 		}
 
-		if len(desired) > len(oldLabels) {
-			var desiredSlice []string
+		if len(desired) > len(issueUpdate.OldLabels) {
 			if !linked {
-				desiredSlice = append(desiredSlice, "forward/review")
+				issueUpdate.Labels = append(issueUpdate.Labels, "forward/review")
 			}
 			for label := range desired {
-				desiredSlice = append(desiredSlice, label)
+				issueUpdate.Labels = append(issueUpdate.Labels, label)
 			}
-			sort.Strings(desiredSlice)
+			sort.Strings(issueUpdate.Labels)
 
-			issueUpdate := IssueUpdate{
-				Number: issue.Number,
-				Labels: desiredSlice,
-			}
-			fmt.Printf("Existing labels: %v\n", oldLabels)
-			fmt.Printf("New labels: %v\n", desiredSlice)
+			issueUpdate.Number = issue.Number
 
 			issueUpdates = append(issueUpdates, issueUpdate)
 		}
@@ -139,6 +143,8 @@ func updateIssues(issueUpdates []IssueUpdate, dryRun bool) {
 			glog.Errorf("Error creating request: %v", err)
 			continue
 		}
+		fmt.Printf("Existing labels: %v\n", issueUpdate.OldLabels)
+		fmt.Printf("New labels: %v\n", issueUpdate.Labels)
 		fmt.Printf("%s %s (https://github.com/hashicorp/terraform-provider-google/issues/%d)\n", req.Method, req.URL, issueUpdate.Number)
 		b, err := json.MarshalIndent(updateBody, "", "  ")
 		if err != nil {
