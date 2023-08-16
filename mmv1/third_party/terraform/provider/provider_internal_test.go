@@ -1026,11 +1026,12 @@ func TestProvider_ProviderConfigure_region(t *testing.T) {
 func TestProvider_ProviderConfigure_zone(t *testing.T) {
 
 	cases := map[string]struct {
-		ConfigValues     map[string]interface{}
-		EnvVariables     map[string]string
-		ExpectedValue    string
-		ExpectError      bool
-		ExpectFieldUnset bool
+		ConfigValues        map[string]interface{}
+		EnvVariables        map[string]string
+		ExpectedSchemaValue string
+		ExpectedConfigValue string
+		ExpectError         bool
+		ExpectFieldUnset    bool
 	}{
 		"zone value set in the provider config is not overridden by ENVs": {
 			ConfigValues: map[string]interface{}{
@@ -1040,7 +1041,16 @@ func TestProvider_ProviderConfigure_zone(t *testing.T) {
 			EnvVariables: map[string]string{
 				"GOOGLE_ZONE": "zone-from-env",
 			},
-			ExpectedValue: "zone-from-config",
+			ExpectedSchemaValue: "zone-from-config",
+			ExpectedConfigValue: "zone-from-config",
+		},
+		"does not shorten zone values when provided as a self link": {
+			ConfigValues: map[string]interface{}{
+				"zone":        "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1",
+				"credentials": transport_tpg.TestFakeCredentialsPath,
+			},
+			ExpectedSchemaValue: "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1",
+			ExpectedConfigValue: "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1", // Value is not shortened from URI to name
 		},
 		"when multiple zone environment variables are provided, `GOOGLE_ZONE` is used first": {
 			ConfigValues: map[string]interface{}{
@@ -1052,7 +1062,8 @@ func TestProvider_ProviderConfigure_zone(t *testing.T) {
 				"GCLOUD_ZONE":           "zone-from-GCLOUD_ZONE",
 				"CLOUDSDK_COMPUTE_ZONE": "zone-from-CLOUDSDK_COMPUTE_ZONE",
 			},
-			ExpectedValue: "zone-from-GOOGLE_ZONE",
+			ExpectedSchemaValue: "zone-from-GOOGLE_ZONE",
+			ExpectedConfigValue: "zone-from-GOOGLE_ZONE",
 		},
 		"when multiple zone environment variables are provided, `GCLOUD_ZONE` is used second": {
 			ConfigValues: map[string]interface{}{
@@ -1064,7 +1075,8 @@ func TestProvider_ProviderConfigure_zone(t *testing.T) {
 				"GCLOUD_ZONE":           "zone-from-GCLOUD_ZONE",
 				"CLOUDSDK_COMPUTE_ZONE": "zone-from-CLOUDSDK_COMPUTE_ZONE",
 			},
-			ExpectedValue: "zone-from-GCLOUD_ZONE",
+			ExpectedSchemaValue: "zone-from-GCLOUD_ZONE",
+			ExpectedConfigValue: "zone-from-GCLOUD_ZONE",
 		},
 		"when multiple zone environment variables are provided, `CLOUDSDK_COMPUTE_ZONE` is used third": {
 			ConfigValues: map[string]interface{}{
@@ -1076,16 +1088,18 @@ func TestProvider_ProviderConfigure_zone(t *testing.T) {
 				// GCLOUD_ZONE unset
 				"CLOUDSDK_COMPUTE_ZONE": "zone-from-CLOUDSDK_COMPUTE_ZONE",
 			},
-			ExpectedValue: "zone-from-CLOUDSDK_COMPUTE_ZONE",
+			ExpectedSchemaValue: "zone-from-CLOUDSDK_COMPUTE_ZONE",
+			ExpectedConfigValue: "zone-from-CLOUDSDK_COMPUTE_ZONE",
 		},
 		"when no values are provided via config or environment variables, the field remains unset without error": {
 			ConfigValues: map[string]interface{}{
 				// zone unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
-			ExpectError:      false,
-			ExpectFieldUnset: true,
-			ExpectedValue:    "",
+			ExpectError:         false,
+			ExpectFieldUnset:    true,
+			ExpectedSchemaValue: "",
+			ExpectedConfigValue: "",
 		},
 		// Handling empty strings in config
 		"when zone is set as an empty string the field is treated as if it's unset, without error": {
@@ -1093,8 +1107,9 @@ func TestProvider_ProviderConfigure_zone(t *testing.T) {
 				"zone":        "",
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
-			ExpectFieldUnset: true,
-			ExpectedValue:    "",
+			ExpectFieldUnset:    true,
+			ExpectedSchemaValue: "",
+			ExpectedConfigValue: "",
 		},
 		"when zone is set as an empty string an environment variable will be used": {
 			ConfigValues: map[string]interface{}{
@@ -1104,7 +1119,8 @@ func TestProvider_ProviderConfigure_zone(t *testing.T) {
 			EnvVariables: map[string]string{
 				"GOOGLE_ZONE": "zone-from-env",
 			},
-			ExpectedValue: "zone-from-env",
+			ExpectedSchemaValue: "zone-from-env",
+			ExpectedConfigValue: "zone-from-env",
 		},
 	}
 
@@ -1132,8 +1148,8 @@ func TestProvider_ProviderConfigure_zone(t *testing.T) {
 				v, ok := d.GetOk("zone")
 				if ok {
 					val := v.(string)
-					if val != tc.ExpectedValue {
-						t.Fatalf("expected zone value set in provider config data to be %s, got %s", tc.ExpectedValue, val)
+					if val != tc.ExpectedSchemaValue {
+						t.Fatalf("expected zone value set in provider config data to be %s, got %s", tc.ExpectedSchemaValue, val)
 					}
 					if tc.ExpectFieldUnset {
 						t.Fatalf("expected zone value to not be set in provider config data, got %s", val)
@@ -1150,11 +1166,11 @@ func TestProvider_ProviderConfigure_zone(t *testing.T) {
 			if ok && tc.ExpectFieldUnset {
 				t.Fatal("expected zone value to be unset in provider config data")
 			}
-			if val != tc.ExpectedValue {
-				t.Fatalf("expected zone value set in provider config data to be %s, got %s", tc.ExpectedValue, val)
+			if val != tc.ExpectedSchemaValue {
+				t.Fatalf("expected zone value set in provider config data to be %s, got %s", tc.ExpectedSchemaValue, val)
 			}
-			if config.Zone != tc.ExpectedValue {
-				t.Fatalf("expected zone value set in Config struct to be to be %s, got %s", tc.ExpectedValue, config.Zone)
+			if config.Zone != tc.ExpectedConfigValue {
+				t.Fatalf("expected zone value set in Config struct to be to be %s, got %s", tc.ExpectedConfigValue, config.Zone)
 			}
 		})
 	}
