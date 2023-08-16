@@ -725,6 +725,7 @@ func TestProvider_providerConfigure_requestTimeout(t *testing.T) {
 		"when value is empty, the value will be 0s in order to set the default value": {
 			ConfigValues: map[string]interface{}{
 				"request_timeout": "",
+				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
 			ExpectedValue: "0s",
 		},
