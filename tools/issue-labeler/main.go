@@ -1,23 +1,39 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
+	"sort"
+	"strings"
 
 	"github.com/golang/glog"
-	"gopkg.in/yaml.v2"
 )
 
+var flagBackfillDate = flag.String("backfill-date", "", "run in backfill mode to apply labels to issues filed after given date")
+var flagDryRun = flag.Bool("backfill-dry-run", false, "when combined with backfill-date, perform a dry run of backfill mode")
+
 func main() {
-	issueBody := os.Getenv("ISSUE_BODY")
-	file, err := os.ReadFile("enrolled_teams.yaml")
+	flag.Parse()
+
+	regexpLabels, err := buildRegexLabels(enrolledTeamsYaml)
 	if err != nil {
-		glog.Exitf("Error reading enrolled teams yaml: %v", err)
+		glog.Exitf("Error building regex labels: %v", err)
 	}
-	enrolledTeams := make(map[string][]string)
-	err = yaml.Unmarshal(file, &enrolledTeams)
-	if err != nil {
-		glog.Exitf("Error unmarshalling enrolled teams yaml: %v", err)
+
+	if *flagBackfillDate == "" {
+		issueBody := os.Getenv("ISSUE_BODY")
+		affectedResources := extractAffectedResources(issueBody)
+		labels := computeLabels(affectedResources, regexpLabels)
+
+		if len(labels) > 0 {
+			labels = append(labels, "forward/review")
+			sort.Strings(labels)
+			fmt.Println(`["` + strings.Join(labels, `", "`) + `"]`)
+		}
+	} else {
+		issues := getIssues(*flagBackfillDate)
+		issueUpdates := computeIssueUpdates(issues, regexpLabels)
+		updateIssues(issueUpdates, *flagDryRun)
 	}
-	fmt.Println(labels(issueBody, enrolledTeams))
 }

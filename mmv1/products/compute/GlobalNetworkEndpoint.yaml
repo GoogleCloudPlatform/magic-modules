@@ -57,7 +57,7 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 id_format: '{{project}}/{{global_network_endpoint_group}}/{{ip_address}}/{{fqdn}}/{{port}}'
 mutex: networkEndpoint/{{project}}/{{global_network_endpoint_group}}
-exclude_validator: true
+exclude_tgc: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'global_network_endpoint'

@@ -183,7 +183,7 @@ module Api
 
       # If true, exclude resource from Terraform Validator
       # (i.e. terraform-provider-conversion)
-      attr_reader :exclude_validator
+      attr_reader :exclude_tgc
 
       # If true, skip sweeper generation for this resource
       attr_reader :skip_sweeper

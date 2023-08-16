@@ -1,6 +1,6 @@
 ---
 steps:
-- name: 'gcr.io/$PROJECT_ID/downstream-builder'
+- name: 'gcr.io/graphite-docker-images/build-environment'
   id: run-rake-tests
   entrypoint: bundle
   dir: mmv1
