@@ -90,9 +90,7 @@ properties:
       The unique identifier of the membership.
   - !ruby/object:Api::Type::String
     name: 'description'
-    deprecation_message:
-      This field is unavailable in the GA provider and will be removed from the
-      beta provider in a future release.
+    deprecation_message: `description` is deprecated and will be removed in a future major release.
     min_version: beta
     description: |
       The name of this entity type to be displayed on the console. This field is unavailable in v1 of the API.
