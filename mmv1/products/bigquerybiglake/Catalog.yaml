@@ -26,6 +26,10 @@ immutable: true
 create_url: "projects/{{project}}/locations/{{location}}/catalogs?resourceId={{catalog_id}}"
 update_verb: :PATCH
 update_mask: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "bigquery_biglake_catalog"
+    primary_resource_id: "example"
 properties:
   - !ruby/object:Api::Type::String
     name: "name"
