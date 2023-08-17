@@ -17,6 +17,7 @@ func IsZone(location string) bool {
 // - location argument in the resource config
 // - region argument in the resource config
 // - zone argument in the resource config
+// - region argument in the provider config
 // - zone argument set in the provider config
 func GetLocation(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
 	if v, ok := d.GetOk("location"); ok {
@@ -24,10 +25,17 @@ func GetLocation(d TerraformResourceData, config *transport_tpg.Config) (string,
 	} else if v, isRegionalCluster := d.GetOk("region"); isRegionalCluster {
 		return GetResourceNameFromSelfLink(v.(string)), nil
 	} else {
-		// If region is not explicitly set, use "zone" (or fall back to the provider-level zone).
-		// For now, to avoid confusion, we require region to be set in the config to create a regional
-		// cluster rather than falling back to the provider-level region.
-		return GetZone(d, config)
+		if v, ok := d.GetOk("zone"); ok {
+			return GetResourceNameFromSelfLink(v.(string)), nil
+		} else {
+			if config.Region != "" {
+				return config.Region, nil
+			} else if config.Zone != "" {
+				return config.Zone, nil
+			} else {
+				return "", fmt.Errorf("Unable to determine location: region/zone not configured in resource/provider config")
+			}
+		}
 	}
 }
 

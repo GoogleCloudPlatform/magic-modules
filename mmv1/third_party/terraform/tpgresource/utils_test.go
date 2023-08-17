@@ -310,13 +310,18 @@ func TestGetLocation(t *testing.T) {
 			},
 			ExpectedLocation: "provider-zone-a",
 		},
-		// Error states
-		"returns an error when only a region value is set in the the provider config and none of location/region/zone are set in the resource config": {
+		"returns the region value when only a region value is set in the the provider config and none of location/region/zone are set in the resource config": {
+			ResourceConfig: map[string]interface{}{
+				"location": "",
+				"region":   "",
+				"zone":     "",
+			},
 			ProviderConfig: map[string]string{
 				"region": "provider-region",
 			},
-			ExpectError: true,
+			ExpectedLocation: "provider-region",
 		},
+		// Error states
 		"returns an error when none of location/region/zone are set on the resource, and neither region or zone is set on the provider": {
 			ExpectError: true,
 		},
