@@ -30,10 +30,11 @@ delete_verb: :DELETE
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "bigquery_biglake_table"
-    primary_resource_id: "example"
+    primary_resource_id: "default"
     vars:
       catalog_name: "my-catalog"
       database_name: "my-database"
+      table_name: "my-table"
 properties:
   - !ruby/object:Api::Type::String
     name: "name"
