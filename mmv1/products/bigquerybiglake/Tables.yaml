@@ -27,6 +27,13 @@ update_verb: :PATCH
 update_mask: true
 delete_url: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases/{{database_id}}/tables?tableId={{table_id}}"
 delete_verb: :DELETE
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "bigquery_biglake_table"
+    primary_resource_id: "example"
+    vars:
+      catalog_name: "my-catalog"
+      database_name: "my-database"
 properties:
   - !ruby/object:Api::Type::String
     name: "name"
