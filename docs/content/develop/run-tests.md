@@ -21,13 +21,12 @@ aliases:
 
     ```bash
     gcloud auth application-default login
-    export GOOGLE_USE_DEFAULT_CREDENTIALS=TRUE
+    export GOOGLE_USE_DEFAULT_CREDENTIALS=true
     ```
 
 1. Set the following environment variables:
 
     ```bash
-    export GOOGLE_USE_DEFAULT_CREDENTIALS=TRUE
     export GOOGLE_PROJECT=PROJECT_ID
     export GOOGLE_REGION=us-central1
     export GOOGLE_ZONE=us-central1-a
@@ -59,7 +58,7 @@ aliases:
 1. Run acceptance tests for only modified resources. (Full test runs can take over 9 hours.) See [Go's documentation](https://pkg.go.dev/cmd/go#hdr-Testing_flags) for more information about `-run` and other flags.
 
     ```bash
-    make testacc TEST=./google TESTARGS='-run=TestAccContainerNodePool'
+    make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool'
     ```
 
 
@@ -67,7 +66,7 @@ aliases:
 1. Optional: Save verbose test output to a file for analysis.
 
     ```bash
-    TF_LOG=TRACE make testacc TEST=./google TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
+    TF_LOG=TRACE make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
     ```
 
 1. Optional: Debug tests with [Delve](https://github.com/go-delve/delve). See [`dlv test` documentation](https://github.com/go-delve/delve/blob/master/Documentation/usage/dlv_test.md) for information about available flags.

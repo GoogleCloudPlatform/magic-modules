@@ -56,6 +56,9 @@ examples:
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
       alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "alloydb-instance-basic")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
@@ -163,7 +166,7 @@ properties:
       The IP address for the Instance. This is the connection endpoint for an end-user application.
   - !ruby/object:Api::Type::NestedObject
     name: 'readPoolConfig'
-    description: 'Read pool specific config.'
+    description: 'Read pool specific config. If the instance type is READ_POOL, this configuration must be provided.'
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'nodeCount'

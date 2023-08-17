@@ -14,7 +14,6 @@ Creates a table resource in a dataset for Google BigQuery. For more information 
 (and run `terraform apply` to write the field to state) in order to destroy an instance.
 It is recommended to not set this field (or set it to true) until you're ready to destroy.
 
-
 ## Example Usage
 
 ```hcl
@@ -107,13 +106,15 @@ The following arguments are supported:
 
 * `friendly_name` - (Optional) A descriptive name for the table.
 
+* `max_staleness`: (Optional) The maximum staleness of data that could be returned when the table (or stale MV) is queried. Staleness encoded as a string encoding of sql IntervalValue type.
+
 * `encryption_configuration` - (Optional) Specifies how the table should be encrypted.
     If left blank, the table will be encrypted with a Google-managed key; that process
     is transparent to the user.  Structure is [documented below](#nested_encryption_configuration).
 
 * `labels` - (Optional) A mapping of labels to assign to the resource.
 
-* `schema` - (Optional) A JSON schema for the table.
+* <a name="schema"></a>`schema` - (Optional) A JSON schema for the table.
 
     ~>**NOTE:** Because this field expects a JSON string, any changes to the
     string will create a diff, even if the JSON itself hasn't changed.
@@ -122,8 +123,11 @@ The following arguments are supported:
     field type, we currently cannot suppress the recurring diff this causes.
     As a workaround, we recommend using the schema as returned by the API.
 
-    ~>**NOTE:**  When setting `schema` for `external_data_configuration`, please use
-    `external_data_configuration.schema` [documented below](#nested_external_data_configuration).
+    ~>**NOTE:**  If you use `external_data_configuration`
+    [documented below](#nested_external_data_configuration) and do **not** set
+    `external_data_configuration.connection_id`, schemas must be specified
+    with `external_data_configuration.schema`. Otherwise, schemas must be
+    specified with this top-level field.
 
 * `time_partitioning` - (Optional) If specified, configures time-based
     partitioning for this table. Structure is [documented below](#nested_time_partitioning).
@@ -157,6 +161,10 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     the form `{{project}}.{{location}}.{{connection_id}}`
     or `projects/{{project}}/locations/{{location}}/connections/{{connection_id}}`.
 
+    ~>**NOTE:** If you set `external_data_configuration.connection_id`, the
+    table schema must be specified using the top-level `schema` field
+    [documented above](#schema).
+
 * `csv_options` (Optional) - Additional properties to set if
     `source_format` is set to "CSV". Structure is [documented below](#nested_csv_options).
 
@@ -175,7 +183,7 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     partitioning on an unsupported format will lead to an error, as will providing
     an invalid specification. Structure is [documented below](#nested_hive_partitioning_options).
 
-* `avro_options` (Optional) - Additional options if `source_format` is set to  
+* `avro_options` (Optional) - Additional options if `source_format` is set to
     "AVRO".  Structure is [documented below](#nested_avro_options).
 
 * `ignore_unknown_values` (Optional) - Indicates if BigQuery should
@@ -200,6 +208,10 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     datasource, after creation the computed schema will be stored in
     `google_bigquery_table.schema`
 
+    ~>**NOTE:** If you set `external_data_configuration.connection_id`, the
+    table schema must be specified using the top-level `schema` field
+    [documented above](#schema).
+
 * `source_format` (Optional) - The data format. Please see sourceFormat under
     [ExternalDataConfiguration](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#externaldataconfiguration)
     in Bigquery's public API documentation for supported formats. To use "GOOGLE_SHEETS"
@@ -207,6 +219,10 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 * `source_uris` - (Required) A list of the fully-qualified URIs that point to
     your data in Google Cloud.
+
+* `file_set_spec_type` - (Optional) Specifies how source URIs are interpreted for constructing the file set to load.
+    By default source URIs are expanded against the underlying storage.
+    Other options include specifying manifest files. Only applicable to object storage systems. [Docs](cloud/bigquery/docs/reference/rest/v2/tables#filesetspectype)
 
 * `reference_file_schema_uri` - (Optional) When creating an external table, the user can provide a reference file with the table schema. This is enabled for the following formats: AVRO, PARQUET, ORC.
 
@@ -280,8 +296,8 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 <a name="nested_avro_options"></a>The `avro_options` block supports:
 
-* `use_avro_logical_types` (Optional) - If is set to true, indicates whether  
-    to interpret logical types as the corresponding BigQuery data type  
+* `use_avro_logical_types` (Optional) - If is set to true, indicates whether
+    to interpret logical types as the corresponding BigQuery data type
     (for example, TIMESTAMP), instead of using the raw type (for example, INTEGER).
 
 <a name="nested_parquet_options"></a>The `parquet_options` block supports:

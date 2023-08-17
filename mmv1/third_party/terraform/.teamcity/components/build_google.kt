@@ -1,9 +1,15 @@
+/*
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 // this file is copied from mmv1, any changes made here will be overwritten
 
 import jetbrains.buildServer.configs.kotlin.ParametrizedWithType
 
-class ClientConfiguration(var custId: String,
-                          var org: String,
+// TODO(SarahFrench) Refactor this - ENVs stored here aren't all client configuration
+class ClientConfiguration(val custId: String,
+                          val org: String,
                           val org2 : String,
                           val billingAccount : String,
                           val billingAccount2: String,
