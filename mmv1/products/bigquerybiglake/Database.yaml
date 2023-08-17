@@ -13,9 +13,9 @@
 
 ---
 !ruby/object:Api::Resource
-name: "ResourceName"
+name: "Database"
 description: |
-  RESOURCE_DESCRIPTION
+  Databases are containers of tables.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     "Manage open source metadata with BigLake Metastore": "https://cloud.google.com/bigquery/docs/manage-open-source-metadata#create_catalogs"
