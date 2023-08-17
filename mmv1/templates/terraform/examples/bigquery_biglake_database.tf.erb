@@ -1,0 +1,8 @@
+resource "google_bigquery_biglake_catalog" "default" {
+    name = "<%= ctx[:vars]['catalog_name'] %>"
+}
+
+resource "google_bigquery_biglake_database" "default" {
+    name = "<%= ctx[:vars][':primary_resource_name'] %>"
+    catalog = google_bigquery_biglake_catalog.default.name
+}
