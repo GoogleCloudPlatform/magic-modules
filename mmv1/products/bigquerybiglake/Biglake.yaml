@@ -31,6 +31,7 @@ update_mask: true
 properties:
   - !ruby/object:Api::Type::String
     name: "name"
+    output: true
     url_param_only: true
     immutable: true
     description: |
@@ -38,12 +39,14 @@ properties:
       projects/{project_id_or_number}/locations/{locationId}/catalogs/{catalogId}
   - !ruby/object:Api::Type::String
     name: "createTime"
+    output: true
     url_param_only: true
     description: |
       The creation time of the catalog. A timestamp in RFC3339 UTC "Zulu"
       format, with nanosecond resolution and up to nine fractional digits.
   - !ruby/object:Api::Type::String
     name: "updateTime"
+    output: true
     url_param_only: true
     description: |
       Output only. The last modification time of the catalog. A timestamp in
@@ -51,6 +54,7 @@ properties:
       fractional digits.
   - !ruby/object:Api::Type::String
     name: "deleteTime"
+    output: true
     url_param_only: true
     description: |
       Output only. The deletion time of the catalog. Only set after the catalog
@@ -58,6 +62,7 @@ properties:
       resolution and up to nine fractional digits.
   - !ruby/object:Api::Type::String
     name: "expireTime"
+    output: true
     url_param_only: true
     description: |
       Output only. The time when this catalog is considered expired. Only set
