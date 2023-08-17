@@ -1,0 +1,66 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+!ruby/object:Api::Resource # API resource name
+name: "Catalog"
+# Resource description for the provider documentation.
+description: |
+  'Catalogs are top-level containers for Databases and Tables.'
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    "Manage open source metadata with BigLake Metastore": "https://cloud.google.com/bigquery/docs/manage-open-source-metadata#create_catalogs"
+  api: "https://cloud.google.com/bigquery/docs/reference/biglake/rest/v1/projects.locations.catalogs"
+base_url: "projects/{{project}}/locations/{{location}}/catalogs"
+self_link: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}"
+immutable: true
+create_url: "projects/{{project}}/locations/{{location}}/catalogs?resourceId={{catalog_id}}"
+update_verb: :PATCH
+update_mask: true
+
+properties:
+  - !ruby/object:Api::Type::String
+    name: "name"
+    url_param_only: true
+    immutable: true
+    description: |
+      Output only. The resource name. Format: 
+      projects/{project_id_or_number}/locations/{locationId}/catalogs/{catalogId}
+  - !ruby/object:Api::Type::String
+    name: "createTime"
+    url_param_only: true
+    description: |
+      The creation time of the catalog. A timestamp in RFC3339 UTC "Zulu"
+      format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: "updateTime"
+    url_param_only: true
+    description: |
+      Output only. The last modification time of the catalog. A timestamp in
+      RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
+      fractional digits.
+  - !ruby/object:Api::Type::String
+    name: "deleteTime"
+    url_param_only: true
+    description: |
+      Output only. The deletion time of the catalog. Only set after the catalog
+      is deleted. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+      resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: "expireTime"
+    url_param_only: true
+    description: |
+      Output only. The time when this catalog is considered expired. Only set
+      after the catalog is deleted. Only set after the catalog is deleted.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and
+      up to nine fractional digits.
