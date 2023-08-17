@@ -9,7 +9,7 @@ description: |-
 Get Latest Recovery Time for a given instance. For more information see the
 [official documentation](https://cloud.google.com/sql/)
 and
-[API](#TODO).
+[API](https://cloud.google.com/sql/docs/postgres/backup-recovery/pitr#get-the-latest-recovery-time).
 
 
 ## Example Usage
