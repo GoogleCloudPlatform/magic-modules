@@ -748,6 +748,19 @@ properties:
                   description: |
                     The name of the user, e.g. `my-gcp-id@gmail.com`.
   - !ruby/object:Api::Type::NestedObject
+    name: 'binaryAuthorization'
+    description: Binary Authorization related configurations.
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'evaluationMode'
+        description: |
+          Mode of operation for binauthz policy evaluation. If unspecified, 
+          defaults to DISABLED.
+        values:
+          - EVALUATION_MODE_UNSPECIFIED
+          - DISABLED
+          - PROJECT_SINGLETON_POLICY_ENFORCE
+  - !ruby/object:Api::Type::NestedObject
     name: 'upgradePolicy'
     description: The cluster upgrade policy.
     properties:
