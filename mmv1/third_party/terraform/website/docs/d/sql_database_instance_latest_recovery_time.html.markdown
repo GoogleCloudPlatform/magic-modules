@@ -36,4 +36,4 @@ The following attributes are exported:
 
 * `instance` - The name of the instance.
 * `project` - The ID of the project in which the resource belongs.
-* `tiers` - Timestamp, identifies the latest recovery time of the source instance.
+* `latest_recovery_time` - Timestamp, identifies the latest recovery time of the source instance.
