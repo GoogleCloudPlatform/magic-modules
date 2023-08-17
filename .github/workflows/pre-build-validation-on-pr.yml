@@ -1,6 +1,7 @@
 name: pre-build-validation-on-pr
 
-permissions: read-all
+permissions:
+  issues: write
 
 on:
   pull_request:
