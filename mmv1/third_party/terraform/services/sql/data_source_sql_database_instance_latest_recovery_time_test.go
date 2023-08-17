@@ -53,7 +53,7 @@ resource "google_sql_database_instance" "main" {
 }
 
 data "google_sql_database_instance_latest_recovery_time" "default" {
-	instance = resource.google_sql_database_instance.main.name
+  instance = resource.google_sql_database_instance.main.name
 }
 `, context)
 }
