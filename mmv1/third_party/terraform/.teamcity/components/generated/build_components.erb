@@ -69,7 +69,7 @@ fun BuildSteps.TagBuildToIndicatePurpose() {
 
             if [[ "${'$'}TRIGGERED_BY_USERNAME" = "n/a" ]] && [[ ${'$'}TRIGGERED_BY == *"Schedule Trigger"* ]]; then
                 echo "Build was triggered as part of automated testing controlled by a Schedule Trigger"
-                TAG="nightly-${'$'}(date +'%Y-%m-%d')" # e.g. nightly-2023-08-17
+                TAG="nightly-${'$'}(date +%F)" # e.g. nightly-2023-08-17
                 echo "##teamcity[addBuildTag '${'$'}{TAG}']"
             else
                 echo "Build wasn't triggered as part of automated testing; it was triggered manually by user ${'$'}{TRIGGERED_BY_USERNAME}."
