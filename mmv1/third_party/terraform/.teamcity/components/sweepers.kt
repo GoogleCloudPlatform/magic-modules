@@ -57,6 +57,8 @@ class sweeperDetails() {
                 WorkingDirectory(path)
             }
 
+            artifactRules = "%teamcity.build.checkoutDir%/debug*.log"
+
             failureConditions {
                 errorMessage = true
                 executionTimeoutMin = buildTimeout

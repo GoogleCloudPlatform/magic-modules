@@ -57,6 +57,8 @@ class packageDetails(packageName: String, displayName: String, providerName: Str
                 WorkingDirectory(path)
             }
 
+            artifactRules = "%teamcity.build.checkoutDir%/debug*.log"
+
             failureConditions {
                 errorMessage = true
                 executionTimeoutMin = buildTimeout
