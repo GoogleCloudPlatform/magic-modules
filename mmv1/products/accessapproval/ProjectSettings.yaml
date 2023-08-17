@@ -129,4 +129,5 @@ properties:
     name: project
     description: |
       Project id.
-    deprecation_message: `project` is deprecated and will be removed in a future major release. Use `project_id` instead.
+    deprecation_message: >-
+      `project` is deprecated and will be removed in a future major release. Use `project_id` instead.

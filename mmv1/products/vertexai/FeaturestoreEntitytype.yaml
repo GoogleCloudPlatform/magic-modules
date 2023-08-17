@@ -156,7 +156,8 @@ properties:
           - !ruby/object:Api::Type::String
             name: 'monitoringInterval'
             min_version: beta
-            deprecation_message: `monitoring_interval` is deprecated and will be removed in a future release.
+            deprecation_message: >-
+              `monitoring_interval` is deprecated and will be removed in a future release.
             description: |
               Configuration of the snapshot analysis based monitoring pipeline running interval. The value is rolled up to full day.
 
