@@ -54,4 +54,7 @@ resource "google_gkeonprem_bare_metal_cluster" "<%= ctx[:primary_resource_id] %>
       }
     }
   }
+  upgrade_policy {
+    policy = "SERIAL"
+  }
 }
