@@ -21,13 +21,13 @@ aliases:
 
     ```bash
     gcloud auth application-default login
-    export GOOGLE_USE_DEFAULT_CREDENTIALS=TRUE
+    export GOOGLE_USE_DEFAULT_CREDENTIALS=true
     ```
 
 1. Set the following environment variables:
 
     ```bash
-    export GOOGLE_USE_DEFAULT_CREDENTIALS=TRUE
+    export GOOGLE_USE_DEFAULT_CREDENTIALS=true
     export GOOGLE_PROJECT=PROJECT_ID
     export GOOGLE_REGION=us-central1
     export GOOGLE_ZONE=us-central1-a
