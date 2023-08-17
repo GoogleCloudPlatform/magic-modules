@@ -7,8 +7,8 @@ resource "google_bigquery_biglake_database" "default" {
     catalog = google_bigquery_biglake_catalog.default.name
 }
 
-resource "google_bigquery_biglake_database" "default" {
-    name = "<%= ctx[:vars][':primary_resource_name'] %>"
+resource "google_bigquery_biglake_database" "<%= ctx[:primary_resource_id] %>" {
+    name = "<%= ctx[:vars]['table_name'] %>"
     catalog = google_bigquery_biglake_catalog.default.name
     database = google_bigquery_biglake_database.default.name
 }
