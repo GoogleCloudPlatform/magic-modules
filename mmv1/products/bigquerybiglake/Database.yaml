@@ -28,7 +28,6 @@ update_verb: :PATCH
 update_mask: true
 delete_url: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases/{{database_id}}"
 delete_verb: :DELETE
-
 properties:
   - !ruby/object:Api::Type::String
     name: "name"
