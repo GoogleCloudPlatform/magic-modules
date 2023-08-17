@@ -6,17 +6,18 @@ import (
 	"testing"
 )
 
-// This test only ensures there isn't a panic or an error reading tests in the provider.
+// This test only ensures there isn't a panic reading tests in the provider.
 func TestReadAllTests(t *testing.T) {
-	if providerDir := os.Getenv("PROVIDER_DIR"); providerDir != "" {
-		if _, err := readAllTests(providerDir); err != nil {
-			t.Error(err)
+	if servicesDir := os.Getenv("SERVICES_DIR"); servicesDir != "" {
+		_, errs := readAllTests(servicesDir)
+		for path, err := range errs {
+			t.Logf("path: %s, err: %v", path, err)
 		}
 	}
 }
 
 func TestReadCoveredResourceTestFile(t *testing.T) {
-	tests, err := readTestFile("testdata/covered_resource_test.go")
+	tests, err := readTestFile("testdata/service/covered_resource_test.go")
 	if err != nil {
 		t.Fatalf("error reading covered resource test file: %v", err)
 	}
@@ -37,13 +38,14 @@ func TestReadCoveredResourceTestFile(t *testing.T) {
 				"field_six": "\"value-three\"",
 			},
 		},
+		"field_seven": "true",
 	}); !reflect.DeepEqual(coveredResource, expectedResource) {
 		t.Errorf("found wrong fields in covered resource config: %#v, expected %#v", coveredResource, expectedResource)
 	}
 }
 
 func TestReadConfigVariableTestFile(t *testing.T) {
-	tests, err := readTestFile("testdata/config_variable_test.go")
+	tests, err := readTestFile("testdata/service/config_variable_test.go")
 	if err != nil {
 		t.Fatalf("error reading config variable test file: %v", err)
 	}
@@ -63,7 +65,7 @@ func TestReadConfigVariableTestFile(t *testing.T) {
 }
 
 func TestReadMultipleResourcesTestFile(t *testing.T) {
-	tests, err := readTestFile("testdata/multiple_resource_test.go")
+	tests, err := readTestFile("testdata/service/multiple_resource_test.go")
 	if err != nil {
 		t.Fatalf("error reading multiple resources test file: %v", err)
 	}

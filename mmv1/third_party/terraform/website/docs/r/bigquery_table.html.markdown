@@ -14,7 +14,6 @@ Creates a table resource in a dataset for Google BigQuery. For more information 
 (and run `terraform apply` to write the field to state) in order to destroy an instance.
 It is recommended to not set this field (or set it to true) until you're ready to destroy.
 
-
 ## Example Usage
 
 ```hcl
@@ -107,13 +106,15 @@ The following arguments are supported:
 
 * `friendly_name` - (Optional) A descriptive name for the table.
 
+* `max_staleness`: (Optional) The maximum staleness of data that could be returned when the table (or stale MV) is queried. Staleness encoded as a string encoding of sql IntervalValue type.
+
 * `encryption_configuration` - (Optional) Specifies how the table should be encrypted.
     If left blank, the table will be encrypted with a Google-managed key; that process
     is transparent to the user.  Structure is [documented below](#nested_encryption_configuration).
 
 * `labels` - (Optional) A mapping of labels to assign to the resource.
 
-* `schema` - (Optional) A JSON schema for the table.
+* <a name="schema"></a>`schema` - (Optional) A JSON schema for the table.
 
     ~>**NOTE:** Because this field expects a JSON string, any changes to the
     string will create a diff, even if the JSON itself hasn't changed.
@@ -122,8 +123,11 @@ The following arguments are supported:
     field type, we currently cannot suppress the recurring diff this causes.
     As a workaround, we recommend using the schema as returned by the API.
 
-    ~>**NOTE:**  When setting `schema` for `external_data_configuration`, please use
-    `external_data_configuration.schema` [documented below](#nested_external_data_configuration).
+    ~>**NOTE:**  If you use `external_data_configuration`
+    [documented below](#nested_external_data_configuration) and do **not** set
+    `external_data_configuration.connection_id`, schemas must be specified
+    with `external_data_configuration.schema`. Otherwise, schemas must be
+    specified with this top-level field.
 
 * `time_partitioning` - (Optional) If specified, configures time-based
     partitioning for this table. Structure is [documented below](#nested_time_partitioning).
@@ -157,8 +161,18 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     the form `{{project}}.{{location}}.{{connection_id}}`
     or `projects/{{project}}/locations/{{location}}/connections/{{connection_id}}`.
 
+    ~>**NOTE:** If you set `external_data_configuration.connection_id`, the
+    table schema must be specified using the top-level `schema` field
+    [documented above](#schema).
+
 * `csv_options` (Optional) - Additional properties to set if
     `source_format` is set to "CSV". Structure is [documented below](#nested_csv_options).
+
+* `json_options` (Optional) - Additional properties to set if
+    `source_format` is set to "JSON". Structure is [documented below](#nested_json_options).
+
+* `parquet_options` (Optional) - Additional properties to set if
+    `source_format` is set to "PARQUET". Structure is [documented below](#nested_parquet_options).
 
 * `google_sheets_options` (Optional) - Additional options if
     `source_format` is set to "GOOGLE_SHEETS". Structure is
@@ -169,9 +183,8 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     partitioning on an unsupported format will lead to an error, as will providing
     an invalid specification. Structure is [documented below](#nested_hive_partitioning_options).
 
-* `avro_options` (Optional) - Additional options if `source_format` is set to  
+* `avro_options` (Optional) - Additional options if `source_format` is set to
     "AVRO".  Structure is [documented below](#nested_avro_options).
-
 
 * `ignore_unknown_values` (Optional) - Indicates if BigQuery should
     allow extra values that are not represented in the table schema.
@@ -195,7 +208,11 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     datasource, after creation the computed schema will be stored in
     `google_bigquery_table.schema`
 
-* `source_format` (Required) - The data format. Please see sourceFormat under
+    ~>**NOTE:** If you set `external_data_configuration.connection_id`, the
+    table schema must be specified using the top-level `schema` field
+    [documented above](#schema).
+
+* `source_format` (Optional) - The data format. Please see sourceFormat under
     [ExternalDataConfiguration](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#externaldataconfiguration)
     in Bigquery's public API documentation for supported formats. To use "GOOGLE_SHEETS"
     the `scopes` must include "https://www.googleapis.com/auth/drive.readonly".
@@ -203,7 +220,15 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 * `source_uris` - (Required) A list of the fully-qualified URIs that point to
     your data in Google Cloud.
 
+* `file_set_spec_type` - (Optional) Specifies how source URIs are interpreted for constructing the file set to load.
+    By default source URIs are expanded against the underlying storage.
+    Other options include specifying manifest files. Only applicable to object storage systems. [Docs](cloud/bigquery/docs/reference/rest/v2/tables#filesetspectype)
+
 * `reference_file_schema_uri` - (Optional) When creating an external table, the user can provide a reference file with the table schema. This is enabled for the following formats: AVRO, PARQUET, ORC.
+
+* `metadata_cache_mode` - (Optional) Metadata Cache Mode for the table. Set this to enable caching of metadata from external data source. Valid values are `AUTOMATIC` and `MANUAL`.
+
+* `object_metadata` - (Optional) Object Metadata is used to create Object Tables. Object Tables contain a listing of objects (with their metadata) found at the sourceUris. If `object_metadata` is set, `source_format` should be omitted.
 
 <a name="nested_csv_options"></a>The `csv_options` block supports:
 
@@ -230,6 +255,10 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 * `skip_leading_rows` (Optional) - The number of rows at the top of a CSV
     file that BigQuery will skip when reading the data.
 
+<a name="nested_json_options"></a>The `json_options` block supports:
+
+* `encoding` (Optional) - The character encoding of the data. The supported values are UTF-8, UTF-16BE, UTF-16LE, UTF-32BE, and UTF-32LE. The default value is UTF-8.
+
 <a name="nested_google_sheets_options"></a>The `google_sheets_options` block supports:
 
 * `range` (Optional) - Range of a sheet to query from. Only used when
@@ -251,7 +280,7 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
       partitioning on an unsupported format will lead to an error.
       Currently supported formats are: JSON, CSV, ORC, Avro and Parquet.
     * CUSTOM: when set to `CUSTOM`, you must encode the partition key schema within the `source_uri_prefix` by setting `source_uri_prefix` to `gs://bucket/path_to_table/{key1:TYPE1}/{key2:TYPE2}/{key3:TYPE3}`.
-    
+
 * `require_partition_filter` - (Optional) If set to true, queries over this table
     require a partition filter that can be used for partition elimination to be
     specified.
@@ -267,10 +296,15 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 <a name="nested_avro_options"></a>The `avro_options` block supports:
 
-* `use_avro_logical_types` (Optional) - If is set to true, indicates whether  
-    to interpret logical types as the corresponding BigQuery data type  
+* `use_avro_logical_types` (Optional) - If is set to true, indicates whether
+    to interpret logical types as the corresponding BigQuery data type
     (for example, TIMESTAMP), instead of using the raw type (for example, INTEGER).
-    
+
+<a name="nested_parquet_options"></a>The `parquet_options` block supports:
+
+* `enum_as_string` (Optional) - Indicates whether to infer Parquet ENUM logical type as STRING instead of BYTES by default.
+
+* `enable_list_inference` (Optional) - Indicates whether to use schema inference specifically for Parquet LIST logical type.
 
 <a name="nested_time_partitioning"></a>The `time_partitioning` block supports:
 

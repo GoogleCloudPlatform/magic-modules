@@ -66,11 +66,11 @@ func (rm ResourceInventoryRule) Identifier() string {
 
 // Message - a message to to inform the user
 // of a breakage.
-func (rm ResourceInventoryRule) Message(version, resource string) string {
+func (rm ResourceInventoryRule) Message(resource string) string {
 	msg := rm.message
 	resource = fmt.Sprintf("`%s`", resource)
 	msg = strings.ReplaceAll(msg, "{{resource}}", resource)
-	return msg + documentationReference(version, rm.identifier)
+	return msg + documentationReference(rm.identifier)
 }
 
 // IsRuleBreak - compares resource entries and returns

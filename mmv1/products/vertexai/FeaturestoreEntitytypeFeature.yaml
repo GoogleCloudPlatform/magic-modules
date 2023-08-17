@@ -66,6 +66,9 @@ examples:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_create: templates/terraform/constants/vertex_ai_featurestore_entitytype_feature.go.erb
   pre_delete: templates/terraform/constants/vertex_ai_featurestore_entitytype_feature.go.erb
+  custom_import: templates/terraform/custom_import/vertex_ai_featurestore_entitytype_feature.go.erb
+  extra_schema_entry: templates/terraform/extra_schema_entry/vertex_ai_featurestore_entitytype_feature.go.erb
+  encoder: templates/terraform/encoders/vertex_ai_featurestore_entitytype_feature.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: entitytype

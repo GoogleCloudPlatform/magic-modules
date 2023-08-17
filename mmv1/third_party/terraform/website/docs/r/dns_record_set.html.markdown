@@ -228,6 +228,7 @@ resource "google_compute_forwarding_rule" "prod" {
   backend_service       = google_compute_region_backend_service.prod.id
   all_ports             = true
   network               = google_compute_network.prod.name
+  allow_global_access   = true
 }
 
 resource "google_compute_region_backend_service" "prod" {
@@ -315,7 +316,7 @@ The following arguments are supported:
 
 <a name="nested_internal_load_balancers"></a>The `internal_load_balancers` block supports:
 
-* `load_balancer_type` - (Required) The type of load balancer. This value is case-sensitive. Possible values: ["regionalL4ilb"]
+* `load_balancer_type` - (Required) The type of load balancer. This value is case-sensitive. Possible values: ["regionalL4ilb", "regionalL7ilb", "globalL7ilb"]
 
 * `ip_address` - (Required) The frontend IP address of the load balancer.
 

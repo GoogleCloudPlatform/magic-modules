@@ -114,6 +114,16 @@ examples:
     ignore_read_extra:
       - "metadata"
       - "metadata_startup_script"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "url_map_path_template_match"
+    primary_resource_id: "urlmap"
+    vars:
+      url_map_name: "urlmap"
+      cart_backend_service_name: "cart-service"
+      user_backend_service_name: "user-service"
+      http_health_check_name: "health-check"
+      backend_bucket_name: "static-asset-backend-bucket"
+      storage_bucket_name: "static-asset-bucket"
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -1093,6 +1103,18 @@ properties:
                         and anchor supplied with the original URL. For regular expression grammar please
                         see en.cppreference.com/w/cpp/regex/ecmascript  Only one of prefixMatch,
                         fullPathMatch or regexMatch must be specified.
+                    - !ruby/object:Api::Type::String
+                      name: pathTemplateMatch
+                      description: |
+                        For satisfying the matchRule condition, the path of the request
+                        must match the wildcard pattern specified in pathTemplateMatch
+                        after removing any query parameters and anchor that may be part
+                        of the original URL.
+
+                        pathTemplateMatch must be between 1 and 255 characters
+                        (inclusive).  The pattern specified by pathTemplateMatch may
+                        have at most 5 wildcard operators and at most 5 variable
+                        captures in total.
               - !ruby/object:Api::Type::NestedObject
                 name: 'routeAction'
                 description: |
@@ -1321,6 +1343,23 @@ properties:
                           Prior to forwarding the request to the selected backend service, the matching
                           portion of the request's path is replaced by pathPrefixRewrite. The value must
                           be between 1 and 1024 characters.
+                      - !ruby/object:Api::Type::String
+                        name: 'pathTemplateRewrite'
+                        description: |
+                          Prior to forwarding the request to the selected origin, if the
+                          request matched a pathTemplateMatch, the matching portion of the
+                          request's path is replaced re-written using the pattern specified
+                          by pathTemplateRewrite.
+
+                          pathTemplateRewrite must be between 1 and 255 characters
+                          (inclusive), must start with a '/', and must only use variables
+                          captured by the route's pathTemplate matchers.
+
+                          pathTemplateRewrite may only be used when all of a route's
+                          MatchRules specify pathTemplate.
+
+                          Only one of pathPrefixRewrite and pathTemplateRewrite may be
+                          specified.
                   - !ruby/object:Api::Type::Array
                     name: 'weightedBackendServices'
                     description: |

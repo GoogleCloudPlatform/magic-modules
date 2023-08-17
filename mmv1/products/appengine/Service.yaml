@@ -23,6 +23,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/appengine/docs/admin-api/deploying-overview'
   api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services'
+# Used as a resource reference
 exclude: true
 properties:
   - !ruby/object:Api::Type::String

@@ -25,7 +25,6 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'service_name'
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
-  exclude: false
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'endpoints_iam'

@@ -31,6 +31,8 @@ import_format:
   [
     'projects/{{project}}/locations/{{location}}/capacityCommitments/{{capacity_commitment_id}}',
   ]
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/bigquery_reservation_capacity_commitment.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_reservation_capacity_commitment_basic'
@@ -81,6 +83,7 @@ properties:
     required: true
     description: |
       Capacity commitment plan. Valid values are at https://cloud.google.com/bigquery/docs/reference/reservations/rpc/google.cloud.bigquery.reservation.v1#commitmentplan
+    diff_suppress_func: bigqueryReservationCapacityCommitmentPlanDiffSuppressFunc
   - !ruby/object:Api::Type::String
     name: 'state'
     output: true

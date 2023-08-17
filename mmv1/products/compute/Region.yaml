@@ -22,6 +22,7 @@ description: |
   Represents a Region resource. A region is a specific geographical
   location where you can run your resources. Each region has one or more
   zones
+# Used as a resource reference
 exclude: true
 properties:
   - !ruby/object:Api::Type::Time

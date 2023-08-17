@@ -1,5 +1,4 @@
 resource "google_cloudbuildv2_connection" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
   location = "us-central1"
   name = "<%= ctx[:vars]['connection_name'] %>"
 

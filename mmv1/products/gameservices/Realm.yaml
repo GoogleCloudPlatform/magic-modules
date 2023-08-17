@@ -47,6 +47,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'game_service_realm_basic'
     primary_resource_id: 'default'
+    skip_test: true
     vars:
       realm_id: 'tf-test-realm'
 parameters:

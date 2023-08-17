@@ -70,8 +70,10 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   iam_conditions_request_type: :QUERY_PARAM
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/subnetwork.erb
-  resource_definition: templates/terraform/resource_definition/subnetwork.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/subnetwork.erb
+custom_diff: [
+  'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)',
+]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'subnetwork_basic'
@@ -124,11 +126,6 @@ properties:
       The gateway address for default routes to reach destination addresses
       outside this subnetwork.
     output: true
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'ipCidrRange'
     description: |
@@ -163,15 +160,17 @@ properties:
       Only networks that are in the distributed mode can have subnetworks.
     immutable: true
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'purpose'
     immutable: true
     description: |
-      The purpose of the resource. This field can be either `PRIVATE_RFC_1918`, `INTERNAL_HTTPS_LOAD_BALANCER` or `REGIONAL_MANAGED_PROXY`.
-      A subnetwork with purpose set to `INTERNAL_HTTPS_LOAD_BALANCER` is a user-created subnetwork that is reserved for Internal HTTP(S) Load Balancing.
-      A subnetwork in a given region with purpose set to `REGIONAL_MANAGED_PROXY` is a proxy-only subnet and is shared between all the regional Envoy-based load balancers.
+      The purpose of the resource. This field can be either `PRIVATE_RFC_1918`, `REGIONAL_MANAGED_PROXY`, `GLOBAL_MANAGED_PROXY`, or `PRIVATE_SERVICE_CONNECT`.
+      A subnet with purpose set to `REGIONAL_MANAGED_PROXY` is a user-created subnetwork that is reserved for regional Envoy-based load balancers.
+      A subnetwork in a given region with purpose set to `GLOBAL_MANAGED_PROXY` is a proxy-only subnet and is shared between all the cross-regional Envoy-based load balancers.
+      A subnetwork with purpose set to `PRIVATE_SERVICE_CONNECT` reserves the subnet for hosting a Private Service Connect published service.
+      Note that `REGIONAL_MANAGED_PROXY` is the preferred setting for all regional Envoy load balancers.
       If unspecified, the purpose defaults to `PRIVATE_RFC_1918`.
-      The enableFlowLogs field isn't supported with the purpose field set to `INTERNAL_HTTPS_LOAD_BALANCER`.
     default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'role'
@@ -184,11 +183,10 @@ properties:
       - :BACKUP
     description: |
       The role of subnetwork.
+      Currently, this field is only used when `purpose` is `REGIONAL_MANAGED_PROXY`.
       The value can be set to `ACTIVE` or `BACKUP`.
-      An `ACTIVE` subnetwork is one that is currently being used.
+      An `ACTIVE` subnetwork is one that is currently being used for Envoy-based load balancers in a region.
       A `BACKUP` subnetwork is one that is ready to be promoted to `ACTIVE` or is currently draining.
-
-      Subnetwork role must be specified when purpose is set to `INTERNAL_HTTPS_LOAD_BALANCER` or `REGIONAL_MANAGED_PROXY`.
   - !ruby/object:Api::Type::Array
     name: 'secondaryIpRange'
     api_name: secondaryIpRanges
@@ -258,6 +256,7 @@ properties:
     immutable: true
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'logConfig'
     update_verb: :PATCH
@@ -265,17 +264,14 @@ properties:
     fingerprint_name: 'fingerprint'
     update_id: 'logConfig'
     description: |
-      Denotes the logging options for the subnetwork flow logs. If logging is enabled
-      logs will be exported to Stackdriver. This field cannot be set if the `purpose` of this
-      subnetwork is `INTERNAL_HTTPS_LOAD_BALANCER`
+      This field denotes the VPC flow logging options for this subnetwork. If
+      logging is enabled, logs are exported to Cloud Logging. Flow logging
+      isn't supported if the subnet `purpose` field is set to subnetwork is
+      `REGIONAL_MANAGED_PROXY` or `GLOBAL_MANAGED_PROXY`.
     send_empty_value: true
     custom_expand: 'templates/terraform/custom_expand/subnetwork_log_config.go.erb'
     custom_flatten: 'templates/terraform/custom_flatten/subnetwork_log_config.go.erb'
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'enable'
-        description: If logging is enabled for this subnetwork
-        exclude: true
       - !ruby/object:Api::Type::Enum
         name: 'aggregationInterval'
         at_least_one_of:

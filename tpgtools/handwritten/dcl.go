@@ -1,4 +1,4 @@
-package google
+package tpgdclresource
 
 import (
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"

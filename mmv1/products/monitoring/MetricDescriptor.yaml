@@ -26,8 +26,8 @@ description:
   deleting or altering it stops data collection and makes the metric type's
   existing data unusable.
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
-  check_response_func_absence: PollCheckForAbsence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
   target_occurrences: 20
   actions: ['create', 'update', 'delete']
 id_format: '{{name}}'

@@ -26,7 +26,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Creating Backups': 'https://cloud.google.com/filestore/docs/create-backups'
   api: 'https://cloud.google.com/filestore/docs/reference/rest/v1/projects.locations.instances.backups'
 mutex: 'filestore/{{project}}'
-error_retry_predicates: ['transport_tpg.IsNotFilestoreQuotaError']
+error_abort_predicates: ['transport_tpg.Is429QuotaError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'filestore_backup_basic'

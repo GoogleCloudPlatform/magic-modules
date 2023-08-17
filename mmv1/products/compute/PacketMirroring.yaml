@@ -89,6 +89,7 @@ properties:
         imports: 'selfLink'
         required: true
         immutable: true
+        custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
     required: true
   - !ruby/object:Api::Type::Integer
     name: priority
@@ -113,6 +114,7 @@ properties:
         resource: 'ForwardingRule'
         imports: 'selfLink'
         description: The URL of the forwarding rule.
+        custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: filter
     description: |
@@ -163,6 +165,7 @@ properties:
               description:
                 The URL of the subnetwork where this rule should be active.
               required: true
+              custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
       - !ruby/object:Api::Type::Array
         name: instances
         description: |
@@ -182,6 +185,7 @@ properties:
               description:
                 The URL of the instances where this rule should be active.
               required: true
+              custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
       - !ruby/object:Api::Type::Array
         name: tags
         at_least_one_of:

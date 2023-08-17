@@ -419,9 +419,9 @@ properties:
           Currently only projects are allowed.
           Format: projects/{project_number}
         at_least_one_of:
-          - status.0.resources
-          - status.0.access_levels
-          - status.0.restricted_services
+          - spec.0.resources
+          - spec.0.access_levels
+          - spec.0.restricted_services
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'accessLevels'
@@ -437,9 +437,9 @@ properties:
 
           Format: accessPolicies/{policy_id}/accessLevels/{access_level_name}
         at_least_one_of:
-          - status.0.resources
-          - status.0.access_levels
-          - status.0.restricted_services
+          - spec.0.resources
+          - spec.0.access_levels
+          - spec.0.restricted_services
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'restrictedServices'
@@ -450,9 +450,9 @@ properties:
           buckets inside the perimeter must meet the perimeter's access
           restrictions.
         at_least_one_of:
-          - status.0.resources
-          - status.0.access_levels
-          - status.0.restricted_services
+          - spec.0.resources
+          - spec.0.access_levels
+          - spec.0.restricted_services
         item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: 'vpcAccessibleServices'

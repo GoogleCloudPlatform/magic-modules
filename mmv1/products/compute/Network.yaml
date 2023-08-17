@@ -86,11 +86,6 @@ properties:
     description: |
       The gateway address for default routing out of the network. This value
       is selected by GCP.
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -105,15 +100,6 @@ properties:
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateGCEName'
-  - !ruby/object:Api::Type::Array
-    # TODO: Change subnetworks to ResourceRef
-    name: 'subnetworks'
-    description: |
-      Server-defined fully-qualified URLs for all subnetworks in this
-      network.
-    output: true
-    exclude: true
-    item_type: Api::Type::String
   - !ruby/object:Api::Type::Boolean
     name: 'autoCreateSubnetworks'
     description: |
@@ -127,11 +113,6 @@ properties:
     default_value: true
     send_empty_value: true
     conflicts: []
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
-    description: 'Creation timestamp in RFC3339 text format.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: 'routingConfig'
     update_verb: :PATCH
@@ -157,45 +138,6 @@ properties:
         update_verb: :PATCH
         update_url: projects/{{project}}/global/networks/{{name}}
         default_from_api: true
-  - !ruby/object:Api::Type::Array
-    name: 'peerings'
-    # This is only used in InSpec, handled via fine-grained in Terraform
-    exclude: true
-    output: true
-    description: |
-      Peerings for a network
-    item_type: !ruby/object:Api::Type::NestedObject
-      name: subnetworks
-      description: The subnetworks that should be mirrored.
-      properties:
-        - !ruby/object:Api::Type::String
-          name: 'name'
-          description: |
-            Name of the peering.
-        - !ruby/object:Api::Type::String
-          name: 'state'
-          description: |
-            State of the peering.
-        - !ruby/object:Api::Type::String
-          name: 'stateDetails'
-          description: |
-            Details about the current state of the peering.
-        - !ruby/object:Api::Type::String
-          name: 'network'
-          description: |
-            URL of the peer network
-        - !ruby/object:Api::Type::Boolean
-          name: 'exportCustomRoutes'
-          description: |
-            Whether to export the custom routes to the peer network.
-        - !ruby/object:Api::Type::Boolean
-          name: 'importCustomRoutes'
-          description: |
-            Whether to import the custom routes to the peer network.
-        - !ruby/object:Api::Type::Integer
-          name: 'peerMtu'
-          description: |
-            Maximum Transmission Unit in bytes.
   - !ruby/object:Api::Type::Integer
     name: 'mtu'
     description: |

@@ -60,15 +60,3 @@ properties:
     description: |
       The resource name for the KeyRing.
     required: true
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
-    description: |
-      The time that this resource was created on the server.
-      This is in RFC3339 text format.
-    output: true
-    exclude: true
-  - !ruby/object:Api::Type::String
-    name: 'keyRingUrl'
-    description: |
-      The full resource name for the KeyRing
-    exclude: true

@@ -25,6 +25,12 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/container-analysis/'
     'Creating Attestations (Occurrences)': 'https://cloud.google.com/binary-authorization/docs/making-attestations'
   api: 'https://cloud.google.com/container-analysis/api/reference/rest/'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  method_name_separator: ':'
+  fetch_iam_policy_verb: :POST
+  parent_resource_attribute: 'note'
+  import_format: ['projects/{{project}}/notes/{{name}}', '{{name}}']
+  allowed_iam_role: 'roles/containeranalysis.notes.occurrences.viewer'
 mutex: 'projects/{{project}}/notes/{{name}}'
 id_format: 'projects/{{project}}/notes/{{name}}'
 import_format: ['projects/{{project}}/notes/{{name}}']
@@ -35,6 +41,9 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'container_analysis_note_basic'
     primary_resource_id: 'note'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-attestor-note%s\",
+      context[\"random_suffix\"\
+      ])"
     vars:
       note_name: 'attestor-note'
   - !ruby/object:Provider::Terraform::Examples

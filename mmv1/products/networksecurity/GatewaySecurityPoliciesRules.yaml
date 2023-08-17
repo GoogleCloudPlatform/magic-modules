@@ -16,15 +16,14 @@ name: 'GatewaySecurityPolicyRule'
 base_url: 'projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies/{{gateway_security_policy}}/rules'
 create_url: 'projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies/{{gateway_security_policy}}/rules?gatewaySecurityPolicyRuleId={{name}}'
 self_link: 'projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies/{{gateway_security_policy}}/rules/{{name}}'
-min_version: beta
 update_verb: :PATCH
 update_mask: true
 description: |
   The GatewaySecurityPolicyRule resource is in a nested collection within a GatewaySecurityPolicy and represents
   a traffic matching condition and associated action to perform.
 references:
-  !ruby/object:Api::Resource::ReferenceLinks  # TODO(felipegc): change the url to beta once it is available.
-  api: 'https://cloud.google.com/secure-web-proxy/docs/reference/network-security/rest/v1alpha1/projects.locations.gatewaySecurityPolicies.rules'
+  !ruby/object:Api::Resource::ReferenceLinks
+  api: 'https://cloud.google.com/secure-web-proxy/docs/reference/network-security/rest/v1/projects.locations.gatewaySecurityPolicies.rules'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -52,14 +51,12 @@ import_format:
   ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_security_gateway_security_policy_rules_basic'
     primary_resource_id: 'default'
     vars:
       gateway_security_policy_id: 'my-gateway-security-policy'
       resource_name: 'my-gateway-security-policy-rule'
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_security_gateway_security_policy_rules_advanced'
     primary_resource_id: 'default'
     vars:

@@ -102,6 +102,10 @@ module Provider
       # Just like the encoder, it is only used if object.input is
       # false.
       attr_reader :post_update
+      # This code replaces the entire contents of the Update call. It
+      # should be used for resources that don't have normal update
+      # semantics that cannot be supported well by other MM features.
+      attr_reader :custom_update
       # This code is run just before the Delete call happens.  It's
       # useful to prepare an object for deletion, e.g. by detaching
       # a disk before deleting it.
@@ -140,6 +144,7 @@ module Provider
         check :pre_read, type: String
         check :pre_update, type: String
         check :post_update, type: String
+        check :custom_update, type: String
         check :pre_delete, type: String
         check :custom_import, type: String
         check :post_import, type: String

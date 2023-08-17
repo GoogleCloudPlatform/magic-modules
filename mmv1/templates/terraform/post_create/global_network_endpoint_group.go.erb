@@ -19,7 +19,15 @@ if err != nil {
 }
 
 log.Printf("[DEBUG] Creating new GlobalNetworkEndpoint: %#v", wrappedReq)
-_, err = transport_tpg.SendRequestWithTimeout(config, "POST", project, attachUrl, userAgent, wrappedReq, d.Timeout(schema.TimeoutCreate))
+_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "POST",
+	Project: project,
+	RawURL: attachUrl,
+	UserAgent: userAgent,
+	Body: wrappedReq,
+	Timeout: d.Timeout(schema.TimeoutCreate),
+})
 if err != nil {
 	return fmt.Errorf("Error creating GlobalNetworkEndpoint: %s", err)
 }

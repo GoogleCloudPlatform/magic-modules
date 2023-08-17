@@ -1,0 +1,61 @@
+resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
+  location = "us-central1"
+  provider = google-beta
+
+  metadata {
+    annotations = {
+      "run.googleapis.com/launch-stage" = "BETA"
+    }
+  }
+  template {
+    metadata {
+      annotations = {
+        "run.googleapis.com/container-dependencies" = jsonencode({hello-1 = ["hello-2"]})
+      }
+    }
+    spec {
+      containers {
+	name = "hello-1"
+	ports {
+	  container_port = 8080
+	}
+	image = "us-docker.pkg.dev/cloudrun/container/hello"
+	volume_mounts {
+	  name = "shared-volume"
+	  mount_path = "/mnt/shared"
+	}
+      }
+      containers {
+	name = "hello-2"
+	image = "us-docker.pkg.dev/cloudrun/container/hello"
+	env {
+	  name = "PORT"
+	  value = "8081"
+	}
+	startup_probe {
+	  http_get {
+	    port = 8081
+	  }
+	}
+	volume_mounts {
+	  name = "shared-volume"
+	  mount_path = "/mnt/shared"
+	}
+      }
+      volumes {
+	name = "shared-volume"
+	empty_dir {
+	  medium = "Memory"
+	  size_limit = "128Mi"
+	}
+      }
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      metadata[0].annotations["run.googleapis.com/launch-stage"],
+    ]
+  }
+}

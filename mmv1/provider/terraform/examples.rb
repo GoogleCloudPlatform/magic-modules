@@ -77,7 +77,7 @@ module Provider
       #   - tests config will have `"network = my-vpc%{random_suffix}"`
       #     with context
       #       map[string]interface{}{
-      #         "random_suffix": RandString()
+      #         "random_suffix": acctest.RandString()
       #       }
       #
       # If test_vars_overrides["network"] = "nameOfVpc()"
@@ -277,8 +277,8 @@ module Provider
       # rubocop:disable Layout/LineLength
       def substitute_test_paths(config)
         config.gsub!('../static/img/header-logo.png', 'test-fixtures/header-logo.png')
-        config.gsub!('path/to/private.key', 'test-fixtures/ssl_cert/test.key')
-        config.gsub!('path/to/certificate.crt', 'test-fixtures/ssl_cert/test.crt')
+        config.gsub!('path/to/private.key', 'test-fixtures/test.key')
+        config.gsub!('path/to/certificate.crt', 'test-fixtures/test.crt')
         config.gsub!('path/to/index.zip', '%{zip_path}')
         config.gsub!('verified-domain.com', 'tf-test-domain%{random_suffix}.gcp.tfacc.hashicorptest.com')
         config.gsub!('path/to/id_rsa.pub', 'test-fixtures/ssh_rsa.pub')

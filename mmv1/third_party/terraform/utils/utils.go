@@ -7,12 +7,12 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/googleapi"
@@ -219,9 +219,9 @@ func lockedCall(lockKey string, f func() error) error {
 // since that would require us to generate a very particular ordering of arguments.
 //
 // Deprecated: For backward compatibility Nprintf is still working,
-// but all new code should use Nprintf in the tpgresource package instead.
+// but all new code should use Nprintf in the acctest package instead.
 func Nprintf(format string, params map[string]interface{}) string {
-	return tpgresource.Nprintf(format, params)
+	return acctest.Nprintf(format, params)
 }
 
 // serviceAccountFQN will attempt to generate the fully qualified name in the format of:
@@ -330,15 +330,7 @@ func checkGoogleIamPolicy(value string) error {
 // cluster. This error can be safely retried until the incompatible operation
 // completes, and the newly requested operation can begin.
 func retryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f func() error) error {
-	return resource.Retry(timeout, func() *resource.RetryError {
-		if err := transport_tpg.LockedCall(lockKey, f); err != nil {
-			if isFailedPreconditionError(err) {
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
+	return tpgresource.RetryWhileIncompatibleOperation(timeout, lockKey, f)
 }
 
 // Deprecated: For backward compatibility frameworkDiagsToSdkDiags is still working,

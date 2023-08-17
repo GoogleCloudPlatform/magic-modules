@@ -452,7 +452,6 @@ func TestBreakingMessage(t *testing.T) {
 		MessageContext{
 			Resource: "a",
 			Field:    "b",
-			Version:  "beta",
 		},
 	)
 

@@ -1,0 +1,123 @@
+<%- # the license inside this block applies to this file
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+-%>
+<%# NOTE NOTE NOTE
+    The newlines in this file are *load bearing*.  This file outputs
+    Markdown, which is extremely sensitive to newlines.  You have got
+    to have a newline after every attribute and property, because
+    otherwise MD will think the next element is part of the previous
+    property's bullet point.  You cannot have any double newlines in the
+    middle of a property or attribute, because MD will think that the
+    empty line ends the bullet point and the indentation will be off.
+    You must have a newline before and after all --- document indicators,
+    and you must have a newline before and after all - - - hlines.
+    You cannot have more than one blank line between properties.
+    The --- document indicator must be the first line of the file.
+    As long as you only use `build_property_documentation`, it all works
+    fine - but when you need to add custom docs (notes, etc), you need
+    to remember these things.
+
+    Know also that the `lines` function in heavy use in MagicModules will
+    strip exactly one trailing newline - unless that's what you've designed
+    your docstring for, it's easier to insert newlines where you need them
+    manually.  That's why, in this file, we use `lines` on anything which
+    is generated from a ruby function, but skip it on anything that is
+    directly inserted from YAML.
+-%>
+<%
+  tf_product = (object.__product.legacy_name || product_ns).underscore
+  product_ns_display = (object.__product.legacy_name || product_ns).camelize
+  tf_subcategory = (object.__product.display_name)
+  resource_ns = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
+  resource_ns_iam = "#{resource_ns}_iam"
+  properties = object.all_user_properties
+
+  # In order of preference, use TF override,
+  # general defined timeouts, or default Timeouts
+  timeouts = object.timeouts
+  timeouts ||= object&.async&.operation&.timeouts
+  timeouts ||= Api::Timeouts.new
+-%>
+---
+<%= lines(autogen_notice(:yaml, pwd)) -%>
+subcategory: "<%= tf_subcategory -%>"
+description: |-
+  A datasource to retrieve the IAM policy state for <%= product.display_name -%> <%= object.name %>
+---
+
+
+# `<%= resource_ns_iam -%>_policy`
+Retrieves the current IAM policy data for <%= object.name.downcase -%>
+
+<% if object.min_version.name == 'beta' || object.iam_policy&.min_version == 'beta' -%>
+~> **Warning:** This datasource is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
+<% end -%>
+
+<% markdown_escaped_name = resource_ns_iam.gsub("_", "\\_") %>
+<% params = extract_identifiers(object.iam_policy.self_link || object.self_link_url) -%>
+<%
+url_properties = object.all_user_properties.select do
+  |param| params.include?(param.name)
+end
+-%>
+
+## example
+
+```hcl
+data "<%= resource_ns_iam -%>_policy" "policy" {
+<% if object.min_version.name == 'beta' -%>
+  provider = google-beta
+<% end -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
+}
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+<% url_properties.each do |param| -%>
+<% if param.name == "name" -%>
+* `<%= object.iam_policy.parent_resource_attribute || object.name.underscore -%>` - (Required) Used to find the parent resource to bind the IAM policy to
+<% elsif ["region", "zone"].include?(param.name.underscore) -%>
+* `<%= param.name.underscore -%>` - (Optional) <%= param.description -%> Used to find the parent resource to bind the IAM policy to. If not specified,
+  the value will be parsed from the identifier of the parent resource. If no <%= param.name.underscore -%> is provided in the parent identifier and no
+  <%= param.name.underscore -%> is specified, it is taken from the provider configuration.
+<% else -%>
+* `<%= param.name.underscore -%>` - (Required) <%= param.description -%> Used to find the parent resource to bind the IAM policy to
+<% end -%>
+<% end -%>
+<% if object.iam_policy.base_url.present? -%>
+<% if object.iam_policy.base_url.include?("{{project}}") -%>
+<%# The following new line allow for project to be bullet-formatted properly. -%>
+
+* `project` - (Optional) The ID of the project in which the resource belongs.
+    If it is not provided, the project will be parsed from the identifier of the parent resource. If no project is provided in the parent identifier and no project is specified, the provider project is used.
+<% end -%>
+<% elsif object.base_url.include?("{{project}}")-%>
+<%# The following new line allow for project to be bullet-formatted properly. -%>
+
+* `project` - (Optional) The ID of the project in which the resource belongs.
+    If it is not provided, the project will be parsed from the identifier of the parent resource. If no project is provided in the parent identifier and no project is specified, the provider project is used.
+<% end -%>
+
+## Attributes Reference
+
+The attributes are exported:
+
+* `etag` - (Computed) The etag of the IAM policy.
+
+* `policy_data` - (Required only by `<%= resource_ns_iam -%>_policy`) The policy data generated by
+  a `google_iam_policy` data source.

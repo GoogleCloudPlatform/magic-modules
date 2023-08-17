@@ -1,6 +1,4 @@
 resource "google_compute_resource_policy" "cgroup" {
-  provider = google-beta
-
   name   = "<%= ctx[:vars]['name'] %>"
   region = "europe-west1"
   disk_consistency_group_policy {

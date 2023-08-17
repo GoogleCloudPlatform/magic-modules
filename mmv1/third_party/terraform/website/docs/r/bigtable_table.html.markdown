@@ -50,6 +50,8 @@ resource "google_bigtable_table" "table" {
   column_family {
     family = "family-second"
   }
+
+  change_stream_retention = "24h0m0s"
 }
 ```
 
@@ -72,6 +74,8 @@ to delete/recreate the entire `google_bigtable_table` resource.
 
 * `deletion_protection` - (Optional) A field to make the table protected against data loss i.e. when set to PROTECTED, deleting the table, the column families in the table, and the instance containing the table would be prohibited. If not provided, deletion protection will be set to UNPROTECTED.
 
+* `change_stream_retention` - (Optional) Duration to retain change stream data for the table. Set to 0 to disable. Must be between 1 and 7 days.
+
 -----
 
 `column_family` supports the following arguments:
@@ -85,6 +89,13 @@ exported:
 
 * `id` - an identifier for the resource with format `projects/{{project}}/instances/{{instance_name}}/tables/{{name}}`
 
+## Timeouts
+
+This resource provides the following
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
+
+- `create` - Default is 45 minutes.
+- `update` - Default is 20 minutes.
 
 ## Import
 

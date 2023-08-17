@@ -23,6 +23,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/logging/docs/apis'
   api: 'https://cloud.google.com/logging/docs/reference/v2/rest/v2/locations.buckets.links'
+# Skip sweeper gen since this is a child resource.
+skip_sweeper: true
 immutable: true
 description: |
   Describes a BigQuery linked dataset

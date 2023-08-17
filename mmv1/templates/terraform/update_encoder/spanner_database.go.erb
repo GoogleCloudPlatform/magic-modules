@@ -12,31 +12,34 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-old, new := d.GetChange("ddl")
-oldDdls := old.([]interface{})
-newDdls := new.([]interface{})
-updateDdls := []string{}
 
-//Only new ddl statments to be add to update call
-for i := len(oldDdls); i < len(newDdls); i++ {
-	if newDdls[i] != nil {
-		updateDdls = append(updateDdls, newDdls[i].(string))
+if obj["versionRetentionPeriod"] != nil || obj["extraStatements"] != nil {
+	old, new := d.GetChange("ddl")
+	oldDdls := old.([]interface{})
+	newDdls := new.([]interface{})
+	updateDdls := []string{}
+
+	//Only new ddl statments to be add to update call
+	for i := len(oldDdls); i < len(newDdls); i++ {
+		if newDdls[i] != nil {
+			updateDdls = append(updateDdls, newDdls[i].(string))
+		}
 	}
-}
 
-//Add statement to update version_retention_period property, if needed
-if d.HasChange("version_retention_period") {
-	dbName := d.Get("name")
-	retentionDdl := fmt.Sprintf("ALTER DATABASE `%s` SET OPTIONS (version_retention_period=\"%s\")", dbName, obj["versionRetentionPeriod"])
-	if dialect, ok := d.GetOk("database_dialect"); ok && dialect == "POSTGRESQL" {
-		retentionDdl = fmt.Sprintf("ALTER DATABASE \"%s\" SET spanner.version_retention_period TO \"%s\"", dbName, obj["versionRetentionPeriod"])
+	//Add statement to update version_retention_period property, if needed
+	if d.HasChange("version_retention_period") {
+		dbName := d.Get("name")
+		retentionDdl := fmt.Sprintf("ALTER DATABASE `%s` SET OPTIONS (version_retention_period=\"%s\")", dbName, obj["versionRetentionPeriod"])
+		if dialect, ok := d.GetOk("database_dialect"); ok && dialect == "POSTGRESQL" {
+			retentionDdl = fmt.Sprintf("ALTER DATABASE \"%s\" SET spanner.version_retention_period TO \"%s\"", dbName, obj["versionRetentionPeriod"])
+		}
+		updateDdls = append(updateDdls, retentionDdl)
 	}
-	updateDdls = append(updateDdls, retentionDdl)
-}
 
-obj["statements"] = updateDdls
-delete(obj, "name")
-delete(obj, "versionRetentionPeriod")
-delete(obj, "instance")
-delete(obj, "extraStatements")
+	obj["statements"] = updateDdls
+	delete(obj, "name")
+	delete(obj, "versionRetentionPeriod")
+	delete(obj, "instance")
+	delete(obj, "extraStatements")
+}
 return obj, nil

@@ -515,7 +515,7 @@ properties:
                                   Names of query string parameters to include in cache keys. All other parameters will be excluded.
 
                                   Either specify includedQueryParameters or excludedQueryParameters, not both. '&' and '=' will be percent encoded and not treated as delimiters.
-                                max_size: 10
+                                max_size: 20
                                 item_type: Api::Type::String
                               - !ruby/object:Api::Type::Array
                                 name: excludedQueryParameters
@@ -523,7 +523,7 @@ properties:
                                   Names of query string parameters to exclude from cache keys. All other parameters will be included.
 
                                   Either specify includedQueryParameters or excludedQueryParameters, not both. '&' and '=' will be percent encoded and not treated as delimiters.
-                                max_size: 10
+                                max_size: 20
                                 item_type: Api::Type::String
                               - !ruby/object:Api::Type::Array
                                 name: includedHeaderNames

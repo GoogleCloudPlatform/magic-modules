@@ -73,6 +73,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'edition'
     immutable: true
+    default_from_api: true
     description: |
       The edition type. Valid values are STANDARD, ENTERPRISE, ENTERPRISE_PLUS
   - !ruby/object:Api::Type::NestedObject

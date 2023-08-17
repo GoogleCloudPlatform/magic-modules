@@ -24,7 +24,7 @@ Manages a project-level logging sink. For more information see:
 resource "google_logging_project_sink" "my-sink" {
   name = "my-pubsub-instance-sink"
 
-  # Can export to pubsub, cloud storage, or bigquery
+  # Can export to pubsub, cloud storage, bigquery, log bucket, or another project
   destination = "pubsub.googleapis.com/projects/my-project/topics/instance-activity"
 
   # Log all WARN or higher severity messages relating to instances
@@ -126,7 +126,8 @@ The following arguments are supported:
     - `storage.googleapis.com/[GCS_BUCKET]`
     - `bigquery.googleapis.com/projects/[PROJECT_ID]/datasets/[DATASET]`
     - `pubsub.googleapis.com/projects/[PROJECT_ID]/topics/[TOPIC_ID]`
-    - `logging.googleapis.com/projects/[PROJECT_ID]]/locations/global/buckets/[BUCKET_ID]`
+    - `logging.googleapis.com/projects/[PROJECT_ID]/locations/global/buckets/[BUCKET_ID]`
+    - `logging.googleapis.com/projects/[PROJECT_ID]`
 
     The writer associated with the sink must have access to write to the above resource.
 

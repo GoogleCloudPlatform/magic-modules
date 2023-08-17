@@ -136,6 +136,7 @@ properties:
     immutable: true
     required: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Integer
     name: 'priority'
     description: |
@@ -219,6 +220,7 @@ properties:
       - next_hop_ilb
     description: |
       URL to a VpnTunnel that should handle matching packets.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'nextHopNetwork'
     output: true

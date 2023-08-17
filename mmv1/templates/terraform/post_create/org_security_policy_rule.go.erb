@@ -6,7 +6,12 @@ if err != nil {
 	return err
 }
 
-policyRes, err := transport_tpg.SendRequest(config, "GET", "", url, userAgent, nil)
+policyRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "GET",
+	RawURL: url,
+	UserAgent: userAgent,
+})
 if err != nil {
 	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeOrganizationSecurityPolicy %q", d.Get("policy_id")))
 }

@@ -59,11 +59,6 @@ examples:
     vars:
       neg_name: 'my-lb-neg'
 properties:
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |

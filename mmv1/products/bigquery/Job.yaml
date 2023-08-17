@@ -34,7 +34,7 @@ import_format:
 skip_delete: true
 id_format: projects/{{project}}/jobs/{{job_id}}
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
   actions: ['create']
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -148,12 +148,6 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/bigquery_job.go
   encoder: templates/terraform/encoders/bigquery_job.go.erb
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'id'
-    output: true
-    description: |
-      Opaque ID field of the job.
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'user_email'
     output: true
@@ -820,12 +814,6 @@ properties:
       Reference describing the unique-per-user name of the job.
     flatten_object: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'projectId'
-        description: |
-          The project ID of the project containing this job.
-        required: true
-        exclude: true
       - !ruby/object:Api::Type::String
         name: 'jobId'
         description: |

@@ -33,7 +33,7 @@ examples:
       idp_entity_id: tf-idp
       sp_entity_id: tf-sp
     test_vars_overrides:
-      name: '"saml.tf-config-" + RandString(t, 10)'
+      name: '"saml.tf-config-" + acctest.RandString(t, 10)'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

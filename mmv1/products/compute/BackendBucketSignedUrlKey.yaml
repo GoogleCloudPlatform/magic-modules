@@ -53,7 +53,7 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 exclude_import: true
-exclude_validator: true
+exclude_tgc: true
 mutex: signedUrlKey/{{project}}/backendBuckets/{{backend_bucket}}/
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -75,6 +75,7 @@ parameters:
     required: true
     immutable: true
     ignore_read: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

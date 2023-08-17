@@ -82,20 +82,6 @@ properties:
     name: 'description'
     description: |
       Description of the AccessLevel and its use. Does not affect behavior.
-  # createTime and updateTime are listed in the docs but are not ever present
-  # in actual API responses.
-  - !ruby/object:Api::Type::Time
-    exclude: true
-    name: 'createTime'
-    description: |
-      Time the AccessPolicy was created in UTC.
-    output: true
-  - !ruby/object:Api::Type::Time
-    exclude: true
-    name: 'updateTime'
-    description: |
-      Time the AccessPolicy was updated in UTC.
-    output: true
   - !ruby/object:Api::Type::NestedObject
     name: 'basic'
     description: |

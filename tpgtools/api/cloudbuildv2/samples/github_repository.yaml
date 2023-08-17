@@ -15,7 +15,7 @@ name: github_repository
 description: Creates a GitHub repository.
 type: repository
 versions:
-- beta
+- ga
 resource: samples/github.repository.json
 dependencies:
 - samples/github_update.connection.json

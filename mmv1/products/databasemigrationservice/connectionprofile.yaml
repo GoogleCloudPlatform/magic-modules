@@ -85,6 +85,10 @@ examples:
       - 'alloydb.0.settings.0.initial_user.0.password'
     vars:
       profile: 'my-profileid'
+      global_address_name: 'private-ip-alloc'
+      network_name: 'vpc-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "profile-alloydb")'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'connectionProfileId'
@@ -475,6 +479,13 @@ properties:
             name: 'cmekKeyName'
             description: |
               The KMS key name used for the csql instance.
+          - !ruby/object:Api::Type::Enum
+            name: 'edition'
+            description: |
+              The edition of the given Cloud SQL instance.
+            values:
+              - :ENTERPRISE
+              - :ENTERPRISE_PLUS
       - !ruby/object:Api::Type::String
         name: 'privateIp'
         output: true

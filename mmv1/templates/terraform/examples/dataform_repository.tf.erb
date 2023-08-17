@@ -28,4 +28,10 @@ resource "google_dataform_repository" "<%= ctx[:primary_resource_id] %>" {
       default_branch = "main"
       authentication_token_secret_version = google_secret_manager_secret_version.secret_version.id
   }
+
+  workspace_compilation_overrides {
+    default_database = "database"
+    schema_suffix = "_suffix"
+    table_prefix = "prefix_"
+  }
 }

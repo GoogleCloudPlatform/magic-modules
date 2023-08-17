@@ -15,7 +15,7 @@ name: ghe_priv_connection
 description: Creates a connection to a private server using Service Directory.
 type: connection
 versions:
-- beta
+- ga
 resource: samples/ghe_priv.connection.json
 variables:
 - name: connection

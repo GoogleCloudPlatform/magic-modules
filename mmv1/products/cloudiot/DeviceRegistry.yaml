@@ -24,7 +24,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/iot/docs/'
   api: 'https://cloud.google.com/iot/docs/reference/cloudiot/rest/'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
   parent_resource_attribute: 'name'
@@ -156,48 +155,6 @@ properties:
           description: |
             PubSub topic name to publish device events.
           diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'stateNotificationConfig'
-    description: |
-      A PubSub topic to publish device state updates.
-    exclude: true
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'pubsubTopicName'
-        required: true
-        description: |
-          PubSub topic name to publish device state updates.
-        exclude: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'mqttConfig'
-    description: |
-      Activate or deactivate MQTT.
-    exclude: true
-    properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'mqttEnabledState'
-        description: |
-          The field allows `MQTT_ENABLED` or `MQTT_DISABLED`
-        required: true
-        values:
-          - :MQTT_ENABLED
-          - :MQTT_DISABLED
-        exclude: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'httpConfig'
-    description: |
-      Activate or deactivate HTTP.
-    exclude: true
-    properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'httpEnabledState'
-        required: true
-        description: |
-          The field allows `HTTP_ENABLED` or `HTTP_DISABLED`.
-        values:
-          - :HTTP_ENABLED
-          - :HTTP_DISABLED
-        exclude: true
   - !ruby/object:Api::Type::Enum
     name: 'logLevel'
     default_value: :NONE
@@ -213,70 +170,3 @@ properties:
       - :INFO
       - :DEBUG
     diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("NONE")'
-  - !ruby/object:Api::Type::Array
-    name: 'credentials'
-    description: |
-      List of public key certificates to authenticate devices.
-    max_size: 10
-    exclude: true
-    item_type: !ruby/object:Api::Type::NestedObject
-      properties:
-        - !ruby/object:Api::Type::NestedObject
-          name: 'publicKeyCertificate'
-          required: true
-          description: |
-            A public key certificate format and data.
-          exclude: true
-          properties:
-            - !ruby/object:Api::Type::Enum
-              name: 'format'
-              required: true
-              description: |
-                The field allows only `X509_CERTIFICATE_PEM`.
-              values:
-                - :X509_CERTIFICATE_PEM
-            - !ruby/object:Api::Type::String
-              name: 'certificate'
-              required: true
-              description: |
-                The certificate data.
-            - !ruby/object:Api::Type::NestedObject
-              name: 'x509Details'
-              output: true
-              description: |
-                The certificate details. Used only for X.509 certificates.
-              properties:
-                - !ruby/object:Api::Type::String
-                  name: 'issuer'
-                  output: true
-                  description: |
-                    The entity that signed the certificate.
-                - !ruby/object:Api::Type::String
-                  name: 'subject'
-                  output: true
-                  description: |
-                    The entity the certificate and public key belong to.
-                - !ruby/object:Api::Type::String
-                  name: 'startTime'
-                  output: true
-                  description: |
-                    The time the certificate becomes valid. A timestamp in
-                    RFC3339 UTC "Zulu" format, accurate to nanoseconds.
-                    Example: "2014-10-02T15:01:23.045123456Z".
-                - !ruby/object:Api::Type::String
-                  name: 'expiryTime'
-                  output: true
-                  description: |
-                    The time the certificate becomes invalid. A timestamp in
-                    RFC3339 UTC "Zulu" format, accurate to nanoseconds.
-                    Example: "2014-10-02T15:01:23.045123456Z".
-                - !ruby/object:Api::Type::String
-                  name: 'signatureAlgorithm'
-                  output: true
-                  description: |
-                    The algorithm used to sign the certificate.
-                - !ruby/object:Api::Type::String
-                  name: 'publicKeyType'
-                  output: true
-                  description: |
-                    The type of public key in the certificate.

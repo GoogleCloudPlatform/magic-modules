@@ -25,6 +25,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/dlp/docs/creating-templates-inspect'
   api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.inspectTemplates'
 id_format: '{{parent}}/inspectTemplates/{{name}}'
+# Skip sweeper due to non-standard URL
+skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_inspect_template_basic'
@@ -45,8 +47,18 @@ examples:
     primary_resource_id: 'custom_type_surrogate'
     test_env_vars:
       project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_inspect_template_with_template_id'
+    primary_resource_id: 'with_template_id'
+    vars:
+      name: 'my-template'
+    test_env_vars:
+      project: :PROJECT_NAME
+    skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/wrap_object.go.erb
+  decoder: templates/terraform/decoders/dlp_template_id.go.erb
+  encoder: templates/terraform/encoders/wrap_object_with_template_id.go.erb
+  update_encoder: templates/terraform/encoders/wrap_object.go.erb
   custom_import: templates/terraform/custom_import/dlp_import.go.erb
 parameters:
   - !ruby/object:Api::Type::String
@@ -76,6 +88,15 @@ properties:
     name: 'displayName'
     description: |
       User set display name of the inspect template.
+  - !ruby/object:Api::Type::String
+    name: 'templateId'
+    description: |
+      The template id can contain uppercase and lowercase letters, numbers, and hyphens;
+      that is, it must match the regular expression: [a-zA-Z\d-_]+. The maximum length is
+      100 characters. Can be empty to allow the system to generate one.
+    immutable: true
+    default_from_api: true
+    url_param_only: true
   - !ruby/object:Api::Type::NestedObject
     name: 'inspectConfig'
     description: The core content of the template.
@@ -139,6 +160,20 @@ properties:
                       name: 'version'
                       description: |
                         Version name for this InfoType.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'sensitivityScore'
+                      description: |
+                        Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                      properties:
+                        - !ruby/object:Api::Type::Enum
+                          name: 'score'
+                          required: true
+                          description: |
+                            The sensitivity score applied to the resource.
+                          values:
+                            - :SENSITIVITY_LOW
+                            - :SENSITIVITY_MODERATE
+                            - :SENSITIVITY_HIGH
                 - !ruby/object:Api::Type::Integer
                   name: 'maxFindings'
                   description: Max findings limit for the given infoType.
@@ -163,6 +198,20 @@ properties:
               name: 'version'
               description: |
                 Version of the information type to use. By default, the version is set to stable
+            - !ruby/object:Api::Type::NestedObject
+              name: 'sensitivityScore'
+              description: |
+                Optional custom sensitivity for this InfoType. This only applies to data profiling.
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: 'score'
+                  required: true
+                  description: |
+                    The sensitivity score applied to the resource.
+                  values:
+                    - :SENSITIVITY_LOW
+                    - :SENSITIVITY_MODERATE
+                    - :SENSITIVITY_HIGH
       - !ruby/object:Api::Type::Array
         name: 'contentOptions'
         description: |
@@ -199,6 +248,20 @@ properties:
                     name: 'version'
                     description: |
                       Version name for this InfoType.
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'sensitivityScore'
+                    description: |
+                      Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                    properties:
+                      - !ruby/object:Api::Type::Enum
+                        name: 'score'
+                        required: true
+                        description: |
+                          The sensitivity score applied to the resource.
+                        values:
+                          - :SENSITIVITY_LOW
+                          - :SENSITIVITY_MODERATE
+                          - :SENSITIVITY_HIGH
             - !ruby/object:Api::Type::Array
               name: 'rules'
               required: true
@@ -352,6 +415,20 @@ properties:
                                   name: 'version'
                                   description: |
                                     Version name for this InfoType.
+                                - !ruby/object:Api::Type::NestedObject
+                                  name: 'sensitivityScore'
+                                  description: |
+                                    Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                                  properties:
+                                    - !ruby/object:Api::Type::Enum
+                                      name: 'score'
+                                      required: true
+                                      description: |
+                                        The sensitivity score applied to the resource.
+                                      values:
+                                        - :SENSITIVITY_LOW
+                                        - :SENSITIVITY_MODERATE
+                                        - :SENSITIVITY_HIGH
                       - !ruby/object:Api::Type::NestedObject
                         name: 'excludeByHotword'
                         description: |
@@ -420,6 +497,20 @@ properties:
                   name: 'version'
                   description: |
                     Version name for this InfoType.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'sensitivityScore'
+                  description: |
+                    Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                  properties:
+                    - !ruby/object:Api::Type::Enum
+                      name: 'score'
+                      required: true
+                      description: |
+                        The sensitivity score applied to the resource.
+                      values:
+                        - :SENSITIVITY_LOW
+                        - :SENSITIVITY_MODERATE
+                        - :SENSITIVITY_HIGH
             - !ruby/object:Api::Type::Enum
               name: 'likelihood'
               description: |
@@ -438,6 +529,20 @@ properties:
                 If set to EXCLUSION_TYPE_EXCLUDE this infoType will not cause a finding to be returned. It still can be used for rules matching.
               values:
                 - :EXCLUSION_TYPE_EXCLUDE
+            - !ruby/object:Api::Type::NestedObject
+              name: 'sensitivityScore'
+              description: |
+                Optional custom sensitivity for this InfoType. This only applies to data profiling.
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: 'score'
+                  required: true
+                  description: |
+                    The sensitivity score applied to the resource.
+                  values:
+                    - :SENSITIVITY_LOW
+                    - :SENSITIVITY_MODERATE
+                    - :SENSITIVITY_HIGH
             - !ruby/object:Api::Type::NestedObject
               name: 'regex'
               description: Regular expression which defines the rule.

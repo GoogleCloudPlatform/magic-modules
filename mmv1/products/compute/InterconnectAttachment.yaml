@@ -68,6 +68,7 @@ parameters:
     description: |
       Region where the regional interconnect attachment resides.
     default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Boolean
     name: 'adminEnabled'
@@ -196,13 +197,6 @@ properties:
       Google reference ID, to be used when raising support tickets with
       Google or otherwise to debug backend connectivity issues.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'operationalStatus'
-    description: |
-      The current status of whether or not this interconnect attachment
-      is functional.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'router'
     resource: 'Router'
@@ -215,18 +209,12 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: |
       Creation timestamp in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'id'
-    description: |
-      The unique identifier for the resource. This identifier is
-      defined by the server.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -289,6 +277,7 @@ properties:
       description: |
         URL of an address that has been reserved for the interconnect
         attachment.
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Enum
     name: 'encryption'
     description: |

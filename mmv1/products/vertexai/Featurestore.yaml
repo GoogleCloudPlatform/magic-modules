@@ -66,7 +66,7 @@ examples:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
     test_vars_overrides:
-      kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
       - 'force_destroy'
   - !ruby/object:Provider::Terraform::Examples
@@ -83,7 +83,7 @@ examples:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
     test_vars_overrides:
-      kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
       - 'force_destroy'
     min_version: beta
@@ -101,7 +101,7 @@ examples:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
     test_vars_overrides:
-      kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
       - 'force_destroy'
 custom_code: !ruby/object:Provider::Terraform::CustomCode

@@ -74,3 +74,16 @@ properties:
         output: true
         description: |
           Indicates the status of the Git access token. https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories#TokenStatus
+  - !ruby/object:Api::Type::NestedObject
+    name: 'workspaceCompilationOverrides'
+    description: Optional. If set, fields of workspaceCompilationOverrides override the default compilation settings that are specified in dataform.json when creating workspace-scoped compilation results.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: defaultDatabase
+        description: Optional. The default database (Google Cloud project ID).
+      - !ruby/object:Api::Type::String
+        name: 'schemaSuffix'
+        description: Optional. The suffix that should be appended to all schema (BigQuery dataset ID) names.
+      - !ruby/object:Api::Type::String
+        name: 'tablePrefix'
+        description: Optional. The prefix that should be prepended to all table names.

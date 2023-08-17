@@ -124,7 +124,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: 'templates/terraform/decoders/backend_service.go.erb'
   post_create: 'templates/terraform/post_create/compute_backend_service_security_policy.go.erb'
   post_update: 'templates/terraform/post_create/compute_backend_service_security_policy.go.erb'
-  resource_definition: 'templates/terraform/resource_definition/backend_service.go.erb'
+schema_version: 1
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'affinityCookieTtlSec'
@@ -740,10 +740,6 @@ properties:
     description: Settings for enabling Cloud Identity Aware Proxy
     send_empty_value: true
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'enabled'
-        description: Enables IAP.
-        exclude: true
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientId'
         required: true
@@ -779,6 +775,7 @@ properties:
     values:
       - :EXTERNAL
       - :INTERNAL_SELF_MANAGED
+      - :INTERNAL_MANAGED
       - :EXTERNAL_MANAGED
   - !ruby/object:Api::Type::Enum
     name: 'localityLbPolicy'
@@ -1214,7 +1211,9 @@ properties:
     description: |
       The protocol this BackendService uses to communicate with backends.
       The default is HTTP. **NOTE**: HTTP2 is only valid for beta HTTP/2 load balancer
-      types and may result in errors if used with the GA API.
+      types and may result in errors if used with the GA API. **NOTE**: With protocol “UNSPECIFIED”,
+      the backend service can be used by Layer 4 Internal Load Balancing or Network Load Balancing
+      with TCP/UDP/L3_DEFAULT Forwarding Rule protocol.
     values:
       - :HTTP
       - :HTTPS
@@ -1222,6 +1221,7 @@ properties:
       - :TCP
       - :SSL
       - :GRPC
+      - :UNSPECIFIED
     # TODO: make a ResourceRef to Security Policy
     default_from_api: true
   - !ruby/object:Api::Type::String
@@ -1251,6 +1251,7 @@ properties:
           connections to backends of a service. This resource itself does not affect
           configuration unless it is attached to a backend service resource.
         required: true
+        custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
       - !ruby/object:Api::Type::Array
         name: 'subjectAltNames'
         description: |

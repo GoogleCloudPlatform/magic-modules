@@ -16,4 +16,9 @@ config := configRaw.(map[string]interface{})
 // Name comes back on the top level, so set here
 config["name"] = name
 
+configMeta := meta.(*transport_tpg.Config)
+if err := d.Set("stored_info_type_id", flattenDataLossPreventionStoredInfoTypeName(res["name"], d, configMeta)); err != nil {
+  return nil, fmt.Errorf("Error reading StoredInfoType: %s", err)
+}
+
 return config, nil

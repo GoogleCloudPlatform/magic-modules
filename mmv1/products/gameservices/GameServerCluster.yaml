@@ -44,12 +44,13 @@ import_format:
   [
     'projects/{{project}}/locations/{{location}}/realms/{{realm_id}}/gameServerClusters/{{cluster_id}}',
   ]
+# Skipping the sweeper due to the non-standard base_url
+skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'game_service_cluster_basic'
     primary_resource_id:
       'default'
-      # NO_TEST: Not worth setting up as it is complicated and game servers are being deprecated
     skip_test: true
     vars:
       realm_id: 'realm'

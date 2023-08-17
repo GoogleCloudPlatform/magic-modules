@@ -51,7 +51,6 @@ properties:
     imports: 'name'
     description: 'The name of the bucket.'
     required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
     ignore_read: true
   - !ruby/object:Api::Type::String
     name: 'domain'
@@ -84,11 +83,6 @@ properties:
     description:
       'The content generation of the object, if applied to an object.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'id'
-    description: 'The ID of the access-control entry.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'object'
     description: 'The name of the object, if applied to an object.'

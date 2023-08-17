@@ -15,7 +15,7 @@ name: github_connection
 description: Creates and updates a GitHub connection.
 type: connection
 versions:
-- beta
+- ga
 resource: samples/github_initial.connection.json
 updates:
 - resource: samples/github_update.connection.json

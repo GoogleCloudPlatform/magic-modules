@@ -27,11 +27,13 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 id_format: 'projects/{{project}}/locations/{{region}}/jobs/{{name}}'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/scheduler.erb
-  resource_definition: templates/terraform/resource_definition/scheduler_auth.erb
   encoder: templates/terraform/encoders/cloud_scheduler.go.erb
   update_encoder: templates/terraform/update_encoder/cloud_scheduler.go.erb
   post_create: templates/terraform/post_create/cloud_scheduler.go.erb
   post_update: templates/terraform/post_update/cloud_scheduler.go.erb
+custom_diff: [
+  'validateAuthHeaders',
+]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'scheduler_job_pubsub'

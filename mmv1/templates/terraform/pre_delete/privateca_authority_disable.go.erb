@@ -10,7 +10,13 @@ if d.Get("state").(string) == "ENABLED" {
 
 	log.Printf("[DEBUG] Disabling CertificateAuthority: %#v", obj)
 
-	dRes, err := transport_tpg.SendRequest(config, "POST", billingProject, disableUrl, userAgent, nil)
+	dRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "POST",
+		Project: billingProject,
+		RawURL: disableUrl,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return fmt.Errorf("Error disabling CertificateAuthority: %s", err)
 	}
