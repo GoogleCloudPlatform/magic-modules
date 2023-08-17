@@ -29,7 +29,9 @@ update_mask: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "bigquery_biglake_catalog"
-    primary_resource_id: "example"
+    primary_resource_id: "default"
+    vars:
+      catalog_name: "my-catalog"
 properties:
   - !ruby/object:Api::Type::String
     name: "name"
