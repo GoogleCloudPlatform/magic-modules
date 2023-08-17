@@ -1,7 +1,6 @@
 name: pre-build-validation-on-pr
 
-permissions:
-  issues: write
+permissions: read-all
 
 on:
   pull_request:
@@ -66,18 +65,3 @@ jobs:
       - name: Build
         working-directory: ./docs
         run: hugo --minify
-  check-changelog:
-    runs-on: ubuntu-22.04
-    steps:
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '^1.19.1'
-    - name: Install go-changelog
-      run: go install github.com/hashicorp/go-changelog/cmd/changelog-pr-body-check@latest
-    - name: Check changelog
-      env:
-        GITHUB_REPO: magic-modules
-        GITHUB_OWNER: GoogleCloudPlatform
-        GITHUB_TOKEN: ${{ github.token }}
-      run: changelog-pr-body-check ${{ github.event.pull_request.number }}
