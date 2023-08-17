@@ -166,7 +166,9 @@ func updateIssues(issueUpdates []IssueUpdate, dryRun bool) {
 			}
 			var errResp ErrorResponse
 			json.Unmarshal(body, &errResp)
-			glog.Infof("API returned message: %s", errResp.Message)
+			if errResp.Message != "" {
+				glog.Infof("API error: %s", errResp.Message)
+			}
 		}
 	}
 }
