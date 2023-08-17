@@ -211,40 +211,42 @@ properties:
           The initial password for the user.
         required: true
         sensitive: true
-  - !ruby/object:Api::Type::String
-    name: 'restoreSourceBackup'
+  - !ruby/object:Api::Type::NestedObject
+    name: 'backupSource'
     ignore_read: true
     immutable: true
     conflicts:
-      - restore_source_cluster
-      - restore_point_in_time
+      - continuous_backup_source
     description: |
-      The name of the backup that this cluster should be restored from. Conflicts with 'restore_source_cluster' and 'restore_point_in_time', both can't be set together.
-  - !ruby/object:Api::Type::String
-    name: 'restoreSourceCluster'
+      The source when restoring from a backup. Conflicts with 'continuous_backup_source', both can't be set together.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'backupName'
+        required: true
+        immutable: true
+        description: |
+          The name of the backup that this cluster is restored from.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'continuousBackupSource'
     ignore_read: true
     immutable: true
-    required_with:
-      - restore_point_in_time
     conflicts:
-      - restore_source_backup
+      - backup_source
     description: |
-      The name of the source cluster that this cluster should be restored from. The source cluster must have continuous
-      backup enabled for restore to succeed. Requires `restore_point_in_time` to also be set.
-
-      Conflicts with 'restore_source_backup', both can't be set together.
-  - !ruby/object:Api::Type::String
-    name: 'restorePointInTime'
-    ignore_read: true
-    immutable: true
-    required_with:
-      - restore_source_cluster
-    conflicts:
-      - restore_source_backup
-    description: |
-      The point in time that this cluster should be restored to, in RFC 3339 format. Requires `restore_source_cluster` to also be set.
-
-      Conflicts with 'restore_source_backup', both can't be set together.
+      The source when restoring via point in time recovery (PITR). Conflicts with 'backup_source', both can't be set together.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'cluster'
+        required: true
+        immutable: true
+        description: |
+          The name of the source cluster that this cluster is restored from.
+      - !ruby/object:Api::Type::String
+        name: 'pointInTime'
+        required: true
+        immutable: true
+        description: |
+          The point in time that this cluster is restored to, in RFC 3339 format.
   - !ruby/object:Api::Type::NestedObject
     name: 'continuousBackupConfig'
     default_from_api: true
@@ -383,14 +385,6 @@ properties:
         default_from_api: true
         description: |
           Whether automated backups are enabled.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'backupSource'
-    output: true
-    description: 'Cluster created from backup.'
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'backupName'
-        description: 'The name of the backup resource.'
   - !ruby/object:Api::Type::NestedObject
     name: 'migrationSource'
     output: true

@@ -1,35 +1,25 @@
 // Read the restore variables from obj and remove them, since they do not map to anything in the cluster
-var restoreBackup interface{}
-var restoreSourceCluster interface{}
-var restorePointInTime interface{}
-if val, ok := obj["restoreSourceBackup"]; ok {
-	restoreBackup = val
-	delete(obj, "restoreSourceBackup")
+var backupSource interface{}
+var continuousBackupSource interface{}
+if val, ok := obj["backupSource"]; ok {
+	backupSource = val
+	delete(obj, "backupSource")
 }
-if val, ok := obj["restoreSourceCluster"]; ok {
-	restoreSourceCluster = val
-	delete(obj, "restoreSourceCluster")
-}
-if val, ok := obj["restorePointInTime"]; ok {
-	restorePointInTime = val
-	delete(obj, "restorePointInTime")
+if val, ok := obj["continuousBackupSource"]; ok {
+	continuousBackupSource = val
+	delete(obj, "continuousBackupSource")
 }
 
 restoreClusterRequestBody := make(map[string]interface{})
-if restoreBackup != nil {
+if backupSource != nil {
 	// If restoring from a backup, set the backupSource
-	backupSource := map[string]interface{}{"backup_name": restoreBackup}
 	restoreClusterRequestBody["backup_source"] = backupSource
-} else if restoreSourceCluster != nil {
+} else if continuousBackupSource != nil {
 	// Otherwise if restoring via PITR, set the continuousBackupSource
-	continuousBackupSource := map[string]interface{}{
-		"cluster": restoreSourceCluster,
-		"point_in_time": restorePointInTime,
-	}
 	restoreClusterRequestBody["continuous_backup_source"] = continuousBackupSource
 }
 
-if restoreBackup != nil || restoreSourceCluster != nil {
+if backupSource != nil || continuousBackupSource != nil {
 	// Use restore API if this is a restore instead of a create cluster call
 	url = strings.Replace(url, "clusters?clusterId", "clusters:restore?clusterId", 1)
 
