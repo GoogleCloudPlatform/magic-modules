@@ -4,7 +4,7 @@
 
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package google
+package <%= product_ns.downcase -%>_test
 
 import (
 	"fmt"
@@ -14,6 +14,7 @@ import (
 
 	"<%= import_path() -%>/acctest"
 	"<%= import_path() -%>/envvar"
+	"<%= import_path() -%>/tpgresource"
 )
 
 <%# Since most resources define a "basic" config as their first example, we can reuse that config to create a resource to test IAM resources with. -%>
@@ -399,7 +400,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 					// TODO(SarahFrench) - uncomment once https://github.com/GoogleCloudPlatform/magic-modules/pull/6466 merged
 					// resource.TestCheckResourceAttr("data.google_iam_policy.foo", "policy_data", expectedPolicyData),
 					resource.TestCheckResourceAttr("<%= resource_ns_iam -%>_policy.foo", "policy_data", expectedPolicyData),
-					resource.TestCheckResourceAttrWith("data.google_iam_policy.foo", "policy_data", checkGoogleIamPolicy),
+					resource.TestCheckResourceAttrWith("data.google_iam_policy.foo", "policy_data", tpgresource.CheckGoogleIamPolicy),
 				),
 			},
 <% unless object.iam_policy.skip_import_test -%>

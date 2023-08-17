@@ -28,24 +28,33 @@ type Test struct {
 	Steps []Step
 }
 
-func readAllTests(providerDir string) ([]*Test, error) {
-	files, err := os.ReadDir(providerDir)
+// Return a slice of tests as well as a map of file names to errors encountered.
+func readAllTests(servicesDir string) ([]*Test, map[string]error) {
+	dirs, err := os.ReadDir(servicesDir)
 	if err != nil {
-		return nil, err
+		return nil, map[string]error{servicesDir: err}
 	}
 	allTests := make([]*Test, 0)
-	errs := make([]error, 0)
-	for _, file := range files {
-		if strings.HasSuffix(file.Name(), "_test.go") {
-			tests, err := readTestFile(filepath.Join(providerDir, file.Name()))
-			if err != nil {
-				errs = append(errs, err)
+	errs := make(map[string]error, 0)
+	for _, dir := range dirs {
+		servicePath := filepath.Join(servicesDir, dir.Name())
+		files, err := os.ReadDir(servicePath)
+		if err != nil {
+			return nil, map[string]error{servicePath: err}
+		}
+		for _, file := range files {
+			if strings.HasSuffix(file.Name(), "_test.go") {
+				filePath := filepath.Join(servicePath, file.Name())
+				tests, err := readTestFile(filePath)
+				if err != nil {
+					errs[filePath] = err
+				}
+				allTests = append(allTests, tests...)
 			}
-			allTests = append(allTests, tests...)
 		}
 	}
 	if len(errs) > 0 {
-		return allTests, fmt.Errorf("errors reading tests: %v", errs)
+		return allTests, errs
 	}
 	return allTests, nil
 }

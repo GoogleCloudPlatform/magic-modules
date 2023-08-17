@@ -3,21 +3,21 @@ package google
 import (
 	"fmt"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgiamresource"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/cai"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
-func resourceConverterOrganizationIamPolicy() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func resourceConverterOrganizationIamPolicy() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType:         "cloudresourcemanager.googleapis.com/Organization",
 		Convert:           GetOrganizationIamPolicyCaiObject,
 		MergeCreateUpdate: MergeOrganizationIamPolicy,
 	}
 }
 
-func resourceConverterOrganizationIamBinding() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func resourceConverterOrganizationIamBinding() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType:         "cloudresourcemanager.googleapis.com/Organization",
 		Convert:           GetOrganizationIamBindingCaiObject,
 		FetchFullResource: FetchOrganizationIamPolicy,
@@ -26,8 +26,8 @@ func resourceConverterOrganizationIamBinding() tpgresource.ResourceConverter {
 	}
 }
 
-func resourceConverterOrganizationIamMember() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func resourceConverterOrganizationIamMember() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType:         "cloudresourcemanager.googleapis.com/Organization",
 		Convert:           GetOrganizationIamMemberCaiObject,
 		FetchFullResource: FetchOrganizationIamPolicy,
@@ -36,65 +36,65 @@ func resourceConverterOrganizationIamMember() tpgresource.ResourceConverter {
 	}
 }
 
-func GetOrganizationIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	return newOrganizationIamAsset(d, config, tpgiamresource.ExpandIamPolicyBindings)
+func GetOrganizationIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	return newOrganizationIamAsset(d, config, cai.ExpandIamPolicyBindings)
 }
 
-func GetOrganizationIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	return newOrganizationIamAsset(d, config, tpgiamresource.ExpandIamRoleBindings)
+func GetOrganizationIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	return newOrganizationIamAsset(d, config, cai.ExpandIamRoleBindings)
 }
 
-func GetOrganizationIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	return newOrganizationIamAsset(d, config, tpgiamresource.ExpandIamMemberBindings)
+func GetOrganizationIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	return newOrganizationIamAsset(d, config, cai.ExpandIamMemberBindings)
 }
 
-func MergeOrganizationIamPolicy(existing, incoming tpgresource.Asset) tpgresource.Asset {
+func MergeOrganizationIamPolicy(existing, incoming cai.Asset) cai.Asset {
 	existing.IAMPolicy = incoming.IAMPolicy
 	return existing
 }
 
-func MergeOrganizationIamBinding(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeIamAssets(existing, incoming, tpgiamresource.MergeAuthoritativeBindings)
+func MergeOrganizationIamBinding(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeIamAssets(existing, incoming, cai.MergeAuthoritativeBindings)
 }
 
-func MergeOrganizationIamBindingDelete(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeDeleteIamAssets(existing, incoming, tpgiamresource.MergeDeleteAuthoritativeBindings)
+func MergeOrganizationIamBindingDelete(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeDeleteIamAssets(existing, incoming, cai.MergeDeleteAuthoritativeBindings)
 }
 
-func MergeOrganizationIamMember(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeIamAssets(existing, incoming, tpgiamresource.MergeAdditiveBindings)
+func MergeOrganizationIamMember(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeIamAssets(existing, incoming, cai.MergeAdditiveBindings)
 }
 
-func MergeOrganizationIamMemberDelete(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeDeleteIamAssets(existing, incoming, tpgiamresource.MergeDeleteAdditiveBindings)
+func MergeOrganizationIamMemberDelete(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeDeleteIamAssets(existing, incoming, cai.MergeDeleteAdditiveBindings)
 }
 
 func newOrganizationIamAsset(
 	d tpgresource.TerraformResourceData,
 	config *transport_tpg.Config,
-	expandBindings func(d tpgresource.TerraformResourceData) ([]tpgresource.IAMBinding, error),
-) ([]tpgresource.Asset, error) {
+	expandBindings func(d tpgresource.TerraformResourceData) ([]cai.IAMBinding, error),
+) ([]cai.Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
-		return []tpgresource.Asset{}, fmt.Errorf("expanding bindings: %v", err)
+		return []cai.Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
-	name, err := tpgresource.AssetName(d, config, "//cloudresourcemanager.googleapis.com/organizations/{{org_id}}")
+	name, err := cai.AssetName(d, config, "//cloudresourcemanager.googleapis.com/organizations/{{org_id}}")
 	if err != nil {
-		return []tpgresource.Asset{}, err
+		return []cai.Asset{}, err
 	}
 
-	return []tpgresource.Asset{{
+	return []cai.Asset{{
 		Name: name,
 		Type: "cloudresourcemanager.googleapis.com/Organization",
-		IAMPolicy: &tpgresource.IAMPolicy{
+		IAMPolicy: &cai.IAMPolicy{
 			Bindings: bindings,
 		},
 	}}, nil
 }
 
-func FetchOrganizationIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgresource.Asset, error) {
-	return tpgiamresource.FetchIamPolicy(
+func FetchOrganizationIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (cai.Asset, error) {
+	return cai.FetchIamPolicy(
 		NewOrganizationIamUpdater,
 		d,
 		config,

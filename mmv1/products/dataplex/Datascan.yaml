@@ -416,6 +416,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'dataQualityResult'
     output: true
+    deprecation_message: "dataQualityResult will be removed from Terraform output fields in 5.0.0"
     description: |
       The result of the data quality scan.
     properties:
@@ -642,6 +643,8 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'dataProfileResult'
     output: true
+    deprecation_message: "dataProfileResult will be removed from Terraform output fields in 5.0.0"
+    custom_flatten: templates/terraform/custom_flatten/dataplex_datascan_ignore_profile_result.go.erb
     description: |
       The result of the data profile scan.
     properties:

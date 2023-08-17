@@ -1,0 +1,12 @@
+- type: DIFF_SUPPRESS_FUNC
+  field: config.root_volume.volume_type
+  details:
+    diffsuppressfunc: tpgresource.CompareCaseInsensitive
+- type: DIFF_SUPPRESS_FUNC
+  field: config.taints.effect
+  details:
+    diffsuppressfunc: tpgresource.CompareCaseInsensitive
+- type: DIFF_SUPPRESS_FUNC
+  field: config.instance_placement.tenancy
+  details:
+    diffsuppressfunc: tpgresource.CompareCaseInsensitive
