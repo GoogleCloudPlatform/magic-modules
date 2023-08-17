@@ -266,7 +266,7 @@ func TestLocationDescription_GetLocation(t *testing.T) {
 			},
 			ExpectedLocation: types.StringValue("provider-region"),
 		},
-		"returns the zone value from the provider config when none of location/region/zone are set in the resource config": {
+		"returns the zone value from the provider config when none of location/region/zone are set in the resource config and region is not set in the provider config": {
 			ld: LocationDescription{
 				ProviderZone: types.StringValue("provider-zone-a"),
 			},
