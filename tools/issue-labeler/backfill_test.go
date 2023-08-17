@@ -125,12 +125,14 @@ func TestComputeIssueUpdates(t *testing.T) {
 			regexpLabels: defaultRegexpLabels,
 			expectedIssueUpdates: []IssueUpdate{
 				{
-					Number: 1,
-					Labels: []string{"forward/review", "service/service1", "service/service2-subteam1"},
+					Number:    1,
+					Labels:    []string{"forward/review", "service/service1", "service/service2-subteam1"},
+					OldLabels: []string{"service/service2-subteam1"},
 				},
 				{
-					Number: 2,
-					Labels: []string{"forward/review", "service/service1", "service/service2-subteam2"},
+					Number:    2,
+					Labels:    []string{"forward/review", "service/service1", "service/service2-subteam2"},
+					OldLabels: []string{"service/service1"},
 				},
 			},
 		},
@@ -146,8 +148,9 @@ func TestComputeIssueUpdates(t *testing.T) {
 			regexpLabels: defaultRegexpLabels,
 			expectedIssueUpdates: []IssueUpdate{
 				{
-					Number: 1,
-					Labels: []string{"forward/linked", "service/service1", "service/service2-subteam1"},
+					Number:    1,
+					Labels:    []string{"forward/linked", "service/service1", "service/service2-subteam1"},
+					OldLabels: []string{"service/service2-subteam1", "forward/linked"},
 				},
 			},
 		},
