@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       since:
-        description: "The date to backfill tickets since"
+        description: "The date to backfill tickets since in YYYY-MM-DD format"
         required: true
       dry_run:
         description: "Whether to skip actually updating issues"
