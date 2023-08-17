@@ -546,9 +546,6 @@ properties:
         name: 'controlPlaneOnly'
         description: |
           Controls whether the upgrade applies to the control plane only.
-  - !ruby/object:Api::Type::Boolean
-    name: 'disableBundledIngress'
-    description: Disable bundled ingress.
   - !ruby/object:Api::Type::String
     name: 'uid'
     description: |

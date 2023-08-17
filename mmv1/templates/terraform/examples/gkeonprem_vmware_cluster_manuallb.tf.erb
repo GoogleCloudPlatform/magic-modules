@@ -68,7 +68,6 @@ resource "google_gkeonprem_vmware_cluster" "<%= ctx[:primary_resource_id] %>" {
   upgrade_policy {
     control_plane_only = true
   }
-  disable_bundled_ingress = true
   authorization {
     admin_users {
       username = "testuser@gmail.com"
