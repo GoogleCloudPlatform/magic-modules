@@ -68,6 +68,7 @@ func getIssues(since string) []Issue {
 			if err.Message == "Bad credentials" {
 				glog.Exitf("Error from API: Bad credentials")
 			}
+			glog.Infof("API returned message: %s", err.Message)
 			done = true
 		} else {
 			issues = append(issues, newIssues...)
