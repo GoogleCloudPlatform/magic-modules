@@ -32,7 +32,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: "name"
     description: |
-      Output only. The resource name. Format: 
+      Output only. The resource name. Format:
       projects/{project_id_or_number}/locations/{locationId}/catalogs/{catalogId}/databases/{databaseId}
     output: true
   - !ruby/object:Api::Type::String
@@ -76,7 +76,7 @@ properties:
 - !ruby/object:Api::Type::NestedObject
   name: 'hiveOptions'
   description: |
-    Options of a Hive database.    
+    Options of a Hive database.
   properties:
     - !ruby/object:Api::Type::String
       name: 'locationUri'
