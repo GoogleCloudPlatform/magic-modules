@@ -32,7 +32,6 @@ update_verb: :PATCH
 update_mask: true
 
 autogen_async: true
-
 parameters:
   - !ruby/object:Api::Type::String
     name: name
@@ -102,6 +101,7 @@ properties:
       network addresses will be designated to the cluster for client access.
       Currently, only one PscConfig is supported.
     required: true
+    ignore_read: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
