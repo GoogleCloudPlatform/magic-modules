@@ -311,3 +311,33 @@ Deprecated in favor of field `x509_description`. It is now removed.
 ### `pem_certificates` is now removed
 
 Deprecated in favor of field `pem_certificate_chain`. It is now removed.
+
+## Resource: `google_secret_manager_secret`
+
+### `replication.automatic` is now a block type instead of boolean type
+
+In 4.X.X and previous versions, `replication.automatic` field was boolean type. In version 5.0.0, `replication.automatic` field is a block type.
+
+#### Old Config
+
+```hcl
+resource "google_secret_manager_secret" "my-secret" {
+  secret_id = "tf-secret"
+  
+  replication {
+    automatic = true
+  }
+}
+```
+
+#### New Config
+
+```hcl
+resource "google_secret_manager_secret" "my-secret" {
+  secret_id = "tf-secret"
+  
+  replication {
+    automatic {}
+  }
+}
+```
