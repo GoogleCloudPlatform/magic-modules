@@ -303,13 +303,6 @@ func TestLocationDescription_GetLocation(t *testing.T) {
 			},
 			ExpectedLocation: types.StringValue("provider-zone-a"),
 		},
-		// // Error states - TODO: What is the purpose of this error catch???
-		// "does not use the region value set in the provider config": {
-		// 	ld: LocationDescription{
-		// 		ProviderRegion: types.StringValue("provider-region"),
-		// 	},
-		// 	ExpectedError: true,
-		// },
 		"returns an error when none of location/region/zone are set on the resource, and neither region or zone is set on the provider": {
 			ExpectedError: true,
 		},
