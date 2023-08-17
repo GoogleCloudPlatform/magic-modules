@@ -700,7 +700,7 @@ func TestProvider_providerConfigure_requestTimeout(t *testing.T) {
 		"if a valid request_timeout is configured in the provider, no error will occur": {
 			ConfigValues: map[string]interface{}{
 				"request_timeout": "10s",
-				"credentials": transport_tpg.TestFakeCredentialsPath,
+				"credentials":     transport_tpg.TestFakeCredentialsPath,
 			},
 			ExpectedValue:       "10s",
 			ExpectedSchemaValue: "10s",
@@ -708,7 +708,7 @@ func TestProvider_providerConfigure_requestTimeout(t *testing.T) {
 		"if an invalid request_timeout is configured in the provider, an error will occur": {
 			ConfigValues: map[string]interface{}{
 				"request_timeout": "timeout",
-				"credentials": transport_tpg.TestFakeCredentialsPath,
+				"credentials":     transport_tpg.TestFakeCredentialsPath,
 			},
 			ExpectedValue:       "timeout",
 			ExpectedSchemaValue: "timeout",
@@ -725,7 +725,7 @@ func TestProvider_providerConfigure_requestTimeout(t *testing.T) {
 		"when value is empty, the value will be 0s in order to set the default value": {
 			ConfigValues: map[string]interface{}{
 				"request_timeout": "",
-				"credentials": transport_tpg.TestFakeCredentialsPath,
+				"credentials":     transport_tpg.TestFakeCredentialsPath,
 			},
 			ExpectedValue: "0s",
 		},
@@ -803,7 +803,7 @@ func TestProvider_providerConfigure_requestReason(t *testing.T) {
 		"request_reason set in the config is not overridden by environment variables": {
 			ConfigValues: map[string]interface{}{
 				"request_reason": "request test",
-				"credentials": transport_tpg.TestFakeCredentialsPath,
+				"credentials":    transport_tpg.TestFakeCredentialsPath,
 			},
 			EnvVariables: map[string]string{
 				"CLOUDSDK_CORE_REQUEST_REASON": "test",
