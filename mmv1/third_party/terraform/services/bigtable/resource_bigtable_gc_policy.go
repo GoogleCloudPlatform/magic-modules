@@ -590,10 +590,6 @@ func validateNestedPolicy(p map[string]interface{}, isTopLevel bool) error {
 		return fmt.Errorf("`rules` need at least 2 GC rule when mode is specified")
 	}
 
-	if isTopLevel && !modeOk && !rulesOk {
-		return nil
-	}
-
 	if isTopLevel && !rulesOk {
 		return fmt.Errorf("invalid nested policy, need `rules`")
 	}
