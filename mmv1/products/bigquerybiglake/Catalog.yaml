@@ -12,9 +12,8 @@
 # limitations under the License.
 
 ---
-!ruby/object:Api::Resource # API resource name
+!ruby/object:Api::Resource
 name: "Catalog"
-# Resource description for the provider documentation.
 description: |
   'Catalogs are top-level containers for Databases and Tables.'
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -27,7 +26,6 @@ immutable: true
 create_url: "projects/{{project}}/locations/{{location}}/catalogs?resourceId={{catalog_id}}"
 update_verb: :PATCH
 update_mask: true
-
 properties:
   - !ruby/object:Api::Type::String
     name: "name"
