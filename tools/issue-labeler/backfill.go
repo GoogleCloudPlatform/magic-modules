@@ -154,11 +154,19 @@ func updateIssues(issueUpdates []IssueUpdate, dryRun bool) {
 		}
 		fmt.Println(string(b))
 		if !dryRun {
-			_, err = client.Do(req)
+			resp, err := client.Do(req)
 			if err != nil {
 				glog.Errorf("Error updating issue: %v", err)
 				continue
 			}
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				glog.Errorf("Error reading response body: %v", err)
+				continue
+			}
+			var errResp ErrorResponse
+			json.Unmarshal(body, &errResp)
+			glog.Infof("API returned message: %s", errResp.Message)
 		}
 	}
 }
