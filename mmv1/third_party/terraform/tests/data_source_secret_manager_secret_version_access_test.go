@@ -82,7 +82,7 @@ resource "google_secret_manager_secret" "secret-basic" {
     label = "my-label"
   }
   replication {
-    automatic = true
+    automatic {}
   }
 }
 
@@ -112,7 +112,7 @@ resource "google_secret_manager_secret" "secret-basic" {
     label = "my-label"
   }
   replication {
-    automatic = true
+    automatic {}
   }
 }
 
