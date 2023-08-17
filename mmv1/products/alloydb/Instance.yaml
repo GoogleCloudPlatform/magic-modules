@@ -166,7 +166,7 @@ properties:
       The IP address for the Instance. This is the connection endpoint for an end-user application.
   - !ruby/object:Api::Type::NestedObject
     name: 'readPoolConfig'
-    description: 'Read pool specific config.'
+    description: 'Read pool specific config. If the instance type is READ_POOL, this configuration must be provided.'
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'nodeCount'
