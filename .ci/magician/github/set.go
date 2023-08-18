@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func PostBuildStatus(prNumber, title, state, target_url, commitSha string) error {
+func (gh *github) PostBuildStatus(prNumber, title, state, target_url, commitSha string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/%s", commitSha)
 
 	postBody := map[string]string{
@@ -15,7 +15,7 @@ func PostBuildStatus(prNumber, title, state, target_url, commitSha string) error
 		"target_url": target_url,
 	}
 
-	_, err := utils.RequestCall(url, "POST", github_token, nil, postBody)
+	_, err := utils.RequestCall(url, "POST", gh.token, nil, postBody)
 	if err != nil {
 		return err
 	}
@@ -25,14 +25,14 @@ func PostBuildStatus(prNumber, title, state, target_url, commitSha string) error
 	return nil
 }
 
-func PostComment(prNumber, comment string) error {
+func (gh *github) PostComment(prNumber, comment string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/comments", prNumber)
 
 	body := map[string]string{
 		"body": comment,
 	}
 
-	reqStatusCode, err := utils.RequestCall(url, "POST", github_token, nil, body)
+	reqStatusCode, err := utils.RequestCall(url, "POST", gh.token, nil, body)
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func PostComment(prNumber, comment string) error {
 	return nil
 }
 
-func RequestPullRequestReviewer(prNumber, assignee string) error {
+func (gh *github) RequestPullRequestReviewer(prNumber, assignee string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/requested_reviewers", prNumber)
 
 	body := map[string][]string{
@@ -54,7 +54,7 @@ func RequestPullRequestReviewer(prNumber, assignee string) error {
 		"team_reviewers": {},
 	}
 
-	reqStatusCode, err := utils.RequestCall(url, "POST", github_token, nil, body)
+	reqStatusCode, err := utils.RequestCall(url, "POST", gh.token, nil, body)
 	if err != nil {
 		return err
 	}
@@ -68,13 +68,13 @@ func RequestPullRequestReviewer(prNumber, assignee string) error {
 	return nil
 }
 
-func AddLabel(prNumber, label string) error {
+func (gh *github) AddLabel(prNumber, label string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/labels", prNumber)
 
 	body := map[string][]string{
 		"labels": {label},
 	}
-	_, err := utils.RequestCall(url, "POST", github_token, nil, body)
+	_, err := utils.RequestCall(url, "POST", gh.token, nil, body)
 
 	if err != nil {
 		return fmt.Errorf("failed to add %s label: %s", label, err)
@@ -84,9 +84,9 @@ func AddLabel(prNumber, label string) error {
 
 }
 
-func RemoveLabel(prNumber, label string) error {
+func (gh *github) RemoveLabel(prNumber, label string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/labels/%s", prNumber, label)
-	_, err := utils.RequestCall(url, "DELETE", github_token, nil, nil)
+	_, err := utils.RequestCall(url, "DELETE", gh.token, nil, nil)
 
 	if err != nil {
 		return fmt.Errorf("failed to remove %s label: %s", label, err)

@@ -68,25 +68,27 @@ var membershipCheckerCmd = &cobra.Command{
 			"_BASE_BRANCH":   baseBranch,
 		}
 
-		author, err := github.GetPullRequestAuthor(prNumber)
+		gh := github.NewGithubService()
+
+		author, err := gh.GetPullRequestAuthor(prNumber)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		authorUserType := github.GetUserType(author)
+		authorUserType := gh.GetUserType(author)
 		trusted := authorUserType == github.CoreContributorUserType || authorUserType == github.GooglerUserType
 
 		if authorUserType != github.CoreContributorUserType {
 			fmt.Println("Not core contributor - assigning reviewer")
 
-			firstRequestedReviewer, err := github.GetPullRequestRequestedReviewer(prNumber)
+			firstRequestedReviewer, err := gh.GetPullRequestRequestedReviewer(prNumber)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
 
-			previouslyInvolvedReviewers, err := github.GetPullRequestPreviousAssignedReviewers(prNumber)
+			previouslyInvolvedReviewers, err := gh.GetPullRequestPreviousAssignedReviewers(prNumber)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
@@ -95,7 +97,7 @@ var membershipCheckerCmd = &cobra.Command{
 			reviewersToRequest, newPrimaryReviewer := github.ChooseReviewers(firstRequestedReviewer, previouslyInvolvedReviewers)
 
 			for _, reviewer := range reviewersToRequest {
-				err = github.RequestPullRequestReviewer(prNumber, reviewer)
+				err = gh.RequestPullRequestReviewer(prNumber, reviewer)
 				if err != nil {
 					fmt.Println(err)
 					os.Exit(1)
@@ -104,7 +106,7 @@ var membershipCheckerCmd = &cobra.Command{
 
 			if newPrimaryReviewer != "" {
 				comment := github.FormatReviewerComment(newPrimaryReviewer, authorUserType, trusted)
-				err = github.PostComment(prNumber, comment)
+				err = gh.PostComment(prNumber, comment)
 				if err != nil {
 					fmt.Println(err)
 					os.Exit(1)
@@ -132,8 +134,18 @@ var membershipCheckerCmd = &cobra.Command{
 				os.Exit(1)
 			}
 		} else {
-			github.AddLabel(prNumber, "awaiting-approval")
-			cloudbuild.PostAwaitingApprovalBuildLink(prNumber, commitSha)
+			gh.AddLabel(prNumber, "awaiting-approval")
+			targetUrl, err := cloudbuild.GetAwaitingApprovalBuildLink(prNumber, commitSha)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+
+			err = gh.PostBuildStatus(prNumber, "Approve Build", "success", targetUrl, commitSha)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		}
 	},
 }

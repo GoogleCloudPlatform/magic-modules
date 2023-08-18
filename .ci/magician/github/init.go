@@ -3,30 +3,31 @@ package github
 import (
 	"fmt"
 	"os"
-	"strings"
 )
 
-var github_token string
+// GithubService represents the service for GitHub interactions.
+type github struct {
+	token string
+}
 
-func init() {
-	isTest := false
-	for _, arg := range os.Args {
-		if strings.HasPrefix(arg, "-test.v") {
-			isTest = true
-			break
-		}
-	}
+type GithubService interface {
+	GetPullRequestAuthor(prNumber string) (string, error)
+	GetPullRequestRequestedReviewer(prNumber string) (string, error)
+	GetPullRequestPreviousAssignedReviewers(prNumber string) ([]string, error)
+	GetUserType(user string) userType
+	PostBuildStatus(prNumber, title, state, target_url, commitSha string) error
+	PostComment(prNumber, comment string) error
+	RequestPullRequestReviewer(prNumber, assignee string) error
+	AddLabel(prNumber, label string) error
+	RemoveLabel(prNumber, label string) error
+}
 
-	if isTest {
-		github_token = "dummyToken"
-		return
-	}
-
+func NewGithubService() GithubService {
 	GITHUB_TOKEN, ok := os.LookupEnv("GITHUB_TOKEN")
 	if !ok {
 		fmt.Println("Did not provide GITHUB_TOKEN environment variable")
 		os.Exit(1)
 	}
 
-	github_token = GITHUB_TOKEN
+	return &github{token: GITHUB_TOKEN}
 }

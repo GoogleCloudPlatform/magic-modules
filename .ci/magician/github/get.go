@@ -5,7 +5,7 @@ import (
 	utils "magician/utility"
 )
 
-func GetPullRequestAuthor(prNumber string) (string, error) {
+func (gh *github) GetPullRequestAuthor(prNumber string) (string, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s", prNumber)
 
 	var pullRequest struct {
@@ -14,7 +14,7 @@ func GetPullRequestAuthor(prNumber string) (string, error) {
 		} `json:"user"`
 	}
 
-	_, err := utils.RequestCall(url, "GET", github_token, &pullRequest, nil)
+	_, err := utils.RequestCall(url, "GET", gh.token, &pullRequest, nil)
 	if err != nil {
 		return "", err
 	}
@@ -22,7 +22,7 @@ func GetPullRequestAuthor(prNumber string) (string, error) {
 	return pullRequest.User.Login, nil
 }
 
-func GetPullRequestRequestedReviewer(prNumber string) (string, error) {
+func (gh *github) GetPullRequestRequestedReviewer(prNumber string) (string, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/requested_reviewers", prNumber)
 
 	var requestedReviewers struct {
@@ -31,7 +31,7 @@ func GetPullRequestRequestedReviewer(prNumber string) (string, error) {
 		} `json:"users"`
 	}
 
-	_, err := utils.RequestCall(url, "GET", github_token, &requestedReviewers, nil)
+	_, err := utils.RequestCall(url, "GET", gh.token, &requestedReviewers, nil)
 	if err != nil {
 		return "", err
 	}
@@ -43,7 +43,7 @@ func GetPullRequestRequestedReviewer(prNumber string) (string, error) {
 	return requestedReviewers.Users[0].Login, nil
 }
 
-func GetPullRequestPreviousAssignedReviewers(prNumber string) ([]string, error) {
+func (gh *github) GetPullRequestPreviousAssignedReviewers(prNumber string) ([]string, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/reviews", prNumber)
 
 	var reviews []struct {
@@ -52,7 +52,7 @@ func GetPullRequestPreviousAssignedReviewers(prNumber string) ([]string, error) 
 		} `json:"user"`
 	}
 
-	_, err := utils.RequestCall(url, "GET", github_token, &reviews, nil)
+	_, err := utils.RequestCall(url, "GET", gh.token, &reviews, nil)
 	if err != nil {
 		return nil, err
 	}

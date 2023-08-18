@@ -3,7 +3,6 @@ package cloudbuild
 import (
 	"context"
 	"fmt"
-	"magician/github"
 	"os"
 
 	"google.golang.org/api/cloudbuild/v1"
@@ -27,24 +26,19 @@ func ApproveCommunityChecker(prNumber, commitSha string) error {
 	return nil
 }
 
-func PostAwaitingApprovalBuildLink(prNumber, commitSha string) error {
+func GetAwaitingApprovalBuildLink(prNumber, commitSha string) (string, error) {
 	buildId, err := getPendingBuildId(PROJECT_ID, commitSha)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if buildId == "" {
-		return fmt.Errorf("failed to find pending build for PR %s", prNumber)
+		return "", fmt.Errorf("failed to find pending build for PR %s", prNumber)
 	}
 
 	targetUrl := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s?project=%s", buildId, PROJECT_ID)
 
-	err = github.PostBuildStatus(prNumber, "Approve Build", "success", targetUrl, commitSha)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return targetUrl, nil
 }
 
 func getPendingBuildId(projectId, commitSha string) (string, error) {

@@ -55,27 +55,18 @@ func (ut userType) String() string {
 	}
 }
 
-// Check if a user is team member to not request a random reviewer
-func isTeamMember(author string) bool {
-	return slices.Contains(reviewerRotation, author) || slices.Contains(trustedContributors, author)
-}
-
-func isTeamReviewer(reviewer string) bool {
-	return slices.Contains(reviewerRotation, reviewer)
-}
-
-func GetUserType(user string) userType {
-	if isTeamMember(user) {
+func (gh *github) GetUserType(user string) userType {
+	if isTeamMember(user, gh.token) {
 		fmt.Println("User is a team member")
 		return CoreContributorUserType
 	}
 
-	if isOrgMember(user, "GoogleCloudPlatform") {
+	if isOrgMember(user, "GoogleCloudPlatform", gh.token) {
 		fmt.Println("User is a GCP org member")
 		return GooglerUserType
 	}
 
-	if isOrgMember(user, "googlers") {
+	if isOrgMember(user, "googlers", gh.token) {
 		fmt.Println("User is a googlers org member")
 		return GooglerUserType
 	}
@@ -83,9 +74,18 @@ func GetUserType(user string) userType {
 	return CommunityUserType
 }
 
-func isOrgMember(author, org string) bool {
+// Check if a user is team member to not request a random reviewer
+func isTeamMember(author, githubToken string) bool {
+	return slices.Contains(reviewerRotation, author) || slices.Contains(trustedContributors, author)
+}
+
+func isTeamReviewer(reviewer string) bool {
+	return slices.Contains(reviewerRotation, reviewer)
+}
+
+func isOrgMember(author, org, githubToken string) bool {
 	url := fmt.Sprintf("https://api.github.com/orgs/%s/members/%s", org, author)
-	res, _ := utils.RequestCall(url, "GET", github_token, nil, nil)
+	res, _ := utils.RequestCall(url, "GET", githubToken, nil, nil)
 
 	return res != 404
 }

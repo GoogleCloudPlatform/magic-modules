@@ -16,8 +16,7 @@ import (
 var communityApprovalCmd = &cobra.Command{
 	Use:   "community-checker",
 	Short: "Run presubmit generate diffs for untrusted users and remove awaiting-approval label",
-	Long: `
-	This command processes pull requests and performs various validations and actions based on the PR's metadata and author.
+	Long: `This command processes pull requests and performs various validations and actions based on the PR's metadata and author.
 
 	The following PR details are expected as arguments:
 	1. PR Number
@@ -61,13 +60,14 @@ var communityApprovalCmd = &cobra.Command{
 			"_BASE_BRANCH":   baseBranch,
 		}
 
-		author, err := github.GetPullRequestAuthor(prNumber)
+		gh := github.NewGithubService()
+		author, err := gh.GetPullRequestAuthor(prNumber)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		authorUserType := github.GetUserType(author)
+		authorUserType := gh.GetUserType(author)
 		trusted := authorUserType == github.CoreContributorUserType || authorUserType == github.GooglerUserType
 
 		// only triggers build for untrusted users (because trusted users will be handled by membership-checker)
@@ -81,7 +81,7 @@ var communityApprovalCmd = &cobra.Command{
 
 		// in community-checker job:
 		// remove awaiting-approval label from external contributor PRs
-		github.RemoveLabel(prNumber, "awaiting-approval")
+		gh.RemoveLabel(prNumber, "awaiting-approval")
 	},
 }
 
