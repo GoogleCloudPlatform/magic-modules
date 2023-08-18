@@ -3,7 +3,11 @@ ifndef OWNER_REPO
 	$(error OWNER_REPO is undefined)
 endif
 	rm -rf ./old ./new
+ifdef DEPTH
+	git clone --depth=$(DEPTH) https://github.com/$(OWNER_REPO).git old
+else
 	git clone https://github.com/$(OWNER_REPO).git old
+endif
 	cp -r old/ new/
 
 clean:
