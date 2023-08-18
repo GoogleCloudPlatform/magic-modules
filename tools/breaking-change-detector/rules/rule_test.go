@@ -40,7 +40,7 @@ func TestMarkdownIdentifiers(t *testing.T) {
 	// Iterate over the identifiers and check if they have a corresponding <h4> tag
 	for _, identifier := range identifiers {
 		// Define the expected <a> tag
-		expectedTag := fmt.Sprintf("<a name=\"%s\">", identifier)
+		expectedTag := fmt.Sprintf("<a name=\"%s\"></a>", identifier)
 
 		// Check if the <a> tag exists in the Markdown string
 		if !strings.Contains(mdString, expectedTag) {

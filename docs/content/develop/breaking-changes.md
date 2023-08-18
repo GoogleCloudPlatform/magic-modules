@@ -37,28 +37,28 @@ For more information, see
 
 * <a name="resource-map-resource-removal-or-rename"></a>Removing or renaming a resource
   or datasource
-* <a id="resource-id"></a> Changing resource ID format
+* <a name="resource-id"></a> Changing resource ID format
   * Terraform uses resource ID to read resource state from the API. Modification of
     the ID format will break the ability to parse the IDs from any deployments.
-* <a id="resource-import-format"></a> Removing or altering resource import ID formats
+* <a name="resource-import-format"></a> Removing or altering resource import ID formats
   * Automation written by end users may rely on specific import formats.
 * Major changes to default resource behavior
   * For example, changing the default implementation of resource deletion
 
 ## Field-level breaking changes
 
-* <a id="resource-schema-field-removal-or-rename"></a>Removing or renaming a field 
-* <a id="field-changing-type"></a> Changing field data type
+* <a name="resource-schema-field-removal-or-rename"></a>Removing or renaming a field 
+* <a name="field-changing-type"></a> Changing field data type
   * For example, changing a String to an Integer
-* <a id="field-optional-to-required"></a> Making an optional field required or adding a new required field
-* <a id="field-becoming-computed"></a> Making a settable field read-only
+* <a name="field-optional-to-required"></a> Making an optional field required or adding a new required field
+* <a name="field-becoming-computed"></a> Making a settable field read-only
   * For MMv1 resources, adding `output: true` to an existing field.
   * For handwritten resources, adding `Computed: true` to a field that does not have `Optional: true` set.
-* <a id="field-oc-to-c"></a> Removing support for API-side defaults
+* <a name="field-oc-to-c"></a> Removing support for API-side defaults
   * For MMv1 resources, removing `default_from_api: true`.
   * For handwritten resources, altering a field schema with `Computed: true` + `Optional: true`
     to only have `Optional: true`.
-* <a id="field-changing-default-value"></a> Adding or changing a default value
+* <a name="field-changing-default-value"></a> Adding or changing a default value
   * Default values in Terraform are used to replace null values in configuration at
     plan/apply time and **do not** respect previously-configured values by the user.
     Even in major releases, these changes are often undesirable, as their impact is extremely broad.
@@ -68,7 +68,7 @@ For more information, see
     if the change will destroy and recreate the resource due to changing an immutable value.
     Default changes in the provider are comparable in impact to default changes in an API,
     and modifying examples and modules may achieve the intended effect with a smaller blast radius.
-* <a id="field-changing-data-format"></a> Modifying how field data is stored in state
+* <a name="field-changing-data-format"></a> Modifying how field data is stored in state
   * For example, changing the case of a value returned by the API in a flattener or decorder
 * Removing diff suppression from a field.
   * For MMv1 resources, removing `diff_suppress_func` from a field.
@@ -77,10 +77,10 @@ For more information, see
 
 ### Making validation more strict
 
-* <a id="field-growing-min"></a> Increasing the minimum number of items in an array
+* <a name="field-growing-min"></a> Increasing the minimum number of items in an array
   * For MMv1 resources, increasing `min_size` on an Array field.
   * For handwritten resources, increasing `MinItems` on an Array field.
-* <a id="field-shrinking-max"></a> Decreasing the maximum number of items in an array
+* <a name="field-shrinking-max"></a> Decreasing the maximum number of items in an array
   * For MMv1 resources, decreasing `max_size` on an Array field.
   * For handwritten resources, decreasing `MaxItems` on an Array field.
 * Adding validation to a field that previously had no validation
