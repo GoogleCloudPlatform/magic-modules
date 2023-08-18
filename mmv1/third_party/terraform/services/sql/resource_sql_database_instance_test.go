@@ -790,6 +790,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(t 
 
 	instanceName := "tf-test-" + acctest.RandString(t, 10)
 	project_id := "psctestproject" + acctest.RandString(t, 10)
+	org_id := envvar.GetTestOrgFromEnv(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -797,7 +798,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(t 
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName, project_id),
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName, project_id, org_id),
 				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil)),
 			},
 			{
@@ -863,6 +864,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddAllowedConsumerProjects_th
 
 	instanceName := "tf-test-" + acctest.RandString(t, 10)
 	project_id := "psctestproject" + acctest.RandString(t, 10)
+	org_id := envvar.GetTestOrgFromEnv(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -870,7 +872,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddAllowedConsumerProjects_th
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName, project_id),
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName, project_id, org_id),
 				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil)),
 			},
 			{
@@ -890,7 +892,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddAllowedConsumerProjects_th
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName, project_id),
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName, project_id, org_id),
 				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{})),
 			},
 			{
@@ -908,6 +910,7 @@ func TestAccSqlDatabaseInstance_basicInstance_thenPSCEnabled(t *testing.T) {
 
 	instanceName := "tf-test-" + acctest.RandString(t, 10)
 	project_id := "psctestproject" + acctest.RandString(t, 10)
+	org_id := envvar.GetTestOrgFromEnv(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -924,7 +927,7 @@ func TestAccSqlDatabaseInstance_basicInstance_thenPSCEnabled(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config:      testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName, project_id),
+				Config:      testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName, project_id, org_id),
 				ExpectError: regexp.MustCompile("PSC connectivity can not be enabled"),
 			},
 		},
@@ -2604,11 +2607,12 @@ resource "google_sql_database_instance" "instance" {
 `, instanceName)
 }
 
-func testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName string, project_id string) string {
+func testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName string, project_id string, org_id string) string {
 	return fmt.Sprintf(`
 resource "google_project" "testproject" {
   name                = "%s"
   project_id          = "%s"
+  org_id              = "%s"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -2632,7 +2636,7 @@ resource "google_sql_database_instance" "instance" {
 	availability_type = "REGIONAL"
   }
 }
-`, project_id, project_id, instanceName)
+`, project_id, project_id, org_id, instanceName)
 }
 
 func testAccSqlDatabaseInstance_withPSCEnabled_withEmptyAllowedConsumerProjects(instanceName string) string {
