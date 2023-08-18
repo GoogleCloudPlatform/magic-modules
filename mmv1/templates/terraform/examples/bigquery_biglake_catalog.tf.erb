@@ -1,3 +1,5 @@
 resource "google_bigquery_biglake_catalog" "<%= ctx[:primary_resource_id] %>"  {
-    name = "<%= ctx[:vars]['catalog_name'] %>"
+    catalog_id = "<%= ctx[:vars]['catalog_id'] %>"
+    project = "<%= ctx[:vars]['project'] %>"
+    location = "<%= ctx[:vars]['location'] %>"
 }
