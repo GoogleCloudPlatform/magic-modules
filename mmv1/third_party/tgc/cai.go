@@ -1,59 +1,60 @@
 package google
 
 import (
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/cai"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
-type ConvertFunc = tpgresource.ConvertFunc
-type GetApiObjectFunc = tpgresource.GetApiObjectFunc
-type FetchFullResourceFunc = tpgresource.FetchFullResourceFunc
-type MergeFunc = tpgresource.MergeFunc
-type ResourceConverter = tpgresource.ResourceConverter
+type ConvertFunc = cai.ConvertFunc
+type GetApiObjectFunc = cai.GetApiObjectFunc
+type FetchFullResourceFunc = cai.FetchFullResourceFunc
+type MergeFunc = cai.MergeFunc
+type ResourceConverter = cai.ResourceConverter
 
 // Asset is the CAI representation of a resource.
-type Asset = tpgresource.Asset
+type Asset = cai.Asset
 
 // AssetResource is the Asset's Resource field.
-type AssetResource = tpgresource.AssetResource
+type AssetResource = cai.AssetResource
 
 // AssetName templates an asset.name by looking up and replacing all instances
 // of {{field}}. In the case where a field would resolve to an empty string, a
 // generated unique string will be used: "placeholder-" + randomString().
 // This is done to preserve uniqueness of asset.name for a given asset.asset_type.
 func AssetName(d tpgresource.TerraformResourceData, config *transport_tpg.Config, linkTmpl string) (string, error) {
-	return tpgresource.AssetName(d, config, linkTmpl)
+	return cai.AssetName(d, config, linkTmpl)
 }
 
-type Folder = tpgresource.Folder
+type Folder = cai.Folder
 
-type IAMPolicy = tpgresource.IAMPolicy
+type IAMPolicy = cai.IAMPolicy
 
-type IAMBinding = tpgresource.IAMBinding
+type IAMBinding = cai.IAMBinding
 
-type OrgPolicy = tpgresource.OrgPolicy
+type OrgPolicy = cai.OrgPolicy
 
 // V2OrgPolicies is the represtation of V2OrgPolicies
-type V2OrgPolicies = tpgresource.V2OrgPolicies
+type V2OrgPolicies = cai.V2OrgPolicies
 
 // Spec is the representation of Spec for V2OrgPolicy
-type PolicySpec = tpgresource.PolicySpec
+type PolicySpec = cai.PolicySpec
 
-type PolicyRule = tpgresource.PolicyRule
+type PolicyRule = cai.PolicyRule
 
-type StringValues = tpgresource.StringValues
+type StringValues = cai.StringValues
 
-type Expr = tpgresource.Expr
+type Expr = cai.Expr
 
-type Timestamp = tpgresource.Timestamp
+type Timestamp = cai.Timestamp
 
-type ListPolicyAllValues = tpgresource.ListPolicyAllValues
+type ListPolicyAllValues = cai.ListPolicyAllValues
 
-type ListPolicy = tpgresource.ListPolicy
+type ListPolicy = cai.ListPolicy
 
-type BooleanPolicy = tpgresource.BooleanPolicy
-type RestoreDefault = tpgresource.RestoreDefault
+type BooleanPolicy = cai.BooleanPolicy
+type RestoreDefault = cai.RestoreDefault
 
 func RandString(n int) string {
-	return tpgresource.RandString(n)
+	return cai.RandString(n)
 }

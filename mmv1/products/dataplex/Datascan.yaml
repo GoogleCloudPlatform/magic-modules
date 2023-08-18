@@ -250,10 +250,27 @@ properties:
         name: 'samplingPercent'
         description: |
           The percentage of the records to be selected from the dataset for DataScan.
+          Value can range between 0.0 and 100.0 with up to 3 significant decimal digits.
+          Sampling is not applied if `sampling_percent` is not specified, 0 or 100.
       - !ruby/object:Api::Type::String
         name: 'rowFilter'
         description: |
           A filter applied to all rows in a single DataScan job. The filter needs to be a valid SQL expression for a WHERE clause in BigQuery standard SQL syntax. Example: col1 >= 0 AND col2 < 10
+      - !ruby/object:Api::Type::NestedObject
+        name: 'postScanActions'
+        description: |
+          Actions to take upon job completion.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'bigqueryExport'
+            description: |
+              If set, results will be exported to the provided BigQuery table.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'resultsTable'
+                description: |
+                  The BigQuery table to export DataQualityScan results to.
+                  Format://bigquery.googleapis.com/projects/PROJECT_ID/datasets/DATASET_ID/tables/TABLE_ID
       - !ruby/object:Api::Type::Array
         name: 'rules'
         min_size: 1
@@ -278,6 +295,19 @@ properties:
               name: 'threshold'
               description: |
                 The minimum ratio of passing_rows / total_rows required to pass this rule, with a range of [0.0, 1.0]. 0 indicates default value (i.e. 1.0).
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              description: |
+                A mutable name for the rule.
+                The name must contain only letters (a-z, A-Z), numbers (0-9), or hyphens (-).
+                The maximum length is 63 characters.
+                Must start with a letter.
+                Must end with a number or a letter.
+            - !ruby/object:Api::Type::String
+              name: 'description'
+              description: |
+                Description of the rule.
+                The maximum length is 1,024 characters.
             - !ruby/object:Api::Type::NestedObject
               name: 'rangeExpectation'
               description: |
@@ -336,7 +366,7 @@ properties:
               allow_empty_object: true
               send_empty_value: true
               description: |
-                ColumnAggregate rule which evaluates whether the column has duplicates.
+                Row-level rule which evaluates whether each column value is unique.
               properties: []
             - !ruby/object:Api::Type::NestedObject
               name: 'statisticRangeExpectation'
@@ -409,13 +439,57 @@ properties:
         name: 'samplingPercent'
         description: |
           The percentage of the records to be selected from the dataset for DataScan.
+          Value can range between 0.0 and 100.0 with up to 3 significant decimal digits.
+          Sampling is not applied if `sampling_percent` is not specified, 0 or 100.
       - !ruby/object:Api::Type::String
         name: 'rowFilter'
         description: |
           A filter applied to all rows in a single DataScan job. The filter needs to be a valid SQL expression for a WHERE clause in BigQuery standard SQL syntax. Example: col1 >= 0 AND col2 < 10
+      - !ruby/object:Api::Type::NestedObject
+        name: 'postScanActions'
+        description: |
+          Actions to take upon job completion.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'bigqueryExport'
+            description: |
+              If set, results will be exported to the provided BigQuery table.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'resultsTable'
+                description: |
+                  The BigQuery table to export DataProfileScan results to.
+                  Format://bigquery.googleapis.com/projects/PROJECT_ID/datasets/DATASET_ID/tables/TABLE_ID
+      - !ruby/object:Api::Type::NestedObject
+        name: 'includeFields'
+        description: |
+          The fields to include in data profile.
+          If not specified, all fields at the time of profile scan job execution are included, except for ones listed in `exclude_fields`.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'fieldNames'
+            description: |
+              Expected input is a list of fully qualified names of fields as in the schema.
+              Only top-level field names for nested fields are supported.
+              For instance, if 'x' is of nested field type, listing 'x' is supported but 'x.y.z' is not supported. Here 'y' and 'y.z' are nested fields of 'x'.
+            item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: 'excludeFields'
+        description: |
+          The fields to exclude from data profile.
+          If specified, the fields will be excluded from data profile, regardless of `include_fields` value.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'fieldNames'
+            description: |
+              Expected input is a list of fully qualified names of fields as in the schema.
+              Only top-level field names for nested fields are supported.
+              For instance, if 'x' is of nested field type, listing 'x' is supported but 'x.y.z' is not supported. Here 'y' and 'y.z' are nested fields of 'x'.
+            item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: 'dataQualityResult'
     output: true
+    deprecation_message: "`data_quality_result` is deprecated and will be removed in a future major release."
     description: |
       The result of the data quality scan.
     properties:
@@ -642,6 +716,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'dataProfileResult'
     output: true
+    deprecation_message: "`data_profile_result` is deprecated and will be removed in a future major release."
     custom_flatten: templates/terraform/custom_flatten/dataplex_datascan_ignore_profile_result.go.erb
     description: |
       The result of the data profile scan.
