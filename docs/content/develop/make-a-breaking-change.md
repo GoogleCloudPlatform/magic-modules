@@ -96,7 +96,10 @@ Set `deprecation_message` on the field. For example:
   deprecation_message: api_field_name is deprecated and will be removed in a future major release. Use other_field_name instead.
 ```
 
-The deprecation message will automatically show up in the API documentation.
+Replace the second sentence with an appropriate short description of the replacement path and/or the reason for
+deprecation.
+
+The deprecation message will automatically show up in the resource documentation.
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 1. Set `Deprecated` on the field. For example:
@@ -108,10 +111,12 @@ The deprecation message will automatically show up in the API documentation.
       ...
    }
    ```
+   Replace the second sentence with an appropriate short description of the replacement path and/or the reason for
+   deprecation.
 2. Update the [documentation for the field]({{< ref "/develop/resource#add-documentation" >}}) to include the deprecation notice. For example:
 
    ```markdown
-   * `api_field_name` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) FIELD_DESCRIPTION. `api_field_name` is deprecated and will be removed in a future major release. Use `other_field_name` instead.
+   * `api_field_name` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Deprecated) FIELD_DESCRIPTION. `api_field_name` is deprecated and will be removed in a future major release. Use `other_field_name` instead.
    ```
 {{< /tab >}}
 {{< /tabs >}}
@@ -120,23 +125,19 @@ The deprecation message will automatically show up in the API documentation.
 
 {{< tabs "Resource deprecations" >}}
 {{< tab "MMv1" >}}
-1. Set `docs.warning` and `custom_code.resource_definition` on the resource. For example:
+Set `deprecation_message` on the resource. For example:
 
-   ```yaml
-   docs: !ruby/object:Provider::Terraform::Docs
-     warning: |
-       google_RESOURCE_NAME is deprecated and will be removed in the next major release
-       of the provider. Use google_OTHER_RESOURCE_NAME instead.
-   custom_code: !ruby/object:Provider::Terraform::CustomCode
-     resource_definition: templates/terraform/resource_definition/RESOURCE_NAME_deprecation.go.erb
-   ```
+```yaml
+deprecation_message: >-
+  `google_RESOURCE_NAME` is deprecated and will be removed in the next major release
+  of the provider. Use `google_OTHER_RESOURCE_NAME` instead.
+```
 
-   Replace RESOURCE_NAME with the name of the resource (excluding the `google_` prefix).
-2. Set `DeprecationMessage` in `mmv1/templates/terraform/resource_definition/RESOURCE_NAME_deprecation.go.erb`. For example:
-   ```go
-   DeprecationMessage: "google_RESOURCE_NAME is deprecated and will be removed in the next " +
-                       "major release of the provider. Use google_OTHER_RESOURCE_NAME instead.",
-   ```
+Replace RESOURCE_NAME with the name of the resource (excluding the `google_` prefix). Replace the
+second sentence with an appropriate short description of the replacement path and/or the reason for
+deprecation.
+
+The deprecation message will automatically show up in the resource documentation.
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 1. Set `DeprecationMessage` on the field. For example:
@@ -144,15 +145,19 @@ The deprecation message will automatically show up in the API documentation.
    ```go
    return &schema.Resource{
       ...
-      DeprecationMessage: "google_RESOURCE_NAME is deprecated and will be removed in the next " +
-                          "major release of the provider. Use google_OTHER_RESOURCE_NAME instead.",
+      DeprecationMessage: "`google_RESOURCE_NAME` is deprecated and will be removed in the next " +
+                          "major release of the provider. Use `google_OTHER_RESOURCE_NAME` instead.",
       ...
    }
    ```
+
+   Replace RESOURCE_NAME with the name of the resource (excluding the `google_` prefix). Replace the
+   second sentence with an appropriate short description of the replacement path and/or the reason for
+   deprecation.
 2. Add a warning to the resource documentation stating that the resource is deprecated. For example:
    ```markdown
-   ~> **Warning:** google_RESOURCE_NAME is deprecated and will be removed in the next
-   major release of the provider. Use google_OTHER_RESOURCE_NAME instead.
+   ~> **Warning:** `google_RESOURCE_NAME` is deprecated and will be removed in the next
+   major release of the provider. Use `google_OTHER_RESOURCE_NAME` instead.
    ```
 {{< /tab >}}
 {{< /tabs >}}
