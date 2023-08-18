@@ -24,8 +24,6 @@ base_url: "projects/{{project}}/locations/{{location}}/catalogs"
 self_link: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}"
 immutable: true
 create_url: "projects/{{project}}/locations/{{location}}/catalogs?catalogId={{catalog_id}}"
-update_verb: :PATCH
-update_mask: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "bigquery_biglake_catalog"
