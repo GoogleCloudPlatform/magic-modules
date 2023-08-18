@@ -1,11 +1,12 @@
 ---
 steps:
-    - name: 'gcr.io/graphite-docker-images/membership-checker'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: community-checker
       secretEnv: ["GITHUB_TOKEN", "GENERATE_DIFFS_TRIGGER", "RAKE_TESTS_TRIGGER"]
       timeout: 8000s
       args:
-          - "needs_approval"
+          - "community-checker"
           - $_PR_NUMBER
           - $COMMIT_SHA
           - $BRANCH_NAME
