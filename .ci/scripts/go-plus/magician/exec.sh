@@ -12,5 +12,7 @@ DIR="$(dirname $(realpath $0))"
 # Construct the path to the Go program
 GO_PROGRAM="$DIR/../../../magician/main.go"
 
+pushd $GO_PROGRAM
+
 # Pass all arguments to the child command
-go run "$GO_PROGRAM" "$@"
+go run . "$@"
