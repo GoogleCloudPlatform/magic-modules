@@ -19,7 +19,8 @@ jobs:
       - name: Build
         run: |
           cd tools/breaking-change-detector
-          make build
+          make clone OWNER_REPO=hashicorp/terraform-provider-google
+          make build OLD_REF=main NEW_REF=main
 
       - name: Test
         run: |
