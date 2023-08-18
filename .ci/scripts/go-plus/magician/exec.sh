@@ -10,7 +10,7 @@ fi
 DIR="$(dirname $(realpath $0))"
 
 # Construct the path to the Go program
-GO_PROGRAM="$DIR/../.../magician/main.go"
+GO_PROGRAM="$DIR/../../magician/main.go"
 
 # Pass all arguments to the child command
 go run "$GO_PROGRAM" "$@"
