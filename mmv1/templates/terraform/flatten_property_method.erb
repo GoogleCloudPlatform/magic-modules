@@ -94,15 +94,15 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
     })
   }
   return transformed
-<% elsif ((property.is_a?(Api::Type::KeyValueLabels)) || (property.is_a?(Api::Type::KeyValueAnnotations)) || property.name == "terraform_labels") -%>
+<% elsif (property.is_a?(Api::Type::KeyValueLabels)) || (property.is_a?(Api::Type::KeyValueAnnotations)) || property.name == "terraformLabels" -%>
   if v == nil {
     return v
   }
 
   transformed := make(map[string]interface{})
-  if l, ok := d.Get("<%= property.terraform_lineage -%>").(map[string]interface{}); ok {
-    for k, _ := range l {
-      transformed[k] = l[k]
+  if l, ok := d.GetOkExists("<%= property.terraform_lineage -%>"); ok {
+    for k := range l.(map[string]interface{}) {
+      transformed[k] = v.(map[string]interface{})[k]
     }
   }
 
