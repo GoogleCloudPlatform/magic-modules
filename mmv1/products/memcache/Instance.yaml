@@ -38,7 +38,7 @@ examples:
       network_name: 'test-network'
       address_name: 'address'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "memcache-instance-basic")'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "memcache-instance-basic-1")'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
