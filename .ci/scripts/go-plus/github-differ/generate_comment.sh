@@ -88,6 +88,12 @@ set -e
 TPGB_LOCAL_PATH_OLD="${TPGB_LOCAL_PATH}old"
 mkdir -p $TPGB_LOCAL_PATH_OLD
 cp -r $TPGB_LOCAL_PATH/. $TPGB_LOCAL_PATH_OLD
+
+pushd $TPGB_LOCAL_PATH
+git checkout origin/$NEW_BRANCH
+update_package_name "github.com/hashicorp/terraform-provider-google-beta" "google/provider/new"
+popd
+
 pushd $TPGB_LOCAL_PATH_OLD
 git checkout origin/$OLD_BRANCH
 update_package_name "github.com/hashicorp/terraform-provider-google-beta" "google/provider/old"
