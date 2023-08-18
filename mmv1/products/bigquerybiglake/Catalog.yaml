@@ -23,7 +23,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: "projects/{{project}}/locations/{{location}}/catalogs"
 self_link: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}"
 immutable: true
-create_url: "projects/{{project}}/locations/{{location}}/catalogs?resourceId={{catalog_id}}"
+create_url: "projects/{{project}}/locations/{{location}}/catalogs?catalogId={{catalog_id}}"
 update_verb: :PATCH
 update_mask: true
 examples:
