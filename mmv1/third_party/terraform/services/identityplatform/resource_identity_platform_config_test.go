@@ -1,52 +1,52 @@
 package identityplatform_test
 
 import (
-        "testing"
-        "time"
+	"testing"
+	"time"
 
-        "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
-        "github.com/hashicorp/terraform-provider-google/google/acctest"
-        "github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccIdentityPlatformConfig_update(t *testing.T) {
-        acctest.SkipIfVcr(t)
-        t.Parallel()
+	acctest.SkipIfVcr(t)
+	t.Parallel()
 
-        context := map[string]interface{}{
-                "org_id":           envvar.GetTestOrgFromEnv(t),
-                "billing_acct":     envvar.GetTestBillingAccountFromEnv(t),
-                "quota_start_time": time.Now().AddDate(0, 0, 1).Format(time.RFC3339),
-                "random_suffix":    acctest.RandString(t, 10),
-        }
+	context := map[string]interface{}{
+		"org_id":           envvar.GetTestOrgFromEnv(t),
+		"billing_acct":     envvar.GetTestBillingAccountFromEnv(t),
+		"quota_start_time": time.Now().AddDate(0, 0, 1).Format(time.RFC3339),
+		"random_suffix":    acctest.RandString(t, 10),
+	}
 
-        acctest.VcrTest(t, resource.TestCase{
-                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-                Steps: []resource.TestStep{
-                        {
-                                Config: testAccIdentityPlatformConfig_basic(context),
-                        },
-                        {
-                                ResourceName:      "google_identity_platform_config.basic",
-                                ImportState:       true,
-                                ImportStateVerify: true,
-                        },
-                        {
-                                Config: testAccIdentityPlatformConfig_update(context),
-                        },
-                        {
-                                ResourceName:      "google_identity_platform_config.update",
-                                ImportState:       true,
-                                ImportStateVerify: true,
-                        },
-                },
-        })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIdentityPlatformConfig_basic(context),
+			},
+			{
+				ResourceName:      "google_identity_platform_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccIdentityPlatformConfig_update(context),
+			},
+			{
+				ResourceName:      "google_identity_platform_config.update",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }
 
 func testAccIdentityPlatformConfig_basic(context map[string]interface{}) string {
-        return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "basic" {
   project_id = "tf-test-my-project%{random_suffix}"
   name       = "tf-test-my-project%{random_suffix}"
@@ -87,7 +87,7 @@ resource "google_identity_platform_config" "basic" {
 }
 
 func testAccIdentityPlatformConfig_update(context map[string]interface{}) string {
-        return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_identity_platform_config" "update" {
   project = "tf-test-my-project%{random_suffix}"
   sign_in {
