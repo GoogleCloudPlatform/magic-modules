@@ -46,8 +46,9 @@ properties:
     output: true
     url_param_only: true
     description: |
-      The creation time of the catalog. A timestamp in RFC3339 UTC "Zulu"
-      format, with nanosecond resolution and up to nine fractional digits.
+      Output only. The creation time of the catalog. A timestamp in RFC3339 UTC
+      "Zulu" format, with nanosecond resolution and up to nine fractional
+      digits.
   - !ruby/object:Api::Type::String
     name: "updateTime"
     output: true
