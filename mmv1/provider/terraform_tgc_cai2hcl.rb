@@ -55,7 +55,9 @@ module Provider
 
       copy_file_list(output_folder, [
                        ['cai2hcl/helper.go',
-                        'third_party/cai2hcl/helper.go']
+                        'third_party/cai2hcl/helper.go'],
+                       ['cai2hcl/cai2hcl_test.go',
+                        'third_party/cai2hcl/cai2hcl_test.go']
                      ])
     end
 

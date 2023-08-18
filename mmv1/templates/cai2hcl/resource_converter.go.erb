@@ -23,7 +23,7 @@ import (
     transport_tpg "<%= import_path() -%>/transport"
     "<%= import_path() -%>/verify"
    "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
-   "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl"
+   cai2hclCommon "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/common"
 )
 
 <%
@@ -47,7 +47,7 @@ type <%=converter_name-%> struct {
 	schema map[string]*schema.Schema
 }
 
-func New<%=converter_name-%>(name string) cai2hcl.Converter {
+func New<%=converter_name-%>(name string) cai2hclCommon.Converter {
 	schema := tpg.Provider().ResourcesMap[name].Schema
 
 	return &<%=converter_name-%>{
@@ -56,9 +56,9 @@ func New<%=converter_name-%>(name string) cai2hcl.Converter {
 	}
 }
 
-func (c *<%=converter_name-%>) Convert(assets []*caiasset.Asset) ([]*cai2hcl.HCLResourceBlock, error) {
-	var blocks []*cai2hcl.HCLResourceBlock
-	config := cai2hcl.NewConfig()
+func (c *<%=converter_name-%>) Convert(assets []*caiasset.Asset) ([]*cai2hclCommon.HCLResourceBlock, error) {
+	var blocks []*cai2hclCommon.HCLResourceBlock
+	config := cai2hclCommon.NewConfig()
 
 	for _, asset := range assets {
 		if asset == nil {
@@ -75,36 +75,37 @@ func (c *<%=converter_name-%>) Convert(assets []*caiasset.Asset) ([]*cai2hcl.HCL
 	return blocks, nil
 }
 
-func (c *<%=converter_name-%>) convertResourceData(asset *caiasset.Asset, config *transport_tpg.Config) (*cai2hcl.HCLResourceBlock, error) {
+func (c *<%=converter_name-%>) convertResourceData(asset *caiasset.Asset, config *transport_tpg.Config) (*cai2hclCommon.HCLResourceBlock, error) {
 	if asset == nil || asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
 
+	assetResourceData := asset.Resource.Data
 	var resource *<%=api_type-%>
 
-	if err := cai2hcl.DecodeJSON(asset.Resource.Data, &resource); err != nil {
+	if err := cai2hclCommon.DecodeJSON(assetResourceData, &resource); err != nil {
 		return nil, err
 	}
 	
-    hcl, _ := resource<%=resource_name-%>Read(resource, config)
+    hcl, _ := resource<%=resource_name-%>Read(assetResourceData, config)
 
-	ctyVal, err := cai2hcl.MapToCtyValWithSchema(hcl, c.schema)
+	ctyVal, err := cai2hclCommon.MapToCtyValWithSchema(hcl, c.schema)
 	if err != nil {
 		return nil, err
 	}
-	return &cai2hcl.HCLResourceBlock{
+	return &cai2hclCommon.HCLResourceBlock{
 		Labels: []string{c.name, resource.Name},
 		Value:  ctyVal,
 	}, nil
 }
 
-func resource<%=resource_name-%>Read(res *<%=api_type-%>, config *transport_tpg.Config) (map[string]interface{}, error) {
+func resource<%=resource_name-%>Read(resource map[string]interface{}, config *transport_tpg.Config) (map[string]interface{}, error) {
     result := make(map[string]interface{})
 	var resource_data *schema.ResourceData = nil
 
 <%  object.gettable_properties.reject{|p| p.ignore_read }.each do |prop|-%>
 <%    if prop.flatten_object-%>
-    if flattenedProp := flatten<%="Nested" if object.nested_query-%><%=resource_name-%><%=titlelize_property(prop)-%>(res.<%= prop.api_name.camelize(:upper) -%>, resource_data, config); flattenedProp != nil {
+    if flattenedProp := flatten<%="Nested" if object.nested_query-%><%=resource_name-%><%=titlelize_property(prop)-%>(resource["<%= prop.api_name -%>"], resource_data, config); flattenedProp != nil {
         if gerr, ok := flattenedProp.(*googleapi.Error); ok {
 			return nil, fmt.Errorf("Error reading <%=object.name-%>: %s", gerr)
 		}
@@ -116,12 +117,8 @@ func resource<%=resource_name-%>Read(res *<%=api_type-%>, config *transport_tpg.
         }
     }
 <%    else-%>
-    result["<%=prop.name.underscore-%>"] = flatten<%="Nested" if object.nested_query-%><%=resource_name-%><%=titlelize_property(prop)-%>(res.<%= prop.api_name.camelize(:upper) -%>, resource_data, config)
+    result["<%=prop.name.underscore-%>"] = flatten<%="Nested" if object.nested_query-%><%=resource_name-%><%=titlelize_property(prop)-%>(resource["<%= prop.api_name -%>"], resource_data, config)
 <%    end-%>
-<%  end-%>
-
-<%  if object.has_self_link-%>
-    result["self_link"] = tpgresource.ConvertSelfLinkToV1(res.SelfLink)
 <%  end-%>
 
     return result, nil
