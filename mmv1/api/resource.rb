@@ -450,7 +450,7 @@ module Api
     def add_labels_related_fields(props, parent)
       props.each do |p|
         if p.is_a? Api::Type::KeyValueLabels
-          // The terraform_labels field is used to write to API, instead of the labels field.
+          # The terraform_labels field is used to write to API, instead of the labels field.
           p.ignore_write = true
 
           @custom_diff ||= []
@@ -478,7 +478,7 @@ module Api
  other clients and services."
 
       Api::Type::KeyValuePairs.new(
-        name: "effective#{name.capitalize()}",
+        name: "effective#{name.capitalize}",
         output: true,
         api_name: name,
         description:,
@@ -492,7 +492,7 @@ module Api
  and default #{name} configured on the provider."
 
       Api::Type::KeyValuePairs.new(
-        name: "terraform#{name.capitalize()}",
+        name: "terraform#{name.capitalize}",
         output: true,
         api_name: name,
         description:,

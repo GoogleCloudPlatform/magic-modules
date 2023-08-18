@@ -223,7 +223,9 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
       end
       res_yaml = File.read(file_path)
       resource = Api::Compiler.new(res_yaml).run
-      resource.properties = resource.add_labels_related_fields(resource.properties_with_excluded, nil)
+      resource.properties = resource.add_labels_related_fields(
+        resource.properties_with_excluded, nil
+      )
       resource.validate
       resources.push(resource)
     end
