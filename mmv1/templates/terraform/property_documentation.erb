@@ -39,6 +39,6 @@
 <% if !property.flatten_object && !property.nested_properties.nil? && !property.nested_properties.empty? -%>
   Structure is [documented below](#nested_<%= property.name.underscore -%>).
 <% end -%>
-<% if property.deprecation_message -%>
-  **Warning**: <%= property.deprecation_message %>
+<% if property.deprecation_message %>
+  ~> **Warning:** <%= property.deprecation_message %>
 <% end -%>
