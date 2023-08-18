@@ -96,6 +96,15 @@ properties:
     values:
       - :COLLECTION
       - :COLLECTION_GROUP
+      - :COLLECTION_RECURSIVE
+  - !ruby/object:Api::Type::Enum
+    name: apiScope
+    description: |
+      The API scope at which a query is run.
+    default_value: :ANY_API
+    values:
+      - :ANY_API
+      - :DATASTORE_MODE_API
   - !ruby/object:Api::Type::Array
     name: fields
     description: |
