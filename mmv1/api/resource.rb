@@ -450,6 +450,9 @@ module Api
     def add_labels_related_fields(props, parent)
       props.each do |p|
         if p.is_a? Api::Type::KeyValueLabels
+          // The terraform_labels field is used to write to API, instead of the labels field.
+          p.ignore_write = true
+
           @custom_diff ||= []
           if parent.nil?
             @custom_diff.append('tpgresource.SetTerraformLabelsDiff')
@@ -494,7 +497,6 @@ module Api
         api_name: name,
         description:,
         min_version:,
-        ignore_write: true,
         update_verb:,
         update_url:
       )
