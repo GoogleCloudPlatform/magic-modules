@@ -39,7 +39,7 @@ func TestAccAlloydbCluster_restore(t *testing.T) {
 			{
 				// Invalid input check - cannot pass in both sources
 				Config:      testAccAlloydbClusterAndInstanceAndBackup_OnlyOneSourceAllowed(context),
-				ExpectError: regexp.MustCompile("\"continuous_backup_source\": conflicts with backup_source"),
+				ExpectError: regexp.MustCompile("\"restore_continuous_backup_source\": conflicts with restore_backup_source"),
 			},
 			{
 				// Invalid input check - both source cluster and point in time are required
@@ -54,7 +54,7 @@ func TestAccAlloydbCluster_restore(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.restored_from_backup",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "backup_source"},
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "restore_backup_source"},
 			},
 			{
 				// Validate PITR succeeds
@@ -64,7 +64,7 @@ func TestAccAlloydbCluster_restore(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.restored_from_point_in_time",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "continuous_backup_source"},
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "restore_continuous_backup_source"},
 			},
 			{
 				// Make sure updates work without recreating the clusters
@@ -156,10 +156,10 @@ resource "google_alloydb_cluster" "restored" {
   cluster_id             = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
   location               = "us-central1"
   network                = data.google_compute_network.default.id
-  backup_source {
+  restore_backup_source {
     backup_name = google_alloydb_backup.default.name
   }
-	continuous_backup_source {
+	restore_continuous_backup_source {
     cluster = google_alloydb_cluster.source.name
     point_in_time = google_alloydb_backup.default.update_time
 	}
@@ -221,7 +221,7 @@ resource "google_alloydb_cluster" "restored" {
   location               = "us-central1"
   network                = data.google_compute_network.default.id
 
-	continuous_backup_source {
+	restore_continuous_backup_source {
     cluster = google_alloydb_cluster.source.name
 	}
 
@@ -280,7 +280,7 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
   location              = "us-central1"
   network               = data.google_compute_network.default.id
-  backup_source {
+  restore_backup_source {
     backup_name = google_alloydb_backup.default.name
   }
 
@@ -341,7 +341,7 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
   location              = "us-central1"
   network               = data.google_compute_network.default.id
-  backup_source {
+  restore_backup_source {
     backup_name = google_alloydb_backup.default.name
   }
 
@@ -354,7 +354,7 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
   cluster_id             = "tf-test-alloydb-pitr-restored-cluster-%{random_suffix}"
   location               = "us-central1"
   network                = data.google_compute_network.default.id
-	continuous_backup_source {
+	restore_continuous_backup_source {
     cluster = google_alloydb_cluster.source.name
     point_in_time = google_alloydb_backup.default.update_time
 	}
@@ -416,7 +416,7 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
   location              = "us-central1"
   network               = data.google_compute_network.default.id
-  backup_source {
+  restore_backup_source {
     backup_name = google_alloydb_backup.default.name
   }
 
@@ -434,7 +434,7 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
   cluster_id             = "tf-test-alloydb-pitr-restored-cluster-%{random_suffix}"
   location               = "us-central1"
   network                = data.google_compute_network.default.id
-	continuous_backup_source {
+	restore_continuous_backup_source {
     cluster = google_alloydb_cluster.source.name
     point_in_time = google_alloydb_backup.default.update_time
 	}
@@ -509,7 +509,7 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
   location              = "us-central1"
   network               = data.google_compute_network.default.id
-	backup_source {
+	restore_backup_source {
     backup_name = google_alloydb_backup.default2.name
   }
 
@@ -529,7 +529,7 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
   cluster_id             = "tf-test-alloydb-pitr-restored-cluster-%{random_suffix}"
   location               = "us-central1"
   network                = data.google_compute_network.default.id
-	continuous_backup_source {
+	restore_continuous_backup_source {
     cluster = google_alloydb_cluster.restored_from_backup.name
     point_in_time = google_alloydb_backup.default.update_time
 	}
@@ -596,7 +596,7 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
   location              = "us-central1"
   network               = data.google_compute_network.default.id
-	backup_source {
+	restore_backup_source {
     backup_name = google_alloydb_backup.default.name
   }
 }
@@ -605,7 +605,7 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
   cluster_id             = "tf-test-alloydb-pitr-restored-cluster-%{random_suffix}"
   location               = "us-central1"
   network                = data.google_compute_network.default.id
-	continuous_backup_source {
+	restore_continuous_backup_source {
     cluster = google_alloydb_cluster.source.name
     point_in_time = google_alloydb_backup.default.update_time
 	}

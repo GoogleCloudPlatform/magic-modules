@@ -1,13 +1,13 @@
 // Read the restore variables from obj and remove them, since they do not map to anything in the cluster
 var backupSource interface{}
 var continuousBackupSource interface{}
-if val, ok := obj["backupSource"]; ok {
+if val, ok := obj["restoreBackupSource"]; ok {
 	backupSource = val
-	delete(obj, "backupSource")
+	delete(obj, "restoreBackupSource")
 }
-if val, ok := obj["continuousBackupSource"]; ok {
+if val, ok := obj["restoreContinuousBackupSource"]; ok {
 	continuousBackupSource = val
-	delete(obj, "continuousBackupSource")
+	delete(obj, "restoreContinuousBackupSource")
 }
 
 restoreClusterRequestBody := make(map[string]interface{})

@@ -212,13 +212,13 @@ properties:
         required: true
         sensitive: true
   - !ruby/object:Api::Type::NestedObject
-    name: 'backupSource'
+    name: 'restoreBackupSource'
     ignore_read: true
     immutable: true
     conflicts:
-      - continuous_backup_source
+      - restore_continuous_backup_source
     description: |
-      The source when restoring from a backup. Conflicts with 'continuous_backup_source', both can't be set together.
+      The source when restoring from a backup. Conflicts with 'restore_continuous_backup_source', both can't be set together.
     properties:
       - !ruby/object:Api::Type::String
         name: 'backupName'
@@ -227,13 +227,13 @@ properties:
         description: |
           The name of the backup that this cluster is restored from.
   - !ruby/object:Api::Type::NestedObject
-    name: 'continuousBackupSource'
+    name: 'restoreContinuousBackupSource'
     ignore_read: true
     immutable: true
     conflicts:
-      - backup_source
+      - restore_backup_source
     description: |
-      The source when restoring via point in time recovery (PITR). Conflicts with 'backup_source', both can't be set together.
+      The source when restoring via point in time recovery (PITR). Conflicts with 'restore_backup_source', both can't be set together.
     properties:
       - !ruby/object:Api::Type::String
         name: 'cluster'
@@ -385,6 +385,14 @@ properties:
         default_from_api: true
         description: |
           Whether automated backups are enabled.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'backupSource'
+    output: true
+    description: 'Cluster created from backup.'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'backupName'
+        description: 'The name of the backup resource.'
   - !ruby/object:Api::Type::NestedObject
     name: 'migrationSource'
     output: true

@@ -32,7 +32,7 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "<%= ctx[:vars]['alloydb_backup_restored_cluster_name'] %>"
   location              = "us-central1"
   network               = data.google_compute_network.default.id
-  backup_source {
+  restore_backup_source {
     backup_name = google_alloydb_backup.<%= ctx[:primary_resource_id] %>.name
   }
 }
@@ -42,7 +42,7 @@ resource "google_alloydb_cluster" "restored_via_pitr" {
   location               = "us-central1"
   network                = data.google_compute_network.default.id
 
-  continuous_backup_source {
+  restore_continuous_backup_source {
     cluster = google_alloydb_cluster.<%= ctx[:primary_resource_id] %>.name
     point_in_time = "2023-08-03T19:19:00.094Z"
   }
