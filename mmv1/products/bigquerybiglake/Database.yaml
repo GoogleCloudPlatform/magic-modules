@@ -74,24 +74,24 @@ properties:
       with nanosecond resolution and up to nine fractional digits. Examples:
       "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-- !ruby/object:Api::Type::Enum
-  name: 'type'
-  description: |
-    The database type.
-  values:
-    - :HIVE
-- !ruby/object:Api::Type::NestedObject
-  name: 'hiveOptions'
-  description: |
-    Options of a Hive database.
-  properties:
-    - !ruby/object:Api::Type::String
-      name: 'locationUri'
-      description: |
-        Cloud Storage folder URI where the database data is stored, starting with "gs://".
-    - !ruby/object:Api::Type::KeyValuePairs
-      name: 'FIELD_NAME'
-      description: |
-        Stores user supplied Hive database parameters. An object containing a
-        list of"key": value pairs.
-        Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+  - !ruby/object:Api::Type::Enum
+    name: 'type'
+    description: |
+      The database type.
+    values:
+      - :HIVE
+  - !ruby/object:Api::Type::NestedObject
+    name: 'hiveOptions'
+    description: |
+      Options of a Hive database.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'locationUri'
+        description: |
+          Cloud Storage folder URI where the database data is stored, starting with "gs://".
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'FIELD_NAME'
+        description: |
+          Stores user supplied Hive database parameters. An object containing a
+          list of"key": value pairs.
+          Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
