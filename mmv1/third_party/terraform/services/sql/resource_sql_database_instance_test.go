@@ -2580,7 +2580,7 @@ resource "google_project" "testproject" {
 resource "google_sql_database_instance" "instance" {
   project             = google_project.testproject.project_id
   name                = "%s"
-  region              = "us-central1"
+  region              = "us-south1"
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
@@ -2606,7 +2606,7 @@ resource "google_project" "testproject" {
 resource "google_sql_database_instance" "instance" {
   project             = google_project.testproject.project_id
   name                = "%s"
-  region              = "us-central1"
+  region              = "us-south1"
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
@@ -2638,7 +2638,7 @@ resource "google_project" "testproject" {
 resource "google_sql_database_instance" "instance" {
   project             = google_project.testproject.project_id
   name                = "%s"
-  region              = "us-central1"
+  region              = "us-south1"
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
@@ -2670,7 +2670,7 @@ resource "google_project" "testproject" {
 resource "google_sql_database_instance" "instance" {
   project             = google_project.testproject.project_id
   name                = "%s"
-  region              = "us-central1"
+  region              = "us-south1"
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
@@ -2702,7 +2702,7 @@ resource "google_project" "testproject" {
 resource "google_sql_database_instance" "instance" {
   project             = google_project.testproject.project_id
   name                = "%s"
-  region              = "us-central1"
+  region              = "us-south1"
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
