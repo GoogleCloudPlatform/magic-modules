@@ -7,6 +7,7 @@ import (
 
 	hashicorpcty "github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/zclconf/go-cty/cty"
 	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
@@ -87,5 +88,16 @@ func normalizeFlattenedMap(obj interface{}) interface{} {
 		return obj.(*schema.Set).List()
 	default:
 		return obj
+	}
+}
+
+// Initializes configuration object which is used by flatteners.
+func NewConfig() *transport_tpg.Config {
+	// Currently its not needed, but it may change in future.
+	return &transport_tpg.Config{
+		Project:   "",
+		Zone:      "",
+		Region:    "",
+		UserAgent: "",
 	}
 }
