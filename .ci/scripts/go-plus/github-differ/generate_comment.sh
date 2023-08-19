@@ -117,7 +117,7 @@ pushd $MM_LOCAL_PATH/tools/missing-test-detector
 go mod edit -replace google/provider/new=$(realpath $TPGB_LOCAL_PATH)
 go mod edit -replace google/provider/old=$(realpath $TPGB_LOCAL_PATH_OLD)
 go mod tidy
-export MISSINGTESTS="$(go run . -provider-dir=$TPGB_LOCAL_PATH/google-beta)"
+export MISSINGTESTS="$(go run . -services-dir=$TPGB_LOCAL_PATH/google-beta/services)"
 retVal=$?
 if [ $retVal -ne 0 ]; then
     export MISSINGTESTS=""
@@ -200,5 +200,5 @@ curl -H "Authorization: token ${GITHUB_TOKEN}" \
 
 if ! git diff --exit-code origin/main tools || [ "$BREAKING_CHANGE_BUILD_FAILURE" -ne 0 ]; then
     ## Run unit tests for breaking change and missing test detector.
-    "$script_dir/test_tools.sh" "$MM_LOCAL_PATH" "$TPG_LOCAL_PATH" "$COMMIT_SHA" "$BUILD_ID" "$BUILD_STEP" "$PROJECT_ID"
+    "$script_dir/test_tools.sh" "$MM_LOCAL_PATH" "$TPGB_LOCAL_PATH" "$COMMIT_SHA" "$BUILD_ID" "$BUILD_STEP" "$PROJECT_ID"
 fi

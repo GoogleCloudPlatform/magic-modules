@@ -354,8 +354,8 @@ properties:
                       description: Name of the container
                       default_from_api: true
                     - !ruby/object:Api::Type::String
-                      deprecation_message:
-                        'Not supported by Cloud Run fully managed'
+                      deprecation_message: >-
+                        `working_dir` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.
                       name: workingDir
                       immutable: true
                       description: |-
@@ -370,8 +370,8 @@ properties:
                       item_type: Api::Type::String
                     - !ruby/object:Api::Type::Array
                       name: envFrom
-                      deprecation_message:
-                        'Not supported by Cloud Run fully managed'
+                      deprecation_message: >-
+                        `env_from` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.
                       immutable: true
                       description: |-
                         List of sources to populate environment variables in the container.
@@ -850,7 +850,8 @@ properties:
                             Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir.
               - !ruby/object:Api::Type::Enum
                 name: servingState
-                deprecation_message: 'Not supported by Cloud Run fully managed'
+                deprecation_message: >-
+                  `serving_state` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.
                 description: |-
                   ServingState holds a value describing the state the resources
                   are in for this Revision.
