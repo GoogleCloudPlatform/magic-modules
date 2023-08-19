@@ -4,22 +4,22 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/services/kms"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgiamresource"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/cai"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/services/kms"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
-func resourceConverterKmsCryptoKeyIamPolicy() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func resourceConverterKmsCryptoKeyIamPolicy() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType:         "cloudkms.googleapis.com/CryptoKey",
 		Convert:           GetKmsCryptoKeyIamPolicyCaiObject,
 		MergeCreateUpdate: MergeKmsCryptoKeyIamPolicy,
 	}
 }
 
-func resourceConverterKmsCryptoKeyIamBinding() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func resourceConverterKmsCryptoKeyIamBinding() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType:         "cloudkms.googleapis.com/CryptoKey",
 		Convert:           GetKmsCryptoKeyIamBindingCaiObject,
 		FetchFullResource: FetchKmsCryptoKeyIamPolicy,
@@ -28,8 +28,8 @@ func resourceConverterKmsCryptoKeyIamBinding() tpgresource.ResourceConverter {
 	}
 }
 
-func resourceConverterKmsCryptoKeyIamMember() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func resourceConverterKmsCryptoKeyIamMember() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType:         "cloudkms.googleapis.com/CryptoKey",
 		Convert:           GetKmsCryptoKeyIamMemberCaiObject,
 		FetchFullResource: FetchKmsCryptoKeyIamPolicy,
@@ -38,74 +38,74 @@ func resourceConverterKmsCryptoKeyIamMember() tpgresource.ResourceConverter {
 	}
 }
 
-func GetKmsCryptoKeyIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	return newKmsCryptoKeyIamAsset(d, config, tpgiamresource.ExpandIamPolicyBindings)
+func GetKmsCryptoKeyIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	return newKmsCryptoKeyIamAsset(d, config, cai.ExpandIamPolicyBindings)
 }
 
-func GetKmsCryptoKeyIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	return newKmsCryptoKeyIamAsset(d, config, tpgiamresource.ExpandIamRoleBindings)
+func GetKmsCryptoKeyIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	return newKmsCryptoKeyIamAsset(d, config, cai.ExpandIamRoleBindings)
 }
 
-func GetKmsCryptoKeyIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	return newKmsCryptoKeyIamAsset(d, config, tpgiamresource.ExpandIamMemberBindings)
+func GetKmsCryptoKeyIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	return newKmsCryptoKeyIamAsset(d, config, cai.ExpandIamMemberBindings)
 }
 
-func MergeKmsCryptoKeyIamPolicy(existing, incoming tpgresource.Asset) tpgresource.Asset {
+func MergeKmsCryptoKeyIamPolicy(existing, incoming cai.Asset) cai.Asset {
 	existing.IAMPolicy = incoming.IAMPolicy
 	return existing
 }
 
-func MergeKmsCryptoKeyIamBinding(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeIamAssets(existing, incoming, tpgiamresource.MergeAuthoritativeBindings)
+func MergeKmsCryptoKeyIamBinding(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeIamAssets(existing, incoming, cai.MergeAuthoritativeBindings)
 }
 
-func MergeKmsCryptoKeyIamBindingDelete(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeDeleteIamAssets(existing, incoming, tpgiamresource.MergeDeleteAuthoritativeBindings)
+func MergeKmsCryptoKeyIamBindingDelete(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeDeleteIamAssets(existing, incoming, cai.MergeDeleteAuthoritativeBindings)
 }
 
-func MergeKmsCryptoKeyIamMember(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeIamAssets(existing, incoming, tpgiamresource.MergeAdditiveBindings)
+func MergeKmsCryptoKeyIamMember(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeIamAssets(existing, incoming, cai.MergeAdditiveBindings)
 }
 
-func MergeKmsCryptoKeyIamMemberDelete(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeDeleteIamAssets(existing, incoming, tpgiamresource.MergeDeleteAdditiveBindings)
+func MergeKmsCryptoKeyIamMemberDelete(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeDeleteIamAssets(existing, incoming, cai.MergeDeleteAdditiveBindings)
 }
 
 func newKmsCryptoKeyIamAsset(
 	d tpgresource.TerraformResourceData,
 	config *transport_tpg.Config,
-	expandBindings func(d tpgresource.TerraformResourceData) ([]tpgresource.IAMBinding, error),
-) ([]tpgresource.Asset, error) {
+	expandBindings func(d tpgresource.TerraformResourceData) ([]cai.IAMBinding, error),
+) ([]cai.Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
-		return []tpgresource.Asset{}, fmt.Errorf("expanding bindings: %v", err)
+		return []cai.Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
 	assetNameTemplate := constructAssetNameTemplate(d)
-	name, err := tpgresource.AssetName(d, config, assetNameTemplate)
+	name, err := cai.AssetName(d, config, assetNameTemplate)
 	if err != nil {
-		return []tpgresource.Asset{}, err
+		return []cai.Asset{}, err
 	}
 
-	return []tpgresource.Asset{{
+	return []cai.Asset{{
 		Name: name,
 		Type: "cloudkms.googleapis.com/CryptoKey",
-		IAMPolicy: &tpgresource.IAMPolicy{
+		IAMPolicy: &cai.IAMPolicy{
 			Bindings: bindings,
 		},
 	}}, nil
 }
 
-func FetchKmsCryptoKeyIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgresource.Asset, error) {
+func FetchKmsCryptoKeyIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (cai.Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("crypto_key_id"); !ok {
-		return tpgresource.Asset{}, tpgresource.ErrEmptyIdentityField
+		return cai.Asset{}, cai.ErrEmptyIdentityField
 	}
 
 	assetNameTemplate := constructAssetNameTemplate(d)
 
 	// We use crypto_key_id in the asset name template to be consistent with newKmsCryptoKeyIamAsset.
-	return tpgiamresource.FetchIamPolicy(
+	return cai.FetchIamPolicy(
 		kms.NewKmsCryptoKeyIamUpdater,
 		d,
 		config,

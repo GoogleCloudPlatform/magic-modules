@@ -55,7 +55,7 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 id_format: '{{project}}/{{region}}/{{region_instance_group_manager}}/{{name}}'
 mutex: instanceGroupManager/{{project}}/{{region}}/{{region_instance_group_manager}}
-exclude_validator: true
+exclude_tgc: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'stateful_rigm'

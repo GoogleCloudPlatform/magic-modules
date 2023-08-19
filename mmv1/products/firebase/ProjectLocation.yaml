@@ -37,6 +37,9 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 import_format: ['projects/{{project}}', '{{project}}']
 skip_delete: true
 skip_sweeper: true
+deprecation_message: >-
+  `google_firebase_project_location` is deprecated in favor of explicitly configuring `google_app_engine_application`
+  and `google_firestore_database`. This resource will be removed in the next major release of the provider.
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'firebase_project_location_basic'

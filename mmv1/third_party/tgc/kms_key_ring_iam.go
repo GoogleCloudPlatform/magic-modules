@@ -4,22 +4,22 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/services/kms"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgiamresource"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/cai"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/services/kms"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
-func resourceConverterKmsKeyRingIamPolicy() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func resourceConverterKmsKeyRingIamPolicy() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType:         "cloudkms.googleapis.com/KeyRing",
 		Convert:           GetKmsKeyRingIamPolicyCaiObject,
 		MergeCreateUpdate: MergeKmsKeyRingIamPolicy,
 	}
 }
 
-func resourceConverterKmsKeyRingIamBinding() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func resourceConverterKmsKeyRingIamBinding() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType:         "cloudkms.googleapis.com/KeyRing",
 		Convert:           GetKmsKeyRingIamBindingCaiObject,
 		FetchFullResource: FetchKmsKeyRingIamPolicy,
@@ -28,8 +28,8 @@ func resourceConverterKmsKeyRingIamBinding() tpgresource.ResourceConverter {
 	}
 }
 
-func resourceConverterKmsKeyRingIamMember() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func resourceConverterKmsKeyRingIamMember() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType:         "cloudkms.googleapis.com/KeyRing",
 		Convert:           GetKmsKeyRingIamMemberCaiObject,
 		FetchFullResource: FetchKmsKeyRingIamPolicy,
@@ -38,74 +38,74 @@ func resourceConverterKmsKeyRingIamMember() tpgresource.ResourceConverter {
 	}
 }
 
-func GetKmsKeyRingIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	return newKmsKeyRingIamAsset(d, config, tpgiamresource.ExpandIamPolicyBindings)
+func GetKmsKeyRingIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	return newKmsKeyRingIamAsset(d, config, cai.ExpandIamPolicyBindings)
 }
 
-func GetKmsKeyRingIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	return newKmsKeyRingIamAsset(d, config, tpgiamresource.ExpandIamRoleBindings)
+func GetKmsKeyRingIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	return newKmsKeyRingIamAsset(d, config, cai.ExpandIamRoleBindings)
 }
 
-func GetKmsKeyRingIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	return newKmsKeyRingIamAsset(d, config, tpgiamresource.ExpandIamMemberBindings)
+func GetKmsKeyRingIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	return newKmsKeyRingIamAsset(d, config, cai.ExpandIamMemberBindings)
 }
 
-func MergeKmsKeyRingIamPolicy(existing, incoming tpgresource.Asset) tpgresource.Asset {
+func MergeKmsKeyRingIamPolicy(existing, incoming cai.Asset) cai.Asset {
 	existing.IAMPolicy = incoming.IAMPolicy
 	return existing
 }
 
-func MergeKmsKeyRingIamBinding(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeIamAssets(existing, incoming, tpgiamresource.MergeAuthoritativeBindings)
+func MergeKmsKeyRingIamBinding(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeIamAssets(existing, incoming, cai.MergeAuthoritativeBindings)
 }
 
-func MergeKmsKeyRingIamBindingDelete(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeDeleteIamAssets(existing, incoming, tpgiamresource.MergeDeleteAuthoritativeBindings)
+func MergeKmsKeyRingIamBindingDelete(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeDeleteIamAssets(existing, incoming, cai.MergeDeleteAuthoritativeBindings)
 }
 
-func MergeKmsKeyRingIamMember(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeIamAssets(existing, incoming, tpgiamresource.MergeAdditiveBindings)
+func MergeKmsKeyRingIamMember(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeIamAssets(existing, incoming, cai.MergeAdditiveBindings)
 }
 
-func MergeKmsKeyRingIamMemberDelete(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeDeleteIamAssets(existing, incoming, tpgiamresource.MergeDeleteAdditiveBindings)
+func MergeKmsKeyRingIamMemberDelete(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeDeleteIamAssets(existing, incoming, cai.MergeDeleteAdditiveBindings)
 }
 
 func newKmsKeyRingIamAsset(
 	d tpgresource.TerraformResourceData,
 	config *transport_tpg.Config,
-	expandBindings func(d tpgresource.TerraformResourceData) ([]tpgresource.IAMBinding, error),
-) ([]tpgresource.Asset, error) {
+	expandBindings func(d tpgresource.TerraformResourceData) ([]cai.IAMBinding, error),
+) ([]cai.Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
-		return []tpgresource.Asset{}, fmt.Errorf("expanding bindings: %v", err)
+		return []cai.Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
 	assetNameTemplate := constructKmsKeyRingIAMAssetNameTemplate(d)
-	name, err := tpgresource.AssetName(d, config, assetNameTemplate)
+	name, err := cai.AssetName(d, config, assetNameTemplate)
 	if err != nil {
-		return []tpgresource.Asset{}, err
+		return []cai.Asset{}, err
 	}
 
-	return []tpgresource.Asset{{
+	return []cai.Asset{{
 		Name: name,
 		Type: "cloudkms.googleapis.com/KeyRing",
-		IAMPolicy: &tpgresource.IAMPolicy{
+		IAMPolicy: &cai.IAMPolicy{
 			Bindings: bindings,
 		},
 	}}, nil
 }
 
-func FetchKmsKeyRingIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgresource.Asset, error) {
+func FetchKmsKeyRingIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (cai.Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("key_ring_id"); !ok {
-		return tpgresource.Asset{}, tpgresource.ErrEmptyIdentityField
+		return cai.Asset{}, cai.ErrEmptyIdentityField
 	}
 
 	assetNameTemplate := constructKmsKeyRingIAMAssetNameTemplate(d)
 
 	// We use key_ring_id in the asset name template to be consistent with newKmsKeyRingIamAsset.
-	return tpgiamresource.FetchIamPolicy(
+	return cai.FetchIamPolicy(
 		kms.NewKmsKeyRingIamUpdater,
 		d,
 		config,
