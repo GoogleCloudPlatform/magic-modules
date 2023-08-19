@@ -30,7 +30,6 @@ examples:
     primary_resource_id: "default"
     vars:
       catalog_id: "my-catalog"
-      project: "my-project"
       location: "US"
 properties:
   - !ruby/object:Api::Type::String
