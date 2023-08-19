@@ -312,3 +312,30 @@ properties:
             values:
               - :MERGE_USER_INFO_OVER_ID_TOKEN_CLAIMS
               - :ONLY_ID_TOKEN_CLAIMS
+      - !ruby/object:Api::Type::String
+        name: 'jwksJson'
+        min_version: beta
+        description: |
+          OIDC JWKs in JSON String format. For details on definition of a
+          JWK, see https:tools.ietf.org/html/rfc7517. If not set, then we
+          use the `jwks_uri` from the discovery document fetched from the
+          .well-known path for the `issuer_uri`. Currently, RSA and EC asymmetric
+          keys are supported. The JWK must use following format and include only
+          the following fields:
+          ```
+          {
+            "keys": [
+              {
+                    "kty": "RSA/EC",
+                    "alg": "<algorithm>",
+                    "use": "sig",
+                    "kid": "<key-id>",
+                    "n": "",
+                    "e": "",
+                    "x": "",
+                    "y": "",
+                    "crv": ""
+              }
+            ]
+          }
+          ```
