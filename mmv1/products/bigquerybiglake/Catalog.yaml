@@ -29,7 +29,7 @@ examples:
     name: "bigquery_biglake_catalog"
     primary_resource_id: "default"
     vars:
-      catalog_id: "my-catalog"
+      catalog_id: "my_catalog"
       location: "US"
 properties:
   - !ruby/object:Api::Type::String
