@@ -40,6 +40,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_build'
     primary_resource_id: 'build-trigger'
+    vars:
+      cloudbuild_trigger_name: 'my-trigger'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_service_account'
     primary_resource_id: 'service-account-trigger'
@@ -70,6 +72,9 @@ examples:
     name: 'cloudbuild_trigger_manual_github_enterprise'
     primary_resource_id: 'manual-ghe-trigger'
     skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuild_trigger_manual_bitbucket_server'
+    primary_resource_id: 'manual-bitbucket-trigger'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_repo'
     primary_resource_id: 'repo-trigger'
@@ -102,9 +107,13 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_allow_failure'
     primary_resource_id: 'allow-failure-trigger'
+    vars:
+      cloudbuild_trigger_name: 'my-trigger'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_allow_exit_codes'
     primary_resource_id: 'allow-exit-codes-trigger'
+    vars:
+      cloudbuild_trigger_name: 'my-trigger'
   - !ruby/object:Provider::Terraform::Examples
     name: "cloudbuild_trigger_pubsub_with_repo"
     primary_resource_id: "pubsub-with-repo-trigger"
@@ -252,6 +261,11 @@ properties:
         description: |
           The full resource name of the github enterprise config.
           Format: projects/{project}/locations/{location}/githubEnterpriseConfigs/{id}. projects/{project}/githubEnterpriseConfigs/{id}.
+      - !ruby/object:Api::Type::String
+        name: 'bitbucketServerConfig'
+        description: |
+          The full resource name of the bitbucket server config.
+          Format: projects/{project}/locations/{location}/bitbucketServerConfigs/{id}.
   - !ruby/object:Api::Type::NestedObject
     name: 'repositoryEventConfig'
     description: |
@@ -378,6 +392,11 @@ properties:
         description: |
           The full resource name of the github enterprise config.
           Format: projects/{project}/locations/{location}/githubEnterpriseConfigs/{id}. projects/{project}/githubEnterpriseConfigs/{id}.
+      - !ruby/object:Api::Type::String
+        name: 'bitbucketServerConfig'
+        description: |
+          The full resource name of the bitbucket server config.
+          Format: projects/{project}/locations/{location}/bitbucketServerConfigs/{id}.
   - !ruby/object:Api::Type::Array
     name: 'ignoredFiles'
     item_type: Api::Type::String

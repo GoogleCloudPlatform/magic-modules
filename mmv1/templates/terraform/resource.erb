@@ -130,6 +130,10 @@ func Resource<%= resource_name -%>() *schema.Resource {
         ),
 <%  end -%>
 
+<% if object.deprecation_message %>
+        DeprecationMessage: "<%= object.deprecation_message -%>",
+<% end -%>
+
 <%= lines(compile(pwd + '/' + object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>
 
         Schema: map[string]*schema.Schema{
