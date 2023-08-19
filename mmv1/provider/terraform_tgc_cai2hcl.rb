@@ -36,7 +36,7 @@ module Provider
       product_name = data.object.__product.name.downcase
       output_folder = File.join(
         data.output_folder,
-        'cai2hcl',
+        'cai2hcl/generated/converters',
         product_name
       )
       object_name = data.object.name.underscore
@@ -54,10 +54,33 @@ module Provider
       return unless generate_code
 
       copy_file_list(output_folder, [
-                       ['cai2hcl/helper.go',
-                        'third_party/cai2hcl/helper.go'],
-                       ['cai2hcl/cai2hcl_test.go',
-                        'third_party/cai2hcl/cai2hcl_test.go']
+                       ['cai2hcl/generated/converters/common/converter.go',
+                        'third_party/cai2hcl/converters/common/converter.go'],
+                       ['cai2hcl/generated/converters/common/utils.go',
+                        'third_party/cai2hcl/converters/common/utils.go'],
+                       ['cai2hcl/generated/convert.go',
+                        'third_party/cai2hcl/convert.go'],
+                       ['cai2hcl/generated/converter_map.go',
+                        'third_party/cai2hcl/converter_map.go']
+                     ])
+
+      Google::LOGGER.info 'Copying testdata files.'
+
+      copy_file_list(output_folder, [
+                       ['cai2hcl/generated/converters/testdata/full_compute_backend_service.json',
+                        'third_party/cai2hcl/converters/testdata/full_compute_backend_service.json'],
+                       ['cai2hcl/generated/converters/testdata/full_compute_backend_service.tf',
+                        'third_party/cai2hcl/converters/testdata/full_compute_backend_service.tf'],
+
+                       ['cai2hcl/generated/converters/testdata/full_compute_forwarding_rule.json',
+                        'third_party/cai2hcl/converters/testdata/full_compute_forwarding_rule.json'],
+                       ['cai2hcl/generated/converters/testdata/full_compute_forwarding_rule.tf',
+                        'third_party/cai2hcl/converters/testdata/full_compute_forwarding_rule.tf'],
+
+                       ['cai2hcl/generated/converters/testdata/full_compute_health_check.json',
+                        'third_party/cai2hcl/converters/testdata/full_compute_health_check.json'],
+                       ['cai2hcl/generated/converters/testdata/full_compute_health_check.tf',
+                        'third_party/cai2hcl/converters/testdata/full_compute_health_check.tf']
                      ])
     end
 

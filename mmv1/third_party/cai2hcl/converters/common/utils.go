@@ -1,4 +1,4 @@
-package cai2hcl
+package common
 
 import (
 	"encoding/json"
@@ -7,26 +7,23 @@ import (
 
 	hashicorpcty "github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 	"github.com/zclconf/go-cty/cty"
 	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
 
-func parseFieldValue(str string, field string) string {
-	strList := strings.Split(str, "/")
-	for ix, item := range strList {
-		if item == field && ix+1 < len(strList) {
-			return strList[ix+1]
+// Extracts named part from resource url.
+func ParseFieldValue(url string, name string) string {
+	fragments := strings.Split(url, "/")
+	for ix, item := range fragments {
+		if item == name && ix+1 < len(fragments) {
+			return fragments[ix+1]
 		}
 	}
 	return ""
 }
 
-func ParseFieldValue(str string, field string) string {
-	return parseFieldValue(str, field)
-}
-
-func decodeJSON(data map[string]interface{}, v interface{}) error {
+// Decodes the map object into the target struct.
+func DecodeJSON(data map[string]interface{}, v interface{}) error {
 	b, err := json.Marshal(data)
 	if err != nil {
 		return err
@@ -37,12 +34,8 @@ func decodeJSON(data map[string]interface{}, v interface{}) error {
 	return nil
 }
 
-// Decodes the map object into the target struct.
-func DecodeJSON(data map[string]interface{}, v interface{}) error {
-	return decodeJSON(data, v)
-}
-
-func mapToCtyValWithSchema(m map[string]interface{}, s map[string]*schema.Schema) (cty.Value, error) {
+// Converts resource from untyped map format to TF JSON.
+func MapToCtyValWithSchema(m map[string]interface{}, s map[string]*schema.Schema) (cty.Value, error) {
 	b, err := json.Marshal(&m)
 	if err != nil {
 		return cty.NilVal, fmt.Errorf("error marshaling map as JSON: %v", err)
@@ -58,10 +51,6 @@ func mapToCtyValWithSchema(m map[string]interface{}, s map[string]*schema.Schema
 	return ret, nil
 }
 
-func MapToCtyValWithSchema(m map[string]interface{}, s map[string]*schema.Schema) (cty.Value, error) {
-	return mapToCtyValWithSchema(m, s)
-}
-
 func hashicorpCtyTypeToZclconfCtyType(t hashicorpcty.Type) (cty.Type, error) {
 	b, err := json.Marshal(t)
 	if err != nil {
@@ -72,13 +61,4 @@ func hashicorpCtyTypeToZclconfCtyType(t hashicorpcty.Type) (cty.Type, error) {
 		return cty.NilType, err
 	}
 	return ret, nil
-}
-
-func NewConfig() *transport_tpg.Config {
-	return &transport_tpg.Config{
-		Project:   "",
-		Zone:      "",
-		Region:    "",
-		UserAgent: "",
-	}
 }
