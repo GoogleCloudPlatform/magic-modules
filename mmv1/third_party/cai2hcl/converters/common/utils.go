@@ -36,6 +36,8 @@ func DecodeJSON(data map[string]interface{}, v interface{}) error {
 
 // Converts resource from untyped map format to TF JSON.
 func MapToCtyValWithSchema(m map[string]interface{}, s map[string]*schema.Schema) (cty.Value, error) {
+	m = normalizeFlattenedMap(m).(map[string]interface{})
+
 	b, err := json.Marshal(&m)
 	if err != nil {
 		return cty.NilVal, fmt.Errorf("error marshaling map as JSON: %v", err)
@@ -61,4 +63,29 @@ func hashicorpCtyTypeToZclconfCtyType(t hashicorpcty.Type) (cty.Type, error) {
 		return cty.NilType, err
 	}
 	return ret, nil
+}
+
+// Normalizes flatteners output map by eliminating unmarshallable objects like schema.Map
+func normalizeFlattenedMap(obj interface{}) interface{} {
+	switch obj.(type) {
+	case []interface{}:
+		arr := obj.([]interface{})
+		newArr := make([]interface{}, len(arr))
+		for i := range arr {
+			newArr[i] = normalizeFlattenedMap(arr[i])
+		}
+
+		return newArr
+	case map[string]interface{}:
+		mp := obj.(map[string]interface{})
+		newMap := map[string]interface{}{}
+		for key, value := range mp {
+			newMap[key] = normalizeFlattenedMap(value)
+		}
+		return newMap
+	case *schema.Set:
+		return obj.(*schema.Set).List()
+	default:
+		return obj
+	}
 }
