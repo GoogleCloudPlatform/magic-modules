@@ -13,7 +13,6 @@
 
 --- !ruby/object:Api::Resource
 name: 'DenyPolicy'
-min_version: beta
 base_url: policies/{{parent}}/denypolicies
 create_url: policies/{{parent}}/denypolicies?policyId={{name}}
 description: |
@@ -21,7 +20,7 @@ description: |
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Permissions supported in deny policies': 'https://cloud.google.com/iam/docs/deny-permissions-support'
-  api: 'https://cloud.google.com/iam/docs/reference/rest/v2beta/policies'
+  api: 'https://cloud.google.com/iam/docs/reference/rest/v2/policies'
 autogen_async: true
 import_format: ['{{parent}}/{{name}}']
 id_format: '{{parent}}/{{name}}'
@@ -36,7 +35,6 @@ examples:
     test_env_vars:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
-    min_version: beta
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
