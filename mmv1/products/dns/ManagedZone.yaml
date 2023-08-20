@@ -290,7 +290,7 @@ properties:
             }
             raw := v.(map[string]interface{})
             if url, ok := raw["network_url"]; ok {
-              return tpgresource.SelfLinkNameHash(url)
+              return tpgresource.SelfLinkRelativePathHash(url)
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsManagedZonePrivateVisibilityConfigNetworksSchema())
