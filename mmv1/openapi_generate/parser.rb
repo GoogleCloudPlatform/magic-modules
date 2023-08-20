@@ -32,6 +32,11 @@ module OpenAPIGenerate
 
     def write_object(name, obj, type, url_param)
       field = nil
+      if name == "projectsId"
+        return field
+      elsif name == "locationsId"
+        name = "location"
+      end
       case type
       when 'string'
         field = Api::Type::String.new(name)
@@ -55,7 +60,9 @@ module OpenAPIGenerate
           properties = []
           obj.properties&.each do |prop, i|
             prop = write_object(prop, i, i.type, false)
-            prop.instance_variable_set(:@required, required_props.include?(prop.name))
+            if required_props.include?(prop.name)
+              prop.instance_variable_set(:@required, true)
+            end
             required_props.delete(prop.name)
             properties.push(prop)
           end
@@ -92,11 +99,15 @@ module OpenAPIGenerate
       field.instance_variable_set(:@description, obj.description || 'No description')
       if url_param
         field.instance_variable_set(:@url_param_only, true)
-        field.instance_variable_set(:@required, obj.required)
+        if obj.required
+          field.instance_variable_set(:@required, true)
+        end
       end
 
       # These methods are only available when the field is set
-      field.instance_variable_set(:@output, obj.read_only) if obj.respond_to?(:read_only)
+      if obj.respond_to?(:read_only) && obj.read_only
+        field.instance_variable_set(:@output, obj.read_only)
+      end
 
       if obj.respond_to?(:write_only) && obj.write_only
         field.instance_variable_set(:@immutable, obj.write_only)
@@ -127,6 +138,9 @@ module OpenAPIGenerate
       path.post.parameters.each do |param|
         parameter_object = write_object(param.name, param, param.schema.type, true)
         # All parameters are immutable
+        if parameter_object == nil
+          next
+        end
         parameter_object.instance_variable_set(:@immutable, true)
         parameters.push(parameter_object)
       end
@@ -134,7 +148,9 @@ module OpenAPIGenerate
       required_properties = path.post.request_body.content['application/json'].schema.required || []
       path.post.request_body.content['application/json'].schema.properties.each do |prop, i|
         prop_object = write_object(prop, i, i.type, false)
-        prop_object.instance_variable_set(:@required, required_properties.include?(prop))
+        if required_properties.include?(prop)
+          prop_object.instance_variable_set(:@required, true)
+        end
         required_properties.delete(prop)
         properties.push(prop_object)
       end
@@ -153,11 +169,16 @@ module OpenAPIGenerate
 
     def base_url(resource_path)
       base = resource_path.gsub('{', '{{').gsub('}', '}}')
+
+      base = base.gsub("projectsId", "project")
+      base = base.gsub("locationsId", "location")
       field_names = base.scan(/(?<=\{\{)\w+(?=\}\})/)
       field_names.each do |field_name|
         field_name_in_snake_case = field_name.underscore
         base = base.gsub("{{#{field_name}}}", "{{#{field_name_in_snake_case}}}")
       end
+      base = base.gsub("/v1/", '')
+      base = base.gsub("/v1alpha/", '')
       base
     end
 
@@ -168,7 +189,10 @@ module OpenAPIGenerate
       base_url = base_url(resource_path)
       resource.base_url = base_url
       resource.create_url = "#{base_url}?#{query_param}={{#{query_param.underscore}}}"
-      resource.self_link = "#{base_url}/{{#{query_param.underscore}}}"
+      self_link = "#{base_url}/{{#{query_param.underscore}}}"
+      resource.self_link = self_link
+      resource.id_format = self_link
+      resource.import_format = [self_link]
 
       # Name is on the Api::Object::Named parent resource, lets not modify that
       resource.instance_variable_set(:@name, resource_name)
