@@ -2447,7 +2447,7 @@ resource "google_bigquery_table" "test" {
 	dataset_id = google_bigquery_dataset.test.dataset_id
 	biglake_configuration {
 	  connection_id   = google_bigquery_connection.test.connection_id
-	  storage_uri = "gs://${google_storage_bucket.test.name}/data",
+	  storage_uri = "gs://${google_storage_bucket.test.name}/data"
 	  file_format = "PARQUET"
 	  table_format = "ICEBERG"
 	}
