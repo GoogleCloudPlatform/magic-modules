@@ -1576,23 +1576,22 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
-					},
-				},
-			},
-
-			"additional_pod_ranges_config": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				Description: `AdditionalPodRangesConfig is the configuration for additional pod secondary ranges supporting the ClusterUpdate message.`,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"pod_range_names": {
-							Type:        schema.TypeSet,
-							MinItems:    1,
-							Required:    true,
-							Elem:        &schema.Schema{Type: schema.TypeString},
-							Description: `Name for pod secondary ipv4 range which has the actual range defined ahead.`,
+						"additional_pod_ranges_config": {
+							Type:        schema.TypeList,
+							MaxItems:    1,
+							Optional:    true,
+							Description: `AdditionalPodRangesConfig is the configuration for additional pod secondary ranges supporting the ClusterUpdate message.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"pod_range_names": {
+										Type:        schema.TypeSet,
+										MinItems:    1,
+										Required:    true,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+										Description: `Name for pod secondary ipv4 range which has the actual range defined ahead.`,
+									},
+								},
+							},
 						},
 					},
 				},
@@ -2451,7 +2450,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
-	if names, ok := d.GetOk("additional_pod_ranges_config.0.pod_range_names"); ok {
+	if names, ok := d.GetOk("ip_allocation_policy.0.additional_pod_ranges_config.0.pod_range_names"); ok {
 		name := containerClusterFullName(project, location, clusterName)
 		additionalPodRangesConfig := &container.AdditionalPodRangesConfig{
 			PodRangeNames: tpgresource.ConvertStringSet(names.(*schema.Set)),
@@ -2655,11 +2654,6 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
                 return fmt.Errorf("Error setting allow_net_admin: %s", err)
             }
         }
-	}
-	if aprc := flattenAdditionalPodRangesConfig(cluster.IpAllocationPolicy); aprc != nil {
-		if err := d.Set("additional_pod_ranges_config", aprc); err != nil {
-			return fmt.Errorf("Error setting additional_pod_ranges_config: %s", err)
-		}
 	}
 	if cluster.ShieldedNodes != nil {
 		if err := d.Set("enable_shielded_nodes", cluster.ShieldedNodes.Enabled); err != nil {
@@ -3410,8 +3404,8 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	}
 
-	if d.HasChange("additional_pod_ranges_config") {
-		o, n := d.GetChange("additional_pod_ranges_config.0.pod_range_names")
+	if d.HasChange("ip_allocation_policy.0.additional_pod_ranges_config") {
+		o, n := d.GetChange("ip_allocation_policy.0.additional_pod_ranges_config.0.pod_range_names")
 		old_names := o.(*schema.Set)
 		new_names := n.(*schema.Set)
 		
@@ -5669,6 +5663,7 @@ func flattenIPAllocationPolicy(c *container.Cluster, d *schema.ResourceData, con
 			"services_secondary_range_name": p.ServicesSecondaryRangeName,
 			"stack_type":                    p.StackType,
 			"pod_cidr_overprovision_config": flattenPodCidrOverprovisionConfig(p.PodCidrOverprovisionConfig),
+			"additional_pod_ranges_config":  flattenAdditionalPodRangesConfig(c.IpAllocationPolicy),
 		},
 	}, nil
 }

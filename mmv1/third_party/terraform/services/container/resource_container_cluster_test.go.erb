@@ -8210,9 +8210,8 @@ func testAccContainerCluster_additional_pod_ranges_config(name string, nameCount
 		ip_allocation_policy {
 			cluster_secondary_range_name  = "gke-autopilot-pods"
 			services_secondary_range_name = "gke-autopilot-services"
+			%s
 		}
-
-		%s
 	}
 	`, name, name, name, aprc)
 }
