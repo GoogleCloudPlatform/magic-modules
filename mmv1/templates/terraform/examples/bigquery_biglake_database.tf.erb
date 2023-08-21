@@ -4,7 +4,7 @@ resource "google_biglake_catalog" "default" {
     location = "US"
 }
 
-resource "google_biglake_database" "<%= ctx[:vars][':primary_resource_name'] %>" {
+resource "google_biglake_database" "<%= ctx[:primary_resource_id] %>" {
     database_id = "<%= ctx[:vars]['database_id'] %>"
     catalog_id = google_biglake_catalog.default.catalog_id
     # Hard code to avoid invalid random id suffix
