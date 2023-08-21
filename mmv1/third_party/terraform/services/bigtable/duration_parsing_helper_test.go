@@ -6,11 +6,13 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/hashicorp/terraform-provider-google/google/services/bigtable"
 )
 
 var parseDurationTests = []struct {
 	in   string
-	want Duration
+	want time.Duration
 }{
 	// simple
 	{"0", 0},
@@ -72,9 +74,9 @@ var parseDurationTests = []struct {
 
 func TestParseDuration(t *testing.T) {
 	for _, tc := range parseDurationTests {
-		d, err := ParseDuration(tc.in)
+		d, err := bigtable.ParseDuration(tc.in)
 		if err != nil || d != tc.want {
-			t.Errorf("ParseDuration(%q) = %v, %v, want %v, nil", tc.in, d, err, tc.want)
+			t.Errorf("bigtable.ParseDuration(%q) = %v, %v, want %v, nil", tc.in, d, err, tc.want)
 		}
 	}
 }
@@ -110,25 +112,25 @@ var parseDurationErrorTests = []struct {
 
 func TestParseDurationErrors(t *testing.T) {
 	for _, tc := range parseDurationErrorTests {
-		_, err := ParseDuration(tc.in)
+		_, err := bigtable.ParseDuration(tc.in)
 		if err == nil {
-			t.Errorf("ParseDuration(%q) = _, nil, want _, non-nil", tc.in)
+			t.Errorf("bigtable.ParseDuration(%q) = _, nil, want _, non-nil", tc.in)
 		} else if !strings.Contains(err.Error(), tc.expect) {
-			t.Errorf("ParseDuration(%q) = _, %q, error does not contain %q", tc.in, err, tc.expect)
+			t.Errorf("bigtable.ParseDuration(%q) = _, %q, error does not contain %q", tc.in, err, tc.expect)
 		}
 	}
 }
 
 func TestParseDurationRoundTrip(t *testing.T) {
 	// https://golang.org/issue/48629
-	max0 := Duration(math.MaxInt64)
-	max1, err := ParseDuration(max0.String())
+	max0 := time.Duration(math.MaxInt64)
+	max1, err := bigtable.ParseDuration(max0.String())
 	if err != nil || max0 != max1 {
 		t.Errorf("round-trip failed: %d => %q => %d, %v", max0, max0.String(), max1, err)
 	}
 
-	min0 := Duration(math.MinInt64)
-	min1, err := ParseDuration(min0.String())
+	min0 := time.Duration(math.MinInt64)
+	min1, err := bigtable.ParseDuration(min0.String())
 	if err != nil || min0 != min1 {
 		t.Errorf("round-trip failed: %d => %q => %d, %v", min0, min0.String(), min1, err)
 	}
@@ -136,9 +138,9 @@ func TestParseDurationRoundTrip(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		// Resolutions finer than milliseconds will result in
 		// imprecise round-trips.
-		d0 := Duration(rand.Int31()) * time.Millisecond
+		d0 := time.Duration(rand.Int31()) * time.Millisecond
 		s := d0.String()
-		d1, err := ParseDuration(s)
+		d1, err := bigtable.ParseDuration(s)
 		if err != nil || d0 != d1 {
 			t.Errorf("round-trip failed: %d => %q => %d, %v", d0, s, d1, err)
 		}
@@ -147,7 +149,7 @@ func TestParseDurationRoundTrip(t *testing.T) {
 
 func BenchmarkParseDuration(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		ParseDuration("9007199254.740993ms")
-		ParseDuration("9007199254740993ns")
+		bigtable.ParseDuration("9007199254.740993ms")
+		bigtable.ParseDuration("9007199254740993ns")
 	}
 }
