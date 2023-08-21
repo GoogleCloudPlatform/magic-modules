@@ -52,12 +52,14 @@ func TestAccBiglakeDatabase_bigqueryBiglakeDatabase_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"database_id", "catalog_id", "location"},
 			},
 			{
-				Config:testAccBiglakeDatabase_bigqueryBiglakeDatabase_update(context),
-			 },
-			 {
-				...
-			 },
-	
+				Config: testAccBiglakeDatabase_bigqueryBiglakeDatabase_update(context),
+			},
+			{
+				ResourceName:            "google_biglake_database.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"database_id", "catalog_id", "location"},
+			},
 		},
 	})
 }
@@ -71,7 +73,8 @@ resource "google_biglake_catalog" "default" {
 }
 
 resource "google_biglake_database" "" {
-    database_id = "tf-test-my-database%{random_suffix}"
+	# Update Database Id
+    database_id = "tf-test-my-database%{random_suffix}-%{random_suffic}"
     catalog_id = google_biglake_catalog.default.catalog_id
     # Hard code to avoid invalid random id suffix
     location = google_biglake_catalog.default.location
