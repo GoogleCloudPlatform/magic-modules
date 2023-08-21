@@ -2419,6 +2419,7 @@ resource "google_bigquery_table" "test" {
 
 func testAccBigLakeManagedTable(bucketName, connectionID, datasetID, tableID string) string {
 	return fmt.Sprintf(`
+data "google_project" "project" {}
 resource "google_storage_bucket" "test" {
   name          = "%s"
   location      = "US"
