@@ -61,13 +61,7 @@ func TestAccBiglakeDatabase_bigqueryBiglakeDatabase_update(t *testing.T) {
 
 func testAccBiglakeDatabase_bigqueryBiglakeDatabase_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_biglake_catalog" "default" {
-    catalog_id = "tf_test_my_catalog%{random_suffix}"
-    # Hard code to avoid invalid random id suffix
-    location = "US"
-}
-
-resource "google_biglake_database" "default" {
+resource "google_biglake_database" "database" {
 	# Update Database Id
     database_id = "tf-test-my-database%{random_suffix}-%{random_suffix}"
     catalog_id = google_biglake_catalog.default.catalog_id
