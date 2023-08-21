@@ -48,8 +48,11 @@ For more information, see
 ## Field-level breaking changes
 
 * <a name="resource-schema-field-removal-or-rename"></a>Removing or renaming a field 
-* <a name="field-changing-type"></a> Changing field data type
-  * For example, changing a String to an Integer
+* <a name="field-changing-type"></a> Changing field output type
+  * Between primitive types, like changing a String to an Integer
+  * Between complex types like changing a List to a Set.
+  * Changing the field type between primitive and complex data
+    types is not possible. For this scenario, field renames are preferred.
 * <a name="field-optional-to-required"></a> Making an optional field required or adding a new required field
 * <a name="field-becoming-computed"></a> Making a settable field read-only
   * For MMv1 resources, adding `output: true` to an existing field.
