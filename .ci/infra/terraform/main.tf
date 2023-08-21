@@ -315,7 +315,7 @@ module "project-services" {
 }
 
 resource "google_project_service_identity" "bigtable_sa" {
-  provider   = google-beta
+  provider = google-beta
   depends_on = [module.project-services]
 
   project = google_project.proj.project_id
@@ -323,7 +323,7 @@ resource "google_project_service_identity" "bigtable_sa" {
 }
 
 resource "google_project_service_identity" "secretmanager_sa" {
-  provider   = google-beta
+  provider = google-beta
   depends_on = [module.project-services]
 
   project = google_project.proj.project_id
@@ -331,7 +331,7 @@ resource "google_project_service_identity" "secretmanager_sa" {
 }
 
 resource "google_project_service_identity" "sqladmin_sa" {
-  provider   = google-beta
+  provider = google-beta
   depends_on = [module.project-services]
 
   project = google_project.proj.project_id
@@ -432,7 +432,7 @@ module "firestore-project-services" {
 }
 
 resource "google_firestore_database" "firestore_db" {
-  provider   = google-beta
+  provider = google-beta
   depends_on = [module.firestore-project-services]
 
   project     = google_project.firestore_proj.project_id
@@ -448,3 +448,4 @@ output "service_account" {
 output "project_number" {
   value = google_project.proj.number
 }
+
