@@ -25,17 +25,37 @@ self_link: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/
 create_url: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases/{{database_id}}/tables?tableId={{table_id}}"
 update_verb: :PATCH
 update_mask: true
-delete_url: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases/{{database_id}}/tables?tableId={{table_id}}"
-delete_verb: :DELETE
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "bigquery_biglake_table"
-    primary_resource_id: "default"
+    primary_resource_id: "table"
     vars:
-      catalog_name: "my-catalog"
-      database_name: "my-database"
-      table_name: "my-table"
+      catalog_id: "my_catalog"
+      database_id: "my_database"
+      table_id: "my_table"
+      bucket_id: "my_bucket"
 properties:
+  - !ruby/object:Api::Type::String
+    name: "table_id"
+    url_param_only: true
+    description: |
+      The name of the table.
+  - !ruby/object:Api::Type::String
+    name: "database_id"
+    url_param_only: true
+    description: |
+      The name of the parent database.
+  - !ruby/object:Api::Type::String
+    name: "catalog_id"
+    url_param_only: true
+    description: |
+      The name of the parent catalog.
+  - !ruby/object:Api::Type::String
+    name: "location"
+    url_param_only: true
+    description: |
+      The geographic location where the Table should reside.
+
   - !ruby/object:Api::Type::String
     name: "name"
     description: |
@@ -74,12 +94,6 @@ properties:
       with nanosecond resolution and up to nine fractional digits. Examples:
       "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-  - !ruby/object:Api::Type::Enum
-    name: "type"
-    description: |
-      The database type.
-    values:
-      - :HIVE
   - !ruby/object:Api::Type::String
     name: "etag"
     description: |
@@ -87,18 +101,52 @@ properties:
       of other fields. It may be sent on update requests to ensure the client
       has an up-to-date value before proceeding. It is only checked for update
       table operations.
+    output: true
+
+  - !ruby/object:Api::Type::Enum
+    name: "type"
+    description: |
+      The database type.
+    values:
+      - :HIVE
   - !ruby/object:Api::Type::NestedObject
     name: "hiveOptions"
     description: |
-      Options of a Hive database.
+      Options of a Hive table.
     properties:
-      - !ruby/object:Api::Type::String
-        name: "locationUri"
-        description: |
-          Cloud Storage folder URI where the database data is stored, starting with "gs://".
       - !ruby/object:Api::Type::KeyValuePairs
-        name: "FIELD_NAME"
+        name: "parameters"
         description: |
-          Stores user supplied Hive database parameters. An object containing a
-          list of"key": value pairs.
+          Stores user supplied Hive table parameters. An object containing a
+          list of "key": value pairs.
           Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+      - !ruby/object:Api::Type::String
+        name: "tableType"
+        description: |
+          Hive table type. For example, MANAGED_TABLE, EXTERNAL_TABLE.
+      - !ruby/object:Api::Type::NestedObject
+        name: "storageDescriptor"
+        description: |
+          Stores physical storage information on the data.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "locationUri"
+            description: |
+              Cloud Storage folder URI where the table data is stored, starting with "gs://".
+          - !ruby/object:Api::Type::String
+            name: "inputFormat"
+            description: |
+              The fully qualified Java class name of the input format.
+          - !ruby/object:Api::Type::String
+            name: "outputFormat"
+            description: |
+              The fully qualified Java class name of the output format.
+          - !ruby/object:Api::Type::NestedObject
+            name: "serdeInfo"
+            description: |
+              Serializer and deserializer information.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: "serializationLib"
+                description: |
+                  The fully qualified Java class name of the serialization library.
