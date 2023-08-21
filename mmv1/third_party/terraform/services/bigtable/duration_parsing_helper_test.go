@@ -43,6 +43,7 @@ var parseDurationTests = []struct {
 	{"14s", 14 * time.Second},
 	{"15m", 15 * time.Minute},
 	{"16h", 16 * time.Hour},
+	{"5d", 5 * 24 * time.Hour},
 	// composite durations
 	{"3h30m", 3*time.Hour + 30*time.Minute},
 	{"10.5s4m", 4*time.Minute + 10*time.Second + 500*time.Millisecond},
@@ -94,7 +95,6 @@ var parseDurationErrorTests = []struct {
 	{"-.", `"-."`},
 	{".s", `".s"`},
 	{"+.s", `"+.s"`},
-	{"1d", `"1d"`},
 	{"\x85\x85", `"\x85\x85"`},
 	{"\xffff", `"\xffff"`},
 	{"hello \xffff world", `"hello \xffff world"`},

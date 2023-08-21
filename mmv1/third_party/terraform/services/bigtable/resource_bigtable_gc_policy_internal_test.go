@@ -173,7 +173,7 @@ func TestGCRulesDiffSuppress(t *testing.T) {
 		"s->h-diff": {
 			Old:                "3601s",
 			New:                "1h",
-			ExpectDiffSuppress: true,
+			ExpectDiffSuppress: false,
 		},
 	}
 
