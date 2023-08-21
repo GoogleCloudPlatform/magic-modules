@@ -94,6 +94,7 @@ func createOrUpdateRedisCluster(name string, replicaCount int, shardCount int, p
 	}
 	return fmt.Sprintf(`
 resource "google_redis_cluster" "test" {
+        provider = google-beta
         name           = "%s"
 	replica_count = %d
 	shard_count = %d
@@ -105,6 +106,7 @@ resource "google_redis_cluster" "test" {
 }
 
 data "google_project" "project" {
+  provider = google-beta
 }
 `, name, replicaCount, shardCount, lifecycleBlock)
 }
