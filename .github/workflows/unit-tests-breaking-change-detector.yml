@@ -4,6 +4,8 @@ permissions: read-all
 
 on:
   pull_request:
+    paths:
+      - 'tools/breaking-change-detector/**'
 
 jobs:
   test:
