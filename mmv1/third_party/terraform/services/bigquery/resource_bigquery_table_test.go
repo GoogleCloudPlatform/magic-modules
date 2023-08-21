@@ -248,7 +248,7 @@ func TestAccBigQueryTable_AvroPartitioning(t *testing.T) {
 
 func TestAccBigQueryBigLakeManagedTable(t *testing.T) {
 	t.Parallel()
-	bucketName := TestBucketName(t)
+	bucketName := acctest.TestBucketName(t)
 	connectionID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 
 	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
