@@ -1,6 +1,7 @@
 name: pre-build-validation-on-pr
 
-permissions: read-all
+permissions:
+  issues: write
 
 on:
   pull_request:
@@ -66,3 +67,20 @@ jobs:
       - name: Build
         working-directory: ./docs
         run: hugo --minify
+  check-changelog:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          repository: trodge/magic-modules
+          ref: go-changelog
+          path: repo
+      - name: Check Changelog
+        env:
+          GITHUB_OWNER: GoogleCloudPlatform
+          GITHUB_REPO: magic-modules
+          GITHUB_TOKEN: ${{github.token}}
+        run: |
+          cd repo/tools/go-changelog/cmd/changelog-pr-body-check
+          go run . ${{github.event.pull_request.number}}
