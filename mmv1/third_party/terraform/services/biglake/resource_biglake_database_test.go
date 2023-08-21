@@ -74,7 +74,7 @@ resource "google_biglake_catalog" "default" {
 
 resource "google_biglake_database" "" {
 	# Update Database Id
-    database_id = "tf-test-my-database%{random_suffix}-%{random_suffic}"
+    database_id = "tf-test-my-database%{random_suffix}-%{random_suffix}"
     catalog_id = google_biglake_catalog.default.catalog_id
     # Hard code to avoid invalid random id suffix
     location = google_biglake_catalog.default.location
