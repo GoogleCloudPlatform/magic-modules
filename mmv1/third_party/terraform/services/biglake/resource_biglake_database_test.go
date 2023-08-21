@@ -55,7 +55,7 @@ func TestAccBiglakeDatabase_bigqueryBiglakeDatabase_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"database_id", "catalog_id", "location"},
 			},
-		},
+		}e
 	})
 }
 
