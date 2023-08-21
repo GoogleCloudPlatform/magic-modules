@@ -362,7 +362,7 @@ func TestGCRulesDiffSuppress(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if gcRulesDiffSuppress(fmt.Sprintf(format, tc.Old), fmt.Sprintf(format, tc.New), nil) != tc.ExpectDiffSuppress {
+		if bigtable.gcRulesDiffSuppress(fmt.Sprintf(format, tc.Old), fmt.Sprintf(format, tc.New), nil) != tc.ExpectDiffSuppress {
 			t.Errorf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
