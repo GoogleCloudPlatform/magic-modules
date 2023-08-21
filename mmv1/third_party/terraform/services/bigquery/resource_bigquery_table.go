@@ -1151,7 +1151,7 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 		if err != nil {
 			return nil, err
 		}
-		table.BiglakeConfiguration = biglakeConfiguration
+		table.BigLakeConfiguration = biglakeConfiguration
 	}
 
 	if v, ok := d.GetOk("friendly_name"); ok {
@@ -1372,8 +1372,8 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if res.BiglakeConfiguration != nil {
-		bigLakeConfiguration, err := flattenBigLakeConfiguration(res.BiglakeConfiguration)
+	if res.BigLakeConfiguration != nil {
+		bigLakeConfiguration, err := flattenBigLakeConfiguration(res.BigLakeConfiguration)
 		if err != nil {
 			return err
 		}
