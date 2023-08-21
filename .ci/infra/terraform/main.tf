@@ -173,7 +173,6 @@ module "project-services" {
     "autoscaling.googleapis.com",
     "backupdr.googleapis.com",
     "beyondcorp.googleapis.com",
-    "biglake.googleapis.com",
     "bigquery.googleapis.com",
     "bigqueryconnection.googleapis.com",
     "bigquerydatapolicy.googleapis.com",
