@@ -35,6 +35,7 @@ examples:
     vars:
       catalog_id: "my_catalog"
       database_id: "my_database"
+      bucket_id: "my_bucket"
 properties:
   - !ruby/object:Api::Type::String
     name: "database_id"
