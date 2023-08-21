@@ -448,4 +448,3 @@ output "service_account" {
 output "project_number" {
   value = google_project.proj.number
 }
-
