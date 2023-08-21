@@ -73,6 +73,7 @@ resource "google_biglake_database" "default" {
     catalog_id = google_biglake_catalog.default.catalog_id
     # Hard code to avoid invalid random id suffix
     location = google_biglake_catalog.default.location
+	type = "HIVE"
 }
 `, context)
 }

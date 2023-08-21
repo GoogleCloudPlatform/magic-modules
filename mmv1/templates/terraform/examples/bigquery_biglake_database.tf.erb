@@ -9,4 +9,5 @@ resource "google_biglake_database" "<%= ctx[:primary_resource_id] %>" {
     catalog_id = google_biglake_catalog.default.catalog_id
     # Hard code to avoid invalid random id suffix
     location = google_biglake_catalog.default.location
+    type = "HIVE"
 }
