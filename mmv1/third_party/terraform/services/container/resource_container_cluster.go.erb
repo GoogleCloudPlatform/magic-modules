@@ -1976,6 +1976,7 @@ func ResourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				MaxItems:    1,
 				ForceNew:    true,
+				DiffSuppressFunc: suppressDiffForAutopilot,
 				Description: `Configuration for Cloud DNS for Kubernetes Engine.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

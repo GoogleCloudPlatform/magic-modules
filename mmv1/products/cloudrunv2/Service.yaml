@@ -500,10 +500,8 @@ properties:
                   name: 'tcpSocket'
                   description: |-
                     TCPSocket specifies an action involving a TCP port. This field is not supported in liveness probe currently.
-                  deprecation_message:
-                    Cloud Run does not support tcp socket in liveness probe and
-                    `liveness_probe.tcp_socket` field will be removed in a
-                    future major release.
+                  deprecation_message: >-
+                    `tcp_socket` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.
                   send_empty_value: true
                   allow_empty_object: true
                   properties:

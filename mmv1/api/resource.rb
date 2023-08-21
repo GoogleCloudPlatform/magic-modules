@@ -236,6 +236,9 @@ module Api
       # these resources will be deleted and recreated on the next apply call. This pattern
       # is preferred over deleting the resource directly in post_create_failure hooks.
       attr_reader :taint_resource_on_failed_create
+
+      # Add a deprecation message for a resource that's been deprecated in the API.
+      attr_reader :deprecation_message
     end
 
     include Properties
@@ -324,6 +327,7 @@ module Api
       check :read_error_transform, type: String
       check :taint_resource_on_failed_create, type: :boolean, default: false
       check :skip_sweeper, type: :boolean, default: false
+      check :deprecation_message, type: ::String
 
       validate_identity unless @identity.nil?
     end

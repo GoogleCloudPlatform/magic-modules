@@ -37,7 +37,7 @@ func TestAccFirebaseWebApp_firebaseWebAppFull(t *testing.T) {
 						Source:            "hashicorp/google<%= "-" + version unless version == 'ga'  -%>",
 					},
 				},
-				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, ""),
+				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, "", "key1"),
 			},
 			{
 				ExternalProviders: map[string]resource.ExternalProvider{
@@ -46,7 +46,7 @@ func TestAccFirebaseWebApp_firebaseWebAppFull(t *testing.T) {
 						Source:            "hashicorp/google<%= "-" + version unless version == 'ga'  -%>",
 					},
 				},
-				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, "2"),
+				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, "2", "key2"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "api_key"),
 					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "auth_domain"),
@@ -55,11 +55,11 @@ func TestAccFirebaseWebApp_firebaseWebAppFull(t *testing.T) {
 			},
 			{
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, ""),
+				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, "", "key1"),
 			},
 			{
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, "2"),
+				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, "2", "key2"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "api_key"),
 					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "auth_domain"),
@@ -70,8 +70,9 @@ func TestAccFirebaseWebApp_firebaseWebAppFull(t *testing.T) {
 	})
 }
 
-func testAccFirebaseWebApp_firebaseWebAppFull(context map[string]interface{}, update string) string {
+func testAccFirebaseWebApp_firebaseWebAppFull(context map[string]interface{}, update string, apiKeyLabel string) string {
 	context["display_name"] = context["display_name"].(string) + update
+	context["api_key_label"] = apiKeyLabel
 	return acctest.Nprintf(`
 resource "google_project" "default" {
 	provider = google-beta
@@ -89,10 +90,37 @@ resource "google_firebase_project" "default" {
 	project  = google_project.default.project_id
 }
 
+resource "google_apikeys_key" "key1" {
+	provider     = google-beta
+	name         = "tf-test-api-key1%{random_suffix}"
+	display_name = "Test api key 1"
+	project      = google_project.default.project_id
+
+	restrictions {
+		browser_key_restrictions {
+			allowed_referrers = ["*"]
+		}
+	}
+}
+
+resource "google_apikeys_key" "key2" {
+	provider     = google-beta
+	name         = "tf-test-api-key2%{random_suffix}"
+	display_name = "Test api key 2"
+	project      = google_project.default.project_id
+
+	restrictions {
+		browser_key_restrictions {
+			allowed_referrers = ["*"]
+		}
+	}
+}
+
 resource "google_firebase_web_app" "default" {
 	provider = google-beta
 	project = google_project.default.project_id
 	display_name = "%{display_name} %{random_suffix}"
+	api_key_id = google_apikeys_key.%{api_key_label}.uid
 
 	depends_on = [google_firebase_project.default]
 }
