@@ -1,4 +1,4 @@
-package time_test
+package bigtable_test
 
 import (
 	"math"
