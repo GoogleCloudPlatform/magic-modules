@@ -57,7 +57,7 @@ func resourceBigtableGCPolicyCustomizeDiffFunc(diff tpgresource.TerraformResourc
 
 	return nil
 }
-func handleGCRulesDiffs(oldRules, newRules interface{}) bool {
+func gcRulesDiffSuppress(oldRules, newRules interface{}) bool {
 	var oldPolicyRaw map[string]interface{}
 	if err := json.Unmarshal([]byte(oldRules.(string)), &oldPolicyRaw); err != nil {
 		return false
@@ -139,7 +139,7 @@ func ResourceBigtableGCPolicy() *schema.Resource {
 					return json
 				},
 				DiffSuppressFunc: func(k, old, new string, _ *schema.ResourceData) bool {
-					return handleGCRulesDiffs(old, new)
+					return gcRulesDiffSuppress(old, new)
 				},
 			},
 			"mode": {
