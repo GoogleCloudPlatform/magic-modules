@@ -2429,6 +2429,10 @@ resource "google_bigquery_connection" "test" {
 	location = "US"
 	cloud_resource {}
 }
+locals {
+	connection_id_split = split("/", google_bigquery_connection.test.name)
+	connection_id_reformatted = "${local.connection_id_split[1]}.${local.connection_id_split[3]}.${local.connection_id_split[5]}"
+ }
 resource "google_project_iam_member" "test" {
 	role = "roles/storage.objectViewer"
 	project = data.google_project.project.id
@@ -2442,7 +2446,7 @@ resource "google_bigquery_table" "test" {
 	table_id   = "%s"
 	dataset_id = google_bigquery_dataset.test.dataset_id
 	biglake_configuration {
-	  connection_id   = local.connection_id_reformatted
+	  connection_id   = google_bigquery_connection.test.connection_id
 	  storage_uri = "gs://${google_storage_bucket.test.name}/data",
 	  file_format = "PARQUET"
 	  table_format = "ICEBERG"
