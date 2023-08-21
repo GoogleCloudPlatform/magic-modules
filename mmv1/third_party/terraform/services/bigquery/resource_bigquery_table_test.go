@@ -2424,6 +2424,7 @@ resource "google_storage_bucket" "test" {
   name          = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 resource "google_bigquery_connection" "test" {
 	connection_id = "%s"
