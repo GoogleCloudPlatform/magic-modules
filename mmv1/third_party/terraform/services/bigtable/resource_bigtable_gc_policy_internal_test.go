@@ -2,6 +2,7 @@ package bigtable
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -139,6 +140,47 @@ func TestUnitBigtableGCPolicy_getGCPolicyFromJSON(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestGCRulesDiffSuppress(t *testing.T) {
+	format := "{\"rules\": [{\"max_age\":\"%s\"}]}"
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"compound": {
+			Old:                "1d1h",
+			New:                "25h",
+			ExpectDiffSuppress: true,
+		},
+		"s->h": {
+			Old:                "3600s",
+			New:                "1h",
+			ExpectDiffSuppress: true,
+		},
+		"s->m": {
+			Old:                "3600s",
+			New:                "60m",
+			ExpectDiffSuppress: true,
+		},
+		"compound-diff": {
+			Old:                "1d1h",
+			New:                "26h",
+			ExpectDiffSuppress: false,
+		},
+
+		"s->h-diff": {
+			Old:                "3601s",
+			New:                "1h",
+			ExpectDiffSuppress: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		if gcRulesDiffSuppress(fmt.Sprintf(format, tc.Old), fmt.Sprintf(format, tc.New), nil) != tc.ExpectDiffSuppress {
+			t.Errorf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
 	}
 }
 
