@@ -78,8 +78,6 @@ For more information, see
   * For handwritten resources, removing `DiffSuppressFunc` from a field.
 * Removing update support from a field.
 
-* 
-
 ### Making validation more strict
 
 * <a name="field-growing-min"></a> Increasing the minimum number of items in an array
