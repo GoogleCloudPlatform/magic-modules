@@ -67,7 +67,7 @@ resource "google_biglake_catalog" "default" {
     location = "US"
 }
 
-resource "google_biglake_database" "" {
+resource "google_biglake_database" "default" {
 	# Update Database Id
     database_id = "tf-test-my-database%{random_suffix}-%{random_suffix}"
     catalog_id = google_biglake_catalog.default.catalog_id
