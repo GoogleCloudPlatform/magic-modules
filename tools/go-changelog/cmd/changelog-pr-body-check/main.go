@@ -66,16 +66,7 @@ func main() {
 				" in the PR body, as described in https://github.com/GoogleCloudPlatform/magic-modules/blob/master/.ci/RELEASE_NOTES_GUIDE.md:" +
 				"\n\n~~~\n```release-note:TYPE\nRelease note" +
 				"\n```\n~~~"
-			_, _, err := client.Issues.CreateComment(ctx, owner, repo,
-				prNo, &github.IssueComment{
-					Body: &body,
-				})
-			if err != nil {
-				log.Fatalf("Error creating pull request comment on"+
-					" github.com/%s/%s/%d: %s", owner, repo, prNo,
-					err)
-			}
-			os.Exit(1)
+			log.Fatal(body)
 		case changelog.EntryErrorUnknownTypes:
 			unknownTypes := err.Details["unknownTypes"].([]string)
 
@@ -92,16 +83,7 @@ func main() {
 				body += "\n* " + t
 			}
 			body += "\n\nPlease only use the types listed in https://github.com/GoogleCloudPlatform/magic-modules/blob/master/.ci/RELEASE_NOTES_GUIDE.md."
-			_, _, err := client.Issues.CreateComment(ctx, owner, repo,
-				prNo, &github.IssueComment{
-					Body: &body,
-				})
-			if err != nil {
-				log.Fatalf("Error creating pull request comment on"+
-					" github.com/%s/%s/%d: %s", owner, repo, prNo,
-					err)
-			}
-			os.Exit(1)
+			log.Fatal(body)
 		}
 	}
 }
