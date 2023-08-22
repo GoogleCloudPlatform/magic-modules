@@ -35,9 +35,4 @@ resource "google_identity_platform_config" "default" {
       quota_duration = "7200s"
     }
   }
-  authorized_domains = [
-    "localhost",
-    "<%= ctx[:vars]['project_id'] %>.firebaseapp.com",
-    "<%= ctx[:vars]['project_id'] %>.web.app",
-  ]
 }

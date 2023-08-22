@@ -129,3 +129,4 @@ properties:
     description: |
       List of domains authorized for OAuth redirects.
     item_type: Api::Type::String
+    # default_from_api: true
