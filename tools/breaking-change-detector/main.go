@@ -10,6 +10,7 @@ var docMode = flag.Bool("docs", false, "legacy flag to not break existing CI can
 var providerFolder = flag.String("providerFolder", "", "legacy flag to not break existing CI can be removed after 7/10")
 
 func main() {
+	panic("hi - breaking on purpose")
 	flag.Parse()
 	if !*docMode {
 		breakages := compare()
