@@ -46,13 +46,16 @@ func testAccBiglakeDatabase_bigqueryBiglakeDatabase_update(context map[string]in
 	return acctest.Nprintf(`
 resource "google_biglake_database" "database" {
 	# Update Database Id
-    database_id = "tf-test-my-database%{random_suffix}-%{random_suffix}"
+    database_id = "tf-test-my-database%{random_suffix}"
     catalog_id = google_biglake_catalog.default.catalog_id
     # Hard code to avoid invalid random id suffix
     location = google_biglake_catalog.default.location
 	type = "HIVE"
 	hive_options {
-        location_uri = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.metadata_folder.name}"
+        location_uri = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.metadata_folder.name}/metadata"
+		parameters = {
+			"tool" = "screwdriver"
+		}
     }
 }
 `, context)
