@@ -81,6 +81,11 @@ if [ $retVal -ne 0 ]; then
     BREAKING_CHANGE_BUILD_FAILURE=$?
 fi
 BREAKINGCHANGES="$($script_dir/compare_breaking_changes.sh)"
+if [ $BREAKING_CHANGE_BUILD_FAILURE -ne 0 ]; then
+    BREAKINGCHANGES=message="## Breaking Change Detection Failed
+The breaking change detector crashed durring execution. This is usually due to the downstream provider(s) failing to compile. Please investigate or follow up with your reviewer.
+"
+fi
 popd
 set -e
 
