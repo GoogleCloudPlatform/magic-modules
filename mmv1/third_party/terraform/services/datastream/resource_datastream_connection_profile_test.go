@@ -59,7 +59,7 @@ func TestAccDatastreamConnectionProfile_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "mysql_profile.0.password"},
 			},
 			{
-			    // run once more to update the password. it should update it in-place
+				// run once more to update the password. it should update it in-place
 				Config: testAccDatastreamConnectionProfile_mySQLUpdate(context, true, random_pass_2),
 			},
 			{
@@ -169,7 +169,6 @@ resource "google_datastream_connection_profile" "default" {
 }
 `, context)
 }
-
 
 func testAccDatastreamConnectionProfile_mySQLUpdate(context map[string]interface{}, preventDestroy bool, password string) string {
 	context["lifecycle_block"] = ""
