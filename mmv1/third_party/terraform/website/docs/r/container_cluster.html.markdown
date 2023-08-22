@@ -728,7 +728,7 @@ the cluster level. Used for Autopilot clusters and Standard clusters with which 
 secondary Pod IP address assignment to node pools isn't needed. Structure is [documented below](#nested_additional_pod_ranges_config).
 
 
-<a name="additional_pod_ranges_config"></a>The `additional_pod_ranges_config` block supports:
+<a name="nested_additional_pod_ranges_config"></a>The `additional_pod_ranges_config` block supports:
 
 * `pod_range_names` - (Required) The names of the Pod ranges to add to the cluster.
 
