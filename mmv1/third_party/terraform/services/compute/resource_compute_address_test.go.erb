@@ -174,6 +174,9 @@ func TestAccComputeAddress_networkTier_withProvider5(t *testing.T) {
 }
 
 func TestAccComputeAddress_withProviderDefaultLabels(t *testing.T) {
+	// The test failed if VCR testing is enabled, because the cached provider config is used.
+	// With the cached provider config, any changes in the provider default labels will not be applied. 
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	acctest.VcrTest(t, resource.TestCase{

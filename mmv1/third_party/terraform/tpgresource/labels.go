@@ -3,7 +3,6 @@ package tpgresource
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -11,21 +10,18 @@ import (
 
 func SetTerraformLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	log.Printf("[DEBUG] SetTerraformLabelsDiff  DefaultLabels %#v", config.DefaultLabels)
 
 	// Merge provider default labels with the user defined labels in the resource to get terraform managed labels
 	terraformLabels := make(map[string]string)
 	for k, v := range config.DefaultLabels {
 		terraformLabels[k] = v
 	}
-	log.Printf("[DEBUG] SetTerraformLabelsDiff  terraformLabels0 %#v", terraformLabels)
 
 	labels := d.Get("labels").(map[string]interface{})
 	for k, v := range labels {
 		terraformLabels[k] = v.(string)
 	}
 
-	log.Printf("[DEBUG] SetTerraformLabelsDiff  terraformLabels1 %#v", terraformLabels)
 	if err := d.SetNew("terraform_labels", terraformLabels); err != nil {
 		return fmt.Errorf("error setting new terraform_labels diff: %w", err)
 	}

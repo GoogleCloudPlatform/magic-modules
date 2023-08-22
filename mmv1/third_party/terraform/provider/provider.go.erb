@@ -4,7 +4,6 @@ package provider
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -724,12 +723,10 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 
 	config.DefaultLabels = make(map[string]string)
 	defaultLabels := d.Get("default_labels").(map[string]interface{})
-	log.Printf("[DEBUG] provider defaultLabels %#v", defaultLabels)
 
 	for k, v := range defaultLabels {
 		config.DefaultLabels[k] = v.(string)
 	}
-	log.Printf("[DEBUG] config.DefaultLabels %#v", config.DefaultLabels)
 
 	batchCfg, err := transport_tpg.ExpandProviderBatchingConfig(d.Get("batching"))
 	if err != nil {
