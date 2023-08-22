@@ -37,24 +37,24 @@ package <%= product_ns.downcase -%>
 import (
   "fmt"
 
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgiamresource"
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
-  transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/cai"
+  "github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+  transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
 // Provide a separate asset type constant so we don't have to worry about name conflicts between IAM and non-IAM converter files
 const <%= resource_name -%>IAMAssetType string = "<%= product_backend_name.downcase -%>.googleapis.com/<%= object.name -%>"
 
-func ResourceConverter<%= resource_name -%>IamPolicy() tpgresource.ResourceConverter {
-    return tpgresource.ResourceConverter{
+func ResourceConverter<%= resource_name -%>IamPolicy() cai.ResourceConverter {
+    return cai.ResourceConverter{
         AssetType: <%= resource_name -%>IAMAssetType,
         Convert: Get<%= resource_name -%>IamPolicyCaiObject,
         MergeCreateUpdate: Merge<%= resource_name -%>IamPolicy,
     }
 }
 
-func ResourceConverter<%= resource_name -%>IamBinding() tpgresource.ResourceConverter {
-    return tpgresource.ResourceConverter{
+func ResourceConverter<%= resource_name -%>IamBinding() cai.ResourceConverter {
+    return cai.ResourceConverter{
         AssetType: <%= resource_name -%>IAMAssetType,
         Convert: Get<%= resource_name -%>IamBindingCaiObject,
         FetchFullResource: Fetch<%= resource_name -%>IamPolicy,
@@ -63,8 +63,8 @@ func ResourceConverter<%= resource_name -%>IamBinding() tpgresource.ResourceConv
     }
 }
 
-func ResourceConverter<%= resource_name -%>IamMember() tpgresource.ResourceConverter {
-    return tpgresource.ResourceConverter{
+func ResourceConverter<%= resource_name -%>IamMember() cai.ResourceConverter {
+    return cai.ResourceConverter{
         AssetType: <%= resource_name -%>IAMAssetType,
         Convert: Get<%= resource_name -%>IamMemberCaiObject,
         FetchFullResource: Fetch<%= resource_name -%>IamPolicy,
@@ -73,73 +73,73 @@ func ResourceConverter<%= resource_name -%>IamMember() tpgresource.ResourceConve
     }
 }
 
-func Get<%= resource_name -%>IamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	return new<%= resource_name -%>IamAsset(d, config, tpgiamresource.ExpandIamPolicyBindings)
+func Get<%= resource_name -%>IamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	return new<%= resource_name -%>IamAsset(d, config, cai.ExpandIamPolicyBindings)
 }
 
-func Get<%= resource_name -%>IamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	return new<%= resource_name -%>IamAsset(d, config, tpgiamresource.ExpandIamRoleBindings)
+func Get<%= resource_name -%>IamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	return new<%= resource_name -%>IamAsset(d, config, cai.ExpandIamRoleBindings)
 }
 
-func Get<%= resource_name -%>IamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	return new<%= resource_name -%>IamAsset(d, config, tpgiamresource.ExpandIamMemberBindings)
+func Get<%= resource_name -%>IamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	return new<%= resource_name -%>IamAsset(d, config, cai.ExpandIamMemberBindings)
 }
 
-func Merge<%= resource_name -%>IamPolicy(existing, incoming tpgresource.Asset) tpgresource.Asset {
+func Merge<%= resource_name -%>IamPolicy(existing, incoming cai.Asset) cai.Asset {
 	existing.IAMPolicy = incoming.IAMPolicy
 	return existing
 }
 
-func Merge<%= resource_name -%>IamBinding(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeIamAssets(existing, incoming, tpgiamresource.MergeAuthoritativeBindings)
+func Merge<%= resource_name -%>IamBinding(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeIamAssets(existing, incoming, cai.MergeAuthoritativeBindings)
 }
 
-func Merge<%= resource_name -%>IamBindingDelete(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeDeleteIamAssets(existing, incoming, tpgiamresource.MergeDeleteAuthoritativeBindings)
+func Merge<%= resource_name -%>IamBindingDelete(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeDeleteIamAssets(existing, incoming, cai.MergeDeleteAuthoritativeBindings)
 }
 
-func Merge<%= resource_name -%>IamMember(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeIamAssets(existing, incoming, tpgiamresource.MergeAdditiveBindings)
+func Merge<%= resource_name -%>IamMember(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeIamAssets(existing, incoming, cai.MergeAdditiveBindings)
 }
 
-func Merge<%= resource_name -%>IamMemberDelete(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeDeleteIamAssets(existing, incoming, tpgiamresource.MergeDeleteAdditiveBindings)
+func Merge<%= resource_name -%>IamMemberDelete(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeDeleteIamAssets(existing, incoming, cai.MergeDeleteAdditiveBindings)
 }
 
 func new<%= resource_name -%>IamAsset(
 	d tpgresource.TerraformResourceData,
 	config *transport_tpg.Config,
-	expandBindings func(d tpgresource.TerraformResourceData) ([]tpgresource.IAMBinding, error),
-) ([]tpgresource.Asset, error) {
+	expandBindings func(d tpgresource.TerraformResourceData) ([]cai.IAMBinding, error),
+) ([]cai.Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
-		return []tpgresource.Asset{}, fmt.Errorf("expanding bindings: %v", err)
+		return []cai.Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
-	name, err := tpgresource.AssetName(d, config, "<%= asset_name_template -%>")
+	name, err := cai.AssetName(d, config, "<%= asset_name_template -%>")
 	if err != nil {
-		return []tpgresource.Asset{}, err
+		return []cai.Asset{}, err
 	}
 
-	return []tpgresource.Asset{{
+	return []cai.Asset{{
 		Name: name,
 		Type: <%= resource_name -%>IAMAssetType,
-		IAMPolicy: &tpgresource.IAMPolicy{
+		IAMPolicy: &cai.IAMPolicy{
 			Bindings: bindings,
 		},
 	}}, nil
 }
 
-func Fetch<%= resource_name -%>IamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgresource.Asset, error) {
+func Fetch<%= resource_name -%>IamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (cai.Asset, error) {
 	// Check if the identity field returns a value
   <% resource_params.each do |param| -%>
   if _, ok := d.GetOk("<%= param.underscore -%>"); !ok {
-    return tpgresource.Asset{}, tpgresource.ErrEmptyIdentityField
+    return cai.Asset{}, cai.ErrEmptyIdentityField
   }
   <% end # resource_params.each -%>
 
 
-	return tpgiamresource.FetchIamPolicy(
+	return cai.FetchIamPolicy(
 		<%= resource_name -%>IamUpdaterProducer,
 		d,
 		config,
