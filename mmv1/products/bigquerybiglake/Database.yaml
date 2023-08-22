@@ -24,7 +24,7 @@ base_url: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/d
 self_link: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases/{{database_id}}"
 create_url: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases?databaseId={{database_id}}"
 update_mask: true
-update_verb: ":PATCH"
+update_verb: :PATCH
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "bigquery_biglake_database"
