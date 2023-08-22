@@ -70,6 +70,15 @@ examples:
       network_1_name: 'network-1'
       network_2_name: 'network-2'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'dns_managed_zone_private_multiproject'
+    primary_resource_id: 'private-zone'
+    vars:
+      zone_name: 'private-zone'
+      network_1_name: 'network-1'
+      network_2_name: 'network-2'
+      project_1_name: 'project-1'
+      project_2_name: 'project-2'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'dns_managed_zone_private_forwarding'
     primary_resource_id: 'private-zone'
     skip_test: true

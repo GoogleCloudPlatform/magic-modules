@@ -32,6 +32,15 @@ examples:
       policy_name: 'example-policy'
       network_1_name: 'network-1'
       network_2_name: 'network-2'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dns_policy_multiproject'
+    primary_resource_id: 'example-policy'
+    vars:
+      policy_name: 'example-policy'
+      network_1_name: 'network-1'
+      network_2_name: 'network-2'
+      project_1_name: 'project-1'
+      project_2_name: 'project-2'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/detach_network.erb
 properties:
