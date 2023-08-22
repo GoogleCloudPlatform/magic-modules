@@ -339,9 +339,3 @@ Another way to debug this is to run a Terraform command with the `TF_LOG` enviro
 {{< /tab >}}
 
 {{< /tabs >}}
-
-## What's next?
-
-- [Create a pull request](https://docs.github.com/en/get-started/quickstart/github-flow#create-a-pull-request)
-- [Write release notes]({{< ref "/contribute/release-notes" >}})
-- [Review a pull request]({{< ref "/contribute/review-pr" >}})
