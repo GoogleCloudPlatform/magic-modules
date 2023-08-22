@@ -26,11 +26,9 @@ timeouts: !ruby/object:Api::Timeouts
 min_version: beta
 base_url: 'projects/{{project}}/locations/{{region}}/clusters'
 self_link: 'projects/{{project}}/locations/{{region}}/clusters/{{name}}'
-
 create_url: 'projects/{{project}}/locations/{{region}}/clusters?clusterId={{name}}'
 update_verb: :PATCH
 update_mask: true
-
 autogen_async: true
 parameters:
   - !ruby/object:Api::Type::String
@@ -41,6 +39,7 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'region'
     required: false
@@ -83,6 +82,17 @@ properties:
       System assigned, unique identifier for the cluster.
     output: true
   - !ruby/object:Api::Type::Enum
+    name: authorizationMode
+    description: |
+      Optional. The authorization mode of the Redis cluster. If not provided, auth feature is disabled for the cluster.
+    values:
+      - :AUTH_MODE_UNSPECIFIED
+      - :AUTH_MODE_IAM_AUTH
+      - :AUTH_MODE_DISABLED
+    default_value: :AUTH_MODE_DISABLED
+    immutable: true
+    required: false
+  - !ruby/object:Api::Type::Enum
     name: transitEncryptionMode
     description: |
       Optional. The in-transit encryption for the Redis cluster.
@@ -109,7 +119,7 @@ properties:
           description: |
             Required. The consumer network where the network address of
             the discovery endpoint will be reserved, in the form of
-            projects/{network_host_project_id}/global/networks/{network_id}.
+            projects/{network_project_id_or_number}/global/networks/{network_id}.
           required: true
   - !ruby/object:Api::Type::Array
     name: 'discoveryEndpoints'
@@ -139,7 +149,34 @@ properties:
               description: |
                 The consumer network where the network address of the discovery
                 endpoint will be reserved, in the form of
-                projects/{network_host_project_id}/global/networks/{network_id}.
+                projects/{network_project_id}/global/networks/{network_id}.
+  - !ruby/object:Api::Type::Array
+    name: 'pscConnections'
+    description: |
+      Output only. PSC connections for discovery of the cluster topology and accessing the cluster.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'pscConnectionId'
+          description: |
+            Output only. The PSC connection id of the forwarding rule connected to the service attachment.
+        - !ruby/object:Api::Type::String
+          name: 'address'
+          description: |
+            Output only. The IP allocated on the consumer network for the PSC forwarding rule.
+        - !ruby/object:Api::Type::String
+          name: 'forwardingRule'
+          description: |
+            Output only. The URI of the consumer side forwarding rule. Example: projects/{projectNumOrId}/regions/us-east1/forwardingRules/{resourceId}.
+        - !ruby/object:Api::Type::String
+          name: 'projectId'
+          description: |
+            Output only. The consumer projectId where the forwarding rule is created from.
+        - !ruby/object:Api::Type::String
+          name: 'network'
+          description: |
+            The consumer network where the IP address resides, in the form of projects/{projectId}/global/networks/{network_id}.
+    output: true
   - !ruby/object:Api::Type::Integer
     name: replicaCount
     description: |
