@@ -80,8 +80,11 @@ if [ $retVal -ne 0 ]; then
     export TPGB_BREAKING=""
     BREAKING_CHANGE_BUILD_FAILURE=$?
 fi
-BREAKINGCHANGES="$($script_dir/compare_breaking_changes.sh)"
-if [ $BREAKING_CHANGE_BUILD_FAILURE -ne 0 ]; then
+if [ $BREAKING_CHANGE_BUILD_FAILURE -eq 0 ]; then
+    echo "Breaking changes succeeded"
+    BREAKINGCHANGES="$($script_dir/compare_breaking_changes.sh)"
+else
+    echo "Breaking changes failed"
     BREAKINGCHANGES="## Breaking Change Detection Failed${NEWLINE}The breaking change detector crashed during execution. This is usually due to the downstream provider(s) failing to compile. Please investigate or follow up with your reviewer."
 fi
 popd
