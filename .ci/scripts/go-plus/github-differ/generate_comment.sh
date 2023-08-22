@@ -82,9 +82,7 @@ if [ $retVal -ne 0 ]; then
 fi
 BREAKINGCHANGES="$($script_dir/compare_breaking_changes.sh)"
 if [ $BREAKING_CHANGE_BUILD_FAILURE -ne 0 ]; then
-    BREAKINGCHANGES=message="## Breaking Change Detection Failed
-The breaking change detector crashed durring execution. This is usually due to the downstream provider(s) failing to compile. Please investigate or follow up with your reviewer.
-"
+    BREAKINGCHANGES="## Breaking Change Detection Failed${NEWLINE}The breaking change detector crashed during execution. This is usually due to the downstream provider(s) failing to compile. Please investigate or follow up with your reviewer."
 fi
 popd
 set -e
@@ -190,7 +188,7 @@ curl -H "Authorization: token ${GITHUB_TOKEN}" \
       -d "$(jq -r --arg diffs "$MESSAGE" -n "{body: \$diffs}")" \
       "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}/comments"
 
-if ! git diff --exit-code origin/main tools || [ "$BREAKING_CHANGE_BUILD_FAILURE" -ne 0 ]; then
+if ! git diff --exit-code origin/main tools; then
     ## Run unit tests for breaking change and missing test detector.
     "$script_dir/test_tools.sh" "$MM_LOCAL_PATH" "$TPGB_LOCAL_PATH" "$COMMIT_SHA" "$BUILD_ID" "$BUILD_STEP" "$PROJECT_ID"
 fi
