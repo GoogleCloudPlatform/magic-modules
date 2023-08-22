@@ -12,23 +12,33 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
+// This is a decoder, so config is the response data
 config := meta.(*transport_tpg.Config)
 
-expectedName, _ := expandNestedMonitoringMonitoredProjectName(d.Get("name"), d, config)
-expectedFlattenedName := flattenNestedMonitoringMonitoredProjectName(expectedName, d, config)
-_, isNumErr := tpgresource.StringToFixed64(expectedFlattenedName.(string))
-expectProjectNumber := isNumErr == nil
+// The API returns all monitored projects
+monitoredProjects, _ = res["monitoredProjects"].([]interface{})
 
-name := res["name"].(string)
-name = tpgresource.GetResourceNameFromSelfLink(name)
-
-if expectProjectNumber {
-	res["name"] = name
-} else if name != "" {
-	project, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(name).Do()
-	if err != nil {
-		return nil, err
-	}
-	res["name"] = project.ProjectId
+// Convert configured terraform monitored_project resource name to a projectId
+expectedProject, configProjectErr := config.NewResourceManagerClient(config.UserAgent).Projects.Get(d.Get("name")).Do()
+if configProjectErr != nil {
+	return nil, configProjectErr
 }
-return res, nil
+expectedProjectId = expectedProject.ProjectId
+
+// Iterate through the list of monitoredProjects to make sure one matches the configured monitored_project
+for idx, projectRaw := range monitoredProjects {
+	if projectRaw == nil {
+		continue
+	}
+	project := projectRaw.(map[string]interface{})
+
+	projectName := project["name"]
+	if !reflect.DeepEqual(projectName, expectedFlattenedName) {
+		continue
+	} else {
+		res["name"] = project.ProjectId
+		return res, nil
+	}
+}
+log.Printf("[DEBUG] MonitoringMonitoredProject couldn't be matched.")
+return nil, nil
