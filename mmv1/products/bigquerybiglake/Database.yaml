@@ -23,11 +23,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases"
 self_link: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases/{{database_id}}"
 create_url: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases?databaseId={{database_id}}"
-update_url: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases/{{database_id}}"
-update_verb: :PATCH
 update_mask: true
-delete_url: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases/{{database_id}}"
-delete_verb: :DELETE
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "bigquery_biglake_database"
