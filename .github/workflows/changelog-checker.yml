@@ -1,4 +1,4 @@
-name: check-changelog
+name: changelog-checker
 
 permissions: read-all
 
@@ -7,7 +7,7 @@ on:
     types: [opened, edited]
 
 jobs:
-  check-changelog:
+  check:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
