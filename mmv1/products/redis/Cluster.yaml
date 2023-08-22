@@ -56,6 +56,9 @@ examples:
     primary_resource_id: "cluster-ha"
     vars:
       cluster_name: "ha-cluster"
+      policy_name: "mypolicy"
+      subnet_name: "mysubnet"
+      network_name: "mynetwork"
 properties:
   - !ruby/object:Api::Type::Time
     name: createTime
@@ -176,6 +179,20 @@ properties:
           name: 'network'
           description: |
             The consumer network where the IP address resides, in the form of projects/{projectId}/global/networks/{network_id}.
+    output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: stateInfo
+    description: Output only. Additional information about the current state of the cluster.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: updateInfo
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: targetShardCount
+            description: Target number of shards for redis cluster.
+          - !ruby/object:Api::Type::Integer
+            name: targetReplicaCount
+            description: Target number of replica nodes per shard.
     output: true
   - !ruby/object:Api::Type::Integer
     name: replicaCount
