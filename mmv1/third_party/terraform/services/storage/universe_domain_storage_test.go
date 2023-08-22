@@ -1,4 +1,4 @@
-package compute_test
+package storage_test
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccUniverseDomainDisk(t *testing.T) {
+func TestAccUniverseDomainStorage(t *testing.T) {
 	// Skip VCR since this test can only run in specific test project.
 	t.Skip()
 
@@ -18,33 +18,31 @@ func TestAccUniverseDomainDisk(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccUniverseDomain_basic_disk(universeDomain),
+				Config: testAccUniverseDomain_bucket(universeDomain),
 			},
 		},
 	})
 }
 
-func testAccUniverseDomain_basic_disk(universeDomain string) string {
+func testAccUniverseDomain_bucket(universeDomain string) string {
 	return fmt.Sprintf(`
 provider "google" {
   universe_domain = "%s"
 }
 	  
-resource "google_compute_instance_template" "instance_template" {
-  name = "demo-it"
-  machine_type = "n1-standard-1"
-
-// boot disk
-  disk {
-	disk_size_gb = 20
-  }
-
-  network_interface {
-	network = "default"
-  }
+resource "google_storage_bucket" "foo" {
+  name     = "storage_test_skip"
+  location = "US"
+}
+  
+data "google_storage_bucket" "bar" {
+  name = google_storage_bucket.foo.name
+  depends_on = [
+	google_storage_bucket.foo,
+  ]
 }
 `, universeDomain)
 }
