@@ -269,6 +269,7 @@ properties:
           - !ruby/object:Api::Type::Boolean
             name: 'writeMetadata'
             required: true
+            send_empty_value: true
             description: |
               When true, writes the Pub/Sub message metadata to
               `x-goog-pubsub-<KEY>:<VAL>` headers of the HTTP request. Writes the
