@@ -15,10 +15,8 @@
 name: 'Namespace'
 base_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces'
 create_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/?scope_namespace_id={{scope_namespace_id}}'
-update_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/{{scope_namespace_id}}'
 self_link: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/{{scope_namespace_id}}'
-update_verb: :PATCH
-update_mask: true
+immutable: true
 description: |
   Namespace represents a namespace across the Fleet.
 references: !ruby/object:Api::Resource::ReferenceLinks
