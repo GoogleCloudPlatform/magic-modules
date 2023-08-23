@@ -70,7 +70,7 @@ if [ $retVal -ne 0 ]; then
     BREAKING_CHANGE_BUILD_FAILURE=1
 fi
 
-rm -rf ./old/ ./new/
+rm -rf ./old/ ./new/ ./bin/
 cp -r $TPGB_LOCAL_PATH old/
 cp -r $TPGB_LOCAL_PATH new/
 make build OLD_REF=$OLD_BRANCH NEW_REF=$NEW_BRANCH

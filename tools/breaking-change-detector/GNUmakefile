@@ -17,6 +17,7 @@ clean:
 	cd new/; \
 		git checkout -- .; \
 		git clean -f
+	rm -rf bin/
 
 build:
 ifndef OLD_REF
