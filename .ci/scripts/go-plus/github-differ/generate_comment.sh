@@ -67,7 +67,7 @@ TPG_BREAKING="$(bin/breaking-change-detector)"
 retVal=$?
 if [ $retVal -ne 0 ]; then
     TPG_BREAKING=""
-    BREAKING_CHANGE_BUILD_FAILURE=$?
+    BREAKING_CHANGE_BUILD_FAILURE=1
 fi
 
 rm -rf ./old/ ./new/
@@ -78,7 +78,7 @@ TPGB_BREAKING="$(bin/breaking-change-detector)"
 retVal=$?
 if [ $retVal -ne 0 ]; then
     TPGB_BREAKING=""
-    BREAKING_CHANGE_BUILD_FAILURE=$?
+    BREAKING_CHANGE_BUILD_FAILURE=1
 fi
 if [ $BREAKING_CHANGE_BUILD_FAILURE -eq 0 ]; then
     echo "Breaking changes succeeded"
