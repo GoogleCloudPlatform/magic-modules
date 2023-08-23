@@ -290,8 +290,8 @@ properties:
 	- !ruby/object:Api::Type::Boolean
           name: sendPreviousResourceOnDelete
           description: |
-            Whether to send full pervious FHIR resource to this Pub/Sub topic for Delete operation.
+            Whether to send full previous FHIR resource to this Pub/Sub topic for Delete operation.
             Note that setting this to true does not guarantee that all resources will be sent in the format of
             full FHIR resource. When a resource change is too large or during heavy traffic, only the resource name will be
             sent. Clients should always check the "payloadType" label from a Pub/Sub message to determine whether
-            it needs to fetch the full pervious resource as a separate operation.
+            it needs to fetch the full previous resource as a separate operation.
