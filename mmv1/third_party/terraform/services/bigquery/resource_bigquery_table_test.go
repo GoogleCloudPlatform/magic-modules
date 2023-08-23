@@ -694,14 +694,44 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchema_InvalidSchemas(t *testing.T
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	objectName := fmt.Sprintf("tf_test_%s.csv", RandString(t, 10))
+	objectName := fmt.Sprintf("tf_test_%s.csv", acctest.RandString(t, 10))
 
-	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
-	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccBigQueryTableFromGCSWithExternalDataConfigSchema(datasetID, tableID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_INVALID_SCHEMA_NOT_JSON),
+				ExpectError: regexp.MustCompile("contains an invalid JSON"),
+			},
+			{
+				Config:      testAccBigQueryTableFromGCSWithExternalDataConfigSchema(datasetID, tableID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_INVALID_SCHEMA_NOT_JSON_LIST),
+				ExpectError: regexp.MustCompile("\"schema\" is not a JSON array"),
+			},
+			{
+				Config:      testAccBigQueryTableFromGCSWithExternalDataConfigSchema(datasetID, tableID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_INVALID_SCHEMA_JSON_LIST_WITH_NULL_ELEMENT),
+				ExpectError: regexp.MustCompile("\"schema\" contains a nil element"),
+			},
+		},
+	})
+}
+
+func TestAccBigQueryExternalDataTable_CSV_WithSchemaAndConnectionID_UpdateNoConnectionID(t *testing.T) {
+	t.Parallel()
+
+	bucketName := testBucketName(t)
+	objectName := fmt.Sprintf("tf_test_%s.csv", acctest.RandString(t, 10))
+
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
