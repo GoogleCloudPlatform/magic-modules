@@ -262,6 +262,7 @@ properties:
         diff_suppress_func: 'tpgresource.IgnoreMissingKeyInMap("x-goog-version")'
       - !ruby/object:Api::Type::NestedObject
         name: 'noWrapper'
+        send_empty_value: true
         description: |
           When set, the payload to the push endpoint is not wrapped.Sets the
           `data` field as the HTTP body for delivery.
