@@ -26,7 +26,7 @@ if configProjectErr != nil {
 expectedProjectId := expectedProject.ProjectId
 
 // Iterate through the list of monitoredProjects to make sure one matches the configured monitored_project
-for idx, projectRaw := range monitoredProjects {
+for _, projectRaw := range monitoredProjects {
 	if projectRaw == nil {
 		continue
 	}
@@ -37,7 +37,7 @@ for idx, projectRaw := range monitoredProjects {
 		continue
 	} else {
 		// Match found - set response object name to match
-		res["name"] = project.ProjectId
+		res["name"] = projectName
 		return res, nil
 	}
 }
