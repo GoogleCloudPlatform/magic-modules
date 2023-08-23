@@ -19,7 +19,7 @@ resource "google_storage_bucket_object" "metadata_folder" {
 
 resource "google_biglake_database" "<%= ctx[:primary_resource_id] %>"  {
     name = "<%= ctx[:vars]['name'] %>"
-    catalog_id = google_biglake_catalog.catalog.catalog_id
+    catalog_id = google_biglake_catalog.catalog.name
     location = google_biglake_catalog.catalog.location
     type = "HIVE"
     hive_options {
