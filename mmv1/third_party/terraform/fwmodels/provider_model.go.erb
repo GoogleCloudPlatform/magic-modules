@@ -57,9 +57,9 @@ type ProviderModel struct {
 	OrgPolicyCustomEndpoint            types.String `tfsdk:"org_policy_custom_endpoint"`
 <% end -%>
 	RecaptchaEnterpriseCustomEndpoint  types.String `tfsdk:"recaptcha_enterprise_custom_endpoint"`
-<% unless version == "ga" -%>
+
 	GkehubFeatureCustomEndpoint        types.String `tfsdk:"gkehub_feature_custom_endpoint"`
-<% end -%>
+
 <% if version == "private" -%>
 	// artifact from a private internal fork- this one can be removed when the
 	// internal definition is removed.
