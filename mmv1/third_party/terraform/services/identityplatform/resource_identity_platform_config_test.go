@@ -103,7 +103,7 @@ resource "google_project_service" "identitytoolkit" {
   service = "identitytoolkit.googleapis.com"
 }
 
-resource "google_identity_platform_config" "update" {
+resource "google_identity_platform_config" "basic" {
   project = google_project.basic.project_id
   sign_in {
     allow_duplicate_emails = false
