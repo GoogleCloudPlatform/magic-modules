@@ -44,8 +44,26 @@ func TestAccBiglakeDatabase_bigqueryBiglakeDatabase_update(t *testing.T) {
 
 func testAccBiglakeDatabase_bigqueryBiglakeDatabase_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_biglake_catalog" "catalog" {
+	name = "tf_test_my_catalog%{random_suffix}"
+	# Hard code to avoid invalid random id suffix
+	location = "US"
+}
+
+resource "google_storage_bucket" "bucket" {
+	name                        = "tf_test_my_bucket%{random_suffix}"
+	location                    = "US"
+	force_destroy               = true
+	uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "metadata_folder" {
+	name    = "metadata/"
+	content = " "
+	bucket  = google_storage_bucket.bucket.name
+}
+
 resource "google_biglake_database" "database" {
-	# Update Database Id
     name = "tf-test-my-database%{random_suffix}"
     catalog_id = google_biglake_catalog.catalog.name
     # Hard code to avoid invalid random id suffix
