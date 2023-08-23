@@ -46,7 +46,6 @@ parameters:
     description: |
       The name of the Catalog. Format: 
       projects/{project_id_or_number}/locations/{locationId}/catalogs/{catalogId}
-
 properties:
   - !ruby/object:Api::Type::String
     name: "createTime"
