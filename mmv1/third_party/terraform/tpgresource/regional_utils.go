@@ -29,9 +29,9 @@ func GetLocation(d TerraformResourceData, config *transport_tpg.Config) (string,
 			return GetResourceNameFromSelfLink(v.(string)), nil
 		} else {
 			if config.Region != "" {
-				return config.Region, nil
+				return GetResourceNameFromSelfLink(config.Region), nil
 			} else if config.Zone != "" {
-				return config.Zone, nil
+				return GetResourceNameFromSelfLink(config.Zone), nil
 			} else {
 				return "", fmt.Errorf("Unable to determine location: region/zone not configured in resource/provider config")
 			}

@@ -275,13 +275,23 @@ func TestGetLocation(t *testing.T) {
 			},
 			ExpectedLocation: "provider-zone-a",
 		},
-		"does not shorten the zone value when it is set as a self link in the provider config": {
-			// This behaviour makes sense because provider config values don't originate from APIs
-			// Users should always configure the provider with the short names of regions/zones
+		"returns the region value from the provider config when none of location/region/zone are set in the resource config": {
+			ProviderConfig: map[string]string{
+				"region": "provider-region",
+			},
+			ExpectedLocation: "provider-region",
+		},
+		"shortens the region value when it is set as a self link in the provider config": {
+			ProviderConfig: map[string]string{
+				"region": "https://www.googleapis.com/compute/v1/projects/my-project/region/provider-region",
+			},
+			ExpectedLocation: "provider-region",
+		},
+		"shortens the zone value when it is set as a self link in the provider config": {
 			ProviderConfig: map[string]string{
 				"zone": "https://www.googleapis.com/compute/v1/projects/my-project/zones/provider-zone-a",
 			},
-			ExpectedLocation: "https://www.googleapis.com/compute/v1/projects/my-project/zones/provider-zone-a",
+			ExpectedLocation: "provider-zone-a",
 		},
 		// Handling of empty strings
 		"returns the region value set in the resource config when location is an empty string": {
