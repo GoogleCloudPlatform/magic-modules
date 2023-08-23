@@ -23,7 +23,7 @@ expectedProject, configProjectErr := config.NewResourceManagerClient(config.User
 if configProjectErr != nil {
 	return nil, configProjectErr
 }
-expectedProjectId = expectedProject.ProjectId
+expectedProjectId := expectedProject.ProjectId
 
 // Iterate through the list of monitoredProjects to make sure one matches the configured monitored_project
 for idx, projectRaw := range monitoredProjects {
@@ -36,6 +36,7 @@ for idx, projectRaw := range monitoredProjects {
 	if !reflect.DeepEqual(projectName, expectedFlattenedName) {
 		continue
 	} else {
+		// Match found - set response object name to match
 		res["name"] = project.ProjectId
 		return res, nil
 	}
