@@ -28,7 +28,7 @@ update_verb: :PATCH
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "bigquery_biglake_database"
-    primary_resource_id: "my-db"
+    primary_resource_id: "database"
     vars:
       name: "my_database"
       catalog_id: "my_catalog"
