@@ -114,9 +114,9 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                 Optional: true,
             },
             "default_labels": schema.MapAttribute{
-				Optional:    true,
-				ElementType: types.StringType,
-			},
+                Optional:    true,
+                ElementType: types.StringType,
+            },
 
             // Generated Products
             <% products.each do |product| -%>

@@ -390,7 +390,7 @@ module Api
     # they will need to be set in every Update.
     def settable_properties
       all_user_properties
-        .reject { |v| v.output && !v.is_a?(Api::Type::Fingerprint) && v.name != 'terraformLabels' }
+        .reject { |v| v.output && !v.is_a?(Api::Type::Fingerprint) && !v.is_a?(Api::Type::KeyValueTerraformLabels) }
         .reject(&:url_param_only)
         .reject { |v| v.is_a?(Api::Type::KeyValueLabels) }
     end
@@ -489,7 +489,7 @@ module Api
       description = "The combination of #{name} configured directly on the resource
  and default #{name} configured on the provider."
 
-      Api::Type::KeyValuePairs.new(
+      Api::Type::KeyValueTerraformLabels.new(
         name: "terraform#{name.capitalize}",
         output: true,
         api_name: name,
