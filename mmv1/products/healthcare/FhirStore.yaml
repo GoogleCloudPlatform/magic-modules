@@ -287,7 +287,7 @@ properties:
             full FHIR resource. When a resource change is too large or during heavy traffic, only the resource name will be
             sent. Clients should always check the "payloadType" label from a Pub/Sub message to determine whether
             it needs to fetch the full resource as a separate operation.
-	- !ruby/object:Api::Type::Boolean
+        - !ruby/object:Api::Type::Boolean
           name: sendPreviousResourceOnDelete
           description: |
             Whether to send full previous FHIR resource to this Pub/Sub topic for Delete operation.
