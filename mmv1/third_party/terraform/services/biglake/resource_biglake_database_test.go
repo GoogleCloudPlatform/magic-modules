@@ -49,7 +49,7 @@ resource "google_biglake_database" "database" {
     name = "tf-test-my-database%{random_suffix}"
     catalog_id = google_biglake_catalog.default.name
     # Hard code to avoid invalid random id suffix
-    location = google_biglake_catalog.default.location
+    location = google_biglake_catalog.catalog.location
 	type = "HIVE"
 	hive_options {
         location_uri = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.metadata_folder.name}/metadata"
