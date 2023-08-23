@@ -49,7 +49,7 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      Output only. The name of the Table. Format: 
+      Output only. The name of the Table. Format:
       projects/{project_id_or_number}/locations/{locationId}/catalogs/{catalogId}/databases/{databaseId}/tables/{tableId}
   - !ruby/object:Api::Type::String
     name: "database_id"
