@@ -132,6 +132,18 @@ func TestLocationDescription_GetRegion(t *testing.T) {
 			},
 			ExpectedRegion: types.StringValue("us-central1"),
 		},
+		"shortens region values set as self links in the provider config": {
+			ld: LocationDescription{
+				ProviderRegion: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/regions/us-central1"),
+			},
+			ExpectedRegion: types.StringValue("us-central1"),
+		},
+		"shortens region values when derived from a zone self link set in the provider config": {
+			ld: LocationDescription{
+				ProviderZone: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a"),
+			},
+			ExpectedRegion: types.StringValue("us-central1"),
+		},
 		"returns the value of the region field in provider config when region/zone is unset in resource config": {
 			ld: LocationDescription{
 				ProviderRegion: types.StringValue("provider-region"),
