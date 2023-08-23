@@ -89,7 +89,7 @@ For each release note block, choose an appropriate type from the following list:
 - `breaking-change` : Changes that require users to change their configuration
 - `note` : General type for other notes that might be relevant to users but don't fit into another category
 - `none` : Changes where there is no user impact, like test fixes, website updates and
-CI changes (release notes of this type should be empty)
+  CI changes. Release notes of this type should be empty.
 
 ### Guidelines
 
