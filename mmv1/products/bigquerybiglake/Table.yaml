@@ -34,12 +34,23 @@ examples:
       database_id: "my_database"
       table_id: "my_table"
       bucket_id: "my_bucket"
-properties:
+
+parameters:
   - !ruby/object:Api::Type::String
-    name: "table_id"
+    name: "location"
+    required: true
+    immutable: true
     url_param_only: true
     description: |
-      The name of the table.
+      The geographic location where the Table should reside.
+  - !ruby/object:Api::Type::String
+    name: "name"
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      Output only. The name of the Table. Format: 
+      projects/{project_id_or_number}/locations/{locationId}/catalogs/{catalogId}/databases/{databaseId}/tables/{tableId}
   - !ruby/object:Api::Type::String
     name: "database_id"
     url_param_only: true
@@ -50,18 +61,8 @@ properties:
     url_param_only: true
     description: |
       The name of the parent catalog.
-  - !ruby/object:Api::Type::String
-    name: "location"
-    url_param_only: true
-    description: |
-      The geographic location where the Table should reside.
 
-  - !ruby/object:Api::Type::String
-    name: "name"
-    description: |
-      Output only. The resource name. Format: 
-      projects/{project_id_or_number}/locations/{locationId}/catalogs/{catalogId}/databases/{databaseId}
-    output: true
+properties:
   - !ruby/object:Api::Type::String
     name: "createTime"
     description: |
