@@ -3,6 +3,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -675,16 +676,6 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		config.RequestReason = v.(string)
 	}
 
-	// Replace hostname by the universe_domain field.
-	if v, ok := d.GetOk("universe_domain"); ok {
-		for key, bp := range transport_tpg.DefaultBasePaths {
-			if key == "Compute" {
-				transport_tpg.DefaultBasePaths[key] = strings.Replace(bp, "/v1", "/staging_v1", 1)
-			}
-			transport_tpg.DefaultBasePaths[key] = strings.ReplaceAll(transport_tpg.DefaultBasePaths[key], "googleapis.com", v.(string))
-		}
-	}
-
 	// Check for primary credentials in config. Note that if neither is set, ADCs
 	// will be used if available.
 	if v, ok := d.GetOk("access_token"); ok {
@@ -707,6 +698,42 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		config.AccessToken = transport_tpg.MultiEnvSearch([]string{
 			"GOOGLE_OAUTH_ACCESS_TOKEN",
 		})
+	}
+	
+	// set universe_domain based on the service account key file.
+	if config.Credentials != "" {
+		contents, _, err := verify.PathOrContents(config.Credentials)
+		if err != nil {
+			fmt.Errorf("error loading service account credentials: %s", err)
+		}
+		var content map[string]any
+
+		if err := json.Unmarshal([]byte(contents), &content); err != nil {
+			return nil, diag.FromErr(err)
+		}
+
+		if content["universe_domain"] != nil {
+			config.UniverseDomain = content["universe_domain"].(string)
+		}
+	}
+	
+	// Check if the user provided a value from the universe_domain field
+	if v, ok := d.GetOk("universe_domain"); ok {
+		if config.UniverseDomain == "" {
+			config.UniverseDomain = v.(string)
+		} else if  v.(string) != "googleapis.com" {
+			fmt.Errorf("universe domain %s is already defined in the service credential file", config.UniverseDomain)
+		}
+	}
+
+	// Replace hostname by the universe_domain field.
+	if config.UniverseDomain != "" {
+		for key, bp := range transport_tpg.DefaultBasePaths {
+			if key == "Compute" {
+				transport_tpg.DefaultBasePaths[key] = strings.Replace(bp, "/v1", "/staging_v1", 1)
+			}
+			transport_tpg.DefaultBasePaths[key] = strings.ReplaceAll(transport_tpg.DefaultBasePaths[key], "googleapis.com", config.UniverseDomain)
+		}
 	}
 
 	// Given that impersonate_service_account is a secondary auth method, it has
