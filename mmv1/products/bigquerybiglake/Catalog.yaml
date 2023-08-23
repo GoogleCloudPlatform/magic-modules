@@ -15,7 +15,7 @@
 !ruby/object:Api::Resource
 name: "Catalog"
 description: |
-  'Catalogs are top-level containers for Databases and Tables.'
+  Catalogs are top-level containers for Databases and Tables.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     "Manage open source metadata with BigLake Metastore": "https://cloud.google.com/bigquery/docs/manage-open-source-metadata#create_catalogs"
