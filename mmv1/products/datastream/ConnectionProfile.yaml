@@ -178,7 +178,6 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'password'
         required: true
-        immutable: true
         description: |
           Password for the MySQL connection.
         sensitive: true
