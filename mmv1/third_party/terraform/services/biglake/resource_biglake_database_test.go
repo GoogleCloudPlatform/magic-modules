@@ -47,7 +47,7 @@ func testAccBiglakeDatabase_bigqueryBiglakeDatabase_update(context map[string]in
 resource "google_biglake_database" "database" {
 	# Update Database Id
     name = "tf-test-my-database%{random_suffix}"
-    catalog_id = google_biglake_catalog.default.name
+    catalog_id = google_biglake_catalog.catalog.name
     # Hard code to avoid invalid random id suffix
     location = google_biglake_catalog.catalog.location
 	type = "HIVE"
