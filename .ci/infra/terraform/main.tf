@@ -241,7 +241,6 @@ module "project-services" {
     "firebasestorage.googleapis.com",
     "firestore.googleapis.com",
     "firestorekeyvisualizer.googleapis.com",
-    "gameservices.googleapis.com",
     "gkebackup.googleapis.com",
     "gkeconnect.googleapis.com",
     "gkehub.googleapis.com",

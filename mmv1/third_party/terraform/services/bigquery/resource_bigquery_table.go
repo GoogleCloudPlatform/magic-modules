@@ -383,6 +383,32 @@ func resourceBigQueryTableSchemaCustomizeDiff(_ context.Context, d *schema.Resou
 	return resourceBigQueryTableSchemaCustomizeDiffFunc(d)
 }
 
+func validateBigQueryTableSchema(v interface{}, k string) (warnings []string, errs []error) {
+	if v == nil {
+		return
+	}
+
+	if _, e := validation.StringIsJSON(v, k); e != nil {
+		errs = append(errs, e...)
+		return
+	}
+
+	var jsonList []interface{}
+	if err := json.Unmarshal([]byte(v.(string)), &jsonList); err != nil {
+		errs = append(errs, fmt.Errorf("\"schema\" is not a JSON array: %s", err))
+		return
+	}
+
+	for _, v := range jsonList {
+		if v == nil {
+			errs = append(errs, errors.New("\"schema\" contains a nil element"))
+			return
+		}
+	}
+
+	return
+}
+
 func ResourceBigQueryTable() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceBigQueryTableCreate,
@@ -497,7 +523,7 @@ func ResourceBigQueryTable() *schema.Resource {
 							Optional:     true,
 							Computed:     true,
 							ForceNew:     true,
-							ValidateFunc: validation.StringIsJSON,
+							ValidateFunc: validateBigQueryTableSchema,
 							StateFunc: func(v interface{}) string {
 								json, _ := structure.NormalizeJsonString(v)
 								return json
@@ -761,26 +787,37 @@ func ResourceBigQueryTable() *schema.Resource {
 			// start with a letter and each label in the list must have a different
 			// key.
 			"labels": {
-				Type:        schema.TypeMap,
-				Optional:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: `A mapping of labels to assign to the resource.`,
-			},
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Description: `A mapping of labels to assign to the resource.
 
+				**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
+			},
+			"effective_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			// Schema: [Optional] Describes the schema of this table.
+			// Schema is mutually exclusive with View and Materialized View.
 			"schema": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				ValidateFunc: validation.StringIsJSON,
+				ValidateFunc: validateBigQueryTableSchema,
 				StateFunc: func(v interface{}) string {
 					json, _ := structure.NormalizeJsonString(v)
 					return json
 				},
 				DiffSuppressFunc: bigQueryTableSchemaDiffSuppress,
 				Description:      `A JSON schema for the table.`,
+				ConflictsWith:    []string{"view", "materialized_view"},
 			},
 			// View: [Optional] If specified, configures this table as a view.
+			// View is mutually exclusive with Schema and Materialized View.
 			"view": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -807,9 +844,11 @@ func ResourceBigQueryTable() *schema.Resource {
 						},
 					},
 				},
+				ConflictsWith: []string{"schema", "materialized_view"},
 			},
 
 			// Materialized View: [Optional] If specified, configures this table as a materialized view.
+			// Materialized View is mutually exclusive with Schema and View.
 			"materialized_view": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -846,6 +885,7 @@ func ResourceBigQueryTable() *schema.Resource {
 						},
 					},
 				},
+				ConflictsWith: []string{"schema", "view"},
 			},
 
 			// TimePartitioning: [Experimental] If specified, configures time-based
@@ -1184,40 +1224,15 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 
 	datasetID := d.Get("dataset_id").(string)
 
-	if table.View != nil && table.Schema != nil {
+	log.Printf("[INFO] Creating BigQuery table: %s", table.TableReference.TableId)
 
-		log.Printf("[INFO] Removing schema from table definition because big query does not support setting schema on view creation")
-		schemaBack := table.Schema
-		table.Schema = nil
-
-		log.Printf("[INFO] Creating BigQuery table: %s without schema", table.TableReference.TableId)
-
-		res, err := config.NewBigQueryClient(userAgent).Tables.Insert(project, datasetID, table).Do()
-		if err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] BigQuery table %s has been created", res.Id)
-		d.SetId(fmt.Sprintf("projects/%s/datasets/%s/tables/%s", res.TableReference.ProjectId, res.TableReference.DatasetId, res.TableReference.TableId))
-
-		table.Schema = schemaBack
-		log.Printf("[INFO] Updating BigQuery table: %s with schema", table.TableReference.TableId)
-		if _, err = config.NewBigQueryClient(userAgent).Tables.Update(project, datasetID, res.TableReference.TableId, table).Do(); err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] BigQuery table %s has been update with schema", res.Id)
-	} else {
-		log.Printf("[INFO] Creating BigQuery table: %s", table.TableReference.TableId)
-
-		res, err := config.NewBigQueryClient(userAgent).Tables.Insert(project, datasetID, table).Do()
-		if err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] BigQuery table %s has been created", res.Id)
-		d.SetId(fmt.Sprintf("projects/%s/datasets/%s/tables/%s", res.TableReference.ProjectId, res.TableReference.DatasetId, res.TableReference.TableId))
+	res, err := config.NewBigQueryClient(userAgent).Tables.Insert(project, datasetID, table).Do()
+	if err != nil {
+		return err
 	}
+
+	log.Printf("[INFO] BigQuery table %s has been created", res.Id)
+	d.SetId(fmt.Sprintf("projects/%s/datasets/%s/tables/%s", res.TableReference.ProjectId, res.TableReference.DatasetId, res.TableReference.TableId))
 
 	return resourceBigQueryTableRead(d, meta)
 }
@@ -1259,8 +1274,11 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("max_staleness", res.MaxStaleness); err != nil {
 		return fmt.Errorf("Error setting max_staleness: %s", err)
 	}
-	if err := d.Set("labels", res.Labels); err != nil {
+	if err := d.Set("labels", tpgresource.FlattenLabels(res.Labels, d)); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	if err := d.Set("effective_labels", res.Labels); err != nil {
+		return fmt.Errorf("Error setting effective_labels: %s", err)
 	}
 	if err := d.Set("creation_time", res.CreationTime); err != nil {
 		return fmt.Errorf("Error setting creation_time: %s", err)
