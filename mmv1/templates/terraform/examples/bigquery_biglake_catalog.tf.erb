@@ -1,5 +1,4 @@
 resource "google_biglake_catalog" "<%= ctx[:primary_resource_id] %>"  {
     name = "<%= ctx[:vars]['name'] %>"
-    # Hard code to avoid invalid random id suffix
     location = "US"
 }
