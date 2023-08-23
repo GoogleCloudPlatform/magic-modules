@@ -16,10 +16,10 @@
 config := meta.(*transport_tpg.Config)
 
 // The API returns all monitored projects
-monitoredProjects, _ = res["monitoredProjects"].([]interface{})
+monitoredProjects, _ := res["monitoredProjects"].([]interface{})
 
 // Convert configured terraform monitored_project resource name to a projectId
-expectedProject, configProjectErr := config.NewResourceManagerClient(config.UserAgent).Projects.Get(d.Get("name")).Do()
+expectedProject, configProjectErr := config.NewResourceManagerClient(config.UserAgent).Projects.Get(d.Get("name").(string)).Do()
 if configProjectErr != nil {
 	return nil, configProjectErr
 }
@@ -33,7 +33,7 @@ for idx, projectRaw := range monitoredProjects {
 	project := projectRaw.(map[string]interface{})
 
 	projectName := project["name"]
-	if !reflect.DeepEqual(projectName, expectedFlattenedName) {
+	if !reflect.DeepEqual(projectName, expectedProjectId) {
 		continue
 	} else {
 		// Match found - set response object name to match
