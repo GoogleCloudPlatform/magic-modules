@@ -90,6 +90,7 @@ var (
 	}
 
 	composerPrivateEnvironmentConfig = []string{
+		"config.0.private_environment_config.0.connection_type",
 		"config.0.private_environment_config.0.enable_private_endpoint",
 		"config.0.private_environment_config.0.master_ipv4_cidr_block",
 		"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
@@ -484,6 +485,15 @@ func ResourceComposerEnvironment() *schema.Resource {
 							Description:  `The configuration used for the Private IP Cloud Composer environment.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
+									"connection_type": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: composerPrivateEnvironmentConfig,
+										ForceNew: true,
+										ValidateFunc: validation.StringInSlice([]string{"VPC_PEERING", "PRIVATE_SERVICE_CONNECT"}, false),
+										Description: `Mode of internal communication within the Composer environment. Must be one of "VPC_PEERING" or "PRIVATE_SERVICE_CONNECT".`,
+									},
 									"enable_private_endpoint": {
 										Type:     schema.TypeBool,
 										Optional: true,
@@ -870,7 +880,17 @@ func ResourceComposerEnvironment() *schema.Resource {
 				Type:        schema.TypeMap,
 				Optional:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: `User-defined labels for this environment. The labels map can contain no more than 64 entries. Entries of the labels map are UTF8 strings that comply with the following restrictions: Label keys must be between 1 and 63 characters long and must conform to the following regular expression: [a-z]([-a-z0-9]*[a-z0-9])?. Label values must be between 0 and 63 characters long and must conform to the regular expression ([a-z]([-a-z0-9]*[a-z0-9])?)?. No more than 64 labels can be associated with a given environment. Both keys and values must be <= 128 bytes in size.`,
+				Description: `User-defined labels for this environment. The labels map can contain no more than 64 entries. Entries of the labels map are UTF8 strings that comply with the following restrictions: Label keys must be between 1 and 63 characters long and must conform to the following regular expression: [a-z]([-a-z0-9]*[a-z0-9])?. Label values must be between 0 and 63 characters long and must conform to the regular expression ([a-z]([-a-z0-9]*[a-z0-9])?)?. No more than 64 labels can be associated with a given environment. Both keys and values must be <= 128 bytes in size.
+				
+				**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
+			},
+
+			"effective_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 		},
 		UseJSONNumber: true,
@@ -974,7 +994,10 @@ func resourceComposerEnvironmentRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("config", flattenComposerEnvironmentConfig(res.Config)); err != nil {
 		return fmt.Errorf("Error setting Environment: %s", err)
 	}
-	if err := d.Set("labels", res.Labels); err != nil {
+	if err := d.Set("labels", tpgresource.FlattenLabels(res.Labels, d)); err != nil {
+		return fmt.Errorf("Error setting Environment: %s", err)
+	}
+	if err := d.Set("effective_labels", res.Labels); err != nil {
 		return fmt.Errorf("Error setting Environment: %s", err)
 	}
 	return nil
@@ -1516,6 +1539,9 @@ func flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg *composer.P
 	}
 
 	transformed := make(map[string]interface{})
+	if envCfg.NetworkingConfig != nil{
+		transformed["connection_type"] = envCfg.NetworkingConfig.ConnectionType
+	}
 	transformed["enable_private_endpoint"] = envCfg.PrivateClusterConfig.EnablePrivateEndpoint
 	transformed["master_ipv4_cidr_block"] = envCfg.PrivateClusterConfig.MasterIpv4CidrBlock
 	transformed["cloud_sql_ipv4_cidr_block"] = envCfg.CloudSqlIpv4CidrBlock
@@ -1969,6 +1995,11 @@ func expandComposerEnvironmentConfigPrivateEnvironmentConfig(v interface{}, d *s
 	}
 
 	subBlock := &composer.PrivateClusterConfig{}
+	networkConfig := &composer.NetworkingConfig{}
+
+	if v, ok := original["connection_type"]; ok {
+		networkConfig.ConnectionType = v.(string)
+	}
 
 	if v, ok := original["enable_private_endpoint"]; ok {
 		subBlock.EnablePrivateEndpoint = v.(bool)
@@ -1997,6 +2028,7 @@ func expandComposerEnvironmentConfigPrivateEnvironmentConfig(v interface{}, d *s
 	}
 
 	transformed.PrivateClusterConfig = subBlock
+	transformed.NetworkingConfig = networkConfig
 
 	return transformed, nil
 }

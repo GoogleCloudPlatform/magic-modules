@@ -482,6 +482,12 @@ func ResourceBigQueryTable() *schema.Resource {
 							Description: `A list of the fully-qualified URIs that point to your data in Google Cloud.`,
 							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
+						// FileSetSpecType: [Optional] Specifies how source URIs are interpreted for constructing the file set to load.  By default source URIs are expanded against the underlying storage.  Other options include specifying manifest files. Only applicable to object storage systems.
+						"file_set_spec_type": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `Specifies how source URIs are interpreted for constructing the file set to load.  By default source URIs are expanded against the underlying storage.  Other options include specifying manifest files. Only applicable to object storage systems.`,
+						},
 						// Compression: [Optional] The compression type of the data source.
 						"compression": {
 							Type:         schema.TypeString,
@@ -747,6 +753,13 @@ func ResourceBigQueryTable() *schema.Resource {
 				Description: `A descriptive name for the table.`,
 			},
 
+			// max_staleness: [Optional] The maximum staleness of data that could be returned when the table (or stale MV) is queried. Staleness encoded as a string encoding of sql IntervalValue type.
+			"max_staleness": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The maximum staleness of data that could be returned when the table (or stale MV) is queried. Staleness encoded as a string encoding of sql IntervalValue type.`,
+			},
+
 			// Labels: [Experimental] The labels associated with this table. You can
 			// use these to organize and group your tables. Label keys and values
 			// can be no longer than 63 characters, can only contain lowercase
@@ -755,13 +768,22 @@ func ResourceBigQueryTable() *schema.Resource {
 			// start with a letter and each label in the list must have a different
 			// key.
 			"labels": {
-				Type:        schema.TypeMap,
-				Optional:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: `A mapping of labels to assign to the resource.`,
-			},
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Description: `A mapping of labels to assign to the resource.
 
+				**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
+			},
+			"effective_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			// Schema: [Optional] Describes the schema of this table.
+			// Schema is mutually exclusive with View and Materialized View.
 			"schema": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -773,8 +795,10 @@ func ResourceBigQueryTable() *schema.Resource {
 				},
 				DiffSuppressFunc: bigQueryTableSchemaDiffSuppress,
 				Description:      `A JSON schema for the table.`,
+				ConflictsWith:    []string{"view", "materialized_view"},
 			},
 			// View: [Optional] If specified, configures this table as a view.
+			// View is mutually exclusive with Schema and Materialized View.
 			"view": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -801,9 +825,11 @@ func ResourceBigQueryTable() *schema.Resource {
 						},
 					},
 				},
+				ConflictsWith: []string{"schema", "materialized_view"},
 			},
 
 			// Materialized View: [Optional] If specified, configures this table as a materialized view.
+			// Materialized View is mutually exclusive with Schema and View.
 			"materialized_view": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -840,6 +866,7 @@ func ResourceBigQueryTable() *schema.Resource {
 						},
 					},
 				},
+				ConflictsWith: []string{"schema", "view"},
 			},
 
 			// TimePartitioning: [Experimental] If specified, configures time-based
@@ -1105,6 +1132,10 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 		table.FriendlyName = v.(string)
 	}
 
+	if v, ok := d.GetOk("max_staleness"); ok {
+		table.MaxStaleness = v.(string)
+	}
+
 	if v, ok := d.GetOk("encryption_configuration.0.kms_key_name"); ok {
 		table.EncryptionConfiguration = &bigquery.EncryptionConfiguration{
 			KmsKeyName: v.(string),
@@ -1171,40 +1202,15 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 
 	datasetID := d.Get("dataset_id").(string)
 
-	if table.View != nil && table.Schema != nil {
+	log.Printf("[INFO] Creating BigQuery table: %s", table.TableReference.TableId)
 
-		log.Printf("[INFO] Removing schema from table definition because big query does not support setting schema on view creation")
-		schemaBack := table.Schema
-		table.Schema = nil
-
-		log.Printf("[INFO] Creating BigQuery table: %s without schema", table.TableReference.TableId)
-
-		res, err := config.NewBigQueryClient(userAgent).Tables.Insert(project, datasetID, table).Do()
-		if err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] BigQuery table %s has been created", res.Id)
-		d.SetId(fmt.Sprintf("projects/%s/datasets/%s/tables/%s", res.TableReference.ProjectId, res.TableReference.DatasetId, res.TableReference.TableId))
-
-		table.Schema = schemaBack
-		log.Printf("[INFO] Updating BigQuery table: %s with schema", table.TableReference.TableId)
-		if _, err = config.NewBigQueryClient(userAgent).Tables.Update(project, datasetID, res.TableReference.TableId, table).Do(); err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] BigQuery table %s has been update with schema", res.Id)
-	} else {
-		log.Printf("[INFO] Creating BigQuery table: %s", table.TableReference.TableId)
-
-		res, err := config.NewBigQueryClient(userAgent).Tables.Insert(project, datasetID, table).Do()
-		if err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] BigQuery table %s has been created", res.Id)
-		d.SetId(fmt.Sprintf("projects/%s/datasets/%s/tables/%s", res.TableReference.ProjectId, res.TableReference.DatasetId, res.TableReference.TableId))
+	res, err := config.NewBigQueryClient(userAgent).Tables.Insert(project, datasetID, table).Do()
+	if err != nil {
+		return err
 	}
+
+	log.Printf("[INFO] BigQuery table %s has been created", res.Id)
+	d.SetId(fmt.Sprintf("projects/%s/datasets/%s/tables/%s", res.TableReference.ProjectId, res.TableReference.DatasetId, res.TableReference.TableId))
 
 	return resourceBigQueryTableRead(d, meta)
 }
@@ -1243,8 +1249,14 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("friendly_name", res.FriendlyName); err != nil {
 		return fmt.Errorf("Error setting friendly_name: %s", err)
 	}
-	if err := d.Set("labels", res.Labels); err != nil {
+	if err := d.Set("max_staleness", res.MaxStaleness); err != nil {
+		return fmt.Errorf("Error setting max_staleness: %s", err)
+	}
+	if err := d.Set("labels", tpgresource.FlattenLabels(res.Labels, d)); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	if err := d.Set("effective_labels", res.Labels); err != nil {
+		return fmt.Errorf("Error setting effective_labels: %s", err)
 	}
 	if err := d.Set("creation_time", res.CreationTime); err != nil {
 		return fmt.Errorf("Error setting creation_time: %s", err)
@@ -1433,6 +1445,10 @@ func expandExternalDataConfiguration(cfg interface{}) (*bigquery.ExternalDataCon
 		edc.SourceUris = sourceUris
 	}
 
+	if v, ok := raw["file_set_spec_type"]; ok {
+		edc.FileSetSpecType = v.(string)
+	}
+
 	if v, ok := raw["compression"]; ok {
 		edc.Compression = v.(string)
 	}
@@ -1494,6 +1510,10 @@ func flattenExternalDataConfiguration(edc *bigquery.ExternalDataConfiguration) (
 
 	result["autodetect"] = edc.Autodetect
 	result["source_uris"] = edc.SourceUris
+
+	if edc.FileSetSpecType != "" {
+		result["file_set_spec_type"] = edc.FileSetSpecType
+	}
 
 	if edc.Compression != "" {
 		result["compression"] = edc.Compression

@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/golang/glog"
@@ -9,7 +10,7 @@ import (
 )
 
 func TestLabels(t *testing.T) {
-	file, err := os.ReadFile("enrolled_teams.yaml")
+	file, err := os.ReadFile("enrolled_teams.yml")
 	if err != nil {
 		glog.Exitf("Error reading enrolled teams yaml: %v", err)
 	}
@@ -20,23 +21,22 @@ func TestLabels(t *testing.T) {
 	}
 	for _, tc := range []struct {
 		issueBody      string
-		expectedLabels string
+		expectedLabels []string
 	}{
 		{
 			issueBody: `### New or Affected Resource(s):
 			google_gke_hub_feature
 			google_storage_hmac_key
 			#`,
-			expectedLabels: `["forward/review", "service/gkehub", "service/storage"]`,
+			expectedLabels: []string{"service/gkehub", "service/storage"},
 		},
 		{
 			issueBody: `### New or Affected Resource(s):
 			#`,
-			expectedLabels: "",
 		},
 	} {
-		if actualLabels := labels(tc.issueBody, enrolledTeams); actualLabels != tc.expectedLabels {
-			t.Errorf("unexpected labels for issue body %s: %s, expected %s", tc.issueBody, actualLabels, tc.expectedLabels)
+		if actualLabels := serviceLabels(tc.issueBody, enrolledTeams); !reflect.DeepEqual(actualLabels, tc.expectedLabels) {
+			t.Errorf("unexpected labels for issue body %s: %v, expected %v", tc.issueBody, actualLabels, tc.expectedLabels)
 		}
 	}
 }
