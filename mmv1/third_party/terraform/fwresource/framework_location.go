@@ -80,9 +80,8 @@ func (ld *LocationDescription) GetRegion() (types.String, error) {
 	}
 	// Region from zone in resource config
 	if !ld.ResourceZone.IsNull() && !ld.ResourceZone.IsUnknown() && !ld.ResourceZone.Equal(types.StringValue("")) {
-		regionSelfLink := tpgresource.GetRegionFromZone(ld.ResourceZone.ValueString())
-		region := tpgresource.GetResourceNameFromSelfLink(regionSelfLink) // Region could be a self link
-		return types.StringValue(region), nil
+		region := tpgresource.GetResourceNameFromSelfLink(ld.ResourceZone.ValueString()) // Region could be a self link
+		return tpgresource.GetRegionFromZone(region), nil
 	}
 	// Region from provider config
 	if !ld.ProviderRegion.IsNull() && !ld.ProviderRegion.IsUnknown() && !ld.ProviderRegion.Equal(types.StringValue("")) {
@@ -91,9 +90,8 @@ func (ld *LocationDescription) GetRegion() (types.String, error) {
 	}
 	// Region from zone in provider config
 	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() && !ld.ProviderZone.Equal(types.StringValue("")) {
-		regionSelfLink := tpgresource.GetRegionFromZone(ld.ProviderZone.ValueString())
-		region := tpgresource.GetResourceNameFromSelfLink(regionSelfLink) // Region could be a self link
-		return types.StringValue(region), nil
+		region := tpgresource.GetResourceNameFromSelfLink(ld.ProviderZone.ValueString()) // Region could be a self link
+		return tpgresource.GetRegionFromZone(region), nil
 	}
 
 	var err error
