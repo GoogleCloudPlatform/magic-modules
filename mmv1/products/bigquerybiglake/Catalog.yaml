@@ -21,9 +21,9 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     "Manage open source metadata with BigLake Metastore": "https://cloud.google.com/bigquery/docs/manage-open-source-metadata#create_catalogs"
   api: "https://cloud.google.com/bigquery/docs/reference/biglake/rest/v1/projects.locations.catalogs"
 base_url: "projects/{{project}}/locations/{{location}}/catalogs"
-self_link: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}"
+self_link: "projects/{{project}}/locations/{{location}}/catalogs/{{name}}"
 immutable: true
-create_url: "projects/{{project}}/locations/{{location}}/catalogs?catalogId={{catalog_id}}"
+create_url: "projects/{{project}}/locations/{{location}}/catalogs?catalogId={{name}}"
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "bigquery_biglake_catalog"
@@ -31,24 +31,24 @@ examples:
     vars:
       catalog_id: "my_catalog"
       location: "US"
-properties:
-  - !ruby/object:Api::Type::String
-    name: "catalog_id"
-    url_param_only: true
-    description: |
-      The name of the catalog.
+parameters:
   - !ruby/object:Api::Type::String
     name: "location"
+    required: true
+    immutable: true
     url_param_only: true
     description: |
       The geographic location where the Catalog should reside.
-
   - !ruby/object:Api::Type::String
     name: "name"
-    output: true
+    required: true
+    immutable: true
+    url_param_only: true
     description: |
-      Output only. The resource name. Format: 
+      The name of the Catalog. Format: 
       projects/{project_id_or_number}/locations/{locationId}/catalogs/{catalogId}
+
+properties:
   - !ruby/object:Api::Type::String
     name: "createTime"
     output: true
