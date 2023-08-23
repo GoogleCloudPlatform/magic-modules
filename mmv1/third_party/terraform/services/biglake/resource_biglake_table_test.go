@@ -45,7 +45,7 @@ func TestAccBiglakeTable_bigqueryBiglakeTable_update(t *testing.T) {
 func testAccBiglakeTable_bigqueryBiglakeTable_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_biglake_table" "table" {
-    table_id = "tf_test_my_table%{random_suffix}"
+    name = "tf_test_my_table%{random_suffix}"
     catalog_id = google_biglake_catalog.catalog.catalog_id
     database_id = google_biglake_database.database.database_id
     location = google_biglake_catalog.catalog.location
