@@ -40,6 +40,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_build'
     primary_resource_id: 'build-trigger'
+    vars:
+      cloudbuild_trigger_name: 'my-trigger'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_service_account'
     primary_resource_id: 'service-account-trigger'
@@ -52,16 +54,27 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_pubsub_config'
     primary_resource_id: 'pubsub-config-trigger'
+    vars:
+      pubsub_topic_name: 'my-topic'
+      cloudbuild_trigger_name: 'pubsub-trigger'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_webhook_config'
     primary_resource_id: 'webhook-config-trigger'
+    vars:
+      cloudbuild_trigger_name: 'webhook-trigger'
+      secret_id: "webhook-trigger-secret-key"
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_manual'
     primary_resource_id: 'manual-trigger'
+    vars:
+      cloudbuild_trigger_name: 'manual-trigger'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_manual_github_enterprise'
     primary_resource_id: 'manual-ghe-trigger'
     skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuild_trigger_manual_bitbucket_server'
+    primary_resource_id: 'manual-bitbucket-trigger'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_repo'
     primary_resource_id: 'repo-trigger'
@@ -69,6 +82,8 @@ examples:
       installation_id: '123123'
       pat_secret: 'projects/my-project/secrets/github-pat-secret/versions/latest'
       repo_uri: 'https://github.com/myuser/my-repo.git'
+      cloudbuildv2_connection_name: "my-connection"
+      cloudbuildv2_repo_name: "my-repo"
     test_vars_overrides:
       installation_id: 31300675
       pat_secret: '"projects/gcb-terraform-creds/secrets/github-pat/versions/latest"'
@@ -76,19 +91,29 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_bitbucket_server_push'
     primary_resource_id: 'bbs-push-trigger'
+    vars:
+      cloudbuild_trigger_name: 'bbs-push-trigger'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_bitbucket_server_pull_request'
     primary_resource_id: 'bbs-pull-request-trigger'
+    vars:
+      cloudbuild_trigger_name: 'ghe-trigger'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_github_enterprise'
     primary_resource_id: 'ghe-trigger'
+    vars:
+      cloudbuild_trigger_name: 'ghe-trigger'
     skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_allow_failure'
     primary_resource_id: 'allow-failure-trigger'
+    vars:
+      cloudbuild_trigger_name: 'my-trigger'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_allow_exit_codes'
     primary_resource_id: 'allow-exit-codes-trigger'
+    vars:
+      cloudbuild_trigger_name: 'my-trigger'
   - !ruby/object:Provider::Terraform::Examples
     name: "cloudbuild_trigger_pubsub_with_repo"
     primary_resource_id: "pubsub-with-repo-trigger"
@@ -96,6 +121,10 @@ examples:
       installation_id: "123123"
       pat_secret: "projects/my-project/secrets/github-pat-secret/versions/latest"
       repo_uri: "https://github.com/myuser/my-repo.git"
+      cloudbuildv2_connection_name: "my-connection"
+      cloudbuildv2_repo_name: "my-repo"
+      pubsub_topic_name: "my-topic"
+      cloudbuild_trigger_name: "pubsub-with-repo-trigger"
     test_vars_overrides:
       installation_id: 31300675
       pat_secret: '"projects/gcb-terraform-creds/secrets/github-pat/versions/latest"'
@@ -232,6 +261,11 @@ properties:
         description: |
           The full resource name of the github enterprise config.
           Format: projects/{project}/locations/{location}/githubEnterpriseConfigs/{id}. projects/{project}/githubEnterpriseConfigs/{id}.
+      - !ruby/object:Api::Type::String
+        name: 'bitbucketServerConfig'
+        description: |
+          The full resource name of the bitbucket server config.
+          Format: projects/{project}/locations/{location}/bitbucketServerConfigs/{id}.
   - !ruby/object:Api::Type::NestedObject
     name: 'repositoryEventConfig'
     description: |
@@ -358,6 +392,11 @@ properties:
         description: |
           The full resource name of the github enterprise config.
           Format: projects/{project}/locations/{location}/githubEnterpriseConfigs/{id}. projects/{project}/githubEnterpriseConfigs/{id}.
+      - !ruby/object:Api::Type::String
+        name: 'bitbucketServerConfig'
+        description: |
+          The full resource name of the bitbucket server config.
+          Format: projects/{project}/locations/{location}/bitbucketServerConfigs/{id}.
   - !ruby/object:Api::Type::Array
     name: 'ignoredFiles'
     item_type: Api::Type::String
@@ -1108,16 +1147,10 @@ properties:
             values:
               - :NOT_VERIFIED
               - :VERIFIED
-          - !ruby/object:Api::Type::Enum
+          - !ruby/object:Api::Type::String
             name: 'machineType'
             description: |
               Compute Engine machine type on which to run the build.
-            values:
-              - :UNSPECIFIED
-              - :N1_HIGHCPU_8
-              - :N1_HIGHCPU_32
-              - :E2_HIGHCPU_8
-              - :E2_HIGHCPU_32
           - !ruby/object:Api::Type::Integer
             name: 'diskSizeGb'
             description: |

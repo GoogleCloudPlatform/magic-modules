@@ -22,6 +22,12 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
   data_profile_spec {
     sampling_percent = 80
     row_filter = "word_count > 10"
+    include_fields {
+      field_names = ["word_count"]
+    }
+    exclude_fields {
+      field_names = ["property_type"]
+    }
   }
 
   project = "<%= ctx[:test_env_vars]['project_name'] %>"

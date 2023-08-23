@@ -161,6 +161,36 @@ properties:
       All system annotations in v1 now have a corresponding field in v2 Service.
 
       This field follows Kubernetes annotations' namespacing, limits, and rules.
+  - !ruby/object:Api::Type::Time
+    name: 'createTime'
+    output: true
+    description: |-
+      The creation time.
+  - !ruby/object:Api::Type::Time
+    name: 'updateTime'
+    output: true
+    description: |-
+      The last-modified time.
+  - !ruby/object:Api::Type::Time
+    name: 'deleteTime'
+    output: true
+    description: |-
+      The deletion time.
+  - !ruby/object:Api::Type::Time
+    name: 'expireTime'
+    output: true
+    description: |-
+      For a deleted resource, the time after which it will be permamently deleted.
+  - !ruby/object:Api::Type::String
+    name: 'creator'
+    output: true
+    description: |-
+      Email address of the authenticated creator.
+  - !ruby/object:Api::Type::String
+    name: 'lastModifier'
+    output: true
+    description: |-
+      Email address of the last authenticated modifier.
   - !ruby/object:Api::Type::String
     name: 'client'
     description: |
@@ -207,6 +237,13 @@ properties:
         name: 'useDefault'
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
+  - !ruby/object:Api::Type::Array
+    name: 'custom_audiences'
+    min_version: beta
+    description: |
+      One or more custom audiences that you want this service to support. Specify each custom audience as the full URL in a string. The custom audiences are encoded in the token and used to authenticate requests.
+      For more information, see https://cloud.google.com/run/docs/configuring/custom-audiences.
+    item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: 'template'
     required: true
@@ -463,10 +500,8 @@ properties:
                   name: 'tcpSocket'
                   description: |-
                     TCPSocket specifies an action involving a TCP port. This field is not supported in liveness probe currently.
-                  deprecation_message:
-                    Cloud Run does not support tcp socket in liveness probe and
-                    `liveness_probe.tcp_socket` field will be removed in a
-                    future major release.
+                  deprecation_message: >-
+                    `tcp_socket` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.
                   send_empty_value: true
                   allow_empty_object: true
                   properties:

@@ -53,16 +53,14 @@ type ProviderModel struct {
 	CloudResourceManagerCustomEndpoint types.String `tfsdk:"cloud_resource_manager_custom_endpoint"`
 	EventarcCustomEndpoint             types.String `tfsdk:"eventarc_custom_endpoint"`
 	FirebaserulesCustomEndpoint        types.String `tfsdk:"firebaserules_custom_endpoint"`
-	NetworkConnectivityCustomEndpoint  types.String `tfsdk:"network_connectivity_custom_endpoint"`
 <% if version == "ga" -%>
 	OrgPolicyCustomEndpoint            types.String `tfsdk:"org_policy_custom_endpoint"`
 <% end -%>
 	RecaptchaEnterpriseCustomEndpoint  types.String `tfsdk:"recaptcha_enterprise_custom_endpoint"`
-<% unless version == "ga" -%>
+
 	GkehubFeatureCustomEndpoint        types.String `tfsdk:"gkehub_feature_custom_endpoint"`
-<% end -%>
+
 <% if version == "private" -%>
-	VmwareCustomEndpoint                  types.String `tfsdk:"vmware_custom_endpoint"`
 	// artifact from a private internal fork- this one can be removed when the
 	// internal definition is removed.
 	RunCustomEndpoint                  types.String `tfsdk:"run_custom_endpoint"`

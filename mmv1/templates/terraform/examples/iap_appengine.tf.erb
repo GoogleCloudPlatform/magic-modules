@@ -2,6 +2,7 @@ resource "google_project" "project" {
   name       = "%{project_id}"
   project_id = "%{project_id}"
   org_id     = "%{org_id}"
+  billing_account = "%{billing_account}"
 }
 
 resource "time_sleep" "wait_60_seconds" {

@@ -17,12 +17,13 @@ This page provides guidelines for reviewing Magic Modules pull requests
    1. the features are added in the correct version
       * features only available in beta are not included in the GA google provider.
       * features added to the GA provider are also included in the beta provider -- beta should be a strict superset of GA.
-   1. no [breaking changes]({{< ref "/develop/make-a-breaking-change" >}}) are introduced without a valid justification.
+   1. no [breaking changes]({{< ref "/develop/make-a-breaking-change" >}}) are introduced without a valid justification. Add the `override-breaking-change` label if there is a valid justification.
    1. verify the change actually resolves the linked issues, if any.
 1. Check the tests added/modified to ensure that:
    1. all fields added/updated in the PR appear in at least one test.
       * It is advisable to test updating from a non-zero value to a zero value if feasible.
    1. all mutable fields are tested in at least one update test.
+   1. all resources in the acceptance tests have a `tf-test` or `tf_test` prefix in their primary id field.
    1. all related tests pass in GA for features promoted from beta to GA.
       {{< hint info >}}Note:
       Presubmit VCR tests do not run in GA. Manual testing is required for promoted GA features.
