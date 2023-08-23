@@ -68,7 +68,8 @@ resource "google_biglake_database" "database" {
 	hive_options {
         location_uri = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.metadata_folder.name}/metadata/metadata"
 		parameters = {
-			"tool" = "screwdriver"
+          "owner": "Jane Doe"
+		  "tool" = "screwdriver"
 		}
     }
 }
