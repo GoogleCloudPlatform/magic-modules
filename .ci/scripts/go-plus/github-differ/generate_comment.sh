@@ -63,10 +63,10 @@ pushd $MM_LOCAL_PATH/tools/breaking-change-detector
 cp -r $TPG_LOCAL_PATH old/
 cp -r $TPG_LOCAL_PATH new/
 make build OLD_REF=$OLD_BRANCH NEW_REF=$NEW_BRANCH
-export TPG_BREAKING="$(bin/breaking-change-detector)"
+TPG_BREAKING="$(bin/breaking-change-detector)"
 retVal=$?
 if [ $retVal -ne 0 ]; then
-    export TPG_BREAKING=""
+    TPG_BREAKING=""
     BREAKING_CHANGE_BUILD_FAILURE=$?
 fi
 
@@ -74,10 +74,10 @@ rm -rf ./old/ ./new/
 cp -r $TPGB_LOCAL_PATH old/
 cp -r $TPGB_LOCAL_PATH new/
 make build OLD_REF=$OLD_BRANCH NEW_REF=$NEW_BRANCH
-export TPGB_BREAKING="$(bin/breaking-change-detector)"
+TPGB_BREAKING="$(bin/breaking-change-detector)"
 retVal=$?
 if [ $retVal -ne 0 ]; then
-    export TPGB_BREAKING=""
+    TPGB_BREAKING=""
     BREAKING_CHANGE_BUILD_FAILURE=$?
 fi
 if [ $BREAKING_CHANGE_BUILD_FAILURE -eq 0 ]; then
@@ -110,10 +110,10 @@ pushd $MM_LOCAL_PATH/tools/missing-test-detector
 go mod edit -replace google/provider/new=$(realpath $TPGB_LOCAL_PATH)
 go mod edit -replace google/provider/old=$(realpath $TPGB_LOCAL_PATH_OLD)
 go mod tidy
-export MISSINGTESTS="$(go run . -services-dir=$TPGB_LOCAL_PATH/google-beta/services)"
+MISSINGTESTS="$(go run . -services-dir=$TPGB_LOCAL_PATH/google-beta/services)"
 retVal=$?
 if [ $retVal -ne 0 ]; then
-    export MISSINGTESTS=""
+    MISSINGTESTS=""
 fi
 set -e
 popd
