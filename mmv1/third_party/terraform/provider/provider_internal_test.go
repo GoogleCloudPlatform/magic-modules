@@ -889,6 +889,7 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 		},
 		"if batch is configured with both enable_batching and send_after": {
 			ConfigValues: map[string]interface{}{
+				"credentials": transport_tpg.TestFakeCredentialsPath,
 				"batching": []interface{}{
 					map[string]interface{}{
 						"enable_batching": true,
@@ -913,6 +914,7 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 		},
 		"if batch is configured with only send_after": {
 			ConfigValues: map[string]interface{}{
+				"credentials": transport_tpg.TestFakeCredentialsPath,
 				"batching": []interface{}{
 					map[string]interface{}{
 						"send_after": "10s",
@@ -924,6 +926,7 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 		},
 		"if batch is configured with invalid value for send_after": {
 			ConfigValues: map[string]interface{}{
+				"credentials": transport_tpg.TestFakeCredentialsPath,
 				"batching": []interface{}{
 					map[string]interface{}{
 						"send_after": "invalid value",
@@ -935,6 +938,7 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 		},
 		"if batch is configured with value without seconds (s) for send_after": {
 			ConfigValues: map[string]interface{}{
+				"credentials": transport_tpg.TestFakeCredentialsPath,
 				"batching": []interface{}{
 					map[string]interface{}{
 						"send_after": "10",
