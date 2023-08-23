@@ -13,6 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'NetworkAttachment'
+min_version: beta
 kind: 'compute#networkAttachment'
 description: |
   A network attachment is a resource that lets a producer Virtual Private Cloud (VPC) network initiate connections to a consumer VPC network through a Private Service Connect interface.
@@ -41,7 +42,6 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'network_attachment_basic'
@@ -50,6 +50,9 @@ examples:
       resource_name: 'basic-network-attachment'
       network_name: 'basic-network'
       subnetwork_name: 'basic-subnetwork'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
 # TODO uncomment once this resource is available at google_compute_instance resource
 #   - !ruby/object:Provider::Terraform::Examples
 #     name: 'network_attachment_instance_usage'
@@ -59,35 +62,39 @@ examples:
 #       network_name: 'basic-network'
 #       subnetwork_name: 'basic-subnetwork'
 #       instance_name: 'basic-instance'
-
-min_version: beta
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
       Name of the resource. Provided by the client when the resource is created. The name must be 1-63 characters long, and comply with RFC1035. Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])? which means the first character must be a lowercase letter, and all following characters must be a dash, lowercase letter, or digit, except the last character, which cannot be a dash.
     required: true
-  - !ruby/object:Api::Type::String
+  - !ruby/object:Api::Type::ResourceRef
     name: 'region'
+    resource: 'Region'
+    imports: 'name'
+    required: true
+    immutable: true
     description: |
       URL of the region where the network attachment resides. This field applies only to the region resource. You must specify this field as part of the HTTP request URL. It is not settable as a field in the request body.
-    required: true
-
+    default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'kind'
     description: 'Type of the resource.'
     output: true
-    ignore_read: true
   - !ruby/object:Api::Type::String
     name: 'id'
     description: 'The unique identifier for the resource type. The server generates this identifier.'
     output: true
-    ignore_read: true
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      An optional description of this resource. Provide this property when you create the resource.
   - !ruby/object:Api::Type::String
     name: 'selfLink'
     description: 'Server-defined URL for the resource.'
@@ -114,15 +121,15 @@ properties:
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
-          name: 'projectIdOrNum'
-          output: true
-          description: |
-            The project id or number of the interface to which the IP was assigned.
-        - !ruby/object:Api::Type::String
           name: 'status'
           output: true
           description: |
             The status of a connected endpoint to this network attachment.
+        - !ruby/object:Api::Type::String
+          name: 'projectIdOrNum'
+          output: true
+          description: |
+            The project id or number of the interface to which the IP was assigned.
         - !ruby/object:Api::Type::String
           name: 'subnetwork'
           output: true
@@ -138,17 +145,18 @@ properties:
           output: true
           description: |
             Alias IP ranges from the same subnetwork.
-  - !ruby/object:Api::Type::String
-    name: 'description'
-    description: |
-      An optional description of this resource. Provide this property when you create the resource.
   - !ruby/object:Api::Type::Array
     name: 'subnetworks'
-    ignore_read: true
     required: true
     description: |
       An array of URLs where each entry is the URL of a subnet provided by the service consumer to use for endpoints in the producers that connect to this network attachment.
-    item_type: Api::Type::String
+    item_type: !ruby/object:Api::Type::ResourceRef
+      name: 'subnet'
+      resource: 'Subnetwork'
+      imports: 'selfLink'
+      description: |
+        A subnet that is provided to set this network attachment.
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Array
     name: 'producerRejectLists'
     description: |
@@ -163,7 +171,7 @@ properties:
     name: 'fingerprint'
     description: |
       Fingerprint of this resource. A hash of the contents stored in this object. This
-      field is used in optimistic locking.
+      field is used in optimistic locking. An up-to-date fingerprint must be provided in order to patch.
   - !ruby/object:Api::Type::String
     name: 'network'
     output: true
