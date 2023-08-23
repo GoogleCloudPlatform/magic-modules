@@ -37,7 +37,7 @@ func TestAccIdentityPlatformConfig_update(t *testing.T) {
 				Config: testAccIdentityPlatformConfig_update(context),
 			},
 			{
-				ResourceName:      "google_identity_platform_config.update",
+				ResourceName:      "google_identity_platform_config.basic",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
