@@ -17,7 +17,7 @@ resource "google_storage_bucket_object" "metadata_folder" {
   bucket  = google_storage_bucket.bucket.name
 }
 
-resource "google_biglake_database" "database" {
+resource "google_biglake_database" "<%= ctx[:primary_resource_id] %>"  {
     name = "<%= ctx[:vars]['name'] %>"
     catalog_id = google_biglake_catalog.catalog.catalog_id
     location = google_biglake_catalog.catalog.location
