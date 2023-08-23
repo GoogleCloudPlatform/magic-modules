@@ -30,8 +30,8 @@ examples:
     name: "bigquery_biglake_database"
     primary_resource_id: "my-db"
     vars:
+      name: "my_database"
       catalog_id: "my_catalog"
-      database_id: "my_database"
       bucket_id: "my_bucket"
 parameters:
   - !ruby/object:Api::Type::String
@@ -40,14 +40,14 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      The name of the database.
+      The geographic location where the Database should reside.
   - !ruby/object:Api::Type::String
     name: "name"
     required: true
     immutable: true
     url_param_only: true
     description: |
-      The geographic location where the Database should reside.
+      The name of the database.
   - !ruby/object:Api::Type::String
     name: "catalog_id"
     url_param_only: true
