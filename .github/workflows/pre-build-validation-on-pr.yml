@@ -24,7 +24,7 @@ jobs:
           git merge --no-ff origin/${{ github.base_ref }} # Merge with the base branch
           yamlfiles=$(git diff --name-only origin/${{ github.base_ref }} -- mmv1/products) # Compare with the base branch
           if [ ! -z "$yamlfiles" ]; then
-            echo "yamlfiles=repo/${yamlfiles//$'\n'/ repo/}" >> $GITHUB_ENV
+            echo "yamlfiles=repo/${yamlfiles//$'\n'/ repo/}" >> $GITHUB_OUTPUT
           fi
       - name: Install yamllint
         if: ${{ !failure() && steps.pull_request.outputs.yamlfiles != '' }}
