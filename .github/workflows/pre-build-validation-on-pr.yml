@@ -20,8 +20,9 @@ jobs:
           cd repo
           git config user.name "modular-magician"
           git config user.email "magic-modules@google.com"
-          git merge --no-ff origin/main
-          yamlfiles=$(git diff --name-only origin/main -- mmv1/products)
+          git fetch origin ${{ github.base_ref }} # Fetch the base branch
+          git merge --no-ff origin/${{ github.base_ref }} # Merge with the base branch
+          yamlfiles=$(git diff --name-only origin/${{ github.base_ref }} -- mmv1/products) # Compare with the base branch
           if [ ! -z "$yamlfiles" ]; then
             echo "yamlfiles=repo/${yamlfiles//$'\n'/ repo/}" >> $GITHUB_OUTPUT
           fi
