@@ -27,7 +27,7 @@ func TestAccBiglakeTable_bigqueryBiglakeTable_update(t *testing.T) {
 				ResourceName:            "google_biglake_table.table",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"table_id", "database_id", "catalog_id", "location"},
+				ImportStateVerifyIgnore: []string{"location", "name", "database_id", "catalog_id"},
 			},
 			{
 				Config: testAccBiglakeTable_bigqueryBiglakeTable_update(context),
@@ -36,7 +36,7 @@ func TestAccBiglakeTable_bigqueryBiglakeTable_update(t *testing.T) {
 				ResourceName:            "google_biglake_table.table",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"table_id", "database_id", "catalog_id", "location"},
+				ImportStateVerifyIgnore: []string{"location", "name", "database_id", "catalog_id"},
 			},
 		},
 	})
