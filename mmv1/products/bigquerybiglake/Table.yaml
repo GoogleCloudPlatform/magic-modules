@@ -21,8 +21,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     "Manage open source metadata with BigLake Metastore": "https://cloud.google.com/bigquery/docs/manage-open-source-metadata#create_catalogs"
   api: "https://cloud.google.com/bigquery/docs/reference/biglake/rest/v1/projects.locations.catalogs.databases.tables"
 base_url: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases/{{database_id}}/tables"
-self_link: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases/{{database_id}}/tables/{{table_id}}"
-create_url: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases/{{database_id}}/tables?tableId={{table_id}}"
+self_link: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases/{{database_id}}/tables/{{name}}"
+create_url: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases/{{database_id}}/tables?tableId={{name}}"
 update_verb: :PATCH
 update_mask: true
 examples:
@@ -30,9 +30,9 @@ examples:
     name: "bigquery_biglake_table"
     primary_resource_id: "table"
     vars:
+      name: "my_table"
       catalog_id: "my_catalog"
       database_id: "my_database"
-      table_id: "my_table"
       bucket_id: "my_bucket"
 
 parameters:
