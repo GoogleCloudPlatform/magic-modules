@@ -3280,6 +3280,103 @@ resource "google_container_node_pool" "with_sole_tenant_config" {
 `, cluster, np)
 }
 
+func TestAccContainerNodePool_withConfidentialNodes(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withConfidentialNodes(clusterName, npName),
+			},
+			{
+				ResourceName:            "google_container_node_pool.confidential_nodes",
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
+			{
+				Config: testAccContainerNodePool_disableConfidentialNodes(clusterName, npName),
+			},
+			{
+				ResourceName:            "google_container_node_pool.confidential_nodes",
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
+			{
+				Config: testAccContainerNodePool_withConfidentialNodes(clusterName, npName),
+			},
+			{
+				ResourceName:            "google_container_node_pool.confidential_nodes",
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
+		},
+	})
+}
+
+func testAccContainerNodePool_withConfidentialNodes(clusterName string, npName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "asia-east1-c"
+  initial_node_count = 1
+  node_config {
+    host_maintenance_policy {
+		maintenance_interval = "PERIODIC"
+	}
+    machine_type = "n2-standard-2"
+  }
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "asia-east1-c"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    machine_type = "n2d-standard-2" // can't be e2 because Confidential Nodes require AMD CPUs
+    confidential_nodes {
+      enabled = true
+    }
+  }
+}
+`, clusterName, npName)
+}
+
+func testAccContainerNodePool_disableConfidentialNodes(clusterName string, npName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "asia-east1-c"
+  initial_node_count = 1
+  node_config {
+    host_maintenance_policy {
+		maintenance_interval = "PERIODIC"
+	}
+    machine_type = "n2-standard-2"
+  }
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "asia-east1-c"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    machine_type = "n2d-standard-2" // can't be e2 because Confidential Nodes require AMD CPUs
+    confidential_nodes {
+      enabled = false
+    }
+  }
+}
+`, clusterName, npName)
+}
+
 <% unless version == 'ga' -%>
 func TestAccContainerNodePool_tpuTopology(t *testing.T) {
 	t.Parallel()
@@ -3401,4 +3498,5 @@ resource "google_container_node_pool" "np" {
 }
 `, cluster, np)
 }
+
 <% end -%>
