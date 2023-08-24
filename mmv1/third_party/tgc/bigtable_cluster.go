@@ -3,36 +3,37 @@ package google
 import (
 	"reflect"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/cai"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
-func resourceConverterBigtableCluster() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func resourceConverterBigtableCluster() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType: "bigtableadmin.googleapis.com/Cluster",
 		Convert:   GetBigtableClusterCaiObject,
 	}
 }
 
-func GetBigtableClusterCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
+func GetBigtableClusterCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
 
 	objs, err := GetBigtableClusterApiObjects(d, config)
 
 	if err != nil {
-		return []tpgresource.Asset{}, err
+		return []cai.Asset{}, err
 	}
 
-	assets := []tpgresource.Asset{}
+	assets := []cai.Asset{}
 	for _, obj := range objs {
-		name, err := tpgresource.AssetName(d, config, "//bigtable.googleapis.com/projects/{{project}}/instances/{{name}}/clusters/{{cluster_id}}")
+		name, err := cai.AssetName(d, config, "//bigtable.googleapis.com/projects/{{project}}/instances/{{name}}/clusters/{{cluster_id}}")
 		if err != nil {
-			return []tpgresource.Asset{}, err
+			return []cai.Asset{}, err
 		}
 
-		asset := tpgresource.Asset{
+		asset := cai.Asset{
 			Name: name,
 			Type: "bigtableadmin.googleapis.com/Cluster",
-			Resource: &tpgresource.AssetResource{
+			Resource: &cai.AssetResource{
 				Version:              "v2",
 				DiscoveryDocumentURI: "https://bigtableadmin.googleapis.com/$discovery/rest",
 				DiscoveryName:        "Cluster",

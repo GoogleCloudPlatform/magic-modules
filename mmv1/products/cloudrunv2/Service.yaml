@@ -161,6 +161,36 @@ properties:
       All system annotations in v1 now have a corresponding field in v2 Service.
 
       This field follows Kubernetes annotations' namespacing, limits, and rules.
+  - !ruby/object:Api::Type::Time
+    name: 'createTime'
+    output: true
+    description: |-
+      The creation time.
+  - !ruby/object:Api::Type::Time
+    name: 'updateTime'
+    output: true
+    description: |-
+      The last-modified time.
+  - !ruby/object:Api::Type::Time
+    name: 'deleteTime'
+    output: true
+    description: |-
+      The deletion time.
+  - !ruby/object:Api::Type::Time
+    name: 'expireTime'
+    output: true
+    description: |-
+      For a deleted resource, the time after which it will be permamently deleted.
+  - !ruby/object:Api::Type::String
+    name: 'creator'
+    output: true
+    description: |-
+      Email address of the authenticated creator.
+  - !ruby/object:Api::Type::String
+    name: 'lastModifier'
+    output: true
+    description: |-
+      Email address of the last authenticated modifier.
   - !ruby/object:Api::Type::String
     name: 'client'
     description: |

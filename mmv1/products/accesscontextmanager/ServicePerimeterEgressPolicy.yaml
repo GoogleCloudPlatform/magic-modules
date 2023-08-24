@@ -38,7 +38,7 @@ description: |
   perimeter in certain contexts (e.g. to read data from a Cloud Storage bucket
   or query against a BigQuery dataset).
 autogen_async: true
-exclude_validator: true
+exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
 skip_sweeper: true
 id_format: '{{perimeter}}'
