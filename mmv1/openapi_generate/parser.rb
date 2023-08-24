@@ -109,7 +109,8 @@ module OpenAPIGenerate
         field.instance_variable_set(:@output, obj.read_only)
       end
 
-      if obj.respond_to?(:write_only) && obj.write_only
+      puts  if name == "capacityGib"
+      if (obj.respond_to?(:write_only) && obj.write_only) || obj.instance_variable_get(:@raw_schema)["x-google-immutable"]
         field.instance_variable_set(:@immutable, obj.write_only)
       end
 
@@ -137,10 +138,12 @@ module OpenAPIGenerate
       parameters = []
       path.post.parameters.each do |param|
         parameter_object = write_object(param.name, param, param.schema.type, true)
-        # All parameters are immutable
+        # Ignore standard requestId field
+        next if param.name == "requestId"
         if parameter_object == nil
           next
         end
+        # All parameters are immutable
         parameter_object.instance_variable_set(:@immutable, true)
         parameters.push(parameter_object)
       end
