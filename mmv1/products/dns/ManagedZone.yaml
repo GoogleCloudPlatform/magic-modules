@@ -71,6 +71,7 @@ examples:
       network_2_name: 'network-2'
   - !ruby/object:Provider::Terraform::Examples
     name: 'dns_managed_zone_private_multiproject'
+    skip_docs: true
     primary_resource_id: 'private-zone'
     vars:
       zone_name: 'private-zone'
