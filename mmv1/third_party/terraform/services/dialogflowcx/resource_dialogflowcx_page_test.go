@@ -421,6 +421,8 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 					reprompt_event_handlers {
 						event = "sys.no-match-1"
 						trigger_fulfillment {
+							return_partial_responses = true
+							webhook = google_dialogflow_cx_webhook.my_webhook.id
 							messages {
 								channel = "some-channel"
 								response_type = "PARAMETER_PROMPT"
@@ -644,6 +646,14 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 	resource "google_dialogflow_cx_page" "my_page2" {
 		parent       = google_dialogflow_cx_agent.agent_page.start_flow
 		display_name = "MyPage2"
+	}
+
+	resource "google_dialogflow_cx_webhook" "my_webhook" {
+		parent       = google_dialogflow_cx_agent.agent_page.id
+		display_name = "MyWebhook"
+		generic_web_service {
+			uri = "https://example.com"
+		}
 	}
 `, context)
 }
