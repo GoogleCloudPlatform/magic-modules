@@ -3,21 +3,21 @@ package spanner
 import (
 	"fmt"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgiamresource"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/cai"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
-func ResourceConverterSpannerInstanceIamPolicy() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func ResourceConverterSpannerInstanceIamPolicy() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType:         "spanner.googleapis.com/Instance",
 		Convert:           GetSpannerInstanceIamPolicyCaiObject,
 		MergeCreateUpdate: MergeSpannerInstanceIamPolicy,
 	}
 }
 
-func ResourceConverterSpannerInstanceIamBinding() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func ResourceConverterSpannerInstanceIamBinding() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType:         "spanner.googleapis.com/Instance",
 		Convert:           GetSpannerInstanceIamBindingCaiObject,
 		FetchFullResource: FetchSpannerInstanceIamPolicy,
@@ -26,8 +26,8 @@ func ResourceConverterSpannerInstanceIamBinding() tpgresource.ResourceConverter 
 	}
 }
 
-func ResourceConverterSpannerInstanceIamMember() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func ResourceConverterSpannerInstanceIamMember() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType:         "spanner.googleapis.com/Instance",
 		Convert:           GetSpannerInstanceIamMemberCaiObject,
 		FetchFullResource: FetchSpannerInstanceIamPolicy,
@@ -36,70 +36,70 @@ func ResourceConverterSpannerInstanceIamMember() tpgresource.ResourceConverter {
 	}
 }
 
-func GetSpannerInstanceIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	return newSpannerInstanceIamAsset(d, config, tpgiamresource.ExpandIamPolicyBindings)
+func GetSpannerInstanceIamPolicyCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	return newSpannerInstanceIamAsset(d, config, cai.ExpandIamPolicyBindings)
 }
 
-func GetSpannerInstanceIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	return newSpannerInstanceIamAsset(d, config, tpgiamresource.ExpandIamRoleBindings)
+func GetSpannerInstanceIamBindingCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	return newSpannerInstanceIamAsset(d, config, cai.ExpandIamRoleBindings)
 }
 
-func GetSpannerInstanceIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	return newSpannerInstanceIamAsset(d, config, tpgiamresource.ExpandIamMemberBindings)
+func GetSpannerInstanceIamMemberCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	return newSpannerInstanceIamAsset(d, config, cai.ExpandIamMemberBindings)
 }
 
-func MergeSpannerInstanceIamPolicy(existing, incoming tpgresource.Asset) tpgresource.Asset {
+func MergeSpannerInstanceIamPolicy(existing, incoming cai.Asset) cai.Asset {
 	existing.IAMPolicy = incoming.IAMPolicy
 	return existing
 }
 
-func MergeSpannerInstanceIamBinding(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeIamAssets(existing, incoming, tpgiamresource.MergeAuthoritativeBindings)
+func MergeSpannerInstanceIamBinding(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeIamAssets(existing, incoming, cai.MergeAuthoritativeBindings)
 }
 
-func MergeSpannerInstanceIamBindingDelete(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeDeleteIamAssets(existing, incoming, tpgiamresource.MergeDeleteAuthoritativeBindings)
+func MergeSpannerInstanceIamBindingDelete(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeDeleteIamAssets(existing, incoming, cai.MergeDeleteAuthoritativeBindings)
 }
 
-func MergeSpannerInstanceIamMember(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeIamAssets(existing, incoming, tpgiamresource.MergeAdditiveBindings)
+func MergeSpannerInstanceIamMember(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeIamAssets(existing, incoming, cai.MergeAdditiveBindings)
 }
 
-func MergeSpannerInstanceIamMemberDelete(existing, incoming tpgresource.Asset) tpgresource.Asset {
-	return tpgiamresource.MergeDeleteIamAssets(existing, incoming, tpgiamresource.MergeDeleteAdditiveBindings)
+func MergeSpannerInstanceIamMemberDelete(existing, incoming cai.Asset) cai.Asset {
+	return cai.MergeDeleteIamAssets(existing, incoming, cai.MergeDeleteAdditiveBindings)
 }
 
 func newSpannerInstanceIamAsset(
 	d tpgresource.TerraformResourceData,
 	config *transport_tpg.Config,
-	expandBindings func(d tpgresource.TerraformResourceData) ([]tpgresource.IAMBinding, error),
-) ([]tpgresource.Asset, error) {
+	expandBindings func(d tpgresource.TerraformResourceData) ([]cai.IAMBinding, error),
+) ([]cai.Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
-		return []tpgresource.Asset{}, fmt.Errorf("expanding bindings: %v", err)
+		return []cai.Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
-	name, err := tpgresource.AssetName(d, config, "//spanner.googleapis.com/projects/{{project}}/instances/{{instance}}")
+	name, err := cai.AssetName(d, config, "//spanner.googleapis.com/projects/{{project}}/instances/{{instance}}")
 	if err != nil {
-		return []tpgresource.Asset{}, err
+		return []cai.Asset{}, err
 	}
 
-	return []tpgresource.Asset{{
+	return []cai.Asset{{
 		Name: name,
 		Type: "spanner.googleapis.com/Instance",
-		IAMPolicy: &tpgresource.IAMPolicy{
+		IAMPolicy: &cai.IAMPolicy{
 			Bindings: bindings,
 		},
 	}}, nil
 }
 
-func FetchSpannerInstanceIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgresource.Asset, error) {
+func FetchSpannerInstanceIamPolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (cai.Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("instance"); !ok {
-		return tpgresource.Asset{}, tpgresource.ErrEmptyIdentityField
+		return cai.Asset{}, cai.ErrEmptyIdentityField
 	}
 
-	return tpgiamresource.FetchIamPolicy(
+	return cai.FetchIamPolicy(
 		NewSpannerInstanceIamUpdater,
 		d,
 		config,

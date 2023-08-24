@@ -17,9 +17,10 @@ import (
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
   "google.golang.org/api/bigtableadmin/v2"
 
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
-  transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/verify"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/cai"
+  "github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+  transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+  "github.com/hashicorp/terraform-provider-google-beta/google-beta/verify"
 )
 
 <%
@@ -42,23 +43,23 @@ import (
 const <%= resource_name -%>AssetType string = "<%= product_backend_name.downcase -%>.googleapis.com/<%= object.name -%>"
 
 
-func ResourceConverter<%= resource_name -%>() tpgresource.ResourceConverter {
-    return tpgresource.ResourceConverter{
+func ResourceConverter<%= resource_name -%>() cai.ResourceConverter {
+    return cai.ResourceConverter{
         AssetType: <%= resource_name -%>AssetType,
         Convert: Get<%= resource_name -%>CaiObject,
     }
 }
 
-func Get<%= resource_name -%>CaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-    name, err := tpgresource.AssetName(d, config, "<%= asset_name_template -%>")
+func Get<%= resource_name -%>CaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+    name, err := cai.AssetName(d, config, "<%= asset_name_template -%>")
     if err != nil {
-        return []tpgresource.Asset{}, err
+        return []cai.Asset{}, err
     }
     if obj, err := Get<%= resource_name -%>ApiObject(d, config); err == nil {
-        return []tpgresource.Asset{{
+        return []cai.Asset{{
             Name: name,
             Type: <%= resource_name -%>AssetType,
-            Resource: &tpgresource.AssetResource{
+            Resource: &cai.AssetResource{
                 Version: "<%= api_version -%>",
                 DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/<%= product_backend_name.downcase -%>/<%= api_version -%>/rest",
                 DiscoveryName: "<%= object.name -%>",
@@ -66,7 +67,7 @@ func Get<%= resource_name -%>CaiObject(d tpgresource.TerraformResourceData, conf
             },
         }}, nil
     } else {
-        return []tpgresource.Asset{}, err
+        return []cai.Asset{}, err
     }
 }
 

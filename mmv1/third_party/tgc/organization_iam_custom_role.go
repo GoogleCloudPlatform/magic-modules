@@ -3,31 +3,31 @@ package google
 import (
 	"reflect"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/cai"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
 const OrganizationIAMCustomRoleAssetType string = "iam.googleapis.com/Role"
 
-func resourceConverterOrganizationIAMCustomRole() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func resourceConverterOrganizationIAMCustomRole() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType: OrganizationIAMCustomRoleAssetType,
 		Convert:   GetOrganizationIAMCustomRoleCaiObject,
 	}
 }
 
-func GetOrganizationIAMCustomRoleCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	name, err := tpgresource.AssetName(d, config, "//iam.googleapis.com/organizations/{{org_id}}/roles/{{role_id}}")
+func GetOrganizationIAMCustomRoleCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	name, err := cai.AssetName(d, config, "//iam.googleapis.com/organizations/{{org_id}}/roles/{{role_id}}")
 	if err != nil {
-		return []tpgresource.Asset{}, err
+		return []cai.Asset{}, err
 	}
 	if obj, err := GetOrganizationIAMCustomRoleApiObject(d, config); err == nil {
-		return []tpgresource.Asset{{
+		return []cai.Asset{{
 			Name: name,
 			Type: OrganizationIAMCustomRoleAssetType,
-			Resource: &tpgresource.AssetResource{
+			Resource: &cai.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://iam.googleapis.com/$discovery/rest?version=v1",
 				DiscoveryName:        "Role",
@@ -35,7 +35,7 @@ func GetOrganizationIAMCustomRoleCaiObject(d tpgresource.TerraformResourceData, 
 			},
 		}}, nil
 	} else {
-		return []tpgresource.Asset{}, err
+		return []cai.Asset{}, err
 	}
 }
 

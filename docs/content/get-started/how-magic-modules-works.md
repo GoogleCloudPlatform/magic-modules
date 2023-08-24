@@ -22,7 +22,7 @@ MMv1 consists of a set of "products"; each product contains one or more "resourc
 
 Each product has a folder in [`magic-modules/mmv1/products`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/products). The name of the folder is the "product name", which usually corresponds to the API subdomain covered by the product (such as `compute.googleapis.com`). Each product folder contains a product configuration file (`product.yaml`) and one or more resource configuration files (`ResourceName.yaml`). The actual name of a `ResourceName.yaml` file usually matches the name of a GCP API resource in the product's subdomain.
 
-MMv1 resource configurations may reference handwritten code stored in [`magic-modules/mmv1/templates/terraform`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform), which will be injected into the generated resource file. Many MMv1 resources also have one or more handwritten tests, which are stored in [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests)
+MMv1 resource configurations may reference handwritten code stored in [`magic-modules/mmv1/templates/terraform`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform), which will be injected into the generated resource file. Many MMv1 resources also have one or more handwritten tests, which are stored in the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
 
 In the providers, MMv1-based resources are stored in `PROVIDER/services/PRODUCT/resource_PRODUCT_RESOURCE.go`, where `PROVIDER` is `google` or `google-beta`, `PRODUCT` is the product name, and RESOURCE is the GCP API resource's name converted to [snake case ↗](https://en.wikipedia.org/wiki/Snake_case).
 
@@ -42,8 +42,8 @@ In addition to the core implementation, handwritten resources and datasources wi
 
 - Resource & datasource implementation: In the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
 - Resource documentation: [`magic-modules/mmv1/third_party/terraform/website/docs/r`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r)
-- Datasource documentation: [`magic-modules/mmv1/third_party/terraform/webside/docs/d`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/webside/docs/d)
-- Tests: [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests)
+- Datasource documentation: [`magic-modules/mmv1/third_party/terraform/website/docs/d`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/d)
+- Tests: In the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
 - Sweepers: [`magic-modules/mmv1/third_party/terraform/utils`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/utils)
 
 In the providers, handwritten resources and datasources are stored in `PROVIDER/services/SERVICE/FILENAME.go`, where `PROVIDER` is `google` or `google-beta`, `SERVICE` is the service name, and `FILENAME` is the name of the handwritten file in magic-modules. Handwritten files do not have an `AUTO GENERATED CODE` header.

@@ -23,7 +23,7 @@ func TestUniqueRuleIdentifiers(t *testing.T) {
 
 func TestMarkdownIdentifiers(t *testing.T) {
 	// Define the Markdown file path relative to the importer
-	mdFilePath := "../../../docs/content/reference/breaking-change-detector.md"
+	mdFilePath := "../../../docs/content/develop/breaking-changes.md"
 
 	// Read the Markdown file
 	mdContent, err := ioutil.ReadFile(mdFilePath)
@@ -39,12 +39,12 @@ func TestMarkdownIdentifiers(t *testing.T) {
 
 	// Iterate over the identifiers and check if they have a corresponding <h4> tag
 	for _, identifier := range identifiers {
-		// Define the expected <h4> tag
-		expectedTag := fmt.Sprintf("<h4 id=\"%s\">", identifier)
+		// Define the expected <a> tag
+		expectedTag := fmt.Sprintf("<a name=\"%s\"></a>", identifier)
 
-		// Check if the <h4> tag exists in the Markdown string
+		// Check if the <a> tag exists in the Markdown string
 		if !strings.Contains(mdString, expectedTag) {
-			t.Errorf("Identifier %s does not have a corresponding <h4> tag", identifier)
+			t.Errorf("Identifier %s does not have a corresponding <a> tag", identifier)
 		}
 	}
 }

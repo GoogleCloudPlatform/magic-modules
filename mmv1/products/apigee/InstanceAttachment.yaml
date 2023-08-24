@@ -78,7 +78,7 @@ parameters:
     name: 'instanceId'
     description: |
       The Apigee instance associated with the Apigee environment,
-      in the format `organisations/{{org_name}}/instances/{{instance_name}}`.
+      in the format `organizations/{{org_name}}/instances/{{instance_name}}`.
     required: true
     url_param_only: true
 properties:

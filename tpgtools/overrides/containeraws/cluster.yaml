@@ -1,0 +1,8 @@
+- type: DIFF_SUPPRESS_FUNC
+  field: control_plane.root_volume.volume_type
+  details:
+    diffsuppressfunc: tpgresource.CompareCaseInsensitive
+- type: DIFF_SUPPRESS_FUNC
+  field: control_plane.main_volume.volume_type
+  details:
+    diffsuppressfunc: tpgresource.CompareCaseInsensitive
