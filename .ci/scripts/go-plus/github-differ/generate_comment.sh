@@ -82,6 +82,8 @@ if [ $retVal -ne 0 ]; then
 fi
 if [ $BREAKING_CHANGE_BUILD_FAILURE -eq 0 ]; then
     echo "Breaking changes succeeded"
+    export TPG_BREAKING=$TPG_BREAKING
+    export TPGB_BREAKING=$TPGB_BREAKING
     BREAKINGCHANGES="$($script_dir/compare_breaking_changes.sh)"
 else
     echo "Breaking changes failed"
