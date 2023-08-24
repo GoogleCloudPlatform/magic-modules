@@ -137,7 +137,7 @@ fun ParametrizedWithType.TerraformAcceptanceTestParameters(parallelism : Int, pr
     text("SWEEP_RUN", sweepRun)
 }
 
-fun ParametrizedWithType.TerraformLoggingParameters(parallelism : Int, prefix : String, timeout: String, sweeperRegions: String, sweepRun: String) {
+fun ParametrizedWithType.TerraformLoggingParameters() {
     // Set logging levels to match old projects
     text("TF_LOG", "DEBUG")
     text("TF_LOG_CORE", "WARN")
