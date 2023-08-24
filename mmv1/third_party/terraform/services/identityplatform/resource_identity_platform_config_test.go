@@ -118,7 +118,7 @@ resource "google_identity_platform_config" "basic" {
     phone_number {
         enabled = true
         test_phone_numbers = {
-            "+987654321" = "111111"
+            "+98765432100" = "111111"
         }
     }
   }
