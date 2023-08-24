@@ -13,8 +13,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
         with:
-          repository: trodge/magic-modules  # Remove these lines before merging
-          ref: go-changelog  # Remove these lines before merging
           path: repo
       - name: Check Changelog
         env:
