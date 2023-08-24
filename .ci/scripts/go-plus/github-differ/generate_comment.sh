@@ -36,7 +36,7 @@ TFC_LOCAL_PATH=$PWD/../tfc
 DIFFS=""
 NEWLINE=$'\n'
 
-# TPG difference
+# TPG/TPGB difference
 mkdir -p $TPG_LOCAL_PATH
 git clone -b $NEW_BRANCH $TPG_SCRATCH_PATH $TPG_LOCAL_PATH
 pushd $TPG_LOCAL_PATH
@@ -45,35 +45,8 @@ if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
     SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
     DIFFS="${DIFFS}${NEWLINE}Terraform GA: [Diff](https://github.com/modular-magician/terraform-provider-google/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
 fi
-TPG_LOCAL_PATH_OLD="${TPG_LOCAL_PATH}old"
-mkdir -p $TPG_LOCAL_PATH_OLD
-cp -r $TPG_LOCAL_PATH/. $TPG_LOCAL_PATH_OLD
-
-git checkout origin/$NEW_BRANCH
-update_package_name "github.com/hashicorp/terraform-provider-google" "google/provider/new"
 popd
 
-## Breaking change setup and execution
-pushd $TPG_LOCAL_PATH_OLD
-git checkout origin/$OLD_BRANCH
-update_package_name "github.com/hashicorp/terraform-provider-google" "google/provider/old"
-popd
-set +e
-pushd $MM_LOCAL_PATH/tools/breaking-change-detector
-sed -i.bak -E "s~google/provider/(.*)/([0-9A-Za-z-]*)~google/provider/\1/google~" comparison.go
-go mod edit -replace google/provider/new=$(realpath $TPG_LOCAL_PATH)
-go mod edit -replace google/provider/old=$(realpath $TPG_LOCAL_PATH_OLD)
-go mod tidy
-export TPG_BREAKING="$(go run .)"
-retVal=$?
-if [ $retVal -ne 0 ]; then
-    export TPG_BREAKING=""
-    BREAKING_CHANGE_BUILD_FAILURE=$?
-fi
-set -e
-popd
-
-# TPGB
 mkdir -p $TPGB_LOCAL_PATH
 git clone -b $NEW_BRANCH $TPGB_SCRATCH_PATH $TPGB_LOCAL_PATH
 pushd $TPGB_LOCAL_PATH
@@ -82,45 +55,69 @@ if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
     SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
     DIFFS="${DIFFS}${NEWLINE}Terraform Beta: [Diff](https://github.com/modular-magician/terraform-provider-google-beta/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
 fi
+popd
+
+## Breaking change setup and execution
+set +e
+pushd $MM_LOCAL_PATH/tools/breaking-change-detector
+cp -r $TPG_LOCAL_PATH old/
+cp -r $TPG_LOCAL_PATH new/
+make build OLD_REF=$OLD_BRANCH NEW_REF=$NEW_BRANCH
+TPG_BREAKING="$(bin/breaking-change-detector)"
+retVal=$?
+if [ $retVal -ne 0 ]; then
+    TPG_BREAKING=""
+    BREAKING_CHANGE_BUILD_FAILURE=1
+fi
+
+rm -rf ./old/ ./new/ ./bin/
+cp -r $TPGB_LOCAL_PATH old/
+cp -r $TPGB_LOCAL_PATH new/
+make build OLD_REF=$OLD_BRANCH NEW_REF=$NEW_BRANCH
+TPGB_BREAKING="$(bin/breaking-change-detector)"
+retVal=$?
+if [ $retVal -ne 0 ]; then
+    TPGB_BREAKING=""
+    BREAKING_CHANGE_BUILD_FAILURE=1
+fi
+if [ $BREAKING_CHANGE_BUILD_FAILURE -eq 0 ]; then
+    echo "Breaking changes succeeded"
+    # Export variables here so that they can be used in compare_breaking_changes
+    # exporting earlier would cause the retvals to not be calculated properly.
+    export TPG_BREAKING=$TPG_BREAKING
+    export TPGB_BREAKING=$TPGB_BREAKING
+    BREAKINGCHANGES="$($script_dir/compare_breaking_changes.sh)"
+else
+    echo "Breaking changes failed"
+    BREAKINGCHANGES="## Breaking Change Detection Failed${NEWLINE}The breaking change detector crashed during execution. This is usually due to the downstream provider(s) failing to compile. Please investigate or follow up with your reviewer."
+fi
+popd
+set -e
+
+## Missing test setup and execution
 TPGB_LOCAL_PATH_OLD="${TPGB_LOCAL_PATH}old"
 mkdir -p $TPGB_LOCAL_PATH_OLD
 cp -r $TPGB_LOCAL_PATH/. $TPGB_LOCAL_PATH_OLD
 
+pushd $TPGB_LOCAL_PATH
 git checkout origin/$NEW_BRANCH
 update_package_name "github.com/hashicorp/terraform-provider-google-beta" "google/provider/new"
 popd
-
 
 pushd $TPGB_LOCAL_PATH_OLD
 git checkout origin/$OLD_BRANCH
 update_package_name "github.com/hashicorp/terraform-provider-google-beta" "google/provider/old"
 popd
-set +e
-pushd $MM_LOCAL_PATH/tools/breaking-change-detector
-sed -i.bak -E "s~google/provider/(.*)/([0-9A-Za-z-]*)~google/provider/\1/google-beta~" comparison.go
-go mod edit -replace google/provider/new=$(realpath $TPGB_LOCAL_PATH)
-go mod edit -replace google/provider/old=$(realpath $TPGB_LOCAL_PATH_OLD)
-go mod tidy
-export TPGB_BREAKING="$(go run .)"
-retVal=$?
-if [ $retVal -ne 0 ]; then
-    export TPGB_BREAKING=""
-    BREAKING_CHANGE_BUILD_FAILURE=$?
-fi
-BREAKINGCHANGES="$($script_dir/compare_breaking_changes.sh)"
-set -e
-popd
 
-## Missing test setup and execution
 set +e
 pushd $MM_LOCAL_PATH/tools/missing-test-detector
 go mod edit -replace google/provider/new=$(realpath $TPGB_LOCAL_PATH)
 go mod edit -replace google/provider/old=$(realpath $TPGB_LOCAL_PATH_OLD)
 go mod tidy
-export MISSINGTESTS="$(go run . -services-dir=$TPGB_LOCAL_PATH/google-beta/services)"
+MISSINGTESTS="$(go run . -services-dir=$TPGB_LOCAL_PATH/google-beta/services)"
 retVal=$?
 if [ $retVal -ne 0 ]; then
-    export MISSINGTESTS=""
+    MISSINGTESTS=""
 fi
 set -e
 popd
@@ -198,7 +195,7 @@ curl -H "Authorization: token ${GITHUB_TOKEN}" \
       -d "$(jq -r --arg diffs "$MESSAGE" -n "{body: \$diffs}")" \
       "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}/comments"
 
-if ! git diff --exit-code origin/main tools || [ "$BREAKING_CHANGE_BUILD_FAILURE" -ne 0 ]; then
+if ! git diff --exit-code origin/main tools; then
     ## Run unit tests for breaking change and missing test detector.
     "$script_dir/test_tools.sh" "$MM_LOCAL_PATH" "$TPGB_LOCAL_PATH" "$COMMIT_SHA" "$BUILD_ID" "$BUILD_STEP" "$PROJECT_ID"
 fi
