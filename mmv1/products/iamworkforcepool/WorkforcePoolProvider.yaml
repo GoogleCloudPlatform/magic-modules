@@ -312,3 +312,10 @@ properties:
             values:
               - :MERGE_USER_INFO_OVER_ID_TOKEN_CLAIMS
               - :ONLY_ID_TOKEN_CLAIMS
+          - !ruby/object:Api::Type::Array
+            name: additionalScopes
+            description: |
+              Additional scopes to request for in the OIDC authentication request on top of scopes requested by default. By default, the `openid`, `profile` and `email` scopes that are supported by the identity provider are requested.
+              Each additional scope may be at most 256 characters. A maximum of 10 additional scopes may be configured.
+            required: false
+            item_type: Api::Type::String
