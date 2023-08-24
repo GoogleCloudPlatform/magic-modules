@@ -4,7 +4,7 @@
 
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package google
+package <%= product_ns.downcase -%>_test
 
 import (
 <% unless object.skip_delete -%>

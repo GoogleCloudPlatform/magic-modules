@@ -62,15 +62,13 @@ examples:
       network_name: 'acctest.BootstrapSharedTestNetwork(t, "redis-full-persis")'
   - !ruby/object:Provider::Terraform::Examples
     name: 'redis_instance_private_service'
-    # Temporary for servicenetworking problems
-    skip_vcr: true
     primary_resource_id: 'cache'
     vars:
       instance_name: 'private-cache'
       address_name: 'address'
       network_name: 'redis-test-network'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "redis-private")'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "redis-private-service")'
   - !ruby/object:Provider::Terraform::Examples
     name: 'redis_instance_mrr'
     primary_resource_id: 'cache'

@@ -29,7 +29,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'tag_value'
   fetch_iam_policy_verb: :POST
 autogen_async: true
-exclude_validator: true
+exclude_tgc: true
 mutex: tagValues/{{parent}}
 id_format: 'tagValues/{{name}}'
 import_format: ['tagValues/{{name}}', '{{name}}']

@@ -4,3 +4,19 @@
   details:
     functions: 
     - tpgresource.DefaultProviderProject
+- type: DIFF_SUPPRESS_FUNC
+  field: control_plane.root_volume.volume_type
+  details:
+    diffsuppressfunc: tpgresource.CompareCaseInsensitive
+- type: DIFF_SUPPRESS_FUNC
+  field: control_plane.main_volume.volume_type
+  details:
+    diffsuppressfunc: tpgresource.CompareCaseInsensitive
+- type: DIFF_SUPPRESS_FUNC
+  field: logging_config.component_config.enable_components
+  details:
+    diffsuppressfunc: tpgresource.CompareCaseInsensitive
+- type: DIFF_SUPPRESS_FUNC
+  field: control_plane.instance_placement.tenancy
+  details:
+    diffsuppressfunc: tpgresource.CompareCaseInsensitive

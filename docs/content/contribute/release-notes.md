@@ -79,14 +79,6 @@ Replace `DATASOURCE_NAME` according to the pull request content. For example:
 ```
 ~~~
 {{< /tab >}}
-{{< tab "No user impact" >}}
-If there is no user impact, use an empty release note block of type `none`. Example:
-
-~~~markdown
-```release-note:none
-```
-~~~
-{{< /tab >}}
 {{< tab "Other" >}}
 ### Choose a release note type
 For each release note block, choose an appropriate type from the following list:
@@ -96,6 +88,8 @@ For each release note block, choose an appropriate type from the following list:
 - `deprecation` : A field/resource is being marked as deprecated (not being removed)
 - `breaking-change` : Changes that require users to change their configuration
 - `note` : General type for other notes that might be relevant to users but don't fit into another category
+- `none` : Changes where there is no user impact, like test fixes, website updates and
+  CI changes. Release notes of this type should be empty.
 
 ### Guidelines
 

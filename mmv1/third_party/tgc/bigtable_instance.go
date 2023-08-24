@@ -3,28 +3,29 @@ package google
 import (
 	"reflect"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/cai"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
-func resourceConverterBigtableInstance() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func resourceConverterBigtableInstance() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType: "bigtableadmin.googleapis.com/Instance",
 		Convert:   GetBigtableInstanceCaiObject,
 	}
 }
 
-func GetBigtableInstanceCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	name, err := tpgresource.AssetName(d, config, "//bigtable.googleapis.com/projects/{{project}}/instances/{{name}}")
+func GetBigtableInstanceCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	name, err := cai.AssetName(d, config, "//bigtable.googleapis.com/projects/{{project}}/instances/{{name}}")
 
 	if err != nil {
-		return []tpgresource.Asset{}, err
+		return []cai.Asset{}, err
 	}
 	if obj, err := GetBigtableInstanceApiObject(d, config); err == nil {
-		return []tpgresource.Asset{{
+		return []cai.Asset{{
 			Name: name,
 			Type: "bigtableadmin.googleapis.com/Instance",
-			Resource: &tpgresource.AssetResource{
+			Resource: &cai.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://bigtableadmin.googleapis.com/$discovery/rest",
 				DiscoveryName:        "Instance",
@@ -32,7 +33,7 @@ func GetBigtableInstanceCaiObject(d tpgresource.TerraformResourceData, config *t
 			},
 		}}, nil
 	} else {
-		return []tpgresource.Asset{}, err
+		return []cai.Asset{}, err
 	}
 }
 
