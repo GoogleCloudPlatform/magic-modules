@@ -50,6 +50,7 @@ class sweeperDetails() {
             params {
                 ConfigureGoogleSpecificTestParameters(environmentVariables)
                 TerraformAcceptanceTestParameters(parallelism, testPrefix, testTimeout, sweeperRegions, sweeperRun)
+                TerraformLoggingParameters()
                 TerraformAcceptanceTestsFlag()
                 TerraformCoreBinaryTesting()
                 TerraformShouldPanicForSchemaErrors()

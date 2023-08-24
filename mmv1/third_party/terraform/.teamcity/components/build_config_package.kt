@@ -50,6 +50,7 @@ class packageDetails(packageName: String, displayName: String, providerName: Str
                 // TODO(SarahFrench) Split TerraformAcceptanceTestParameters function into 2: one that's used for all tests/sweeper commands, and one that's specific to sweepers
                 // We shouldn't be adding sweeper-specific parameters to non-sweeper builds
                 TerraformAcceptanceTestParameters(parallelism, testPrefix, testTimeout, sweeperRegions, sweeperRun)
+                TerraformLoggingParameters()
                 TerraformAcceptanceTestsFlag()
                 TerraformCoreBinaryTesting()
                 TerraformShouldPanicForSchemaErrors()
