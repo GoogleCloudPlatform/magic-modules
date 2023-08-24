@@ -266,6 +266,7 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
 				return_partial_responses = true
 				messages {
 					channel = "some-channel"
+					response_type = "RESPONSE_TYPE_UNSPECIFIED"
 					text {
 						text = ["Some text"]
 					}

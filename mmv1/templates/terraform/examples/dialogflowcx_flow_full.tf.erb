@@ -171,6 +171,7 @@ resource "google_dialogflow_cx_flow" "<%= ctx[:primary_resource_id] %>" {
       return_partial_responses = true
       messages {
         channel = "some-channel"
+        response_type = "RESPONSE_TYPE_UNSPECIFIED"
         text {
           text = ["Some text"]
         }
