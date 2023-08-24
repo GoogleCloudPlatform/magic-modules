@@ -75,6 +75,8 @@ examples:
       'fmt.Sprintf("tf-test-datascan%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
+    vars:
+      dataset_name: dataplex_dataset
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_datascan_basic_quality'
     primary_resource_id: 'basic_quality'
