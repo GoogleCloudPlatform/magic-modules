@@ -389,10 +389,11 @@ module Api
     # At Create, they have no value but they can just be read in anyways, and after a Read
     # they will need to be set in every Update.
     def settable_properties
-      all_user_properties
-        .reject { |v| v.output && !v.is_a?(Api::Type::Fingerprint) && !v.is_a?(Api::Type::KeyValueTerraformLabels) }
-        .reject(&:url_param_only)
-        .reject { |v| v.is_a?(Api::Type::KeyValueLabels) }
+      settable_properties = all_user_properties.reject do |v|
+        v.output && !v.is_a?(Api::Type::Fingerprint) && !v.is_a?(Api::Type::KeyValueTerraformLabels)
+      end
+      settable_properties.reject(&:url_param_only)
+                         .reject { |v| v.is_a?(Api::Type::KeyValueLabels) }
     end
 
     # Properties that will be returned in the API body

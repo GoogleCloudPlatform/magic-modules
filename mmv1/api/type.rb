@@ -803,7 +803,7 @@ module Api
       end
     end
 
-    # An array of string -> string key -> value pairs used specifically for the "terraform_labels" field.
+    # An array of string -> string key -> value pairs used for the "terraform_labels" field.
     class KeyValueTerraformLabels < KeyValuePairs
     end
 
