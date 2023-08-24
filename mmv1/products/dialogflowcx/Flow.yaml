@@ -271,7 +271,7 @@ properties:
                     name: 'value'
                     description: |
                       The new JSON-encoded value of the parameter. A null value clears the parameter.
-                    custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+                    custom_expand: 'templates/terraform/custom_expand/json_value.erb'
                     custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
                     state_func:
                       'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
@@ -491,7 +491,7 @@ properties:
                     name: 'value'
                     description: |
                       The new JSON-encoded value of the parameter. A null value clears the parameter.
-                    custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+                    custom_expand: 'templates/terraform/custom_expand/json_value.erb'
                     custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
                     state_func:
                       'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
