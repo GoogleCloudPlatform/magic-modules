@@ -128,7 +128,6 @@ properties:
     name: 'sslPolicy'
     resource: 'RegionSslPolicy'
     imports: 'selfLink'
-    min_version: beta
     description: |
       A reference to the Region SslPolicy resource that will be associated with
       the TargetHttpsProxy resource. If not set, the TargetHttpsProxy
