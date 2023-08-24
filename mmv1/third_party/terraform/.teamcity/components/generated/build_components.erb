@@ -141,7 +141,7 @@ fun ParametrizedWithType.TerraformLoggingParameters() {
     // Set logging levels to match old projects
     text("TF_LOG", "DEBUG")
     text("TF_LOG_CORE", "WARN")
-    text("TF_LOG_SDK_FRAMEWORK ", "INFO")
+    text("TF_LOG_SDK_FRAMEWORK", "INFO")
 
     // Set where logs are sent
     text("TF_LOG_PATH_MASK", "%system.teamcity.build.checkoutDir%/debug-%PROVIDER_NAME%-%env.BUILD_NUMBER%-%s.log")
