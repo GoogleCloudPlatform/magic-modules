@@ -25,6 +25,8 @@ if configProjectErr != nil {
 }
 expectedProjectId := expectedProject.ProjectId
 
+log.Printf("[DEBUG] Scanning for projectId: %s.".format(expectedProjectId))
+
 // Iterate through the list of monitoredProjects to make sure one matches the configured monitored_project
 for _, projectRaw := range monitoredProjects {
 	if projectRaw == nil {
@@ -33,11 +35,13 @@ for _, projectRaw := range monitoredProjects {
 	project := projectRaw.(map[string]interface{})
 
 	projectName := project["name"]
+	log.Printf("[DEBUG] Matching projectIds: %s to %s.".format(expectedProjectId, projectName))
 	if !reflect.DeepEqual(projectName, expectedProjectId) {
 		continue
 	} else {
 		// Match found - set response object name to match
 		res["name"] = projectName
+		log.Printf("[DEBUG] Matched projectIds: %s and %s.".format(expectedProjectId, projectName))
 		return res, nil
 	}
 }
