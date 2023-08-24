@@ -82,6 +82,8 @@ if [ $retVal -ne 0 ]; then
 fi
 if [ $BREAKING_CHANGE_BUILD_FAILURE -eq 0 ]; then
     echo "Breaking changes succeeded"
+    # Export variables here so that they can be used in compare_breaking_changes
+    # exporting earlier would cause the retvals to not be calculated properly.
     export TPG_BREAKING=$TPG_BREAKING
     export TPGB_BREAKING=$TPGB_BREAKING
     BREAKINGCHANGES="$($script_dir/compare_breaking_changes.sh)"
