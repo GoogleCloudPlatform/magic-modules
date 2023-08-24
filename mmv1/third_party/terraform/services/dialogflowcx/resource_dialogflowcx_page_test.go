@@ -422,104 +422,102 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 						event = "sys.no-match-1"
 						trigger_fulfillment {
 							messages {
-								messages {
-									channel = "some-channel"
-									response_type = "PARAMETER_PROMPT"
-									text {
-										text = ["Please provide param1"]
-									}
+								channel = "some-channel"
+								response_type = "PARAMETER_PROMPT"
+								text {
+									text = ["Please provide param1"]
 								}
-								messages {
-									payload = <<EOF
-										{"some-key": "some-value", "other-key": ["other-value"]}
+							}
+							messages {
+								payload = <<EOF
+									{"some-key": "some-value", "other-key": ["other-value"]}
+								EOF
+							}
+							messages {
+								conversation_success {
+									metadata = <<EOF
+										{"some-metadata-key": "some-value", "other-metadata-key": 1234}
 									EOF
 								}
-								messages {
-									conversation_success {
-										metadata = <<EOF
-											{"some-metadata-key": "some-value", "other-metadata-key": 1234}
-										EOF
-									}
+							}
+							messages {
+								output_audio_text {
+									text = "some output text"
 								}
-								messages {
-									output_audio_text {
-										text = "some output text"
-									}
+							}
+							messages {
+								output_audio_text {
+									ssml = <<EOF
+										<speak>Some example <say-as interpret-as="characters">SSML XML</say-as></speak>
+									EOF
 								}
-								messages {
-									output_audio_text {
-										ssml = <<EOF
-											<speak>Some example <say-as interpret-as="characters">SSML XML</say-as></speak>
-										EOF
-									}
+							}
+							messages {
+								live_agent_handoff {
+									metadata = <<EOF
+										{"some-metadata-key": "some-value", "other-metadata-key": 1234}
+									EOF
 								}
-								messages {
-									live_agent_handoff {
-										metadata = <<EOF
-											{"some-metadata-key": "some-value", "other-metadata-key": 1234}
-										EOF
-									}
+							}
+							messages {
+								play_audio {
+									audio_uri = "http://example.com/some-audio-file.mp3"
 								}
-								messages {
-									play_audio {
-										audio_uri = "http://example.com/some-audio-file.mp3"
-									}
+							}
+							messages {
+								telephony_transfer_call {
+									phone_number = "1-234-567-8901"
 								}
-								messages {
-									telephony_transfer_call {
-										phone_number = "1-234-567-8901"
-									}
-								}
+							}
 
-								tag = "some-tag"
+							tag = "some-tag"
 
-								set_parameter_actions {
-									parameter = "some-param"
-									value     = "123.45"
-								}
-								set_parameter_actions {
-									parameter = "another-param"
-									value     = jsonencode("abc")
-								}
-								set_parameter_actions {
-									parameter = "other-param"
-									value     = jsonencode(["foo"])
-								}
+							set_parameter_actions {
+								parameter = "some-param"
+								value     = "123.45"
+							}
+							set_parameter_actions {
+								parameter = "another-param"
+								value     = jsonencode("abc")
+							}
+							set_parameter_actions {
+								parameter = "other-param"
+								value     = jsonencode(["foo"])
+							}
 
-								conditional_cases {
-									cases = [
-										jsonencode({
-											condition = "$sys.func.RAND() < 0.5",
-											caseContent = [
-												{
-													message = { text = ["First case"] }
-												},
-												{
-													additionalCases = {
-														cases = [
-															{
-																condition = "$sys.func.RAND() < 0.2"
-																caseContent = [
-																	{
-																		message = { text = ["Nested case"] }
-																	}
-																]
-															}
-														]
-													}
+							conditional_cases {
+								cases = [
+									jsonencode({
+										condition = "$sys.func.RAND() < 0.5",
+										caseContent = [
+											{
+												message = { text = ["First case"] }
+											},
+											{
+												additionalCases = {
+													cases = [
+														{
+															condition = "$sys.func.RAND() < 0.2"
+															caseContent = [
+																{
+																	message = { text = ["Nested case"] }
+																}
+															]
+														}
+													]
 												}
-											]
-										}),
-										jsonencode({
-											condition = "",
-											caseContent = [
-												{
-													message = { text = ["Final case"] }
-												}
-											]
-										}),
-									]
-								}
+											}
+										]
+									}),
+									jsonencode({
+										condition = "",
+										caseContent = [
+											{
+												message = { text = ["Final case"] }
+											}
+										]
+									}),
+								]
 							}
 						}
 					}
