@@ -1,5 +1,4 @@
 resource "google_project" "project" {
-  provider        = google-beta
   project_id      = "<%= ctx[:vars]["project_name"] %>"
   name            = "<%= ctx[:vars]["project_name"] %>"
   org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
@@ -7,7 +6,6 @@ resource "google_project" "project" {
 }
 
 resource "google_iam_deny_policy" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
   parent   = urlencode("cloudresourcemanager.googleapis.com/projects/${google_project.project.project_id}")
   name     = "<%= ctx[:vars]["policy_name"] %>"
   display_name = "A deny rule"
@@ -37,7 +35,6 @@ resource "google_iam_deny_policy" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_service_account" "test-account" {
-  provider = google-beta
   account_id   = "<%= ctx[:vars]['account_id'] %>"
   display_name = "Test Service Account"
   project      = google_project.project.project_id
