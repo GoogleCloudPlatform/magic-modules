@@ -22,10 +22,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: 'projects/{{project}}/locations/{{location}}/clusters'
 self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/clusters?cluster_id={{name}}'
-update_url: 'projects/{{project}}/locations/{{location}}/clusters/{{name}}'
-update_verb: :PATCH
-update_mask: true
-delete_url: 'projects/{{project}}/locations/{{location}}/clusters/{{name}}'
 autogen_async: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -75,6 +71,8 @@ examples:
     primary_resource_id: "default"
     vars:
       edgecontainer_cluster_name: "cluster-with-maintenance"
+  # Skip the local control plane cluster test as we only have limited machine resources.
+  # Instead the local control plane cluster test will be tested in the node pool test.
   - !ruby/object:Provider::Terraform::Examples
     name: "edgecontainer_local_control_plane_cluster"
     primary_resource_id: "default"
@@ -99,6 +97,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: "fleet"
     required: true
+    immutable: true
     description: |
       Fleet related configuration.
       Fleets are a Google Cloud concept for logically organizing clusters,
@@ -107,6 +106,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: "project"
+        immutable: true
         description: |
           The name of the Fleet host project where this cluster will be registered.
           Project names are formatted as
@@ -114,7 +114,7 @@ properties:
         required: true
       - !ruby/object:Api::Type::String
         name: "membership"
-        default_from_api: true
+        output: true
         description: |
           The name of the managed Hub Membership resource associated to this cluster.
           Membership names are formatted as
@@ -131,6 +131,7 @@ properties:
       - !ruby/object:Api::Type::Array
         name: "clusterIpv4CidrBlocks"
         item_type: Api::Type::String
+        immutable: true
         required: true
         description: |
           All pods in the cluster are assigned an RFC1918 IPv4 address from these
@@ -139,6 +140,7 @@ properties:
       - !ruby/object:Api::Type::Array
         name: "servicesIpv4CidrBlocks"
         item_type: Api::Type::String
+        immutable: true
         required: true
         description: |
           All services in the cluster are assigned an RFC1918 IPv4 address from these
@@ -162,14 +164,11 @@ properties:
           assigned an IPv6 address from these blocks alongside from an IPv4
           address. Only a single block is supported. This field cannot be changed
           after creation.
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: "networkType"
+        output: true
         description: |
           IP addressing type of this cluster i.e. SINGLESTACK_V4 vs DUALSTACK_V4_V6.
-        values:
-          - :NETWORK_TYPE_UNSPECIFIED
-          - :SINGLESTACK_V4
-          - :DUALSTACK_V4_V6
   - !ruby/object:Api::Type::NestedObject
     name: "authorization"
     required: true
@@ -217,19 +216,23 @@ properties:
     name: "maintenancePolicy"
     description: |
       Cluster-wide maintenance policy configuration.
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: "window"
+        required: true
         description: |
           Specifies the maintenance window in which maintenance may be performed.
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: "recurringWindow"
+            required: true
             description: |
               Represents an arbitrary window of time that recurs.
             properties:
               - !ruby/object:Api::Type::NestedObject
                 name: "window"
+                default_from_api: true
                 description: |
                   Represents an arbitrary window of time.
                 properties:
@@ -237,13 +240,16 @@ properties:
                     name: "startTime"
                     description: |
                       The time that the window first starts.
+                    default_from_api: true
                   - !ruby/object:Api::Type::Time
                     name: "endTime"
                     description: |
                       The time that the window ends. The end time must take place after the
                       start time.
+                    default_from_api: true
               - !ruby/object:Api::Type::String
                 name: "recurrence"
+                default_from_api: true
                 description: |
                   An RRULE (https://tools.ietf.org/html/rfc5545#section-3.8.5.3) for how
                   this window recurs. They go on for the span of time between the start and
@@ -266,27 +272,35 @@ properties:
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: "remote"
+        immutable: true
         exactly_one_of:
           - control_plane.0.remote
           - control_plane.0.local
         description: |
           Remote control plane configuration.
+        default_from_api: true
         properties:
           - !ruby/object:Api::Type::String
             name: "nodeLocation"
+            immutable: true
+            default_from_api: true
             description: |
               Name of the Google Distributed Cloud Edge zones where this node pool
               will be created. For example: `us-central1-edge-customer-a`.
       - !ruby/object:Api::Type::NestedObject
         name: "local"
+        immutable: true
         exactly_one_of:
           - control_plane.0.remote
           - control_plane.0.local
         description: |
           Local control plane configuration.
+        default_from_api: true
         properties:
           - !ruby/object:Api::Type::String
             name: "nodeLocation"
+            default_from_api: true
+            immutable: true
             description: |
               Name of the Google Distributed Cloud Edge zones where this node pool
               will be created. For example: `us-central1-edge-customer-a`.
@@ -295,6 +309,7 @@ properties:
             description: |
               The number of nodes to serve as replicas of the Control Plane.
               Only 1 and 3 are supported.
+            default_from_api: true
           - !ruby/object:Api::Type::String
             name: "machineFilter"
             description: |
@@ -303,6 +318,7 @@ properties:
               and is documented here: [AIP-160](https://google.aip.dev/160).
           - !ruby/object:Api::Type::Enum
             name: "sharedDeploymentPolicy"
+            default_from_api: true
             description: |
               Policy configuration about how user applications are deployed.
             values:
@@ -336,10 +352,12 @@ properties:
   - !ruby/object:Api::Type::Array
     item_type: Api::Type::String
     name: "externalLoadBalancerIpv4AddressPools"
+    default_from_api: true
     description: |
       Address pools for cluster data plane external load balancing.
   - !ruby/object:Api::Type::NestedObject
     name: "controlPlaneEncryption"
+    default_from_api: true
     description: |
       Remote control plane disk encryption options. This field is only used when
       enabling CMEK support.
@@ -347,6 +365,7 @@ properties:
       - !ruby/object:Api::Type::String
         name: "kmsKey"
         immutable: true
+        default_from_api: true
         description: |
           The Cloud KMS CryptoKey e.g.
           projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{cryptoKey}
@@ -358,7 +377,7 @@ properties:
         description: |
           The Cloud KMS CryptoKeyVersion currently in use for protecting control
           plane disks. Only applicable if kms_key is set.
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: "kmsKeyState"
         output: true
         description: |
@@ -366,10 +385,6 @@ properties:
           nodes may go offline as they cannot access their local data. This can be
           caused by a lack of permissions to use the key, or if the key is disabled
           or deleted.
-        values:
-          - :KMS_KEY_STATE_UNSPECIFIED
-          - :KMS_KEY_STATE_KEY_AVAILABLE
-          - :KMS_KEY_STATE_KEY_UNAVAILABLE
       - !ruby/object:Api::Type::NestedObject
         name: "kmsStatus"
         output: true
@@ -389,18 +404,11 @@ properties:
               A developer-facing error message, which should be in English.
               Any user-facing error message should be localized and sent in
               the google.rpc.Status.details field, or localized by the client.
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: "status"
     output: true
     description: |
       Indicates the status of the cluster.
-    values:
-      - :STATUS_UNSPECIFIED
-      - :PROVISIONING
-      - :RUNNING
-      - :DELETING
-      - :ERROR
-      - :RECONCILING
   - !ruby/object:Api::Type::Array
     name: maintenanceEvents
     output: true
@@ -427,32 +435,21 @@ properties:
             into multiple operations (e.g. due to maintenance windows), the latest
             one is recorded.
           output: true
-        - !ruby/object:Api::Type::Enum
+        - !ruby/object:Api::Type::String
           name: "type"
           output: true
           description: |
             Indicates the maintenance event type.
-          values:
-            - :TYPE_UNSPECIFIED
-            - :USER_INITIATED_UPGRADE
-        - !ruby/object:Api::Type::Enum
+        - !ruby/object:Api::Type::String
           name: schedule
           output: true
           description: |
             The schedule of the maintenance event.
-          values:
-            - :SCHEDULE_UNSPECIFIED
-            - :IMMEDIATELY
-        - !ruby/object:Api::Type::Enum
+        - !ruby/object:Api::Type::String
           name: "state"
           output: true
           description: |
             Indicates the maintenance event state.
-          values:
-            - :STATE_UNSPECIFIED
-            - :RECONCILING
-            - :SUCCEEDED
-            - :FAILED
         - !ruby/object:Api::Type::Time
           name: "createTime"
           output: true
@@ -483,7 +480,8 @@ properties:
     update_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}:upgrade'
     update_verb: :POST
   - !ruby/object:Api::Type::Enum
-    name: "kmsStatus"
+    name: "releaseChannel"
+    default_from_api: true
     description: |
       The release channel a cluster is subscribed to.
     values:

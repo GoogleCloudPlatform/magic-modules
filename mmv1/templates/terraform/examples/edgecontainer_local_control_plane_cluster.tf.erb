@@ -1,6 +1,6 @@
 resource "google_edgecontainer_cluster" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]['edgecontainer_cluster_name'] %>"
-  location   = "us-central1"
+  location = "us-central1"
 
   authorization {
     admin_users {

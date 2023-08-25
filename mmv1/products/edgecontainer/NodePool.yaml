@@ -22,9 +22,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: "projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools"
 self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}'
 create_url: "projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools?nodePoolId={{name}}"
-update_verb: :PATCH
-update_mask: true
-delete_url: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}'
 autogen_async: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -48,6 +45,9 @@ async: !ruby/object:Api::OpAsync
     message: "message"
 import_format: ["projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}"]
 examples:
+  # Skip the node-pool test as we only have limited machine resources
+  # The node-pool creation is tested in edgecontainer_local_control_plane_node_pool_internal
+  # in order to avoid exposing the node location and machine name to public.
   - !ruby/object:Provider::Terraform::Examples
     name: "edgecontainer_node_pool"
     primary_resource_id: "default"
@@ -60,7 +60,16 @@ examples:
     name: "edgecontainer_local_control_plane_node_pool"
     primary_resource_id: "default"
     skip_test: true
-properties:
+  # Skip the docs generation for the edgecontainer_local_control_plane_node_pool_internal test
+  # to avoid leaking the machine name, and node location to public.
+  # Skip the vcr test because as we only have limited machine resources and we don't want it run
+  # in github presubmit test.
+  - !ruby/object:Provider::Terraform::Examples
+    name: "edgecontainer_local_control_plane_node_pool_internal"
+    primary_resource_id: "default"
+    skip_docs: true
+    skip_vcr: true
+parameters:
   - !ruby/object:Api::Type::String
     name: "name"
     required: true
@@ -82,6 +91,7 @@ properties:
     url_param_only: true
     description: |
       The name of the target Distributed Cloud Edge Cluster.
+properties:
   - !ruby/object:Api::Type::Time
     name: createTime
     description: |
@@ -98,16 +108,18 @@ properties:
     description: "Labels associated with this resource."
   - !ruby/object:Api::Type::String
     name: "nodeLocation"
+    required: true
+    immutable: true
     description: |
       Name of the Google Distributed Cloud Edge zone where this node pool will be created. For example: `us-central1-edge-customer-a`.
   - !ruby/object:Api::Type::Integer
     name: "nodeCount"
-    url_param_only: false
     required: true
     description: |
       The number of nodes in the pool.
   - !ruby/object:Api::Type::String
     name: "machineFilter"
+    default_from_api: true
     description: |
       Only machines matching this filter will be allowed to join the node pool.
       The filtering language accepts strings like "name=<name>", and is
@@ -128,16 +140,12 @@ properties:
         output: true
         description: |
           The Cloud KMS CryptoKeyVersion currently in use for protecting node local disks. Only applicable if kmsKey is set.
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: kmsKeyState
         description: |
           Availability of the Cloud KMS CryptoKey. If not KEY_AVAILABLE, then nodes may go offline as they cannot access their local data.
           This can be caused by a lack of permissions to use the key, or if the key is disabled or deleted.
         output: true
-        values:
-          - :KMS_KEY_STATE_UNSPECIFIED
-          - :KMS_KEY_STATE_KEY_AVAILABLE
-          - :KMS_KEY_STATE_KEY_UNAVAILABLE
   - !ruby/object:Api::Type::String
     name: "nodeVersion"
     output: true
@@ -145,6 +153,7 @@ properties:
       The lowest release version among all worker nodes.
   - !ruby/object:Api::Type::NestedObject
     name: nodeConfig
+    default_from_api: true
     description: |
       Configuration for each node in the NodePool
     properties:

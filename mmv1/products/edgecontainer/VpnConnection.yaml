@@ -43,11 +43,12 @@ async: !ruby/object:Api::OpAsync
 import_format: ["projects/{{project}}/locations/{{location}}/vpnConnections"]
 autogen_async: true
 examples:
+  # Skip the vpnconnection test as we only have limited machine resources, and the vpn connection is not a critical feature.
   - !ruby/object:Provider::Terraform::Examples
     name: "edgecontainer_vpn_connection"
     primary_resource_id: "default"
     skip_test: true
-properties:
+parameters:
   - !ruby/object:Api::Type::String
     name: "name"
     required: true
@@ -62,6 +63,7 @@ properties:
     url_param_only: true
     description: |
       Google Cloud Platform location.
+properties:
   - !ruby/object:Api::Type::Time
     name: createTime
     description: |
@@ -117,34 +119,35 @@ properties:
     name: "details"
     output: true
     properties:
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: "state"
+        output: true
         description: |
           The current connection state.
-        values:
-          - :STATE_UNSPECIFIED
-          - :STATE_CONNECTED
-          - :STATE_CONNECTING
-          - :STATE_ERROR
       - !ruby/object:Api::Type::String
         name: "error"
+        output: true
         description: |
           The error message. This is only populated when state=ERROR.
       - !ruby/object:Api::Type::NestedObject
         name: "cloudRouter"
+        output: true
         description: |
           The Cloud Router info.
         properties:
           - !ruby/object:Api::Type::String
+            output: true
             name: "name"
             description: |
               The associated Cloud Router name.
       - !ruby/object:Api::Type::NestedObject
         name: "cloudVpns"
+        output: true
         description: |
           Each connection has multiple Cloud VPN gateways.
         properties:
           - !ruby/object:Api::Type::String
+            output: true
             name: "gateway"
             description: |
               The created Cloud VPN gateway name.
