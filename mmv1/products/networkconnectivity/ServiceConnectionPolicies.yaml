@@ -107,7 +107,7 @@ properties:
     name: 'pscConfig'
     description: |
       Configuration used for Private Service Connect connections. Used when Infrastructure is PSC.
-    properties: 
+    properties:
       - !ruby/object:Api::Type::Array
         name: 'subnetworks'
         required: true
@@ -125,9 +125,35 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'pscConnections'
     output: true
-    item_type: Api::Type::String
     description: |
-      Information about each Private Service Connect connection.
+      Information about each Private Service Connect connection.\
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::Enum
+          name: state
+          description: The state of the PSC connection.
+          values:
+            - :STATE_UNSPECIFIED
+            - :ACTIVE
+            - :CREATING
+            - :DELETING
+            - :FAILED
+        - !ruby/object:Api::Type::String
+          name: consumerForwardingRule
+          description: |
+            The resource reference of the PSC Forwarding Rule within the consumer VPC
+        - !ruby/object:Api::Type::String
+          name: gceOperation
+          description: xyz
+        - !ruby/object:Api::Type::String
+          name: consumerTargetProject
+          description: xyz
+        - !ruby/object:Api::Type::String
+          name: pscConnectionId
+          description: xyz
+        - !ruby/object:Api::Type::String
+          name: consumerAddress
+          description: xyz
   - !ruby/object:Api::Type::String
     name: 'infrastructure'
     output: true
