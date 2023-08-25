@@ -270,6 +270,7 @@ properties:
             name: 'writeMetadata'
             required: true
             send_empty_value: true
+            custom_flatten: 'templates/terraform/custom_flatten/pubsub_no_wrapper_write_metadata_flatten.go.erb'
             description: |
               When true, writes the Pub/Sub message metadata to
               `x-goog-pubsub-<KEY>:<VAL>` headers of the HTTP request. Writes the
