@@ -18,7 +18,7 @@ description: |
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/memorystore/docs/cluster/'
-  api: 'https://cloud.google.com/memorystore/docs/cluster/reference/rest/v1alpha1/projects.locations.clusters'
+  api: 'https://cloud.google.com/memorystore/docs/cluster/reference/rest/v1beta1/projects.locations.clusters'
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 60
   update_minutes: 120
