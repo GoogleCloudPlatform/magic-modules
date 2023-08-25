@@ -1,0 +1,21 @@
+
+config := meta.(*transport_tpg.Config)
+	
+// current import_formats can't import fields with forward slashes in their value
+if err := tpgresource.ParseImportId([]string{"(?P<project>[^ ]+) (?P<name>[^ ]+)", "(?P<name>[^ ]+)"}, d, config); err != nil {
+    return nil, err
+}
+
+stringParts := strings.Split(d.Get("name").(string), "/")
+if len(stringParts) != 6 {
+	return nil, fmt.Errorf(
+			"Saw %s when the name is expected to have shape %s",
+			d.Get("name"),
+			"projects/{{project}}/locations/{{location}}/transferConfigs/{{config_id}}",
+		)
+}
+
+if err := d.Set("location", stringParts[3]); err != nil {
+	return nil, fmt.Errorf("Error setting location: %s", err)
+}
+return []*schema.ResourceData{d}, nil
