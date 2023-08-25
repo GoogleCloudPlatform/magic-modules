@@ -173,12 +173,12 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 			}
 
 			conditional_cases {
-				cases = [
-					jsonencode({
+				cases = jsonencode([
+					{
 						condition = "$sys.func.RAND() < 0.5",
 						caseContent = [
 							{
-								message = { text = ["First case"] }
+								message = { text = { text = ["First case"] } }
 							},
 							{
 								additionalCases = {
@@ -187,7 +187,7 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 											condition = "$sys.func.RAND() < 0.2"
 											caseContent = [
 												{
-													message = { text = ["Nested case"] }
+													message = { text = { text = ["Nested case"] } }
 												}
 											]
 										}
@@ -195,16 +195,16 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 								}
 							}
 						]
-					}),
-					jsonencode({
+					},
+					{
 						condition = "",
 						caseContent = [
 							{
-								message = { text = ["Final case"] }
+								message = { text = { text = ["Final case"] } }
 							}
 						]
-					}),
-				]
+					},
+				])
 			}
 		}
 
@@ -276,12 +276,12 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 				}
 
 				conditional_cases {
-					cases = [
-						jsonencode({
+					cases = jsonencode([
+						{
 							condition = "$sys.func.RAND() < 0.5",
 							caseContent = [
 								{
-									message = { text = ["First case"] }
+									message = { text = { text = ["First case"] } }
 								},
 								{
 									additionalCases = {
@@ -290,7 +290,7 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 												condition = "$sys.func.RAND() < 0.2"
 												caseContent = [
 													{
-														message = { text = ["Nested case"] }
+														message = { text = { text = ["Nested case"] } }
 													}
 												]
 											}
@@ -298,16 +298,16 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 									}
 								}
 							]
-						}),
-						jsonencode({
+						},
+						{
 							condition = "",
 							caseContent = [
 								{
-									message = { text = ["Final case"] }
+									message = { text = { text = ["Final case"] } }
 								}
 							]
-						}),
-					]
+						},
+					])
 				}
 			}
 		}
@@ -384,12 +384,12 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 						}
 
 						conditional_cases {
-							cases = [
-								jsonencode({
+							cases = jsonencode([
+								{
 									condition = "$sys.func.RAND() < 0.5",
 									caseContent = [
 										{
-											message = { text = ["First case"] }
+											message = { text = { text = ["First case"] } }
 										},
 										{
 											additionalCases = {
@@ -398,7 +398,7 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 														condition = "$sys.func.RAND() < 0.2"
 														caseContent = [
 															{
-																message = { text = ["Nested case"] }
+																message = { text = { text = ["Nested case"] } }
 															}
 														]
 													}
@@ -406,16 +406,16 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 											}
 										}
 									]
-								}),
-								jsonencode({
+								},
+								{
 									condition = "",
 									caseContent = [
 										{
-											message = { text = ["Final case"] }
+											message = { text = { text = ["Final case"] } }
 										}
 									]
-								}),
-							]
+								},
+							])
 						}
 					}
 					reprompt_event_handlers {
@@ -488,12 +488,12 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 							}
 
 							conditional_cases {
-								cases = [
-									jsonencode({
+								cases = jsonencode([
+									{
 										condition = "$sys.func.RAND() < 0.5",
 										caseContent = [
 											{
-												message = { text = ["First case"] }
+												message = { text = { text = ["First case"] } }
 											},
 											{
 												additionalCases = {
@@ -502,7 +502,7 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 															condition = "$sys.func.RAND() < 0.2"
 															caseContent = [
 																{
-																	message = { text = ["Nested case"] }
+																	message = { text = { text = ["Nested case"] } }
 																}
 															]
 														}
@@ -510,16 +510,16 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 												}
 											}
 										]
-									}),
-									jsonencode({
+									},
+									{
 										condition = "",
 										caseContent = [
 											{
-												message = { text = ["Final case"] }
+												message = { text = { text = ["Final case"] } }
 											}
 										]
-									}),
-								]
+									},
+								])
 							}
 						}
 					}
@@ -605,12 +605,12 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 				}
 
 				conditional_cases {
-					cases = [
-						jsonencode({
+					cases = jsonencode([
+						{
 							condition = "$sys.func.RAND() < 0.5",
 							caseContent = [
 								{
-									message = { text = ["First case"] }
+									message = { text = { text = ["First case"] } }
 								},
 								{
 									additionalCases = {
@@ -619,7 +619,7 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 												condition = "$sys.func.RAND() < 0.2"
 												caseContent = [
 													{
-														message = { text = ["Nested case"] }
+														message = { text = { text = ["Nested case"] } }
 													}
 												]
 											}
@@ -627,16 +627,16 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 									}
 								}
 							]
-						}),
-						jsonencode({
+						},
+						{
 							condition = "",
 							caseContent = [
 								{
-									message = { text = ["Final case"] }
+									message = { text = { text = ["Final case"] } }
 								}
 							]
-						}),
-					]
+						},
+					])
 				}
 			}
 			target_page = google_dialogflow_cx_page.my_page2.id

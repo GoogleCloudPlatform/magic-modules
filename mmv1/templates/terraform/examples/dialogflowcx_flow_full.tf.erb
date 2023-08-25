@@ -130,12 +130,12 @@ resource "google_dialogflow_cx_flow" "<%= ctx[:primary_resource_id] %>" {
       }
 
       conditional_cases {
-        cases = [
-          jsonencode({
+        cases = jsonencode([
+          {
             condition = "$sys.func.RAND() < 0.5",
             caseContent = [
               {
-                message = { text = ["First case"] }
+                message = { text = { text = ["First case"] } }
               },
               {
                 additionalCases = {
@@ -144,7 +144,7 @@ resource "google_dialogflow_cx_flow" "<%= ctx[:primary_resource_id] %>" {
                       condition = "$sys.func.RAND() < 0.2"
                       caseContent = [
                         {
-                          message = { text = ["Nested case"] }
+                          message = { text = { text = ["Nested case"] } }
                         }
                       ]
                     }
@@ -152,16 +152,16 @@ resource "google_dialogflow_cx_flow" "<%= ctx[:primary_resource_id] %>" {
                 }
               }
             ]
-          }),
-          jsonencode({
+          },
+          {
             condition = "",
             caseContent = [
               {
-                message = { text = ["Final case"] }
+                message = { text = { text = ["Final case"] } }
               }
             ]
-          }),
-        ]
+          },
+        ])
       }
     }
   }
@@ -234,12 +234,12 @@ resource "google_dialogflow_cx_flow" "<%= ctx[:primary_resource_id] %>" {
       }
 
       conditional_cases {
-        cases = [
-          jsonencode({
+        cases = jsonencode([
+          {
             condition = "$sys.func.RAND() < 0.5",
             caseContent = [
               {
-                message = { text = ["First case"] }
+                message = { text = { text = ["First case"] } }
               },
               {
                 additionalCases = {
@@ -248,7 +248,7 @@ resource "google_dialogflow_cx_flow" "<%= ctx[:primary_resource_id] %>" {
                       condition = "$sys.func.RAND() < 0.2"
                       caseContent = [
                         {
-                          message = { text = ["Nested case"] }
+                          message = { text = { text = ["Nested case"] } }
                         }
                       ]
                     }
@@ -256,16 +256,16 @@ resource "google_dialogflow_cx_flow" "<%= ctx[:primary_resource_id] %>" {
                 }
               }
             ]
-          }),
-          jsonencode({
+          },
+          {
             condition = "",
             caseContent = [
               {
-                message = { text = ["Final case"] }
+                message = { text = { text = ["Final case"] } }
               }
             ]
-          }),
-        ]
+          },
+        ])
       }
     }
     target_flow = google_dialogflow_cx_agent.agent.start_flow

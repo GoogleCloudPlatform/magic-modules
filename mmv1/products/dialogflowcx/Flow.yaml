@@ -285,17 +285,18 @@ properties:
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                   # This object has a recursive schema so we use a string instead of a NestedObject
-                  - !ruby/object:Api::Type::Array
+                  - !ruby/object:Api::Type::String
                     name: 'cases'
                     description: |
-                      A list of cascading if-else conditions. Cases are mutually exclusive. The first one with a matching condition is selected, all the rest ignored.
+                      A JSON encoded list of cascading if-else conditions. Cases are mutually exclusive. The first one with a matching condition is selected, all the rest ignored.
                       See [Case](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/Fulfillment#case) for the schema.
-                    item_type: Api::Type::String
-                    custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+                    custom_expand: 'templates/terraform/custom_expand/json_value.erb'
                     custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
                     state_func:
                       'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
                       return s }'
+                    validation: !ruby/object:Provider::Terraform::Validation
+                      function: 'validation.StringIsJSON'
         - !ruby/object:Api::Type::String
           name: 'targetPage'
           description: |
@@ -505,17 +506,18 @@ properties:
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                   # This object has a recursive schema so we use a string instead of a NestedObject
-                  - !ruby/object:Api::Type::Array
+                  - !ruby/object:Api::Type::String
                     name: 'cases'
                     description: |
-                      A list of cascading if-else conditions. Cases are mutually exclusive. The first one with a matching condition is selected, all the rest ignored.
+                      A JSON encoded list of cascading if-else conditions. Cases are mutually exclusive. The first one with a matching condition is selected, all the rest ignored.
                       See [Case](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/Fulfillment#case) for the schema.
-                    item_type: Api::Type::String
-                    custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+                    custom_expand: 'templates/terraform/custom_expand/json_value.erb'
                     custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
                     state_func:
                       'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
                       return s }'
+                    validation: !ruby/object:Provider::Terraform::Validation
+                      function: 'validation.StringIsJSON'
         - !ruby/object:Api::Type::String
           name: 'targetPage'
           description: |

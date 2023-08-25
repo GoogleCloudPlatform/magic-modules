@@ -225,12 +225,12 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
 				}
 	
 				conditional_cases {
-					cases = [
-						jsonencode({
+					cases = jsonencode([
+						{
 							condition = "$sys.func.RAND() < 0.5",
 							caseContent = [
 								{
-									message = { text = ["First case"] }
+									message = { text = { text = ["First case"] } }
 								},
 								{
 									additionalCases = {
@@ -239,7 +239,7 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
 												condition = "$sys.func.RAND() < 0.2"
 												caseContent = [
 													{
-														message = { text = ["Nested case"] }
+														message = { text = { text = ["Nested case"] } }
 													}
 												]
 											}
@@ -247,16 +247,16 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
 									}
 								}
 							]
-						}),
-						jsonencode({
+						},
+						{
 							condition = "",
 							caseContent = [
 								{
-									message = { text = ["Final case"] }
+									message = { text = { text = ["Final case"] } }
 								}
 							]
-						}),
-					]
+						},
+					])
 				}
 			}
 		}
@@ -329,12 +329,12 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
 				}
 
 				conditional_cases {
-					cases = [
-						jsonencode({
+					cases = jsonencode([
+						{
 							condition = "$sys.func.RAND() < 0.5",
 							caseContent = [
 								{
-									message = { text = ["First case"] }
+									message = { text = { text = ["First case"] } }
 								},
 								{
 									additionalCases = {
@@ -343,7 +343,7 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
 												condition = "$sys.func.RAND() < 0.2"
 												caseContent = [
 													{
-														message = { text = ["Nested case"] }
+														message = { text = { text = ["Nested case"] } }
 													}
 												]
 											}
@@ -351,16 +351,16 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
 									}
 								}
 							]
-						}),
-						jsonencode({
+						},
+						{
 							condition = "",
 							caseContent = [
 								{
-									message = { text = ["Final case"] }
+									message = { text = { text = ["Final case"] } }
 								}
 							]
-						}),
-					]
+						},
+					])
 				}
 			}
 			target_flow = google_dialogflow_cx_agent.agent_entity.start_flow
