@@ -261,6 +261,7 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
     }
 
     transition_routes {
+      condition = "true"
       trigger_fulfillment {
         return_partial_responses = true
         messages {

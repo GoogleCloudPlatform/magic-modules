@@ -228,7 +228,7 @@ resource "google_dialogflow_cx_page" "<%= ctx[:primary_resource_id] %>" {
     parameters {
       display_name = "param1"
       entity_type  = "projects/-/locations/-/agents/-/entityTypes/sys.date"
-      default_value = "2000-01-01"
+      default_value = jsonencode("2000-01-01")
       fill_behavior {
         initial_prompt_fulfillment {
           messages {

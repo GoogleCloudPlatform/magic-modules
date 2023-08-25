@@ -316,7 +316,7 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
       parameters {
         display_name = "param1"
         entity_type  = "projects/-/locations/-/agents/-/entityTypes/sys.date"
-        default_value = "2000-01-01"
+        default_value = jsonencode("2000-01-01")
         fill_behavior {
           initial_prompt_fulfillment {
             messages {
