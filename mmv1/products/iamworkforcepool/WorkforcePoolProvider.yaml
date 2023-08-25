@@ -72,6 +72,7 @@ examples:
       - 'oidc.0.client_secret.0.value.0.plain_text'
   - !ruby/object:Provider::Terraform::Examples
     name: 'iam_workforce_pool_provider_oidc_upload_key'
+    min_version: beta
     skip_docs: true
     primary_resource_id: 'example'
     vars:
