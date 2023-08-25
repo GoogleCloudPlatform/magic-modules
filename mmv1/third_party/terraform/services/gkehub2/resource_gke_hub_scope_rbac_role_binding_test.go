@@ -72,7 +72,7 @@ resource "google_gke_hub_scope" "scoperbacrolebinding" {
 resource "google_gke_hub_scope_rbac_role_binding" "scoperbacrolebinding" {
   scope_rbac_role_binding_id = "tf-test-scope-rbac-role-binding%{random_suffix}"
   scope_id = "tf-test-scope%{random_suffix}"
-  user = "test-email@gmail.com"
+  group = "test-email2@gmail.com"
   role {
     predefined_role = "VIEW"
   }
