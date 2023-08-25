@@ -1,0 +1,24 @@
+name: changelog-checker
+
+permissions: read-all
+
+on:
+  pull_request:
+    types: [opened, edited]
+
+jobs:
+  check:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          path: repo
+      - name: Check Changelog
+        env:
+          GITHUB_OWNER: GoogleCloudPlatform
+          GITHUB_REPO: magic-modules
+          GITHUB_TOKEN: ${{github.token}}
+        run: |
+          cd repo/tools/go-changelog/cmd/changelog-pr-body-check
+          go run . ${{github.event.pull_request.number}}
