@@ -42,6 +42,9 @@ examples:
       network_2_name: 'network-2'
       project_1_name: 'project-1'
       project_2_name: 'project-2'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/detach_network.erb
 properties:
