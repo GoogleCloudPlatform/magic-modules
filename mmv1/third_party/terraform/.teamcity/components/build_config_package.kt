@@ -58,7 +58,7 @@ class packageDetails(packageName: String, displayName: String, providerName: Str
                 WorkingDirectory(path)
             }
 
-            artifactRules = "%teamcity.build.checkoutDir%/debug*.log"
+            artifactRules = "%teamcity.build.checkoutDir%/debug*.txt"
 
             failureConditions {
                 errorMessage = true
