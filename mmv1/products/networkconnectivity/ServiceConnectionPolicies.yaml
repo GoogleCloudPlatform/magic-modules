@@ -126,7 +126,7 @@ properties:
     name: 'pscConnections'
     output: true
     description: |
-      Information about each Private Service Connect connection.\
+      Information about each Private Service Connect connection.
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::Enum
@@ -141,7 +141,7 @@ properties:
         - !ruby/object:Api::Type::String
           name: consumerForwardingRule
           description: |
-            The resource reference of the PSC Forwarding Rule within the consumer VPC
+            The resource reference of the PSC Forwarding Rule within the consumer VPC.
         - !ruby/object:Api::Type::String
           name: consumerAddress
           description: |
