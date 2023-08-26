@@ -193,6 +193,7 @@ properties:
       - 'host.gceInstance.poolSize'
       - 'host.gceInstance.tags'
       - 'host.gceInstance.disablePublicIpAddresses'
+      - 'host.gceInstance.enableNestedVirtualization'
       - 'host.gceInstance.shieldedInstanceConfig.enableSecureBoot'
       - 'host.gceInstance.shieldedInstanceConfig.enableVtpm'
       - 'host.gceInstance.shieldedInstanceConfig.enableIntegrityMonitoring'
@@ -235,6 +236,12 @@ properties:
             name: 'disablePublicIpAddresses'
             description: |
               Whether instances have no public IP address.
+          - !ruby/object:Api::Type::Boolean
+            name: 'enableNestedVirtualization'
+            description: |
+              Whether to enable nested virtualization on the Compute Engine VMs backing the Workstations.
+
+              See https://cloud.google.com/workstations/docs/reference/rest/v1beta/projects.locations.workstationClusters.workstationConfigs#GceInstance.FIELDS.enable_nested_virtualization
           - !ruby/object:Api::Type::NestedObject
             name: 'shieldedInstanceConfig'
             description: |
