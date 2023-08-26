@@ -23,7 +23,7 @@ import (
     transport_tpg "<%= import_path() -%>/transport"
     "<%= import_path() -%>/verify"
    "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
-   "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/generated/converters/common"
+   "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/google/converters/common"
 )
 
 <%
@@ -47,9 +47,7 @@ type <%=converter_name-%> struct {
 	schema map[string]*schema.Schema
 }
 
-func New<%=converter_name-%>(name string) common.Converter {
-	schema := tpg.Provider().ResourcesMap[name].Schema
-
+func New<%=converter_name-%>(name string, schema map[string]*schema.Schema) common.Converter {
 	return &<%=converter_name-%>{
 		name:   name,
 		schema: schema,

@@ -23,9 +23,18 @@ module Provider
     end
 
     def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
+      cai2hcl_folder = File.join(
+        output_folder,
+        'cai2hcl'
+      )
+      FileUtils.mkdir_p(cai2hcl_folder)
+
+      # # Clear "cai2hcl/" folder in case some files were deleted in new version of generated code.
+      # FileUtils.rm_rf Dir.glob("#{cai2hcl_folder}/*")
+
       @base_url = @version.cai_base_url || @version.base_url
       generate_objects(
-        output_folder,
+        cai2hcl_folder,
         types,
         generate_code,
         generate_docs
@@ -34,16 +43,15 @@ module Provider
 
     def generate_resource(pwd, data, _generate_code, _generate_docs)
       product_name = data.object.__product.name.downcase
-      output_folder = File.join(
-        data.output_folder,
-        'cai2hcl/generated/converters',
-        product_name
-      )
+
+      generators_folder = File.join(data.output_folder, 'google/converters', product_name)
+      FileUtils.mkdir_p(generators_folder)
+
       object_name = data.object.name.underscore
-      target = "#{product_name}_#{object_name}.go"
+      converter_file_name = "#{product_name}_#{object_name}.go"
       data.generate(pwd,
                     'templates/cai2hcl/resource_converter.go.erb',
-                    File.join(output_folder, target),
+                    File.join(generators_folder, converter_file_name),
                     self)
     end
 
@@ -53,35 +61,7 @@ module Provider
       Google::LOGGER.info 'Copying common files.'
       return unless generate_code
 
-      copy_file_list(output_folder, [
-                       ['cai2hcl/generated/converters/common/converter.go',
-                        'third_party/cai2hcl/converters/common/converter.go'],
-                       ['cai2hcl/generated/converters/common/utils.go',
-                        'third_party/cai2hcl/converters/common/utils.go'],
-                       ['cai2hcl/generated/convert.go',
-                        'third_party/cai2hcl/convert.go'],
-                       ['cai2hcl/generated/converter_map.go',
-                        'third_party/cai2hcl/converter_map.go']
-                     ])
-
-      Google::LOGGER.info 'Copying testdata files.'
-
-      copy_file_list(output_folder, [
-                       ['cai2hcl/generated/converters/testdata/full_compute_backend_service.json',
-                        'third_party/cai2hcl/converters/testdata/full_compute_backend_service.json'],
-                       ['cai2hcl/generated/converters/testdata/full_compute_backend_service.tf',
-                        'third_party/cai2hcl/converters/testdata/full_compute_backend_service.tf'],
-
-                       ['cai2hcl/generated/converters/testdata/full_compute_forwarding_rule.json',
-                        'third_party/cai2hcl/converters/testdata/full_compute_forwarding_rule.json'],
-                       ['cai2hcl/generated/converters/testdata/full_compute_forwarding_rule.tf',
-                        'third_party/cai2hcl/converters/testdata/full_compute_forwarding_rule.tf'],
-
-                       ['cai2hcl/generated/converters/testdata/full_compute_health_check.json',
-                        'third_party/cai2hcl/converters/testdata/full_compute_health_check.json'],
-                       ['cai2hcl/generated/converters/testdata/full_compute_health_check.tf',
-                        'third_party/cai2hcl/converters/testdata/full_compute_health_check.tf']
-                     ])
+      FileUtils.cp_r('third_party/cai2hcl/.', "#{output_folder}/cai2hcl")
     end
 
     def generate_resource_tests(pwd, data) end

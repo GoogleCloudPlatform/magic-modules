@@ -1,9 +1,8 @@
-package generated
+package cai2hcl
 
 import (
 	"fmt"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/generated/converters/common"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
 
 	"github.com/hashicorp/hcl/hcl/printer"
@@ -19,7 +18,7 @@ type ConvertOptions struct {
 }
 
 // Convert converts Asset into HCL.
-func Convert(assets []*caiasset.Asset, converterNames map[string]string, converterMap map[string]common.Converter, options *ConvertOptions) ([]byte, error) {
+func Convert(assets []*caiasset.Asset, options *ConvertOptions) ([]byte, error) {
 	if options == nil || options.ErrorLogger == nil {
 		return nil, fmt.Errorf("logger is not initialized")
 	}
@@ -28,7 +27,7 @@ func Convert(assets []*caiasset.Asset, converterNames map[string]string, convert
 	// tf -> cai has 1:N mappings occasionally
 	groups := make(map[string][]*caiasset.Asset)
 	for _, asset := range assets {
-		name, ok := converterNames[asset.Type]
+		name, ok := ConverterNames[asset.Type]
 		if !ok {
 			continue
 		}
@@ -38,7 +37,7 @@ func Convert(assets []*caiasset.Asset, converterNames map[string]string, convert
 	f := hclwrite.NewFile()
 	rootBody := f.Body()
 	for name, v := range groups {
-		converter, ok := converterMap[name]
+		converter, ok := ConverterMap[name]
 		if !ok {
 			continue
 		}
