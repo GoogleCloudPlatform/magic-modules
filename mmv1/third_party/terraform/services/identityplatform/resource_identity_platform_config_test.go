@@ -69,7 +69,6 @@ resource "google_identity_platform_config" "basic" {
     allow_duplicate_emails = true
 
     anonymous {
-        enabled = true
     }
     email {
         enabled = true
