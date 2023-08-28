@@ -116,19 +116,6 @@ properties:
                 The list of rich message responses to present to the user.
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
-                  - !ruby/object:Api::Type::Enum
-                    name: 'responseType'
-                    description: |
-                      Represents different response types.
-                      * RESPONSE_TYPE_UNSPECIFIED: Not specified.
-                      * ENTRY_PROMPT: The response is from an entry prompt in the page.
-                      * PARAMETER_PROMPT: The response is from form-filling prompt in the page.
-                      * HANDLER_PROMPT: The response is from a transition route or an [event handler][EventHandler] in the page or flow or transition route group.
-                    values:
-                      - :RESPONSE_TYPE_UNSPECIFIED
-                      - :ENTRY_PROMPT
-                      - :PARAMETER_PROMPT
-                      - :HANDLER_PROMPT
                   - !ruby/object:Api::Type::String
                     name: 'channel'
                     description: |
@@ -337,19 +324,6 @@ properties:
                 The list of rich message responses to present to the user.
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
-                  - !ruby/object:Api::Type::Enum
-                    name: 'responseType'
-                    description: |
-                      Represents different response types.
-                      * RESPONSE_TYPE_UNSPECIFIED: Not specified.
-                      * ENTRY_PROMPT: The response is from an entry prompt in the page.
-                      * PARAMETER_PROMPT: The response is from form-filling prompt in the page.
-                      * HANDLER_PROMPT: The response is from a transition route or an [event handler][EventHandler] in the page or flow or transition route group.
-                    values:
-                      - :RESPONSE_TYPE_UNSPECIFIED
-                      - :ENTRY_PROMPT
-                      - :PARAMETER_PROMPT
-                      - :HANDLER_PROMPT
                   - !ruby/object:Api::Type::String
                     name: 'channel'
                     description: |

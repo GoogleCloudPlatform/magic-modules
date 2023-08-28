@@ -21,7 +21,6 @@ resource "google_dialogflow_cx_page" "<%= ctx[:primary_resource_id] %>" {
   entry_fulfillment {
     messages {
       channel = "some-channel"
-      response_type = "ENTRY_PROMPT"
       text {
         text = ["Welcome to page"]
       }
@@ -122,7 +121,6 @@ resource "google_dialogflow_cx_page" "<%= ctx[:primary_resource_id] %>" {
       return_partial_responses = true
       messages {
         channel = "some-channel"
-        response_type = "HANDLER_PROMPT"
         text {
           text = ["Some text"]
         }
@@ -227,7 +225,6 @@ resource "google_dialogflow_cx_page" "<%= ctx[:primary_resource_id] %>" {
         initial_prompt_fulfillment {
           messages {
             channel = "some-channel"
-            response_type = "PARAMETER_PROMPT"
             text {
               text = ["Please provide param1"]
             }
@@ -330,7 +327,6 @@ resource "google_dialogflow_cx_page" "<%= ctx[:primary_resource_id] %>" {
 
             messages {
               channel = "some-channel"
-              response_type = "PARAMETER_PROMPT"
               text {
                 text = ["Please provide param1"]
               }
@@ -444,7 +440,6 @@ resource "google_dialogflow_cx_page" "<%= ctx[:primary_resource_id] %>" {
     trigger_fulfillment {
       messages {
         channel = "some-channel"
-        response_type = "HANDLER_PROMPT"
         text {
           text = ["information completed, navigating to page 2"]
         }

@@ -110,7 +110,6 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
     entry_fulfillment {
       messages {
         channel = "some-channel"
-        response_type = "ENTRY_PROMPT"
         text {
           text = ["Welcome to page"]
         }
@@ -315,7 +314,6 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
           initial_prompt_fulfillment {
             messages {
               channel = "some-channel"
-              response_type = "PARAMETER_PROMPT"
               text {
                 text = ["Please provide param1"]
               }
@@ -418,7 +416,6 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 
               messages {
                 channel = "some-channel"
-                response_type = "PARAMETER_PROMPT"
                 text {
                   text = ["Please provide param1"]
                 }
@@ -532,7 +529,6 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
       trigger_fulfillment {
         messages {
           channel = "some-channel"
-          response_type = "HANDLER_PROMPT"
           text {
             text = ["information completed, navigating to page 2"]
           }

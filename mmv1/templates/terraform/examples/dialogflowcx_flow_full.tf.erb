@@ -41,7 +41,6 @@ resource "google_dialogflow_cx_flow" "<%= ctx[:primary_resource_id] %>" {
     trigger_fulfillment {
       return_partial_responses = false
       messages {
-        response_type = "RESPONSE_TYPE_UNSPECIFIED"
         text {
           text = ["Sorry, could you say that again?"]
         }
@@ -54,7 +53,6 @@ resource "google_dialogflow_cx_flow" "<%= ctx[:primary_resource_id] %>" {
     trigger_fulfillment {
       return_partial_responses = false
       messages {
-        response_type = "ENTRY_PROMPT"
         text {
           text = ["One more time?"]
         }
@@ -169,7 +167,6 @@ resource "google_dialogflow_cx_flow" "<%= ctx[:primary_resource_id] %>" {
       return_partial_responses = true
       messages {
         channel = "some-channel"
-        response_type = "RESPONSE_TYPE_UNSPECIFIED"
         text {
           text = ["Some text"]
         }

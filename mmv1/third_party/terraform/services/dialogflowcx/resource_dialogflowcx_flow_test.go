@@ -135,7 +135,6 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
       trigger_fulfillment {
         return_partial_responses = false
         messages {
-          response_type = "RESPONSE_TYPE_UNSPECIFIED"
           text {
             text = ["Sorry, could you say that again?"]
           }
@@ -148,7 +147,6 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
       trigger_fulfillment {
         return_partial_responses = false
         messages {
-          response_type = "ENTRY_PROMPT"
           text {
             text = ["One more time?"]
           }
@@ -263,7 +261,6 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
         return_partial_responses = true
         messages {
           channel = "some-channel"
-          response_type = "RESPONSE_TYPE_UNSPECIFIED"
           text {
             text = ["Some text"]
           }
