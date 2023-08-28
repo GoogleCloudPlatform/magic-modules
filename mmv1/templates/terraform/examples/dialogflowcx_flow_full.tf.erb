@@ -114,8 +114,6 @@ resource "google_dialogflow_cx_flow" "<%= ctx[:primary_resource_id] %>" {
         }
       }
 
-      tag = "some-tag"
-
       set_parameter_actions {
         parameter = "some-param"
         value     = "123.45"
@@ -217,8 +215,6 @@ resource "google_dialogflow_cx_flow" "<%= ctx[:primary_resource_id] %>" {
           phone_number = "1-234-567-8901"
         }
       }
-
-      tag = "some-tag"
 
       set_parameter_actions {
         parameter = "some-param"

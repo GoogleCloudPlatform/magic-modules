@@ -208,8 +208,6 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
           }
         }
 
-        tag = "some-tag"
-
         set_parameter_actions {
           parameter = "some-param"
           value     = "123.45"
@@ -311,8 +309,6 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
             phone_number = "1-234-567-8901"
           }
         }
-
-        tag = "some-tag"
 
         set_parameter_actions {
           parameter = "some-param"

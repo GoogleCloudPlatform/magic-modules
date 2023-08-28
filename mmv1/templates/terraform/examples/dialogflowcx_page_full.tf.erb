@@ -68,8 +68,6 @@ resource "google_dialogflow_cx_page" "<%= ctx[:primary_resource_id] %>" {
       }
     }
 
-    tag = "some-tag"
-
     set_parameter_actions {
       parameter = "some-param"
       value     = "123.45"
@@ -170,8 +168,6 @@ resource "google_dialogflow_cx_page" "<%= ctx[:primary_resource_id] %>" {
           phone_number = "1-234-567-8901"
         }
       }
-
-      tag = "some-tag"
 
       set_parameter_actions {
         parameter = "some-param"
@@ -278,8 +274,6 @@ resource "google_dialogflow_cx_page" "<%= ctx[:primary_resource_id] %>" {
             }
           }
 
-          tag = "some-tag"
-
           set_parameter_actions {
             parameter = "some-param"
             value     = "123.45"
@@ -332,6 +326,8 @@ resource "google_dialogflow_cx_page" "<%= ctx[:primary_resource_id] %>" {
           trigger_fulfillment {
             return_partial_responses = true
             webhook = google_dialogflow_cx_webhook.my_webhook.id
+            tag = "some-tag"
+
             messages {
               channel = "some-channel"
               response_type = "PARAMETER_PROMPT"
@@ -380,8 +376,6 @@ resource "google_dialogflow_cx_page" "<%= ctx[:primary_resource_id] %>" {
                 phone_number = "1-234-567-8901"
               }
             }
-
-            tag = "some-tag"
 
             set_parameter_actions {
               parameter = "some-param"
@@ -496,8 +490,6 @@ resource "google_dialogflow_cx_page" "<%= ctx[:primary_resource_id] %>" {
           phone_number = "1-234-567-8901"
         }
       }
-
-      tag = "some-tag"
 
       set_parameter_actions {
         parameter = "some-param"

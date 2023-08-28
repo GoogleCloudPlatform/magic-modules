@@ -157,8 +157,6 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
         }
       }
 
-      tag = "some-tag"
-
       set_parameter_actions {
         parameter = "some-param"
         value     = "123.45"
@@ -258,8 +256,6 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
             phone_number = "1-234-567-8901"
           }
         }
-
-        tag = "some-tag"
 
         set_parameter_actions {
           parameter = "some-param"
@@ -366,8 +362,6 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
               }
             }
 
-            tag = "some-tag"
-
             set_parameter_actions {
               parameter = "some-param"
               value     = "123.45"
@@ -420,6 +414,8 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
             trigger_fulfillment {
               return_partial_responses = true
               webhook = google_dialogflow_cx_webhook.my_webhook.id
+              tag = "some-tag"
+
               messages {
                 channel = "some-channel"
                 response_type = "PARAMETER_PROMPT"
@@ -468,8 +464,6 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
                   phone_number = "1-234-567-8901"
                 }
               }
-
-              tag = "some-tag"
 
               set_parameter_actions {
                 parameter = "some-param"
@@ -584,8 +578,6 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
             phone_number = "1-234-567-8901"
           }
         }
-
-        tag = "some-tag"
 
         set_parameter_actions {
           parameter = "some-param"
