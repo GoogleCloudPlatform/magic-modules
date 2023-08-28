@@ -69,7 +69,7 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 	    		then
 #					echo -n \	\"$resource\"\: >> importmetadata.txt
 #					echo \	NON STANDARD MD LOGGING >> importmetadata.txt
-	    		else
+#	    		else
 					echo -n \	\"$resource\"\: >> importmetadata.txt
 					importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
 					importformat=$(sed -e 's| \$ terraform import [^.]*\.[^[[:space:]]* |", "|g'  <<< $importformat)
@@ -108,7 +108,7 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 							then
 								echo -n \	\"$resource\"\: >> importmetadata.txt
 								echo \ '["folders/{{folder_id}}", "{{folder_id}}"]' >> importmetadata.txt
-							else
+#							else
 #								echo -n \	\"$resource\"\: >> importmetadata.txt
 #								echo \	NON STANDARD MD >> importmetadata.txt
 							fi
