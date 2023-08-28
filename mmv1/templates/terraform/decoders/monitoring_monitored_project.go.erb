@@ -18,30 +18,30 @@ config := meta.(*transport_tpg.Config)
 // The API returns all monitored projects
 monitoredProjects, _ := res["monitoredProjects"].([]interface{})
 
-// Convert configured terraform monitored_project resource name to a projectId
+// Convert configured terraform monitored_project resource name to a ProjectNumber
 expectedProject, configProjectErr := config.NewResourceManagerClient(config.UserAgent).Projects.Get(d.Get("name").(string)).Do()
 if configProjectErr != nil {
 	return nil, configProjectErr
 }
-expectedProjectId := expectedProject.ProjectId
+expectedProjectNumber := expectedProject.ProjectNumber
 
-log.Printf("[DEBUG] Scanning for projectId: %s.", expectedProjectId)
+log.Printf("[DEBUG] Scanning for ProjectNumber: %s.", expectedProjectNumber)
 
 // Iterate through the list of monitoredProjects to make sure one matches the configured monitored_project
-for _, projectRaw := range monitoredProjects {
-	if projectRaw == nil {
+for _, monitoredProjectRaw := range monitoredProjects {
+	if monitoredProjectRaw == nil {
 		continue
 	}
-	project := projectRaw.(map[string]interface{})
+	monitoredProject := monitoredProjectRaw.(map[string]interface{})
 
-	projectName := project["name"]
-	log.Printf("[DEBUG] Matching projectIds: %s to %s.", expectedProjectId, projectName)
-	if !reflect.DeepEqual(projectName, expectedProjectId) {
-		continue
-	} else {
+	monitoredProjectName := monitoredProject["name"]
+	// MonitoredProject names have the format locations/global/metricsScopes/[metricScopeProjectId]/projects/[projectId]
+	// `res` contains the MonitoredProjects of the relevant metrics scope
+	log.Printf("[DEBUG] Matching ProjectNumbers: %s to %s.", expectedProjectNumber, monitoredProjectName)
+	if !strings.HasSuffix(monitoredProjectName, "/"+expectedProjectNumber) {
 		// Match found - set response object name to match
-		res["name"] = projectName
-		log.Printf("[DEBUG] Matched projectIds: %s and %s.", expectedProjectId, projectName)
+		res["name"] = monitoredProjectName
+		log.Printf("[DEBUG] Matched ProjectNumbers: %s and %s.", expectedProjectNumber, monitoredProjectName)
 		return res, nil
 	}
 }
