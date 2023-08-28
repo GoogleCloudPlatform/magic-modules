@@ -206,10 +206,6 @@ properties:
         properties:
           - !ruby/object:Api::Type::Integer
             name: numFiniteBuckets
-            at_least_one_of:
-              - bucket_options.0.linear_buckets.0.num_finite_buckets
-              - bucket_options.0.linear_buckets.0.width
-              - bucket_options.0.linear_buckets.0.offset
             description: |
               Must be greater than 0.
             required: true
@@ -241,10 +237,6 @@ properties:
         properties:
           - !ruby/object:Api::Type::Integer
             name: numFiniteBuckets
-            at_least_one_of:
-              - bucket_options.0.exponential_buckets.0.num_finite_buckets
-              - bucket_options.0.exponential_buckets.0.growth_factor
-              - bucket_options.0.exponential_buckets.0.scale
             description: |
               Must be greater than 0.
             required: true
