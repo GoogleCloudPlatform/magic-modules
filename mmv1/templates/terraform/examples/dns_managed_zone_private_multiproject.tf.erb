@@ -84,7 +84,7 @@ resource "google_project_service" "compute_project-1" {
 }
 
 resource "google_project_service" "compute_project-2" {
-  project = google_project.project_1.project_id
+  project = google_project.project_2.project_id
   service = "compute.googleapis.com"
 }
 
@@ -94,6 +94,6 @@ resource "google_project_service" "dns_project-1" {
 }
 
 resource "google_project_service" "dns_project-2" {
-  project = google_project.project_1.project_id
+  project = google_project.project_2.project_id
   service = "dns.googleapis.com"
 }
