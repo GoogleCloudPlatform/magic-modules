@@ -52,8 +52,8 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 		importable=$(ggrep -Pzo 'return ResourceLoggingBucketConfig' $file)
 		if [ -z "$importable"  ]
     	then
-			echo -n \	\"$resource\"\: >> importmetadata.txt
-			echo \	not importable >> importmetadata.txt
+#			echo -n \	\"$resource\"\: >> importmetadata.txt
+#			echo \	not importable >> importmetadata.txt
 
 # NOT IMPORTABLE RESOURCES
 			continue
@@ -67,8 +67,8 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 				importformat=$(ggrep -Pzo '```\n\$ terraform import(.*\n)*?```' $resourcemd)
 				if [ -z "$importformat"  ]
 	    		then
-					echo -n \	\"$resource\"\: >> importmetadata.txt
-					echo \	NON STANDARD MD LOGGING >> importmetadata.txt
+#					echo -n \	\"$resource\"\: >> importmetadata.txt
+#					echo \	NON STANDARD MD LOGGING >> importmetadata.txt
 	    		else
 					echo -n \	\"$resource\"\: >> importmetadata.txt
 					importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
@@ -104,12 +104,13 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 						importformat=$(ggrep -Pzos '```\n\$ terraform import(.*\n)*?```' $resourcemd)
 						if [ -z "$importformat"  ]
 	    				then
-							echo -n \	\"$resource\"\: >> importmetadata.txt
 							if [[ "$resource" == "google_folder" ]]
 							then
+								echo -n \	\"$resource\"\: >> importmetadata.txt
 								echo \ '["folders/{{folder_id}}", "{{folder_id}}"]' >> importmetadata.txt
 							else
-								echo \	NON STANDARD MD >> importmetadata.txt
+#								echo -n \	\"$resource\"\: >> importmetadata.txt
+#								echo \	NON STANDARD MD >> importmetadata.txt
 							fi
 						else
 							echo -n \	\"$resource\"\: >> importmetadata.txt
@@ -180,7 +181,7 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 #code checks for importstatepassthrough but officially does not support importing so we proceed with no entry
 					;;
 				*)
-#should not be generated -- will be configured with error code for CI integration
+#resource needs to be hardcoded into this script for support
 					echo -n "$resource: " >> importmetadata.txt
 					echo \ NOT CONFIGURED  >> importmetadata.txt
 #					exit 1
@@ -214,7 +215,3 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 	fi
 done
 echo "}" >> importmetadata.txt
-
-#google_healthcare_fhir_store
-#/Users/nickelliot/go/src/magic-modules/mmv1/products/healthcare/FhirStore.yaml
-#/Users/nickelliot/go/src/github.com/hashicorp/terraform-provider-google/website/docs/r/healthcare_fhir_store.html.markdown
