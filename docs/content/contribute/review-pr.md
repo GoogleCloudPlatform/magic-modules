@@ -1,11 +1,11 @@
 ---
-title: "Review a PR"
-weight: 11
+title: "Review a pull request"
+weight: 20
 ---
 
-# Review a PR
+# Review a pull request
 
-This page provides guidelines for reviewing Magic Modules pull requests
+This page provides guidelines for reviewing a Magic Modules pull request (PR).
 
 1. Read the PR description to understand the context and ensure the PR either
    * is linked to a GitHub issue or an internal bug
