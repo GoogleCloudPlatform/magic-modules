@@ -248,7 +248,6 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
               ]
             },
             {
-              condition = "",
               caseContent = [
                 {
                   message = { text = { text = ["Final case"] } }
@@ -353,7 +352,6 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
               ]
             },
             {
-              condition = "",
               caseContent = [
                 {
                   message = { text = { text = ["Final case"] } }

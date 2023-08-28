@@ -197,7 +197,6 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
             ]
           },
           {
-            condition = "",
             caseContent = [
               {
                 message = { text = { text = ["Final case"] } }
@@ -300,7 +299,6 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
               ]
             },
             {
-              condition = "",
               caseContent = [
                 {
                   message = { text = { text = ["Final case"] } }
@@ -408,7 +406,6 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
                   ]
                 },
                 {
-                  condition = "",
                   caseContent = [
                     {
                       message = { text = { text = ["Final case"] } }
@@ -512,7 +509,6 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
                     ]
                   },
                   {
-                    condition = "",
                     caseContent = [
                       {
                         message = { text = { text = ["Final case"] } }
@@ -629,7 +625,6 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
               ]
             },
             {
-              condition = "",
               caseContent = [
                 {
                   message = { text = { text = ["Final case"] } }
