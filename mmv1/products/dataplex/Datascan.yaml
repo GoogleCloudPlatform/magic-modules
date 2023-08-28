@@ -68,6 +68,8 @@ examples:
       'fmt.Sprintf("tf-test-datascan%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
+    vars:
+      datascan_name: test-datascan
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_datascan_full_profile'
     primary_resource_id: 'full_profile'
@@ -85,6 +87,8 @@ examples:
       'fmt.Sprintf("tf-test-datascan%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
+    vars:
+      datascan_name: test-datascan
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_datascan_full_quality'
     primary_resource_id: 'full_quality'
@@ -92,6 +96,8 @@ examples:
       'fmt.Sprintf("tf-test-datascan%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
+    vars:
+      datascan_name: test-datascan
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
