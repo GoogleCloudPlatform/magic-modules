@@ -50,6 +50,8 @@ parameters:
       The name of the database.
   - !ruby/object:Api::Type::String
     name: "catalog_id"
+    required: true
+    immutable: true
     url_param_only: true
     description: |
       The name of the parent catalog.
