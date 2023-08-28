@@ -14,7 +14,7 @@ import (
 	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/tfdata"
 	tfjson "github.com/hashicorp/terraform-json"
-	provider "github.com/hashicorp/terraform-provider-google-beta/google-beta"
+	provider "github.com/hashicorp/terraform-provider-google-beta/google-beta/provider"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 	"github.com/stretchr/testify/assert"

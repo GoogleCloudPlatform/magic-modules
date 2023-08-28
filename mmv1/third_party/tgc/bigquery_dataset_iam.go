@@ -1,4 +1,4 @@
-package google
+package bigquery
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
-func resourceConverterBigqueryDatasetIamPolicy() cai.ResourceConverter {
+func ResourceConverterBigqueryDatasetIamPolicy() cai.ResourceConverter {
 	return cai.ResourceConverter{
 		AssetType:         "bigquery.googleapis.com/Dataset",
 		Convert:           GetBigqueryDatasetIamPolicyCaiObject,
@@ -16,7 +16,7 @@ func resourceConverterBigqueryDatasetIamPolicy() cai.ResourceConverter {
 	}
 }
 
-func resourceConverterBigqueryDatasetIamBinding() cai.ResourceConverter {
+func ResourceConverterBigqueryDatasetIamBinding() cai.ResourceConverter {
 	return cai.ResourceConverter{
 		AssetType:         "bigquery.googleapis.com/Dataset",
 		Convert:           GetBigqueryDatasetIamBindingCaiObject,
@@ -26,7 +26,7 @@ func resourceConverterBigqueryDatasetIamBinding() cai.ResourceConverter {
 	}
 }
 
-func resourceConverterBigqueryDatasetIamMember() cai.ResourceConverter {
+func ResourceConverterBigqueryDatasetIamMember() cai.ResourceConverter {
 	return cai.ResourceConverter{
 		AssetType:         "bigquery.googleapis.com/Dataset",
 		Convert:           GetBigqueryDatasetIamMemberCaiObject,
