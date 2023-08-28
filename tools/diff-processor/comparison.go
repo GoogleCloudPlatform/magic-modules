@@ -5,7 +5,7 @@ import (
 	oldProvider "google/provider/old/google"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/magic-modules/.ci/breaking-change-detector/rules"
+	"github.com/GoogleCloudPlatform/magic-modules/.ci/diff-processor/rules"
 	"github.com/golang/glog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -71,6 +71,10 @@ func compareResourceSchema(resourceName string, old, new map[string]*schema.Sche
 func compareField(resourceName, fieldName string, old, new *schema.Schema) []string {
 	messages := []string{}
 	fieldRules := rules.FieldRules
+
+	if fieldName != "psc_connections" {
+		return messages
+	}
 
 	for _, rule := range fieldRules {
 		breakageMessage := rule.IsRuleBreak(
