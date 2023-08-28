@@ -15,10 +15,8 @@
 name: 'Scope'
 base_url: 'projects/{{project}}/locations/global/scopes'
 create_url: 'projects/{{project}}/locations/global/scopes?scopeId={{scope_id}}'
-update_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}'
 self_link: 'projects/{{project}}/locations/global/scopes/{{scope_id}}'
-update_verb: :PATCH
-update_mask: true
+immutable: true
 description: |
   Scope represents a Scope in a Fleet.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -98,10 +96,6 @@ properties:
     description: |
       Time the Scope was deleted in UTC.
     output: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'all_memberships'
-    description: |
-      If true, all Memberships in the Fleet bind to this Scope.
   - !ruby/object:Api::Type::NestedObject
     name: 'state'
     description: |
