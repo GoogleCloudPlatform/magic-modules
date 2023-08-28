@@ -89,12 +89,11 @@ properties:
       "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
 
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: "type"
+    required: true
     description: |
       The database type.
-    values:
-      - :HIVE
   - !ruby/object:Api::Type::NestedObject
     name: "hiveOptions"
     description: |
