@@ -96,6 +96,7 @@ properties:
       The database type.
   - !ruby/object:Api::Type::NestedObject
     name: "hiveOptions"
+    required: true
     description: |
       Options of a Hive database.
     properties:
