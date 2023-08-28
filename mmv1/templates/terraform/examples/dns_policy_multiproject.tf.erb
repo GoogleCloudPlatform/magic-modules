@@ -36,22 +36,58 @@ resource "google_compute_network" "network-1_project-1" {
   name                    = "<%= ctx[:vars]['network_1_name'] %>"
   project                 = google_project.project_1.project_id
   auto_create_subnetworks = false
+  depends_on              = [ 
+    google_project_service.compute_project-1,
+    google_project_service.dns_project-1,
+  ]
 }
 
 resource "google_compute_network" "network-2_project-1" {
   name                    = "<%= ctx[:vars]['network_2_name'] %>"
   project                 = google_project.project_1.project_id
   auto_create_subnetworks = false
+  depends_on              = [ 
+    google_project_service.compute_project-1,
+    google_project_service.dns_project-1,
+  ]
 }
 
 resource "google_compute_network" "network-1_project-2" {
   name                    = "<%= ctx[:vars]['network_1_name'] %>"
   project                 = google_project.project_2.project_id
   auto_create_subnetworks = false
+  depends_on              = [ 
+    google_project_service.compute_project-2,
+    google_project_service.dns_project-2,
+  ]
 }
 
 resource "google_compute_network" "network-2_project-2" {
   name                    = "<%= ctx[:vars]['network_2_name'] %>"
   project                 = google_project.project_2.project_id
   auto_create_subnetworks = false
+  depends_on              = [ 
+    google_project_service.compute_project-2,
+    google_project_service.dns_project-2,
+  ]
+}
+
+resource "google_project_service" "compute_project-1" {
+  project = google_project.project_1.project_id
+  service = "compute.googleapis.com"
+}
+
+resource "google_project_service" "compute_project-2" {
+  project = google_project.project_1.project_id
+  service = "compute.googleapis.com"
+}
+
+resource "google_project_service" "dns_project-1" {
+  project = google_project.project_1.project_id
+  service = "dns.googleapis.com"
+}
+
+resource "google_project_service" "dns_project-2" {
+  project = google_project.project_1.project_id
+  service = "dns.googleapis.com"
 }
