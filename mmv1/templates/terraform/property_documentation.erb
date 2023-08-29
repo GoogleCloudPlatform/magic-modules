@@ -2,20 +2,22 @@
 * `<%= property.name.underscore -%>` -
 <% if property.min_version.name == 'beta' && property.__resource.min_version.name != 'beta'-%>
 <%   if property.required -%>
-  (Required, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  (Required, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)<% if property.deprecation_message -%>, Deprecated<% end -%>)
 <%   elsif !property.output -%>
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)<% if property.deprecation_message -%>, Deprecated<% end -%>)
+<%   elsif property.output && !property.parent.nil? -%>
+  (Output, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)<% if property.deprecation_message -%>, Deprecated<% end -%>)
 <%   else -%>
-  ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)<% if property.deprecation_message -%>, Deprecated<% end -%>)
 <%   end -%>
 <% else -%>
 <%   if property.required -%>
-  (Required<% if property.deprecated? -%>, Deprecated<% end -%>)
+  (Required<% if property.deprecation_message -%>, Deprecated<% end -%>)
 <%   elsif !property.output -%>
-  (Optional<% if property.deprecated? -%>, Deprecated<% end -%>)
+  (Optional<% if property.deprecation_message -%>, Deprecated<% end -%>)
 <%   elsif property.output && !property.parent.nil? -%>
-  (Output<% if property.deprecated? -%>, Deprecated<% end -%>)
-<%   elsif property.deprecated? -%>
+  (Output<% if property.deprecation_message -%>, Deprecated<% end -%>)
+<%   elsif property.deprecation_message -%>
   (Deprecated)
 <%   end -%>
 <% end -%>
@@ -36,4 +38,7 @@
 <% end -%>
 <% if !property.flatten_object && !property.nested_properties.nil? && !property.nested_properties.empty? -%>
   Structure is [documented below](#nested_<%= property.name.underscore -%>).
+<% end -%>
+<% if property.deprecation_message %>
+  ~> **Warning:** <%= property.deprecation_message %>
 <% end -%>

@@ -56,6 +56,18 @@ examples:
     vars:
       display_name: 'tcp-uptime-check'
       group_display_name: 'uptime-check-group'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'uptime_check_config_synthetic_monitor'
+    primary_resource_id: 'synthetic_monitor'
+    vars:
+      display_name: 'synthetic_monitor'
+      function_name: 'synthetic_function'
+      zip_path: 'synthetic-fn-source.zip'
+      bucket_name: 'gcf-source'
+    test_env_vars:
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      zip_path: '"./test-fixtures/synthetic-fn-source.zip"'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/monitoring_uptime_check_config.go.erb
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
@@ -163,9 +175,6 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: httpCheck
     description: Contains information needed to make an HTTP or HTTPS check.
-    exactly_one_of:
-      - http_check
-      - tcp_check
     properties:
       - !ruby/object:Api::Type::Enum
         name: requestMethod
@@ -324,9 +333,6 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: tcpCheck
     description: Contains information needed to make a TCP check.
-    exactly_one_of:
-      - http_check
-      - tcp_check
     properties:
       - !ruby/object:Api::Type::Integer
         name: port
@@ -342,6 +348,7 @@ properties:
     exactly_one_of:
       - monitored_resource
       - resource_group
+      - synthetic_monitor
     properties:
       - !ruby/object:Api::Type::Enum
         name: resourceType
@@ -379,6 +386,7 @@ properties:
     exactly_one_of:
       - monitored_resource
       - resource_group
+      - synthetic_monitor
     properties:
       - !ruby/object:Api::Type::String
         name: type
@@ -401,3 +409,28 @@ properties:
           Values for all of the labels listed in the associated monitored
           resource descriptor. For example, Compute Engine VM instances use the
           labels "project_id", "instance_id", and "zone".
+  - !ruby/object:Api::Type::NestedObject
+    name: syntheticMonitor
+    immutable: true
+    description:
+      A Synthetic Monitor deployed to a Cloud Functions V2 instance.
+    exactly_one_of:
+      - monitored_resource
+      - resource_group
+      - synthetic_monitor
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: cloudFunctionV2
+        immutable: true
+        required: true
+        description:
+          Target a Synthetic Monitor GCFv2 Instance
+        exactly_one_of:
+          - cloud_function_v2
+        properties:
+          - !ruby/object:Api::Type::String
+            name: name
+            immutable: true
+            required: true
+            description:
+              The fully qualified name of the cloud function resource.

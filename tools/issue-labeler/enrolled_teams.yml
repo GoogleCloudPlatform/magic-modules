@@ -20,6 +20,7 @@ service/beyondcorp:
   resources:
   - google_beyondcorp_.*
 service/bigquery:
+  team: bq-terraform-eng
   resources:
   - google_bigquery_.*
 service/bigtableadmin:
@@ -28,6 +29,9 @@ service/bigtableadmin:
 service/billingbudgets:
   resources:
   - google_billing_budget
+service/binaryauthorization:
+  resources:
+  - google_binary_authorization_.*
 service/certificatemanager:
   resources:
   - google_certificate_manager_.*
@@ -61,6 +65,9 @@ service/cloudtasks:
 service/composer:
   resources:
   - google_composer_.*
+service/compute-interconnect:
+  resources:
+  - google_compute_interconnect_.*
 service/compute-nat:
   resources:
   - google_compute_router_nat
@@ -104,6 +111,9 @@ service/documentaiwarehouse:
 service/edgenetwork:
   resources:
   - google_edgenetwork_.*
+service/endpoints:
+  resources:
+  - google_endpoints_.*
 service/essentialcontacts:
   resources:
   - google_essential_contacts_.*
@@ -190,6 +200,10 @@ service/monitoring-alerting:
   resources:
   - google_monitoring_notification_channel
   - google_monitoring_alert_policy
+service/monitoring-metrics:
+  resources:
+  - google_monitoring_metric_descriptor
+  - google_monitoring_group
 service/monitoring-services:
   resources:
   - google_monitoring_custom_service
@@ -252,6 +266,8 @@ service/storage:
   - google_storage_notification
   - google_storage_object_.*
   - google_storage_project_service_account
+  - google_storage_transfer_agent_pool
+  - google_storage_transfer_job
 service/vmwareengine:
   resources:
   - google_vmwareengine_network

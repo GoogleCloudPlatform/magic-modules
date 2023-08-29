@@ -62,6 +62,24 @@ examples:
     primary_resource_id: 'full'
     vars:
       alloydb_cluster_name: 'alloydb-cluster-full'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_cluster_restore'
+    primary_resource_id: 'source'
+    skip_test: true
+    vars:
+      alloydb_cluster_name: 'alloydb-source-cluster'
+      alloydb_backup_restored_cluster_name: 'alloydb-backup-restored'
+      alloydb_pitr_restored_cluster_name: 'alloydb-pitr-restored'
+      alloydb_backup_id: 'alloydb-backup'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "alloydb-instance-basic")'
+    ignore_read_extra:
+      - 'reconciling'
+      - 'update_time'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_create: templates/terraform/pre_create/alloydb_restore_cluster.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'clusterId'
@@ -193,6 +211,42 @@ properties:
           The initial password for the user.
         required: true
         sensitive: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'restoreBackupSource'
+    ignore_read: true
+    immutable: true
+    conflicts:
+      - restore_continuous_backup_source
+    description: |
+      The source when restoring from a backup. Conflicts with 'restore_continuous_backup_source', both can't be set together.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'backupName'
+        required: true
+        immutable: true
+        description: |
+          The name of the backup that this cluster is restored from.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'restoreContinuousBackupSource'
+    ignore_read: true
+    immutable: true
+    conflicts:
+      - restore_backup_source
+    description: |
+      The source when restoring via point in time recovery (PITR). Conflicts with 'restore_backup_source', both can't be set together.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'cluster'
+        required: true
+        immutable: true
+        description: |
+          The name of the source cluster that this cluster is restored from.
+      - !ruby/object:Api::Type::String
+        name: 'pointInTime'
+        required: true
+        immutable: true
+        description: |
+          The point in time that this cluster is restored to, in RFC 3339 format.
   - !ruby/object:Api::Type::NestedObject
     name: 'continuousBackupConfig'
     default_from_api: true

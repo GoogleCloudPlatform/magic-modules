@@ -134,7 +134,7 @@ func TestAccFilestoreInstance_reservedIpRange_update(t *testing.T) {
 				ResourceName:            "google_filestore_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "location"},
+				ImportStateVerifyIgnore: []string{"zone", "location", "networks.0.reserved_ip_range"},
 			},
 			{
 				Config: testAccFilestoreInstance_reservedIpRange_update2(name),
@@ -143,7 +143,7 @@ func TestAccFilestoreInstance_reservedIpRange_update(t *testing.T) {
 				ResourceName:            "google_filestore_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "location"},
+				ImportStateVerifyIgnore: []string{"zone", "location", "networks.0.reserved_ip_range"},
 			},
 		},
 	})

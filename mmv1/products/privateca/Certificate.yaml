@@ -546,7 +546,8 @@ properties:
                 item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: 'configValues'
-        deprecation_message: Deprecated in favor of `x509_description`.
+        deprecation_message: >-
+          `config_values` is deprecated and will be removed in a future release. Use `x509_description` instead.
         output: true
         description: |
           Describes some of the technical fields in a certificate.
@@ -741,7 +742,8 @@ properties:
     item_type: Api::Type::String
   - !ruby/object:Api::Type::Array
     name: 'pemCertificates'
-    deprecation_message: Deprecated in favor of `pem_certificate_chain`.
+    deprecation_message: >-
+      `pem_certificates` is deprecated and will be removed in a future major release. Use `pem_certificate_chain` instead.
     output: true
     description: |
       Required. Expected to be in leaf-to-root order according to RFC 5246.
