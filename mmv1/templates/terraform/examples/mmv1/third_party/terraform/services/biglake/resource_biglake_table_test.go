@@ -85,8 +85,8 @@ resource "google_biglake_table" "table" {
 		table_type = "MANAGED_TABLE"
 		storage_descriptor {
 		  location_uri = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.data_folder.name}"
-		  inputFormat = "org.apache.hadoop.mapred.SequenceFileInputFormat",
-		  outputFormat =  "org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat"
+		  input_format = "org.apache.hadoop.mapred.SequenceFileInputFormat",
+		  output_format =  "org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat"
 		}
 		# Some Example Parameters.
 		parameters = {
