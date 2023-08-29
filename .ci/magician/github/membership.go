@@ -31,20 +31,19 @@ var (
 
 	// This is for reviewers who are "on vacation": will not receive new review assignments but will still receive re-requests for assigned PRs.
 	onVacationReviewers = []string{
-		"rileykarson",
-		"NickElliot",
+		"zli82016",
 	}
 )
 
-type userType int64
+type UserType int64
 
 const (
-	CommunityUserType userType = iota
+	CommunityUserType UserType = iota
 	GooglerUserType
 	CoreContributorUserType
 )
 
-func (ut userType) String() string {
+func (ut UserType) String() string {
 	switch ut {
 	case GooglerUserType:
 		return "Googler"
@@ -55,7 +54,7 @@ func (ut userType) String() string {
 	}
 }
 
-func (gh *github) GetUserType(user string) userType {
+func (gh *github) GetUserType(user string) UserType {
 	if isTeamMember(user, gh.token) {
 		fmt.Println("User is a team member")
 		return CoreContributorUserType
@@ -90,7 +89,7 @@ func isOrgMember(author, org, githubToken string) bool {
 	return res != 404
 }
 
-func getRandomReviewer() string {
+func GetRandomReviewer() string {
 	availableReviewers := utils.Removes(reviewerRotation, onVacationReviewers)
 	rand.Seed(time.Now().UnixNano())
 	reviewer := availableReviewers[rand.Intn(len(availableReviewers))]

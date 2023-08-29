@@ -12,6 +12,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type ccGithub interface {
+	GetPullRequestAuthor(string) (string, error)
+	GetUserType(string) github.UserType
+	RemoveLabel(prNumber string, label string) error
+	PostBuildStatus(prNumber string, title string, state string, targetUrl string, commitSha string) error
+}
+
+type ccCloudbuild interface {
+	TriggerMMPresubmitRuns(commitSha string, substitutions map[string]string) error
+}
+
 // communityApprovalCmd represents the communityApproval command
 var communityApprovalCmd = &cobra.Command{
 	Use:   "community-checker",
@@ -52,37 +63,42 @@ var communityApprovalCmd = &cobra.Command{
 		baseBranch := args[5]
 		fmt.Println("Base Branch: ", baseBranch)
 
-		substitutions := map[string]string{
-			"BRANCH_NAME":    branchName,
-			"_PR_NUMBER":     prNumber,
-			"_HEAD_REPO_URL": headRepoUrl,
-			"_HEAD_BRANCH":   headBranch,
-			"_BASE_BRANCH":   baseBranch,
-		}
-
 		gh := github.NewGithubService()
-		author, err := gh.GetPullRequestAuthor(prNumber)
+		cb := cloudbuild.NewCloudBuildService()
+		execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch, gh, cb)
+	},
+}
+
+func execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch string, gh ccGithub, cb ccCloudbuild) {
+	substitutions := map[string]string{
+		"BRANCH_NAME":    branchName,
+		"_PR_NUMBER":     prNumber,
+		"_HEAD_REPO_URL": headRepoUrl,
+		"_HEAD_BRANCH":   headBranch,
+		"_BASE_BRANCH":   baseBranch,
+	}
+
+	author, err := gh.GetPullRequestAuthor(prNumber)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	authorUserType := gh.GetUserType(author)
+	trusted := authorUserType == github.CoreContributorUserType || authorUserType == github.GooglerUserType
+
+	// only triggers build for untrusted users (because trusted users will be handled by membership-checker)
+	if !trusted {
+		err = cb.TriggerMMPresubmitRuns(commitSha, substitutions)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+	}
 
-		authorUserType := gh.GetUserType(author)
-		trusted := authorUserType == github.CoreContributorUserType || authorUserType == github.GooglerUserType
-
-		// only triggers build for untrusted users (because trusted users will be handled by membership-checker)
-		if !trusted {
-			err = cloudbuild.TriggerMMPresubmitRuns(commitSha, substitutions)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-		}
-
-		// in community-checker job:
-		// remove awaiting-approval label from external contributor PRs
-		gh.RemoveLabel(prNumber, "awaiting-approval")
-	},
+	// in community-checker job:
+	// remove awaiting-approval label from external contributor PRs
+	gh.RemoveLabel(prNumber, "awaiting-approval")
 }
 
 func init() {

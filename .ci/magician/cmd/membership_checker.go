@@ -12,6 +12,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type mcGithub interface {
+	GetPullRequestAuthor(string) (string, error)
+	GetUserType(string) github.UserType
+	GetPullRequestRequestedReviewer(string) (string, error)
+	GetPullRequestPreviousAssignedReviewers(string) ([]string, error)
+	RequestPullRequestReviewer(prNumber string, reviewer string) error
+	PostComment(prNumber string, comment string) error
+	AddLabel(prNumber string, label string) error
+	PostBuildStatus(prNumber string, title string, state string, targetUrl string, commitSha string) error
+}
+
+type mcCloudbuild interface {
+	ApproveCommunityChecker(prNumber, commitSha string) error
+	GetAwaitingApprovalBuildLink(prNumber, commitSha string) (string, error)
+	TriggerMMPresubmitRuns(commitSha string, substitutions map[string]string) error
+}
+
 // membershipCheckerCmd represents the membershipChecker command
 var membershipCheckerCmd = &cobra.Command{
 	Use:   "membership-checker",
@@ -60,94 +77,98 @@ var membershipCheckerCmd = &cobra.Command{
 		baseBranch := args[5]
 		fmt.Println("Base Branch: ", baseBranch)
 
-		substitutions := map[string]string{
-			"BRANCH_NAME":    branchName,
-			"_PR_NUMBER":     prNumber,
-			"_HEAD_REPO_URL": headRepoUrl,
-			"_HEAD_BRANCH":   headBranch,
-			"_BASE_BRANCH":   baseBranch,
-		}
-
 		gh := github.NewGithubService()
+		cb := cloudbuild.NewCloudBuildService()
+		execMembershipChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch, gh, cb)
+	},
+}
 
-		author, err := gh.GetPullRequestAuthor(prNumber)
+func execMembershipChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch string, gh mcGithub, cb mcCloudbuild) {
+	substitutions := map[string]string{
+		"BRANCH_NAME":    branchName,
+		"_PR_NUMBER":     prNumber,
+		"_HEAD_REPO_URL": headRepoUrl,
+		"_HEAD_BRANCH":   headBranch,
+		"_BASE_BRANCH":   baseBranch,
+	}
+
+	author, err := gh.GetPullRequestAuthor(prNumber)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	authorUserType := gh.GetUserType(author)
+	trusted := authorUserType == github.CoreContributorUserType || authorUserType == github.GooglerUserType
+
+	if authorUserType != github.CoreContributorUserType {
+		fmt.Println("Not core contributor - assigning reviewer")
+
+		firstRequestedReviewer, err := gh.GetPullRequestRequestedReviewer(prNumber)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		authorUserType := gh.GetUserType(author)
-		trusted := authorUserType == github.CoreContributorUserType || authorUserType == github.GooglerUserType
-
-		if authorUserType != github.CoreContributorUserType {
-			fmt.Println("Not core contributor - assigning reviewer")
-
-			firstRequestedReviewer, err := gh.GetPullRequestRequestedReviewer(prNumber)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-
-			previouslyInvolvedReviewers, err := gh.GetPullRequestPreviousAssignedReviewers(prNumber)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-
-			reviewersToRequest, newPrimaryReviewer := github.ChooseReviewers(firstRequestedReviewer, previouslyInvolvedReviewers)
-
-			for _, reviewer := range reviewersToRequest {
-				err = gh.RequestPullRequestReviewer(prNumber, reviewer)
-				if err != nil {
-					fmt.Println(err)
-					os.Exit(1)
-				}
-			}
-
-			if newPrimaryReviewer != "" {
-				comment := github.FormatReviewerComment(newPrimaryReviewer, authorUserType, trusted)
-				err = gh.PostComment(prNumber, comment)
-				if err != nil {
-					fmt.Println(err)
-					os.Exit(1)
-				}
-			}
+		previouslyInvolvedReviewers, err := gh.GetPullRequestPreviousAssignedReviewers(prNumber)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
 		}
 
-		// auto_run(contributor-membership-checker) will be run on every commit or /gcbrun:
-		// only triggers builds for trusted users
-		if trusted {
-			err = cloudbuild.TriggerMMPresubmitRuns(commitSha, substitutions)
+		reviewersToRequest, newPrimaryReviewer := github.ChooseReviewers(firstRequestedReviewer, previouslyInvolvedReviewers)
+
+		for _, reviewer := range reviewersToRequest {
+			err = gh.RequestPullRequestReviewer(prNumber, reviewer)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
 		}
 
-		// in contributor-membership-checker job:
-		// 1. auto approve community-checker run for trusted users
-		// 2. add awaiting-approval label to external contributor PRs
-		if trusted {
-			err = cloudbuild.ApproveCommunityChecker(prNumber, commitSha)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-		} else {
-			gh.AddLabel(prNumber, "awaiting-approval")
-			targetUrl, err := cloudbuild.GetAwaitingApprovalBuildLink(prNumber, commitSha)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-
-			err = gh.PostBuildStatus(prNumber, "Approve Build", "success", targetUrl, commitSha)
+		if newPrimaryReviewer != "" {
+			comment := github.FormatReviewerComment(newPrimaryReviewer, authorUserType, trusted)
+			err = gh.PostComment(prNumber, comment)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
 		}
-	},
+	}
+
+	// auto_run(contributor-membership-checker) will be run on every commit or /gcbrun:
+	// only triggers builds for trusted users
+	if trusted {
+		err = cb.TriggerMMPresubmitRuns(commitSha, substitutions)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
+
+	// in contributor-membership-checker job:
+	// 1. auto approve community-checker run for trusted users
+	// 2. add awaiting-approval label to external contributor PRs
+	if trusted {
+		err = cb.ApproveCommunityChecker(prNumber, commitSha)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	} else {
+		gh.AddLabel(prNumber, "awaiting-approval")
+		targetUrl, err := cb.GetAwaitingApprovalBuildLink(prNumber, commitSha)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		err = gh.PostBuildStatus(prNumber, "Approve Build", "success", targetUrl, commitSha)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
 }
 
 func init() {

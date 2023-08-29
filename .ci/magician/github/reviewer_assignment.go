@@ -30,14 +30,14 @@ func ChooseReviewers(firstRequestedReviewer string, previouslyInvolvedReviewers 
 	}
 
 	if !hasPrimaryReviewer {
-		newPrimaryReviewer = getRandomReviewer()
+		newPrimaryReviewer = GetRandomReviewer()
 		reviewersToRequest = append(reviewersToRequest, newPrimaryReviewer)
 	}
 
 	return reviewersToRequest, newPrimaryReviewer
 }
 
-func FormatReviewerComment(newPrimaryReviewer string, authorUserType userType, trusted bool) string {
+func FormatReviewerComment(newPrimaryReviewer string, authorUserType UserType, trusted bool) string {
 	tmpl, err := template.New("REVIEWER_ASSIGNMENT_COMMENT.md").Parse(reviewerAssignmentComment)
 	if err != nil {
 		panic(fmt.Sprintf("Unable to parse REVIEWER_ASSIGNMENT_COMMENT.md: %s", err))

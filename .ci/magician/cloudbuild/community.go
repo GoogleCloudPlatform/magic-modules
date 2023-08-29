@@ -8,7 +8,7 @@ import (
 	"google.golang.org/api/cloudbuild/v1"
 )
 
-func ApproveCommunityChecker(prNumber, commitSha string) error {
+func (cb cloudBuild) ApproveCommunityChecker(prNumber, commitSha string) error {
 	buildId, err := getPendingBuildId(PROJECT_ID, commitSha)
 	if err != nil {
 		return err
@@ -26,7 +26,7 @@ func ApproveCommunityChecker(prNumber, commitSha string) error {
 	return nil
 }
 
-func GetAwaitingApprovalBuildLink(prNumber, commitSha string) (string, error) {
+func (cb cloudBuild) GetAwaitingApprovalBuildLink(prNumber, commitSha string) (string, error) {
 	buildId, err := getPendingBuildId(PROJECT_ID, commitSha)
 	if err != nil {
 		return "", err

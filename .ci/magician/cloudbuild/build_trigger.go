@@ -8,7 +8,7 @@ import (
 	"google.golang.org/api/cloudbuild/v1"
 )
 
-func TriggerMMPresubmitRuns(commitSha string, substitutions map[string]string) error {
+func (cb cloudBuild) TriggerMMPresubmitRuns(commitSha string, substitutions map[string]string) error {
 	presubmitTriggerId, ok := os.LookupEnv("GENERATE_DIFFS_TRIGGER")
 	if !ok {
 		return fmt.Errorf("did not provide GENERATE_DIFFS_TRIGGER environment variable")

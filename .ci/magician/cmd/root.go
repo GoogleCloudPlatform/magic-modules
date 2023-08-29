@@ -5,20 +5,12 @@ package cmd
 
 import (
 	"fmt"
-	"magician/github"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
-var config configuration = {
-	gh github.NewGithubService(),
-}
-
 // rootCmd represents the base command when called without any subcommands
-type configuration struct {
-	gh github.GithubService
-}
 
 var rootCmd = &cobra.Command{
 	Use: "magician",

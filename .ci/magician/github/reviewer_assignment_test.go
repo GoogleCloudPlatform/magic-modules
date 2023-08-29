@@ -83,7 +83,7 @@ func TestChooseReviewers(t *testing.T) {
 func TestFormatReviewerComment(t *testing.T) {
 	cases := map[string]struct {
 		Reviewer       string
-		AuthorUserType userType
+		AuthorUserType UserType
 		Trusted        bool
 	}{
 		"community contributor": {
@@ -118,7 +118,7 @@ func TestFormatReviewerComment(t *testing.T) {
 			if strings.Contains(comment, fmt.Sprintf("~%s~", tc.AuthorUserType.String())) {
 				t.Errorf("wanted user type (%s) in comment to not be crossed out, but it is", tc.AuthorUserType.String())
 			}
-			for _, ut := range []userType{CommunityUserType, GooglerUserType, CoreContributorUserType} {
+			for _, ut := range []UserType{CommunityUserType, GooglerUserType, CoreContributorUserType} {
 				if ut != tc.AuthorUserType && !strings.Contains(comment, fmt.Sprintf("~%s~", ut.String())) {
 					t.Errorf("wanted other user type (%s) in comment to be crossed out, but it is not", ut)
 				}
