@@ -1,6 +1,6 @@
 resource "google_dns_managed_zone" "<%= ctx[:primary_resource_id] %>" {
   name        = "<%= ctx[:vars]['zone_name'] %>"
-  dns_name    = "private.example.com."
+  dns_name    = "<%= ctx[:vars]['zone_dns_name'] %>"
   description = "Example private DNS zone"
   labels = {
     foo = "bar"

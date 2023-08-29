@@ -35,9 +35,9 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dns_policy_multiproject'
     skip_docs: true
-    primary_resource_id: 'example-policy'
+    primary_resource_id: 'example-policy-multiproject'
     vars:
-      policy_name: 'example-policy'
+      policy_name: 'example-policy-multiproject'
       network_1_name: 'network-1'
       network_2_name: 'network-2'
       project_1_name: 'project-1'
