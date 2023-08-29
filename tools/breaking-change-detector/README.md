@@ -1,28 +1,24 @@
 # Breaking change detector
 
-## Purpose
 Detects breaking changes between provider versions.
 
 Specifically protects customer expectations between [minor version](https://www.terraform.io/plugin/sdkv2/best-practices/versioning#example-minor-number-increments).
 
 
-## Execution of
+## Run
 
-### Program:mode-default
 ```bash
-go run .
+# set up old / new dirs
+make clone OWNER_REPO=modular-magician/terraform-provider-google
+
+# build based on old / new dirs
+make build OLD_REF=branch_or_commit NEW_REF=branch_or_commit
+
+# Run the binary
+bin/breaking-change-detector
 ```
 
-### Tests
+## Test
 ```bash
 go test ./...
 ```
-
-
-## Misc
-```bash
-# getting the go version label from git log
-TZ=UTC0 git log --since="jan 1 2019" --format=%cd-%H --date=format-local:%Y%m%d%H%M%S | sed -E "s/(.*-.{12}).*/\1/"
-```
-
-

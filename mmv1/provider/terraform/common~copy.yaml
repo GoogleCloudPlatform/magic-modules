@@ -31,20 +31,6 @@
 <% end -%>
 <% end -%>
 
-# Copy all of the terraform resources that are still hand written
-<%
-  Dir["third_party/terraform/resources/*.go"].each do |file_path|
-    fname = file_path.split('/')[-1]
--%>
-'<%= dir -%>/<%= fname -%>': 'third_party/terraform/resources/<%= fname -%>'
-<% end -%>
-<%
-  Dir["third_party/terraform/data_sources/*.go"].each do |file_path|
-    fname = file_path.split('/')[-1]
--%>
-'<%= dir -%>/<%= fname -%>': 'third_party/terraform/data_sources/<%= fname -%>'
-<% end -%>
-
 <%
   Dir["third_party/terraform/acctest/*.go"].each do |file_path|
     fname = file_path.split('/')[-1]
@@ -142,13 +128,7 @@
 -%>
 '<%= fname -%>': '<%= file_path -%>'
 <% end -%>
-<%
-  Dir["third_party/terraform/framework_utils/*.go"].each do |file_path|
-    fname = file_path.split('/')[-1]
--%>
-'<%= dir -%>/<%= fname -%>': 'third_party/terraform/framework_utils/<%= fname -%>'
-<% end -%>
-'<%= dir -%>/test-fixtures/': 'third_party/terraform/utils/test-fixtures'
+'<%= dir -%>/test-fixtures/': 'third_party/terraform/test-fixtures'
 <% end -%>
 <% if generate_docs -%>
 <%  Dir["third_party/terraform/website/**/*.*"].each do |file_path|
