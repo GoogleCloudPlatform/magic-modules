@@ -1,0 +1,37 @@
+resource "google_storage_insights_report_config" "<%= ctx[:primary_resource_id] %>" {
+  location = "us-central1"
+  frequency_options {
+    frequency = "WEEKLY"
+    start_date {
+      day = 15
+      month = 3
+      year = 2023
+    }
+    end_date {
+      day = 15
+      month = 4
+      year = 2023
+    }
+  }
+  csv_options {
+    record_separator = "\n"
+    delimiter = ","
+    header_required = false
+  }
+  object_metadata_report_options {
+    metadata_fields = ["bucket", "name", "project"]
+    storage_filters {
+      bucket = google_storage_bucket.report_bucket.name
+    }
+    storage_destination_options {
+      bucket = google_storage_bucket.report_bucket.name
+    }
+  }
+}
+
+resource "google_storage_bucket" "report_bucket" {
+  name                        = "<%= ctx[:vars]['bucket_name'] %>"
+  location                    = "us-central1"
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
