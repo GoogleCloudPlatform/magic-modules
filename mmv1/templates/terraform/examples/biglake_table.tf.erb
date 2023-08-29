@@ -25,7 +25,7 @@ resource "google_storage_bucket_object" "data_folder" {
 
 resource "google_biglake_database" "database" {
     name = "<%= ctx[:vars]['database_id'] %>"
-    catalog_id = google_biglake_catalog.catalog.name
+    catalog = google_biglake_catalog.catalog.id
     location = google_biglake_catalog.catalog.location
     type = "HIVE"
     hive_options {
@@ -38,8 +38,7 @@ resource "google_biglake_database" "database" {
 
 resource "google_biglake_table" "<%= ctx[:primary_resource_id] %>" {
     name = "<%= ctx[:vars]['name'] %>"
-    catalog_id = google_biglake_catalog.catalog.name
-    database_id = google_biglake_database.database.name
+    database = google_biglake_database.database.id
     location = google_biglake_catalog.catalog.location
     type = "HIVE"
     hive_options {
