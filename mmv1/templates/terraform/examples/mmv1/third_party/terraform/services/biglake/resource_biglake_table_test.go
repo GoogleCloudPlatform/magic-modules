@@ -85,19 +85,19 @@ resource "google_biglake_table" "table" {
 		table_type = "MANAGED_TABLE"
 		storage_descriptor {
 		  location_uri = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.data_folder.name}"
-		  "inputFormat": "org.apache.hadoop.mapred.SequenceFileInputFormat",
-		  "outputFormat": "org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat"
+		  inputFormat = "org.apache.hadoop.mapred.SequenceFileInputFormat",
+		  outputFormat =  "org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat"
 		}
 		# Some Example Parameters.
-		parameters {
-		  "spark.sql.create.version": "3.1.7",
-		  "spark.sql.sources.schema.numParts": "1",
-		  "transient_lastDdlTime": "1680895000",
-		  "spark.sql.partitionProvider": "catalog",
-		  "owner": "Jane Doe",
-		  "spark.sql.sources.schema.part.0": "{\"type\":\"struct\",\"fields\":[{\"name\":\"id\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{}},{\"name\":\"name\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"age\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{}}]}",
-		  "spark.sql.sources.provider": "iceberg",
-		  "provider": "iceberg"
+		parameters = {
+		  "spark.sql.create.version" = "3.1.7"
+		  "spark.sql.sources.schema.numParts" = "1"
+		  "transient_lastDdlTime" = "1680895000"
+		  "spark.sql.partitionProvider" = "catalog"
+		  "owner" = "Jane Doe"
+		  "spark.sql.sources.schema.part.0" = "{\"type\":\"struct\",\"fields\":[{\"name\":\"id\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{}},{\"name\":\"name\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"age\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{}}]}"
+		  "spark.sql.sources.provider": "iceberg"
+		  "provider" = "iceberg"
 		}
 	}
 }
