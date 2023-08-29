@@ -650,6 +650,16 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     }
 <%  end -%>
 
+<%  if has_zone -%>
+    zone, err := tpgresource.GetZone(d, config)
+    if err != nil {
+        return err
+    }
+    if err := d.Set("zone", zone); err != nil {
+        return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
+    }
+<%  end -%>
+
 <%  object.gettable_properties.reject{|p| p.ignore_read }.each do |prop| -%>
 <%    if prop.flatten_object -%>
 // Terraform must set the top level schema field, but since this object contains collapsed properties

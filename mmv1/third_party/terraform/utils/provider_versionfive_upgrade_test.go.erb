@@ -43,6 +43,7 @@ func TestProvider_versionfive_upgrade(t *testing.T) {
 			{
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 				Config:                   testProvider_versionfive_upgrades(project, org, billingId, name1, name2, name3, name4),
+				PlanOnly:									true,
 			},
 			{
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -66,7 +67,7 @@ func TestProvider_versionfive_upgrade(t *testing.T) {
 	})
 }
 
-func TestProvider_versionfive_upgrades_ignorereads(t *testing.T) {
+func TestProvider_versionfive_ignorereads_upgrade(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
@@ -119,6 +120,7 @@ func TestProvider_versionfive_upgrades_ignorereads(t *testing.T) {
 				Config: testProvider_versionfive_upgrades_ignorereads(itName, tpName, igmName, autoscalerName, diskName, policyName,
 					itNameRegion, tpNameRegion, igmNameRegion, autoscalerNameRegion, endpointContext,
 					policyContext, attachmentContext),
+				PlanOnly:									true,
 			},
 		},
 	})
@@ -564,7 +566,6 @@ resource "google_compute_service_attachment" "psc_ilb_service_attachment6" {
   region      = "us-west2"
   description = "A service attachment configured with Terraform"
 
-  domain_names             = ["gcp.tfacc.hashicorptest.com."]
   enable_proxy_protocol    = true
   connection_preference    = "ACCEPT_AUTOMATIC"
   nat_subnets              = [google_compute_subnetwork.psc_ilb_nat6.id]

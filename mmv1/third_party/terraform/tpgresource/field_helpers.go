@@ -399,6 +399,20 @@ func GetRegionFromSchema(regionSchemaField, zoneSchemaField string, d TerraformR
 	return "", fmt.Errorf("Cannot determine region: set in this resource, or set provider-level 'region' or 'zone'.")
 }
 
+// Infers the region based on the following (in order of priority):
+// - `zoneSchemaField` in resource schema
+// - provider-level zone
+func GetZoneFromSchema(zoneSchemaField string, d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	if v, ok := d.GetOk(zoneSchemaField); ok && zoneSchemaField != "" {
+		return GetResourceNameFromSelfLink(v.(string)), nil
+	}
+	if config.Zone != "" {
+		return config.Zone, nil
+	}
+
+	return "", fmt.Errorf("Cannot determine zone: set in this resource, or set provider-level 'zone'.")
+}
+
 type ProjectFieldValue struct {
 	Project string
 	Name    string

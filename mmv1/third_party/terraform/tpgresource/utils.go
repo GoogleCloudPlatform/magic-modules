@@ -78,6 +78,13 @@ func GetRegion(d TerraformResourceData, config *transport_tpg.Config) (string, e
 	return GetRegionFromSchema("region", "zone", d, config)
 }
 
+// Infers the region based on the following (in order of priority):
+// - `zone` field in resource schema
+// - provider-level zone
+func GetZone(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	return GetZoneFromSchema("region", "zone", d, config)
+}
+
 // GetProject reads the "project" field from the given resource data and falls
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
