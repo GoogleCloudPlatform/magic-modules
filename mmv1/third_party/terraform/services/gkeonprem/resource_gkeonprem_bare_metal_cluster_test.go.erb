@@ -324,6 +324,12 @@ func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateManualLbStart(contex
         }
       }
     }
+    binary_authorization {
+      evaluation_mode = "DISABLED"
+    }
+    upgrade_policy {
+      policy = "SERIAL"
+    }
   }
 `, context)
 }
@@ -386,6 +392,12 @@ func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateManualLb(context map
           username = "admin-updated@hashicorptest.com"
         }
       }
+    }
+    binary_authorization {
+      evaluation_mode = "DISABLED"
+    }
+    upgrade_policy {
+      policy = "SERIAL"
     }
   }
 `, context)
