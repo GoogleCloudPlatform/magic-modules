@@ -1,0 +1,82 @@
+package fwtransport_test
+
+import (
+	"context"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
+	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func TestFrameworkProvider_LoadAndValidateFramework_project(t *testing.T) {
+	cases := map[string]struct {
+		ConfigValues  map[string]interface{}
+		EnvVariables  map[string]string
+		ExpectedValue string
+		ExpectError   bool
+	}{
+		"project value set in the provider schema is not overridden by environment variables": {
+			ConfigValues: map[string]interface{}{
+				"project": "my-project-from-config",
+				// See hardcoded values in test function
+			},
+			EnvVariables: map[string]string{
+				"GOOGLE_PROJECT":        "project-from-GOOGLE_PROJECT",
+				"GOOGLE_CLOUD_PROJECT":  "project-from-GOOGLE_CLOUD_PROJECT",
+				"GCLOUD_PROJECT":        "project-from-GCLOUD_PROJECT",
+				"CLOUDSDK_CORE_PROJECT": "project-from-CLOUDSDK_CORE_PROJECT",
+			},
+			ExpectedValue: "my-project-from-config",
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			ctx := context.Background()
+			unsetTestProviderConfigEnvs(t) // inaccessible due to being in the provider_test package
+			setupTestEnvs(t, tc.EnvVariables)
+
+			tfVersion := "foobar"
+			providerversion := "999"
+			diags := diag.Diagnostics{}
+
+			impersonateServiceAccountDelegates, _ := types.ListValue(types.StringType, []attr.Value{})
+
+			data := fwmodels.ProviderModel{
+				Project: types.StringValue(tc.ExpectedValue),
+
+				// We need to set the below fields to stop the code under tests experiencing errors
+				// Credentials: If we don't set this then the test looks for application default credentials and can fail depending on the machine running the test
+				// ImpersonateServiceAccountDelegates: If we don't set this, we get a nil pointer exception ¯\_(ツ)_/¯
+				Credentials:                        types.StringValue(transport_tpg.TestFakeCredentialsPath),
+				ImpersonateServiceAccountDelegates: impersonateServiceAccountDelegates,
+			}
+
+			p := fwtransport.FrameworkProviderConfig{}
+			p.LoadAndValidateFramework(ctx, data, tfVersion, &diags, providerversion)
+
+			if diags.HasError() && tc.ExpectError {
+				return
+			}
+			if diags.HasError() && !tc.ExpectError {
+				for i, err := range diags.Errors() {
+					num := i + 1
+					t.Logf("unexpected error #%d : %s", num, err.Summary())
+				}
+				t.Fatalf("did not expect error, but [%d] error(s) occurred", diags.ErrorsCount())
+			}
+			if p.Project.IsNull() {
+				t.Fatalf("want project to be `%s`, but the value is null [null=%v]", tc.ExpectedValue, p.Project.IsNull())
+			}
+			if !p.Project.Equal(types.StringValue(tc.ExpectedValue)) {
+				t.Fatalf("want project to be `%s`, but got the value `%s`", tc.ExpectedValue, p.Project.String())
+			}
+		})
+	}
+}
