@@ -211,20 +211,14 @@ properties:
             required: true
           - !ruby/object:Api::Type::Double
             name: width
-            at_least_one_of:
-              - bucket_options.0.linear_buckets.0.num_finite_buckets
-              - bucket_options.0.linear_buckets.0.width
-              - bucket_options.0.linear_buckets.0.offset
             description: |
               Must be greater than 0.
+            required: true
           - !ruby/object:Api::Type::Double
             name: offset
-            at_least_one_of:
-              - bucket_options.0.linear_buckets.0.num_finite_buckets
-              - bucket_options.0.linear_buckets.0.width
-              - bucket_options.0.linear_buckets.0.offset
             description: |
               Lower bound of the first bucket.
+            required: true
       - !ruby/object:Api::Type::NestedObject
         name: exponentialBuckets
         at_least_one_of:
@@ -242,20 +236,14 @@ properties:
             required: true
           - !ruby/object:Api::Type::Double
             name: growthFactor
-            at_least_one_of:
-              - bucket_options.0.exponential_buckets.0.num_finite_buckets
-              - bucket_options.0.exponential_buckets.0.growth_factor
-              - bucket_options.0.exponential_buckets.0.scale
             description: |
               Must be greater than 1.
+            required: true
           - !ruby/object:Api::Type::Double
             name: scale
-            at_least_one_of:
-              - bucket_options.0.exponential_buckets.0.num_finite_buckets
-              - bucket_options.0.exponential_buckets.0.growth_factor
-              - bucket_options.0.exponential_buckets.0.scale
             description: |
               Must be greater than 0.
+            required: true
       - !ruby/object:Api::Type::NestedObject
         name: explicitBuckets
         at_least_one_of:
