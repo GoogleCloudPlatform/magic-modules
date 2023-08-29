@@ -46,7 +46,6 @@ var fieldRule_ChangingType = FieldRule{
 
 func fieldRule_ChangingType_func(old, new *schema.Schema, mc MessageContext) string {
 	message := mc.message
-	fmt.Printf("old: %v\nnew: %v\n", old, new)
 	if old.Type != new.Type {
 		oldType := getValueType(old.Type)
 		newType := getValueType(new.Type)
@@ -57,7 +56,6 @@ func fieldRule_ChangingType_func(old, new *schema.Schema, mc MessageContext) str
 
 	oldCasted, _ := old.Elem.(*schema.Schema)
 	newCasted, _ := new.Elem.(*schema.Schema)
-	fmt.Printf("oldCasted: %v\nnewCasted: %v\n", oldCasted, newCasted)
 	if oldCasted != nil && newCasted != nil && oldCasted.Type != newCasted.Type {
 		oldType := getValueType(old.Type) + "." + getValueType(oldCasted.Type)
 		newType := getValueType(new.Type) + "." + getValueType(newCasted.Type)
