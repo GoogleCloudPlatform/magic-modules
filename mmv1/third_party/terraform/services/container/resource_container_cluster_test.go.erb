@@ -340,6 +340,40 @@ func TestAccContainerCluster_withMultiNetworking(t *testing.T) {
 }
 <% end -%>
 
+<% unless version == 'ga' -%>
+func TestAccContainerCluster_withFQDNNetworkPolicy(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withFQDNNetworkPolicy(clusterName, false),
+			},
+			{
+				ResourceName:      "google_container_cluster.cluster",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
+			},
+			{
+				Config: testAccContainerCluster_withFQDNNetworkPolicy(clusterName, true),
+			},
+			{
+				ResourceName:      "google_container_cluster.cluster",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
+			},
+		},
+	})
+}
+<% end -%>
+
 func TestAccContainerCluster_withMasterAuthConfig_NoCert(t *testing.T) {
 	t.Parallel()
 
@@ -470,6 +504,69 @@ resource "google_container_cluster" "cluster" {
   datapath_provider = "ADVANCED_DATAPATH"
 }
 `, clusterName, clusterName)
+}
+<% end -%>
+
+
+<% unless version == 'ga' -%>
+func testAccContainerCluster_withFQDNNetworkPolicy(clusterName string, enabled bool) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "uscentral1a" {
+  location = "us-central1-a"
+}
+
+resource "google_compute_network" "container_network" {
+  name                    = "%s-nw"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "container_subnetwork" {
+  name                     = google_compute_network.container_network.name
+  network                  = google_compute_network.container_network.name
+  ip_cidr_range            = "10.0.36.0/24"
+  region                   = "us-central1"
+  private_ip_google_access = true
+
+  secondary_ip_range {
+    range_name    = "pod"
+    ip_cidr_range = "10.0.0.0/19"
+  }
+
+  secondary_ip_range {
+    range_name    = "svc"
+    ip_cidr_range = "10.0.32.0/22"
+  }
+
+  secondary_ip_range {
+    range_name    = "another-pod"
+    ip_cidr_range = "10.1.32.0/22"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      # The auto nodepool creates a secondary range which diffs this resource.
+      secondary_ip_range,
+    ]
+  }
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
+  initial_node_count = 1
+
+  network    = google_compute_network.container_network.name
+  subnetwork = google_compute_subnetwork.container_subnetwork.name
+  ip_allocation_policy {
+    cluster_secondary_range_name  = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
+    services_secondary_range_name = google_compute_subnetwork.container_subnetwork.secondary_ip_range[1].range_name
+  }
+
+  enable_fqdn_network_policy = %t
+  datapath_provider          = "ADVANCED_DATAPATH"
+}
+`, clusterName, clusterName, enabled)
 }
 <% end -%>
 
@@ -3919,6 +4016,80 @@ func TestAccContainerCluster_autopilot_net_admin(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore:	[]string{"min_master_version"},
+			},
+		},
+	})
+}
+
+func TestAccContainerCluster_additional_pod_ranges_config_on_create(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_additional_pod_ranges_config(clusterName, 1),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccContainerCluster_additional_pod_ranges_config_on_update(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_additional_pod_ranges_config(clusterName, 0),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerCluster_additional_pod_ranges_config(clusterName, 2),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerCluster_additional_pod_ranges_config(clusterName, 0),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerCluster_additional_pod_ranges_config(clusterName, 1),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerCluster_additional_pod_ranges_config(clusterName, 0),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -8060,4 +8231,84 @@ resource "google_container_cluster" "cluster" {
     }
   }
 }`, policyName, cluster, np)
+}
+
+func testAccContainerCluster_additional_pod_ranges_config(name string, nameCount int) string {
+	var podRangeNamesStr string
+	names := []string{"\"gke-autopilot-pods-add\",", "\"gke-autopilot-pods-add-2\""}
+	for i := 0; i < nameCount; i++ {
+		podRangeNamesStr += names[i]
+	}
+	var aprc string
+	if len(podRangeNamesStr) > 0 {
+		aprc = fmt.Sprintf(`
+			additional_pod_ranges_config {
+				pod_range_names = [%s]
+			}
+		`, podRangeNamesStr)
+	}
+	
+	return fmt.Sprintf(`
+	resource "google_compute_network" "main" {
+		name                    = "%s"
+		auto_create_subnetworks = false
+	}
+	resource "google_compute_subnetwork" "main" {
+		ip_cidr_range = "10.10.0.0/16"
+		name          = "%s"
+		network       = google_compute_network.main.self_link
+		region        = "us-central1"
+
+		secondary_ip_range {
+			range_name    = "gke-autopilot-services"
+			ip_cidr_range = "10.11.0.0/20"
+		}
+
+		secondary_ip_range {
+			range_name    = "gke-autopilot-pods"
+			ip_cidr_range = "10.12.0.0/16"
+		}
+
+		secondary_ip_range {
+			range_name    = "gke-autopilot-pods-add"
+			ip_cidr_range = "10.100.0.0/16"
+		}
+		secondary_ip_range {
+			range_name    = "gke-autopilot-pods-add-2"
+			ip_cidr_range = "100.0.0.0/16"
+		}
+	}
+	resource "google_container_cluster" "primary" {
+		name     = "%s"
+		location = "us-central1"
+
+		enable_autopilot = true
+
+		release_channel {
+			channel = "REGULAR"
+		}
+
+		network    = google_compute_network.main.name
+		subnetwork = google_compute_subnetwork.main.name
+
+		private_cluster_config {
+			enable_private_endpoint = false
+			enable_private_nodes    = true
+			master_ipv4_cidr_block  = "172.16.0.0/28"
+		}
+
+		# supresses permadiff
+		dns_config {
+			cluster_dns = "CLOUD_DNS"
+			cluster_dns_domain = "cluster.local"
+			cluster_dns_scope = "CLUSTER_SCOPE"
+		}
+
+		ip_allocation_policy {
+			cluster_secondary_range_name  = "gke-autopilot-pods"
+			services_secondary_range_name = "gke-autopilot-services"
+			%s
+		}
+	}
+	`, name, name, name, aprc)
 }
