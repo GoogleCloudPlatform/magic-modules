@@ -47,7 +47,6 @@ func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_b
 	return acctest.Nprintf(`
 resource "google_gke_hub_scope" "scoperbacrolebinding" {
   scope_id = "tf-test-scope%{random_suffix}"
-  all_memberships = false
 }
 
 resource "google_gke_hub_scope_rbac_role_binding" "scoperbacrolebinding" {
@@ -66,7 +65,6 @@ func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_u
 	return acctest.Nprintf(`
 resource "google_gke_hub_scope" "scoperbacrolebinding" {
   scope_id = "tf-test-scope%{random_suffix}"
-  all_memberships = false
 }
 
 resource "google_gke_hub_scope_rbac_role_binding" "scoperbacrolebinding" {

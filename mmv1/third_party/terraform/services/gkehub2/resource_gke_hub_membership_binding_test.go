@@ -65,7 +65,6 @@ resource "google_gke_hub_membership" "example" {
 
 resource "google_gke_hub_scope" "example" {
   scope_id = "tf-test-scope%{random_suffix}"
-  all_memberships = false
 }
 
 resource "google_gke_hub_membership_binding" "example" {
@@ -102,7 +101,6 @@ resource "google_gke_hub_membership" "example" {
 
 resource "google_gke_hub_scope" "example2" {
   scope_id = "tf-test-scope2%{random_suffix}"
-  all_memberships = false
 }
 
 resource "google_gke_hub_membership_binding" "example" {
