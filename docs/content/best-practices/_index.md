@@ -7,7 +7,7 @@ aliases:
 
 # Best practices
 
-The following is a list of best practices that contributions are expected to follow in order to ensure a consistent UX for the Google Terraform provider internally and also compared to other Terraform providers.
+The following is a list of best practices that contributions are expected to follow in order to ensure a consistent UX for the Google Terraform provider internally and also compared to other Terraform providers
 
 ## ForceNew
 
