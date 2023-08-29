@@ -27,7 +27,7 @@ func TestAccBiglakeDatabase_bigqueryBiglakeDatabase_update(t *testing.T) {
 				ResourceName:            "google_biglake_database.database",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "catalog_id"},
+				ImportStateVerifyIgnore: []string{"name", "catalog"},
 			},
 			{
 				Config: testAccBiglakeDatabase_bigqueryBiglakeDatabase_update(context),
@@ -36,7 +36,7 @@ func TestAccBiglakeDatabase_bigqueryBiglakeDatabase_update(t *testing.T) {
 				ResourceName:            "google_biglake_database.database",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "catalog_id"},
+				ImportStateVerifyIgnore: []string{"name", "catalog"},
 			},
 		},
 	})
@@ -62,8 +62,7 @@ resource "google_storage_bucket_object" "metadata_folder" {
 }
 resource "google_biglake_database" "database" {
     name = "tf_test_my_database%{random_suffix}"
-    catalog_id = google_biglake_catalog.catalog.name
-    location = google_biglake_catalog.catalog.location
+    catalog = google_biglake_catalog.catalog.id
 	type = "HIVE"
 	hive_options {
         location_uri = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.metadata_folder.name}/metadata/metadata"
