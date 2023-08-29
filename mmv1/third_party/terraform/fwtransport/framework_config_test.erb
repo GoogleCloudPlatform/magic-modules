@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package fwtransport_test
 
 import (
@@ -7,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
@@ -14,16 +16,21 @@ import (
 )
 
 func TestFrameworkProvider_LoadAndValidateFramework_project(t *testing.T) {
+
+	// Note: In the test function we need to set the below fields in test case's fwmodels.ProviderModel value
+	// this is to stop the code under tests experiencing errors, and could be addressed in future refactoring.
+	// - Credentials: If we don't set this then the test looks for application default credentials and can fail depending on the machine running the test
+	// - ImpersonateServiceAccountDelegates: If we don't set this, we get a nil pointer exception ¯\_(ツ)_/¯
+
 	cases := map[string]struct {
-		ConfigValues  map[string]interface{}
+		ConfigValues  fwmodels.ProviderModel
 		EnvVariables  map[string]string
-		ExpectedValue string
+		ExpectedValue basetypes.StringValue
 		ExpectError   bool
 	}{
 		"project value set in the provider schema is not overridden by environment variables": {
-			ConfigValues: map[string]interface{}{
-				"project": "my-project-from-config",
-				// See hardcoded values in test function
+			ConfigValues: fwmodels.ProviderModel{
+				Project: types.StringValue("my-project-from-config"),
 			},
 			EnvVariables: map[string]string{
 				"GOOGLE_PROJECT":        "project-from-GOOGLE_PROJECT",
@@ -31,7 +38,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_project(t *testing.T) {
 				"GCLOUD_PROJECT":        "project-from-GCLOUD_PROJECT",
 				"CLOUDSDK_CORE_PROJECT": "project-from-CLOUDSDK_CORE_PROJECT",
 			},
-			ExpectedValue: "my-project-from-config",
+			ExpectedValue: types.StringValue("my-project-from-config"),
 		},
 	}
 
@@ -39,29 +46,25 @@ func TestFrameworkProvider_LoadAndValidateFramework_project(t *testing.T) {
 		t.Run(tn, func(t *testing.T) {
 
 			// Arrange
-			ctx := context.Background()
 			acctest.UnsetTestProviderConfigEnvs(t)
 			acctest.SetupTestEnvs(t, tc.EnvVariables)
 
+			ctx := context.Background()
 			tfVersion := "foobar"
 			providerversion := "999"
 			diags := diag.Diagnostics{}
-
-			impersonateServiceAccountDelegates, _ := types.ListValue(types.StringType, []attr.Value{})
-
-			data := fwmodels.ProviderModel{
-				Project: types.StringValue(tc.ExpectedValue),
-
-				// We need to set the below fields to stop the code under tests experiencing errors
-				// Credentials: If we don't set this then the test looks for application default credentials and can fail depending on the machine running the test
-				// ImpersonateServiceAccountDelegates: If we don't set this, we get a nil pointer exception ¯\_(ツ)_/¯
-				Credentials:                        types.StringValue(transport_tpg.TestFakeCredentialsPath),
-				ImpersonateServiceAccountDelegates: impersonateServiceAccountDelegates,
-			}
+			
+			data := tc.ConfigValues
+			data.Credentials = types.StringValue(transport_tpg.TestFakeCredentialsPath)
+			impersonateServiceAccountDelegates, _ := types.ListValue(types.StringType, []attr.Value{}) // empty list
+			data.ImpersonateServiceAccountDelegates = impersonateServiceAccountDelegates
 
 			p := fwtransport.FrameworkProviderConfig{}
+
+			// Act
 			p.LoadAndValidateFramework(ctx, data, tfVersion, &diags, providerversion)
 
+			// Assert
 			if diags.HasError() && tc.ExpectError {
 				return
 			}
@@ -72,10 +75,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_project(t *testing.T) {
 				}
 				t.Fatalf("did not expect error, but [%d] error(s) occurred", diags.ErrorsCount())
 			}
-			if p.Project.IsNull() {
-				t.Fatalf("want project to be `%s`, but the value is null [null=%v]", tc.ExpectedValue, p.Project.IsNull())
-			}
-			if !p.Project.Equal(types.StringValue(tc.ExpectedValue)) {
+			if !p.Project.Equal(tc.ExpectedValue) {
 				t.Fatalf("want project to be `%s`, but got the value `%s`", tc.ExpectedValue, p.Project.String())
 			}
 		})
