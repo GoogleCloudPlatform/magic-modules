@@ -23,13 +23,13 @@ docs: !ruby/object:Provider::Terraform::Docs
     VPC SC configs are automatically created for a given location. Creating a
     resource of this type will acquire and update the resource that already
     exists at the location. Deleting this resource will remove the config from
-    your Terraform state and reset the config.
+    your Terraform state but leave the resource as is.
 base_url: 'projects/{{project}}/locations/{{location}}/vpcscConfig'
 self_link: 'projects/{{project}}/locations/{{location}}/vpcscConfig'
 create_url: 'projects/{{project}}/locations/{{location}}/vpcscConfig'
 create_verb: :PATCH
 update_verb: :PATCH
-delete_verb: :PATCH
+skip_delete: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     # Requires VPC SC Policy configured on organization
