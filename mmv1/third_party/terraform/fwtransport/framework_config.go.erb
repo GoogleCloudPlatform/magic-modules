@@ -130,6 +130,11 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 		data.ImpersonateServiceAccount = types.StringValue(os.Getenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT"))
 	}
 
+	// TODO(SarahFrench)remove as part of https://github.com/hashicorp/terraform-provider-google/issues/14447
+	// Temporarily adding this to fix https://github.com/hashicorp/terraform-provider-google/issues/14255 in a v4.x.x release
+	if data.Project.Equal(types.StringValue("")) {
+		data.Project = types.StringNull()
+	}
 	if data.Project.IsNull() {
 		project := transport_tpg.MultiEnvDefault([]string{
 			"GOOGLE_PROJECT",
