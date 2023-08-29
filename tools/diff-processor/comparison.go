@@ -72,10 +72,6 @@ func compareField(resourceName, fieldName string, old, new *schema.Schema) []str
 	messages := []string{}
 	fieldRules := rules.FieldRules
 
-	if fieldName != "psc_connections" {
-		return messages
-	}
-
 	for _, rule := range fieldRules {
 		breakageMessage := rule.IsRuleBreak(
 			old,
