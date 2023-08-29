@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccBiglakeDatabase_bigqueryBiglakeDatabase_update(t *testing.T) {
+func TestAccBiglakeDatabase_biglakeDatabase_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -21,7 +21,7 @@ func TestAccBiglakeDatabase_bigqueryBiglakeDatabase_update(t *testing.T) {
 		CheckDestroy:             testAccCheckBiglakeDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBiglakeDatabase_bigqueryBiglakeDatabaseExample(context),
+				Config: testAccBiglakeDatabase_biglakeDatabaseExample(context),
 			},
 			{
 				ResourceName:            "google_biglake_database.database",
@@ -30,7 +30,7 @@ func TestAccBiglakeDatabase_bigqueryBiglakeDatabase_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"name", "catalog"},
 			},
 			{
-				Config: testAccBiglakeDatabase_bigqueryBiglakeDatabase_update(context),
+				Config: testAccBiglakeDatabase_biglakeDatabase_update(context),
 			},
 			{
 				ResourceName:            "google_biglake_database.database",
@@ -42,7 +42,7 @@ func TestAccBiglakeDatabase_bigqueryBiglakeDatabase_update(t *testing.T) {
 	})
 }
 
-func testAccBiglakeDatabase_bigqueryBiglakeDatabase_update(context map[string]interface{}) string {
+func testAccBiglakeDatabase_biglakeDatabase_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_biglake_catalog" "catalog" {
 	name = "tf_test_my_catalog%{random_suffix}"
