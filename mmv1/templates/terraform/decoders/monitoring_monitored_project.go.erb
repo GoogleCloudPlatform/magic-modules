@@ -35,7 +35,7 @@ for _, monitoredProjectRaw := range monitoredProjects {
 	monitoredProject := monitoredProjectRaw.(map[string]interface{})
 
 	monitoredProjectName := monitoredProject["name"]
-	// MonitoredProject names have the format locations/global/metricsScopes/[metricScopeProjectId]/projects/[projectId]
+	// MonitoredProject names have the format locations/global/metricsScopes/[metricScopeProjectNumber]/projects/[projectNumber]
 	// `res` contains the MonitoredProjects of the relevant metrics scope
 	log.Printf("[DEBUG] Matching ProjectNumbers: %s to %s.", expectedProjectNumber, monitoredProjectName)
 	if strings.HasSuffix(monitoredProjectName, "/"+expectedProjectNumber) {
