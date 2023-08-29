@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -39,8 +40,8 @@ func TestFrameworkProvider_LoadAndValidateFramework_project(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t) // inaccessible due to being in the provider_test package
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 
 			tfVersion := "foobar"
 			providerversion := "999"

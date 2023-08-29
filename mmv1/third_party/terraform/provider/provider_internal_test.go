@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/provider"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -80,53 +80,6 @@ func TestProvider_ValidateCredentials(t *testing.T) {
 				}
 			}
 		})
-	}
-}
-
-// ProviderConfigEnvNames returns a list of all the environment variables that could be set by a user to configure the provider
-func ProviderConfigEnvNames() []string {
-
-	envs := []string{}
-
-	// Use existing collections of ENV names
-	envVarsSets := [][]string{
-		envvar.CredsEnvVars,   // credentials field
-		envvar.ProjectEnvVars, // project field
-		envvar.RegionEnvVars,  //region field
-		envvar.ZoneEnvVars,    // zone field
-	}
-	for _, set := range envVarsSets {
-		envs = append(envs, set...)
-	}
-
-	// Add remaining ENVs
-	envs = append(envs, "GOOGLE_OAUTH_ACCESS_TOKEN")          // access_token field
-	envs = append(envs, "GOOGLE_BILLING_PROJECT")             // billing_project field
-	envs = append(envs, "GOOGLE_IMPERSONATE_SERVICE_ACCOUNT") // impersonate_service_account field
-	envs = append(envs, "USER_PROJECT_OVERRIDE")              // user_project_override field
-	envs = append(envs, "CLOUDSDK_CORE_REQUEST_REASON")       // request_reason field
-
-	return envs
-}
-
-// unsetProviderConfigEnvs unsets any ENVs in the test environment that
-// configure the provider.
-// The testing package will restore the original values after the test
-func unsetTestProviderConfigEnvs(t *testing.T) {
-	envs := ProviderConfigEnvNames()
-	if len(envs) > 0 {
-		for _, k := range envs {
-			t.Setenv(k, "")
-		}
-	}
-}
-
-func setupTestEnvs(t *testing.T, envValues map[string]string) {
-	// Set ENVs
-	if len(envValues) > 0 {
-		for k, v := range envValues {
-			t.Setenv(k, v)
-		}
 	}
 }
 
@@ -251,8 +204,8 @@ func TestProvider_ProviderConfigure_credentials(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -371,8 +324,8 @@ func TestProvider_ProviderConfigure_accessToken(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -473,8 +426,8 @@ func TestProvider_ProviderConfigure_impersonateServiceAccount(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -569,8 +522,8 @@ func TestProvider_ProviderConfigure_impersonateServiceAccountDelegates(t *testin
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -733,8 +686,8 @@ func TestProvider_ProviderConfigure_project(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -844,8 +797,8 @@ func TestProvider_ProviderConfigure_billingProject(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -969,8 +922,8 @@ func TestProvider_ProviderConfigure_region(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -1122,8 +1075,8 @@ func TestProvider_ProviderConfigure_zone(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -1250,8 +1203,8 @@ func TestProvider_ProviderConfigure_userProjectOverride(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -1352,8 +1305,8 @@ func TestProvider_ProviderConfigure_scopes(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
