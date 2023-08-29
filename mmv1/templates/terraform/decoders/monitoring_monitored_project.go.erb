@@ -23,7 +23,7 @@ expectedProject, configProjectErr := config.NewResourceManagerClient(config.User
 if configProjectErr != nil {
 	return nil, configProjectErr
 }
-expectedProjectNumber := expectedProject.ProjectNumber
+expectedProjectNumber := strconv.Itoa(expectedProject.ProjectNumber)
 
 log.Printf("[DEBUG] Scanning for ProjectNumber: %s.", expectedProjectNumber)
 
