@@ -133,6 +133,7 @@ properties:
               #   - status.0.access_levels
               #   - status.0.restricted_services
               item_type: Api::Type::String
+              is_set: true
             - !ruby/object:Api::Type::Array
               name: 'accessLevels'
               description: |
@@ -153,6 +154,7 @@ properties:
               #   - status.0.access_levels
               #   - status.0.restricted_services
               item_type: Api::Type::String
+              is_set: true
             - !ruby/object:Api::Type::Array
               name: 'restrictedServices'
               description: |
@@ -194,6 +196,7 @@ properties:
                 have multiple `IngressPolicies`, each of which is evaluated
                 separately. Access is granted if any `Ingress Policy` grants it.
                 Must be empty for a perimeter bridge.
+              is_set: true
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                   - !ruby/object:Api::Type::NestedObject
@@ -215,6 +218,7 @@ properties:
                           - :ANY_SERVICE_ACCOUNT
                       - !ruby/object:Api::Type::Array
                         name: 'identities'
+                        is_set: true
                         item_type: Api::Type::String
                         description: |
                           A list of identities that are allowed access through this ingress policy.
@@ -224,6 +228,7 @@ properties:
                         name: 'sources'
                         description: |
                           Sources that this `IngressPolicy` authorizes access from.
+                        is_set: true
                         item_type: !ruby/object:Api::Type::NestedObject
                           properties:
                             - !ruby/object:Api::Type::String
@@ -255,6 +260,7 @@ properties:
                       - !ruby/object:Api::Type::Array
                         name: 'resources'
                         item_type: Api::Type::String
+                        is_set: true
                         description: |
                           A list of resources, currently only projects in the form
                           `projects/<projectnumber>`, protected by this `ServicePerimeter`
@@ -304,6 +310,7 @@ properties:
                 have multiple EgressPolicies, each of which is evaluated separately.
                 Access is granted if any EgressPolicy grants it. Must be empty for
                 a perimeter bridge.
+              is_set: true
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                   - !ruby/object:Api::Type::NestedObject
@@ -328,6 +335,7 @@ properties:
                           A list of identities that are allowed access through this `EgressPolicy`.
                           Should be in the format of email address. The email address should
                           represent individual user or service account only.
+                        is_set: true
                         item_type: Api::Type::String
                   - !ruby/object:Api::Type::NestedObject
                     name: 'egressTo'
@@ -338,6 +346,7 @@ properties:
                       - !ruby/object:Api::Type::Array
                         name: 'resources'
                         item_type: Api::Type::String
+                        is_set: true
                         description: |
                           A list of resources, currently only projects in the form
                           `projects/<projectnumber>`, that match this to stanza. A request matches
@@ -347,6 +356,7 @@ properties:
                       - !ruby/object:Api::Type::Array
                         name: 'externalResources'
                         item_type: Api::Type::String
+                        is_set: true
                         description: |
                           A list of external resources that are allowed to be accessed. A request
                           matches if it contains an external resource in this list (Example:
@@ -404,9 +414,11 @@ properties:
               #   - spec.0.resources
               #   - spec.0.access_levels
               #   - spec.0.restricted_services
+              is_set: true
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
               name: 'accessLevels'
+              is_set: true
               description: |
                 A list of AccessLevel resource names that allow resources within
                 the ServicePerimeter to be accessed from the internet.
@@ -440,6 +452,7 @@ properties:
               #   - spec.0.access_levels
               #   - spec.0.restricted_services
               item_type: Api::Type::String
+              is_set: true
             - !ruby/object:Api::Type::NestedObject
               name: 'vpcAccessibleServices'
               description: |
@@ -457,6 +470,7 @@ properties:
                     The list of APIs usable within the Service Perimeter.
                     Must be empty unless `enableRestriction` is True.
                   item_type: Api::Type::String
+                  is_set: true
             - !ruby/object:Api::Type::Array
               name: 'ingressPolicies'
               description: |
@@ -464,6 +478,7 @@ properties:
                 have multiple `IngressPolicies`, each of which is evaluated
                 separately. Access is granted if any `Ingress Policy` grants it.
                 Must be empty for a perimeter bridge.
+              is_set: true
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                   - !ruby/object:Api::Type::NestedObject
@@ -485,6 +500,7 @@ properties:
                           - :ANY_SERVICE_ACCOUNT
                       - !ruby/object:Api::Type::Array
                         name: 'identities'
+                        is_set: true
                         item_type: Api::Type::String
                         description: |
                           A list of identities that are allowed access through this ingress policy.
@@ -494,6 +510,7 @@ properties:
                         name: 'sources'
                         description: |
                           Sources that this `IngressPolicy` authorizes access from.
+                        is_set: true
                         item_type: !ruby/object:Api::Type::NestedObject
                           properties:
                             - !ruby/object:Api::Type::String
@@ -525,6 +542,7 @@ properties:
                       - !ruby/object:Api::Type::Array
                         name: 'resources'
                         item_type: Api::Type::String
+                        is_set: true
                         description: |
                           A list of resources, currently only projects in the form
                           `projects/<projectnumber>`, protected by this `ServicePerimeter`
@@ -574,6 +592,7 @@ properties:
                 have multiple EgressPolicies, each of which is evaluated separately.
                 Access is granted if any EgressPolicy grants it. Must be empty for
                 a perimeter bridge.
+              is_set: true
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                   - !ruby/object:Api::Type::NestedObject
@@ -599,6 +618,7 @@ properties:
                           Should be in the format of email address. The email address should
                           represent individual user or service account only.
                         item_type: Api::Type::String
+                        is_set: true
                   - !ruby/object:Api::Type::NestedObject
                     name: 'egressTo'
                     description: |
@@ -608,6 +628,7 @@ properties:
                       - !ruby/object:Api::Type::Array
                         name: 'resources'
                         item_type: Api::Type::String
+                        is_set: true
                         description: |
                           A list of resources, currently only projects in the form
                           `projects/<projectnumber>`, that match this to stanza. A request matches
@@ -617,6 +638,7 @@ properties:
                       - !ruby/object:Api::Type::Array
                         name: 'externalResources'
                         item_type: Api::Type::String
+                        is_set: true
                         description: |
                           A list of external resources that are allowed to be accessed. A request
                           matches if it contains an external resource in this list (Example:
