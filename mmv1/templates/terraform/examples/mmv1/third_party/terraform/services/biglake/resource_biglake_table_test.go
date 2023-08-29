@@ -27,7 +27,7 @@ func TestAccBiglakeTable_bigqueryBiglakeTable_update(t *testing.T) {
 				ResourceName:            "google_biglake_table.table",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "database_id", "catalog_id"},
+				ImportStateVerifyIgnore: []string{"location", "name", "database", "catalog"},
 			},
 			{
 				Config: testAccBiglakeTable_bigqueryBiglakeTable_update(context),
@@ -36,7 +36,7 @@ func TestAccBiglakeTable_bigqueryBiglakeTable_update(t *testing.T) {
 				ResourceName:            "google_biglake_table.table",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "database_id", "catalog_id"},
+				ImportStateVerifyIgnore: []string{"location", "name", "database", "catalog"},
 			},
 		},
 	})
@@ -45,11 +45,11 @@ func TestAccBiglakeTable_bigqueryBiglakeTable_update(t *testing.T) {
 func testAccBiglakeTable_bigqueryBiglakeTable_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_biglake_catalog" "catalog" {
-	name = "<%= ctx[:vars]['catalog_id'] %>"
+	name = "<%= ctx[:vars]['catalog'] %>"
 	location = "US"
 }
 resource "google_storage_bucket" "bucket" {
-	name                        = "<%= ctx[:vars]['bucket_id'] %>"
+	name                        = "<%= ctx[:vars]['bucket'] %>"
 	location                    = "US"
 	force_destroy               = true
 	uniform_bucket_level_access = true
@@ -65,8 +65,8 @@ resource "google_storage_bucket_object" "data_folder" {
 	bucket  = google_storage_bucket.bucket.name
 }
 resource "google_biglake_database" "database" {
-	name = "<%= ctx[:vars]['database_id'] %>"
-	catalog_id = google_biglake_catalog.catalog.catalog_id
+	name = "<%= ctx[:vars]['database'] %>"
+	catalog = google_biglake_catalog.catalog.id
 	location = google_biglake_catalog.catalog.location
 	type = "HIVE"
 	hive_options {
@@ -78,8 +78,7 @@ resource "google_biglake_database" "database" {
 }
 resource "google_biglake_table" "table" {
     name = "tf_test_my_table%{random_suffix}"
-    catalog_id = google_biglake_catalog.catalog.catalog_id
-    database_id = google_biglake_database.database.name
+    database = google_biglake_database.database.id
     location = google_biglake_catalog.catalog.location
     type = "HIVE"
     hive_options {

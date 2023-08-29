@@ -31,9 +31,9 @@ examples:
     primary_resource_id: "table"
     vars:
       name: "my_table"
-      catalog_id: "my_catalog"
-      database_id: "my_database"
-      bucket_id: "my_bucket"
+      catalog: "my_catalog"
+      database: "my_database"
+      bucket: "my_bucket"
 
 parameters:
   - !ruby/object:Api::Type::String

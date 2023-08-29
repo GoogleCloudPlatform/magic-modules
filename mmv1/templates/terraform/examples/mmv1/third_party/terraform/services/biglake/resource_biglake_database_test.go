@@ -27,7 +27,7 @@ func TestAccBiglakeDatabase_bigqueryBiglakeDatabase_update(t *testing.T) {
 				ResourceName:            "google_biglake_database.database",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "catalog_id"},
+				ImportStateVerifyIgnore: []string{"location", "name", "catalog"},
 			},
 			{
 				Config: testAccBiglakeDatabase_bigqueryBiglakeDatabase_update(context),
@@ -36,7 +36,7 @@ func TestAccBiglakeDatabase_bigqueryBiglakeDatabase_update(t *testing.T) {
 				ResourceName:            "google_biglake_database.database",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "catalog_id"},
+				ImportStateVerifyIgnore: []string{"location", "name", "catalog"},
 			},
 		},
 	})
