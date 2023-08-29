@@ -65,30 +65,33 @@ examples:
     name: 'dataplex_datascan_basic_profile'
     primary_resource_id: 'basic_profile'
     primary_resource_name:
-      'fmt.Sprintf("tf-test-datascan%s", context["random_suffix"])'
+      'fmt.Sprintf("tf-test-dataprofile-basic%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
+    vars:
+      datascan_name: dataprofile-basic
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_datascan_full_profile'
     primary_resource_id: 'full_profile'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-datascan%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
+    vars:
+      dataset_name: dataplex_dataset
+      datascan_name: dataprofile-full
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_datascan_basic_quality'
     primary_resource_id: 'basic_quality'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-datascan%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
+    vars:
+      datascan_name: dataquality-basic
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_datascan_full_quality'
     primary_resource_id: 'full_quality'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-datascan%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
+    vars:
+      datascan_name: dataquality-full
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
