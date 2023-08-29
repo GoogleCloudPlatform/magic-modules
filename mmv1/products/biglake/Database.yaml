@@ -23,10 +23,10 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: "{{catalog}}/databases"
 self_link: "{{catalog}}/databases/{{name}}"
 create_url: "{{catalog}}/databases?databaseId={{name}}"
+id_format: "{{catalog}}/databases/{{name}}"
+import_format: ["{{%catalog}}/databases/{{name}}"]
 update_mask: true
 update_verb: :PATCH
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/biglake_database.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "biglake_database"
