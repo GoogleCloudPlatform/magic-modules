@@ -45,8 +45,8 @@ resource "google_biglake_table" "<%= ctx[:primary_resource_id] %>" {
       table_type = "MANAGED_TABLE"
       storage_descriptor {
         location_uri = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.data_folder.name}"
-        "inputFormat": "org.apache.hadoop.mapred.SequenceFileInputFormat",
-        "outputFormat": "org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat"
+        inputFormat  = "org.apache.hadoop.mapred.SequenceFileInputFormat",
+        outputFormat = "org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat"
       }
       # Some Example Parameters.
       parameters {
