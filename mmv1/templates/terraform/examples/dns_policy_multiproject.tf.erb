@@ -16,6 +16,13 @@ resource "google_dns_policy" "<%= ctx[:primary_resource_id] %>" {
   networks {
     network_url = google_compute_network.network-2_project-2.id
   }
+  
+  depends_on = [
+    google_project_service.compute_project-1,
+    google_project_service.dns_project-1,
+    google_project_service.compute_project-2,
+    google_project_service.dns_project-2,
+  ]
 }
 
 resource "google_project" "project-1" {
