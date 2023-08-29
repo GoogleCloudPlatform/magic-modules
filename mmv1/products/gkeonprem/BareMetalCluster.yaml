@@ -757,7 +757,6 @@ properties:
           Mode of operation for binauthz policy evaluation. If unspecified, 
           defaults to DISABLED.
         values:
-          - EVALUATION_MODE_UNSPECIFIED
           - DISABLED
           - PROJECT_SINGLETON_POLICY_ENFORCE
   - !ruby/object:Api::Type::NestedObject
@@ -768,7 +767,6 @@ properties:
         name: 'policy'
         description: Specifies which upgrade policy to use.
         values:
-          - NODE_POOL_POLICY_UNSPECIFIED
           - SERIAL
           - CONCURRENT
   - !ruby/object:Api::Type::String
