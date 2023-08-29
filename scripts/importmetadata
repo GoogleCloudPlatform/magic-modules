@@ -52,8 +52,8 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 		importable=$(ggrep -Pzo 'return ResourceLoggingBucketConfig' $file)
 		if [ -z "$importable"  ]
     	then
-#			echo -n \	\"$resource\"\: >> importmetadata.txt
-#			echo \	not importable >> importmetadata.txt
+			echo -n \	\"$resource\"\: >> importmetadata.txt
+			echo \	not importable >> importmetadata.txt
 
 # NOT IMPORTABLE RESOURCES
 			continue
@@ -67,8 +67,8 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 				importformat=$(ggrep -Pzo '```\n\$ terraform import(.*\n)*?```' $resourcemd)
 				if [ -z "$importformat"  ]
 	    		then
-#					echo -n \	\"$resource\"\: >> importmetadata.txt
-#					echo \	NON STANDARD MD LOGGING >> importmetadata.txt
+					echo -n \	\"$resource\"\: >> importmetadata.txt
+					echo \	NON STANDARD MD LOGGING >> importmetadata.txt
 #	    		else
 					echo -n \	\"$resource\"\: >> importmetadata.txt
 					importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
@@ -108,9 +108,9 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 							then
 								echo -n \	\"$resource\"\: >> importmetadata.txt
 								echo \ '["folders/{{folder_id}}", "{{folder_id}}"]' >> importmetadata.txt
-#							else
-#								echo -n \	\"$resource\"\: >> importmetadata.txt
-#								echo \	NON STANDARD MD >> importmetadata.txt
+							else
+								echo -n \	\"$resource\"\: >> importmetadata.txt
+								echo \	NON STANDARD MD >> importmetadata.txt
 							fi
 						else
 							echo -n \	\"$resource\"\: >> importmetadata.txt
