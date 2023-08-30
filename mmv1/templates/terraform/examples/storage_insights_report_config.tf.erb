@@ -1,3 +1,6 @@
+data "google_project" "project" {
+}
+
 resource "google_storage_insights_report_config" "<%= ctx[:primary_resource_id] %>" {
   location = "us-central1"
   frequency_options {
@@ -35,3 +38,10 @@ resource "google_storage_bucket" "report_bucket" {
   force_destroy               = true
   uniform_bucket_level_access = true
 }
+
+resource "google_storage_bucket_iam_member" "admin" {
+  bucket = google_storage_bucket.report_bucket.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-storageinsights.iam.gserviceaccount.com"
+}
+
