@@ -34,7 +34,7 @@ func TestProvider_versionfive_upgrade(t *testing.T) {
 			{
 				ExternalProviders: map[string]resource.ExternalProvider{
 					"google": {
-						VersionConstraint: "4.58.0",
+						VersionConstraint: "4.80.0",
 						Source:            "hashicorp/google-beta",
 					},
 				},
@@ -107,7 +107,7 @@ func TestProvider_versionfive_ignorereads_upgrade(t *testing.T) {
 			{
 				ExternalProviders: map[string]resource.ExternalProvider{
 					"google": {
-						VersionConstraint: "4.58.0",
+						VersionConstraint: "4.80.0",
 						Source:            "hashicorp/google-beta",
 					},
 				},
@@ -117,10 +117,10 @@ func TestProvider_versionfive_ignorereads_upgrade(t *testing.T) {
 			},
 			{
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-				Config: testProvider_versionfive_upgrades_ignorereads(itName, tpName, igmName, autoscalerName, diskName, policyName,
+				Config: 	testProvider_versionfive_upgrades_ignorereads(itName, tpName, igmName, autoscalerName, diskName, policyName,
 					itNameRegion, tpNameRegion, igmNameRegion, autoscalerNameRegion, endpointContext,
 					policyContext, attachmentContext),
-				PlanOnly:									true,
+				PlanOnly:	true,
 			},
 		},
 	})
@@ -152,7 +152,7 @@ resource "google_data_fusion_instance" "unset" {
 
 resource "google_data_fusion_instance" "set" {
   name   = "%s"
-  region = "us-central1"
+  region = "us-west1"
   type   = "BASIC"
   options = {
   	prober_test_run = "true"
@@ -166,7 +166,7 @@ resource "google_data_fusion_instance" "reference" {
   options = {
   	prober_test_run = "true"
   }
-  zone   = "us-central1-a"
+  zone   = "us-west1-a"
   depends_on = [
     google_project_service.dfapi
   ]
@@ -382,6 +382,7 @@ resource "google_compute_target_pool" "foobar1" {
   description      = "Resource created for Terraform acceptance testing"
   name             = "%s"
   session_affinity = "CLIENT_IP_PROTO"
+  region					 = "us-west1"
 }
 
 resource "google_compute_instance_group_manager" "foobar1" {
@@ -393,7 +394,7 @@ resource "google_compute_instance_group_manager" "foobar1" {
   }
   target_pools       = [google_compute_target_pool.foobar1.self_link]
   base_instance_name = "foobar1"
-  zone               = "us-central1-a"
+  zone               = "us-west1-a"
 }
 `, itName, tpName, igmName)
 
@@ -404,7 +405,7 @@ func testAccComputeAutoscaler_basic(itName, tpName, igmName, autoscalerName stri
 resource "google_compute_autoscaler" "foobar1" {
   description = "Resource created for Terraform acceptance testing"
   name        = "%s"
-  zone        = "us-central1-a"
+  zone        = "us-west1-a"
   target      = google_compute_instance_group_manager.foobar1.self_link
   autoscaling_policy {
     max_replicas    = 5
@@ -430,7 +431,7 @@ resource "google_compute_disk" "foobar2" {
   image = data.google_compute_image.my_image2.self_link
   size  = 1000
   type  = "pd-extreme"
-  zone  = "us-central1-c"
+  zone  = "us-west1-c"
   labels = {
     my-label = "my-label-value"
   }
@@ -439,7 +440,7 @@ resource "google_compute_disk" "foobar2" {
 
 resource "google_compute_resource_policy" "foobar2" {
   name = "%s"
-  region = "us-central1"
+  region = "us-west1"
   snapshot_schedule_policy {
     schedule {
       daily_schedule {
@@ -453,7 +454,7 @@ resource "google_compute_resource_policy" "foobar2" {
 resource "google_compute_disk_resource_policy_attachment" "foobar2" {
   name = google_compute_resource_policy.foobar2.name
   disk = google_compute_disk.foobar2.name
-  zone = "us-central1-c"
+  zone = "us-west1-c"
 }
 `, diskName, policyName)
 }
@@ -464,7 +465,7 @@ resource "google_compute_network_endpoint_group" "neg3" {
   name         = "tf-test-my-lb-neg%{random_suffix}"
   network      = google_compute_network.default3.id
   default_port = "90"
-  zone         = "us-central1-a"
+  zone         = "us-west1-a"
 }
 
 resource "google_compute_network" "default3" {
@@ -506,6 +507,7 @@ resource "google_compute_target_pool" "foobar4" {
   description      = "Resource created for Terraform acceptance testing"
   name             = "%s"
   session_affinity = "CLIENT_IP_PROTO"
+  region					 = "us-west1"
 }
 
 resource "google_compute_region_instance_group_manager" "foobar4" {
@@ -517,7 +519,7 @@ resource "google_compute_region_instance_group_manager" "foobar4" {
   }
   target_pools       = [google_compute_target_pool.foobar4.self_link]
   base_instance_name = "tf-test-foobar4"
-  region             = "us-central1"
+  region             = "us-west1"
 }
 
 `, itName, tpName, igmName)
@@ -528,7 +530,7 @@ func testAccComputeRegionAutoscaler_basic(itName, tpName, igmName, autoscalerNam
 resource "google_compute_region_autoscaler" "foobar4" {
   description = "Resource created for Terraform acceptance testing"
   name        = "%s"
-  region      = "us-central1"
+  region      = "us-west1"
   target      = google_compute_region_instance_group_manager.foobar4.self_link
   autoscaling_policy {
     max_replicas    = 5
@@ -546,7 +548,7 @@ func testAccComputeResourcePolicy_resourcePolicyBasicExample(context map[string]
 	return acctest.Nprintf(`
 resource "google_compute_resource_policy" "foo5" {
   name   = "tf-test-gce-policy%{random_suffix}"
-  region = "us-central1"
+  region = "us-west1"
   snapshot_schedule_policy {
     schedule {
       daily_schedule {
@@ -570,6 +572,7 @@ resource "google_compute_service_attachment" "psc_ilb_service_attachment6" {
   connection_preference    = "ACCEPT_AUTOMATIC"
   nat_subnets              = [google_compute_subnetwork.psc_ilb_nat6.id]
   target_service           = google_compute_forwarding_rule.psc_ilb_target_service6.id
+  reconcile_connections    = true
 }
 
 resource "google_compute_address" "psc_ilb_consumer_address6" {
