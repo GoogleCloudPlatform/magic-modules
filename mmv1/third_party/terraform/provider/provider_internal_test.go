@@ -1417,7 +1417,7 @@ func TestProvider_ProviderConfigure_scopes(t *testing.T) {
 	}
 }
 
-func TestProvider_providerConfigure_requestTimeout(t *testing.T) {
+func TestProvider_ProviderConfigure_requestTimeout(t *testing.T) {
 	cases := map[string]struct {
 		ConfigValues        map[string]interface{}
 		ExpectedValue       string
@@ -1447,6 +1447,9 @@ func TestProvider_providerConfigure_requestTimeout(t *testing.T) {
 		// This can be seen in this part of the config code where the default value is set to 120s
 		// https://github.com/hashicorp/terraform-provider-google/blob/09cb850ee64bcd78e4457df70905530c1ed75f19/google/transport/config.go#L1228-L1233
 		"when config is unset, the value will be 0s in order to set the default value": {
+			ConfigValues: map[string]interface{}{
+				"credentials": transport_tpg.TestFakeCredentialsPath,
+			},
 			ExpectedValue:    "0s",
 			ExpectFieldUnset: true,
 		},
@@ -1465,11 +1468,11 @@ func TestProvider_providerConfigure_requestTimeout(t *testing.T) {
 			// Arrange
 			ctx := context.Background()
 			unsetTestProviderConfigEnvs(t)
-			p := Provider()
+			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
 			// Act
-			c, diags := providerConfigure(ctx, d, p)
+			c, diags := provider.ProviderConfigure(ctx, d, p)
 
 			// Assert
 			if diags.HasError() && !tc.ExpectError {
@@ -1507,7 +1510,7 @@ func TestProvider_providerConfigure_requestTimeout(t *testing.T) {
 	}
 }
 
-func TestProvider_providerConfigure_requestReason(t *testing.T) {
+func TestProvider_ProviderConfigure_requestReason(t *testing.T) {
 
 	cases := map[string]struct {
 		ConfigValues        map[string]interface{}
@@ -1555,11 +1558,11 @@ func TestProvider_providerConfigure_requestReason(t *testing.T) {
 			ctx := context.Background()
 			unsetTestProviderConfigEnvs(t)
 			setupTestEnvs(t, tc.EnvVariables)
-			p := Provider()
+			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
 			// Act
-			c, diags := providerConfigure(ctx, d, p)
+			c, diags := provider.ProviderConfigure(ctx, d, p)
 
 			// Assert
 			if diags.HasError() && !tc.ExpectError {
@@ -1597,7 +1600,7 @@ func TestProvider_providerConfigure_requestReason(t *testing.T) {
 	}
 }
 
-func TestProvider_providerConfigure_batching(t *testing.T) {
+func TestProvider_ProviderConfigure_batching(t *testing.T) {
 	//var batch []interface{}
 	cases := map[string]struct {
 		ConfigValues                map[string]interface{}
@@ -1608,6 +1611,9 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 		ExpectedSendAfterValue      string
 	}{
 		"if batch is an empty block, it will set the default values": {
+			ConfigValues: map[string]interface{}{
+				"credentials": transport_tpg.TestFakeCredentialsPath,
+			},
 			// Although at the schema level it's shown that by default it's set to false, the actual default value
 			// is true and can be seen in the `ExpanderProviderBatchingConfig` struct
 			// https://github.com/GoogleCloudPlatform/magic-modules/blob/8cd4a506f0ac4db7b07a8cce914449d34df6f20b/mmv1/third_party/terraform/transport/config.go.erb#L504-L508
@@ -1684,11 +1690,11 @@ func TestProvider_providerConfigure_batching(t *testing.T) {
 			// Arrange
 			ctx := context.Background()
 			unsetTestProviderConfigEnvs(t)
-			p := Provider()
+			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
 			// Act
-			_, diags := providerConfigure(ctx, d, p)
+			_, diags := provider.ProviderConfigure(ctx, d, p)
 
 			// Assert
 			if diags.HasError() && !tc.ExpectError {
