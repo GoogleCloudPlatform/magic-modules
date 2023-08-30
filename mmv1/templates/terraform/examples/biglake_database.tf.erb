@@ -18,8 +18,7 @@ resource "google_storage_bucket_object" "metadata_folder" {
 
 resource "google_biglake_database" "<%= ctx[:primary_resource_id] %>"  {
     name = "<%= ctx[:vars]['name'] %>"
-    catalog_id = google_biglake_catalog.catalog.name
-    location = google_biglake_catalog.catalog.location
+    catalog = google_biglake_catalog.catalog.id
     type = "HIVE"
     hive_options {
         location_uri = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.metadata_folder.name}"
