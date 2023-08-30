@@ -352,6 +352,9 @@ subnetwork in which the cluster's instances are launched.
 * `enable_multi_networking` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
     Whether multi-networking is enabled for this cluster.
 
+* `enable_fqdn_network_policy` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+    Whether FQDN Network Policy is enabled on this cluster. Users who enable this feature for existing Standard clusters must restart the GKE Dataplane V2 `anetd` DaemonSet after enabling it. See the [Enable FQDN Network Policy in an existing cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/fqdn-network-policies#enable_fqdn_network_policy_in_an_existing_cluster) for more information.
+
 * `private_ipv6_google_access` - (Optional)
     The desired state of IPv6 connectivity to Google Services. By default, no private IPv6 access to or from Google Services (all access will be via IPv4).
 
@@ -722,6 +725,16 @@ pick a specific range to use.
 * `stack_type` - (Optional) The IP Stack Type of the cluster.
 Default value is `IPV4`.
 Possible values are `IPV4` and `IPV4_IPV6`.
+
+* `additional_pod_ranges_config` - (Optional) The configuration for additional pod secondary ranges at
+the cluster level. Used for Autopilot clusters and Standard clusters with which control of the 
+secondary Pod IP address assignment to node pools isn't needed. Structure is [documented below](#nested_additional_pod_ranges_config).
+
+
+<a name="nested_additional_pod_ranges_config"></a>The `additional_pod_ranges_config` block supports:
+
+* `pod_range_names` - (Required) The names of the Pod ranges to add to the cluster.
+
 
 <a name="nested_master_auth"></a>The `master_auth` block supports:
 

@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	bitbucket.org/creachadair/stringset v0.0.9
-	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.49.0
+	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.50.0
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/hcl v1.0.0
