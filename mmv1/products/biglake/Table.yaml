@@ -23,10 +23,10 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: "{{database}}/tables"
 self_link: "{{database}}/tables/{{name}}"
 create_url: "{{database}}/tables?tableId={{name}}"
+id_format: "{{database}}/tables/{{name}}"
+import_format: ["{{%database}}/tables/{{name}}"]
 update_verb: :PATCH
 update_mask: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/biglake_table.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "biglake_table"
