@@ -151,4 +151,3 @@ properties:
     name: 'displayName'
     description: |
       The editable display name of the inventory report configuration. Has a limit of 256 characters. Can be empty.
-
