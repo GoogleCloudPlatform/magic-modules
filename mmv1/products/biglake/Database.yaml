@@ -20,14 +20,16 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     "Manage open source metadata with BigLake Metastore": "https://cloud.google.com/bigquery/docs/manage-open-source-metadata#create_databases"
   api: "https://cloud.google.com/bigquery/docs/reference/biglake/rest/v1/projects.locations.catalogs.databases"
-base_url: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases"
-self_link: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases/{{name}}"
-create_url: "projects/{{project}}/locations/{{location}}/catalogs/{{catalog_id}}/databases?databaseId={{name}}"
+base_url: "{{catalog}}/databases"
+self_link: "{{catalog}}/databases/{{name}}"
+create_url: "{{catalog}}/databases?databaseId={{name}}"
+id_format: "{{catalog}}/databases/{{name}}"
+import_format: ["{{%catalog}}/databases/{{name}}"]
 update_mask: true
 update_verb: :PATCH
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_biglake_database"
+    name: "biglake_database"
     primary_resource_id: "database"
     vars:
       name: "my_database"
@@ -35,12 +37,12 @@ examples:
       bucket_id: "my_bucket"
 parameters:
   - !ruby/object:Api::Type::String
-    name: "location"
+    name: "catalog"
     required: true
     immutable: true
     url_param_only: true
     description: |
-      The geographic location where the Database should reside.
+      The parent catalog.
   - !ruby/object:Api::Type::String
     name: "name"
     required: true
@@ -48,13 +50,6 @@ parameters:
     url_param_only: true
     description: |
       The name of the database.
-  - !ruby/object:Api::Type::String
-    name: "catalog_id"
-    required: true
-    immutable: true
-    url_param_only: true
-    description: |
-      The name of the parent catalog.
 properties:
   - !ruby/object:Api::Type::String
     name: "createTime"
