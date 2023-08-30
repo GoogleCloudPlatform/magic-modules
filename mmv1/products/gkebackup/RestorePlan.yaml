@@ -117,7 +117,7 @@ properties:
     description: |
       Description: A set of custom labels supplied by the user.
       A list of key->value pairs.
-      Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }. 
+      Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
   - !ruby/object:Api::Type::String
     name: 'backupPlan'
     required: true
@@ -322,7 +322,7 @@ properties:
               If True, no cluster-scoped resources will be restored.
               Mutually exclusive to any other field in `clusterResourceRestoreScope`.
             exactly_one_of:
-             - restoreConfig.0.clusterResourceRestoreScope.0.allGroupKinds
+              - restoreConfig.0.clusterResourceRestoreScope.0.allGroupKinds
               - restoreConfig.0.clusterResourceRestoreScope.0.excludedGroupKinds
               - restoreConfig.0.clusterResourceRestoreScope.0.selectedGroupKinds
               - restoreConfig.0.clusterResourceRestoreScope.0.noGroupKinds
@@ -458,8 +458,3 @@ properties:
     output: true
     description: |
       Detailed description of why RestorePlan is in its current state.
-
-
-
-
-        
