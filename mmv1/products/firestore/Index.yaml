@@ -105,6 +105,7 @@ properties:
     values:
       - :ANY_API
       - :DATASTORE_MODE_API
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   - !ruby/object:Api::Type::Array
     name: fields
     description: |
