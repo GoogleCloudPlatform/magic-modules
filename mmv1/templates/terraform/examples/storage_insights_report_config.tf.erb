@@ -2,6 +2,7 @@ data "google_project" "project" {
 }
 
 resource "google_storage_insights_report_config" "<%= ctx[:primary_resource_id] %>" {
+  display_name = "Test Report Config"
   location = "us-central1"
   frequency_options {
     frequency = "WEEKLY"
@@ -28,6 +29,7 @@ resource "google_storage_insights_report_config" "<%= ctx[:primary_resource_id] 
     }
     storage_destination_options {
       bucket = google_storage_bucket.report_bucket.name
+      destination_path = "test-insights-reports"
     }
   }
 }
@@ -44,4 +46,3 @@ resource "google_storage_bucket_iam_member" "admin" {
   role   = "roles/storage.admin"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-storageinsights.iam.gserviceaccount.com"
 }
-
