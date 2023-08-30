@@ -1,21 +1,8 @@
+
 package main
-
 import (
-	"flag"
-	"fmt"
-	"sort"
+	"github.com/GoogleCloudPlatform/magic-modules/.ci/diff-processor/cmd"
 )
-
-var docMode = flag.Bool("docs", false, "legacy flag to not break existing CI can be removed after 7/10")
-var providerFolder = flag.String("providerFolder", "", "legacy flag to not break existing CI can be removed after 7/10")
-
 func main() {
-	flag.Parse()
-	if !*docMode {
-		breakages := compare()
-		sort.Strings(breakages)
-		for _, breakage := range breakages {
-			fmt.Println(breakage)
-		}
-	}
+	cmd.Execute()
 }
