@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/provider"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"golang.org/x/oauth2/google"
+	googleoauth "golang.org/x/oauth2/google"
 )
 
 const testOauthScope = "https://www.googleapis.com/auth/compute"
@@ -523,7 +523,7 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 	proj := envvar.GetTestProjectFromEnv()
 	serviceaccount := transport_tpg.MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
 
-	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), transport_tpg.DefaultClientScopes...)
+	c, err := googleoauth.CredentialsFromJSON(context.Background(), []byte(creds), transport_tpg.DefaultClientScopes...)
 	if err != nil {
 		t.Fatalf("invalid test credentials: %s", err)
 	}
@@ -562,7 +562,7 @@ func TestAccConfigLoadValidate_accessToken(t *testing.T) {
 	creds := envvar.GetTestCredsFromEnv()
 	proj := envvar.GetTestProjectFromEnv()
 
-	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), testOauthScope)
+	c, err := googleoauth.CredentialsFromJSON(context.Background(), []byte(creds), testOauthScope)
 	if err != nil {
 		t.Fatalf("invalid test credentials: %s", err)
 	}

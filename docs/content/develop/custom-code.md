@@ -240,3 +240,8 @@ docs: !ruby/object:Provider::Terraform::Docs
 ```
 
 See [Add documentation (Handwritten)]({{< ref "/develop/resource#add-documentation" >}}) for more information about what to include in the field documentation.
+
+## What's next?
+
+- [Add tests]({{< ref "/develop/test.md" >}})
+- [Run tests]({{< ref "/develop/run-tests.md" >}})

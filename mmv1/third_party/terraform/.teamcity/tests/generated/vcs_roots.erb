@@ -16,7 +16,7 @@ import org.junit.Test
 class VcsTests {
     @Test
     fun buildsHaveCleanCheckOut() {
-        val project = Google<%= version.capitalize unless version == 'ga' -%>("default",  testVcsRootId(), "refs/heads/main", testConfiguration())
+        val project = Google<%= version.capitalize unless version == 'ga' -%>("default", "description", testVcsRootId(), "refs/heads/main", testConfiguration())
         project.buildTypes.forEach { bt ->
             assertTrue("Build '${bt.id}' doesn't use clean checkout", bt.vcs.cleanCheckout)
         }

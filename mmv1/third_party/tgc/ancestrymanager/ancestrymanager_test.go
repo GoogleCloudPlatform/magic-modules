@@ -15,7 +15,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 
 	"github.com/google/go-cmp/cmp"
-	provider "github.com/hashicorp/terraform-provider-google-beta/google-beta"
+	provider "github.com/hashicorp/terraform-provider-google-beta/google-beta/provider"
 	"go.uber.org/zap"
 	crmv1 "google.golang.org/api/cloudresourcemanager/v1"
 	crmv3 "google.golang.org/api/cloudresourcemanager/v3"
