@@ -236,6 +236,71 @@ func TestFrameworkProvider_LoadAndValidateFramework_credentials(t *testing.T) {
 				},
 				ExpectedDataModelValue: types.StringValue(acctest.GenerateFakeCredentialsJson("GOOGLE_CREDENTIALS")),
 			},
+		"when credentials is unset in the config, environment variables are used: GOOGLE_CLOUD_KEYFILE_JSON used second": {
+			ConfigValues: fwmodels.ProviderModel{
+				Credentials: types.StringNull(), // unset
+			},
+			EnvVariables: map[string]string{
+				// GOOGLE_CREDENTIALS not set
+				"GOOGLE_CLOUD_KEYFILE_JSON":      acctest.GenerateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
+				"GCLOUD_KEYFILE_JSON":            acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
+				"GOOGLE_APPLICATION_CREDENTIALS": acctest.GenerateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
+			},
+			ExpectedDataModelValue: types.StringValue(acctest.GenerateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON")),
+		},
+		"when credentials is unset in the config, environment variables are used: GCLOUD_KEYFILE_JSON used third": {
+			ConfigValues: fwmodels.ProviderModel{
+				Credentials: types.StringNull(), // unset
+			},
+			EnvVariables: map[string]string{
+				// GOOGLE_CREDENTIALS not set
+				// GOOGLE_CLOUD_KEYFILE_JSON not set
+				"GCLOUD_KEYFILE_JSON":            acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
+				"GOOGLE_APPLICATION_CREDENTIALS": acctest.GenerateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
+			},
+			ExpectedDataModelValue: types.StringValue(acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON")),
+		},
+		"when credentials is unset in the config (and access_token unset), GOOGLE_APPLICATION_CREDENTIALS is used for auth but not to set values in the config": {
+			ConfigValues: fwmodels.ProviderModel{
+				Credentials: types.StringNull(), // unset
+			},
+			EnvVariables: map[string]string{
+				// GOOGLE_CREDENTIALS not set
+				// GOOGLE_CLOUD_KEYFILE_JSON not set
+				// GCLOUD_KEYFILE_JSON not set
+				"GOOGLE_APPLICATION_CREDENTIALS": transport_tpg.TestFakeCredentialsPath, // needs to be a path to a file when used by code
+			},
+			ExpectedDataModelValue: types.StringNull(),
+		},
+		// Handling empty strings in config
+		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14255
+		// "when credentials is set to an empty string in the config (and access_token unset), GOOGLE_APPLICATION_CREDENTIALS is used": {
+		// ConfigValues: fwmodels.ProviderModel{
+		// 	Credentials: types.StringValue(""),
+		// },
+		// 	EnvVariables: map[string]string{
+		// 		"GOOGLE_APPLICATION_CREDENTIALS": transport_tpg.TestFakeCredentialsPath, // needs to be a path to a file when used by code
+		// 	},
+		// 	ExpectedDataModelValue: types.StringNull(),
+		// },
+		// NOTE: these tests can't run in Cloud Build due to ADC locating credentials despite `GOOGLE_APPLICATION_CREDENTIALS` being unset
+		// See https://cloud.google.com/docs/authentication/application-default-credentials#search_order
+		// Also, when running these tests locally you need to run `gcloud auth application-default revoke` to ensure your machine isn't supplying ADCs
+		// "error returned if credentials is set as an empty string and GOOGLE_APPLICATION_CREDENTIALS is unset": {
+		// 	ConfigValues: fwmodels.ProviderModel{
+		// 		Credentials: types.StringValue(""),
+		// 	},
+		// 	EnvVariables: map[string]string{
+		// 		"GOOGLE_APPLICATION_CREDENTIALS": "",
+		// 	},
+		// 	ExpectError: true,
+		// },
+		// "error returned if neither credentials nor access_token set in the provider config, and GOOGLE_APPLICATION_CREDENTIALS is unset": {
+		// 	EnvVariables: map[string]string{
+		// 		"GOOGLE_APPLICATION_CREDENTIALS": "",
+		// 	},
+		// 	ExpectError: true,
+		// },
 	}
 
 	for tn, tc := range cases {
