@@ -626,6 +626,10 @@ properties:
       This is used in PSC consumer ForwardingRule to control whether the PSC
       endpoint can be accessed from another region.
     send_empty_value: true
+    update_verb: :PATCH
+    update_url: projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}
+    update_id: 'allowPscGlobalAccess'
+    fingerprint_name: 'fingerprint'
   - !ruby/object:Api::Type::Boolean
     name: noAutomateDnsZone
     description:
