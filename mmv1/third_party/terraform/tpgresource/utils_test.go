@@ -1,6 +1,7 @@
-package tpgresource
+package tpgresource_test
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -8,6 +9,8 @@ import (
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"google.golang.org/api/googleapi"
@@ -41,7 +44,7 @@ func TestConvertStringArr(t *testing.T) {
 	input[2] = "aaa"
 
 	expected := []string{"aaa", "bbb", "ccc"}
-	actual := ConvertStringArr(input)
+	actual := tpgresource.ConvertStringArr(input)
 
 	if reflect.DeepEqual(expected, actual) {
 		t.Fatalf("(%s) did not match expected value: %s", actual, expected)
@@ -55,7 +58,7 @@ func TestConvertAndMapStringArr(t *testing.T) {
 	input[2] = "aaa"
 
 	expected := []string{"AAA", "BBB", "CCC"}
-	actual := ConvertAndMapStringArr(input, strings.ToUpper)
+	actual := tpgresource.ConvertAndMapStringArr(input, strings.ToUpper)
 
 	if reflect.DeepEqual(expected, actual) {
 		t.Fatalf("(%s) did not match expected value: %s", actual, expected)
@@ -69,7 +72,7 @@ func TestConvertStringMap(t *testing.T) {
 	input["three"] = "3"
 
 	expected := map[string]string{"one": "1", "two": "2", "three": "3"}
-	actual := ConvertStringMap(input)
+	actual := tpgresource.ConvertStringMap(input)
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("%s did not match expected value: %s", actual, expected)
@@ -114,7 +117,7 @@ func TestIpCidrRangeDiffSuppress(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if IpCidrRangeDiffSuppress("ip_cidr_range", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if tpgresource.IpCidrRangeDiffSuppress("ip_cidr_range", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
@@ -157,7 +160,7 @@ func TestRfc3339TimeDiffSuppress(t *testing.T) {
 		},
 	}
 	for tn, tc := range cases {
-		if Rfc3339TimeDiffSuppress("time", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if tpgresource.Rfc3339TimeDiffSuppress("time", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Errorf("bad: %s, '%s' => '%s' expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
@@ -201,10 +204,10 @@ func TestGetProject(t *testing.T) {
 
 			// Create resource config
 			// Here use a fictional schema that includes a project field
-			d := SetupTestResourceDataFromConfigMap(t, fictionalSchema, tc.ResourceConfig)
+			d := tpgresource.SetupTestResourceDataFromConfigMap(t, fictionalSchema, tc.ResourceConfig)
 
 			// Act
-			project, err := GetProject(d, &config)
+			project, err := tpgresource.GetProject(d, &config)
 
 			// Assert
 			if err != nil {
@@ -350,10 +353,10 @@ func TestGetLocation(t *testing.T) {
 			// Here use a fictional schema as example because we need to have all of
 			// location, region, and zone fields present in the schema for the test,
 			// and no real resources would contain all of these
-			d := SetupTestResourceDataFromConfigMap(t, fictionalSchema, tc.ResourceConfig)
+			d := tpgresource.SetupTestResourceDataFromConfigMap(t, fictionalSchema, tc.ResourceConfig)
 
 			// Act
-			location, err := GetLocation(d, &config)
+			location, err := tpgresource.GetLocation(d, &config)
 
 			// Assert
 			if err != nil {
@@ -443,10 +446,10 @@ func TestGetZone(t *testing.T) {
 			// Here use a fictional schema as example because we need to have all of
 			// location, region, and zone fields present in the schema for the test,
 			// and no real resources would contain all of these
-			d := SetupTestResourceDataFromConfigMap(t, fictionalSchema, tc.ResourceConfig)
+			d := tpgresource.SetupTestResourceDataFromConfigMap(t, fictionalSchema, tc.ResourceConfig)
 
 			// Act
-			zone, err := GetZone(d, &config)
+			zone, err := tpgresource.GetZone(d, &config)
 
 			// Assert
 			if err != nil {
@@ -568,10 +571,10 @@ func TestGetRegion(t *testing.T) {
 			// Here use a fictional schema as example because we need to have all of
 			// location, region, and zone fields present in the schema for the test,
 			// and no real resources would contain all of these
-			d := SetupTestResourceDataFromConfigMap(t, fictionalSchema, tc.ResourceConfig)
+			d := tpgresource.SetupTestResourceDataFromConfigMap(t, fictionalSchema, tc.ResourceConfig)
 
 			// Act
-			region, err := GetRegion(d, &config)
+			region, err := tpgresource.GetRegion(d, &config)
 
 			// Assert
 			if err != nil {
@@ -590,7 +593,7 @@ func TestGetRegion(t *testing.T) {
 
 func TestGetRegionFromZone(t *testing.T) {
 	expected := "us-central1"
-	actual := GetRegionFromZone("us-central1-f")
+	actual := tpgresource.GetRegionFromZone("us-central1-f")
 	if expected != actual {
 		t.Fatalf("Region (%s) did not match expected value: %s", actual, expected)
 	}
@@ -809,7 +812,7 @@ func TestDatasourceSchemaFromResourceSchema(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := DatasourceSchemaFromResourceSchema(tt.args.rs); !reflect.DeepEqual(got, tt.want) {
+			if got := tpgresource.DatasourceSchemaFromResourceSchema(tt.args.rs); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("DatasourceSchemaFromResourceSchema() = %#v, want %#v", got, tt.want)
 			}
 		})
@@ -817,7 +820,7 @@ func TestDatasourceSchemaFromResourceSchema(t *testing.T) {
 }
 
 func TestEmptyOrDefaultStringSuppress(t *testing.T) {
-	testFunc := EmptyOrDefaultStringSuppress("default value")
+	testFunc := tpgresource.EmptyOrDefaultStringSuppress("default value")
 
 	cases := map[string]struct {
 		Old, New           string
@@ -878,7 +881,7 @@ func TestServiceAccountFQN(t *testing.T) {
 	for tn, tc := range cases {
 		config := &transport_tpg.Config{Project: tc.project}
 		d := &schema.ResourceData{}
-		serviceAccountName, err := ServiceAccountFQN(tc.serviceAccount, d, config)
+		serviceAccountName, err := tpgresource.ServiceAccountFQN(tc.serviceAccount, d, config)
 		if err != nil {
 			t.Fatalf("unexpected error for service account FQN: %s", err)
 		}
@@ -892,19 +895,19 @@ func TestConflictError(t *testing.T) {
 	confErr := &googleapi.Error{
 		Code: 409,
 	}
-	if !IsConflictError(confErr) {
+	if !tpgresource.IsConflictError(confErr) {
 		t.Error("did not find that a 409 was a conflict error.")
 	}
-	if !IsConflictError(errwrap.Wrapf("wrap", confErr)) {
+	if !tpgresource.IsConflictError(errwrap.Wrapf("wrap", confErr)) {
 		t.Error("did not find that a wrapped 409 was a conflict error.")
 	}
 	confErr = &googleapi.Error{
 		Code: 412,
 	}
-	if !IsConflictError(confErr) {
+	if !tpgresource.IsConflictError(confErr) {
 		t.Error("did not find that a 412 was a conflict error.")
 	}
-	if !IsConflictError(errwrap.Wrapf("wrap", confErr)) {
+	if !tpgresource.IsConflictError(errwrap.Wrapf("wrap", confErr)) {
 		t.Error("did not find that a wrapped 412 was a conflict error.")
 	}
 	// skipping negative tests as other cases may be added later.
@@ -912,15 +915,15 @@ func TestConflictError(t *testing.T) {
 
 func TestIsNotFoundGrpcErrort(t *testing.T) {
 	error_status := status.New(codes.FailedPrecondition, "FailedPrecondition error")
-	if IsNotFoundGrpcError(error_status.Err()) {
+	if tpgresource.IsNotFoundGrpcError(error_status.Err()) {
 		t.Error("found FailedPrecondition as a NotFound error")
 	}
 	error_status = status.New(codes.OK, "OK")
-	if IsNotFoundGrpcError(error_status.Err()) {
+	if tpgresource.IsNotFoundGrpcError(error_status.Err()) {
 		t.Error("found OK as a NotFound error")
 	}
 	error_status = status.New(codes.NotFound, "NotFound error")
-	if !IsNotFoundGrpcError(error_status.Err()) {
+	if !tpgresource.IsNotFoundGrpcError(error_status.Err()) {
 		t.Error("expect a NotFound error")
 	}
 }
@@ -928,7 +931,7 @@ func TestIsNotFoundGrpcErrort(t *testing.T) {
 func TestSnakeToPascalCase(t *testing.T) {
 	input := "boot_disk"
 	expected := "BootDisk"
-	actual := SnakeToPascalCase(input)
+	actual := tpgresource.SnakeToPascalCase(input)
 
 	if actual != expected {
 		t.Fatalf("(%s) did not match expected value: %s", actual, expected)
@@ -951,7 +954,7 @@ func TestCheckGoogleIamPolicy(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		err := CheckGoogleIamPolicy(tc.json)
+		err := tpgresource.CheckGoogleIamPolicy(tc.json)
 		if tc.valid && err != nil {
 			t.Errorf("The JSON is marked as valid but triggered an error: %s", tc.json)
 		} else if !tc.valid && err == nil {
@@ -1061,7 +1064,7 @@ func TestReplaceVars(t *testing.T) {
 
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
-			d := &ResourceDataMock{
+			d := &tpgresource.ResourceDataMock{
 				FieldsInSchema: tc.SchemaValues,
 			}
 
@@ -1070,7 +1073,7 @@ func TestReplaceVars(t *testing.T) {
 				config = &transport_tpg.Config{}
 			}
 
-			v, err := ReplaceVars(d, config, tc.Template)
+			v, err := tpgresource.ReplaceVars(d, config, tc.Template)
 
 			if err != nil {
 				if !tc.ExpectedError {
@@ -1087,5 +1090,46 @@ func TestReplaceVars(t *testing.T) {
 				t.Errorf("bad: %s; expected %q, got %q", tn, tc.Expected, v)
 			}
 		})
+	}
+}
+
+func TestCheckGCSName(t *testing.T) {
+	valid63 := acctest.RandString(t, 63)
+	cases := map[string]bool{
+		// Valid
+		"foobar":       true,
+		"foobar1":      true,
+		"12345":        true,
+		"foo_bar_baz":  true,
+		"foo-bar-baz":  true,
+		"foo-bar_baz1": true,
+		"foo--bar":     true,
+		"foo__bar":     true,
+		"foo-goog":     true,
+		"foo.goog":     true,
+		valid63:        true,
+		fmt.Sprintf("%s.%s.%s", valid63, valid63, valid63): true,
+
+		// Invalid
+		"goog-foobar":             false,
+		"foobar-google":           false,
+		"-foobar":                 false,
+		"foobar-":                 false,
+		"_foobar":                 false,
+		"foobar_":                 false,
+		"fo":                      false,
+		"foo$bar":                 false,
+		"foo..bar":                false,
+		acctest.RandString(t, 64): false,
+		fmt.Sprintf("%s.%s.%s.%s", valid63, valid63, valid63, valid63): false,
+	}
+
+	for bucketName, valid := range cases {
+		err := tpgresource.CheckGCSName(bucketName)
+		if valid && err != nil {
+			t.Errorf("The bucket name %s was expected to pass validation and did not pass.", bucketName)
+		} else if !valid && err == nil {
+			t.Errorf("The bucket name %s was NOT expected to pass validation and passed.", bucketName)
+		}
 	}
 }
