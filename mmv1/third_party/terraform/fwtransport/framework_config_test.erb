@@ -160,7 +160,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_project(t *testing.T) {
 			p := fwtransport.FrameworkProviderConfig{}
 
 			// Act
-			p.LoadAndValidateFramework(ctx, data, tfVersion, &diags, providerversion)
+			p.LoadAndValidateFramework(ctx, &data, tfVersion, &diags, providerversion)
 
 			// Assert
 			if diags.HasError() && tc.ExpectError {
@@ -224,18 +224,18 @@ func TestFrameworkProvider_LoadAndValidateFramework_credentials(t *testing.T) {
 				},
 				ExpectedDataModelValue: types.StringValue(acctest.GenerateFakeCredentialsJson("test")),
 			},
-		// "when credentials is unset in the config, environment variables are used: GOOGLE_CREDENTIALS used first": {
-		//		ConfigValues: fwmodels.ProviderModel{
-		//			Credentials: types.StringNull(), // unset
-		//		},
-		//		EnvVariables: map[string]string{
-		//			"GOOGLE_CREDENTIALS":             acctest.GenerateFakeCredentialsJson("GOOGLE_CREDENTIALS"),
-		//			"GOOGLE_CLOUD_KEYFILE_JSON":      acctest.GenerateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
-		//			"GCLOUD_KEYFILE_JSON":            acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
-		//			"GOOGLE_APPLICATION_CREDENTIALS": acctest.GenerateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
-		//		},
-		//		ExpectedDataModelValue: types.StringValue(acctest.GenerateFakeCredentialsJson("GOOGLE_CREDENTIALS")),
-		// },
+			"when credentials is unset in the config, environment variables are used: GOOGLE_CREDENTIALS used first": {
+				ConfigValues: fwmodels.ProviderModel{
+					Credentials: types.StringNull(), // unset
+				},
+				EnvVariables: map[string]string{
+					"GOOGLE_CREDENTIALS":             acctest.GenerateFakeCredentialsJson("GOOGLE_CREDENTIALS"),
+					"GOOGLE_CLOUD_KEYFILE_JSON":      acctest.GenerateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
+					"GCLOUD_KEYFILE_JSON":            acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
+					"GOOGLE_APPLICATION_CREDENTIALS": acctest.GenerateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
+				},
+				ExpectedDataModelValue: types.StringValue(acctest.GenerateFakeCredentialsJson("GOOGLE_CREDENTIALS")),
+			},
 	}
 
 	for tn, tc := range cases {
@@ -257,7 +257,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_credentials(t *testing.T) {
 			p := fwtransport.FrameworkProviderConfig{}
 
 			// Act
-			p.LoadAndValidateFramework(ctx, data, tfVersion, &diags, providerversion)
+			p.LoadAndValidateFramework(ctx, &data, tfVersion, &diags, providerversion)
 			fmt.Printf("after act step: %#v", data)
 			// Assert
 			if diags.HasError() && tc.ExpectError {
