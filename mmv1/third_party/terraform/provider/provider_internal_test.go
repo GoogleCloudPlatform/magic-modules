@@ -3,11 +3,10 @@ package provider_test
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/provider"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -83,59 +82,6 @@ func TestProvider_ValidateCredentials(t *testing.T) {
 	}
 }
 
-// ProviderConfigEnvNames returns a list of all the environment variables that could be set by a user to configure the provider
-func ProviderConfigEnvNames() []string {
-
-	envs := []string{}
-
-	// Use existing collections of ENV names
-	envVarsSets := [][]string{
-		envvar.CredsEnvVars,   // credentials field
-		envvar.ProjectEnvVars, // project field
-		envvar.RegionEnvVars,  //region field
-		envvar.ZoneEnvVars,    // zone field
-	}
-	for _, set := range envVarsSets {
-		envs = append(envs, set...)
-	}
-
-	// Add remaining ENVs
-	envs = append(envs, "GOOGLE_OAUTH_ACCESS_TOKEN")          // access_token field
-	envs = append(envs, "GOOGLE_BILLING_PROJECT")             // billing_project field
-	envs = append(envs, "GOOGLE_IMPERSONATE_SERVICE_ACCOUNT") // impersonate_service_account field
-	envs = append(envs, "USER_PROJECT_OVERRIDE")              // user_project_override field
-	envs = append(envs, "CLOUDSDK_CORE_REQUEST_REASON")       // request_reason field
-
-	return envs
-}
-
-// unsetProviderConfigEnvs unsets any ENVs in the test environment that
-// configure the provider.
-// The testing package will restore the original values after the test
-func unsetTestProviderConfigEnvs(t *testing.T) {
-	envs := ProviderConfigEnvNames()
-	if len(envs) > 0 {
-		for _, k := range envs {
-			t.Setenv(k, "")
-		}
-	}
-}
-
-func setupTestEnvs(t *testing.T, envValues map[string]string) {
-	// Set ENVs
-	if len(envValues) > 0 {
-		for k, v := range envValues {
-			t.Setenv(k, v)
-		}
-	}
-}
-
-// Returns a fake credentials JSON string with the client_email set to a test-specific value
-func generateFakeCredentialsJson(testId string) string {
-	json := fmt.Sprintf(`{"private_key_id": "foo","private_key": "bar","client_email": "%s@example.com","client_id": "id@foo.com","type": "service_account"}`, testId)
-	return json
-}
-
 func TestProvider_ProviderConfigure_credentials(t *testing.T) {
 
 	const pathToMissingFile string = "./this/path/doesnt/exist.json" // Doesn't exist
@@ -166,46 +112,46 @@ func TestProvider_ProviderConfigure_credentials(t *testing.T) {
 		},
 		"credentials set in the config are not overridden by environment variables": {
 			ConfigValues: map[string]interface{}{
-				"credentials": generateFakeCredentialsJson("test"),
+				"credentials": acctest.GenerateFakeCredentialsJson("test"),
 			},
 			EnvVariables: map[string]string{
-				"GOOGLE_CREDENTIALS":             generateFakeCredentialsJson("GOOGLE_CREDENTIALS"),
-				"GOOGLE_CLOUD_KEYFILE_JSON":      generateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
-				"GCLOUD_KEYFILE_JSON":            generateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
-				"GOOGLE_APPLICATION_CREDENTIALS": generateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
+				"GOOGLE_CREDENTIALS":             acctest.GenerateFakeCredentialsJson("GOOGLE_CREDENTIALS"),
+				"GOOGLE_CLOUD_KEYFILE_JSON":      acctest.GenerateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
+				"GCLOUD_KEYFILE_JSON":            acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
+				"GOOGLE_APPLICATION_CREDENTIALS": acctest.GenerateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
 			},
-			ExpectedSchemaValue: generateFakeCredentialsJson("test"),
-			ExpectedConfigValue: generateFakeCredentialsJson("test"),
+			ExpectedSchemaValue: acctest.GenerateFakeCredentialsJson("test"),
+			ExpectedConfigValue: acctest.GenerateFakeCredentialsJson("test"),
 		},
 		"when credentials is unset in the config, environment variables are used: GOOGLE_CREDENTIALS used first": {
 			EnvVariables: map[string]string{
-				"GOOGLE_CREDENTIALS":             generateFakeCredentialsJson("GOOGLE_CREDENTIALS"),
-				"GOOGLE_CLOUD_KEYFILE_JSON":      generateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
-				"GCLOUD_KEYFILE_JSON":            generateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
-				"GOOGLE_APPLICATION_CREDENTIALS": generateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
+				"GOOGLE_CREDENTIALS":             acctest.GenerateFakeCredentialsJson("GOOGLE_CREDENTIALS"),
+				"GOOGLE_CLOUD_KEYFILE_JSON":      acctest.GenerateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
+				"GCLOUD_KEYFILE_JSON":            acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
+				"GOOGLE_APPLICATION_CREDENTIALS": acctest.GenerateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
 			},
 			ExpectedSchemaValue: "",
-			ExpectedConfigValue: generateFakeCredentialsJson("GOOGLE_CREDENTIALS"),
+			ExpectedConfigValue: acctest.GenerateFakeCredentialsJson("GOOGLE_CREDENTIALS"),
 		},
 		"when credentials is unset in the config, environment variables are used: GOOGLE_CLOUD_KEYFILE_JSON used second": {
 			EnvVariables: map[string]string{
 				// GOOGLE_CREDENTIALS not set
-				"GOOGLE_CLOUD_KEYFILE_JSON":      generateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
-				"GCLOUD_KEYFILE_JSON":            generateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
-				"GOOGLE_APPLICATION_CREDENTIALS": generateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
+				"GOOGLE_CLOUD_KEYFILE_JSON":      acctest.GenerateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
+				"GCLOUD_KEYFILE_JSON":            acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
+				"GOOGLE_APPLICATION_CREDENTIALS": acctest.GenerateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
 			},
 			ExpectedSchemaValue: "",
-			ExpectedConfigValue: generateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
+			ExpectedConfigValue: acctest.GenerateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
 		},
 		"when credentials is unset in the config, environment variables are used: GCLOUD_KEYFILE_JSON used third": {
 			EnvVariables: map[string]string{
 				// GOOGLE_CREDENTIALS not set
 				// GOOGLE_CLOUD_KEYFILE_JSON not set
-				"GCLOUD_KEYFILE_JSON":            generateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
-				"GOOGLE_APPLICATION_CREDENTIALS": generateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
+				"GCLOUD_KEYFILE_JSON":            acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
+				"GOOGLE_APPLICATION_CREDENTIALS": acctest.GenerateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
 			},
 			ExpectedSchemaValue: "",
-			ExpectedConfigValue: generateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
+			ExpectedConfigValue: acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
 		},
 		"when credentials is unset in the config (and access_token unset), GOOGLE_APPLICATION_CREDENTIALS is used for auth but not to set values in the config": {
 			EnvVariables: map[string]string{
@@ -251,8 +197,8 @@ func TestProvider_ProviderConfigure_credentials(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -371,8 +317,8 @@ func TestProvider_ProviderConfigure_accessToken(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -473,8 +419,8 @@ func TestProvider_ProviderConfigure_impersonateServiceAccount(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -569,8 +515,8 @@ func TestProvider_ProviderConfigure_impersonateServiceAccountDelegates(t *testin
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -733,8 +679,8 @@ func TestProvider_ProviderConfigure_project(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -844,8 +790,8 @@ func TestProvider_ProviderConfigure_billingProject(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -969,8 +915,8 @@ func TestProvider_ProviderConfigure_region(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -1122,8 +1068,8 @@ func TestProvider_ProviderConfigure_zone(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -1250,8 +1196,8 @@ func TestProvider_ProviderConfigure_userProjectOverride(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -1352,8 +1298,8 @@ func TestProvider_ProviderConfigure_scopes(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
