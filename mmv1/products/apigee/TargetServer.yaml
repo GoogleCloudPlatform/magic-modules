@@ -19,7 +19,7 @@ delete_url: '{{env_id}}/targetservers/{{name}}'
 self_link: '{{env_id}}/targetservers/{{name}}'
 update_url: '{{env_id}}/targetservers/{{name}}'
 description: |
-  TargetServer configuration. TargetServers are used to decouple a proxy TargetEndpoint HTTPTargetConnections from concrete URLs for backend services. 
+  TargetServer configuration. TargetServers are used to decouple a proxy TargetEndpoint HTTPTargetConnections from concrete URLs for backend services.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Load balancing across backend servers': 'https://cloud.google.com/apigee/docs/api-platform/deploy/load-balancing-across-backend-servers'
@@ -33,16 +33,14 @@ examples:
     test_env_vars:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
-    skip_test:
-      true   
+    skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_target_server_test'
     primary_resource_id: 'apigee_target_server'
     test_env_vars:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
-    skip_docs:
-      true
+    skip_docs: true
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 1
   update_minutes: 1
@@ -90,58 +88,58 @@ properties:
     name: 'sSLInfo'
     description: Optional. Specifies TLS configuration info for this TargetServer. The JSON name is sSLInfo for legacy/backwards compatibility reasons -- Edge originally supported SSL, and the name is still used for TLS configuration.
     properties:
-     - !ruby/object:Api::Type::Boolean
-       name: 'enabled'
-       description: |
-         Required. Enables TLS. If false, neither one-way nor two-way TLS will be enabled.
-       required: true
-     - !ruby/object:Api::Type::Boolean
-       name: 'clientAuthEnabled'
-       description: |
-         Optional. Enables two-way TLS.
-     - !ruby/object:Api::Type::String
-       name: 'keyStore'
-       description: |
-         Required if clientAuthEnabled is true. The resource ID of the keystore.
-     - !ruby/object:Api::Type::String
-       name: 'keyAlias'
-       description: |
-         Required if clientAuthEnabled is true. The resource ID for the alias containing the private key and cert.
-     - !ruby/object:Api::Type::String
-       name: 'trustStore'
-       description: |
-         The resource ID of the truststore.
-     - !ruby/object:Api::Type::Boolean
-       name: 'ignoreValidationErrors'
-       description: |
-         If true, Edge ignores TLS certificate errors. Valid when configuring TLS for target servers and target endpoints, and when configuring virtual hosts that use 2-way TLS. When used with a target endpoint/target server, if the backend system uses SNI and returns a cert with a subject Distinguished Name (DN) that does not match the hostname, there is no way to ignore the error and the connection fails.
-     - !ruby/object:Api::Type::Array
-       name: 'protocols'
-       item_type: Api::Type::String
-       description: |
-         The TLS versioins to be used.
-     - !ruby/object:Api::Type::Array
-       name: 'ciphers'
-       item_type: Api::Type::String
-       description: |
-         The SSL/TLS cipher suites to be used. For programmable proxies, it must be one of the cipher suite names listed in: http://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#ciphersuites. For configurable proxies, it must follow the configuration specified in: https://commondatastorage.googleapis.com/chromium-boringssl-docs/ssl.h.html#Cipher-suite-configuration. This setting has no effect for configurable proxies when negotiating TLS 1.3.
-     - !ruby/object:Api::Type::NestedObject
-       name: 'commonName'
-       description: The TLS Common Name of the certificate.
-       properties:
-        - !ruby/object:Api::Type::String
-          name: 'value'
-          description: |
-            The TLS Common Name string of the certificate.
-        - !ruby/object:Api::Type::Boolean
-          name: 'wildcardMatch'
-          description: |
-            Indicates whether the cert should be matched against as a wildcard cert.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        description: |
+          Required. Enables TLS. If false, neither one-way nor two-way TLS will be enabled.
+        required: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'clientAuthEnabled'
+        description: |
+          Optional. Enables two-way TLS.
+      - !ruby/object:Api::Type::String
+        name: 'keyStore'
+        description: |
+          Required if clientAuthEnabled is true. The resource ID of the keystore.
+      - !ruby/object:Api::Type::String
+        name: 'keyAlias'
+        description: |
+          Required if clientAuthEnabled is true. The resource ID for the alias containing the private key and cert.
+      - !ruby/object:Api::Type::String
+        name: 'trustStore'
+        description: |
+          The resource ID of the truststore.
+      - !ruby/object:Api::Type::Boolean
+        name: 'ignoreValidationErrors'
+        description: |
+          If true, Edge ignores TLS certificate errors. Valid when configuring TLS for target servers and target endpoints, and when configuring virtual hosts that use 2-way TLS. When used with a target endpoint/target server, if the backend system uses SNI and returns a cert with a subject Distinguished Name (DN) that does not match the hostname, there is no way to ignore the error and the connection fails.
+      - !ruby/object:Api::Type::Array
+        name: 'protocols'
+        item_type: Api::Type::String
+        description: |
+          The TLS versioins to be used.
+      - !ruby/object:Api::Type::Array
+        name: 'ciphers'
+        item_type: Api::Type::String
+        description: |
+          The SSL/TLS cipher suites to be used. For programmable proxies, it must be one of the cipher suite names listed in: http://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#ciphersuites. For configurable proxies, it must follow the configuration specified in: https://commondatastorage.googleapis.com/chromium-boringssl-docs/ssl.h.html#Cipher-suite-configuration. This setting has no effect for configurable proxies when negotiating TLS 1.3.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'commonName'
+        description: The TLS Common Name of the certificate.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'value'
+            description: |
+              The TLS Common Name string of the certificate.
+          - !ruby/object:Api::Type::Boolean
+            name: 'wildcardMatch'
+            description: |
+              Indicates whether the cert should be matched against as a wildcard cert.
 
   - !ruby/object:Api::Type::Enum
     name: 'protocol'
     immutable: true
-    required: true   
+    required: true
     description: |
       Immutable. The protocol used by this TargetServer.
     values:
