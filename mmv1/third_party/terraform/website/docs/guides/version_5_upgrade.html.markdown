@@ -112,6 +112,12 @@ There are now three label-related fields with the new model:
 
 After upgrading to `5.0.0`, and then running `terraform refresh` or `terraform apply`, these three fields should show in the state file of the resources with a self-applying `labels` field.
 
+## Provider Default Zone and Region Values
+
+Several tests were inconsistent with one another when it came to testing `location`, `zone`, and `region` values in the provider block. The inconsistencies included some tests not working with self-links while others did. This has been addressed while also addressing the use of the `region` value within the provider block.
+
+Having the `region` value set in both the resource and provider block will now result in the use of the `region` value being used from the provider block. Prior to the 5.0.0, the `region` value would be ignored and the resource `region` value would be used instead. The same can be said with `region` and `zone` values in the provider where the `region` value, despite being set, would be ignored with the `zone` value being used instead. Users should also expect to see `region` being used if both `region` and `zone` values are set in a resource.
+
 #### Resource annotations
 
 The new annotations model is similar to the new labels model and will be applied to all of the resources with the top level `annotations` field or the nested `annotations` field inside the top level `metadata` field.
