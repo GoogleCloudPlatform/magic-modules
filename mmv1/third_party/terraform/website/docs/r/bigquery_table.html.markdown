@@ -104,6 +104,9 @@ The following arguments are supported:
     By defining these properties, the data source can then be queried as
     if it were a standard BigQuery table. Structure is [documented below](#nested_external_data_configuration).
 
+* `biglake_configuration` - (Optional) Specifies the configuration of
+* a BigLake managed table. Structure is [documented below](#nested_biglake_configuration)
+
 * `friendly_name` - (Optional) A descriptive name for the table.
 
 * `max_staleness`: (Optional) The maximum staleness of data that could be returned when the table (or stale MV) is queried. Staleness encoded as a string encoding of sql IntervalValue type.
@@ -215,7 +218,7 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 * `source_format` (Optional) - The data format. Please see sourceFormat under
     [ExternalDataConfiguration](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#externaldataconfiguration)
     in Bigquery's public API documentation for supported formats. To use "GOOGLE_SHEETS"
-    the `scopes` must include "https://www.googleapis.com/auth/drive.readonly".
+    the `scopes` must include "<https://www.googleapis.com/auth/drive.readonly>".
 
 * `source_uris` - (Required) A list of the fully-qualified URIs that point to
     your data in Google Cloud.
@@ -274,12 +277,12 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 * `mode` (Optional) - When set, what mode of hive partitioning to use when
     reading data. The following modes are supported.
-    * AUTO: automatically infer partition key name(s) and type(s).
-    * STRINGS: automatically infer partition key name(s). All types are
+  * AUTO: automatically infer partition key name(s) and type(s).
+  * STRINGS: automatically infer partition key name(s). All types are
       Not all storage formats support hive partitioning. Requesting hive
       partitioning on an unsupported format will lead to an error.
       Currently supported formats are: JSON, CSV, ORC, Avro and Parquet.
-    * CUSTOM: when set to `CUSTOM`, you must encode the partition key schema within the `source_uri_prefix` by setting `source_uri_prefix` to `gs://bucket/path_to_table/{key1:TYPE1}/{key2:TYPE2}/{key3:TYPE3}`.
+  * CUSTOM: when set to `CUSTOM`, you must encode the partition key schema within the `source_uri_prefix` by setting `source_uri_prefix` to `gs://bucket/path_to_table/{key1:TYPE1}/{key2:TYPE2}/{key3:TYPE3}`.
 
 * `require_partition_filter` - (Optional) If set to true, queries over this table
     require a partition filter that can be used for partition elimination to be
@@ -363,6 +366,20 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     `google_bigquery_default_service_account` datasource and the
     `google_kms_crypto_key_iam_binding` resource.
 
+<a name="nested_biglake_configuration"></a>The `biglake_configuration` block supports:
+
+* `connection_id` - (Required) The connection specifying the credentials to be used to
+    read and write to external storage, such as Cloud Storage. The connection_id can
+    have the form "&lt;project\_id&gt;.&lt;location\_id&gt;.&lt;connection\_id&gt;" or
+    projects/&lt;project\_id&gt;/locations/&lt;location\_id&gt;/connections/&lt;connection\_id&gt;".
+
+* `storage_uri` - (Required) The fully qualified location prefix of the external folder where table data
+  is stored. The '*' wildcard character is not allowed. The URI should be in the format "gs://bucket/path_to_table/"
+
+* `file_format` - (Required) The file format the table data is stored in.
+
+* `table_format` - (Required) The table format the metadata only snapshots are stored in.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
@@ -395,7 +412,7 @@ exported:
 BigQuery tables imported using any of these accepted formats:
 
 ```
-$ terraform import google_bigquery_table.default projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}
-$ terraform import google_bigquery_table.default {{project}}/{{dataset_id}}/{{table_id}}
-$ terraform import google_bigquery_table.default {{dataset_id}}/{{table_id}}
+terraform import google_bigquery_table.default projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}
+terraform import google_bigquery_table.default {{project}}/{{dataset_id}}/{{table_id}}
+terraform import google_bigquery_table.default {{dataset_id}}/{{table_id}}
 ```
