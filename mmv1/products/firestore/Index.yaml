@@ -64,6 +64,15 @@ examples:
       # so we need a pre-created project.
     test_env_vars:
       project_id: :FIRESTORE_PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firestore_index_datastore_mode'
+    primary_resource_id:
+      'my-datastore-mode-index'
+      # This example relies on a well-known collection having been created and
+      # Firestore being enabled on the project. We can't do that automatically
+      # so we need a pre-created project.
+    test_env_vars:
+      project_id: :FIRESTORE_PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/index_self_link_as_name_set_project.go.erb
   encoder: templates/terraform/encoders/index.go.erb
