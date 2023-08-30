@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccBiglakeDatabase_bigqueryBiglakeDatabase_update(t *testing.T) {
+func TestAccBiglakeDatabase_biglakeDatabase_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -21,28 +21,28 @@ func TestAccBiglakeDatabase_bigqueryBiglakeDatabase_update(t *testing.T) {
 		CheckDestroy:             testAccCheckBiglakeDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBiglakeDatabase_bigqueryBiglakeDatabaseExample(context),
+				Config: testAccBiglakeDatabase_biglakeDatabaseExample(context),
 			},
 			{
 				ResourceName:            "google_biglake_database.database",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "catalog"},
+				ImportStateVerifyIgnore: []string{"name", "catalog"},
 			},
 			{
-				Config: testAccBiglakeDatabase_bigqueryBiglakeDatabase_update(context),
+				Config: testAccBiglakeDatabase_biglakeDatabase_update(context),
 			},
 			{
 				ResourceName:            "google_biglake_database.database",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "catalog"},
+				ImportStateVerifyIgnore: []string{"name", "catalog"},
 			},
 		},
 	})
 }
 
-func testAccBiglakeDatabase_bigqueryBiglakeDatabase_update(context map[string]interface{}) string {
+func testAccBiglakeDatabase_biglakeDatabase_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_biglake_catalog" "catalog" {
 	name = "tf_test_my_catalog%{random_suffix}"
@@ -62,8 +62,7 @@ resource "google_storage_bucket_object" "metadata_folder" {
 }
 resource "google_biglake_database" "database" {
     name = "tf_test_my_database%{random_suffix}"
-    catalog_id = google_biglake_catalog.catalog.name
-    location = google_biglake_catalog.catalog.location
+    catalog = google_biglake_catalog.catalog.id
 	type = "HIVE"
 	hive_options {
         location_uri = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.metadata_folder.name}/metadata/metadata"
