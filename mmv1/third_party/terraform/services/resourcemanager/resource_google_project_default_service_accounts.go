@@ -42,6 +42,7 @@ func ResourceGoogleProjectDefaultServiceAccounts() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
+				Computed:    true,
 				ValidateFunc: verify.ValidateProjectID(),
 				Description:  `The project ID where service accounts are created.`,
 			},
