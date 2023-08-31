@@ -581,9 +581,11 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 		operation, err = clusterNodePoolsCreateCall.Do()
 
 		if err != nil {
-			if tpgresource.IsFailedPreconditionError(err) {
+			if tpgresource.IsFailedPreconditionError(err) || tpgresource.IsQuotaError(err) {
 				// We get failed precondition errors if the cluster is updating
 				// while we try to add the node pool.
+				// We get quota errors if there the number of running concurrent
+                                // operations reaches the quota.
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -786,9 +788,11 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 		operation, err = clusterNodePoolsDeleteCall.Do()
 
 		if err != nil {
-			if tpgresource.IsFailedPreconditionError(err) {
+			if tpgresource.IsFailedPreconditionError(err) || tpgresource.IsQuotaError(err) {
 				// We get failed precondition errors if the cluster is updating
 				// while we try to delete the node pool.
+				// We get quota errors if there the number of running concurrent
+				// operations reaches the quota.
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
