@@ -1,4 +1,4 @@
-package main
+package diff
 
 import (
 	newProvider "google/provider/new/google"
@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func compare() []string {
+func Compare() []string {
 	resourceMapOld := oldProvider.ResourceMap()
 	resourceMapNew := newProvider.ResourceMap()
 
