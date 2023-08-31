@@ -301,6 +301,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_credentials(t *testing.T) {
 		// 	},
 		// 	ExpectError: true,
 		// },
+		// Handling unknown values - see separate `TestFrameworkProvider_LoadAndValidateFramework_credentials_unknown` test
 	}
 
 	for tn, tc := range cases {
