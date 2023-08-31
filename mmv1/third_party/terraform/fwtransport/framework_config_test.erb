@@ -129,15 +129,6 @@ func TestFrameworkProvider_LoadAndValidateFramework_project(t *testing.T) {
 		// 	ExpectedDataModelValue:    types.StringNull(),
 		// 	ExpectedConfigStructValue: types.StringNull(),
 		// },
-		// Handling unknown values
-		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
-		// "when project is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
-		// 	ConfigValues: fwmodels.ProviderModel{
-		// 		Project: types.StringUnknown(),
-		// 	},
-		// 	ExpectedDataModelValue:    types.StringNull(),
-		// 	ExpectedConfigStructValue: types.StringNull(),
-		// },
 	}
 
 	for tn, tc := range cases {
