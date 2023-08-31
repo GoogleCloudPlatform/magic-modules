@@ -131,12 +131,3 @@ properties:
             name: "outputFormat"
             description: |
               The fully qualified Java class name of the output format.
-          - !ruby/object:Api::Type::NestedObject
-            name: "serdeInfo"
-            description: |
-              Serializer and deserializer information.
-            properties:
-              - !ruby/object:Api::Type::String
-                name: "serializationLib"
-                description: |
-                  The fully qualified Java class name of the serialization library.
