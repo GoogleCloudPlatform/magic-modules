@@ -54,6 +54,7 @@ parameters:
     required: true
     url_param_only: true
     ignore_read: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: namespaceId
     description: |
