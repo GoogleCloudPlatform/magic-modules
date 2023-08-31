@@ -218,6 +218,11 @@ properties:
       can only be used with INTERNAL type with the VPC_PEERING and
       IPSEC_INTERCONNECT purposes.
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+  - !ruby/object:Api::Type::Integer
+    name: prefixLength
+    description: |
+      The prefix length if the resource represents an IP range.
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'ipVersion'
     description: |
