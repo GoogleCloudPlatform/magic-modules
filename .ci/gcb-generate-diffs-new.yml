@@ -182,7 +182,7 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
-      entrypoint: '/workspace/.ci/scripts/go-plus/terraform-validator-tester/test_terraform_validator.sh'
+      entrypoint: '/workspace/.ci/scripts/go-plus/tgc-tester/test_tgc.sh'
       id: tgc-test
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
@@ -202,7 +202,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tgc-test-integration-0.12.31
-      entrypoint: '/workspace/.ci/scripts/go-plus/terraform-validator-tester-integration/test_terraform_validator_integration.sh'
+      entrypoint: '/workspace/.ci/scripts/go-plus/tgc-tester-integration/test_tgc_integration.sh'
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tpgb-head", "tpgb-base", "tgc-head", "tgc-base"]
@@ -222,7 +222,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tgc-test-integration-0.13.7
-      entrypoint: '/workspace/.ci/scripts/go-plus/terraform-validator-tester-integration/test_terraform_validator_integration.sh'
+      entrypoint: '/workspace/.ci/scripts/go-plus/tgc-tester-integration/test_tgc_integration.sh'
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tpgb-head", "tpgb-base", "tgc-head", "tgc-base"]
