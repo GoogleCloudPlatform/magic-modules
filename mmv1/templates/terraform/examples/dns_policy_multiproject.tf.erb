@@ -102,6 +102,7 @@ resource "google_project_service" "dns_project_1" {
   service = "dns.googleapis.com"
   depends_on              = [
     google_project.project_1,
+    google_project_service.compute_project_1,
   ]
 }
 

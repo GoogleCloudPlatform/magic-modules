@@ -75,7 +75,6 @@ examples:
     primary_resource_id: 'private-zone'
     vars:
       zone_name: 'private-zone'
-      zone_dns_name: 'private-multiproject.example.com.'
       network_1_name: 'network-1'
       network_2_name: 'network-2'
       project_1_name: 'project-1'

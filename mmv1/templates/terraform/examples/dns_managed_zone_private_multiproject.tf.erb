@@ -1,6 +1,6 @@
 resource "google_dns_managed_zone" "<%= ctx[:primary_resource_id] %>" {
   name        = "<%= ctx[:vars]['zone_name'] %>"
-  dns_name    = "<%= ctx[:vars]['zone_dns_name'] %>"
+  dns_name    = "multiproject.private.example.com."
   description = "Example private DNS zone"
   labels = {
     foo = "bar"
@@ -108,6 +108,7 @@ resource "google_project_service" "dns_project_1" {
   service = "dns.googleapis.com"
   depends_on              = [
     google_project.project_1,
+    google_project_service.compute_project_1,
   ]
 }
 
