@@ -160,7 +160,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_project(t *testing.T) {
 			if diags.HasError() && !tc.ExpectError {
 				for i, err := range diags.Errors() {
 					num := i + 1
-					t.Logf("unexpected error #%d : %s", num, err.Summary())
+					t.Logf("unexpected error #%d : %s : %s", num, err.Summary(), err.Detail())
 				}
 				t.Fatalf("did not expect error, but [%d] error(s) occurred", diags.ErrorsCount())
 			}
@@ -323,7 +323,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_credentials(t *testing.T) {
 			if diags.HasError() && !tc.ExpectError {
 				for i, err := range diags.Errors() {
 					num := i + 1
-					t.Logf("unexpected error #%d : %s", num, err.Summary())
+					t.Logf("unexpected error #%d : %s : %s", num, err.Summary(), err.Detail())
 				}
 				t.Fatalf("did not expect error, but [%d] error(s) occurred", diags.ErrorsCount())
 			}
