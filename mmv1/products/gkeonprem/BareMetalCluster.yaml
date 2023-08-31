@@ -754,7 +754,7 @@ properties:
       - !ruby/object:Api::Type::Enum
         name: 'evaluationMode'
         description: |
-          Mode of operation for binauthz policy evaluation. If unspecified, 
+          Mode of operation for binauthz policy evaluation. If unspecified,
           defaults to DISABLED.
         values:
           - DISABLED
