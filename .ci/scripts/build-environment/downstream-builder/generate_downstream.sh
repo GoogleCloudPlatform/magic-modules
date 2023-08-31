@@ -107,6 +107,7 @@ if [ "$REPO" == "terraform" ]; then
 fi
 
 if [ "$REPO" == "terraform-google-conversion" ]; then
+    # Generate tfplan2cai 
     pushd $LOCAL_PATH
     # clear out the templates as they are copied during
     # generation from mmv1/third_party/validator/tests/data
@@ -118,6 +119,13 @@ if [ "$REPO" == "terraform-google-conversion" ]; then
     popd
 
     bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH/tfplan2cai -v $VERSION
+
+    # Generate cai2hcl
+    pushd $LOCAL_PATH
+    rm -rf ./cai2hcl
+    popd
+
+    bundle exec compiler.rb -e terraform -f tgc_cai2hcl -o $LOCAL_PATH/cai2hcl -v $VERSION
 
     if [ "$COMMAND" == "downstream" ]; then
       pushd $LOCAL_PATH
