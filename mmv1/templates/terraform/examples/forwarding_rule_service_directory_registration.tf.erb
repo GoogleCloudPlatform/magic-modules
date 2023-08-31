@@ -1,0 +1,28 @@
+resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
+  name       = "<%= ctx[:vars]['forwarding_rule_name'] %>"
+  target     = google_compute_target_pool.default.id
+  port_range = "80"
+  serviceDirectoryRegistrations = {
+    service = google_service_directory_service.default
+    serviceDirectoryRegion = "us-central1"
+  }
+}
+
+resource "google_service_directory_namespace" "default" {
+  name = "<%= ctx[:vars]['service_directory_namespace_name'] %>"
+  provider     = google-beta
+  namespace_id = "example-namespace"
+  location     = "us-central1"
+}
+
+resource "google_service_directory_service" "default" {
+  name = "<%= ctx[:vars]['service_directory_service_name'] %>"
+  provider   = google-beta
+  service_id = "example-service"
+  namespace  = google_service_directory_namespace.default.id
+
+  metadata = {
+    stage  = "prod"
+    region = "us-central1"
+  }
+}

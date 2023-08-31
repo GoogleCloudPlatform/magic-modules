@@ -214,6 +214,13 @@ examples:
     ignore_read_extra:
       - "port_range"
       - "target"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "forwarding_rule_service_directory_registration"
+    primary_resource_id: "default"
+    vars:
+      forwarding_rule_name: "forwarding_rule_name"
+      service_directory_service_name: "service_directory_name"
+      serivce_directory_namespace_name: "serivce_directory_namespace_name"
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
 parameters:
