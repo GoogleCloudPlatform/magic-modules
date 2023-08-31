@@ -1413,7 +1413,7 @@ func TestProvider_ProviderConfigure_requestTimeout(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
+			acctest.UnsetTestProviderConfigEnvs(t)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -1502,8 +1502,8 @@ func TestProvider_ProviderConfigure_requestReason(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -1635,7 +1635,7 @@ func TestProvider_ProviderConfigure_batching(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
+			acctest.UnsetTestProviderConfigEnvs(t)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
