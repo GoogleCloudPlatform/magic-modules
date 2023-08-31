@@ -752,7 +752,10 @@ func DefaultProviderProject(_ context.Context, diff *schema.ResourceDiff, meta i
 		if err != nil {
 			return fmt.Errorf("Failed to retrieve project, pid: %s, err: %s", project, err)
 		}
-		diff.SetNew("project", project)
+		err = diff.SetNew("project", project)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -766,7 +769,10 @@ func DefaultProviderRegion(_ context.Context, diff *schema.ResourceDiff, meta in
 		if err != nil {
 			return fmt.Errorf("Failed to retrieve region, pid: %s, err: %s", region, err)
 		}
-		diff.SetNew("region", region)
+		err = diff.SetNew("region", region)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -781,7 +787,10 @@ func DefaultProviderZone(_ context.Context, diff *schema.ResourceDiff, meta inte
 		if err != nil {
 			return fmt.Errorf("Failed to retrieve zone, pid: %s, err: %s", zone, err)
 		}
-		diff.SetNew("zone", zone)
+		err = diff.SetNew("zone", zone)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
