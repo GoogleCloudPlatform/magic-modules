@@ -58,7 +58,6 @@ module Provider
     def compile_common_files(output_folder, products, _common_compile_file) end
 
     def copy_common_files(output_folder, generate_code, _generate_docs)
-      Google::LOGGER.info 'Copying common files.'
       return unless generate_code
 
       FileUtils.cp_r('third_party/cai2hcl/.', "#{output_folder}/cai2hcl")
