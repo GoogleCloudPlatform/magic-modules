@@ -17,7 +17,6 @@ type TestCase struct {
 	sourceFolder string
 }
 
-// Files from "testdata/" to test json -> tf conversion.
 var testDataFileNames = []string{
 	"compute_instance_iam",
 	"full_compute_instance",
