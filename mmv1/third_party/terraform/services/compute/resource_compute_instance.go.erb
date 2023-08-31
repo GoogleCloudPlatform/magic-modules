@@ -305,6 +305,16 @@ func ResourceComputeInstance() *schema.Resource {
 							Description:      `The name or self_link of the subnetwork attached to this interface.`,
 						},
 
+						<% if version == "beta" -%>
+						"network_attachment": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+							Description:      `The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.`,
+						},
+						<% end %>
+
 						"subnetwork_project": {
 							Type:        schema.TypeString,
 							Optional:    true,
@@ -1494,7 +1504,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	}
 <% unless version == 'ga' -%>
 	// Add extra check on Scheduling to prevent STOP instance setting MaxRunDuration.
-	// When Instance being stopped, GCE will wipe out the MaxRunDuration field. 
+	// When Instance being stopped, GCE will wipe out the MaxRunDuration field.
 	// And Terraform has no visiblity on this field after then. Given the infrastructure
 	// constraint, MaxRunDuration will only be supported with instance has
 	// DELETE InstanceTerminationAction
@@ -1800,6 +1810,26 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			}
 			instNetworkInterface = instance.NetworkInterfaces[i]
 		}
+
+		<% if version == "beta" %>
+		if !updateDuringStop && d.HasChange(prefix+".network_attachment") {
+			// Instance Network Interface request that specifies a Network Attachment URL
+			// should not specify network, subnetwork or IP address
+			networkInterfacePatchObj := &compute.NetworkInterface{
+				Fingerprint:       instNetworkInterface.Fingerprint,
+				NetworkAttachment: instNetworkInterface.NetworkAttachment,
+			}
+			updateCall := config.NewComputeClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
+			op, err := updateCall()
+			if err != nil {
+				return errwrap.Wrapf("Error updating network interface: {{err}}", err)
+			}
+			opErr := ComputeOperationWaitTime(config, op, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+			if opErr != nil {
+				return opErr
+			}
+		}
+		<% end %>
 
 		if !updateDuringStop && d.HasChange(prefix+".alias_ip_range") {
 			// Alias IP ranges cannot be updated; they must be removed and then added
