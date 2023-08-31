@@ -2751,6 +2751,11 @@ resource "google_compute_subnetwork" "subnet2" {
   network                  = google_compute_network.addn_net_2.name
   ip_cidr_range            = "10.0.38.0/24"
   region                   = "us-central1"
+
+  secondary_ip_range {
+    range_name    = "pod"
+    ip_cidr_range = "10.0.64.0/19"
+  }
 }
 
 resource "google_container_cluster" "cluster" {
@@ -2784,13 +2789,18 @@ resource "google_container_node_pool" "with_multi_nic" {
     create_pod_range = false
     enable_private_nodes = true
     pod_range = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
-	additional_node_network_configs {
-	  network    = google_compute_network.addn_net_1.name
+    additional_node_network_configs {
+      network    = google_compute_network.addn_net_1.name
       subnetwork = google_compute_subnetwork.subnet1.name
     }
     additional_node_network_configs {
-	  network    = google_compute_network.addn_net_2.name
-	  subnetwork = google_compute_subnetwork.subnet2.name
+      network    = google_compute_network.addn_net_2.name
+      subnetwork = google_compute_subnetwork.subnet2.name
+    }
+    additional_pod_network_configs {
+      subnetwork          = google_compute_subnetwork.subnet2.name
+      secondary_pod_range = "pod"
+      max_pods_per_node   = 32
     }
   }
   node_config {
