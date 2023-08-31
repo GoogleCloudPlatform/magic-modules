@@ -11,6 +11,7 @@ replace github.com/GoogleCloudPlatform/magic-modules/.ci/diff-processor => ./
 require (
 	github.com/golang/glog v1.1.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.0
+	github.com/spf13/cobra v1.7.0
 	google/provider/new v0.0.0-00010101000000-000000000000
 	google/provider/old v0.0.0-00010101000000-000000000000
 )
@@ -69,6 +70,7 @@ require (
 	github.com/hashicorp/terraform-registry-address v0.1.0 // indirect
 	github.com/hashicorp/terraform-svchost v0.0.0-20200729002733-f050f53b9734 // indirect
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
@@ -81,6 +83,7 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/vmihailenco/msgpack/v4 v4.3.12 // indirect
 	github.com/vmihailenco/tagparser v0.1.2 // indirect
