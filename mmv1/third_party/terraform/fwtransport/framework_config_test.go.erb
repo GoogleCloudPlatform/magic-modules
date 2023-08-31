@@ -315,7 +315,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_credentials(t *testing.T) {
 
 			// Act
 			p.LoadAndValidateFramework(ctx, &data, tfVersion, &diags, providerversion)
-			fmt.Printf("after act step: %#v", data)
+
 			// Assert
 			if diags.HasError() && tc.ExpectError {
 				return
