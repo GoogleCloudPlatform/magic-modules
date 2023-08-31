@@ -26,7 +26,6 @@ skip_delete: true
 taint_resource_on_failed_create: true
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 60
-  delete_minutes: 60
   update_minutes: 60
 description: "A Google Bare Metal Admin Cluster."
 examples:
