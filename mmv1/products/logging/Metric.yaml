@@ -212,7 +212,6 @@ properties:
               - bucket_options.0.linear_buckets.0.offset
             description: |
               Must be greater than 0.
-            required: true
           - !ruby/object:Api::Type::Double
             name: width
             at_least_one_of:
@@ -247,7 +246,6 @@ properties:
               - bucket_options.0.exponential_buckets.0.scale
             description: |
               Must be greater than 0.
-            required: true
           - !ruby/object:Api::Type::Double
             name: growthFactor
             at_least_one_of:
