@@ -331,3 +331,17 @@ If you were relying on accessing an individual flag by index (for example, `goog
 ### `rule.rate_limit_options.encorce_on_key` no longer has default value
 
 Previously, the default value for `rule.rate_limit_options.encorce_on_key` is "ALL", now this field no longer has a default value.
+
+## Resource: `google_logging_metric`
+
+### Additional fields are now required metrics with `value_type = "DISTRIBUTION"`
+
+For log-based metrics with `value_type = "DISTRIBUTION"`, additional fields are now required depending on the `bucket_options` block:
+
+* `num_finite_buckets`, `width`, and `offset` are now required when `bucket_options` is set to be `linear_buckets`
+
+* `num_finite_buckets`, `growth_factor`, and `scale` are now required when `bucket_options` is set to be `exponential_buckets`
+
+* `bounds` is now required when `bucket_options` is set to be `explicit_buckets`.
+
+Previously these fields should have been required but were not, which allowed for invalid `google_logging_metric` configurations.
