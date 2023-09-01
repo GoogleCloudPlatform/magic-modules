@@ -26,27 +26,41 @@ steps:
     # we're used to from Concourse.
     - name: 'gcr.io/cloud-builders/git'
       args:
-          - remote
-          - add
-          - head
-          - $_HEAD_REPO_URL
+        - remote
+        - add
+        - head
+        - $_HEAD_REPO_URL
+
+    # Checkout BASE branch
+    - name: 'gcr.io/cloud-builders/git'
+      args:
+        - fetch
+        - origin
+        - main
 
     - name: 'gcr.io/cloud-builders/git'
       args:
-          - fetch
-          - head
-          - $_HEAD_BRANCH
+        - checkout
+        - head
+        - $_HEAD_BRANCH
 
+    # Find common ancestor commit and merge the latest changes
+    # to the .ci folder
     - name: 'gcr.io/cloud-builders/git'
+      id: findMergeBase
+      entrypoint: 'bash'
       args:
-          - checkout
-          - origin/$_BASE_BRANCH
-    - name: 'gcr.io/cloud-builders/git'
-      id: merged
-      args:
-          - merge
-          - --no-ff
-          - head/$_HEAD_BRANCH
+        - '-c'
+        - |
+          # Find the common ancestor commit
+          base_commit=$(git merge-base origin/main head/$_HEAD_BRANCH)
+          echo "Common ancestor commit: $base_commit"
+
+          # Generate a diff for the .ci directory
+          git diff $base_commit origin/main -- .ci/ > /workspace/ci.diff
+
+          # Apply the diff
+          git apply /workspace/ci.diff
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
