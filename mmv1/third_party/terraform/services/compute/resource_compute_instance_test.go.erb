@@ -2639,7 +2639,7 @@ func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 func TestAccComputeInstance_networkAttachmentUpdate(t *testing.T) {
 	t.Parallel()
 	suffix := fmt.Sprintf("%s", acctest.RandString(t, 10))
-	instanceName := fmt.Sprintf("tf-test-%s")
+	instanceName := fmt.Sprintf("tf-test-%s", suffix)
 
 	context := map[string]interface{}{
 		"suffix":        suffix,
