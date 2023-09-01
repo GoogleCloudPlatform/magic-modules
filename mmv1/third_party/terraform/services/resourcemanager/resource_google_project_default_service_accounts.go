@@ -33,16 +33,11 @@ func ResourceGoogleProjectDefaultServiceAccounts() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
-		CustomizeDiff: customdiff.All(
-			tpgresource.DefaultProviderProject,
-		),
-
 		Schema: map[string]*schema.Schema{
 			"project": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				Computed:    true,
 				ValidateFunc: verify.ValidateProjectID(),
 				Description:  `The project ID where service accounts are created.`,
 			},
