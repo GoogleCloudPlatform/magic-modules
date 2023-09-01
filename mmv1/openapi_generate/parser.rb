@@ -32,11 +32,13 @@ module OpenAPIGenerate
 
     def write_object(name, obj, type, url_param)
       field = nil
-      if name == "projectsId"
+      case name
+      when 'projectsId'
         return field
-      elsif name == "locationsId"
-        name = "location"
+      when 'locationsId'
+        name = 'location'
       end
+
       case type
       when 'string'
         field = Api::Type::String.new(name)
@@ -60,9 +62,7 @@ module OpenAPIGenerate
           properties = []
           obj.properties&.each do |prop, i|
             prop = write_object(prop, i, i.type, false)
-            if required_props.include?(prop.name)
-              prop.instance_variable_set(:@required, true)
-            end
+            prop.instance_variable_set(:@required, true) if required_props.include?(prop.name)
             required_props.delete(prop.name)
             properties.push(prop)
           end
@@ -99,9 +99,7 @@ module OpenAPIGenerate
       field.instance_variable_set(:@description, obj.description || 'No description')
       if url_param
         field.instance_variable_set(:@url_param_only, true)
-        if obj.required
-          field.instance_variable_set(:@required, true)
-        end
+        field.instance_variable_set(:@required, true) if obj.required
       end
 
       # These methods are only available when the field is set
@@ -109,7 +107,8 @@ module OpenAPIGenerate
         field.instance_variable_set(:@output, obj.read_only)
       end
 
-      if (obj.respond_to?(:write_only) && obj.write_only) || obj.instance_variable_get(:@raw_schema)["x-google-immutable"]
+      if (obj.respond_to?(:write_only) && obj.write_only) \
+        || obj.instance_variable_get(:@raw_schema)['x-google-immutable']
         field.instance_variable_set(:@immutable, true)
       end
 
@@ -138,10 +137,9 @@ module OpenAPIGenerate
       path.post.parameters.each do |param|
         parameter_object = write_object(param.name, param, param.schema.type, true)
         # Ignore standard requestId field
-        next if param.name == "requestId"
-        if parameter_object == nil
-          next
-        end
+        next if param.name == 'requestId'
+        next if parameter_object.nil?
+
         # All parameters are immutable
         parameter_object.instance_variable_set(:@immutable, true)
         parameters.push(parameter_object)
@@ -150,9 +148,7 @@ module OpenAPIGenerate
       required_properties = path.post.request_body.content['application/json'].schema.required || []
       path.post.request_body.content['application/json'].schema.properties.each do |prop, i|
         prop_object = write_object(prop, i, i.type, false)
-        if required_properties.include?(prop)
-          prop_object.instance_variable_set(:@required, true)
-        end
+        prop_object.instance_variable_set(:@required, true) if required_properties.include?(prop)
         required_properties.delete(prop)
         properties.push(prop_object)
       end
@@ -172,16 +168,15 @@ module OpenAPIGenerate
     def base_url(resource_path)
       base = resource_path.gsub('{', '{{').gsub('}', '}}')
 
-      base = base.gsub("projectsId", "project")
-      base = base.gsub("locationsId", "location")
+      base = base.gsub('projectsId', 'project')
+      base = base.gsub('locationsId', 'location')
       field_names = base.scan(/(?<=\{\{)\w+(?=\}\})/)
       field_names.each do |field_name|
         field_name_in_snake_case = field_name.underscore
         base = base.gsub("{{#{field_name}}}", "{{#{field_name_in_snake_case}}}")
       end
-      base = base.gsub("/v1/", '')
-      base = base.gsub("/v1alpha/", '')
-      base
+      base = base.gsub('/v1/', '')
+      base.gsub('/v1alpha/', '')
     end
 
     def build_resource(spec_path, resource_path, resource_name)
