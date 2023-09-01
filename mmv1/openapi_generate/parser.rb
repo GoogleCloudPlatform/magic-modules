@@ -109,7 +109,6 @@ module OpenAPIGenerate
         field.instance_variable_set(:@output, obj.read_only)
       end
 
-      puts  if name == "capacityGib"
       if (obj.respond_to?(:write_only) && obj.write_only) || obj.instance_variable_get(:@raw_schema)["x-google-immutable"]
         field.instance_variable_set(:@immutable, true)
       end
