@@ -16,6 +16,9 @@ service/apigee:
 service/artifactregistry:
   resources:
   - google_artifact_registry_.*
+service/assuredworkloads:
+  resources:
+  - google_assured_workloads_workload
 service/beyondcorp:
   resources:
   - google_beyondcorp_.*
@@ -41,6 +44,7 @@ service/cloudasset:
 service/cloudbilling:
   resources:
   - google_billing_account.*
+  - google_billing_project_info
   - google_billing_subaccount
 service/cloudbuild:
   resources:
@@ -75,6 +79,12 @@ service/compute-regional-l7-load-balancer:
   resources:
   - google_compute_region_target_http_proxy
   - google_compute_region_target_https_proxy
+service/compute-router:
+  resources:
+  - google_compute_router
+  - google_compute_router_interface
+  - google_compute_router_peer
+  - google_compute_router_status
 service/compute-security-policy:
   resources:
   - google_compute_security_policy
@@ -83,9 +93,15 @@ service/container:
   - google_container_cluster
   - google_container_engine_versions
   - google_container_node_pool
+service/containeranalysis:
+  resources:
+  - google_container_analysis_.*
 service/datacatalog:
   resources:
   - google_data_catalog_.*
+service/dataform:
+  resources:
+  - google_dataform_.*
 service/dataproc:
   resources:
   - google_dataproc_cluster
@@ -96,6 +112,10 @@ service/dataproc:
 service/datastream:
   resources:
   - google_datastream_.*
+service/deploymentmanager:
+  resources:
+  - google_deployment_manager_.*
+  - google_runtimeconfig_.*
 service/dialogflow:
   resources:
   - google_dialogflow_.*
@@ -134,6 +154,7 @@ service/firestore-dataplane:
   resources:
   - google_datastore_index
   - google_firestore_document
+  - google_firestore_field
   - google_firestore_index
   - google_firestore_ttl
 service/gkebackup:
@@ -163,6 +184,8 @@ service/iam-core:
   - google_iam_testable_permissions
 service/iam-serviceaccount:
   resources:
+  - google_project_default_service_accounts
+  - google_project_service_identity
   - google_service_account.*
 service/iam-wlid:
   resources:
@@ -231,6 +254,9 @@ service/osconfig:
 service/privateca:
   resources:
   - google_privateca_.*
+service/publicca:
+  resources:
+  - google_public_ca_external_account_key
 service/pubsub:
   resources:
   - google_pubsub_schema
@@ -239,6 +265,9 @@ service/pubsub:
 service/pubsublite:
   resources:
   - google_pubsub_lite_.*
+service/redis-cluster:
+  resources:
+  - google_redis_cluster
 service/redis-instance:
   resources:
   - google_redis_instance
@@ -260,7 +289,7 @@ service/sqladmin:
   - google_sql_.*
 service/storage:
   resources:
-  - google_storage_bucket_.*
+  - google_storage_bucket.*
   - google_storage_default_object_.*
   - google_storage_hmac_key
   - google_storage_notification
