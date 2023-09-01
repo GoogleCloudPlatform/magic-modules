@@ -41,8 +41,7 @@ steps:
   - name: 'gcr.io/cloud-builders/git'
     args:
       - checkout
-      - head
-      - $_HEAD_BRANCH
+      - head/$_HEAD_BRANCH
 
   # Find common ancestor commit and merge the latest changes
   # to the .ci folder from main

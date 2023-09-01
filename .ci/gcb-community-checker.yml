@@ -1,80 +1,80 @@
 ---
 steps:
-    # The GCB / GH integration uses a shallow clone of the repo. We need to convert
-    # that to a full clone in order to work with it properly.
-    # https://cloud.google.com/source-repositories/docs/integrating-with-cloud-build#unshallowing_clones
-    - name: 'gcr.io/cloud-builders/git'
-      args:
-          - fetch
-          - --unshallow
-    # We need to configure git since creating the merge commit is
-    # technically a commit.
-    - name: 'gcr.io/cloud-builders/git'
-      args:
-          - config
-          - --global
-          - user.email
-          - magic-modules+differ@google.com
-    - name: 'gcr.io/cloud-builders/git'
-      args:
-          - config
-          - --global
-          - user.name
-          - "Modular Magician Diff Process"
-    # Then we check out the branch provided, and merge it into
-    # the base branch provided.  This matches the behavior
-    # we're used to from Concourse.
-    - name: 'gcr.io/cloud-builders/git'
-      args:
-        - remote
-        - add
-        - head
-        - $_HEAD_REPO_URL
-
-    # Checkout BASE branch
-    - name: 'gcr.io/cloud-builders/git'
-      args:
+  # The GCB / GH integration uses a shallow clone of the repo. We need to convert
+  # that to a full clone in order to work with it properly.
+  # https://cloud.google.com/source-repositories/docs/integrating-with-cloud-build#unshallowing_clones
+  - name: 'gcr.io/cloud-builders/git'
+    args:
         - fetch
-        - origin
-        - main
+        - --unshallow
+  # We need to configure git since creating the merge commit is
+  # technically a commit.
+  - name: 'gcr.io/cloud-builders/git'
+    args:
+        - config
+        - --global
+        - user.email
+        - magic-modules+differ@google.com
+  - name: 'gcr.io/cloud-builders/git'
+    args:
+        - config
+        - --global
+        - user.name
+        - "Modular Magician Diff Process"
+  # Then we check out the branch provided, and merge it into
+  # the base branch provided.  This matches the behavior
+  # we're used to from Concourse.
+  - name: 'gcr.io/cloud-builders/git'
+    args:
+      - remote
+      - add
+      - head
+      - $_HEAD_REPO_URL
 
-    - name: 'gcr.io/cloud-builders/git'
-      args:
-        - checkout
-        - head
+  # Checkout BASE branch
+  - name: 'gcr.io/cloud-builders/git'
+    args:
+      - fetch
+      - origin
+      - main
+
+  - name: 'gcr.io/cloud-builders/git'
+    args:
+      - checkout
+      - head/$_HEAD_BRANCH
+
+
+  # Find common ancestor commit and merge the latest changes
+  # to the .ci folder
+  - name: 'gcr.io/cloud-builders/git'
+    id: findMergeBase
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        # Find the common ancestor commit
+        base_commit=$(git merge-base origin/main head/$_HEAD_BRANCH)
+        echo "Common ancestor commit: $base_commit"
+
+        # Generate a diff for the .ci directory
+        git diff $base_commit origin/main -- .ci/ > /workspace/ci.diff
+
+        # Apply the diff
+        git apply /workspace/ci.diff
+
+  - name: 'gcr.io/graphite-docker-images/go-plus'
+    entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+    id: community-checker
+    secretEnv: ["GITHUB_TOKEN", "GENERATE_DIFFS_TRIGGER"]
+    timeout: 8000s
+    args:
+        - "community-checker"
+        - $_PR_NUMBER
+        - $COMMIT_SHA
+        - $BRANCH_NAME
+        - $_HEAD_REPO_URL
         - $_HEAD_BRANCH
-
-    # Find common ancestor commit and merge the latest changes
-    # to the .ci folder
-    - name: 'gcr.io/cloud-builders/git'
-      id: findMergeBase
-      entrypoint: 'bash'
-      args:
-        - '-c'
-        - |
-          # Find the common ancestor commit
-          base_commit=$(git merge-base origin/main head/$_HEAD_BRANCH)
-          echo "Common ancestor commit: $base_commit"
-
-          # Generate a diff for the .ci directory
-          git diff $base_commit origin/main -- .ci/ > /workspace/ci.diff
-
-          # Apply the diff
-          git apply /workspace/ci.diff
-
-    - name: 'gcr.io/graphite-docker-images/go-plus'
-      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
-      id: community-checker
-      secretEnv: ["GITHUB_TOKEN", "GENERATE_DIFFS_TRIGGER"]
-      timeout: 8000s
-      args:
-          - "community-checker"
-          - $_PR_NUMBER
-          - $COMMIT_SHA
-          - $BRANCH_NAME
-          - $_HEAD_REPO_URL
-          - $_HEAD_BRANCH
-          - $_BASE_BRANCH
+        - $_BASE_BRANCH
 
 availableSecrets:
   secretManager:
