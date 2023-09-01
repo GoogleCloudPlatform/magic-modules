@@ -6923,24 +6923,23 @@ resource "google_compute_instance" "foobar" {
   name         = "tf-test-instance-%{suffix}"
   machine_type = "e2-medium"
 
-  boot_disk {
-    source_image = data.google_compute_image.my_image.self_link
-    auto_delete  = true
-    disk_size_gb = 10
-    boot         = true
-  }
+	boot_disk {
+		initialize_params {
+			image = data.google_compute_image.my_image.id
+		}
+	}
 
-  network_interface {
-	network = "default"
-  }
+	network_interface {
+		network = "default"
+	}
 
-  network_interface {
-	network_attachment = "%{network_attachment}"
-  }
+	network_interface {
+		network_attachment = "%{network_attachment}"
+	}
 
-  metadata = {
-    foo = "bar"
-  }
+	metadata = {
+		foo = "bar"
+	}
 }
 `, context)
 }
