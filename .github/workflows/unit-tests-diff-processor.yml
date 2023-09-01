@@ -1,11 +1,11 @@
-name: unit-tests-breaking-change-detector
+name: unit-tests-diff-processor
 
 permissions: read-all
 
 on:
   pull_request:
     paths:
-      - 'tools/breaking-change-detector/**'
+      - 'tools/diff-processor/**'
 
 jobs:
   test:
@@ -20,11 +20,11 @@ jobs:
 
       - name: Build
         run: |
-          cd tools/breaking-change-detector
+          cd tools/diff-processor
           make clone OWNER_REPO=hashicorp/terraform-provider-google DEPTH=1
           make build OLD_REF=main NEW_REF=main
 
       - name: Test
         run: |
-          cd tools/breaking-change-detector
+          cd tools/diff-processor
           go test -v ./...
