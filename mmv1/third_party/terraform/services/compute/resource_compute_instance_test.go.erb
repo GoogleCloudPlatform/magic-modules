@@ -6964,13 +6964,13 @@ resource "google_compute_subnetwork" "test-subnetwork1" {
 }
 
 resource "google_compute_network_attachment" "test_network_attachment1" {
-	name = "tf-test-network-attachment1-%{random_suffix}"
+	name = "tf-test-network-attachment1-%{suffix}"
     region = "us-central1"
     description = "network attachment 1 description"
     connection_preference = "ACCEPT_AUTOMATIC"
 
     subnetworks = [
-        google_compute_subnetwork.test_network_attachment1.self_link
+        google_compute_subnetwork.test-subnetwork1.self_link
     ]
 }
 
@@ -6982,13 +6982,13 @@ resource "google_compute_subnetwork" "test-subnetwork2" {
 }
 
 resource "google_compute_network_attachment" "test_network_attachment2" {
-	name = "tf-test-network-attachment2-%{random_suffix}"
+	name = "tf-test-network-attachment2-%{suffix}"
     region = "us-central1"
     description = "network attachment 2 description"
     connection_preference = "ACCEPT_AUTOMATIC"
 
     subnetworks = [
-        google_compute_subnetwork.test_network_attachment2.self_link
+        google_compute_subnetwork.test-subnetwork2.self_link
     ]
 }
 
@@ -7000,7 +7000,7 @@ resource "google_compute_instance" "foobar" {
 
 	boot_disk {
 		initialize_params {
-			image = data.google_compute_image.my_image.id
+			image = data.google_compute_image.my_image.self_link
 		}
 	}
 
@@ -7039,13 +7039,13 @@ resource "google_compute_subnetwork" "test-subnetwork1" {
 }
 
 resource "google_compute_network_attachment" "test_network_attachment1" {
-	name = "tf-test-network-attachment1-%{random_suffix}"
+	name = "tf-test-network-attachment1-%{suffix}"
     region = "us-central1"
     description = "network attachment 1 description"
     connection_preference = "ACCEPT_AUTOMATIC"
 
     subnetworks = [
-        google_compute_subnetwork.test_network_attachment1.self_link
+        google_compute_subnetwork.test-subnetwork1.self_link
     ]
 }
 
@@ -7057,13 +7057,13 @@ resource "google_compute_subnetwork" "test-subnetwork2" {
 }
 
 resource "google_compute_network_attachment" "test_network_attachment2" {
-	name = "tf-test-network-attachment2-%{random_suffix}"
+	name = "tf-test-network-attachment2-%{suffix}"
     region = "us-central1"
     description = "network attachment 2 description"
     connection_preference = "ACCEPT_AUTOMATIC"
 
     subnetworks = [
-        google_compute_subnetwork.test_network_attachment2.self_link
+        google_compute_subnetwork.test-subnetwork2.self_link
     ]
 }
 
