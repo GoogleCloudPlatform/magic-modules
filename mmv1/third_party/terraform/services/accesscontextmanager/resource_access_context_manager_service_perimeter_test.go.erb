@@ -251,10 +251,35 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 				}
 			}
 		}
+		ingress_policies {
+			ingress_from {
+				identities = ["user:test@google.com"]
+			}
+			ingress_to {
+				resources = ["*"]
+			}
+		}
 
 		egress_policies {
 			egress_from {
 				identity_type = "ANY_USER_ACCOUNT"
+			}
+			egress_to {
+				operations {
+					service_name = "bigquery.googleapis.com"
+					method_selectors {
+						permission = "externalResource.read"
+					}
+				}
+				external_resources = ["s3://bucket1"]
+			}
+		}
+		egress_policies {
+			egress_from {
+				identities = ["user:test@google.com"]
+			}
+			egress_to {
+				resources = ["*"]
 			}
 		}
   }
