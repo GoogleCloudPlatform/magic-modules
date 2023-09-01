@@ -213,6 +213,10 @@ properties:
             A /29 CIDR block that identifies the range of IP
             addresses reserved for this instance.
           default_from_api: true
+          # When using connectMode=PRIVATE_SERVICE_ACCESS, the returned value
+          # won't match the sent value as the returned value is an IP range
+          # from the provided named range.
+          custom_flatten: templates/terraform/custom_flatten/filestore_instance_networks_reserved_ip_range.go.erb
         - !ruby/object:Api::Type::Array
           name: 'ipAddresses'
           description: |
