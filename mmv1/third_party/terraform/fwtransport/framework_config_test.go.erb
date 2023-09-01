@@ -430,12 +430,21 @@ func TestFrameworkProvider_LoadAndValidateFramework_impersonateServiceAccount(t 
 			},
 			ExpectedDataModelValue: types.StringNull(),
 		},
-		// // Handling empty strings in config
+		// Handling empty strings in config
+		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14255
 		// "when impersonate_service_account is set as an empty array the field is treated as if it's unset, without error": {
 		// 	ConfigValues: fwmodels.ProviderModel{
 		// 		ImpersonateServiceAccount: types.StringValue(""),
 		// 	},
 		// 	ExpectedDataModelValue: types.StringNull(),
+		// },
+		// Handling unknown values
+		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
+		// "when impersonate_service_account is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		// 	ConfigValues: fwmodels.ProviderModel{
+		// 		ImpersonateServiceAccount: types.StringUnknown(),
+		// 	},
+		// 	ExpectedDataModelValue:    types.StringNull(),
 		// },
 	}
 
