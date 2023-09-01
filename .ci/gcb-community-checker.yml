@@ -31,17 +31,28 @@ steps:
       - head
       - $_HEAD_REPO_URL
 
-  # Checkout BASE branch
+  - name: 'gcr.io/cloud-builders/git'
+    args:
+      - log
+      - '--oneline'  # This will print each commit as a single line. Remove or modify as needed.
+      - '-n 10'      # This will print the last 10 commits. Adjust or remove to modify the number of commits displayed.
+
   - name: 'gcr.io/cloud-builders/git'
     args:
       - fetch
-      - origin
-      - main
+      - head
+      - $_HEAD_BRANCH
 
   - name: 'gcr.io/cloud-builders/git'
     args:
       - checkout
       - head/$_HEAD_BRANCH
+
+  - name: 'gcr.io/cloud-builders/git'
+    args:
+      - log
+      - '--oneline'  # This will print each commit as a single line. Remove or modify as needed.
+      - '-n 10'      # This will print the last 10 commits. Adjust or remove to modify the number of commits displayed.
 
 
   # Find common ancestor commit and merge the latest changes

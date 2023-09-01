@@ -33,18 +33,30 @@ steps:
 
   - name: 'gcr.io/cloud-builders/git'
     args:
-      - fetch
-      - origin
-      - main
+      - log
+      - '--oneline'  # This will print each commit as a single line. Remove or modify as needed.
+      - '-n 10'      # This will print the last 10 commits. Adjust or remove to modify the number of commits displayed.
 
-  # Checkout HEAD branch
+  - name: 'gcr.io/cloud-builders/git'
+    args:
+      - fetch
+      - head
+      - $_HEAD_BRANCH
+
   - name: 'gcr.io/cloud-builders/git'
     args:
       - checkout
       - head/$_HEAD_BRANCH
 
+  - name: 'gcr.io/cloud-builders/git'
+    args:
+      - log
+      - '--oneline'  # This will print each commit as a single line. Remove or modify as needed.
+      - '-n 10'      # This will print the last 10 commits. Adjust or remove to modify the number of commits displayed.
+
+
   # Find common ancestor commit and merge the latest changes
-  # to the .ci folder from main
+  # to the .ci folder
   - name: 'gcr.io/cloud-builders/git'
     id: findMergeBase
     entrypoint: 'bash'
