@@ -158,6 +158,7 @@ resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
     project_id_or_num = "658859330310"
     connection_limit  = 4
   }
+  reconcile_connections = false
   %{lifecycle_block}
 }
 
