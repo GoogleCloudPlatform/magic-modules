@@ -1,3 +1,7 @@
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - tpgresource.DefaultProviderProject
 - type: DIFF_SUPPRESS_FUNC
   field: config.root_volume.volume_type
   details:
