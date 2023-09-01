@@ -11,7 +11,6 @@ import (
 var (
 	// This is for the random-assignee rotation.
 	reviewerRotation = []string{
-		"slevenick",
 		"c2thorn",
 		"rileykarson",
 		"melinath",
@@ -31,6 +30,7 @@ var (
 	// This is for reviewers who are "on vacation": will not receive new review assignments but will still receive re-requests for assigned PRs.
 	onVacationReviewers = []string{
 		"zli82016",
+		"slevenick",
 	}
 )
 
