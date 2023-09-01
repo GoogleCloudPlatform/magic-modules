@@ -2636,10 +2636,15 @@ func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 	})
 }
 
-func TestAccComputeInstance_networkAttachmentkUpdate(t *testing.T) {
+func TestAccComputeInstance_networkAttachmentUpdate(t *testing.T) {
 	t.Parallel()
-	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	suffix := fmt.Sprintf("%s", acctest.RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s")
+
+	context := map[string]interface{}{
+		"suffix":        suffix,
+		"instance_name": instanceName,
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -2647,15 +2652,15 @@ func TestAccComputeInstance_networkAttachmentkUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_networkAttachmentkUpdate(suffix, instanceName),
+				Config: testAccComputeInstance_networkAttachmentUpdate(context),
 			},
 			computeInstanceImportStep("us-east1-d", instanceName, []string{"allow_stopping_for_update"}),
 			{
-				Config: testAccComputeInstance_networkAttachmentkUpdateTwo(suffix, instanceName),
+				Config: testAccComputeInstance_networkAttachmentUpdateTwo(context),
 			},
 			computeInstanceImportStep("us-east1-d", instanceName, []string{"allow_stopping_for_update"}),
 			{
-				Config: testAccComputeInstance_networkAttachmentkUpdate(suffix, instanceName),
+				Config: testAccComputeInstance_networkAttachmentUpdate(context),
 			},
 			computeInstanceImportStep("us-east1-d", instanceName, []string{"allow_stopping_for_update"}),
 		},
@@ -6940,7 +6945,7 @@ resource "google_compute_instance" "foobar" {
 `, context)
 }
 
-func testAccComputeInstance_networkAttachmentkUpdate(context map[string]interface{}) string {
+func testAccComputeInstance_networkAttachmentUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
 	family  = "debian-11"
@@ -7015,7 +7020,7 @@ resource "google_compute_instance" "foobar" {
 `, context)
 }
 
-func testAccComputeInstance_networkAttachmentkUpdateTwo(context map[string]interface{}) string {
+func testAccComputeInstance_networkAttachmentUpdateTwo(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
 	family  = "debian-11"
