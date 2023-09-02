@@ -53,6 +53,11 @@ examples:
       network_name: "network-name"
     test_vars_overrides:
       network_name: 'acctest.BootstrapSharedTestNetwork(t, "vertex-ai-index-endpoint")'
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_index_endpoint_with_public_endpoint"
+    primary_resource_id: "index_endpoint"
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "vertex-ai-index-endpoint")'
 parameters:
   - !ruby/object:Api::Type::String
     name: region
@@ -97,3 +102,12 @@ properties:
       [Format](https://cloud.google.com/compute/docs/reference/rest/v1/networks/insert): `projects/{project}/global/networks/{network}`.
       Where `{project}` is a project number, as in `12345`, and `{network}` is network name.
     immutable: true
+  - !ruby/object:Api::Type::Boolean
+    name: publicEndpointEnabled
+    immutable: true
+    ignore_read: true
+    description: If true, the deployed index will be accessible through public endpoint.
+  - !ruby/object:Api::Type::String
+    name: publicEndpointDomainName
+    output: true
+    description: If publicEndpointEnabled is true, this field will be populated with the domain name to use for this index endpoint.
