@@ -294,8 +294,6 @@ resource "google_logging_project_sink" "basic" {
   project     = "%s"
   destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
-
-  unique_writer_identity = false
 }
 
 resource "google_storage_bucket" "log-bucket" {
@@ -313,8 +311,6 @@ resource "google_logging_project_sink" "described" {
   destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
   description = "this is a description for a project level logging sink"
-
-  unique_writer_identity = false
 }
 
 resource "google_storage_bucket" "log-bucket" {
@@ -332,8 +328,6 @@ resource "google_logging_project_sink" "described" {
   destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
   description = "description updated"
-
-  unique_writer_identity = false
 }
 
 resource "google_storage_bucket" "log-bucket" {
@@ -351,8 +345,6 @@ resource "google_logging_project_sink" "disabled" {
   destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
   disabled    = true
-
-  unique_writer_identity = false
 }
 
 resource "google_storage_bucket" "log-bucket" {
@@ -370,8 +362,6 @@ resource "google_logging_project_sink" "disabled" {
   destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
   disabled    = "%s"
-
-  unique_writer_identity = true
 }
 
 resource "google_storage_bucket" "log-bucket" {
@@ -387,8 +377,6 @@ resource "google_logging_project_sink" "unique_writer" {
   name        = "%s"
   destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
-
-  unique_writer_identity = true
 }
 
 resource "google_storage_bucket" "log-bucket" {
@@ -405,7 +393,7 @@ resource "google_logging_project_sink" "unique_writer" {
   destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=WARNING"
 
-  unique_writer_identity = true
+  unique_writer_identity = false
 }
 
 resource "google_storage_bucket" "log-bucket" {
@@ -429,8 +417,6 @@ AND severity>=ERROR
 
 
 EOS
-
-  unique_writer_identity = false
 }
 
 resource "google_storage_bucket" "log-bucket" {
@@ -446,8 +432,6 @@ resource "google_logging_project_sink" "bigquery" {
   name        = "%s"
   destination = "bigquery.googleapis.com/projects/%s/datasets/${google_bigquery_dataset.logging_sink.dataset_id}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
-
-  unique_writer_identity = true
 
   bigquery_options {
     use_partitioned_tables = true
@@ -467,8 +451,6 @@ resource "google_logging_project_sink" "bigquery" {
   name        = "%s"
   destination = "bigquery.googleapis.com/projects/%s/datasets/${google_bigquery_dataset.logging_sink.dataset_id}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=WARNING"
-
-  unique_writer_identity = false
 }
 
 resource "google_bigquery_dataset" "logging_sink" {
@@ -495,8 +477,6 @@ resource "google_logging_project_sink" "loggingbucket" {
     description = "test-2"
     filter = "resource.type = k8s_container"
   }
-
-  unique_writer_identity = true
 }
 
 `, name, project, project)
