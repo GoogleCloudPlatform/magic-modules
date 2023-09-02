@@ -333,7 +333,7 @@ resource "google_logging_project_sink" "described" {
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
   description = "description updated"
 
-  unique_writer_identity = false
+  unique_writer_identity = true
 }
 
 resource "google_storage_bucket" "log-bucket" {
