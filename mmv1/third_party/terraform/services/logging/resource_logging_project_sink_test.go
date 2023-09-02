@@ -377,6 +377,8 @@ resource "google_logging_project_sink" "unique_writer" {
   name        = "%s"
   destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
+
+  unique_writer_identity = false
 }
 
 resource "google_storage_bucket" "log-bucket" {
@@ -393,7 +395,7 @@ resource "google_logging_project_sink" "unique_writer" {
   destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=WARNING"
 
-  unique_writer_identity = false
+  unique_writer_identity = true
 }
 
 resource "google_storage_bucket" "log-bucket" {
