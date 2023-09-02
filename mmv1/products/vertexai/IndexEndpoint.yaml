@@ -114,34 +114,3 @@ properties:
         name: projectAllowlist
         description: A list of Projects from which the forwarding rule will target the service attachment.
         item_type: Api::Type::String
-  - !ruby/object:Api::Type::Array
-    name: deployedIndexes
-    description: Output only. The indexes deployed in this endpoint.
-    output: true
-    item_type: !ruby/object:Api::Type::NestedObject
-      properties:
-        - !ruby/object:Api::Type::String
-          name: id
-          output: true
-          description: The user specified ID of the DeployedIndex. The ID can be up to 128 characters long and must start with a letter and only contain letters, numbers, and underscores.
-        - !ruby/object:Api::Type::String
-          name: index
-          output: true
-          description: The name of the Index this is the deployment of. We may refer to this Index as the DeployedIndex's "original" Index.
-        - !ruby/object:Api::Type::String
-          name: displayName
-          output: true
-          description: The display name of the DeployedIndex. If not provided upon creation, the Index's displayName is used.
-        - !ruby/object:Api::Type::NestedObject
-          name: privateEndpoints
-          output: true
-          description: Provides paths for users to send requests directly to the deployed index services running on Cloud via private services access.
-          properties:
-            - !ruby/object:Api::Type::String
-              name: matchGrpcAddress
-              output: true
-              description: The ip address used to send match gRPC requests.
-            - !ruby/object:Api::Type::String
-              name: serviceAttachment
-              output: true
-              description: The name of the service attachment resource. Populated if private service connect is enabled.
