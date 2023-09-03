@@ -122,7 +122,7 @@ if [ "$REPO" == "terraform-google-conversion" ]; then
 
     # Generate cai2hcl
     pushd $LOCAL_PATH
-    rm -rf ./cai2hcl
+    rm -rf ./cai2hcl/*
     popd
 
     bundle exec compiler.rb -a -e terraform -f tgc_cai2hcl -o $LOCAL_PATH/cai2hcl -v $VERSION
