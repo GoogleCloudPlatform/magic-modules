@@ -22,19 +22,7 @@ module Provider
       false
     end
 
-    def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
-      cai2hcl_folder = "#{output_folder}/cai2hcl"
-
-      FileUtils.mkdir_p(cai2hcl_folder)
-
-      @base_url = @version.cai_base_url || @version.base_url
-      generate_objects(
-        cai2hcl_folder,
-        types,
-        generate_code,
-        generate_docs
-      )
-    end
+    def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs) end
 
     def generate_resource(pwd, data, _generate_code, _generate_docs) end
 
@@ -43,7 +31,11 @@ module Provider
     def copy_common_files(output_folder, generate_code, _generate_docs)
       return unless generate_code
 
-      FileUtils.cp_r('third_party/cai2hcl/.', "#{output_folder}/cai2hcl")
+      Google::LOGGER.info('Coping cai2hcl common files')
+
+      FileUtils.mkdir_p(output_folder)
+
+      FileUtils.cp_r('third_party/cai2hcl/.', output_folder)
     end
 
     def generate_resource_tests(pwd, data) end

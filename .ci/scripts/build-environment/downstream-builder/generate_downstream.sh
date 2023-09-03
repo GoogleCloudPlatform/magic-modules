@@ -125,7 +125,7 @@ if [ "$REPO" == "terraform-google-conversion" ]; then
     rm -rf ./cai2hcl
     popd
 
-    bundle exec compiler.rb -e terraform -f tgc_cai2hcl -o $LOCAL_PATH/cai2hcl -v $VERSION
+    bundle exec compiler.rb -a -e terraform -f tgc_cai2hcl -o $LOCAL_PATH/cai2hcl -v $VERSION
 
     if [ "$COMMAND" == "downstream" ]; then
       pushd $LOCAL_PATH
