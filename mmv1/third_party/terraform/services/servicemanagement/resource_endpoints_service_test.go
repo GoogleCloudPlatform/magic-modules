@@ -58,6 +58,30 @@ func TestAccEndpointsService_grpc(t *testing.T) {
 	})
 }
 
+func TestAccEndpointsService_grpcNotPreComputeConfigId(t *testing.T) {
+	t.Parallel()
+	prj := envvar.GetTestProjectFromEnv()
+	parent := fmt.Sprintf("projects/%s", prj)
+	description := acctest.RandString(t, 100)
+	serviceId := "tf-test" + acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckEndpointServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEndpointsService_grpcNotPreComputeConfigId(serviceId, envvar.GetTestProjectFromEnv(), parent, description),
+				Check:  testAccCheckEndpointExistsByName(t, serviceId),
+			},
+			{
+				Config: testAccEndpointsService_grpcNotPreComputeConfigId(serviceId, envvar.GetTestProjectFromEnv(), parent, description),
+				Check:  testAccCheckEndpointExistsByName(t, serviceId),
+			},
+		},
+	})
+}
+
 func testAccEndpointsService_basic(serviceId, project, rev string) string {
 	return fmt.Sprintf(`
 resource "google_endpoints_service" "endpoints_service" {
@@ -127,6 +151,41 @@ EOF
   protoc_output_base64 = filebase64("test-fixtures/test_api_descriptor.pb")
 }
 `, serviceId, project)
+}
+
+func testAccEndpointsService_grpcNotPreComputeConfigId(serviceId, project, parent, description string) string {
+	return fmt.Sprintf(`
+resource "google_tags_tag_key" "key1" {
+  parent      = "%[3]s"
+  short_name  = "endpoints-service-test-1"
+  description = "%[4]s"
+}
+
+resource "google_tags_tag_key" "key2" {
+  parent      = "%[3]s"
+  short_name  = "endpoints-service-test-2"
+  lifecycle {
+    replace_triggered_by = [google_tags_tag_key.key1.description]
+  }
+}
+
+resource "google_endpoints_service" "endpoints_service" {
+  service_name = "%[1]s.endpoints.%[2]s.cloud.goog"
+  project      = "%[2]s"
+  grpc_config  = <<EOF
+type: google.api.Service
+config_version: 3
+name: %[1]s.endpoints.%[2]s.cloud.goog
+title: Test ${google_tags_tag_key.key2.namespaced_name}
+usage:
+  rules:
+  - selector: endpoints.examples.bookstore.Bookstore.ListShelves
+    allow_unregistered_calls: true
+EOF
+
+  protoc_output_base64 = filebase64("test-fixtures/test_api_descriptor.pb")
+}
+`, serviceId, project, parent, description)
 }
 
 func testAccCheckEndpointExistsByName(t *testing.T, serviceId string) resource.TestCheckFunc {
