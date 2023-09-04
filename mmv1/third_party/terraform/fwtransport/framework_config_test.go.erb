@@ -31,7 +31,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_project(t *testing.T) {
 	}{
 		"project value set in the provider schema is not overridden by environment variables": {
 			ConfigValues: fwmodels.ProviderModel{
-				Project: types.StringValue("my-project-from-config"),
+				Project: types.StringValue("project-from-config"),
 			},
 			EnvVariables: map[string]string{
 				"GOOGLE_PROJECT":        "project-from-GOOGLE_PROJECT",
@@ -39,8 +39,8 @@ func TestFrameworkProvider_LoadAndValidateFramework_project(t *testing.T) {
 				"GCLOUD_PROJECT":        "project-from-GCLOUD_PROJECT",
 				"CLOUDSDK_CORE_PROJECT": "project-from-CLOUDSDK_CORE_PROJECT",
 			},
-			ExpectedDataModelValue:    types.StringValue("my-project-from-config"),
-			ExpectedConfigStructValue: types.StringValue("my-project-from-config"),
+			ExpectedDataModelValue:    types.StringValue("project-from-config"),
+			ExpectedConfigStructValue: types.StringValue("project-from-config"),
 		},
 		"project value can be set by environment variable: GOOGLE_PROJECT is used first": {
 			ConfigValues: fwmodels.ProviderModel{
