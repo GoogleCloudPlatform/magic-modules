@@ -57,7 +57,6 @@ properties:
     name: 'servicePerimeters'
     description: |
       The desired Service Perimeters that should replace all existing Service Perimeters in the Access Policy.
-    is_set: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
@@ -228,7 +227,6 @@ properties:
                         name: 'sources'
                         description: |
                           Sources that this `IngressPolicy` authorizes access from.
-                        is_set: true
                         item_type: !ruby/object:Api::Type::NestedObject
                           properties:
                             - !ruby/object:Api::Type::String
@@ -310,7 +308,6 @@ properties:
                 have multiple EgressPolicies, each of which is evaluated separately.
                 Access is granted if any EgressPolicy grants it. Must be empty for
                 a perimeter bridge.
-              is_set: true
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                   - !ruby/object:Api::Type::NestedObject
@@ -478,7 +475,6 @@ properties:
                 have multiple `IngressPolicies`, each of which is evaluated
                 separately. Access is granted if any `Ingress Policy` grants it.
                 Must be empty for a perimeter bridge.
-              is_set: true
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                   - !ruby/object:Api::Type::NestedObject
@@ -510,7 +506,6 @@ properties:
                         name: 'sources'
                         description: |
                           Sources that this `IngressPolicy` authorizes access from.
-                        is_set: true
                         item_type: !ruby/object:Api::Type::NestedObject
                           properties:
                             - !ruby/object:Api::Type::String
@@ -592,7 +587,6 @@ properties:
                 have multiple EgressPolicies, each of which is evaluated separately.
                 Access is granted if any EgressPolicy grants it. Must be empty for
                 a perimeter bridge.
-              is_set: true
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                   - !ruby/object:Api::Type::NestedObject
