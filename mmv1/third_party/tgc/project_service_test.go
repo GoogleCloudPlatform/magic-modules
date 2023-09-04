@@ -1,8 +1,9 @@
 package google
 
 import (
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 )
 
 func TestParseServiceForExistingProject(t *testing.T) {

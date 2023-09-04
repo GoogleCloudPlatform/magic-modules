@@ -10,23 +10,24 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/cai"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
 const ContainerClusterAssetType string = "container.googleapis.com/Cluster"
 const ContainerNodePoolAssetType string = "container.googleapis.com/NodePool"
 
-func resourceConverterContainerCluster() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func resourceConverterContainerCluster() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType: ContainerClusterAssetType,
 		Convert:   GetContainerClusterCaiObject,
 	}
 }
 
-func resourceConverterContainerNodePool() tpgresource.ResourceConverter {
-	return tpgresource.ResourceConverter{
+func resourceConverterContainerNodePool() cai.ResourceConverter {
+	return cai.ResourceConverter{
 		AssetType: ContainerNodePoolAssetType,
 		Convert:   GetContainerNodePoolCaiObject,
 	}
@@ -102,16 +103,16 @@ func expandContainerNodePoolNodeConfigOauthScopes(v interface{}, d tpgresource.T
 	return canonicalizeServiceScopesFromSet(scopesSet)
 }
 
-func GetContainerClusterCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	name, err := tpgresource.AssetName(d, config, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{name}}")
+func GetContainerClusterCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	name, err := cai.AssetName(d, config, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{name}}")
 	if err != nil {
-		return []tpgresource.Asset{}, err
+		return []cai.Asset{}, err
 	}
 	if obj, err := GetContainerClusterApiObject(d, config); err == nil {
-		return []tpgresource.Asset{{
+		return []cai.Asset{{
 			Name: name,
 			Type: ContainerClusterAssetType,
-			Resource: &tpgresource.AssetResource{
+			Resource: &cai.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/container/v1/rest",
 				DiscoveryName:        "Cluster",
@@ -119,7 +120,7 @@ func GetContainerClusterCaiObject(d tpgresource.TerraformResourceData, config *t
 			},
 		}}, nil
 	} else {
-		return []tpgresource.Asset{}, err
+		return []cai.Asset{}, err
 	}
 }
 
@@ -1178,16 +1179,16 @@ func expandContainerClusterKubectlContext(v interface{}, d tpgresource.Terraform
 	return v, nil
 }
 
-func GetContainerNodePoolCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]tpgresource.Asset, error) {
-	name, err := tpgresource.AssetName(d, config, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}")
+func GetContainerNodePoolCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+	name, err := cai.AssetName(d, config, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}")
 	if err != nil {
-		return []tpgresource.Asset{}, err
+		return []cai.Asset{}, err
 	}
 	if obj, err := GetContainerNodePoolApiObject(d, config); err == nil {
-		return []tpgresource.Asset{{
+		return []cai.Asset{{
 			Name: name,
 			Type: ContainerNodePoolAssetType,
-			Resource: &tpgresource.AssetResource{
+			Resource: &cai.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/container/v1/rest",
 				DiscoveryName:        "NodePool",
@@ -1195,7 +1196,7 @@ func GetContainerNodePoolCaiObject(d tpgresource.TerraformResourceData, config *
 			},
 		}}, nil
 	} else {
-		return []tpgresource.Asset{}, err
+		return []cai.Asset{}, err
 	}
 }
 

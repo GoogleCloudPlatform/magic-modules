@@ -33,7 +33,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 description: |
   This resource has been deprecated, please refer to ServicePerimeterEgressPolicy.
 autogen_async: true
-exclude_validator: true
+exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter/IngressPolicy
 skip_sweeper: true
 id_format: '{{egress_policy_name}}/{{resource}}'

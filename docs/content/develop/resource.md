@@ -19,6 +19,8 @@ aliases:
   - /develop/update-handwritten-documentation
   - /docs/how-to
   - /how-to
+  - /docs/getting-started/provider-documentation
+  - /getting-started/provider-documentation
 ---
 
 # Add or modify a resource
@@ -80,7 +82,7 @@ For more information about types of resources and the generation process overall
 
    # Inserts styled markdown into the header of the resource's page in the
    # provider documentation.
-   # docs:
+   # docs: !ruby/object:Provider::Terraform::Docs
    #   warning: |
    #     MULTILINE_WARNING_MARKDOWN
    #   note: |
@@ -193,15 +195,16 @@ For more information about types of resources and the generation process overall
 3. From the beta provider, copy the files generated for the resource to the following locations:
    - Resource: Copy to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
    - Documentation: [`magic-modules/mmv1/third_party/terraform/website/docs/r`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r)
-   - Tests: [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests), and remove `_generated` from the filename
+   - Tests: Copy to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services), and remove `_generated` from the filename
    - Sweepers: [`magic-modules/mmv1/third_party/terraform/utils`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/utils)
 4. Modify the Go code as needed.
+   - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
    - Remove the `Example` suffix from all test function names.
-   - Replace the comments at the top of the file with the following:
-     ```
-     <% autogen_exception -%>
-     ```
-   - If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.erb` and wrap the beta-only code in a version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`.
+   - Remove the comments at the top of the file.
+   - If beta-only fields are being tested, do the following:
+     - Change the file suffix to `.go.erb`
+     - Add `<% autogen_exception -%>` to the top of the file
+     - Wrap each beta-only test in a separate version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`
 5. Register the resource in [`magic-modules/mmv1/third_party/terraform/utils/provider.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/utils/provider.go.erb) under "START handwritten resources"
    - Add a version guard for any beta-only resources.
 6. Optional: Complete other handwritten tasks that require the MMv1 configuration file.
@@ -421,13 +424,14 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 2. From the beta provider, copy the files generated for the IAM resources to the following locations:
    - Resource: Copy to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
    - Documentation: [`magic-modules/mmv1/third_party/terraform/website/docs/r`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r)
-   - Tests: [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests)
+   - Tests: In the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
 3. Modify the Go code as needed.
-   - Replace the comments at the top of the file with the following:
-     ```
-     <% autogen_exception -%>
-     ```
-   - If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.erb` and wrap the beta-only code in a version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`.
+   - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
+   - Remove the comments at the top of the file.
+   - If any of the added Go code is beta-only:
+     - Change the file suffix to `.go.erb`
+     - Add `<% autogen_exception -%>` to the top of the file
+     - Wrap each beta-only code block (including any imports) in a separate version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`
 4. Register the binding, member, and policy resources in [`magic-modules/mmv1/third_party/terraform/utils/provider.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/utils/provider.go.erb) under "START non-generated IAM resources"
    - Add a version guard for any beta-only resources.
 {{< /tab >}}
@@ -443,26 +447,18 @@ Documentation is autogenerated based on the resource and field configurations. T
 2. Copy and paste the generated documentation into the Hashicorp Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it is rendered.
 {{< /tab >}}
 {{< tab "Handwritten" >}}
+### Add or modify documentation files
+
 1. Open the resource documentation in [`magic-modules/third_party/terraform/website/docs/r/`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r) using an editor of your choice.
    - The name of the file is the name of the resource without a `google_` prefix. For example, for `google_compute_instance`, the file is called `compute_instance.html.markdown`
-2. For beta-only resources, add the following snippet directly above the first example: 
-
-   ```markdown
-   ~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-   See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
-   ```
-3. For resources that are in the `google` provider but have beta-only fields, make sure that all beta-only fields are clearly marked. For example:
-   ```markdown
-   * `FIELD_NAME` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) FIELD_DESCRIPTION
-   ```
-
-   Replace `FIELD_NAME` and `FIELD_DESCRIPTION` with the field's name and description.
-4. [Generate the providers]({{< ref "/get-started/generate-providers.md" >}})
-5. Copy and paste the generated documentation into the Hashicorp Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it is rendered.
+2. Modify the documentation as needed according to [Handwritten documentation style guide]({{< ref "/develop/handwritten-docs-style-guide" >}}).
+3. [Generate the providers]({{< ref "/get-started/generate-providers.md" >}})
+4. Copy and paste the generated documentation into the Hashicorp Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it is rendered.
 {{< /tab >}}
 {{< /tabs >}}
 
 ## What's next?
 
+- [Add custom resource code]({{< ref "/develop/custom-code.md" >}})
 - [Add tests]({{< ref "/develop/test.md" >}})
-- [Test your changes]({{< ref "/develop/run-tests.md" >}})
+- [Run tests]({{< ref "/develop/run-tests.md" >}})

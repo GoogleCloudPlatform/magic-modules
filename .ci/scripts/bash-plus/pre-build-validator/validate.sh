@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# remove after 9/2023
+
 set -e
 
 gh_repo=magic-modules

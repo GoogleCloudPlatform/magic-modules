@@ -93,15 +93,16 @@ This section assumes you've used the [Add a resource]({{< ref "/develop/resource
 > **Note:** If not, you can create one now, or skip this guide and construct the test by hand. Writing tests by hand can sometimes be a better option if there is a similar test you can copy from.
 
 1. Add the test in MMv1. Repeat for all the create tests you will need.
-2. [Generate the providers]({{< ref "/get-started/generate-providers.md" >}}).
-3. From the provider, copy and paste the generated `*_generated_test.go` file into [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests) as a new file call `*_test.go`.
+2. [Generate the beta provider]({{< ref "/get-started/generate-providers.md" >}}).
+3. From the beta provider, copy and paste the generated `*_generated_test.go` file into the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services/) as a new file call `*_test.go`.
 4. Modify the tests as needed.
+   - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
    - Remove the comments at the top of the file.
    - Remove the `Example` suffix from all function names.
    - If beta-only fields are being tested, do the following:
-     - Change the file suffix to `.go.erb`.
-     - Add `<% autogen_exception -%>` to the top of the file.
-     - Wrap the beta-only tests in a version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`.
+     - Change the file suffix to `.go.erb`
+     - Add `<% autogen_exception -%>` to the top of the file
+     - Wrap each beta-only test in a separate version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`
 {{< /tab >}}
 {{< /tabs >}}
 
@@ -113,8 +114,8 @@ An update test is a test that creates the target resource and then makes updates
 
 {{< tabs "update" >}}
 {{< tab "MMv1" >}}
-1. [Generate the providers]({{< ref "/get-started/generate-providers.md" >}}).
-2. From the provider, copy and paste the generated `*_generated_test.go` file into [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests) as a new file call `*_test.go`.
+1. [Generate the beta provider]({{< ref "/get-started/generate-providers.md" >}}).
+2. From the beta provider, copy and paste the generated `*_generated_test.go` file into the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services) as a new file call `*_test.go`.
 3. Using an editor of your choice, delete the `*DestroyProducer` function, and all but one test. The remaining test should be the "full" test, or if there is no "full" test, the "basic" test. This will be the starting point for your new update test.
 4. Modify the `TestAcc*` *test function* to support updates.
    - Change the suffix of the test function to `_update`.
@@ -159,15 +160,18 @@ An update test is a test that creates the target resource and then makes updates
    }
    ```
 6. Modify the test as needed.
+   - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
    - Modify the template function ending in `_update` so that updatable fields are changed or removed. This may require additions to the `context` map in the test function.
    - Remove the comments at the top of the file.
    - If beta-only fields are being tested, do the following:
-     - Change the file suffix to `.go.erb`.
-     - Add `<% autogen_exception -%>` to the top of the file.
-     - Wrap the beta-only tests in a version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`.
+     - Change the file suffix to `.go.erb`
+     - Add `<% autogen_exception -%>` to the top of the file
+     - Wrap each beta-only test in a separate version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`
+     - In each beta-only test, ensure that the TestCase sets `ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t)`
+     - In each beta-only test, ensure that all Terraform resources in all configs have `provider = google-beta` set
 {{< /tab >}}
 {{< tab "Handwritten" >}}
-1. Using an editor of your choice, open the existing `*_test.go` or `*_test.go.erb` file in [`magic-modules/mmv1/third_party/terraform/tests`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests) which contains your create tests.
+1. Using an editor of your choice, open the existing `*_test.go` or `*_test.go.erb` file in the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services) which contains your create tests.
 2. Copy the `TestAcc*` *test function* for the existing "full" test. If there is no "full" test, use the "basic" test. This will be the starting point for your new update test.
 3. Modify the test function to support updates.
    - Change the suffix of the test function to `_update`.
@@ -209,9 +213,11 @@ An update test is a test that creates the target resource and then makes updates
    - Modify the new template function so that updatable fields are changed or removed. This may require additions to the `context` map in the test function.
    - Remove the comments at the top of the file.
    - If beta-only fields are being tested, do the following:
-     - Change the file suffix to `.go.erb`.
-     - Add `<% autogen_exception -%>` to the top of the file.
-     - Wrap the beta-only tests in a version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`.
+     - Change the file suffix to `.go.erb`
+     - Add `<% autogen_exception -%>` to the top of the file
+     - Wrap each beta-only test in a separate version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`
+     - In each beta-only test, ensure that the TestCase sets `ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t)`
+     - In each beta-only test, ensure that all Terraform resources in all configs have `provider = google-beta` set
 {{< /tab >}}
 {{< /tabs >}}
 
