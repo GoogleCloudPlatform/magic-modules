@@ -166,7 +166,6 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: 'enableProxyProtocol'
     required: true
-    immutable: true
     description: |
       If true, enable the proxy protocol which is for supplying client TCP/IP
       address data in TCP connections that traverse proxies on their way to
