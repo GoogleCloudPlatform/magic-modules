@@ -279,7 +279,7 @@ func TestProvider_ProviderConfigure_accessToken(t *testing.T) {
 			ExpectedSchemaValue: "",
 			ExpectedConfigValue: "value-from-GOOGLE_OAUTH_ACCESS_TOKEN",
 		},
-		"when no values are provided via config or environment variables, the field remains unset without error": {
+		"when no access_token values are provided via config or environment variables, the field remains unset without error": {
 			ConfigValues: map[string]interface{}{
 				// access_token unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
@@ -393,7 +393,7 @@ func TestProvider_ProviderConfigure_impersonateServiceAccount(t *testing.T) {
 			},
 			ExpectedValue: "value-from-env@example.com",
 		},
-		"when no values are provided via config or environment variables, the field remains unset without error": {
+		"when no impersonate_service_account values are provided via config or environment variables, the field remains unset without error": {
 			ConfigValues: map[string]interface{}{
 				// impersonate_service_account unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
@@ -755,7 +755,7 @@ func TestProvider_ProviderConfigure_billingProject(t *testing.T) {
 			},
 			ExpectedValue: "my-billing-project-from-env",
 		},
-		"when no values are provided via config or environment variables, the field remains unset without error": {
+		"when no billing_project values are provided via config or environment variables, the field remains unset without error": {
 			ConfigValues: map[string]interface{}{
 				// billing_project unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
@@ -877,7 +877,7 @@ func TestProvider_ProviderConfigure_region(t *testing.T) {
 			ExpectedSchemaValue: "region-from-env",
 			ExpectedConfigValue: "region-from-env",
 		},
-		"when no values are provided via config or environment variables, the field remains unset without error": {
+		"when no region values are provided via config or environment variables, the field remains unset without error": {
 			ConfigValues: map[string]interface{}{
 				// region unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
@@ -1030,7 +1030,7 @@ func TestProvider_ProviderConfigure_zone(t *testing.T) {
 			ExpectedSchemaValue: "zone-from-CLOUDSDK_COMPUTE_ZONE",
 			ExpectedConfigValue: "zone-from-CLOUDSDK_COMPUTE_ZONE",
 		},
-		"when no values are provided via config or environment variables, the field remains unset without error": {
+		"when no zone values are provided via config or environment variables, the field remains unset without error": {
 			ConfigValues: map[string]interface{}{
 				// zone unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
@@ -1179,7 +1179,7 @@ func TestProvider_ProviderConfigure_userProjectOverride(t *testing.T) {
 			},
 			ExpectError: true,
 		},
-		"when no values are provided via config or environment variables, the field remains unset without error": {
+		"when no user_project_override values are provided via config or environment variables, the field remains unset without error": {
 			ConfigValues: map[string]interface{}{
 				// user_project_override unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
