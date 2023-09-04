@@ -1,8 +1,6 @@
 <% autogen_exception -%>
 package compute
 
-<% unless version == 'ga' -%>
-
 import (
 	"encoding/json"
 	"fmt"
@@ -128,5 +126,3 @@ func retrieveInstances(d *schema.ResourceData, meta interface{}, project, region
 
 	return resourceComputeRegionInstanceTemplateRead(d, meta)
 }
-
-<% end -%>
