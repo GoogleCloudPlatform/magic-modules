@@ -72,7 +72,8 @@ var (
 		"config.0.workloads_config",
 		"config.0.environment_size",
 		"config.0.master_authorized_networks_config",
-		"config.0.resilience_mode",	
+		"config.0.resilience_mode",
+		"config.0.storage_config",
 	}
 
 	recoveryConfigKeys = []string{
@@ -867,6 +868,24 @@ func ResourceComposerEnvironment() *schema.Resource {
 							Computed:    true,
 							Description: `The Kubernetes Engine cluster used to run this environment.`,
 						},
+						"storage_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: composerConfigKeys,
+							MaxItems:     1,
+							Description:  ``,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"bucket_name": {
+										Type:         schema.TypeString,
+										Required:     true,
+										ForceNew:     true,
+										Description: `Optional. Name of an existing Cloud Storage bucket to be used by the environment.`,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -1350,6 +1369,7 @@ func flattenComposerEnvironmentConfig(envCfg *composer.EnvironmentConfig) interf
 		transformed["resilience_mode"] = envCfg.ResilienceMode
 	}
 	transformed["master_authorized_networks_config"] = flattenComposerEnvironmentConfigMasterAuthorizedNetworksConfig(envCfg.MasterAuthorizedNetworksConfig)
+	transformed["storage_config"] = flattenComposerEnvironmentConfigStorageConfig(envCfg.StorageConfig)
 	return []interface{}{transformed}
 }
 
@@ -1634,6 +1654,17 @@ func flattenComposerEnvironmentConfigMasterAuthorizedNetworksConfig(masterAuthNe
 	return []interface{}{masterAuthorizedNetworksConfig}
 }
 
+func flattenComposerEnvironmentConfigStorageConfig(storageConfig *composer.StorageConfig) interface{} {
+	if storageConfig == nil {
+		return nil
+	}
+
+	transformed := make(map[string]interface{})
+	transformed["bucket_name"] = storageConfig.bucketName
+
+	return []interface{}{transformed}
+}
+
 func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (*composer.EnvironmentConfig, error) {
 	l := v.([]interface{})
 	if len(l) == 0 {
@@ -1731,6 +1762,12 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 		return nil, err
 	}
 	transformed.RecoveryConfig = transformedRecoveryConfig
+
+	transformedStorageConfig, err := expandComposerEnvironmentConfigStorageConfig(original["storage_config"], d, config)
+	if err != nil {
+		return nil, err
+	}
+	transformed.StorageConfig = transformedStorageConfig
 
 	return transformed, nil
 }
@@ -2127,7 +2164,22 @@ func expandComposerEnvironmentIPAllocationPolicy(v interface{}, d *schema.Resour
 		transformed.ServicesSecondaryRangeName = v.(string)
 	}
 	return transformed, nil
+}
 
+func expandComposerEnvironmentConfigStorageConfig(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (*composer.StorageConfig, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	transformed := &composer.StorageConfig{}
+
+	if v, ok := original["bucket_name"]; ok {
+		transformed.BucketName = v.(string)
+	}
+
+	return transformed, nil
 }
 
 func expandComposerEnvironmentServiceAccount(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (string, error) {
