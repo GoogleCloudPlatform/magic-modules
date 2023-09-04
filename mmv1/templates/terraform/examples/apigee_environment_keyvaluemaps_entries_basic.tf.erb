@@ -61,6 +61,17 @@ resource "google_apigee_environment" "apigee_environment" {
   display_name = "Apigee Environment"
 }
 
+resource "google_apigee_instance" "apigee_instance" {
+  name     = "tf-test%{random_suffix}"
+  location = "us-central1"
+  org_id   = google_apigee_organization.apigee_org.id
+}
+
+resource "google_apigee_instance_attachment" "apigee_instance_attachment" {
+  instance_id  = google_apigee_instance.apigee_instance.id
+  environment  = google_apigee_environment.apigee_environment.name
+}
+
 resource "google_apigee_environment_keyvaluemaps" "apigee_environment_keyvaluemaps" {
   env_id    = google_apigee_environment.create_apigee_environment.id
   name      = "tf-test-env-kvms%{random_suffix}"
