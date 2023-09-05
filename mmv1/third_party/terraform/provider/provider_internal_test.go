@@ -1173,13 +1173,13 @@ func TestProvider_ProviderConfigure_userProjectOverride(t *testing.T) {
 			},
 			ExpectedValue: false,
 		},
-		"error returned due to non-boolean environment variables": {
+		"setting user_project_override using a non-boolean environment variables results in an error": {
 			EnvVariables: map[string]string{
 				"USER_PROJECT_OVERRIDE": "I'm not a boolean",
 			},
 			ExpectError: true,
 		},
-		"when no values are provided via config or environment variables, the field remains unset without error": {
+		"when no user_project_override values are provided via config or environment variables, the field remains unset without error": {
 			ConfigValues: map[string]interface{}{
 				// user_project_override unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
