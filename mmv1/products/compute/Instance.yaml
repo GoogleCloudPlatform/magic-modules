@@ -451,6 +451,10 @@ properties:
                   unspecified, the primary range of the subnetwork will
                   be used.
         - !ruby/object:Api::Type::String
+          name: 'internalIpv6PrefixLength'
+          description: |
+            The prefix length of the primary internal IPv6 range.
+        - !ruby/object:Api::Type::String
           name: 'ipv6Address'
           description: |
             An IPv6 internal network address for this network interface.

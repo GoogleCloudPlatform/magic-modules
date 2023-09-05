@@ -2751,7 +2751,7 @@ func testAccCheckComputeInstanceIpv6AccessConfigHasInternalIPv6(instance *comput
   return func(s *terraform.State) error {
     for _, i := range instance.NetworkInterfaces {
       if i.Ipv6Address == "" {
-        return fmt.Errorf("no External IPv6")
+        return fmt.Errorf("no internal IPv6 address")
       }
     }
 
