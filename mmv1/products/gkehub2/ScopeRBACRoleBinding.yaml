@@ -148,3 +148,7 @@ properties:
           - :ADMIN
           - :EDIT
           - :VIEW
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'labels'
+    description: |
+      Labels for this ScopeRBACRoleBinding.
