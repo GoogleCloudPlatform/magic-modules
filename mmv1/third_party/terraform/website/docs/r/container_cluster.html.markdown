@@ -352,6 +352,9 @@ subnetwork in which the cluster's instances are launched.
 * `enable_multi_networking` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
     Whether multi-networking is enabled for this cluster.
 
+* `enable_fqdn_network_policy` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+    Whether FQDN Network Policy is enabled on this cluster. Users who enable this feature for existing Standard clusters must restart the GKE Dataplane V2 `anetd` DaemonSet after enabling it. See the [Enable FQDN Network Policy in an existing cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/fqdn-network-policies#enable_fqdn_network_policy_in_an_existing_cluster) for more information.
+
 * `private_ipv6_google_access` - (Optional)
     The desired state of IPv6 connectivity to Google Services. By default, no private IPv6 access to or from Google Services (all access will be via IPv4).
 
@@ -591,13 +594,20 @@ This block also contains several computed attributes, documented below.
 
 <a name="nested_monitoring_config"></a>The `monitoring_config` block supports:
 
-*  `enable_components` - (Optional) The GKE components exposing metrics. Supported values include: `SYSTEM_COMPONENTS`, `APISERVER`, `CONTROLLER_MANAGER`, and `SCHEDULER`. In beta provider, `WORKLOADS` is supported on top of those 4 values. (`WORKLOADS` is deprecated and removed in GKE 1.24.)
+*  `enable_components` - (Optional) The GKE components exposing metrics. Supported values include: `SYSTEM_COMPONENTS`, `APISERVER`, `SCHEDULER`, `CONTROLLER_MANAGER`, `STORAGE`, `HPA`, `POD`, `DAEMONSET`, `DEPLOYMENT` and `STATEFULSET`. In beta provider, `WORKLOADS` is supported on top of those 10 values. (`WORKLOADS` is deprecated and removed in GKE 1.24.)
 
 *  `managed_prometheus` - (Optional) Configuration for Managed Service for Prometheus. Structure is [documented below](#nested_managed_prometheus).
+
+* `advanced_datapath_observability_config` - (Optional) Configuration for Advanced Datapath Monitoring. Structure is [documented below](#nested_advanced_datapath_observability_config).
 
 <a name="nested_managed_prometheus"></a>The `managed_prometheus` block supports:
 
 * `enabled` - (Required) Whether or not the managed collection is enabled.
+
+<a name="nested_advanced_datapath_observability_config"></a>The `advanced_datapath_observability_config` block supports:
+
+* `enable_metrics` - (Required) Whether or not to enable advanced datapath metrics.
+* `relay_mode` - (Optional) Mode used to make Relay available.
 
 <a name="nested_maintenance_policy"></a>The `maintenance_policy` block supports:
 * `daily_maintenance_window` - (Optional) structure documented below.
@@ -712,9 +722,19 @@ to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.
 from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to
 pick a specific range to use.
 
-* `stack_type` - (Optional) The IP Stack Type of the cluster. 
+* `stack_type` - (Optional) The IP Stack Type of the cluster.
 Default value is `IPV4`.
 Possible values are `IPV4` and `IPV4_IPV6`.
+
+* `additional_pod_ranges_config` - (Optional) The configuration for additional pod secondary ranges at
+the cluster level. Used for Autopilot clusters and Standard clusters with which control of the 
+secondary Pod IP address assignment to node pools isn't needed. Structure is [documented below](#nested_additional_pod_ranges_config).
+
+
+<a name="nested_additional_pod_ranges_config"></a>The `additional_pod_ranges_config` block supports:
+
+* `pod_range_names` - (Required) The names of the Pod ranges to add to the cluster.
+
 
 <a name="nested_master_auth"></a>The `master_auth` block supports:
 
@@ -1047,7 +1067,8 @@ notification_config {
 
 <a name="nested_confidential_nodes"></a> The `confidential_nodes` block supports:
 
-* `enabled` (Required) - Enable Confidential Nodes for this cluster.
+* `enabled` (Required) - Enable Confidential GKE Nodes for this cluster, to
+    enforce encryption of data in-use.
 
 <a name="nested_pod_security_policy_config"></a>The `pod_security_policy_config` block supports:
 

@@ -128,5 +128,6 @@ properties:
   - !ruby/object:Api::Type::String
     name: project
     description: |
-      Deprecated in favor of `project_id`
-    deprecation_message: Deprecated in favor of `project_id`
+      Project id.
+    deprecation_message: >-
+      `project` is deprecated and will be removed in a future major release. Use `project_id` instead.

@@ -1,0 +1,22 @@
+name: membership-checker
+
+permissions: read-all
+
+on:
+  pull_request:
+    paths:
+      - '.ci/containers/membership-checker/**'
+
+jobs:
+  build-and-unit-tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '^1.19.1'
+      - name: Run membership checker unit tests
+        run: |
+          cd .ci/containers/membership-checker
+          go test -v

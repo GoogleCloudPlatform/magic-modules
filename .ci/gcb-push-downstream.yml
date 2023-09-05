@@ -25,7 +25,8 @@ steps:
           - $COMMIT_SHA
 
     # TPG
-    - name: 'gcr.io/graphite-docker-images/downstream-waiter'
+    - name: 'gcr.io/graphite-docker-images/bash-plus'
+      entrypoint: '/workspace/.ci/scripts/bash-plus/downstream-waiter/wait_for_commit.sh'
       id: tpg-sync
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["checkout"]
@@ -34,7 +35,8 @@ steps:
           - $BRANCH_NAME
           - $COMMIT_SHA
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
       secretEnv: ["GITHUB_TOKEN"]
       id: tpg-push
       waitFor: ["tpg-sync"]
@@ -55,12 +57,13 @@ steps:
           - |
             if [ "$BRANCH_NAME" == "main" ]; then
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpg-sync
-            else 
+            else
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpg-sync-$BRANCH_NAME
             fi
 
     # TPGB
-    - name: 'gcr.io/graphite-docker-images/downstream-waiter'
+    - name: 'gcr.io/graphite-docker-images/bash-plus'
+      entrypoint: '/workspace/.ci/scripts/bash-plus/downstream-waiter/wait_for_commit.sh'
       id: tpgb-sync
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["checkout"]
@@ -69,7 +72,8 @@ steps:
           - $BRANCH_NAME
           - $COMMIT_SHA
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
       secretEnv: ["GITHUB_TOKEN"]
       id: tpgb-push
       waitFor: ["tpgb-sync"]
@@ -90,12 +94,13 @@ steps:
           - |
             if [ "$BRANCH_NAME" == "main" ]; then
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpgb-sync
-            else 
+            else
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpgb-sync-$BRANCH_NAME
             fi
 
     # TGC
-    - name: 'gcr.io/graphite-docker-images/downstream-waiter'
+    - name: 'gcr.io/graphite-docker-images/bash-plus'
+      entrypoint: '/workspace/.ci/scripts/bash-plus/downstream-waiter/wait_for_commit.sh'
       id: tgc-sync
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["checkout"]
@@ -104,10 +109,11 @@ steps:
           - $BRANCH_NAME
           - $COMMIT_SHA
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
       secretEnv: ["GITHUB_TOKEN"]
       id: tgc-push
-      waitFor: ["tgc-sync", "tpg-push"]
+      waitFor: ["tgc-sync", "tpgb-push"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
       args:
@@ -125,12 +131,13 @@ steps:
           - |
             if [ "$BRANCH_NAME" == "main" ]; then
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tgc-sync
-            else 
+            else
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tgc-sync-$BRANCH_NAME
             fi
 
     # TF-OICS
-    - name: 'gcr.io/graphite-docker-images/downstream-waiter'
+    - name: 'gcr.io/graphite-docker-images/bash-plus'
+      entrypoint: '/workspace/.ci/scripts/bash-plus/downstream-waiter/wait_for_commit.sh'
       id: tf-oics-sync
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["checkout"]
@@ -139,7 +146,8 @@ steps:
           - $BRANCH_NAME
           - $COMMIT_SHA
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
       secretEnv: ["GITHUB_TOKEN"]
       id: tf-oics-push
       waitFor: ["tf-oics-sync"]
@@ -160,11 +168,12 @@ steps:
           - |
             if [ "$BRANCH_NAME" == "main" ]; then
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-oics-sync
-            else 
+            else
               git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-oics-sync-$BRANCH_NAME
             fi
 
-    - name: 'gcr.io/graphite-docker-images/vcr-cassette-merger'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/vcr-cassette-merger/vcr_merge.sh'
       secretEnv: ["GITHUB_TOKEN", "GOOGLE_PROJECT"]
       waitFor: ["tpg-push"]
       env:

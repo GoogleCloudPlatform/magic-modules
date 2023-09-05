@@ -146,6 +146,36 @@ properties:
       All system annotations in v1 now have a corresponding field in v2 Job.
 
       This field follows Kubernetes annotations' namespacing, limits, and rules.
+  - !ruby/object:Api::Type::Time
+    name: 'createTime'
+    output: true
+    description: |-
+      The creation time.
+  - !ruby/object:Api::Type::Time
+    name: 'updateTime'
+    output: true
+    description: |-
+      The last-modified time.
+  - !ruby/object:Api::Type::Time
+    name: 'deleteTime'
+    output: true
+    description: |-
+      The deletion time.
+  - !ruby/object:Api::Type::Time
+    name: 'expireTime'
+    output: true
+    description: |-
+      For a deleted resource, the time after which it will be permamently deleted.
+  - !ruby/object:Api::Type::String
+    name: 'creator'
+    output: true
+    description: |-
+      Email address of the authenticated creator.
+  - !ruby/object:Api::Type::String
+    name: 'lastModifier'
+    output: true
+    description: |-
+      Email address of the last authenticated modifier.
   - !ruby/object:Api::Type::String
     name: 'client'
     description: |
@@ -342,10 +372,8 @@ properties:
                   description: |-
                     Periodic probe of container liveness. Container will be restarted if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
                     This field is not supported in Cloud Run Job currently.
-                  deprecation_message:
-                    Cloud Run Job does not support liveness probe and
-                    `liveness_probe` field will be removed in a future major
-                    release.
+                  deprecation_message: >-
+                    `liveness_probe` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.
                   properties:
                     - !ruby/object:Api::Type::Integer
                       name: 'initialDelaySeconds'
@@ -420,10 +448,8 @@ properties:
                   description: |-
                     Startup probe of application within the container. All other probes are disabled if a startup probe is provided, until it succeeds. Container will not be added to service endpoints if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
                     This field is not supported in Cloud Run Job currently.
-                  deprecation_message:
-                    Cloud Run Job does not support startup probe and
-                    `startup_probe` field will be removed in a future major
-                    release.
+                  deprecation_message: >-
+                    `startup_probe` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.
                   default_from_api: true
                   properties:
                     - !ruby/object:Api::Type::Integer
@@ -542,7 +568,6 @@ properties:
                               The Cloud Secret Manager secret version. Can be 'latest' for the latest value or an integer for a specific version
                           - !ruby/object:Api::Type::Integer
                             name: 'mode'
-                            required: true
                             description: |-
                               Integer octal mode bits to use on this file, must be a value between 01 and 0777 (octal). If 0 or not set, the Volume's default mode will be used.
                 - !ruby/object:Api::Type::NestedObject

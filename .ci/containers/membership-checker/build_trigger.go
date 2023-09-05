@@ -14,17 +14,7 @@ func triggerMMPresubmitRuns(projectId, repoName, commitSha string, substitutions
 		return fmt.Errorf("Did not provide GENERATE_DIFFS_TRIGGER environment variable")
 	}
 
-	rakeTestTriggerId, ok := os.LookupEnv("RAKE_TESTS_TRIGGER")
-	if !ok {
-		return fmt.Errorf("Did not provide RAKE_TESTS_TRIGGER environment variable")
-	}
-
 	err := triggerCloudBuildRun(projectId, presubmitTriggerId, repoName, commitSha, substitutions)
-	if err != nil {
-		return err
-	}
-
-	err = triggerCloudBuildRun(projectId, rakeTestTriggerId, repoName, commitSha, substitutions)
 	if err != nil {
 		return err
 	}
