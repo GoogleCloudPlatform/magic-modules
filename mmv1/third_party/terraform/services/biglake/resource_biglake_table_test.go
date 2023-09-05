@@ -80,11 +80,11 @@ resource "google_biglake_table" "table" {
     database = google_biglake_database.database.id
     type = "HIVE"
     hive_options {
-		table_type = "MANAGED_TABLE"
+		table_type = "EXTERNAL_TABLE"
 		storage_descriptor {
-		  location_uri = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.data_folder.name}"
-		  input_format = "org.apache.hadoop.mapred.SequenceFileInputFormat"
-		  output_format =  "org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat"
+		  location_uri = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.data_folder.name}/data"
+		  input_format = "org.apache.hadoop.mapred.SequenceFileInputFormat2"
+		  output_format =  "org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat2"
 		}
 		# Some Example Parameters.
 		parameters = {
