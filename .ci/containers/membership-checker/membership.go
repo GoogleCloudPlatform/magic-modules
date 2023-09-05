@@ -11,6 +11,7 @@ import (
 var (
 	// This is for the random-assignee rotation.
 	reviewerRotation = []string{
+		"slevenick",
 		"c2thorn",
 		"rileykarson",
 		"melinath",
