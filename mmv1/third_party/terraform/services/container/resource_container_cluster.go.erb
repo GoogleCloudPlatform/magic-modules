@@ -1163,11 +1163,6 @@ func ResourceContainerCluster() *schema.Resource {
 <% end -%>
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
-<% if version == "ga" -%>
-								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS", "APISERVER", "SCHEDULER", "CONTROLLER_MANAGER", "STORAGE", "HPA", "POD", "DAEMONSET", "DEPLOYMENT", "STATEFULSET"}, false),
-<% else -%>
-								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS", "APISERVER", "SCHEDULER", "CONTROLLER_MANAGER", "STORAGE", "HPA", "POD", "DAEMONSET", "DEPLOYMENT", "STATEFULSET", "WORKLOADS"}, false),
-<% end -%>
 							},
 						},
 						"managed_prometheus": {
