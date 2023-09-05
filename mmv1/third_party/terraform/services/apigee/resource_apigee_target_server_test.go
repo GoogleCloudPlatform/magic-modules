@@ -350,7 +350,7 @@ resource "google_apigee_target_server" "apigee_target_server"{
 	  ignore_validation_errors = true
 	  key_alias                = google_apigee_keystores_aliases_key_cert_file.apigee_test_alias2.alias 
 	  key_store                = google_apigee_env_keystore.apigee_environment_keystore2.name
-	  protocols                = ["TLSv1.2"]
+	  protocols                = ["TLSv1.2", "TLSv1.1"]
 	  trust_store              = google_apigee_env_keystore.apigee_environment_keystore2.name
 	}
 	depends_on                 = [ 
