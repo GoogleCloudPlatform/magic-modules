@@ -110,19 +110,19 @@ There are now three label-related fields with the new model:
 * The output-only `effective_labels` will list all of labels present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 * The output-only `terraform_labels` will merge the labels defined by the users on the resource through Terraform and the default labels configured on the provider. If the same label exists on both the resource labels and provider default labels, the label on the resource will override the provider label.
 
-After upgrading to `5.0.0`, and then running `terraform refresh` or `terraform apply`, these three fields should show in the state file of the resources with a self-applying `labels` field.
-
-## Provider Default Zone and Region Values
-
-Several tests were inconsistent with one another when it came to testing `location`, `zone`, and `region` values in the provider block. The inconsistencies included some tests not working with self-links while others did. This has been addressed while also addressing the use of the `region` value within the provider block.
-
-Having the `region` value set in both the resource and provider block will now result in the use of the `region` value being used from the provider block. Prior to the 5.0.0, the `region` value would be ignored and the resource `region` value would be used instead. The same can be said with `region` and `zone` values in the provider where the `region` value, despite being set, would be ignored with the `zone` value being used instead. Users should also expect to see `region` being used if both `region` and `zone` values are set in a resource.
+After upgrading to `5.0.0`, and then running `terraform refresh` or `terraform apply`, these three fields should show in the state file of the resources with a self-applying `labels` field
 
 #### Resource annotations
 
 The new annotations model is similar to the new labels model and will be applied to all of the resources with the top level `annotations` field or the nested `annotations` field inside the top level `metadata` field.
 
 There are now two annotation-related fields with the new model, the `annotations` and the output-only `effective_annotations` fields.
+
+### Changes to how `location`, `region` and `zone` values are obtained for resources
+
+With the recent updates to the `location`, `region` and `zone` values in the provider block, users should expect the `location` value to come from the `region` value from the provider block (if set). Previously the `location` value would use the `zone` value from the provider block regardless of whether location was set or not. 
+
+Users should also expect a different `region` value be used since the `region` value could be different to the `region` value obtained from using the default `zone` value from the provider block.
 
 ## Datasources
 
