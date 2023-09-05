@@ -71,7 +71,7 @@ resource "google_biglake_database" "database" {
 	hive_options {
 		location_uri = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.metadata_folder.name}"
 		parameters = {
-			"owner" = "John Doe"
+			"owner" = "Alex"
 		}
 	}
 }
@@ -95,7 +95,7 @@ resource "google_biglake_table" "table" {
 		  "transient_lastDdlTime" = "1680895000"
 		  "spark.sql.partitionProvider" = "catalog"
 		  # Change The Name
-		  "owner" = "Jane Doe"
+		  "owner" = "Dana"
 		  "spark.sql.sources.schema.part.0" = "{\"type\":\"struct\",\"fields\":[{\"name\":\"id\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{}},{\"name\":\"name\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"age\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{}}]}"
 		  "spark.sql.sources.provider": "iceberg"
 		  "provider" = "iceberg"
