@@ -56,7 +56,7 @@ func dataSourceAccessApprovalFolderServiceAccountRead(d *schema.ResourceData, me
 		UserAgent: userAgent,
 	})
 	if err != nil {
-		return transport_tpg.HandleDataSourceNotFoundError(url, fmt.Sprintf("AccessApprovalFolderServiceAccount %q"), err, d)
+		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("AccessApprovalFolderServiceAccount %q", d.Id()), url)
 	}
 
 	if err := d.Set("name", res["name"]); err != nil {

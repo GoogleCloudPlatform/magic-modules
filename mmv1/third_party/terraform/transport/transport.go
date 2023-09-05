@@ -136,9 +136,9 @@ func HandleNotFoundError(err error, d *schema.ResourceData, resource string) err
 		fmt.Sprintf("Error when reading or editing %s: {{err}}", resource), err)
 }
 
-func HandleDataSourceNotFoundError(url, resource string, err error, d *schema.ResourceData) error {
+func HandleDataSourceNotFoundError(err error, d *schema.ResourceData, resource, url string) error {
 	if IsGoogleApiErrorWithCode(err, 404) {
-		return fmt.Errorf("Error 404: %s not found", url)
+		return fmt.Errorf("%s not found", url)
 	}
 
 	return errwrap.Wrapf(
