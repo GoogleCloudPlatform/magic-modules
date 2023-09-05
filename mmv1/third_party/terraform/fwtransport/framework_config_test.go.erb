@@ -469,6 +469,15 @@ func TestFrameworkProvider_LoadAndValidateFramework_userProjectOverride(t *testi
 			ExpectedDataModelValue:    types.BoolNull(),
 			ExpectedConfigStructValue: types.BoolNull(),
 		},
+		// Handling unknown values
+		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
+		// "when user_project_override is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		// 	ConfigValues: fwmodels.ProviderModel{
+		// 		UserProjectOverride: types.BoolUnknown(),
+		// 	},
+		// 	ExpectedDataModelValue:    types.BoolNull(),
+		// 	ExpectedConfigStructValue: types.BoolNull(),
+		// },
 	}
 
 	for tn, tc := range cases {
