@@ -352,6 +352,9 @@ subnetwork in which the cluster's instances are launched.
 * `enable_multi_networking` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
     Whether multi-networking is enabled for this cluster.
 
+* `enable_fqdn_network_policy` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+    Whether FQDN Network Policy is enabled on this cluster. Users who enable this feature for existing Standard clusters must restart the GKE Dataplane V2 `anetd` DaemonSet after enabling it. See the [Enable FQDN Network Policy in an existing cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/fqdn-network-policies#enable_fqdn_network_policy_in_an_existing_cluster) for more information.
+
 * `private_ipv6_google_access` - (Optional)
     The desired state of IPv6 connectivity to Google Services. By default, no private IPv6 access to or from Google Services (all access will be via IPv4).
 
@@ -603,7 +606,7 @@ This block also contains several computed attributes, documented below.
 
 <a name="nested_advanced_datapath_observability_config"></a>The `advanced_datapath_observability_config` block supports:
 
-* `enabled_metrics` - (Required) Whether or not the advanced datapath metrics are enabled.
+* `enable_metrics` - (Required) Whether or not to enable advanced datapath metrics.
 * `relay_mode` - (Optional) Mode used to make Relay available.
 
 <a name="nested_maintenance_policy"></a>The `maintenance_policy` block supports:
@@ -1064,7 +1067,8 @@ notification_config {
 
 <a name="nested_confidential_nodes"></a> The `confidential_nodes` block supports:
 
-* `enabled` (Required) - Enable Confidential Nodes for this cluster.
+* `enabled` (Required) - Enable Confidential GKE Nodes for this cluster, to
+    enforce encryption of data in-use.
 
 <a name="nested_pod_security_policy_config"></a>The `pod_security_policy_config` block supports:
 
