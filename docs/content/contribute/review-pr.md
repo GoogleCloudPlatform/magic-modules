@@ -1,6 +1,6 @@
 ---
 title: "Review a pull request"
-weight: 20
+weight: 30
 ---
 
 # Review a pull request
