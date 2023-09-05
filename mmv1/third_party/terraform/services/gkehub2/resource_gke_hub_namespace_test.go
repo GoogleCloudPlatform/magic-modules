@@ -55,10 +55,14 @@ resource "google_gke_hub_namespace" "namespace" {
   scope_id = "tf-test-scope%{random_suffix}"
   scope = "${google_gke_hub_scope.namespace.name}"
   namespace_labels = {
-      key = "value"
+      keyb = "valueb"
+      keya = "valuea"
+      keyc = "valuec"
   }
   labels = {
-      key = "value" 
+      keyb = "valueb"
+      keya = "valuea"
+      keyc = "valuec" 
   }
   depends_on = [google_gke_hub_scope.namespace]
 }
@@ -77,10 +81,14 @@ resource "google_gke_hub_namespace" "namespace" {
   scope_id = "tf-test-scope%{random_suffix}"
   scope = "${google_gke_hub_scope.namespace.name}"
   namespace_labels = {
-      updated_key = "updated_value"
+      updated_keyb = "updated_valueb"
+      updated_keya = "updated_valuea"
+      updated_keyc = "updated_valuec"
   }
   labels = {
-      updated_key = "updated_value" 
+      updated_keyb = "updated_valueb"
+      updated_keya = "updated_valuea"
+      updated_keyc = "updated_valuec" 
   }
   depends_on = [google_gke_hub_scope.namespace]
 }
