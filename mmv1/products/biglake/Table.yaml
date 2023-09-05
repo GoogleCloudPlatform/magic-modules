@@ -48,6 +48,7 @@ parameters:
       projects/{project_id_or_number}/locations/{locationId}/catalogs/{catalogId}/databases/{databaseId}/tables/{tableId}
   - !ruby/object:Api::Type::String
     name: "database"
+    immutable: true
     url_param_only: true
     description: |
       The id of the parent database.
