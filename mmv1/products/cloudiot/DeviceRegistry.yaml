@@ -41,6 +41,8 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/cloudiot_device_registry.go.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/cloudiot_device_registry.go.erb
   pre_update: templates/terraform/pre_update/cloudiot_device_registry.go.erb
+deprecation_message: >-
+  `google_cloudiot_registry` is deprecated in the API. This resource will be removed in the next major release of the provider.
 docs: !ruby/object:Provider::Terraform::Docs
   optional_properties: |
     * `state_notification_config` - A PubSub topic to publish device state updates.
