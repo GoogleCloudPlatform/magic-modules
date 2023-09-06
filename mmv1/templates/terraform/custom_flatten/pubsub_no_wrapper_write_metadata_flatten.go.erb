@@ -14,7 +14,15 @@
 -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
-		return false
+		return nil
 	}
-	return v
+
+	original := v.(map[string]interface{})
+	transformed := make(map[string]interface{})
+
+	if original["writeMetadata"] == nil {
+		transformed["writeMetadata"] = false
+	}
+
+	return []interface{}{transformed}
 }
