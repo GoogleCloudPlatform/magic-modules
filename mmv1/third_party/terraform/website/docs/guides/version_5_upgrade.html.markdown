@@ -336,7 +336,7 @@ Previously, the default value for `rule.rate_limit_options.encorce_on_key` is "A
 
 ### Additional `bucket_options` subfields are now properly required
 
-For log-based metrics with `value_type = "DISTRIBUTION"`, additional fields are now required depending on the `bucket_options` block:
+When setting the `bucket_options` block, the following fields may be required:
 
 * `num_finite_buckets`, `width`, and `offset` are now required when `bucket_options` is set to be `linear_buckets`
 
