@@ -179,12 +179,33 @@ properties:
             output: true
   - !ruby/object:Api::Type::String
     name: 'network'
-    required: true
+    exactly_one_of:
+      - network
+      - network_config.0.network
+    default_from_api: true
     description: |
       The relative resource name of the VPC network on which the instance can be accessed. It is specified in the following form:
 
       "projects/{projectNumber}/global/networks/{network_id}".
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - !ruby/object:Api::Type::NestedObject
+    name: 'networkConfig'   
+    description: |
+      Description.
+    default_from_api: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: network
+        exactly_one_of:
+          - network
+          - network_config.0.network
+        description: |
+          Description.
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+      - !ruby/object:Api::Type::String
+        name: allocatedIpRange
+        description: |
+          Description.
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
