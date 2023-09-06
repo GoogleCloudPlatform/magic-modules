@@ -2997,7 +2997,7 @@ resource "google_sql_database_instance" "clone1" {
 
 func testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone_withSettings(databaseName, networkName, addressRangeName string) string {
 	return fmt.Sprintf(`
-data "google_compute_network" "servicenet" {
+resource "google_compute_network" "servicenet" {
   name                    = "%s"
 }
 
@@ -3006,11 +3006,11 @@ resource "google_compute_global_address" "foobar" {
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
-  network       = data.google_compute_network.servicenet.self_link
+  network       = google_compute_network.servicenet.self_link
 }
 
 resource "google_service_networking_connection" "foobar" {
-  network                 = data.google_compute_network.servicenet.self_link
+  network                 = google_compute_network.servicenet.self_link
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.foobar.name]
 }
@@ -3025,7 +3025,7 @@ resource "google_sql_database_instance" "instance" {
     tier = "db-f1-micro"
     ip_configuration {
       ipv4_enabled       = "false"
-      private_network    = data.google_compute_network.servicenet.self_link
+      private_network    = google_compute_network.servicenet.self_link
     }
     backup_configuration {
       enabled            = true

@@ -382,12 +382,12 @@ resource "google_alloydb_instance" "primary" {
 resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
-  network    = data.google_compute_network.default.id
+  network    = google_compute_network.default.id
 }
 
 data "google_project" "project" {}
 
-data "google_compute_network" "default" {
+resource "google_compute_network" "default" {
   name = "%{network_name}"
 }
 
@@ -396,11 +396,11 @@ resource "google_compute_global_address" "private_ip_alloc" {
   address_type  = "INTERNAL"
   purpose       = "VPC_PEERING"
   prefix_length = 16
-  network       = data.google_compute_network.default.id
+  network       = google_compute_network.default.id
 }
 
 resource "google_service_networking_connection" "vpc_connection" {
-  network                 = data.google_compute_network.default.id
+  network                 = google_compute_network.default.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
