@@ -217,6 +217,10 @@ module Api
       # public ca external account keys
       attr_reader :skip_read
 
+      # Set to true for resources that wish to disable automatic generation of default provider
+      # value customdiff functions
+      attr_reader :skip_default_cdiff
+
       # This enables resources that get their project via a reference to a different resource
       # instead of a project field to use User Project Overrides
       attr_reader :supports_indirect_user_project_override
@@ -322,6 +326,7 @@ module Api
       check :migrate_state, type: String
       check :skip_delete, type: :boolean, default: false
       check :skip_read, type: :boolean, default: false
+      check :skip_default_cdiff, type: :boolean, default: false
       check :supports_indirect_user_project_override, type: :boolean, default: false
       check :legacy_long_form_project, type: :boolean, default: false
       check :read_error_transform, type: String
@@ -389,8 +394,11 @@ module Api
     # At Create, they have no value but they can just be read in anyways, and after a Read
     # they will need to be set in every Update.
     def settable_properties
-      all_user_properties.reject { |v| v.output && !v.is_a?(Api::Type::Fingerprint) }
-                         .reject(&:url_param_only)
+      settable_properties = all_user_properties.reject do |v|
+        v.output && !v.is_a?(Api::Type::Fingerprint) && !v.is_a?(Api::Type::KeyValueTerraformLabels)
+      end
+      settable_properties.reject(&:url_param_only)
+                         .reject { |v| v.is_a?(Api::Type::KeyValueLabels) }
     end
 
     # Properties that will be returned in the API body
@@ -443,14 +451,26 @@ module Api
       !@transport&.decoder.nil?
     end
 
-    def add_labels_related_fields(props)
+    def add_labels_related_fields(props, parent)
       props.each do |p|
         if p.is_a? Api::Type::KeyValueLabels
+          # The terraform_labels field is used to write to API, instead of the labels field.
+          p.ignore_write = true
+
+          @custom_diff ||= []
+          if parent.nil?
+            @custom_diff.append('tpgresource.SetTerraformLabelsDiff')
+          elsif parent == 'metadata'
+            @custom_diff.append('tpgresource.SetMetadataTerraformLabelsDiff')
+          end
+
+          props << build_terraform_labels_field('labels', p.field_min_version, p.update_verb,
+                                                p.update_url)
           props << build_effective_labels_field('labels', p.field_min_version)
         elsif p.is_a? Api::Type::KeyValueAnnotations
           props << build_effective_labels_field('annotations', p.field_min_version)
         elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
-          p.properties = add_labels_related_fields(p.all_properties)
+          p.properties = add_labels_related_fields(p.all_properties, p.name)
         end
       end
       props
@@ -462,12 +482,27 @@ module Api
  other clients and services."
 
       Api::Type::KeyValuePairs.new(
-        name: "effective_#{name}",
+        name: "effective#{name.capitalize}",
         output: true,
         api_name: name,
         description:,
         min_version:,
         ignore_write: true
+      )
+    end
+
+    def build_terraform_labels_field(name, min_version, update_verb, update_url)
+      description = "The combination of #{name} configured directly on the resource
+ and default #{name} configured on the provider."
+
+      Api::Type::KeyValueTerraformLabels.new(
+        name: "terraform#{name.capitalize}",
+        output: true,
+        api_name: name,
+        description:,
+        min_version:,
+        update_verb:,
+        update_url:
       )
     end
 

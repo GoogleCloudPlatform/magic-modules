@@ -1,4 +1,4 @@
-package google
+package resourcemanager
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
-func resourceConverterFolderIamPolicy() cai.ResourceConverter {
+func ResourceConverterFolderIamPolicy() cai.ResourceConverter {
 	return cai.ResourceConverter{
 		AssetType:         "cloudresourcemanager.googleapis.com/Folder",
 		Convert:           GetFolderIamPolicyCaiObject,
@@ -16,7 +16,7 @@ func resourceConverterFolderIamPolicy() cai.ResourceConverter {
 	}
 }
 
-func resourceConverterFolderIamBinding() cai.ResourceConverter {
+func ResourceConverterFolderIamBinding() cai.ResourceConverter {
 	return cai.ResourceConverter{
 		AssetType:         "cloudresourcemanager.googleapis.com/Folder",
 		Convert:           GetFolderIamBindingCaiObject,
@@ -26,7 +26,7 @@ func resourceConverterFolderIamBinding() cai.ResourceConverter {
 	}
 }
 
-func resourceConverterFolderIamMember() cai.ResourceConverter {
+func ResourceConverterFolderIamMember() cai.ResourceConverter {
 	return cai.ResourceConverter{
 		AssetType:         "cloudresourcemanager.googleapis.com/Folder",
 		Convert:           GetFolderIamMemberCaiObject,

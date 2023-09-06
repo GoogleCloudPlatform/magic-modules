@@ -22,6 +22,9 @@
             "labels": {
               "env": "dev"
             },
+            "terraform_labels": {
+              "env": "dev"
+            },
             "location": "EU",
             "timeouts": null
           }
@@ -52,6 +55,9 @@
           "labels": {
             "env": "dev"
           },
+          "terraform_labels": {
+            "env": "dev"
+          },
           "location": "EU",
           "timeouts": null
         },
@@ -62,6 +68,7 @@
           "etag": true,
           "id": true,
           "labels": {},
+          "terraform_labels": {},
           "last_modified_time": true,
           "project": true,
           "self_link": true
