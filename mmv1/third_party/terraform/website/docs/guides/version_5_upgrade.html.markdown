@@ -338,10 +338,8 @@ Previously, the default value for `rule.rate_limit_options.encorce_on_key` is "A
 
 When setting the `bucket_options` block, the following fields may be required:
 
-* `num_finite_buckets`, `width`, and `offset` are now required when `bucket_options` is set to be `linear_buckets`
+* `num_finite_buckets`, `width`, and `offset` are now required when `bucket_options.linear_buckets` is set.
 
-* `num_finite_buckets`, `growth_factor`, and `scale` are now required when `bucket_options` is set to be `exponential_buckets`
-
-* `bounds` is now required when `bucket_options` is set to be `explicit_buckets`.
+* `num_finite_buckets`, `growth_factor`, and `scale` are now required when `bucket_options.exponential_buckets` is set.
 
 Previously these fields should have been required but were not, which allowed for invalid `google_logging_metric` configurations.
