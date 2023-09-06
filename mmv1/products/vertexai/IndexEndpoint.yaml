@@ -56,6 +56,11 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vertex_ai_index_endpoint_with_psc"
     primary_resource_id: "index_endpoint"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_index_endpoint_with_public_endpoint"
+    primary_resource_id: "index_endpoint"
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "vertex-ai-index-endpoint")'
 parameters:
   - !ruby/object:Api::Type::String
     name: region
@@ -119,3 +124,12 @@ properties:
         description: A list of Projects from which the forwarding rule will target the service attachment.
         item_type: Api::Type::String
         immutable: true
+  - !ruby/object:Api::Type::Boolean
+    name: publicEndpointEnabled
+    immutable: true
+    ignore_read: true
+    description: If true, the deployed index will be accessible through public endpoint.
+  - !ruby/object:Api::Type::String
+    name: publicEndpointDomainName
+    output: true
+    description: If publicEndpointEnabled is true, this field will be populated with the domain name to use for this index endpoint.
