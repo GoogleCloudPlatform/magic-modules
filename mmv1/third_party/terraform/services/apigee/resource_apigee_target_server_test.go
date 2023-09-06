@@ -58,24 +58,6 @@ func TestAccApigeeTargetServer_apigeeTargetServerTest_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"env_id"},
 			},
-			{
-				Config: testAccApigeeTargetServer_apigeeTargetServerTest_full(context),
-			},
-			{
-				ResourceName:            "google_apigee_target_server.apigee_target_server",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"env_id"},
-			},
-			{
-				Config: testAccApigeeTargetServer_apigeeTargetServerTest_update(context),
-			},
-			{
-				ResourceName:            "google_apigee_target_server.apigee_target_server",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"env_id"},
-			},
 		},
 	})
 }
@@ -229,6 +211,42 @@ resource "google_apigee_target_server" "apigee_target_server" {
   env_id      = google_apigee_environment.apigee_environment.id
 }
 `, context)
+}
+
+func TestAccApigeeTargetServer_apigeeTargetServerTest_clientAuthEnabled(t *testing.T) {
+	t.Parallel()
+	acctest.SkipIfVcr(t)
+	context := map[string]interface{}{
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckApigeeTargetServerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccApigeeTargetServer_apigeeTargetServerTest_full(context),
+			},
+			{
+				ResourceName:            "google_apigee_target_server.apigee_target_server",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"env_id"},
+			},
+			{
+				Config: testAccApigeeTargetServer_apigeeTargetServerTest_update(context),
+			},
+			{
+				ResourceName:            "google_apigee_target_server.apigee_target_server",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"env_id"},
+			},
+		},
+	})
 }
 
 func testAccApigeeTargetServer_apigeeTargetServerTest_full(context map[string]interface{}) string {
