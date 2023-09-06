@@ -93,6 +93,7 @@ module Provider
         Api::Type::KeyValuePairs => 'schema.TypeMap',
         Api::Type::KeyValueLabels => 'schema.TypeMap',
         Api::Type::KeyValueTerraformLabels => 'schema.TypeMap',
+        Api::Type::KeyValueEffectiveLabels => 'schema.TypeMap',
         Api::Type::KeyValueAnnotations => 'schema.TypeMap',
         Api::Type::Map => 'schema.TypeSet',
         Api::Type::Fingerprint => 'schema.TypeString'

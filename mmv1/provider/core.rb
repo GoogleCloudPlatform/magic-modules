@@ -402,7 +402,7 @@ module Provider
     def properties_by_custom_update(properties)
       update_props = properties.reject do |p|
         p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP ||
-          p.is_a?(Api::Type::KeyValueLabels)
+          p.is_a?(Api::Type::KeyValueLabels) # effective_labels is used for update
       end
 
       update_props.group_by do |p|

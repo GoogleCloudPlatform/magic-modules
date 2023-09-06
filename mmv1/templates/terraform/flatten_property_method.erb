@@ -94,7 +94,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
     })
   }
   return transformed
-<% elsif (property.is_a?(Api::Type::KeyValueLabels)) || (property.is_a?(Api::Type::KeyValueAnnotations)) || property.name == "terraformLabels" -%>
+<% elsif (property.is_a?(Api::Type::KeyValueLabels)) || (property.is_a?(Api::Type::KeyValueAnnotations)) || (property.is_a?(Api::Type::KeyValueTerraformLabels)) -%>
   if v == nil {
     return v
   }

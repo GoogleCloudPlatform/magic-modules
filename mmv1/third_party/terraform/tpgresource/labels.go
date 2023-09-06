@@ -29,6 +29,27 @@ func SetTerraformLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta inte
 	return nil
 }
 
+func SetEffectiveLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	o, n := d.GetChange("terraform_labels")
+	effectiveLabels := d.Get("effective_labels").(map[string]interface{})
+
+	for k, v := range n.(map[string]interface{}) {
+		effectiveLabels[k] = v.(string)
+	}
+
+	for k := range o.(map[string]interface{}) {
+		if _, ok := n.(map[string]interface{})[k]; !ok {
+			delete(effectiveLabels, k)
+		}
+	}
+
+	if err := d.SetNew("effective_labels", effectiveLabels); err != nil {
+		return fmt.Errorf("error setting new effective_labels diff: %w", err)
+	}
+
+	return nil
+}
+
 func SetMetadataTerraformLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	v := d.Get("metadata")
 	l := v.([]interface{})
@@ -52,6 +73,35 @@ func SetMetadataTerraformLabelsDiff(_ context.Context, d *schema.ResourceDiff, m
 	raw := l[0]
 	original := raw.(map[string]interface{})
 	original["terraform_labels"] = terraformLabels
+
+	if err := d.SetNew("metadata", []interface{}{original}); err != nil {
+		return fmt.Errorf("error setting new metadata diff: %w", err)
+	}
+
+	return nil
+}
+
+func SetMetadataEffectiveLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	l := d.Get("metadata").([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+
+	o, n := d.GetChange("metadata.0.terraform_labels")
+	effectiveLabels := d.Get("metadata.0.effective_labels").(map[string]interface{})
+
+	for k, v := range n.(map[string]interface{}) {
+		effectiveLabels[k] = v.(string)
+	}
+
+	for k := range o.(map[string]interface{}) {
+		if _, ok := n.(map[string]interface{})[k]; !ok {
+			delete(effectiveLabels, k)
+		}
+	}
+
+	original := l[0].(map[string]interface{})
+	original["effective_labels"] = effectiveLabels
 
 	if err := d.SetNew("metadata", []interface{}{original}); err != nil {
 		return fmt.Errorf("error setting new metadata diff: %w", err)
