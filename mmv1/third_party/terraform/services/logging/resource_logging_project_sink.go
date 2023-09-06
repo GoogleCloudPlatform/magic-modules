@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package logging
 
 import (
@@ -160,4 +162,3 @@ func resourceLoggingProjectSinkDelete(d *schema.ResourceData, meta interface{}) 
 	d.SetId("")
 	return nil
 }
-
