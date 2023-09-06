@@ -10,9 +10,10 @@ import (
 func TestAccAlloydbBackup_update(t *testing.T) {
 	t.Parallel()
 
+	random_suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"network_name":  "tf-test-" + acctest.RandString(t, 10),
-		"random_suffix": acctest.RandString(t, 10),
+		"network_name":  "tf-test-alloydb-network" + random_suffix,
+		"random_suffix": random_suffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
