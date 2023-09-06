@@ -401,7 +401,8 @@ module Provider
     # method and group them by update url & verb.
     def properties_by_custom_update(properties)
       update_props = properties.reject do |p|
-        p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
+        p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP ||
+          p.is_a?(Api::Type::KeyValueLabels)
       end
 
       update_props.group_by do |p|

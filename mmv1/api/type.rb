@@ -766,10 +766,10 @@ module Api
     # in Map.
     class KeyValuePairs < Composite
       # Ignore writing the "effective_labels" and "effective_annotations" fields to API.
-      attr_reader :ignore_write
+      attr_accessor :ignore_write
 
       def initialize(name: nil, output: nil, api_name: nil, description: nil, min_version: nil,
-                     ignore_write: nil)
+                     ignore_write: nil, update_verb: nil, update_url: nil)
         super()
 
         @name = name
@@ -778,6 +778,8 @@ module Api
         @description = description
         @min_version = min_version
         @ignore_write = ignore_write
+        @update_verb = update_verb
+        @update_url = update_url
       end
 
       def validate
@@ -799,6 +801,10 @@ module Api
 
         raise "The field #{name} has the type KeyValueLabels, but the field name is not 'labels'!"
       end
+    end
+
+    # An array of string -> string key -> value pairs used for the "terraform_labels" field.
+    class KeyValueTerraformLabels < KeyValuePairs
     end
 
     # An array of string -> string key -> value pairs used specifically for the "annotations" field.
