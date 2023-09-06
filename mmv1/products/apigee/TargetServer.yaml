@@ -143,7 +143,7 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: 'protocol'
     immutable: true
-    default_value: :HTTP
+    default_from_api: true
     description: |
       Immutable. The protocol used by this TargetServer.
     values:
