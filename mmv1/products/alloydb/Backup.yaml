@@ -121,11 +121,11 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: 'type'
     description: 'The backup type, which suggests the trigger for the backup.'
-      values:
-        - :TYPE_UNSPECIFIED
-        - :ON_DEMAND
-        - :AUTOMATED
-        - :CONTINUOUS
+    values:
+      - :TYPE_UNSPECIFIED
+      - :ON_DEMAND
+      - :AUTOMATED
+      - :CONTINUOUS
   - !ruby/object:Api::Type::String
     name: 'description'
     description: 'User-provided description of the backup.'
@@ -182,8 +182,8 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'annotations'
     description: |
-    Annotations to allow client tools to store small amount of arbitrary data. This is distinct from labels. https://google.aip.dev/128
-    An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+      Annotations to allow client tools to store small amount of arbitrary data. This is distinct from labels. https://google.aip.dev/128
+      An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
   - !ruby/object:Api::Type::String
     name: 'sizeBytes'
     output: true
@@ -205,8 +205,9 @@ properties:
         name: 'retentionCount'
         output: true
         description: |
-        Output only. The backup's position among its backups with the same source cluster and type, by descending chronological order create time (i.e. newest first).
+          Output only. The backup's position among its backups with the same source cluster and type, by descending chronological order create time (i.e. newest first).
       - !ruby/object:Api::Type::Integer
         name: 'totalRetentionCount'
         output: true
-        description: 'Output only. The length of the quantity-based queue, specified by the backup's retention policy.'
+        description: |
+          Output only. The length of the quantity-based queue, specified by the backup's retention policy.
