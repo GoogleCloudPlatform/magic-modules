@@ -183,6 +183,8 @@ properties:
       - network
       - network_config.0.network
     default_from_api: true
+    deprecation_message: >-
+      `network` is deprecated and will be removed in a future major release. Instead, use `network_config` to define the network configuration.
     description: |
       The relative resource name of the VPC network on which the instance can be accessed. It is specified in the following form:
 
