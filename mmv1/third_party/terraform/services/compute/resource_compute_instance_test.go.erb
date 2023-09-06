@@ -2562,6 +2562,35 @@ func TestAccComputeInstance_regionBootDisk(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
+//TODO(felipegc)
+// func TestAccComputeInstance_nic_securityPolicy(t *testing.T) {
+// 	var instance compute.Instance
+// 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+// 	acctest.VcrTest(t, resource.TestCase{
+// 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+// 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+// 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+// 		Steps: []resource.TestStep{
+// 			{
+// 				Config: testAccComputeInstance_nic_securityPolicy(instanceName),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheckComputeInstanceExists(
+// 						t, "google_compute_instance.foobar", &instance),
+// 					testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(&instance),
+// 				),
+// 			},
+// 			{
+// 				ResourceName:      "google_compute_instance.foobar",
+// 				ImportState:       true,
+// 				ImportStateVerify: true,
+// 			},
+// 		},
+// 	})
+// }
+<% end -%>
+
 func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -6829,3 +6858,83 @@ resource "google_compute_disk" "debian" {
 }
 `, instance, diskName, suffix, suffix, suffix)
 }
+
+<% unless version == 'ga' -%>
+//TODO(felipegc)
+// func testAccComputeInstance_nic_securityPolicy(instance, suffix string) string {
+// 	return fmt.Sprintf(`
+// data "google_compute_image" "my_image" {
+//   family  = "debian-11"
+//   project = "debian-cloud"
+// }
+
+// # First activate advanced network DDoS protection for the desired region
+// resource "google_compute_region_security_policy" "policyddosprotection" {
+//   region      = "asia-southeast1"
+//   name        = "tf-test-policyddosprotection-%s"
+//   description = "region security policy for instance"
+//   type        = "CLOUD_ARMOR_NETWORK"
+//   ddos_protection_config {
+//     ddos_protection = "ADVANCED_PREVIEW"
+//   }
+// }
+
+// resource "google_compute_network_edge_security_service" "edge_sec_service" {
+//   region          = "asia-southeast1"
+//   name            = "tf-test-edgesecservice-%s"
+//   description     = "My basic resource using security policy"
+//   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
+// }
+
+// resource "google_compute_region_security_policy" "policyforinstance" {
+//   region      = "asia-southeast1"
+//   name        = "%s"
+//   description = "region security policy to set to instance"
+//   type        = "CLOUD_ARMOR_NETWORK"
+//   depends_on  = [google_compute_network_edge_security_service.edge_sec_service]
+// }
+
+// resource "google_compute_network" "custom-test" {
+//   name                    = "tf-test-network-%s"
+//   auto_create_subnetworks = false
+// }
+
+// resource "google_compute_subnetwork" "subnetwork-ipv6" {
+//   region                     = "asia-southeast1"
+//   name                       = "tf-test-subnet-%s"
+//   ip_cidr_range              = "10.1.2.0/24"
+//   private_ipv6_google_access = "DISABLE_GOOGLE_ACCESS"
+//   purpose                    = "PRIVATE"
+//   stack_type                 = "IPV4_ONLY"
+//   network                    = google_compute_network.custom-test.id
+// }
+
+// resource "google_compute_instance" "foobar" {
+//   name         = "%s"
+//   machine_type = "e2-medium"
+//   zone         = "us-west2-a"
+//   tags         = ["foo", "bar"]
+
+//   boot_disk {
+//     initialize_params {
+//       image = data.google_compute_image.my_image.self_link
+//     }
+//   }
+
+//   network_interface {
+//     subnetwork = google_compute_subnetwork.subnetwork-ipv6.name
+//     stack_type = "IPV4_IPV6"
+//     ipv6_access_config {
+//       network_tier = "PREMIUM"
+//       public_ptr_domain_name = "%s.gcp.tfacc.hashicorptest.com."
+//     }
+//   }
+
+//   metadata = {
+//     foo = "bar"
+//   }
+// }
+// `, instance, instance, ip, instance, record)
+// }
+
+<% end -%>

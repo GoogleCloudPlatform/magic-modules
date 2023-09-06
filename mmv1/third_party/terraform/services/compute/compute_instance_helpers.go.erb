@@ -322,6 +322,10 @@ func flattenIpv6AccessConfigs(ipv6AccessConfigs []*compute.AccessConfig) []map[s
 		flattened[i]["external_ipv6"] = ac.ExternalIpv6
 		flattened[i]["external_ipv6_prefix_length"] = strconv.FormatInt(ac.ExternalIpv6PrefixLength, 10)
 		flattened[i]["name"] = ac.Name
+		<% unless version == 'ga' -%>
+		// TODO(felipegc)
+		flattened[i]["security_policy"] = ac.SecurityPolicy
+		<% end -%>
 	}
 	return flattened
 }
@@ -370,6 +374,18 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 				return nil, "", "", "", err
 			}
 			flattened[i]["network_attachment"] = networkAttachment
+		}
+		<% end -%>
+
+		<% unless version == 'ga' -%>
+		// TODO(felipegc)
+		// the security_policy for a network_interface is found in one of its accessConfigs.
+		if len(iface.AccessConfigs) > 0 && iface.AccessConfigs[0].SecurityPolicy != "" {
+			flattened[i]["security_policy"] = iface.AccessConfigs[0].SecurityPolicy
+		} else if len(iface.Ipv6AccessConfigs) > 0 && iface.Ipv6AccessConfigs[0].SecurityPolicy != "" {
+			flattened[i]["security_policy"] = iface.Ipv6AccessConfigs[0].SecurityPolicy
+		} else {
+			flattened[i]["security_policy"] = ""
 		}
 		<% end -%>
 	}
@@ -421,6 +437,12 @@ func expandIpv6AccessConfigs(configs []interface{}) []*compute.AccessConfig {
 				iacs[i].Name = name.(string)
 			}
 			iacs[i].Type = "DIRECT_IPV6" // Currently only type supported
+			<% unless version == 'ga' -%>
+			// TODO(felipegc)
+			if securityPolicy, ok := data["security_policy"]; ok && securityPolicy != "" {
+				iacs[i].SecurityPolicy = securityPolicy.(string)
+			}
+			<% end -%>
 		}
 	}
 	return iacs

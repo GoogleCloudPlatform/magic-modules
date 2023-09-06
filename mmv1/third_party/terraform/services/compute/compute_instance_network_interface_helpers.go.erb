@@ -9,6 +9,11 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+<% unless version == 'ga' -%>
+	// TODO(felipegc)
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+<% end -%>
+
 <% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
 <% else -%>
@@ -129,6 +134,29 @@ func computeInstanceMapSecurityPoliciesForCreate(instance *compute.Instance) map
 	return securityPolicies
 }
 
+func computeInstanceMapSecurityPoliciesForCreate2(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string][]string, error) {
+	configs := d.Get("network_interface").([]interface{})
+	securityPolicies := make(map[string][]string)
+	for i, raw := range configs {
+		data := raw.(map[string]interface{})
+		ac := expandAccessConfigs(data["access_config"].([]interface{}))
+		ipv6Ac := expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{}))
+		secPolicy := data["security_policy"].(string)
+
+		if secPolicy != "" && len(ac) == 0 && len(ipv6Ac) == 0 {
+			return securityPolicies, fmt.Errorf("At least one access config must exist to set the security policy")
+		}
+
+		if secPolicy != "" {
+			nicName := fmt.Sprintf("nic%d", i)
+			securityPolicies[secPolicy] = append(securityPolicies[secPolicy], nicName)
+		}
+	}
+	log.Printf("[DEBUG] FELIPEGC OLHA O MAP DE SEC_POLICY X INTERFACE: %#v", securityPolicies)
+
+	return securityPolicies, nil
+}
+
 func computeInstanceMapSecurityPoliciesForUpdate(instance *compute.Instance, d *schema.ResourceData) (map[string][]string, error) {
 	securityPolicies := make(map[string][]string)
 	for i := 0; i < len(instance.NetworkInterfaces); i++ {
@@ -148,7 +176,7 @@ func computeInstanceMapSecurityPoliciesForUpdate(instance *compute.Instance, d *
 			log.Printf("[DEBUG] FELIPEGC OLHA O ACCESS CONFIG SEC POLICY HAS CHANGED: %#v", securityPolicyHasChanged)
 			if securityPolicyHasChanged && instance.Status != "RUNNING" {
 				log.Print("[DEBUG] FELIPEGC LANCA EXCEPTION PQ PRECISA ESTA RODANDO")
-				return securityPolicies, fmt.Errorf("to update security policy to the instance, the current status must be \"RUNNING\"")
+				return securityPolicies, fmt.Errorf("Error to update security policy to the instance, the current status must be \"RUNNING\"")
 			}
 
 			// Security policy can only exist if access config is present.
