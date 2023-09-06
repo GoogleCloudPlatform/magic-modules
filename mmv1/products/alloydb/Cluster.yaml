@@ -191,7 +191,7 @@ properties:
       "projects/{projectNumber}/global/networks/{network_id}".
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - !ruby/object:Api::Type::NestedObject
-    name: 'networkConfig'   
+    name: 'networkConfig'
     description: |
       Metadata related to network configuration.
     default_from_api: true
@@ -202,13 +202,13 @@ properties:
           - network
           - network_config.0.network
         description: |
-          The relative resource name of the VPC network on which the instance can be accessed. It is specified in the following form: 
+          The relative resource name of the VPC network on which the instance can be accessed. It is specified in the following form:
           "projects/{projectNumber}/global/networks/{network_id}".
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
       - !ruby/object:Api::Type::String
         name: allocatedIpRange
         description: |
-          Name of the allocated IP range for the private IP AlloyDB cluster, for example: "google-managed-services-default". 
+          Name of the allocated IP range for the private IP AlloyDB cluster, for example: "google-managed-services-default".
           If set, the instance IPs for this cluster will be created in the allocated range.
   - !ruby/object:Api::Type::String
     name: 'displayName'
