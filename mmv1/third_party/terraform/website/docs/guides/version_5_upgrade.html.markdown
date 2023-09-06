@@ -334,7 +334,7 @@ Previously, the default value for `rule.rate_limit_options.encorce_on_key` is "A
 
 ## Resource: `google_logging_metric`
 
-### Additional fields are now required metrics with `value_type = "DISTRIBUTION"`
+### Additional `bucket_options` subfields are now properly required
 
 For log-based metrics with `value_type = "DISTRIBUTION"`, additional fields are now required depending on the `bucket_options` block:
 
