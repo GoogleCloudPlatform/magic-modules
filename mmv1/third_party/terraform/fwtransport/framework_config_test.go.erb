@@ -409,8 +409,25 @@ func TestFrameworkProvider_LoadAndValidateFramework_scopes(t *testing.T) {
 		SetAsUnknown              bool
 		ExpectError               bool
 	}{
+		"scopes are set in the provider config as a list": {
+			ScopesValue:               []string{"fizz", "buzz", "baz"},
+			ExpectedDataModelValue:    []string{"fizz", "buzz", "baz"},
+			ExpectedConfigStructValue: []string{"fizz", "buzz", "baz"},
+		},
 		"scopes can be left unset in the provider config without any issues, and a default value is used": {
-			ScopesValue:               nil,
+			SetAsNull:                 true,
+			ExpectedDataModelValue:    transport_tpg.DefaultClientScopes,
+			ExpectedConfigStructValue: transport_tpg.DefaultClientScopes,
+		},
+		// Handling empty values in config
+		"scopes set as an empty list the field is treated as if it's unset and a default value is used without errors": {
+			ScopesValue:               []string{},
+			ExpectedDataModelValue:    transport_tpg.DefaultClientScopes,
+			ExpectedConfigStructValue: transport_tpg.DefaultClientScopes,
+		},
+		// Handling unknown values
+		"when scopes is an unknown value, the provider treats it as if it's unset and a default value is used without errors (align to SDK behaviour)": {
+			SetAsUnknown:              true,
 			ExpectedDataModelValue:    transport_tpg.DefaultClientScopes,
 			ExpectedConfigStructValue: transport_tpg.DefaultClientScopes,
 		},
