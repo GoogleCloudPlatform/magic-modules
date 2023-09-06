@@ -20,7 +20,7 @@ description: |
   The main pipeline entity and all the necessary metadata for launching and managing linked jobs.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-      'Official Documentation': 'https://cloud.google.com/dataflow'
+    'Official Documentation': 'https://cloud.google.com/dataflow'
   api: 'https://cloud.google.com/dataflow/docs/reference/data-pipelines/rest/v1/projects.locations.pipelines'
 id_format: projects/{{project}}/locations/{{region}}/pipelines/{{name}}
 import_format:
@@ -29,7 +29,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'data_pipeline_pipeline'
     primary_resource_name:
-     'fmt.Sprintf("tf-test-my-pipeline%s", context["random_suffix"])'
+      'fmt.Sprintf("tf-test-my-pipeline%s", context["random_suffix"])'
     primary_resource_id: 'primary'
     vars:
       pipeline_name: 'my-pipeline'
