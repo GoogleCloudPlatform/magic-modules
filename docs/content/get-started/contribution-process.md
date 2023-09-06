@@ -28,23 +28,8 @@ aliases:
    - [Make a breaking change]({{< ref "/develop/make-a-breaking-change" >}})
 1. [Generate the providers]({{< ref "/get-started/generate-providers" >}}) that include your change.
 1. [Run provider tests locally]({{< ref "/develop/run-tests" >}}) that are relevant to the change you made
-1. [Create a pull request (PR)](https://docs.github.com/en/get-started/quickstart/github-flow#create-a-pull-request)
-   - A reviewer will be automatically assigned for your PR.
-   - Tests for community contributors will only run after approval from a reviewer
-   - After tests start, downstream diff generation takes about 10 minutes; VCR tests can take up to 2 hours.
-   - Make sure your PR body includes the test `Fixes GITHUB_ISSUE_LINK.` once per issue resolved by your PR. Replace `GITHUB_ISSUE_LINK` with a link to a GitHub issue from the [provider issue tracker](https://github.com/hashicorp/terraform-provider-google/issues).
-
-## Code review
-
-{{< hint info >}}
-**TIP:** Speeding up review:
-1. Make sure your PR only includes one self-contained change. For example, if you are adding two resources, create one PR for each resource.
-1. [Run provider tests locally]({{< ref "/develop/run-tests" >}}) that are relevant to the change you made
-1. [Self-review your PR]({{< ref "/contribute/review-pr" >}}") or ask someone you know to review
-   - Try to resolve test failures where possible, and ask for help if you get stuck.
-{{< /hint >}}
-
-If your assigned reviewer does not respond to changes on a pull request within two US business days, ping them on the pull request.
+1. [Create a pull request (PR)]({{< ref "/contribute/create-pr" >}})
+1. Make changes in response to [code review]({{< ref "/contribute/create-pr#code-review" >}})
 
 ## After your change is merged
 
