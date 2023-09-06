@@ -108,7 +108,10 @@ properties:
       - !ruby/object:Api::Type::Boolean
         name: enablePrivateServiceConnect
         description: If set to true, the IndexEndpoint is created without private service access.
+        immutable: true
+        required: true
       - !ruby/object:Api::Type::Array
         name: projectAllowlist
         description: A list of Projects from which the forwarding rule will target the service attachment.
         item_type: Api::Type::String
+        immutable: true
