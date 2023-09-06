@@ -217,6 +217,10 @@ module Api
       # public ca external account keys
       attr_reader :skip_read
 
+      # Set to true for resources that wish to disable automatic generation of default provider
+      # value customdiff functions
+      attr_reader :skip_default_cdiff
+
       # This enables resources that get their project via a reference to a different resource
       # instead of a project field to use User Project Overrides
       attr_reader :supports_indirect_user_project_override
@@ -322,6 +326,7 @@ module Api
       check :migrate_state, type: String
       check :skip_delete, type: :boolean, default: false
       check :skip_read, type: :boolean, default: false
+      check :skip_default_cdiff, type: :boolean, default: false
       check :supports_indirect_user_project_override, type: :boolean, default: false
       check :legacy_long_form_project, type: :boolean, default: false
       check :read_error_transform, type: String
@@ -340,6 +345,10 @@ module Api
     # excluded. This is used for PropertyOverride validation
     def all_properties
       ((@properties || []) + (@parameters || []))
+    end
+
+    def properties_with_excluded
+      @properties || []
     end
 
     def properties
@@ -437,6 +446,34 @@ module Api
 
     def decoder?
       !@transport&.decoder.nil?
+    end
+
+    def add_labels_related_fields(props)
+      props.each do |p|
+        if p.is_a? Api::Type::KeyValueLabels
+          props << build_effective_labels_field('labels', p.field_min_version)
+        elsif p.is_a? Api::Type::KeyValueAnnotations
+          props << build_effective_labels_field('annotations', p.field_min_version)
+        elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
+          p.properties = add_labels_related_fields(p.all_properties)
+        end
+      end
+      props
+    end
+
+    def build_effective_labels_field(name, min_version)
+      description = "All of #{name} (key/value pairs)\
+ present on the resource in GCP, including the #{name} configured through Terraform,\
+ other clients and services."
+
+      Api::Type::KeyValuePairs.new(
+        name: "effective_#{name}",
+        output: true,
+        api_name: name,
+        description:,
+        min_version:,
+        ignore_write: true
+      )
     end
 
     # ====================

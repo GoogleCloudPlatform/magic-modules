@@ -65,6 +65,7 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
+    ignore_read: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
