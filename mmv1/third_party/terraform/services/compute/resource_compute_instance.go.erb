@@ -356,6 +356,13 @@ func ResourceComputeInstance() *schema.Resource {
 										Optional:    true,
 										Description: `The DNS domain name for the public PTR record.`,
 									},
+									<% unless version == 'ga' -%>
+									"security_policy": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Description: `A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.`,
+									},
+									<% end -%>
 								},
 							},
 						},
@@ -1291,6 +1298,14 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		return waitErr
 	}
 
+	<% unless version == 'ga' -%>
+	securityPolicies := computeInstanceMapSecurityPoliciesForCreate(instance)
+	err = computeInstanceAddSecurityPolicy(d, config, securityPolicies, project, z, userAgent, instance.Name)
+	if err != nil {
+		return fmt.Errorf("Error creating instance while setting the security policies: %s", err)
+	}
+	<% end -%>
+	
 	err = waitUntilInstanceHasDesiredStatus(config, d)
 	if err != nil {
 		return fmt.Errorf("Error waiting for status: %s", err)
@@ -1733,6 +1748,13 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Instance had unexpected number of network interfaces: %d", len(instance.NetworkInterfaces))
 	}
 
+	<% unless version == 'ga' -%>	
+	securityPolicies, err := computeInstanceMapSecurityPoliciesForUpdate(instance, d)
+	if err != nil {
+		return err
+	}
+	<% end -%>
+
 	var updatesToNIWhileStopped []func(inst *compute.Instance) error
 	for i := 0; i < len(networkInterfaces); i++ {
 		prefix := fmt.Sprintf("network_interface.%d", i)
@@ -1865,6 +1887,14 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			updatesToNIWhileStopped = append(updatesToNIWhileStopped, updateCall)
 		}
 	}
+
+	<% unless version == 'ga' -%>	
+	// The access config must be updated only if the machine is still RUNNING and after each access_config for each interface has been re-created.
+	err = computeInstanceAddSecurityPolicy(d, config, securityPolicies, project, zone, userAgent, instance.Name)
+	if err != nil {
+		return fmt.Errorf("Error updating instance while setting the security policies: %s", err)
+	}
+	<% end -%>
 
 	if d.HasChange("attached_disk") {
 		o, n := d.GetChange("attached_disk")

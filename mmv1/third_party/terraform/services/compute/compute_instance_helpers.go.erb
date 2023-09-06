@@ -298,6 +298,9 @@ func flattenAccessConfigs(accessConfigs []*compute.AccessConfig) ([]map[string]i
 		flattened[i] = map[string]interface{}{
 			"nat_ip":       ac.NatIP,
 			"network_tier": ac.NetworkTier,
+			<% unless version == 'ga' -%>
+			"security_policy": ac.SecurityPolicy,
+			<% end -%>
 		}
 		if ac.SetPublicPtr {
 			flattened[i]["public_ptr_domain_name"] = ac.PublicPtrDomainName
@@ -386,6 +389,9 @@ func expandAccessConfigs(configs []interface{}) []*compute.AccessConfig {
 				acs[i].SetPublicPtr = true
 				acs[i].PublicPtrDomainName = ptr.(string)
 			}
+			<% unless version == 'ga' -%>
+			acs[i].SecurityPolicy = data["security_policy"].(string)
+			<% end -%>
 		}
 	}
 	return acs
