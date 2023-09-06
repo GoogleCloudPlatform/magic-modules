@@ -99,11 +99,15 @@ properties:
       [Format](https://cloud.google.com/compute/docs/reference/rest/v1/networks/insert): `projects/{project}/global/networks/{network}`.
       Where `{project}` is a project number, as in `12345`, and `{network}` is network name.
     immutable: true
+    conflicts:
+      - privateServiceConnectConfig
   - !ruby/object:Api::Type::NestedObject
     name: privateServiceConnectConfig
     immutable: true
     description: |-
       Optional. Configuration for private service connect. `network` and `privateServiceConnectConfig` are mutually exclusive.
+    conflicts:
+      - network
     properties:
       - !ruby/object:Api::Type::Boolean
         name: enablePrivateServiceConnect
