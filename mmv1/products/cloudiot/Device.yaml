@@ -24,6 +24,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/iot/docs/'
   api: 'https://cloud.google.com/iot/docs/reference/cloudiot/rest/'
 import_format: ['{{%registry}}/devices/{{name}}']
+deprecation_message: >-
+  `google_cloudiot_device` is deprecated in the API. This resource will be removed in the next major release of the provider.
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudiot_device_basic'
