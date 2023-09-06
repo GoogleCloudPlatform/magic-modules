@@ -113,7 +113,7 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: |
-    User-defined labels for the alloydb backup. An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+      User-defined labels for the alloydb backup. An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
   - !ruby/object:Api::Type::String
     name: 'state'
     output: true
