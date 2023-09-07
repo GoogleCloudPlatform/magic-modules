@@ -67,8 +67,6 @@ examples:
       instance_name: 'private-cache'
       address_name: 'address'
       network_name: 'redis-test-network'
-    test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "redis-private-service")'
   - !ruby/object:Provider::Terraform::Examples
     name: 'redis_instance_mrr'
     primary_resource_id: 'cache'
