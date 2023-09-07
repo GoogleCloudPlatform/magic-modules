@@ -22,6 +22,12 @@ resource "google_project_service" "compute" {
   depends_on = [google_project_service.servicenetworking]
 }
 
+resource "google_project_service" "apigeeconnect" {
+  project = google_project.project.project_id
+  service = "apigeeconnect.googleapis.com"
+  depends_on = [google_project_service.apigee]
+}
+
 resource "google_compute_network" "apigee_network" {
   name       = "apigee-network"
   project    = google_project.project.project_id
