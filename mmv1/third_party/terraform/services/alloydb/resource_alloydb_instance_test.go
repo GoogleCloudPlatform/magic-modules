@@ -435,30 +435,30 @@ func TestAccAlloydbInstance_clientConnectionConfig_sslModeDefault(t *testing.T) 
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
 			},
-			// {
-			// 	Config: testAccAlloydbInstance_defaultClientConnectionConfig(context),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		resource.TestCheckResourceAttr("google_alloydb_instance.default", "client_connection_config.0.ssl_config.0.ssl_mode", "ENCRYPTED_ONLY"),
-			// 	),
-			// },
-			// {
-			// 	ResourceName:      "google_alloydb_instance.default",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// 	ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
-			// },
-			// {
-			// 	Config: testAccAlloydbInstance_noClientConnectionConfig(context),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		resource.TestCheckResourceAttr("google_alloydb_instance.default", "client_connection_config.0.ssl_config.0.ssl_mode", "ENCRYPTED_ONLY"),
-			// 	),
-			// },
-			// {
-			// 	ResourceName:      "google_alloydb_instance.default",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// 	ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
-			// },
+			{
+				Config: testAccAlloydbInstance_defaultClientConnectionConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "client_connection_config.0.ssl_config.0.ssl_mode", "ENCRYPTED_ONLY"),
+				),
+			},
+			{
+				ResourceName:      "google_alloydb_instance.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
+			},
+			{
+				Config: testAccAlloydbInstance_noClientConnectionConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "client_connection_config.0.ssl_config.0.ssl_mode", "ENCRYPTED_ONLY"),
+				),
+			},
+			{
+				ResourceName:      "google_alloydb_instance.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
+			},
 			{
 				Config: testAccAlloydbInstance_alloydbInstanceBasicExample(context),
 			},
@@ -466,48 +466,6 @@ func TestAccAlloydbInstance_clientConnectionConfig_sslModeDefault(t *testing.T) 
 	})
 }
 
-// func TestAccAlloydbInstance_clientConnectionConfig_noChangeIfDefaultIsSet(t *testing.T) {
-// 	t.Parallel()
-//
-// 	context := map[string]interface{}{
-// 		"random_suffix": acctest.RandString(t, 10),
-// 		"network_name":  acctest.BootstrapSharedTestNetwork(t, "alloydbinstance-sslmodefaultset"),
-// 	}
-//
-// 	acctest.VcrTest(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-// 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-// 		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
-// 		Steps: []resource.TestStep{
-// 			{
-// 				Config: testAccAlloydbInstance_noClientConnectionConfig(context),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "client_connection_config.0.ssl_config.0.ssl_mode", "ENCRYPTED_ONLY"),
-// 				),
-// 			},
-// 			{
-// 				ResourceName:      "google_alloydb_instance.default",
-// 				ImportState:       true,
-// 				ImportStateVerify: true,
-// 			},
-// 			{
-// 				Config: testAccAlloydbInstance_defaultClientConnectionConfig(context),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "client_connection_config.0.ssl_config.0.ssl_mode", "ENCRYPTED_ONLY"),
-// 				),
-// 			},
-// 			{
-// 				ResourceName:      "google_alloydb_instance.default",
-// 				ImportState:       true,
-// 				ImportStateVerify: true,
-// 			},
-// 			{
-// 				Config: testAccAlloydbInstance_alloydbInstanceBasicExample(context),
-// 			},
-// 		},
-// 	})
-// }
-//
 func TestAccAlloydbInstance_clientConnectionConfig_noChangeIfRemoved(t *testing.T) {
 	t.Parallel()
 

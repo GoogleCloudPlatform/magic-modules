@@ -191,8 +191,6 @@ properties:
    properties:
      - !ruby/object:Api::Type::Boolean
        name: requireConnectors
-       # TODO(nancyhong): remove default value here. just here to check that this actually works??
-       # default_value: false
        description: |
          Configuration to enforce connectors only (ex: AuthProxy) connections to the database.
      - !ruby/object:Api::Type::NestedObject
@@ -204,7 +202,6 @@ properties:
          - !ruby/object:Api::Type::Enum
            name: 'sslMode'
            default_from_api: true
-           # default_value: :ENCRYPTED_ONLY
            description: 'SSL mode. Specifies client-server SSL/TLS connection behavior.'
            values:
                 - :ENCRYPTED_ONLY
