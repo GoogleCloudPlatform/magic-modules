@@ -23,7 +23,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	if original["writeMetadata"] == nil {
 		transformed["write_metadata"] = false
 	} else {
-		transformed["write_metadata"] =  original["writeMetadata"]
+		transformed["write_metadata"] = original["writeMetadata"]
 	}
 
 	return []interface{}{transformed}
