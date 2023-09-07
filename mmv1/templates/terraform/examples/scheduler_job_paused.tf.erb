@@ -15,4 +15,7 @@ resource "google_cloud_scheduler_job" "job" {
     uri         = "https://example.com/ping"
     body        = base64encode("{\"foo\":\"bar\"}")
   }
+  headers = {
+    "Content-Type" = "application/json"
+  }
 }
