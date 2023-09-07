@@ -432,3 +432,9 @@ resource "google_project_iam_binding" "gcs-bucket-writer" {
 ### resource `google_cloudiot_registry_iam_*` is now removed
 
 ### datasource `google_cloudiot_registry_iam_policy` is now removed
+
+## Resource: `google_service_networking_connection`
+
+### `Create` method is used to create the resource
+
+Previously, Patch instead of Create is used to create the resource, because an error message is returned when creating multiple SQL instances after creating `google_service_networking_connection` with Create method. See more details in https://issuetracker.google.com/issues/131908322. Now the issue has been fixed. The initial workaround of using Patch is no longer needed. Create method is used to create the resource.
