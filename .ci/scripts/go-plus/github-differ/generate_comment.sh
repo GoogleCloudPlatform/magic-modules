@@ -63,7 +63,7 @@ pushd $MM_LOCAL_PATH/tools/diff-processor
 cp -r $TPG_LOCAL_PATH old/
 cp -r $TPG_LOCAL_PATH new/
 make build OLD_REF=$OLD_BRANCH NEW_REF=$NEW_BRANCH
-TPG_BREAKING="$(bin/diff-processor)"
+TPG_BREAKING="$(bin/diff-processor breaking-changes)"
 retVal=$?
 if [ $retVal -ne 0 ]; then
     TPG_BREAKING=""
@@ -74,7 +74,7 @@ rm -rf ./old/ ./new/ ./bin/
 cp -r $TPGB_LOCAL_PATH old/
 cp -r $TPGB_LOCAL_PATH new/
 make build OLD_REF=$OLD_BRANCH NEW_REF=$NEW_BRANCH
-TPGB_BREAKING="$(bin/diff-processor)"
+TPGB_BREAKING="$(bin/diff-processor breaking-changes)"
 retVal=$?
 if [ $retVal -ne 0 ]; then
     TPGB_BREAKING=""
