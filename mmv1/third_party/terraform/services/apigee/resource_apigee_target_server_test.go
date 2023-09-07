@@ -215,6 +215,7 @@ resource "google_apigee_target_server" "apigee_target_server" {
 
 func TestAccApigeeTargetServer_apigeeTargetServerTest_clientAuthEnabled(t *testing.T) {
 	t.Parallel()
+        // Skipping VCR tests; google_apigee_keystores_aliases_key_cert_file resource uses multipart boundary which by default is random. Currently this is incompatible with VCR.
 	acctest.SkipIfVcr(t)
 	context := map[string]interface{}{
 		"org_id":          envvar.GetTestOrgFromEnv(t),
