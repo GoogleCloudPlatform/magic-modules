@@ -37,6 +37,7 @@ examples:
       git_repository_name: 'my/repository'
       dataform_repository_name: 'dataform_repository'
       data: secret-data
+      secret_name: my_secret
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
