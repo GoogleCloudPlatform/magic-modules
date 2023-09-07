@@ -126,7 +126,7 @@ resource "google_eventarc_trigger" "primary" {
 		}
 	}
 	service_account = "%{service_account}"
-	event_data_content_type = "application/json"
+
     channel = "projects/${data.google_project.test_project.project_id}/locations/%{region}/channels/${google_eventarc_channel.test_channel.name}"
 
     depends_on = [google_cloud_run_service.default,google_eventarc_channel.test_channel]
@@ -161,7 +161,7 @@ func testAccCheckEventarcChannelTriggerDestroyProducer(t *testing.T) func(s *ter
 				Uid:                  dcl.StringOrNil(rs.Primary.Attributes["uid"]),
 				UpdateTime:           dcl.StringOrNil(rs.Primary.Attributes["update_time"]),
 				Channel:              dcl.StringOrNil(rs.Primary.Attributes["channel"]),
-				EventDataContentType: dcl.String(rs.Primary.Attributes["event_data_content_type"]),
+				EventDataContentType: dcl.StringOrNil(rs.Primary.Attributes["event_data_content_type"]),
 			}
 
 			client := transport_tpg.NewDCLEventarcClient(config, config.UserAgent, billingProject, 0)
