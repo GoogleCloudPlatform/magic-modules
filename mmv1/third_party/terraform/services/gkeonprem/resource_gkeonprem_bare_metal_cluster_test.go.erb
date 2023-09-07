@@ -394,10 +394,10 @@ func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateManualLb(context map
       }
     }
     binary_authorization {
-      evaluation_mode = "DISABLED"
+      evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
     }
     upgrade_policy {
-      policy = "SERIAL"
+      policy = "CONCURRENT"
     }
   }
 `, context)
