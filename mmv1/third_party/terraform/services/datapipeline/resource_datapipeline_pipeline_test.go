@@ -1,4 +1,4 @@
-package google
+package datapipeline_test
 
 import (
 	"fmt"
@@ -60,10 +60,10 @@ func TestAccDataPipelinePipeline_basicLaunchTemplate(t *testing.T) {
 	t.Parallel()
 
 	var generatedId string
-	suffix := RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	suffix := acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataPipelinePipelineDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -96,10 +96,10 @@ func TestAccDataPipelinePipeline_basicFlexTemplate(t *testing.T) {
 	t.Parallel()
 
 	var generatedId string
-	suffix := RandString(t, 10)
-	VcrTest(t, resource.TestCase{
+	suffix := acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataPipelinePipelineDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
