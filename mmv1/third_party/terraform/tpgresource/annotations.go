@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func SetEffectiveAnnotationsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+func SetAnnotationsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	o, n := d.GetChange("annotations")
 	effectiveAnnotations := d.Get("effective_annotations").(map[string]interface{})
 
@@ -28,7 +28,7 @@ func SetEffectiveAnnotationsDiff(_ context.Context, d *schema.ResourceDiff, meta
 	return nil
 }
 
-func SetMetadataEffectiveAnnotationsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+func SetMetadataAnnotationsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	l := d.Get("metadata").([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil

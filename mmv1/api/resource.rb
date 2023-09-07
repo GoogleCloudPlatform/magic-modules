@@ -472,14 +472,9 @@ module Api
 
       @custom_diff ||= []
       if parent.nil?
-        @custom_diff.append(
-          'tpgresource.SetTerraformLabelsDiff', 'tpgresource.SetEffectiveLabelsDiff'
-        )
+        @custom_diff.append('tpgresource.SetLabelsDiff')
       elsif parent == 'metadata'
-        @custom_diff.append(
-          'tpgresource.SetMetadataTerraformLabelsDiff',
-          'tpgresource.SetMetadataEffectiveLabelsDiff'
-        )
+        @custom_diff.append('tpgresource.SetMetadataLabelsDiff')
       end
 
       props << build_terraform_labels_field('labels', labels.field_min_version)
@@ -495,9 +490,9 @@ module Api
 
       @custom_diff ||= []
       if parent.nil?
-        @custom_diff.append('tpgresource.SetEffectiveAnnotationsDiff')
+        @custom_diff.append('tpgresource.SetAnnotationsDiff')
       elsif parent == 'metadata'
-        @custom_diff.append('tpgresource.SetMetadataEffectiveAnnotationsDiff')
+        @custom_diff.append('tpgresource.SetMetadataAnnotationsDiff')
       end
 
       props << build_effective_labels_field(

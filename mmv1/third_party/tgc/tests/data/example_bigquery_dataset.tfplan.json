@@ -54,9 +54,9 @@
           "default_table_expiration_ms": 3600000,
           "delete_contents_on_destroy": false,
           "description": null,
-					"effective_labels": {
-						"env": "dev"
-					},
+          "effective_labels": {
+            "env": "dev"
+          },
           "friendly_name": null,
           "labels": {
             "env": "dev"
