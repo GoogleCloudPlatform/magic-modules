@@ -16,6 +16,8 @@ name: 'ReportConfig'
 base_url: projects/{{project}}/locations/{{location}}/reportConfigs
 create_url: projects/{{project}}/locations/{{location}}/reportConfigs
 self_link: projects/{{project}}/locations/{{location}}/reportConfigs/{{name}}
+update_verb: :PATCH
+update_mask: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/storage/docs/insights/using-storage-insights'
@@ -116,6 +118,10 @@ properties:
     name: 'objectMetadataReportOptions'
     description: |
       Options for including metadata in an inventory report.
+    update_mask_fields:
+      - 'objectMetadataReportOptions.metadataFields'
+      - 'objectMetadataReportOptions.storageDestinationOptions.bucket'
+      - 'objectMetadataReportOptions.storageDestinationOptions.destinationPath'
     properties:
       - !ruby/object:Api::Type::Array
         name: 'metadataFields'
@@ -125,13 +131,12 @@ properties:
         item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: 'storageFilters'
-        required: true
         properties:
           - !ruby/object:Api::Type::String
             name: 'bucket'
             description: |
               The filter to use when specifying which bucket to generate inventory reports for.
-            required: true
+            immutable: true
       - !ruby/object:Api::Type::NestedObject
         name: 'storageDestinationOptions'
         description: |
