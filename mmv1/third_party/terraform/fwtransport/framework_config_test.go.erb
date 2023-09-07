@@ -197,7 +197,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_credentials(t *testing.T) {
 				},
 				ExpectedDataModelValue: types.StringValue(transport_tpg.TestFakeCredentialsPath),
 			},
-			"configuring credentials as a path to a non-existant file results in an error": {
+			"configuring credentials as a path to a non-existent file results in an error": {
 				ConfigValues: fwmodels.ProviderModel{
 					Credentials: types.StringValue(pathToMissingFile),
 				},

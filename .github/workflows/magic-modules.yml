@@ -1,4 +1,4 @@
-name: pre-build-validation-on-pr
+name: magic-modules
 
 permissions: read-all
 
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: repo
           fetch-depth: 0
@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: repo
       - name: Set up Ruby
@@ -51,18 +51,4 @@ jobs:
         run: |
           cd repo/mmv1
           bundle exec rake test
-  hugo-build:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true  # Fetch Hugo themes (true OR recursive)
-          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
-      - name: Setup Hugo
-        uses: peaceiris/actions-hugo@16361eb4acea8698b220b76c0d4e84e1fd22c61d  # v2.6.0
-        with:
-          hugo-version: '0.115.0'
-          extended: true
-      - name: Build
-        working-directory: ./docs
-        run: hugo --minify
+

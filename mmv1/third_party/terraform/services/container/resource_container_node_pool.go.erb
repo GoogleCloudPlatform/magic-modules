@@ -1266,10 +1266,10 @@ func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
 		for _, raw := range pod_network_configs {
 			data := raw.(map[string]interface{})
 			podnetworkConfig := &container.AdditionalPodNetworkConfig{
-				Subnetwork:        data["network"].(string),
-				SecondaryPodRange: data["subnetwork"].(string),
+				Subnetwork:        data["subnetwork"].(string),
+				SecondaryPodRange: data["secondary_pod_range"].(string),
 				MaxPodsPerNode:    &container.MaxPodsConstraint{
-					MaxPodsPerNode: data["max_pods_per_node"].(int64),
+					MaxPodsPerNode: int64(data["max_pods_per_node"].(int)),
 				},
 			}
 			podNetworkConfigs = append(podNetworkConfigs, podnetworkConfig)
