@@ -394,11 +394,13 @@ module Api
     # At Create, they have no value but they can just be read in anyways, and after a Read
     # they will need to be set in every Update.
     def settable_properties
-      settable_properties = all_user_properties.reject do |v|
-        v.output && !v.is_a?(Api::Type::Fingerprint) && !v.is_a?(Api::Type::KeyValueTerraformLabels)
+      props = all_user_properties.reject do |v|
+        v.output && !v.is_a?(Api::Type::Fingerprint) && !v.is_a?(Api::Type::KeyValueEffectiveLabels)
       end
-      settable_properties.reject(&:url_param_only)
-                         .reject { |v| v.is_a?(Api::Type::KeyValueLabels) }
+      props = props.reject(&:url_param_only)
+      props.reject do |v|
+        v.is_a?(Api::Type::KeyValueLabels) || v.is_a?(Api::Type::KeyValueAnnotations)
+      end
     end
 
     # Properties that will be returned in the API body
@@ -454,21 +456,9 @@ module Api
     def add_labels_related_fields(props, parent)
       props.each do |p|
         if p.is_a? Api::Type::KeyValueLabels
-          # The terraform_labels field is used to write to API, instead of the labels field.
-          p.ignore_write = true
-
-          @custom_diff ||= []
-          if parent.nil?
-            @custom_diff.append('tpgresource.SetTerraformLabelsDiff')
-          elsif parent == 'metadata'
-            @custom_diff.append('tpgresource.SetMetadataTerraformLabelsDiff')
-          end
-
-          props << build_terraform_labels_field('labels', p.field_min_version, p.update_verb,
-                                                p.update_url)
-          props << build_effective_labels_field('labels', p.field_min_version)
+          add_labels_fields(props, parent, p)
         elsif p.is_a? Api::Type::KeyValueAnnotations
-          props << build_effective_labels_field('annotations', p.field_min_version)
+          add_annotations_fields(props, parent, p)
         elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
           p.properties = add_labels_related_fields(p.all_properties, p.name)
         end
@@ -476,22 +466,58 @@ module Api
       props
     end
 
-    def build_effective_labels_field(name, min_version)
+    def add_labels_fields(props, parent, labels)
+      # The effective_labels field is used to write to API, instead of the labels field.
+      labels.ignore_write = true
+
+      @custom_diff ||= []
+      if parent.nil?
+        @custom_diff.append('tpgresource.SetLabelsDiff')
+      elsif parent == 'metadata'
+        @custom_diff.append('tpgresource.SetMetadataLabelsDiff')
+      end
+
+      props << build_terraform_labels_field('labels', labels.field_min_version)
+      props << build_effective_labels_field(
+        'labels', labels.field_min_version, labels.update_verb, labels.update_url
+      )
+    end
+
+    def add_annotations_fields(props, parent, annotations)
+      # The effective_annotations field is used to write to API,
+      # instead of the annotations field.
+      annotations.ignore_write = true
+
+      @custom_diff ||= []
+      if parent.nil?
+        @custom_diff.append('tpgresource.SetAnnotationsDiff')
+      elsif parent == 'metadata'
+        @custom_diff.append('tpgresource.SetMetadataAnnotationsDiff')
+      end
+
+      props << build_effective_labels_field(
+        'annotations', annotations.field_min_version,
+        annotations.update_verb, annotations.update_url
+      )
+    end
+
+    def build_effective_labels_field(name, min_version, update_verb, update_url)
       description = "All of #{name} (key/value pairs)\
  present on the resource in GCP, including the #{name} configured through Terraform,\
  other clients and services."
 
-      Api::Type::KeyValuePairs.new(
+      Api::Type::KeyValueEffectiveLabels.new(
         name: "effective#{name.capitalize}",
         output: true,
         api_name: name,
         description:,
         min_version:,
-        ignore_write: true
+        update_verb:,
+        update_url:
       )
     end
 
-    def build_terraform_labels_field(name, min_version, update_verb, update_url)
+    def build_terraform_labels_field(name, min_version)
       description = "The combination of #{name} configured directly on the resource
  and default #{name} configured on the provider."
 
@@ -501,8 +527,7 @@ module Api
         api_name: name,
         description:,
         min_version:,
-        update_verb:,
-        update_url:
+        ignore_write: true
       )
     end
 
