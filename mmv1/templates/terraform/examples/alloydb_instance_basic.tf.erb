@@ -7,6 +7,12 @@ resource "google_alloydb_instance" "<%= ctx[:primary_resource_id] %>" {
     cpu_count = 2
   }
 
+  client_connection_config {
+    ssl_config {
+      ssl_mode = "ENCRYPTED_ONLY"
+    }
+  }
+  
   depends_on = [google_service_networking_connection.vpc_connection]
 }
 
