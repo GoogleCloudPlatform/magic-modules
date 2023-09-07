@@ -435,6 +435,6 @@ resource "google_project_iam_binding" "gcs-bucket-writer" {
 
 ## Resource: `google_service_networking_connection`
 
-### `Create` method is used to create the resource
+### `Create` endpoint is used to create the resource
 
-Previously, Patch instead of Create is used to create the resource, because an error message is returned when creating multiple SQL instances after creating `google_service_networking_connection` with Create method. See more details in https://issuetracker.google.com/issues/131908322. Now the issue has been fixed. The initial workaround of using Patch is no longer needed. Create method is used to create the resource.
+`google_service_networking_connection` now uses the Create endpoint instead of the Patch endpoint during the creation step. Previously, Patch was used as a workaround for an issue that has since been resolved.
