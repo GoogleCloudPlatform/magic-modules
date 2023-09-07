@@ -1936,7 +1936,7 @@ func containerNodePoolAwaitRestingState(config *transport_tpg.Config, name, proj
 func retryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f func() error) error {
 	return resource.Retry(timeout, func() *resource.RetryError {
 		if err := transport_tpg.LockedCall(lockKey, f); err != nil {
-			if IsFailedPreconditionError(err) || IsQuotaError(err) {
+			if tpgresource.IsFailedPreconditionError(err) || tpgresource.IsQuotaError(err) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
