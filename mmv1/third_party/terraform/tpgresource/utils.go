@@ -515,22 +515,6 @@ func CheckGoogleIamPolicy(value string) error {
 	return nil
 }
 
-// Retries an operation while the canonical error code is FAILED_PRECONDTION or RESOURCE_EXHAUSTED
-// which indicates there is an incompatible operation already running on the
-// cluster or there are the number of allowed concurrent operations running on the cluster. These errors can be safely retried until the incompatible operation
-// completes, and the newly requested operation can begin.
-func RetryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f func() error) error {
-	return resource.Retry(timeout, func() *resource.RetryError {
-		if err := transport_tpg.LockedCall(lockKey, f); err != nil {
-			if IsFailedPreconditionError(err) || IsQuotaError(err) {
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-}
-
 func FrameworkDiagsToSdkDiags(fwD fwDiags.Diagnostics) *diag.Diagnostics {
 	var diags diag.Diagnostics
 	for _, e := range fwD.Errors() {
