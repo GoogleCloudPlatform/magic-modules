@@ -132,3 +132,7 @@ properties:
           - :READY
           - :DELETING
           - :UPDATING
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'labels'
+    description: |
+      Labels for this Membership binding.
