@@ -3,6 +3,7 @@ package sql_test
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"testing"
 	"time"
 
@@ -120,8 +121,8 @@ func TestAccSqlDatabaseInstance_basicMSSQL(t *testing.T) {
 func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "sql-instance-test-" + acctest.RandString(t, 10)
-	failoverName := "sql-instance-test-failover-" + acctest.RandString(t, 10)
+	databaseName := "tf-test-sql-instance-" + acctest.RandString(t, 10)
+	failoverName := "tf-test-sql-instance-failover-" + acctest.RandString(t, 10)
 	// 1. Create an instance.
 	// 2. Add a root@'%' user.
 	// 3. Create a replica and assert it succeeds (it'll fail if we try to delete the root user thinking it's a
@@ -173,13 +174,12 @@ func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
 // possible, and we should attempt to find any other scenarios where the root user could otherwise
 // be left on the instance.
 func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *testing.T) {
-	// Service Networking
-	acctest.SkipIfVcr(t)
+
 	t.Parallel()
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	addressName := "tf-test-" + acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-clone-2")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-network-clone-2")
 
 	// 1. Create an instance.
 	// 2. Add a root@'%' user.
@@ -737,7 +737,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(t *te
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	addressName := "tf-test-" + acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-network")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -784,16 +784,195 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(t *te
 	})
 }
 
+func TestAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(t *testing.T) {
+	t.Parallel()
+
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	projectId := "psctestproject" + acctest.RandString(t, 10)
+	orgId := envvar.GetTestOrgFromEnv(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName, projectId, orgId),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil)),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_withPSCEnabled_withEmptyAllowedConsumerProjects(t *testing.T) {
+	t.Parallel()
+
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	projectId := "psctestproject" + acctest.RandString(t, 10)
+	orgId := envvar.GetTestOrgFromEnv(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withEmptyAllowedConsumerProjects(instanceName, projectId, orgId),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{})),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_withPSCEnabled_withAllowedConsumerProjects(t *testing.T) {
+	t.Parallel()
+
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	projectId := "psctestproject" + acctest.RandString(t, 10)
+	orgId := envvar.GetTestOrgFromEnv(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withAllowedConsumerProjects(instanceName, projectId, orgId),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{envvar.GetTestProjectFromEnv()})),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddAllowedConsumerProjects_thenRemoveAllowedConsumerProject(t *testing.T) {
+	t.Parallel()
+
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	projectId := "psctestproject" + acctest.RandString(t, 10)
+	orgId := envvar.GetTestOrgFromEnv(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName, projectId, orgId),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil)),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withAllowedConsumerProjects(instanceName, projectId, orgId),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{envvar.GetTestProjectFromEnv()})),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName, projectId, orgId),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{})),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_basicInstance_thenPSCEnabled(t *testing.T) {
+	t.Parallel()
+
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	projectId := "psctestproject" + acctest.RandString(t, 10)
+	orgId := envvar.GetTestOrgFromEnv(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_basicInstanceForPsc(instanceName, projectId, orgId),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config:      testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName, projectId, orgId),
+				ExpectError: regexp.MustCompile("PSC connectivity can not be enabled"),
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_withPSCEnabled_withIpV4Enabled(t *testing.T) {
+	t.Parallel()
+
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	projectId := "psctestproject" + acctest.RandString(t, 10)
+	orgId := envvar.GetTestOrgFromEnv(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccSqlDatabaseInstance_withPSCEnabled_withIpV4Enable(instanceName, projectId, orgId),
+				ExpectError: regexp.MustCompile("PSC connectivity cannot be enabled together with public IP"),
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(t *testing.T) {
-	// Service Networking
-	acctest.SkipIfVcr(t)
+
 	t.Parallel()
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	addressName := "tf-test-" + acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-allocated-ip-range")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-network-allocated")
 	addressName_update := "tf-test-" + acctest.RandString(t, 10) + "update"
-	networkName_update := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-allocated-ip-range-update")
+	networkName_update := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-network-allocated-update")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -823,13 +1002,12 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(t *testi
 }
 
 func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(t *testing.T) {
-	// Service Networking
-	acctest.SkipIfVcr(t)
+
 	t.Parallel()
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	addressName := "tf-test-" + acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-replica")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-network-replica")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -856,13 +1034,12 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(t
 }
 
 func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(t *testing.T) {
-	// Service Networking
-	acctest.SkipIfVcr(t)
+
 	t.Parallel()
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	addressName := "tf-test-" + acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-clone")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-network-clone")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1653,8 +1830,8 @@ func TestAccSqlDatabaseInstance_activationPolicy(t *testing.T) {
 func TestAccSqlDatabaseInstance_ReplicaPromoteSuccessful(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "sql-instance-test-" + acctest.RandString(t, 10)
-	failoverName := "sql-instance-test-failover-" + acctest.RandString(t, 10)
+	databaseName := "tf-test-sql-instance-" + acctest.RandString(t, 10)
+	failoverName := "tf-test-sql-instance-failover-" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -1697,8 +1874,8 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteSuccessful(t *testing.T) {
 
 func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithMasterInstanceNamePresent(t *testing.T) {
 	t.Parallel()
-	databaseName := "sql-instance-test-" + acctest.RandString(t, 10)
-	failoverName := "sql-instance-test-failover-" + acctest.RandString(t, 10)
+	databaseName := "tf-test-sql-instance-" + acctest.RandString(t, 10)
+	failoverName := "tf-test-sql-instance-failover-" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -1743,8 +1920,8 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithMasterInstanceNamePresen
 func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithReplicaConfigurationPresent(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "sql-instance-test-" + acctest.RandString(t, 10)
-	failoverName := "sql-instance-test-failover-" + acctest.RandString(t, 10)
+	databaseName := "tf-test-sql-instance-" + acctest.RandString(t, 10)
+	failoverName := "tf-test-sql-instance-failover-" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -1789,8 +1966,8 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithReplicaConfigurationPres
 func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithMasterInstanceNameAndReplicaConfigurationPresent(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "sql-instance-test-" + acctest.RandString(t, 10)
-	failoverName := "sql-instance-test-failover-" + acctest.RandString(t, 10)
+	databaseName := "tf-test-sql-instance-" + acctest.RandString(t, 10)
+	failoverName := "tf-test-sql-instance-failover-" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -1834,8 +2011,8 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithMasterInstanceNameAndRep
 func TestAccSqlDatabaseInstance_ReplicaPromoteSkippedWithNoMasterInstanceNameAndNoReplicaConfigurationPresent(t *testing.T) {
 	t.Parallel()
 
-	databaseName := "sql-instance-test-" + acctest.RandString(t, 10)
-	failoverName := "sql-instance-test-failover-" + acctest.RandString(t, 10)
+	databaseName := "tf-test-sql-instance-" + acctest.RandString(t, 10)
+	failoverName := "tf-test-sql-instance-failover-" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -2393,6 +2570,197 @@ resource "google_sql_database_instance" "instance-failover" {
   }
 }
 `, instanceName, failoverName)
+}
+
+func testAccSqlDatabaseInstance_basicInstanceForPsc(instanceName string, projectId string, orgId string) string {
+	return fmt.Sprintf(`
+resource "google_project" "testproject" {
+  name                = "%s"
+  project_id          = "%s"
+  org_id              = "%s"
+}
+
+resource "google_sql_database_instance" "instance" {
+  project             = google_project.testproject.project_id
+  name                = "%s"
+  region              = "us-south1"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	}
+	availability_type = "REGIONAL"
+  }
+}
+`, projectId, projectId, orgId, instanceName)
+}
+
+func testAccSqlDatabaseInstance_withPSCEnabled_withIpV4Enable(instanceName string, projectId string, orgId string) string {
+	return fmt.Sprintf(`
+resource "google_project" "testproject" {
+  name                = "%s"
+  project_id          = "%s"
+  org_id              = "%s"
+}
+
+resource "google_sql_database_instance" "instance" {
+  project             = google_project.testproject.project_id
+  name                = "%s"
+  region              = "us-south1"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+		psc_config {
+			psc_enabled = true
+		}
+		ipv4_enabled = true
+    }
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	}
+	availability_type = "REGIONAL"
+  }
+}
+`, projectId, projectId, orgId, instanceName)
+}
+
+func testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName string, projectId string, orgId string) string {
+	return fmt.Sprintf(`
+resource "google_project" "testproject" {
+  name                = "%s"
+  project_id          = "%s"
+  org_id              = "%s"
+}
+
+resource "google_sql_database_instance" "instance" {
+  project             = google_project.testproject.project_id
+  name                = "%s"
+  region              = "us-south1"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+		psc_config {
+			psc_enabled = true
+		}
+		ipv4_enabled = false
+    }
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	  }
+	availability_type = "REGIONAL"
+  }
+}
+`, projectId, projectId, orgId, instanceName)
+}
+
+func testAccSqlDatabaseInstance_withPSCEnabled_withEmptyAllowedConsumerProjects(instanceName string, projectId string, orgId string) string {
+	return fmt.Sprintf(`
+resource "google_project" "testproject" {
+  name                = "%s"
+  project_id          = "%s"
+  org_id              = "%s"
+}
+
+resource "google_sql_database_instance" "instance" {
+  project             = google_project.testproject.project_id
+  name                = "%s"
+  region              = "us-south1"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+		psc_config {
+			psc_enabled = true
+			allowed_consumer_projects = []
+		}
+		ipv4_enabled = false
+    }
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	}
+	availability_type = "REGIONAL"
+  }
+}
+`, projectId, projectId, orgId, instanceName)
+}
+
+func testAccSqlDatabaseInstance_withPSCEnabled_withAllowedConsumerProjects(instanceName string, projectId string, orgId string) string {
+	return fmt.Sprintf(`
+resource "google_project" "testproject" {
+  name                = "%s"
+  project_id          = "%s"
+  org_id              = "%s"
+}
+resource "google_sql_database_instance" "instance" {
+  project             = google_project.testproject.project_id
+  name                = "%s"
+  region              = "us-south1"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+		psc_config {
+			psc_enabled = true
+			allowed_consumer_projects = ["%s"]
+		}
+		ipv4_enabled = false
+    }
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	}
+	availability_type = "REGIONAL"
+  }
+}
+`, projectId, projectId, orgId, instanceName, projectId)
+}
+
+func verifyPscOperation(resourceName string, isPscConfigExpected bool, expectedPscEnabled bool, expectedAllowedConsumerProjects []string) func(*terraform.State) error {
+	return func(s *terraform.State) error {
+		resource, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Can't find %s in state", resourceName)
+		}
+
+		resourceAttributes := resource.Primary.Attributes
+		_, ok = resourceAttributes["settings.0.ip_configuration.#"]
+		if !ok {
+			return fmt.Errorf("settings.0.ip_configuration.# block is not present in state for %s", resourceName)
+		}
+
+		if isPscConfigExpected {
+			_, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.#"]
+			if !ok {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config property is not present or set in state of %s", resourceName)
+			}
+
+			pscEnabledStr, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.psc_enabled"]
+			pscEnabled, err := strconv.ParseBool(pscEnabledStr)
+			if err != nil || pscEnabled != expectedPscEnabled {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_enabled property value is not set as expected in state of %s, expected %v, actual %v", resourceName, expectedPscEnabled, pscEnabled)
+			}
+
+			allowedConsumerProjectsStr, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.allowed_consumer_projects.#"]
+			allowedConsumerProjects, err := strconv.Atoi(allowedConsumerProjectsStr)
+			if !ok || allowedConsumerProjects != len(expectedAllowedConsumerProjects) {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.allowed_consumer_projects property is not present or set as expected in state of %s", resourceName)
+			}
+		}
+
+		return nil
+	}
 }
 
 func testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName, addressRangeName string, specifyPrivatePathOption bool, enablePrivatePath bool) string {

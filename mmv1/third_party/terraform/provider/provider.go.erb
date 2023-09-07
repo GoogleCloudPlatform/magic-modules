@@ -64,7 +64,7 @@ func Provider() *schema.Provider {
 			"credentials": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ValidateFunc: validateCredentials,
+				ValidateFunc: ValidateCredentials,
 				ConflictsWith: []string{"access_token"},
 			},
 
@@ -190,7 +190,7 @@ func Provider() *schema.Provider {
 	}
 
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-		return providerConfigure(ctx, d, provider)
+		return ProviderConfigure(ctx, d, provider)
 	}
 
 	transport_tpg.ConfigureDCLProvider(provider)
@@ -257,9 +257,7 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_compute_regions":                           compute.DataSourceGoogleComputeRegions(),
 		"google_compute_region_network_endpoint_group":     compute.DataSourceGoogleComputeRegionNetworkEndpointGroup(),
 		"google_compute_region_instance_group":             compute.DataSourceGoogleComputeRegionInstanceGroup(),
-		<% unless version == 'ga' -%>
 		"google_compute_region_instance_template":          compute.DataSourceGoogleComputeRegionInstanceTemplate(),
-		<% end -%>
 		"google_compute_region_ssl_certificate":            compute.DataSourceGoogleRegionComputeSslCertificate(),
 		"google_compute_resource_policy":                   compute.DataSourceGoogleComputeResourcePolicy(),
 		"google_compute_router":                            compute.DataSourceGoogleComputeRouter(),
@@ -338,6 +336,7 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_spanner_instance":                          spanner.DataSourceSpannerInstance(),
 		"google_sql_ca_certs":                              sql.DataSourceGoogleSQLCaCerts(),
 		"google_sql_tiers":                                 sql.DataSourceGoogleSQLTiers(),
+		"google_sql_database_instance_latest_recovery_time": sql.DataSourceSqlDatabaseInstanceLatestRecoveryTime(),
 		"google_sql_backup_run":                            sql.DataSourceSqlBackupRun(),
 		"google_sql_databases":                             sql.DataSourceSqlDatabases(),
 		"google_sql_database":                              sql.DataSourceSqlDatabase(),
@@ -501,9 +500,7 @@ end     # products.each do
 				"google_compute_project_metadata":              compute.ResourceComputeProjectMetadata(),
 				"google_compute_project_metadata_item":         compute.ResourceComputeProjectMetadataItem(),
 				"google_compute_region_instance_group_manager": compute.ResourceComputeRegionInstanceGroupManager(),
-				<% unless version == 'ga' -%>
 				"google_compute_region_instance_template":      compute.ResourceComputeRegionInstanceTemplate(),
-				<% end -%>
 				"google_compute_router_interface":              compute.ResourceComputeRouterInterface(),
 				"google_compute_security_policy":               compute.ResourceComputeSecurityPolicy(),
 				"google_compute_shared_vpc_host_project":       compute.ResourceComputeSharedVpcHostProject(),
@@ -638,7 +635,7 @@ end     # products.each do
 		)
 }
 
-func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Provider) (interface{}, diag.Diagnostics) {
+func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Provider) (interface{}, diag.Diagnostics) {
 	err := transport_tpg.HandleSDKDefaults(d)
 	if err != nil {
 		return nil, diag.FromErr(err)
@@ -800,7 +797,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	return transport_tpg.ProviderDCLConfigure(d, &config), nil
 }
 
-func validateCredentials(v interface{}, k string) (warnings []string, errors []error) {
+func ValidateCredentials(v interface{}, k string) (warnings []string, errors []error) {
 	if v == nil || v.(string) == "" {
 		return
 	}

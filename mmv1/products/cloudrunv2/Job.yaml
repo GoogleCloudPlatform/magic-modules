@@ -372,10 +372,8 @@ properties:
                   description: |-
                     Periodic probe of container liveness. Container will be restarted if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
                     This field is not supported in Cloud Run Job currently.
-                  deprecation_message:
-                    Cloud Run Job does not support liveness probe and
-                    `liveness_probe` field will be removed in a future major
-                    release.
+                  deprecation_message: >-
+                    `liveness_probe` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.
                   properties:
                     - !ruby/object:Api::Type::Integer
                       name: 'initialDelaySeconds'
@@ -450,10 +448,8 @@ properties:
                   description: |-
                     Startup probe of application within the container. All other probes are disabled if a startup probe is provided, until it succeeds. Container will not be added to service endpoints if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
                     This field is not supported in Cloud Run Job currently.
-                  deprecation_message:
-                    Cloud Run Job does not support startup probe and
-                    `startup_probe` field will be removed in a future major
-                    release.
+                  deprecation_message: >-
+                    `startup_probe` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.
                   default_from_api: true
                   properties:
                     - !ruby/object:Api::Type::Integer
@@ -572,7 +568,6 @@ properties:
                               The Cloud Secret Manager secret version. Can be 'latest' for the latest value or an integer for a specific version
                           - !ruby/object:Api::Type::Integer
                             name: 'mode'
-                            required: true
                             description: |-
                               Integer octal mode bits to use on this file, must be a value between 01 and 0777 (octal). If 0 or not set, the Volume's default mode will be used.
                 - !ruby/object:Api::Type::NestedObject

@@ -10,12 +10,12 @@ import (
 	"testing"
 
 	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/tfdata"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 
 	"github.com/google/go-cmp/cmp"
-	provider "github.com/hashicorp/terraform-provider-google-beta/google-beta"
+	provider "github.com/hashicorp/terraform-provider-google-beta/google-beta/provider"
 	"go.uber.org/zap"
 	crmv1 "google.golang.org/api/cloudresourcemanager/v1"
 	crmv3 "google.golang.org/api/cloudresourcemanager/v3"

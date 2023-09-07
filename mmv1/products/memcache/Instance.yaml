@@ -30,9 +30,7 @@ timeouts: !ruby/object:Api::Timeouts
   delete_minutes: 20
 autogen_async: true
 examples:
-  # Temporary as CI has used up servicenetworking quota
   - !ruby/object:Provider::Terraform::Examples
-    skip_vcr: true
     name: 'memcache_instance_basic'
     primary_resource_id: 'instance'
     vars:
@@ -40,7 +38,7 @@ examples:
       network_name: 'test-network'
       address_name: 'address'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "memcache-private")'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "memcache-instance-basic")'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
