@@ -1,9 +1,12 @@
-name: github pages
+name: repository-documentation
 
 on:
   push:
     branches:
       - main  # Set a branch to deploy
+  pull_request:
+    paths:
+      - 'docs/**'
 
 jobs:
   deploy:

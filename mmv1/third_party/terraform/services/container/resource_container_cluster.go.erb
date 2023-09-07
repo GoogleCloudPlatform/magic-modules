@@ -1157,17 +1157,12 @@ func ResourceContainerCluster() *schema.Resource {
 							Optional:    true,
 							Computed:    true,
 <% if version == "ga" -%>
-							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, CONTROLLER_MANAGER, and SCHEDULER.`,
+							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, SCHEDULER, CONTROLLER_MANAGER, STORAGE, HPA, POD, DAEMONSET, DEPLOYMENT and STATEFULSET.`,
 <% else -%>
-							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, CONTROLLER_MANAGER, SCHEDULER, and WORKLOADS.`,
+							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, SCHEDULER, CONTROLLER_MANAGER, STORAGE, HPA, POD, DAEMONSET, DEPLOYMENT, STATEFULSET and WORKLOADS.`,
 <% end -%>
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
-<% if version == "ga" -%>
-								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER"}, false),
-<% else -%>
-								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER", "WORKLOADS"}, false),
-<% end -%>
 							},
 						},
 						"managed_prometheus": {
@@ -4850,17 +4845,6 @@ func expandBinaryAuthorization(configured interface{}, legacy_enabled bool) *con
 	}
 }
 
-func expandConfidentialNodes(configured interface{}) *container.ConfidentialNodes {
-	l := configured.([]interface{})
-	if len(l) == 0 || l[0] == nil {
-		return nil
-	}
-	config := l[0].(map[string]interface{})
-	return &container.ConfidentialNodes{
-		Enabled: config["enabled"].(bool),
-	}
-}
-
 func expandMasterAuth(configured interface{}) *container.MasterAuth {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -5390,16 +5374,6 @@ func flattenBinaryAuthorization(c *container.BinaryAuthorization) []map[string]i
 			"evaluation_mode": c.EvaluationMode,
 		})
         }
-	return result
-}
-
-func flattenConfidentialNodes(c *container.ConfidentialNodes) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"enabled": c.Enabled,
-		})
-	}
 	return result
 }
 

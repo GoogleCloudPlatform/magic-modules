@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}
         ref: ${{ github.event.inputs.sha }}
