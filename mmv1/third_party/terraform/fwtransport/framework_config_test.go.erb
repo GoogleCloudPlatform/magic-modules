@@ -500,22 +500,22 @@ func TestFrameworkProvider_LoadAndValidateFramework_requestTimeout(t *testing.T)
 			},
 			ExpectError: true,
 		},
-		// it's default value is set when RequestTimeout value is 0.
-		// This can be seen in this part of the config code where the default value is set to 120s
-		// https://github.com/hashicorp/terraform-provider-google/blob/09cb850ee64bcd78e4457df70905530c1ed75f19/google/transport/config.go#L1228-L1233
-		"when request_timeout is unset in the config, the value will be 0s in order to set the default value": {
+		// In the SDK version of the provider config code, this scenario results in a value of "0s"
+		// instead of "120s", but the final 'effective' value is also "120s"
+		// See : https://github.com/hashicorp/terraform-provider-google/blob/09cb850ee64bcd78e4457df70905530c1ed75f19/google/transport/config.go#L1228-L1233
+		"when request_timeout is unset in the config, the default value is 120s.": {
 			ConfigValues: fwmodels.ProviderModel{
 				RequestTimeout: types.StringNull(),
 			},
-			ExpectedDataModelValue: types.StringValue("0s"),
+			ExpectedDataModelValue: types.StringValue("120s"),
 		},
 		// Handling empty strings in config
 		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14255
-		// "when request_timeout is set as an empty string, the value will be 0s in order to set the default value": {
+		// "when request_timeout is set as an empty string, the default value is 120s.": {
 		// 	ConfigValues: fwmodels.ProviderModel{
 		// 		RequestTimeout: types.StringValue(""),
 		// 	},
-		// 	ExpectedDataModelValue: types.StringValue("0s"),
+		// 	ExpectedDataModelValue: types.StringValue("120s"),
 		// },
 		// Handling unknown values
 		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
