@@ -443,4 +443,4 @@ resource "google_project_iam_binding" "gcs-bucket-writer" {
 
 ### `gce_persistent_disk_csi_driver_config` now is enabled by default on newly created clusters
 
-Previously the doc stated that `gce_persistent_disk_csi_driver` defaults to `disable`, now it defaults to `enable`.
+Previously gce_persistent_disk_csi_driver defaulted to `disable`, now it defaults to `enable`.
