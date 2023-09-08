@@ -155,7 +155,7 @@ func TestProvider_ProviderConfigure_credentials(t *testing.T) {
 		},
 		"when credentials is unset in the config (and access_token unset), GOOGLE_APPLICATION_CREDENTIALS is used for auth but not to set values in the config": {
 			EnvVariables: map[string]string{
-				"GOOGLE_APPLICATION_CREDENTIALS": transport_tpg.TestFakeCredentialsPath,
+				"GOOGLE_APPLICATION_CREDENTIALS": transport_tpg.TestFakeCredentialsPath, // needs to be a path to a file when used
 			},
 			ExpectFieldUnset:    true,
 			ExpectedSchemaValue: "",
@@ -166,7 +166,7 @@ func TestProvider_ProviderConfigure_credentials(t *testing.T) {
 				"credentials": "",
 			},
 			EnvVariables: map[string]string{
-				"GOOGLE_APPLICATION_CREDENTIALS": transport_tpg.TestFakeCredentialsPath,
+				"GOOGLE_APPLICATION_CREDENTIALS": transport_tpg.TestFakeCredentialsPath, // needs to be a path to a file when used
 			},
 			ExpectFieldUnset:    true,
 			ExpectedSchemaValue: "",
@@ -180,13 +180,13 @@ func TestProvider_ProviderConfigure_credentials(t *testing.T) {
 		// 		"credentials": "",
 		// 	},
 		// 	EnvVariables: map[string]string{
-		// 		"GOOGLE_APPLICATION_CREDENTIALS": "", // setting to empty string to help test run in CI
+		// 		"GOOGLE_APPLICATION_CREDENTIALS": "",
 		// 	},
 		// 	ExpectError: true,
 		// },
 		// "error returned if neither credentials nor access_token set in the provider config, and GOOGLE_APPLICATION_CREDENTIALS is unset": {
 		// 	EnvVariables: map[string]string{
-		// 		"GOOGLE_APPLICATION_CREDENTIALS": "", // setting to empty string to help test run in CI
+		// 		"GOOGLE_APPLICATION_CREDENTIALS": "",
 		// 	},
 		// 	ExpectError: true,
 		// },
@@ -741,21 +741,21 @@ func TestProvider_ProviderConfigure_billingProject(t *testing.T) {
 				"credentials":     transport_tpg.TestFakeCredentialsPath,
 			},
 			EnvVariables: map[string]string{
-				"GOOGLE_BILLING_PROJECT": "my-billing-project-from-env",
+				"GOOGLE_BILLING_PROJECT": "billing-project-from-env",
 			},
 			ExpectedValue: "my-billing-project-from-config",
 		},
-		"billing project can be set by environment variable, when no value supplied via the config": {
+		"billing_project can be set by environment variable, when no value supplied via the config": {
 			ConfigValues: map[string]interface{}{
 				// billing_project unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
 			EnvVariables: map[string]string{
-				"GOOGLE_BILLING_PROJECT": "my-billing-project-from-env",
+				"GOOGLE_BILLING_PROJECT": "billing-project-from-env",
 			},
-			ExpectedValue: "my-billing-project-from-env",
+			ExpectedValue: "billing-project-from-env",
 		},
-		"when no values are provided via config or environment variables, the field remains unset without error": {
+		"when no billing_project values are provided via config or environment variables, the field remains unset without error": {
 			ConfigValues: map[string]interface{}{
 				// billing_project unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
@@ -779,9 +779,9 @@ func TestProvider_ProviderConfigure_billingProject(t *testing.T) {
 				"credentials":     transport_tpg.TestFakeCredentialsPath,
 			},
 			EnvVariables: map[string]string{
-				"GOOGLE_BILLING_PROJECT": "my-billing-project-from-env",
+				"GOOGLE_BILLING_PROJECT": "billing-project-from-env",
 			},
-			ExpectedValue: "my-billing-project-from-env",
+			ExpectedValue: "billing-project-from-env",
 		},
 	}
 
