@@ -115,6 +115,7 @@ parameters:
     immutable: true
     required: true
     url_param_only: true
+virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: wait_dns_verification
     description: |
@@ -123,7 +124,6 @@ parameters:
       the `CustomDomain` will be returned and stored in the Terraform state.
     immutable: true
     default_value: false
-    url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: name

@@ -4,6 +4,4 @@ resource "google_firebase_hosting_custom_domain" "default" {
   project  = "<%= ctx[:test_env_vars]['project_id'] %>"
   site_id = "<%= ctx[:vars]['site_id'] %>"
   custom_domain = "<%= ctx[:vars]['custom_domain'] %>"
-
-  wait_dns_verification = false
 }
