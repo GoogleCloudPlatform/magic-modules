@@ -13,7 +13,7 @@ func TestAccUniverseDomainPubSub(t *testing.T) {
 	// Skip VCR since this test can only run in specific test project.
 	t.Skip()
 
-	universeDomain := envvar.GetUniverseDomainFromEnv(t)
+	universeDomain := envvar.GetTestUniverseDomainFromEnv(t)
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	subscription := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
 

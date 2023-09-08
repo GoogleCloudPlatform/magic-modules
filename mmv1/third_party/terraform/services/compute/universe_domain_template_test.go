@@ -13,7 +13,25 @@ func TestAccUniverseDomainDisk(t *testing.T) {
 	// Skip VCR since this test can only run in specific test project.
 	t.Skip()
 
-	universeDomain := envvar.GetUniverseDomainFromEnv(t)
+	universeDomain := envvar.GetTestUniverseDomainFromEnv(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccUniverseDomain_basic_disk(universeDomain),
+			},
+		},
+	})
+}
+
+func TestAccDefaultUniverseDomainDisk(t *testing.T) {
+	// Skip VCR since this test can only run in specific test project.
+	// t.Skip()
+
+	universeDomain := "googleapis.com"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

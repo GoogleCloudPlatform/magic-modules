@@ -14,7 +14,7 @@ func TestAccUniverseDomainStorage(t *testing.T) {
 	// Location field from `google_storage_bucket` needs to be changed depending on the universe.
 	t.Skip()
 
-	universeDomain := envvar.GetUniverseDomainFromEnv(t)
+	universeDomain := envvar.GetTestUniverseDomainFromEnv(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

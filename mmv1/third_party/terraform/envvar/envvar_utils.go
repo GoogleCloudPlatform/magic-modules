@@ -116,7 +116,7 @@ func GetTestCredsFromEnv() string {
 }
 
 // Returns googleapis.com if there's no universe set.
-func GetUniverseDomainFromEnv(t *testing.T) string {
+func GetTestUniverseDomainFromEnv(t *testing.T) string {
 	if transport_tpg.MultiEnvSearch(UniverseDomainEnvVars) == "" {
 		return "googleapis.com"
 	}
