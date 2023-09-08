@@ -206,6 +206,8 @@ properties:
                     Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/intents/<Intent ID>.
                 - !ruby/object:Api::Type::String
                   name: 'displayName'
+                  # Output only because you can't set it independently of name; if they don't match, displayName is ignored and may lead to spurious changes
+                  output: true
                   description: |
                     The human-readable name of the intent, unique within the agent.
             - !ruby/object:Api::Type::NestedObject
@@ -220,6 +222,8 @@ properties:
                     Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
                 - !ruby/object:Api::Type::String
                   name: 'displayName'
+                  # Output only because you can't set it independently of name; if they don't match, displayName is ignored and may lead to spurious changes
+                  output: true
                   description: |
                     The human-readable name of the page, unique within the flow.
             - !ruby/object:Api::Type::Array

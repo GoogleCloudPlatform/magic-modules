@@ -208,11 +208,9 @@ resource "google_dialogflow_cx_test_case" "basic_test_case" {
       session_parameters = jsonencode({ some_param = "1" })
       triggered_intent {
         name         = google_dialogflow_cx_intent.intent.id
-        display_name = google_dialogflow_cx_intent.intent.display_name
       }
       current_page {
         name         = google_dialogflow_cx_page.page.id
-        display_name = google_dialogflow_cx_page.page.display_name
       }
       text_responses {
         text = ["Training phrase response"]
@@ -231,7 +229,6 @@ resource "google_dialogflow_cx_test_case" "basic_test_case" {
     virtual_agent_output {
       current_page {
         name         = google_dialogflow_cx_page.page.id
-        display_name = google_dialogflow_cx_page.page.display_name
       }
       text_responses {
         text = ["Handling some event"]
