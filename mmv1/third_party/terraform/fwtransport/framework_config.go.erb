@@ -44,7 +44,7 @@ type FrameworkProviderConfig struct {
 	Scopes                     types.List
 	TokenSource                oauth2.TokenSource
 	UserAgent                  string
-	UserProjectOverride        bool
+	UserProjectOverride        types.Bool
 
 	// paths for client setup
 	<% products.each do |product| -%>
