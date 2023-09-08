@@ -1,0 +1,3 @@
+if err := waitForVertexAIPipelineJobReady(d, config, d.Timeout(schema.TimeoutCreate)-time.Minute); err != nil {
+	return fmt.Errorf("Error waiting for VertexAIPipelineJob %q to be ready during creation: %q", d.Get("name").(string), err)
+}

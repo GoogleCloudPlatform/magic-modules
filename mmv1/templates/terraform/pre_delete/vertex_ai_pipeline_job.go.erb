@@ -1,0 +1,41 @@
+getUrl, err := tpgresource.ReplaceVars(d, config, "{{VertexAIBasePath}}projects/{{project}}/locations/{{location}}/pipelineJobs/{{name}}")
+if err != nil {
+	return err
+}
+
+getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   project,
+	RawURL:    getUrl,
+	UserAgent: userAgent,
+})
+if err != nil {
+	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("VertexAIPipelineJob %q", d.Id()))
+}
+
+// VertexAIPipelineJob cannot be deleted when it's in progress
+if v := getRes["state"]; v == "PIPELINE_STATE_RUNNING" {
+	cancelUrl, err := tpgresource.ReplaceVars(d, config, "{{VertexAIBasePath}}projects/{{project}}/locations/{{location}}/pipelineJobs/{{name}}:cancel")
+	if err != nil {
+		return err
+	}
+	var obj map[string]interface{}
+	log.Printf("[DEBUG] Cancelling VertexAIPipelineJob %q: %#v", d.Id(), getRes)
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   billingProject,
+		RawURL:    cancelUrl,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutDelete),
+	})
+	if err != nil {
+		return fmt.Errorf("Error canceling VertexAIPipelineJob %q: %s", d.Id(), err)
+	}
+}
+
+if err := waitForVertexAIPipelineJobReadyForDeletion(d, config, d.Timeout(schema.TimeoutDelete)-time.Minute); err != nil {
+	return fmt.Errorf("Error waiting for VertexAIPipelineJob %q to be ready for deletion: %q", d.Get("name").(string), err)
+}

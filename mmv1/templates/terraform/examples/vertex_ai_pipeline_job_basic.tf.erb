@@ -1,0 +1,29 @@
+resource "google_vertex_ai_pipeline_job" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['pipeline_job_name'] %>"
+  location = "us-central1"
+  runtime_config {
+    gcs_output_directory = google_storage_bucket.bucket.url
+    parameter_values = {
+      model_display_name = "The display name for your model in the UI"
+      large_model_reference = "text-bison@001"
+      train_steps = 20
+      project = data.google_project.project.project_id
+      location = "us-central1"
+      dataset_uri = google_storage_bucket_object.object.media_link
+    }
+  }
+  template_uri = "https://us-kfp.pkg.dev/ml-pipeline/large-language-model-pipelines/tune-large-model/v2.0.0"
+}
+
+data "google_project" "project" {}
+
+resource "google_storage_bucket" "bucket" {
+  name     = "<%= ctx[:vars]['bucket_name'] %>"
+  location = "US"
+}
+
+resource "google_storage_bucket_object" "object" {
+  name   = "<%= ctx[:vars]['bucket_object_name'] %>"
+  bucket = google_storage_bucket.bucket.name
+  source = "./test-fixtures/dataset.jsonl"
+}
