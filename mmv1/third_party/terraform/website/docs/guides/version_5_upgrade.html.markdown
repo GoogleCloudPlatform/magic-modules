@@ -438,3 +438,9 @@ resource "google_project_iam_binding" "gcs-bucket-writer" {
 ### `Create` endpoint is used to create the resource
 
 `google_service_networking_connection` now uses the Create endpoint instead of the Patch endpoint during the creation step. Previously, Patch was used as a workaround for an issue that has since been resolved.
+
+## Resource: `google_container_cluster`
+
+### `gce_persistent_disk_csi_driver_config` now is enabled by default on newly created clusters
+
+Previously the doc stated that `gce_persistent_disk_csi_driver` defaults to `disable`, now it defaults to `enable`.
