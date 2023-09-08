@@ -68,7 +68,7 @@ func assertTestData(testCase TestCase) (err error) {
 
 	logger, err := zap.NewDevelopment()
 
-	got, err := Convert(assets, &ConvertOptions{
+	got, err := Convert(assets, &Options{
 		ErrorLogger: logger,
 	})
 	if err != nil {

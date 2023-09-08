@@ -13,12 +13,12 @@ import (
 
 // Options is a struct for options so that adding new options does not
 // require updating function signatures all along the pipe.
-type ConvertOptions struct {
+type Options struct {
 	ErrorLogger *zap.Logger
 }
 
 // Convert converts Asset into HCL.
-func Convert(assets []*caiasset.Asset, options *ConvertOptions) ([]byte, error) {
+func Convert(assets []*caiasset.Asset, options *Options) ([]byte, error) {
 	if options == nil || options.ErrorLogger == nil {
 		return nil, fmt.Errorf("logger is not initialized")
 	}
