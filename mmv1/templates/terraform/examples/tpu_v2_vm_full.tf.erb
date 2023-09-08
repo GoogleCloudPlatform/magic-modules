@@ -2,11 +2,17 @@ data "google_tpu_v2_runtime_versions" "available" {
   provider = google-beta
 }
 
+data "google_tpu_v2_accelerator_types" "available" {
+  provider = google-beta
+}
+
 resource "google_tpu_v2_vm" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
 
   name = "<%= ctx[:vars]["vm_name"] %>"
   zone = "us-central1-b"
+  description = "Text description of the TPU."
 
   runtime_version  = data.google_tpu_v2_runtime_versions.available.versions[0]
+  accelerator_type = data.google_tpu_v2_accelerator_types.available.types[0]
 }
