@@ -120,7 +120,7 @@ virtual_fields:
     name: wait_dns_verification
     description: |
       If true, Terraform will wait for DNS records to be fully resolved on the `CustomDomain`.
-      If false, Terraform will not wait for DNS records on the `CustomDomain`. Any issues in 
+      If false, Terraform will not wait for DNS records on the `CustomDomain`. Any issues in
       the `CustomDomain` will be returned and stored in the Terraform state.
     immutable: true
     default_value: false
@@ -202,12 +202,12 @@ properties:
       The ownership state of your domain name. Ownership is determined at a
       Firebase project level, and established by adding `TXT` records to your
       domain name's DNS records.
-     
+
       Ownership cascades to subdomains. Granting a project ownership of `foo.com`
       also grants that project ownership over `bar.foo.com`, unless you add
       specific `TXT` records to `bar.foo.com` that grant a different project
       ownership.
-     
+
       If your `CustomDomain` is in an `OwnershipState` other than
       `OWNERSHIP_ACTIVE` for more than 30 days and it hasn't been updated in at
       least 30 days, Hosting's ownership systems delete the `CustomDomain`.
