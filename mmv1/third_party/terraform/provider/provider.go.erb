@@ -345,6 +345,10 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_tags_tag_key":                              tags.DataSourceGoogleTagsTagKey(),
 		"google_tags_tag_value":                            tags.DataSourceGoogleTagsTagValue(),
 		"google_tpu_tensorflow_versions":                   tpu.DataSourceTpuTensorflowVersions(),
+		<% unless version == 'ga' -%>
+		"google_tpu_v2_runtime_versions":                   tpuv2.DataSourceTpuV2RuntimeVersions(),
+		"google_tpu_v2_accelerator_types":                  tpuv2.DataSourceTpuV2AcceleratorTypes(),
+		<% end -%>
 		"google_vpc_access_connector":                      vpcaccess.DataSourceVPCAccessConnector(),
 		"google_redis_instance":                            redis.DataSourceGoogleRedisInstance(),
 		"google_vertex_ai_index":                           vertexai.DataSourceVertexAIIndex(),
