@@ -17,7 +17,7 @@ display_name: Cloud TPU v2
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://tpu.googleapis.com/v2/
+    base_url: https://tpu.googleapis.com/v2alpha1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:

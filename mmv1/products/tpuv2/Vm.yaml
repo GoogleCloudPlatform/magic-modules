@@ -25,6 +25,24 @@ create_url: projects/{{project}}/locations/{{zone}}/nodes?nodeId={{name}}
 update_url: projects/{{project}}/locations/{{zone}}/nodes/{{name}}
 update_verb: :PATCH
 update_mask: true
+autogen_async: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'tpu_v2_vm_basic'
