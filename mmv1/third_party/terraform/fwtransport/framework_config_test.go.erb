@@ -430,6 +430,23 @@ func TestFrameworkProvider_LoadAndValidateFramework_requestReason(t *testing.T) 
 			},
 			ExpectedDataModelValue: types.StringNull(),
 		},
+		// Handling empty strings in config
+		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14255
+		// "when request_reason is set as an empty string in the config it is overridden by environment variables": {
+		// 	ConfigValues: fwmodels.ProviderModel{
+		// 		RequestReason: types.StringValue(""),
+		// 	},
+		// 	EnvVariables: map[string]string{
+		// 		"CLOUDSDK_CORE_REQUEST_REASON": "foo",
+		// 	},
+		// 	ExpectedDataModelValue: types.StringValue("foo"),
+		// },
+		// "when request_reason is set as an empty string in the config the field is treated as if it's unset, without error": {
+		// 	ConfigValues: fwmodels.ProviderModel{
+		// 		RequestReason: types.StringValue(""),
+		// 	},
+		// 	ExpectedDataModelValue: types.StringNull(),
+		// },
 	}
 
 	for tn, tc := range cases {

@@ -1493,6 +1493,27 @@ func TestProvider_ProviderConfigure_requestReason(t *testing.T) {
 				// request_reason unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
+			ExpectedSchemaValue: "",
+			ExpectedConfigValue: "",
+		},
+		// Handling empty values in config
+		"when request_reason is set as an empty string in the config it is overridden by environment variables": {
+			ConfigValues: map[string]interface{}{
+				"request_reason": "",
+				"credentials":    transport_tpg.TestFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"CLOUDSDK_CORE_REQUEST_REASON": "test",
+			},
+			ExpectedSchemaValue: "test",
+			ExpectedConfigValue: "test",
+		},
+		"when request_reason is set as an empty string in the config, the field remains unset without error": {
+			ConfigValues: map[string]interface{}{
+				"request_reason": "",
+				"credentials":    transport_tpg.TestFakeCredentialsPath,
+			},
+			ExpectedSchemaValue: "",
 			ExpectedConfigValue: "",
 		},
 	}
