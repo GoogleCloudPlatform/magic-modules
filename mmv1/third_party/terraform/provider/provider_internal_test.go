@@ -1392,14 +1392,14 @@ func TestProvider_ProviderConfigure_requestTimeout(t *testing.T) {
 		// it's default value is set when RequestTimeout value is 0.
 		// This can be seen in this part of the config code where the default value is set to 120s
 		// https://github.com/hashicorp/terraform-provider-google/blob/09cb850ee64bcd78e4457df70905530c1ed75f19/google/transport/config.go#L1228-L1233
-		"when config is unset, the value will be 0s in order to set the default value": {
+		"when request_timeout is unset in the config, the value will be 0s in order to set the default value": {
 			ConfigValues: map[string]interface{}{
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
 			ExpectedValue:    "0s",
 			ExpectFieldUnset: true,
 		},
-		"when value is empty, the value will be 0s in order to set the default value": {
+		"when request_timeout is set as an empty string, the value will be 0s in order to set the default value": {
 			ConfigValues: map[string]interface{}{
 				"request_timeout": "",
 				"credentials":     transport_tpg.TestFakeCredentialsPath,
