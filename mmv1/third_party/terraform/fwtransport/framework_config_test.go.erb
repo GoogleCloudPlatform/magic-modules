@@ -447,6 +447,14 @@ func TestFrameworkProvider_LoadAndValidateFramework_requestReason(t *testing.T) 
 		// 	},
 		// 	ExpectedDataModelValue: types.StringNull(),
 		// },
+		// Handling unknown values
+		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
+		// "when request_timeout is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		// 	ConfigValues: fwmodels.ProviderModel{
+		// 		RequestReason: types.StringUnknown(),
+		// 	},
+		// 	ExpectedDataModelValue: types.StringNull(),
+		// },
 	}
 
 	for tn, tc := range cases {
