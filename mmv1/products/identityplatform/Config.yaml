@@ -61,6 +61,28 @@ examples:
         :BILLING_ACCT
     skip_vcr: true
     skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'identity_platform_config_monitoring'
+    primary_resource_id: 'default'
+    vars:
+      project_id: 'my-project-1'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_acct:
+        :BILLING_ACCT
+    skip_vcr: true
+    skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'identity_platform_tenant_monitoring'
+    primary_resource_id: 'default'
+    vars:
+      project_id: 'my-project-1'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_acct:
+        :BILLING_ACCT
+    skip_vcr: true
+    skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_create: 'templates/terraform/custom_create/identity_platform_config.go'
 properties:
@@ -73,6 +95,35 @@ properties:
     name: 'autodeleteAnonymousUsers'
     description: |
       Whether anonymous users will be auto-deleted after a period of 30 days
+  - !ruby/object:Api::Type::NestedObject
+    name: 'multiTenant'
+    description: |
+      Configuration related to multi-tenant functionality.
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'allowTenants'
+        description: |
+          Whether this project can have tenants or not.
+      - !ruby/object:Api::Type::String
+        name: 'defaultTenantLocation'
+        description: |
+          The default cloud parent org or folder that the tenant project should be created under.
+          The parent resource name should be in the format of "/", such as "folders/123" or "organizations/456".
+          If the value is not set, the tenant will be created under the same organization or folder as the agent project.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'monitoring'
+    description: |
+      Configuration related to monitoring project activity.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'requestLogging'
+        description: |
+          Configuration for logging requests made to this project to Stackdriver Logging.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enabled'
+            description: |
+              Whether logging is enabled for this project or not.
   - !ruby/object:Api::Type::NestedObject
     name: 'blockingFunctions'
     description: |
