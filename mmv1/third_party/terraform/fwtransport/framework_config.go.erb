@@ -98,6 +98,7 @@ func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, 
 	<% end -%>
 
 	p.Context = ctx
+	p.BillingProject = data.BillingProject
 	p.Project = data.Project
 	p.Region = data.Region
 	p.Zone = data.Zone
