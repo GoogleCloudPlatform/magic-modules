@@ -57,6 +57,11 @@ examples:
     name: "vertex_ai_index_endpoint_with_psc"
     primary_resource_id: "index_endpoint"
   - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_index_endpoint_with_false_psc"
+    primary_resource_id: "index_endpoint"
+    # It's not distinguishable if the psc is false or not set, so we need to skip the test.
+    skip_import_test: true
+  - !ruby/object:Provider::Terraform::Examples
     name: "vertex_ai_index_endpoint_with_public_endpoint"
     primary_resource_id: "index_endpoint"
     test_vars_overrides:
@@ -114,6 +119,7 @@ properties:
       Optional. Configuration for private service connect. `network` and `privateServiceConnectConfig` are mutually exclusive.
     conflicts:
       - network
+    custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_endpoint_private_service_connect_config.go.erb
     properties:
       - !ruby/object:Api::Type::Boolean
         name: enablePrivateServiceConnect
