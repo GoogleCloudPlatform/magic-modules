@@ -20,21 +20,30 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
         enable_psc, ok := d.GetOkExists("private_service_connect_config.0.enable_private_service_connect")
         if ok {
             transformed["enable_private_service_connect"] = enable_psc
+        }
+
+        project_allowlist, ok := d.GetOkExists("private_service_connect_config.0.project_allowlist")
+        if ok {
+            transformed["project_allowlist"] = project_allowlist
+        }
+
+        if len(transformed) > 0 {
             return []interface{}{transformed}
         }
+
         return nil
-	}
+    }
 
     original := v.(map[string]interface{})
-	if len(original) == 0 {
-		return nil
-	}
+    if len(original) == 0 {
+        return nil
+    }
 
     transformed["enable_private_service_connect"] =
-		flattenVertexAIIndexEndpointPrivateServiceConnectConfigEnablePrivateServiceConnect(original["enablePrivateServiceConnect"], d, config)
-	transformed["project_allowlist"] =
-		flattenVertexAIIndexEndpointPrivateServiceConnectConfigProjectAllowlist(original["projectAllowlist"], d, config)
-	return []interface{}{transformed}
+        flattenVertexAIIndexEndpointPrivateServiceConnectConfigEnablePrivateServiceConnect(original["enablePrivateServiceConnect"], d, config)
+    transformed["project_allowlist"] =
+        flattenVertexAIIndexEndpointPrivateServiceConnectConfigProjectAllowlist(original["projectAllowlist"], d, config)
+    return []interface{}{transformed}
 }
 
 func flattenVertexAIIndexEndpointPrivateServiceConnectConfigEnablePrivateServiceConnect(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
