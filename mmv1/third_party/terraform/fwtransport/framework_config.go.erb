@@ -46,10 +46,10 @@ type FrameworkProviderConfig struct {
 	UserAgent                  string
 	UserProjectOverride        bool
 
-    // paths for client setup
-    <% products.each do |product| -%>
-    <%= product[:definitions].name -%>BasePath string
-    <% end -%>
+	// paths for client setup
+	<% products.each do |product| -%>
+	<%= product[:definitions].name -%>BasePath string
+	<% end -%>
 }
 
 // LoadAndValidateFramework handles the bulk of configuring the provider
@@ -93,10 +93,12 @@ func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, 
 	<% end -%>
 
 	p.Context = ctx
+	p.BillingProject = data.BillingProject
 	p.Project = data.Project
 	p.Region = data.Region
 	p.Scopes = data.Scopes
 	p.Zone = data.Zone
+	p.UserProjectOverride = data.UserProjectOverride
 	p.PollInterval = 10 * time.Second
 	p.RequestBatcherServiceUsage = transport_tpg.NewRequestBatcher("Service Usage", ctx, batchingConfig)
 	p.RequestBatcherIam = transport_tpg.NewRequestBatcher("IAM", ctx, batchingConfig)
