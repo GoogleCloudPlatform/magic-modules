@@ -131,7 +131,8 @@ properties:
     description: 'User-provided description of the backup.'
   - !ruby/object:Api::Type::String
     name: 'clusterUid'
-    description: 'User-provided description of the backup.'
+    output: true
+    description: 'Output only. The system-generated UID of the cluster which was used to create this resource.'
   - !ruby/object:Api::Type::String
     name: 'clusterName'
     required: true
@@ -178,6 +179,7 @@ properties:
           Output only. Cloud KMS key versions that are being used to protect the database or the backup.
   - !ruby/object:Api::Type::String
     name: 'etag'
+    output: true
     description: 'For Resource freshness validation (https://google.aip.dev/154)'
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'annotations'
