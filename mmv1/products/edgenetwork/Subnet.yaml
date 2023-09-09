@@ -135,4 +135,3 @@ properties:
       - :STATE_DELETING
     description: |
       Current stage of the resource to the device by config push.
-

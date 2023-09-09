@@ -94,4 +94,3 @@ properties:
     default_value: 1500
     description: |
       IP (L3) MTU value of the network. Default value is `1500`. Possible values are: `1500`, `9000`.
-
