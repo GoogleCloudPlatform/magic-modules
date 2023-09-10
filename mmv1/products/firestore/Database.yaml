@@ -167,3 +167,8 @@ properties:
     description: |
       Output only. The timestamp at which this database was created.
     output: true
+  - !ruby/object:Api::Type::String
+    name: update_time
+    description: |
+      Output only. The timestamp at which this database was most recently updated.
+    output: true
