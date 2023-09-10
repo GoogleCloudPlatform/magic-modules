@@ -172,3 +172,8 @@ properties:
     description: |
       Output only. The timestamp at which this database was most recently updated.
     output: true
+  - !ruby/object:Api::Type::String
+    name: uid
+    description: |
+      Output only. The system-generated UUID4 for this Database.
+    output: true
