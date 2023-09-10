@@ -165,5 +165,5 @@ properties:
   - !ruby/object:Api::Type::String
     name: create_time
     description: |
-      The timestamp at which this database was created.
+      Output only. The timestamp at which this database was created.
     output: true
