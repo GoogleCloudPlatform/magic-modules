@@ -1,0 +1,103 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'BackupSchedule'
+base_url: projects/{{project}}/databases/{{database}}/backupSchedules
+self_link: '{{name}}'
+immutable: true
+description: |
+  A backup schedule for a Cloud Firestore Database.
+  This resource is owned by the database it is backing up, and is deleted along with the database.
+  The actual backups are not though.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/firestore/docs/backups'
+  api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.backupSchedules'
+skip_sweeper: true
+id_format: 'projects/{{project}}/databases/{{database}}/backupSchedules/{{name}}'
+import_format:
+  - 'projects/{{project}}/databases/{{database}}/backupSchedules/{{name}}'
+  - '{{project}}/{{database}}/{{name}}'
+  - '{{database}}/{{name}}'
+  - '{{name}}'
+docs: !ruby/object:Provider::Terraform::Docs
+  warning: |
+    This resource creates a Firestore Backup Schedule on a project that already has
+    a Firestore database. If you haven't already created it, you may
+    create a `google_firestore_database` resource with `type` set to
+    `"FIRESTORE_NATIVE"` and `location_id` set to your chosen location.
+    If you wish to use App Engine, you may instead create a
+    `google_app_engine_application` resource with `database_type` set to
+    `"CLOUD_FIRESTORE"`. Your Firestore location will be the same as
+    the App Engine location specified.
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firestore_backup_schedule_basic'
+    primary_resource_id:
+      'daily-backup'
+    test_env_vars:
+      project_id: :FIRESTORE_PROJECT_NAME
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    output: true
+    description: |
+      A server defined name for this index. Format:
+      `projects/{{project}}/databases/{{database}}/backupSchedules/{{backupSchedule}}
+  - !ruby/object:Api::Type::String
+    name: database
+    default_value: '(default)'
+    description: |
+      The Firestore database id. Defaults to `"(default)"`.
+    ignore_read: true
+  - !ruby/object:Api::Type::String
+    name: collection
+    required: true
+    description: |
+      The collection being indexed.
+    ignore_read: true
+  - !ruby/object:Api::Type::String
+    name: retention
+    required: true
+    description: |
+      At what relative time in the future, compared to its creation time, the backup should be deleted, e.g. keep backups for 7 days.
+      A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+  - !ruby/object:Api::Type::NestedObject
+    name: dailyRecurrence
+    description: |
+      For a schedule that runs daily at a specified time.
+    exactly_one_of:
+      - daily_recurrence
+      - weekly_recurrence
+  - !ruby/object:Api::Type::NestedObject
+    name: weeklyRecurrence
+    description: |
+      For a schedule that runs weekly on a specific day and time.
+    exactly_one_of:
+      - daily_recurrence
+      - weekly_recurrence
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: day
+        description: |
+          The day of week to run.
+        values:
+          - :DAY_OF_WEEK_UNSPECIFIED
+          - :MONDAY
+          - :TUESDAY
+          - :WEDNESDAY
+          - :THURSDAY
+          - :FRIDAY
+          - :SATURDAY
+          - :SUNDAY
