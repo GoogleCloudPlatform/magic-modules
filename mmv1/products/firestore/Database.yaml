@@ -158,7 +158,7 @@ properties:
   - !ruby/object:Api::Type::Fingerprint
     name: etag
     description: |
-      This checksum is computed by the server based on the value of other fields,
+      Output only. This checksum is computed by the server based on the value of other fields,
       and may be sent on update and delete requests to ensure the client has an
       up-to-date value before proceeding.
     output: true
