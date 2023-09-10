@@ -144,7 +144,7 @@ properties:
     description: |
       Whether to enable the PITR feature on this database.
       When disabled allows reads against any version within the last hour.
-      When enabled allows reads against any version within the last last hour and 
+      When enabled allows reads against any version within the last last hour and
       reads against 1-minute snapshots beyond 1 hour and within 7 days.
       `version_retention_period` and `earliest_version_time` can be used to determine the supported versions.
     values:
