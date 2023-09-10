@@ -155,6 +155,15 @@ properties:
       that is returned from the Cloud Datastore APIs in Google App Engine first generation runtimes.
       This value may be empty in which case the appid to use for URL-encoded keys is the project_id (eg: foo instead of v~foo).
     output: true
+  - !ruby/object:Api::Type::Enum
+    name: deleteProtectionState
+    description: |
+      State of delete protection for the database.
+    values:
+      - :DELETE_PROTECTION_STATE_UNSPECIFIED
+      - :DELETE_PROTECTION_ENABLED
+      - :DELETE_PROTECTION_DISABLED
+    default_from_api: true
   - !ruby/object:Api::Type::Fingerprint
     name: etag
     description: |
