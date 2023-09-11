@@ -126,6 +126,20 @@ func IsFailedPreconditionError(err error) bool {
 	return false
 }
 
+func IsQuotaError(err error) bool {
+	gerr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error)
+        if !ok {
+                return false
+        }
+        if gerr == nil {
+                return false
+        }
+        if gerr.Code != 429 {
+                return false
+        }
+	return true
+}
+
 func IsConflictError(err error) bool {
 	if e, ok := err.(*googleapi.Error); ok && (e.Code == 409 || e.Code == 412) {
 		return true
@@ -502,13 +516,15 @@ func CheckGoogleIamPolicy(value string) error {
 }
 
 // Retries an operation while the canonical error code is FAILED_PRECONDTION
-// which indicates there is an incompatible operation already running on the
-// cluster. This error can be safely retried until the incompatible operation
-// completes, and the newly requested operation can begin.
+// or RESOURCE_EXHAUSTED which indicates there is an incompatible operation
+// already running on the cluster or there are the number of allowed concurrent
+// operations running on the cluster. These errors can be safely retried until
+// the incompatible operation completes, and the newly requested operation can
+// begin.
 func RetryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f func() error) error {
 	return resource.Retry(timeout, func() *resource.RetryError {
 		if err := transport_tpg.LockedCall(lockKey, f); err != nil {
-			if IsFailedPreconditionError(err) {
+			if IsFailedPreconditionError(err) || IsQuotaError(err) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
