@@ -8,14 +8,23 @@ resource "google_project" "default" {
   }
 }
 
-resource "google_project_service" "identitytoolkit" {
-  project = google_project.default.project_id
-  service = "identitytoolkit.googleapis.com"
-}
-
 resource "google_identity_platform_config" "default" {
   project = google_project.default.project_id
-  autodelete_anonymous_users = true
+
+  multi_tenant {
+    allow_tenants = true
+  }
+
+  depends_on = [
+    google_project_service.identitytoolkit
+  ]
+}
+
+resource "google_identity_platform_tenant" "<%= ctx[:primary_resource_id] %>" {
+  project = google_project.default.project_id
+
+  display_name          = "tenant"
+  allow_password_signup = true
 
   monitoring {
     request_logging {
@@ -24,6 +33,6 @@ resource "google_identity_platform_config" "default" {
   }
 
   depends_on = [
-    google_project_service.identitytoolkit
-  ] 
+    google_identity_platform_config.default
+  ]
 }
