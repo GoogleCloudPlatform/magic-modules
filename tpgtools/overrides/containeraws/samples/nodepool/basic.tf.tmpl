@@ -147,7 +147,7 @@ resource "google_container_aws_node_pool" "primary" {
   }
 
   management {
-    auto_repair = false
+    auto_repair = true
   }
 
   project = "{{project}}"
