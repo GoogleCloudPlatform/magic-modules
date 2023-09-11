@@ -74,6 +74,7 @@ properties:
       The set of labels that can be used to describe a specific instance of this
       metric type. In order to delete a label, the entire resource must be
       deleted, then created with the desired labels.
+    immutable: true
     is_set: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
