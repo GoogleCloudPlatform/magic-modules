@@ -68,7 +68,7 @@ examples:
       project_id: :PROJECT_NAME
     test_vars_overrides:
       # Use the default hosting site for the project in tests
-      site_id: acctest.GetTestProjectFromEnv()
+      site_id: envvar.GetTestProjectFromEnv()
       # Don't add random suffix
       custom_domain: '"custom.domain.com"'
   - !ruby/object:Provider::Terraform::Examples
@@ -83,7 +83,7 @@ examples:
       project_id: :PROJECT_NAME
     test_vars_overrides:
       # Use the default hosting site for the project in tests
-      site_id: acctest.GetTestProjectFromEnv()
+      site_id: envvar.GetTestProjectFromEnv()
       # Don't add random suffix
       custom_domain: '"source.domain.com"'
       redirect_target: '"destination.domain.com"'
