@@ -80,6 +80,7 @@ properties:
     exactly_one_of:
       - daily_recurrence
       - weekly_recurrence
+    properties: []
   - !ruby/object:Api::Type::NestedObject
     name: weeklyRecurrence
     description: |
