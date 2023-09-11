@@ -1,0 +1,37 @@
+resource "google_cloud_run_v2_job" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['cloud_run_job_name'] %>"
+  location = "us-central1"
+
+  template {
+    template{
+      containers {
+        image = "us-docker.pkg.dev/cloudrun/container/hello"
+      }
+      vpc_access {
+        network_interfaces [{
+          network = google_compute_network.custom_test.name
+          subnetwork = google_compute_subnetwork.custom_test.name
+          tags = ["tag1"]
+        }]
+        egress = "ALL_TRAFFIC"
+      }
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      launch_stage,
+    ]
+  }
+}
+
+resource "google_compute_subnetwork" "custom_test" {
+  name          = "<%= ctx[:vars]['vpc_compute_subnetwork_name'] %>"
+  ip_cidr_range = "10.2.0.0/28"
+  region        = "us-central1"
+  network       = google_compute_network.custom_test.id
+}
+resource "google_compute_network" "custom_test" {
+  name                    = "<%= ctx[:vars]['compute_network_name'] %>"
+  auto_create_subnetworks = false
+}
