@@ -1,4 +1,4 @@
-package google
+package backupdr_test
 
 import (
 	"testing"
@@ -63,9 +63,7 @@ func testAccDataSourceGoogleBackupDRManagementServer_basic(context map[string]in
 		}
 		depends_on = [ google_service_networking_connection.default ]
 	  }
-
-data "ggoogle_backup_dr_management_server" "foo" {
-  location = google_backup_dr_management_server.foo.location
+data "google_backup_dr_management_server" "foo" {
 }
 `, context)
 }

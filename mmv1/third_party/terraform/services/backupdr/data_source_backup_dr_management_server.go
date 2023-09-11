@@ -7,11 +7,10 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleCloudBackupDRService() *schema.Resource {
+func DataSourceGoogleCloudBackupDRService() *schema.Resource {
 
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceBackupDRManagementServer().Schema)
-	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name", "location", "network")
-	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "project","location")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleCloudBackupDRServiceRead,
@@ -22,7 +21,7 @@ func dataSourceGoogleCloudBackupDRService() *schema.Resource {
 func dataSourceGoogleCloudBackupDRServiceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/managementServers/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/managementServers")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
