@@ -118,7 +118,15 @@ The new annotations model is similar to the new labels model and will be applied
 
 There are now two annotation-related fields with the new model, the `annotations` and the output-only `effective_annotations` fields.
 
+### Provider default values shown at plan-time
+
+`project`, `region`, and `zone` fields will now display their values during plan-time instead of the placeholder `(known after apply)` value normally displayed for fields without fixed Terraform default values. These values will be taken from either the Terraform resource config file, provider config, or local environment variables, depending on which variables are supplied by the user, matching the existing per-resource functionality for what default values are used in execution of a Terraform plan.
+
 ## Datasources
+
+### Datasources now error universally on 404
+
+All data sources have been updated to return an error when a target resource URI can not be reached. Previously this was inconsistent between different datasources in whether an empty value was returned to Terraform state upon 404 or if an error was returned, but this has been standardized. Any plans that reference datasources which no longer exist (or do not exist yet) will need to be revised to have these datasources removed from configuration files.
 
 ## Datasource: `google_product_datasource`
 
@@ -385,6 +393,18 @@ If you were relying on accessing an individual flag by index (for example, `goog
 
 Previously, the default value for `rule.rate_limit_options.encorce_on_key` is "ALL", now this field no longer has a default value.
 
+## Resource: `google_logging_metric`
+
+### Additional `bucket_options` subfields are now properly required
+
+When setting the `bucket_options` block, the following fields may be required:
+
+* `num_finite_buckets`, `width`, and `offset` are now required when `bucket_options.linear_buckets` is set.
+
+* `num_finite_buckets`, `growth_factor`, and `scale` are now required when `bucket_options.exponential_buckets` is set.
+
+Previously these fields should have been required but were not, which allowed for invalid `google_logging_metric` configurations.
+
 ## Resource: `google_logging_project_sink`
 
 ### `unique_writer_identity` now defaults to `TRUE`
@@ -432,3 +452,9 @@ resource "google_project_iam_binding" "gcs-bucket-writer" {
 ### resource `google_cloudiot_registry_iam_*` is now removed
 
 ### datasource `google_cloudiot_registry_iam_policy` is now removed
+
+## Resource: `google_service_networking_connection`
+
+### `Create` endpoint is used to create the resource
+
+`google_service_networking_connection` now uses the Create endpoint instead of the Patch endpoint during the creation step. Previously, Patch was used as a workaround for an issue that has since been resolved.
