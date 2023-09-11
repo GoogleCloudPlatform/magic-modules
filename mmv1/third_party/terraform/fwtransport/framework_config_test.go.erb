@@ -1142,7 +1142,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_impersonateServiceAccountDel
 		// Handling empty values in config
 		"when impersonate_service_account_delegates is set as an empty array the field is treated as if it's unset, without error": {
 			ImpersonateServiceAccountDelegatesValue: []string{},
-			ExpectedDataModelValue:                  []string{},
+			ExpectedDataModelValue:                  nil,
 		},
 		// Handling unknown values
 		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
