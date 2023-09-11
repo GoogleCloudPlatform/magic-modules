@@ -73,7 +73,18 @@ examples:
     skip_vcr: true
     skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
-    name: 'identity_platform_tenant_monitoring'
+    name: 'identity_platform_config_multi_tenant'
+    primary_resource_id: 'default'
+    vars:
+      project_id: 'my-project-1'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_acct:
+        :BILLING_ACCT
+    skip_vcr: true
+    skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'identity_platform_config_multi_tenant_monitoring'
     primary_resource_id: 'default'
     vars:
       project_id: 'my-project-1'
@@ -114,6 +125,7 @@ properties:
     name: 'monitoring'
     description: |
       Configuration related to monitoring project activity.
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'requestLogging'

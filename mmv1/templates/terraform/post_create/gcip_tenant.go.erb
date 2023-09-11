@@ -12,3 +12,27 @@ if err != nil {
 	return fmt.Errorf("Error constructing id: %s", err)
 }
 d.SetId(id)
+
+// Monitoring must be set as an update after creation.
+if d.Get("monitoring") != nil {
+	updateURL, err := tpgresource.ReplaceVars(d, config, "{{IdentityPlatformBasePath}}projects/{{project}}/tenants/{{name}}")
+	if err != nil {
+		return err
+	}
+	updateURL, err = transport_tpg.AddQueryParams(updateURL, map[string]string{"updateMask": "monitoring"})
+	if err != nil {
+		return err
+	}
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "PATCH",
+		Project:   billingProject,
+		RawURL:    updateURL,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutCreate),
+	})
+	if err != nil {
+		return fmt.Errorf("Error updating Tenant monitoring config: %s", err)
+	}
+}
