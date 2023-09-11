@@ -1150,7 +1150,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
     config := meta.(*transport_tpg.Config)
     if err := tpgresource.ParseImportId([]string{
 <%      for import_id in import_id_formats_from_resource(object) -%>
-        "<%= format2regex(import_id) %>",
+        "^<%= format2regex(import_id) %>$",
 <%      end -%>
     }, d, config); err != nil {
       return nil, err
