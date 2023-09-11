@@ -1,0 +1,4 @@
+- type: DIFF_SUPPRESS_FUNC
+  field: management.auto_repair
+  details:
+    diffsuppressfunc: tpgresource.EmptyOrDefaultStringSuppress("false")

@@ -6,3 +6,7 @@
   field: config.taints.effect
   details:
     diffsuppressfunc: tpgresource.CompareCaseInsensitive
+- type: DIFF_SUPPRESS_FUNC
+  field: management.auto_repair
+  details:
+    diffsuppressfunc: tpgresource.EmptyOrDefaultStringSuppress("false")

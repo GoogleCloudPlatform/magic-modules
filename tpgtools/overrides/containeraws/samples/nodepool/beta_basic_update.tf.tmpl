@@ -151,7 +151,7 @@ resource "google_container_aws_node_pool" "primary" {
   version   = "${data.google_container_aws_versions.versions.valid_versions[0]}"
 
   management {
-    auto_repair = true
+    auto_repair = false
   }
 
   annotations = {
