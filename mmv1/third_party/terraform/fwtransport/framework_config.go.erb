@@ -117,6 +117,8 @@ func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, 
 // HandleZeroValues will make the plugin framework act like the SDK; zero value, particularly empty strings, are converted to null.
 // This causes the plugin framework to treat the field as unset, just like how the SDK ignores empty strings.
 func (p *FrameworkProviderConfig) HandleZeroValues(ctx context.Context, data *fwmodels.ProviderModel, diags *diag.Diagnostics) {
+	
+	// Change empty strings to null values
 	if data.AccessToken.Equal(types.StringValue("")) {
 		data.AccessToken = types.StringNull()
 	}
@@ -145,10 +147,16 @@ func (p *FrameworkProviderConfig) HandleZeroValues(ctx context.Context, data *fw
 		data.Zone = types.StringNull()
 	}
 
-	// TODO - how to handle non-string fields? Do they need handling?
-	// - impersonate_service_account_delegates
-	// - scopes
-	// - batching , send_after, enable_batching
+	// Change lists that aren't null or unknown with length of zero to null lists
+	if !data.Scopes.IsNull() && !data.Scopes.IsUnknown() && (len(data.Scopes.Elements()) == 0) {
+		data.Scopes = types.ListNull(types.StringType)
+	}
+	if !data.ImpersonateServiceAccountDelegates.IsNull() && !data.ImpersonateServiceAccountDelegates.IsUnknown() && (len(data.ImpersonateServiceAccountDelegates.Elements()) == 0) {
+		data.ImpersonateServiceAccountDelegates = types.ListNull(types.StringType)
+	}
+
+	// TODO - how to handle batching, send_after, enable_batching
+
 }
 
 // HandleDefaults will handle all the defaults necessary in the provider
