@@ -112,13 +112,13 @@ resource "google_dialogflow_cx_test_case" "basic_test_case" {
       input {
         language_code = "en"
         text {
-          text = "training phrase"
+          text = "some phrase"
         }
       }
     }
     virtual_agent_output {
       text_responses {
-        text = ["Training phrase response"]
+        text = ["Some response"]
       }
     }
   }
@@ -201,16 +201,16 @@ resource "google_dialogflow_cx_test_case" "basic_test_case" {
         }
       }
       injected_parameters       = jsonencode({ some_param = "1" })
-      is_webhook_enabled        = false
-      enable_sentiment_analysis = false
+      is_webhook_enabled        = true
+      enable_sentiment_analysis = true
     }
     virtual_agent_output {
       session_parameters = jsonencode({ some_param = "1" })
       triggered_intent {
-        name         = google_dialogflow_cx_intent.intent.id
+        name = google_dialogflow_cx_intent.intent.id
       }
       current_page {
-        name         = google_dialogflow_cx_page.page.id
+        name = google_dialogflow_cx_page.page.id
       }
       text_responses {
         text = ["Training phrase response"]
@@ -228,7 +228,7 @@ resource "google_dialogflow_cx_test_case" "basic_test_case" {
     }
     virtual_agent_output {
       current_page {
-        name         = google_dialogflow_cx_page.page.id
+        name = google_dialogflow_cx_page.page.id
       }
       text_responses {
         text = ["Handling some event"]
