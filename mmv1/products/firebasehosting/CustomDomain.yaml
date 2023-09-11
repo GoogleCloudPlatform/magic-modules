@@ -131,9 +131,6 @@ properties:
     description: |
       The fully-qualified name of the `CustomDomain`.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: annotations
-    description: Annotations you can add to leave both human- and machine-readable metadata about your `CustomDomain`.
   - !ruby/object:Api::Type::Time
     name: createTime
     output: true
@@ -509,6 +506,3 @@ properties:
       make the `CustomDomain`'s state match your preferred state. This is most
       frequently `true` when initially provisioning a `CustomDomain` or when creating
       a new SSL certificate to match an updated `cert_preference`
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: labels
-    description: Labels used for extra metadata and/or filtering.
