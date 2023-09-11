@@ -127,15 +127,15 @@ func IsFailedPreconditionError(err error) bool {
 
 func IsQuotaError(err error) bool {
 	gerr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error)
-        if !ok {
-                return false
-        }
-        if gerr == nil {
-                return false
-        }
-        if gerr.Code != 429 {
-                return false
-        }
+	if !ok {
+		return false
+	}
+	if gerr == nil {
+		return false
+	}
+	if gerr.Code != 429 {
+		return false
+	}
 	return true
 }
 
