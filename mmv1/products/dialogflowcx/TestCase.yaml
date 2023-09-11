@@ -116,6 +116,7 @@ properties:
               description: |
                 User input. Supports text input, event input, dtmf input in the test case.
               properties:
+                # Does not support intent or audio as of this writing. https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/ConversationTurn#userinput
                 - !ruby/object:Api::Type::String
                   name: 'languageCode'
                   description: |
