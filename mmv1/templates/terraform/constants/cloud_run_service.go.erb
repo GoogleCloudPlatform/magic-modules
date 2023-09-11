@@ -65,6 +65,7 @@ func cloudrunLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool 
 
 var cloudRunGoogleProvidedTemplateLabels = []string{
 	"run.googleapis.com/startupProbeType",
+	"run.googleapis.com/startup-cpu-boost",
 }
 
 func cloudrunTemplateLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
