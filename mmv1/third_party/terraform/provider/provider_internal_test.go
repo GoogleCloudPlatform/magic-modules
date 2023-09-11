@@ -1556,9 +1556,23 @@ func TestProvider_ProviderConfigure_batching(t *testing.T) {
 		ExpectedEnableBatchingValue bool
 		ExpectedSendAfterValue      string
 	}{
-		"if batch is an empty block, it will set the default values": {
+		"batching can be configured with values for enable_batching and send_after": {
 			ConfigValues: map[string]interface{}{
 				"credentials": transport_tpg.TestFakeCredentialsPath,
+				"batching": []interface{}{
+					map[string]interface{}{
+						"enable_batching": true,
+						"send_after":      "123s",
+					},
+				},
+			},
+			ExpectedEnableBatchingValue: true,
+			ExpectedSendAfterValue:      "123s",
+		},
+		"if batching is an empty block, it will set the default values for enable_batching and send_after": {
+			ConfigValues: map[string]interface{}{
+				"credentials": transport_tpg.TestFakeCredentialsPath,
+				// batching not set
 			},
 			// Although at the schema level it's shown that by default it's set to false, the actual default value
 			// is true and can be seen in the `ExpanderProviderBatchingConfig` struct
@@ -1567,20 +1581,7 @@ func TestProvider_ProviderConfigure_batching(t *testing.T) {
 			ExpectedSendAfterValue:      "", // uses "" value to be able to set the default value of 30s
 			ExpectFieldUnset:            true,
 		},
-		"if batch is configured with both enable_batching and send_after": {
-			ConfigValues: map[string]interface{}{
-				"credentials": transport_tpg.TestFakeCredentialsPath,
-				"batching": []interface{}{
-					map[string]interface{}{
-						"enable_batching": true,
-						"send_after":      "10s",
-					},
-				},
-			},
-			ExpectedEnableBatchingValue: true,
-			ExpectedSendAfterValue:      "10s",
-		},
-		"if batch is configured with only enable_batching": {
+		"when batching is configured with only enable_batching, send_after will be set to a default value": {
 			ConfigValues: map[string]interface{}{
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 				"batching": []interface{}{
@@ -1592,19 +1593,20 @@ func TestProvider_ProviderConfigure_batching(t *testing.T) {
 			ExpectedEnableBatchingValue: true,
 			ExpectedSendAfterValue:      "",
 		},
-		"if batch is configured with only send_after": {
+		"when batching is configured with only send_after, enable_batching will be set to a default value": {
 			ConfigValues: map[string]interface{}{
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 				"batching": []interface{}{
 					map[string]interface{}{
-						"send_after": "10s",
+						"send_after": "123s",
 					},
 				},
 			},
 			ExpectedEnableBatchingValue: false,
-			ExpectedSendAfterValue:      "10s",
+			ExpectedSendAfterValue:      "123s",
 		},
-		"if batch is configured with invalid value for send_after": {
+		// Error states
+		"if batching is configured with send_after as an invalid value, there's an error": {
 			ConfigValues: map[string]interface{}{
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 				"batching": []interface{}{
@@ -1613,10 +1615,9 @@ func TestProvider_ProviderConfigure_batching(t *testing.T) {
 					},
 				},
 			},
-			ExpectedSendAfterValue: "invalid value",
-			ExpectError:            true,
+			ExpectError: true,
 		},
-		"if batch is configured with value without seconds (s) for send_after": {
+		"if batching is configured with send_after as number value without seconds (s), there's an error": {
 			ConfigValues: map[string]interface{}{
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 				"batching": []interface{}{
@@ -1625,8 +1626,7 @@ func TestProvider_ProviderConfigure_batching(t *testing.T) {
 					},
 				},
 			},
-			ExpectedSendAfterValue: "10",
-			ExpectError:            true,
+			ExpectError: true,
 		},
 	}
 
