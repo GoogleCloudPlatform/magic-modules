@@ -13,6 +13,6 @@ resource "google_tpu_v2_vm" "<%= ctx[:primary_resource_id] %>" {
   zone = "us-central1-c"
   description = "Text description of the TPU."
 
-  runtime_version  = data.google_tpu_v2_runtime_versions.available.versions[0]
-  accelerator_type = data.google_tpu_v2_accelerator_types.available.types[0]
+  runtime_version  = "tpu-vm-tf-2.13.0"
+  accelerator_type = "v2-8"
 }
