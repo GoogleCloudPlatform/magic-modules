@@ -292,6 +292,4 @@ Terraform will resume its normal behaviour of pulling published provider version
 
 
 ## What's next?
-- [Create a pull request](https://docs.github.com/en/get-started/quickstart/github-flow#create-a-pull-request)
-- [Write release notes]({{< ref "/contribute/release-notes" >}})
-- [Review a pull request]({{< ref "/contribute/review-pr" >}})
+- [Create a pull request]({{< ref "/contribute/create-pr" >}})
