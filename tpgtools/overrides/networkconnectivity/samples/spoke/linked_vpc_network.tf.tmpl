@@ -1,6 +1,7 @@
 
 resource "google_compute_network" "network" {
   name                    = "{{network}}"
+  region                  = "{{region}}"
   auto_create_subnetworks = false
 }
 
