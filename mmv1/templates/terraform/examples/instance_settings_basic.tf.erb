@@ -1,0 +1,13 @@
+# [START instance_settings_basic]
+
+resource "google_compute_instance_settings" "<%= ctx[:primary_resource_id] %>" {
+  zone = "us-central1-a"
+  update_mask = "metadata.items.foo"
+  metadata {
+    items = {
+      foo = "baz"
+    }
+  }
+}
+
+# [END instance_settings_basic]
