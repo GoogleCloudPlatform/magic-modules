@@ -6,8 +6,7 @@ resource "google_tpu_v2_vm" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
 
   name = "<%= ctx[:vars]["vm_name"] %>"
-  zone = "us-central1-b"
+  zone = "us-central1-c"
 
   runtime_version  = data.google_tpu_v2_runtime_versions.available.versions[0]
-  accelerator_type = "v3-8"
 }
