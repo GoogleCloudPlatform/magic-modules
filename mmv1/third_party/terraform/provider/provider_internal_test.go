@@ -403,7 +403,7 @@ func TestProvider_ProviderConfigure_impersonateServiceAccount(t *testing.T) {
 			ExpectedValue:    "",
 		},
 		// Handling empty strings in config
-		"when impersonate_service_account is set as an empty array the field is treated as if it's unset, without error": {
+		"when impersonate_service_account is set as an empty string the field is treated as if it's unset, without error": {
 			ConfigValues: map[string]interface{}{
 				"impersonate_service_account": "",
 				"credentials":                 transport_tpg.TestFakeCredentialsPath,
@@ -411,6 +411,16 @@ func TestProvider_ProviderConfigure_impersonateServiceAccount(t *testing.T) {
 			ExpectError:      false,
 			ExpectFieldUnset: true,
 			ExpectedValue:    "",
+		},
+		"when impersonate_service_account is set as an empty string in the config, an environment variable is used": {
+			ConfigValues: map[string]interface{}{
+				"impersonate_service_account": "",
+				"credentials":                 transport_tpg.TestFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT": "value-from-env@example.com",
+			},
+			ExpectedValue: "value-from-env@example.com",
 		},
 	}
 

@@ -1055,6 +1055,15 @@ func TestFrameworkProvider_LoadAndValidateFramework_impersonateServiceAccount(t 
 			},
 			ExpectedDataModelValue: types.StringNull(),
 		},
+		"when impersonate_service_account is set as an empty string in the config, an environment variable is used": {
+			ConfigValues: fwmodels.ProviderModel{
+				ImpersonateServiceAccount: types.StringValue(""),
+			},
+			EnvVariables: map[string]string{
+				"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT": "value-from-env@example.com",
+			},
+			ExpectedDataModelValue: types.StringValue("value-from-env@example.com"),
+		},
 		// Handling unknown values
 		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
 		// "when impersonate_service_account is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
