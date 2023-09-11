@@ -435,7 +435,6 @@ resource "google_project_iam_binding" "gcs-bucket-writer" {
   ]
 }
 ```
-
 ## Product: `cloudiot`
 
 ### resource `google_cloudiot_device` is now removed
