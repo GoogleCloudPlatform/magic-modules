@@ -1615,7 +1615,8 @@ func TestProvider_ProviderConfigure_batching(t *testing.T) {
 					},
 				},
 			},
-			ExpectError: true,
+			ExpectedSendAfterValue: "invalid value",
+			ExpectError:            true,
 		},
 		"if batching is configured with send_after as number value without seconds (s), there's an error": {
 			ConfigValues: map[string]interface{}{
@@ -1626,7 +1627,8 @@ func TestProvider_ProviderConfigure_batching(t *testing.T) {
 					},
 				},
 			},
-			ExpectError: true,
+			ExpectedSendAfterValue: "10",
+			ExpectError:            true,
 		},
 	}
 
@@ -1665,10 +1667,10 @@ func TestProvider_ProviderConfigure_batching(t *testing.T) {
 				if ok {
 					val := v.(string)
 					if val != tc.ExpectedSendAfterValue {
-						t.Fatalf("expected request_timeout value set in provider data to be %v, got %v", tc.ExpectedSendAfterValue, val)
+						t.Fatalf("expected send_after value set in provider data to be %v, got %v", tc.ExpectedSendAfterValue, val)
 					}
 					if tc.ExpectFieldUnset {
-						t.Fatalf("expected request_timeout value to not be set in provider data, got %s", val)
+						t.Fatalf("expected send_after value to not be set in provider data, got %s", val)
 					}
 				}
 				// Return early in tests where errors expected
