@@ -841,6 +841,7 @@ func ResourceBigQueryTable() *schema.Resource {
 							Type:        schema.TypeBool,
 							Default:     false,
 							Optional:    true,
+							ForceNew:    true,
 							Description: `Allow non incremental materialized view definition. The default value is false.`,
 						},
 
