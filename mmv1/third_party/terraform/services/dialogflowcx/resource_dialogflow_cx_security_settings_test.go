@@ -48,8 +48,6 @@ func testAccDialogflowCXSecuritySettings_dialogflowcxSecuritySettings_basic(cont
 resource "google_dialogflow_cx_security_settings" "basic_security_settings" {
   display_name          = "tf-test-dialogflowcx-security-settings%{random_suffix}"
   location              = "global"
-  redaction_strategy    = "REDACTION_STRATEGY_UNSPECIFIED"
-  redaction_scope       = "REDACTION_SCOPE_UNSPECIFIED"
   purge_data_types      = []
   retention_window_days = 7
 }

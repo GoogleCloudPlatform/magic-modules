@@ -69,19 +69,15 @@ properties:
     name: 'redactionStrategy'
     description: |
       Defines how we redact data.
-      * REDACTION_STRATEGY_UNSPECIFIED: Do not redact.
       * REDACT_WITH_SERVICE: Call redaction service to clean up the data to be persisted.
     values:
-      - :REDACTION_STRATEGY_UNSPECIFIED
       - :REDACT_WITH_SERVICE
   - !ruby/object:Api::Type::Enum
     name: 'redactionScope'
     description: |
       Defines what types of data to redact.
-      * REDACTION_SCOPE_UNSPECIFIED: Don't redact any kind of data.
       * REDACT_DISK_STORAGE: On data to be written to disk or similar devices that are capable of holding data even if power is disconnected. This includes data that are temporarily saved on disk.
     values:
-      - :REDACTION_SCOPE_UNSPECIFIED
       - :REDACT_DISK_STORAGE
   - !ruby/object:Api::Type::String
     name: 'inspectTemplate'
@@ -160,8 +156,6 @@ properties:
       - retentionWindowDays
     description: |
       Defines how long we retain persisted data that contains sensitive info. Only one of `retention_window_days` and `retention_strategy` may be set.
-      * RETENTION_STRATEGY_UNSPECIFIED: Retains the persisted data with Dialogflow's internal default 365d TTLs.
       * REMOVE_AFTER_CONVERSATION: Removes data when the conversation ends. If there is no conversation explicitly established, a default conversation ends when the corresponding Dialogflow session ends.
     values:
-      - :RETENTION_STRATEGY_UNSPECIFIED
       - :REMOVE_AFTER_CONVERSATION
