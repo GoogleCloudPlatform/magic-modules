@@ -499,7 +499,7 @@ func TestProvider_ProviderConfigure_impersonateServiceAccountDelegates(t *testin
 			ExpectedValue:    nil,
 		},
 		// Handling empty values in config
-		"when project is set as an empty array the field is treated as if it's unset, without error": {
+		"when impersonate_service_account_delegates is set as an empty array the field is treated as if it's unset, without error": {
 			ConfigValues: map[string]interface{}{
 				"impersonate_service_account_delegates": []string{},
 				"credentials":                           transport_tpg.TestFakeCredentialsPath,
@@ -1255,22 +1255,10 @@ func TestProvider_ProviderConfigure_scopes(t *testing.T) {
 		"scopes are set in the provider config as a list": {
 			ConfigValues: map[string]interface{}{
 				"credentials": transport_tpg.TestFakeCredentialsPath,
-				"scopes": []string{
-					"fizz",
-					"buzz",
-					"fizzbuzz",
-				},
+				"scopes":      []string{"fizz", "buzz", "fizzbuzz"},
 			},
-			ExpectedSchemaValue: []string{
-				"fizz",
-				"buzz",
-				"fizzbuzz",
-			},
-			ExpectedConfigValue: []string{
-				"fizz",
-				"buzz",
-				"fizzbuzz",
-			},
+			ExpectedSchemaValue: []string{"fizz", "buzz", "fizzbuzz"},
+			ExpectedConfigValue: []string{"fizz", "buzz", "fizzbuzz"},
 		},
 		"scopes can be left unset in the provider config without any issues, and a default value is used": {
 			ConfigValues: map[string]interface{}{
