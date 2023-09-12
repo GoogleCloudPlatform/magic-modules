@@ -7281,10 +7281,10 @@ resource "google_compute_network_edge_security_service" "edge_sec_service" {
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
 }
 
-#resource "google_compute_network" "net" {
-#  name                    = "tf-test-network-%s"
-#  auto_create_subnetworks = false
-#}
+resource "google_compute_network" "net" {
+  name                    = "tf-test-network-%s"
+  auto_create_subnetworks = false
+}
 
 resource "google_compute_subnetwork" "subnet" {
   region                     = "asia-northeast1"
@@ -7292,8 +7292,7 @@ resource "google_compute_subnetwork" "subnet" {
   ip_cidr_range              = "192.168.0.0/16"
   purpose                    = "PRIVATE"
   stack_type                 = "IPV4_ONLY"
-# network                    = google_compute_network.net.id
-  network = "felipegc-default"
+  network                    = google_compute_network.net.id
 }
 
 resource "google_compute_subnetwork" "subnet-ipv6" {
@@ -7303,8 +7302,7 @@ resource "google_compute_subnetwork" "subnet-ipv6" {
   purpose                    = "PRIVATE"
   stack_type                 = "IPV4_IPV6"
   ipv6_access_type           = "EXTERNAL"
-# network                    = google_compute_network.net.id
-  network = "felipegc-default"
+  network                    = google_compute_network.net.id
 }
 
 resource "google_compute_address" "normal-address" {
@@ -7343,8 +7341,7 @@ resource "google_compute_instance" "foobar" {
   }
 
   network_interface {
-    # network = google_compute_network.net.self_link
-	network = "felipegc-default"
+    network = google_compute_network.net.self_link
     subnetwork = google_compute_subnetwork.subnet-ipv6.self_link
     stack_type = "IPV4_IPV6"
     ipv6_access_config {
@@ -7393,10 +7390,10 @@ resource "google_compute_network_edge_security_service" "edge_sec_service" {
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
 }
 
-#resource "google_compute_network" "net" {
-#  name                    = "tf-test-network-%s"
-#  auto_create_subnetworks = false
-#}
+resource "google_compute_network" "net" {
+  name                    = "tf-test-network-%s"
+  auto_create_subnetworks = false
+}
 
 resource "google_compute_subnetwork" "subnet" {
   region                     = "asia-northeast1"
@@ -7404,8 +7401,7 @@ resource "google_compute_subnetwork" "subnet" {
   ip_cidr_range              = "192.168.0.0/16"
   purpose                    = "PRIVATE"
   stack_type                 = "IPV4_ONLY"
-# network                    = google_compute_network.net.id
-  network = "felipegc-default"
+  network                    = google_compute_network.net.id
 }
 
 resource "google_compute_subnetwork" "subnet-ipv6" {
@@ -7415,8 +7411,7 @@ resource "google_compute_subnetwork" "subnet-ipv6" {
   purpose                    = "PRIVATE"
   stack_type                 = "IPV4_IPV6"
   ipv6_access_type           = "EXTERNAL"
-# network                    = google_compute_network.net.id
-  network = "felipegc-default"
+  network                    = google_compute_network.net.id
 }
 
 resource "google_compute_address" "normal-address" {
@@ -7463,8 +7458,7 @@ resource "google_compute_instance" "foobar" {
   }
 
   network_interface {
-    # network = google_compute_network.net.self_link
-	network = "felipegc-default"
+    network = google_compute_network.net.self_link
     subnetwork = google_compute_subnetwork.subnet-ipv6.self_link
     stack_type = "IPV4_IPV6"
     ipv6_access_config {
@@ -7513,10 +7507,10 @@ resource "google_compute_network_edge_security_service" "edge_sec_service" {
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
 }
 
-#resource "google_compute_network" "net" {
-#  name                    = "tf-test-network-%s"
-#  auto_create_subnetworks = false
-#}
+resource "google_compute_network" "net" {
+  name                    = "tf-test-network-%s"
+  auto_create_subnetworks = false
+}
 
 resource "google_compute_subnetwork" "subnet" {
   region                     = "asia-northeast1"
@@ -7524,8 +7518,7 @@ resource "google_compute_subnetwork" "subnet" {
   ip_cidr_range              = "192.168.0.0/16"
   purpose                    = "PRIVATE"
   stack_type                 = "IPV4_ONLY"
-# network                    = google_compute_network.net.id
-  network = "felipegc-default"
+  network                    = google_compute_network.net.id
 }
 
 resource "google_compute_subnetwork" "subnet-ipv6" {
@@ -7535,8 +7528,7 @@ resource "google_compute_subnetwork" "subnet-ipv6" {
   purpose                    = "PRIVATE"
   stack_type                 = "IPV4_IPV6"
   ipv6_access_type           = "EXTERNAL"
-# network                    = google_compute_network.net.id
-  network = "felipegc-default"
+  network                    = google_compute_network.net.id
 }
 
 resource "google_compute_address" "normal-address" {
@@ -7583,8 +7575,7 @@ resource "google_compute_instance" "foobar" {
   }
 
   network_interface {
-    # network = google_compute_network.net.self_link
-	network = "felipegc-default"
+    network    = google_compute_network.net.self_link
     subnetwork = google_compute_subnetwork.subnet-ipv6.self_link
     stack_type = "IPV4_IPV6"
     ipv6_access_config {
@@ -7635,10 +7626,10 @@ resource "google_compute_network_edge_security_service" "edge_sec_service" {
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
 }
 
-#resource "google_compute_network" "net" {
-#  name                    = "tf-test-network-%s"
-#  auto_create_subnetworks = false
-#}
+resource "google_compute_network" "net" {
+  name                    = "tf-test-network-%s"
+  auto_create_subnetworks = false
+}
 
 resource "google_compute_subnetwork" "subnet" {
   region                     = "asia-northeast1"
@@ -7646,8 +7637,7 @@ resource "google_compute_subnetwork" "subnet" {
   ip_cidr_range              = "192.168.0.0/16"
   purpose                    = "PRIVATE"
   stack_type                 = "IPV4_ONLY"
-# network                    = google_compute_network.net.id
-  network = "felipegc-default"
+  network                    = google_compute_network.net.id
 }
 
 resource "google_compute_subnetwork" "subnet-ipv6" {
@@ -7657,8 +7647,7 @@ resource "google_compute_subnetwork" "subnet-ipv6" {
   purpose                    = "PRIVATE"
   stack_type                 = "IPV4_IPV6"
   ipv6_access_type           = "EXTERNAL"
-# network                    = google_compute_network.net.id
-  network = "felipegc-default"
+  network                    = google_compute_network.net.id
 }
 
 resource "google_compute_address" "normal-address" {
@@ -7705,8 +7694,7 @@ resource "google_compute_instance" "foobar" {
   }
 
   network_interface {
-    # network = google_compute_network.net.self_link
-	network = "felipegc-default"
+    network    = google_compute_network.net.self_link
     subnetwork = google_compute_subnetwork.subnet-ipv6.self_link
     stack_type = "IPV4_IPV6"
     ipv6_access_config {
@@ -7751,10 +7739,10 @@ resource "google_compute_network_edge_security_service" "edge_sec_service" {
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
 }
 
-#resource "google_compute_network" "net" {
-#  name                    = "tf-test-network-%s"
-#  auto_create_subnetworks = false
-#}
+resource "google_compute_network" "net" {
+  name                    = "tf-test-network-%s"
+  auto_create_subnetworks = false
+}
 
 resource "google_compute_subnetwork" "subnet" {
   region                     = "asia-northeast1"
@@ -7762,8 +7750,7 @@ resource "google_compute_subnetwork" "subnet" {
   ip_cidr_range              = "192.168.0.0/16"
   purpose                    = "PRIVATE"
   stack_type                 = "IPV4_ONLY"
-# network                    = google_compute_network.net.id
-  network = "felipegc-default"
+  network                    = google_compute_network.net.id
 }
 
 resource "google_compute_subnetwork" "subnet-ipv6" {
@@ -7773,8 +7760,7 @@ resource "google_compute_subnetwork" "subnet-ipv6" {
   purpose                    = "PRIVATE"
   stack_type                 = "IPV4_IPV6"
   ipv6_access_type           = "EXTERNAL"
-# network                    = google_compute_network.net.id
-  network = "felipegc-default"
+  network                    = google_compute_network.net.id
 }
 
 resource "google_compute_address" "normal-address" {
@@ -7792,10 +7778,10 @@ resource "google_compute_address" "ipv6-address" {
   subnetwork         = google_compute_subnetwork.subnet-ipv6.name
 }
 
-#resource "google_compute_network" "net2" {
-  #  name                    = "tf-test-network2-%s"
-  #  auto_create_subnetworks = false
-#}
+resource "google_compute_network" "net2" {
+  name                    = "tf-test-network2-%s"
+  auto_create_subnetworks = false
+}
 
 resource "google_compute_subnetwork" "subnet2" {
   region                     = "asia-northeast1"
@@ -7803,8 +7789,7 @@ resource "google_compute_subnetwork" "subnet2" {
   ip_cidr_range              = "192.170.0.0/20"
   purpose                    = "PRIVATE"
   stack_type                 = "IPV4_ONLY"
-  # network                    = google_compute_network.net2.id
-  network = "felipegc-default2"
+  network                    = google_compute_network.net2.id
 }
   
 resource "google_compute_subnetwork" "subnet-ipv62" {
@@ -7814,8 +7799,7 @@ resource "google_compute_subnetwork" "subnet-ipv62" {
   purpose                    = "PRIVATE"
   stack_type                 = "IPV4_IPV6"
   ipv6_access_type           = "EXTERNAL"
-  # network                    = google_compute_network.net2.id
-  network = "felipegc-default2"
+  network                    = google_compute_network.net2.id
 }
 
 resource "google_compute_address" "normal-address2" {
@@ -7862,8 +7846,7 @@ resource "google_compute_instance" "foobar" {
   }
 
   network_interface {
-    # network = google_compute_network.net.self_link
-	network = "felipegc-default"
+    network    = google_compute_network.net.self_link
     subnetwork = google_compute_subnetwork.subnet-ipv6.self_link
     stack_type = "IPV4_IPV6"
     ipv6_access_config {
@@ -7881,8 +7864,7 @@ resource "google_compute_instance" "foobar" {
   }
 
   network_interface {
-    # network = google_compute_network.net2.self_link
-	network = "felipegc-default2"
+    network    = google_compute_network.net2.self_link
     subnetwork = google_compute_subnetwork.subnet-ipv62.self_link
     stack_type = "IPV4_IPV6"
     ipv6_access_config {
@@ -7913,10 +7895,10 @@ data "google_compute_image" "my_image" {
   project = "debian-cloud"
 }
 
-#resource "google_compute_network" "net" {
-#  name                    = "tf-test-network-%s"
-#  auto_create_subnetworks = false
-#}
+resource "google_compute_network" "net" {
+  name                    = "tf-test-network-%s"
+  auto_create_subnetworks = false
+}
 
 resource "google_compute_subnetwork" "subnet" {
   region                     = "asia-northeast1"
@@ -7924,8 +7906,7 @@ resource "google_compute_subnetwork" "subnet" {
   ip_cidr_range              = "192.168.0.0/16"
   purpose                    = "PRIVATE"
   stack_type                 = "IPV4_ONLY"
-# network                    = google_compute_network.net.id
-  network = "felipegc-default"
+  network                    = google_compute_network.net.id
 }
 
 resource "google_compute_subnetwork" "subnet-ipv6" {
@@ -7935,8 +7916,7 @@ resource "google_compute_subnetwork" "subnet-ipv6" {
   purpose                    = "PRIVATE"
   stack_type                 = "IPV4_IPV6"
   ipv6_access_type           = "EXTERNAL"
-# network                    = google_compute_network.net.id
-  network = "felipegc-default"
+  network                    = google_compute_network.net.id
 }
 
 resource "google_compute_address" "normal-address" {
@@ -7967,8 +7947,7 @@ resource "google_compute_instance" "foobar" {
   }
 
   network_interface {
-    # network = google_compute_network.net.self_link
-	network = "felipegc-default"
+    network    = google_compute_network.net.self_link
     subnetwork = google_compute_subnetwork.subnet-ipv6.self_link
     stack_type = "IPV4_IPV6"
     ipv6_access_config {
