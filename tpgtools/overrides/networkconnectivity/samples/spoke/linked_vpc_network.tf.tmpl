@@ -1,7 +1,6 @@
 
 resource "google_compute_network" "network" {
   name                    = "{{network}}"
-  region                  = "{{region}}"
   auto_create_subnetworks = false
 }
 
@@ -15,7 +14,7 @@ resource "google_network_connectivity_hub" "basic_hub" {
 
 resource "google_network_connectivity_spoke" "primary" {
   name = "{{name}}"
-  location = "{{region}}"
+  location = "global"
   description = "A sample spoke with a linked routher appliance instance"
   labels = {
     label-one = "value-one"
