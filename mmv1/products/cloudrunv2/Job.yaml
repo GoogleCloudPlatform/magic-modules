@@ -657,23 +657,27 @@ properties:
               - !ruby/object:Api::Type::Array
                 name: 'networkInterfaces'
                 description: |-
-                  VPC network to access to. Currently only single network interface is supported.
+                  Direct VPC egress settings. Currently only single network interface is supported.
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::String
                       name: 'network'
                       description: |-
-                        The VPC network name to access to. Defaults to "default" network.
+                        The VPC network that the Cloud Run resource will be able to send traffic to. At least one of network or subnetwork must be specified. If both
+                        network and subnetwork are specified, the given VPC subnetwork must belong to the given VPC network. If network is not specified, it will be
+                        looked up from the subnetwork.
                       default_from_api: true
                     - !ruby/object:Api::Type::String
                       name: 'subnetwork'
                       description: |-
-                        The VPC subnetwork name to access to. Defaults to the same vaule of network.
+                        The VPC subnetwork that the Cloud Run resource will get IPs from. At least one of network or subnetwork must be specified. If both
+                        network and subnetwork are specified, the given VPC subnetwork must belong to the given VPC network. If subnetwork is not specified, the
+                        subnetwork with the same name with the network will be used.
                       default_from_api: true
                     - !ruby/object:Api::Type::Array
                       name: 'tags'
                       description: |-
-                        Network tags applied to this VPC network.
+                        Network tags applied to this Cloud Run job.
                       item_type: Api::Type::String
           - !ruby/object:Api::Type::Integer
             name: 'maxRetries'
