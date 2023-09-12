@@ -903,6 +903,30 @@ func expandTransferSchedules(transferSchedules []interface{}) *storagetransfer.S
 	}
 }
 
+func flattenTransferSchedule(transferSchedule *storagetransfer.Schedule) []map[string]interface{} {
+	if transferSchedule == nil || reflect.DeepEqual(transferSchedule, &storagetransfer.Schedule{}) {
+		return nil
+	}
+
+	data := map[string]interface{}{
+		"schedule_start_date": flattenDate(transferSchedule.ScheduleStartDate),
+	}
+
+	if transferSchedule.ScheduleEndDate != nil {
+		data["schedule_end_date"] = flattenDate(transferSchedule.ScheduleEndDate)
+	}
+
+	if transferSchedule.StartTimeOfDay != nil {
+		data["start_time_of_day"] = flattenTimeOfDay(transferSchedule.StartTimeOfDay)
+	}
+
+	if transferSchedule.RepeatInterval != "" {
+		data["repeat_interval"] = transferSchedule.RepeatInterval
+	}
+
+	return []map[string]interface{}{data}
+}
+
 func expandEventStream(e []interface{}) *storagetransfer.EventStream {
 	if len(e) == 0 || e[0] == nil {
 		return nil
@@ -925,60 +949,12 @@ func flattenEventStream(eventStream *storagetransfer.EventStream) []map[string]i
 		"name": eventStream.Name,
 	}
 
-	if eventStream.EventStreamStartTime != nil {
+	if eventStream.EventStreamStartTime != "" {
 		data["event_stream_start_time"] = eventStream.EventStreamStartTime
 	}
 
-	if eventStream.EventStreamExpirationTime != nil {
+	if eventStream.EventStreamExpirationTime != "" {
 		data["event_stream_expiration_time"] = eventStream.EventStreamExpirationTime
-	}
-
-	return []map[string]interface{}{data}
-}
-
-func flattenTransferSchedule(transferSchedule *storagetransfer.Schedule) []map[string]interface{} {
-	if transferSchedule == nil || reflect.DeepEqual(transferSchedule, &storagetransfer.Schedule{}) {
-		return nil
-	}
-
-	data := map[string]interface{}{
-		"schedule_start_date": flattenDate(transferSchedule.ScheduleStartDate),
-	}
-
-	if transferSchedule.ScheduleEndDate != nil {
-		data["schedule_end_date"] = flattenDate(transferSchedule.ScheduleEndDate)
-	}
-
-	if transferSchedule.StartTimeOfDay != nil {
-		data["start_time_of_day"] = flattenTimeOfDay(transferSchedule.StartTimeOfDay)
-	}
-
-	if transferSchedule.RepeatInterval != "" {
-		data["repeat_interval"] = transferSchedule.RepeatInterval
-	}
-
-	return []map[string]interface{}{data}
-}
-
-func flattenTransferSchedule(transferSchedule *storagetransfer.Schedule) []map[string]interface{} {
-	if transferSchedule == nil || reflect.DeepEqual(transferSchedule, &storagetransfer.Schedule{}) {
-		return nil
-	}
-
-	data := map[string]interface{}{
-		"schedule_start_date": flattenDate(transferSchedule.ScheduleStartDate),
-	}
-
-	if transferSchedule.ScheduleEndDate != nil {
-		data["schedule_end_date"] = flattenDate(transferSchedule.ScheduleEndDate)
-	}
-
-	if transferSchedule.StartTimeOfDay != nil {
-		data["start_time_of_day"] = flattenTimeOfDay(transferSchedule.StartTimeOfDay)
-	}
-
-	if transferSchedule.RepeatInterval != "" {
-		data["repeat_interval"] = transferSchedule.RepeatInterval
 	}
 
 	return []map[string]interface{}{data}
