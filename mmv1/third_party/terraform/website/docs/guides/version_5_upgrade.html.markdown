@@ -443,6 +443,15 @@ resource "google_project_iam_binding" "gcs-bucket-writer" {
   ]
 }
 ```
+
+## Resource: `google_cloudfunctions2_function`
+### `location` now a required field
+Deployment would fail if this field was unspecified. Marked this field as requied to align with implementation. This value cannot be inferred from any provider level config. No change is necessary for upgrade as this field is already needed for any deployments.
+
+## Resource: `google_cloud_run_v2_service`
+### transitioned `volumes.cloud_sql_instance.instances` to SET from ARRAY for `google_cloud_run_v2_service`
+Previously the API would reorder the user's instances, causing a clientside diff on this field. We've changed to a set implementation to avoid any reordering issues. For upgrading from 4.x you will experience apply/plan diff. After applying the change no further modification is necessary.
+
 ## Product: `cloudiot`
 
 ### resource `google_cloudiot_device` is now removed
