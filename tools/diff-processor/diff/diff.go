@@ -2,8 +2,6 @@ package diff
 
 import (
 	"reflect"
-	"runtime"
-	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -220,21 +218,14 @@ func fieldChanged(oldField, newField *schema.Schema) bool {
 
 func funcChanged(oldFunc, newFunc interface{}) bool {
 	// If it changed to/from nil, it changed
-	if (oldFunc == nil || newFunc == nil) && !(oldFunc == nil && newFunc == nil) {
+	oldFuncIsNil := reflect.ValueOf(oldFunc).IsNil()
+	newFuncIsNil := reflect.ValueOf(newFunc).IsNil()
+	if (oldFuncIsNil && !newFuncIsNil) || (!oldFuncIsNil && newFuncIsNil) {
 		return true
 	}
 
-	// If the name (relative to package) changed, consider it changed
-	oldFuncName := runtime.FuncForPC(reflect.ValueOf(oldFunc).Pointer()).Name()
-	oldFuncNameSplit := strings.Split(oldFuncName, "/")
-	oldFuncName = oldFuncNameSplit[len(oldFuncNameSplit)-1]
-	newFuncName := runtime.FuncForPC(reflect.ValueOf(newFunc).Pointer()).Name()
-	newFuncNameSplit := strings.Split(newFuncName, "/")
-	newFuncName = newFuncNameSplit[len(newFuncNameSplit)-1]
-	if oldFuncName != newFuncName {
-		return true
-	}
-
-	// We do not currently try to detect whether the contents of a func changed.
+	// If a func is set before and after we don't currently have a way to reliably
+	// determine whether the function changed, so we assume that it has not changed.
+	// b/300157205
 	return false
 }

@@ -564,7 +564,7 @@ func TestFieldChanged(t *testing.T) {
 			newField:      &schema.Schema{},
 			expectChanged: true,
 		},
-		"DiffSuppressFunc unchanged": {
+		"DiffSuppressFunc remains set": {
 			oldField: &schema.Schema{
 				DiffSuppressFunc: oldTpgresource.CaseDiffSuppress,
 			},
@@ -573,31 +573,7 @@ func TestFieldChanged(t *testing.T) {
 			},
 			expectChanged: false,
 		},
-		// If the func is created at runtime it will have a name like
-		// tpgresource.IgnoreMissingKeyInMap.func1, which seems to be
-		// reliable. Detecting changes to the func args is similar to
-		// detecting changes in the func implementation.
-		"DiffSuppressFunc unchanged but dynamic": {
-			oldField: &schema.Schema{
-				DiffSuppressFunc: oldTpgresource.IgnoreMissingKeyInMap("hello"),
-			},
-			newField: &schema.Schema{
-				DiffSuppressFunc: newTpgresource.IgnoreMissingKeyInMap("hello"),
-			},
-			expectChanged: false,
-		},
-		"DiffSuppressFunc changed": {
-			oldField: &schema.Schema{
-				DiffSuppressFunc: oldTpgresource.CaseDiffSuppress,
-			},
-			newField: &schema.Schema{
-				DiffSuppressFunc: newTpgresource.Sha256DiffSuppress,
-			},
-			expectChanged: true,
-		},
 
-		// Rely on "unchanged" test for DiffSuppressFunc since there are no reusable DefaultFunc functions
-		// in the provider
 		"DefaultFunc added": {
 			oldField: &schema.Schema{},
 			newField: &schema.Schema{
@@ -612,18 +588,16 @@ func TestFieldChanged(t *testing.T) {
 			newField:      &schema.Schema{},
 			expectChanged: true,
 		},
-		"DefaultFunc changed": {
+		"DefaultFunc remains set": {
 			oldField: &schema.Schema{
 				DefaultFunc: testDefaultFunc1,
 			},
 			newField: &schema.Schema{
 				DefaultFunc: testDefaultFunc2,
 			},
-			expectChanged: true,
+			expectChanged: false,
 		},
 
-		// Rely on "unchanged" test for DiffSuppressFunc since there's not a library of StateFunc functions
-		// in the provider
 		"StateFunc added": {
 			oldField: &schema.Schema{},
 			newField: &schema.Schema{
@@ -638,14 +612,14 @@ func TestFieldChanged(t *testing.T) {
 			newField:      &schema.Schema{},
 			expectChanged: true,
 		},
-		"StateFunc changed": {
+		"StateFunc remains set": {
 			oldField: &schema.Schema{
 				StateFunc: testStateFunc1,
 			},
 			newField: &schema.Schema{
 				StateFunc: testStateFunc2,
 			},
-			expectChanged: true,
+			expectChanged: false,
 		},
 
 		"Set added": {
@@ -662,7 +636,7 @@ func TestFieldChanged(t *testing.T) {
 			newField:      &schema.Schema{},
 			expectChanged: true,
 		},
-		"Set unchanged": {
+		"Set remains set": {
 			oldField: &schema.Schema{
 				Set: oldTpgresource.SelfLinkRelativePathHash,
 			},
@@ -670,15 +644,6 @@ func TestFieldChanged(t *testing.T) {
 				Set: newTpgresource.SelfLinkRelativePathHash,
 			},
 			expectChanged: false,
-		},
-		"Set changed": {
-			oldField: &schema.Schema{
-				Set: oldTpgresource.SelfLinkNameHash,
-			},
-			newField: &schema.Schema{
-				Set: newTpgresource.SelfLinkRelativePathHash,
-			},
-			expectChanged: true,
 		},
 
 		"ValidateFunc added": {
@@ -695,7 +660,7 @@ func TestFieldChanged(t *testing.T) {
 			newField:      &schema.Schema{},
 			expectChanged: true,
 		},
-		"ValidateFunc unchanged": {
+		"ValidateFunc remains set": {
 			oldField: &schema.Schema{
 				ValidateFunc: oldVerify.ValidateBase64String,
 			},
@@ -704,29 +669,7 @@ func TestFieldChanged(t *testing.T) {
 			},
 			expectChanged: false,
 		},
-		// If the func is created at runtime it will have a name like
-		// diff.TestFieldChanged.func2; we can't tell if it has changed.
-		"ValidateFunc unchanged but dynamic": {
-			oldField: &schema.Schema{
-				ValidateFunc: oldVerify.ValidateEnum([]string{"hello"}),
-			},
-			newField: &schema.Schema{
-				ValidateFunc: newVerify.ValidateEnum([]string{"hello"}),
-			},
-			expectChanged: false,
-		},
-		"ValidateFunc changed": {
-			oldField: &schema.Schema{
-				ValidateFunc: oldVerify.ValidateBase64String,
-			},
-			newField: &schema.Schema{
-				ValidateFunc: newVerify.ValidateIpAddress,
-			},
-			expectChanged: true,
-		},
 
-		// Rely on "unchanged" test for DiffSuppressFunc since there are no reusable DefaultFunc functions
-		// in the provider
 		"ValidateDiagFunc added": {
 			oldField: &schema.Schema{},
 			newField: &schema.Schema{
@@ -741,14 +684,14 @@ func TestFieldChanged(t *testing.T) {
 			newField:      &schema.Schema{},
 			expectChanged: true,
 		},
-		"ValidateDiagFunc changed": {
+		"ValidateDiagFunc remains set": {
 			oldField: &schema.Schema{
 				ValidateDiagFunc: testValidateDiagFunc1,
 			},
 			newField: &schema.Schema{
 				ValidateDiagFunc: testValidateDiagFunc2,
 			},
-			expectChanged: true,
+			expectChanged: false,
 		},
 	}
 
