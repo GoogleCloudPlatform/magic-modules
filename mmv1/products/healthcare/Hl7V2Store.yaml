@@ -198,7 +198,8 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: notificationConfig
     # This field is duplicated because beta and ga have different behaviors.
-    deprecation_message: This field has been replaced by notificationConfigs
+    deprecation_message: >-
+      `notification_config` is deprecated and will be removed in a future major release. Use `notification_configs` instead.
     exact_version: beta
     required: false
     properties:

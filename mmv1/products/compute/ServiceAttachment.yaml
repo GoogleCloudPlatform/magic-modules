@@ -166,7 +166,6 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: 'enableProxyProtocol'
     required: true
-    immutable: true
     description: |
       If true, enable the proxy protocol which is for supplying client TCP/IP
       address data in TCP connections that traverse proxies on their way to
@@ -209,7 +208,6 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: reconcileConnections
     default_value: true
-    immutable: true
     send_empty_value: true
     description: |
       This flag determines whether a consumer accept/reject list change can reconcile the statuses of existing ACCEPTED or REJECTED PSC endpoints.
