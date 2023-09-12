@@ -17,6 +17,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/hashicorp/go-cleanhttp"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -117,7 +118,7 @@ func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, 
 // HandleZeroValues will make the plugin framework act like the SDK; zero value, particularly empty strings, are converted to null.
 // This causes the plugin framework to treat the field as unset, just like how the SDK ignores empty strings.
 func (p *FrameworkProviderConfig) HandleZeroValues(ctx context.Context, data *fwmodels.ProviderModel, diags *diag.Diagnostics) {
-	
+
 	// Change empty strings to null values
 	if data.AccessToken.Equal(types.StringValue("")) {
 		data.AccessToken = types.StringNull()
@@ -155,8 +156,32 @@ func (p *FrameworkProviderConfig) HandleZeroValues(ctx context.Context, data *fw
 		data.ImpersonateServiceAccountDelegates = types.ListNull(types.StringType)
 	}
 
-	// TODO - how to handle batching, send_after, enable_batching
-
+	// Batching implementation will change in future, but this code will be removed in 5.0.0 so may be unaffected
+	var pbConfigs []fwmodels.ProviderBatching
+	d := data.Batching.ElementsAs(ctx, &pbConfigs, true)
+	diags.Append(d...)
+	if diags.HasError() {
+		return
+	}
+	if pbConfigs[0].SendAfter.Equal(types.StringValue("")) {
+		pbConfigs[0].SendAfter = types.StringNull() // Convert empty string to null
+	}
+	b, _ := types.ObjectValue(
+		map[string]attr.Type{
+			"enable_batching": types.BoolType,
+			"send_after":      types.StringType,
+		},
+		map[string]attr.Value{
+			"enable_batching": pbConfigs[0].EnableBatching,
+			"send_after":      pbConfigs[0].SendAfter,
+		},
+	)
+	newBatching, d := types.ListValue(types.ObjectType{}.WithAttributeTypes(fwmodels.ProviderBatchingAttributes), []attr.Value{b})
+	diags.Append(d...)
+	if diags.HasError() {
+		return
+	}
+	data.Batching = newBatching
 }
 
 // HandleDefaults will handle all the defaults necessary in the provider
