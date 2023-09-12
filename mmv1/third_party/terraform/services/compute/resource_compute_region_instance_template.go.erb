@@ -2,8 +2,6 @@
 
 package compute
 
-<% unless version == 'ga' -%>
-
 import (
 	"encoding/json"
 	"fmt"
@@ -532,6 +530,19 @@ Google Cloud KMS.`,
 								},
 							},
 						},
+						"internal_ipv6_prefix_length": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Computed:    true,
+							Description: `The prefix length of the primary internal IPv6 range.`,
+						},
+						"ipv6_address": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							DiffSuppressFunc: ipv6RepresentationDiffSuppress,
+							Description: `An IPv6 internal network address for this network interface. If not specified, Google Cloud will automatically assign an internal IPv6 address from the instance's subnetwork.`,
+						},
 						"queue_count": {
 							Type:        schema.TypeInt,
 							Optional:    true,
@@ -657,7 +668,7 @@ be from 0 to 999,999,999 inclusive.`,
   recovery of the Local Ssd state is attempted. Its value should be in
   between 0 and 168 hours with hour granularity and the default value being 1
   hour.`,
-							
+
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"seconds": {
@@ -1301,5 +1312,3 @@ func resourceComputeRegionInstanceTemplateImportState(d *schema.ResourceData, me
 
 	return []*schema.ResourceData{d}, nil
 }
-
-<% end -%>
