@@ -31,30 +31,25 @@ import (
 )
 
 type FrameworkProviderConfig struct {
-    BillingProject types.String
-    Client *http.Client
-    Context context.Context
-    gRPCLoggingOptions []option.ClientOption
-    PollInterval time.Duration
-    Project types.String
-    Region types.String
-    Zone types.String
-    RequestBatcherIam *transport_tpg.RequestBatcher
-    RequestBatcherServiceUsage *transport_tpg.RequestBatcher
-    Scopes []string
-    TokenSource oauth2.TokenSource
-    UserAgent string
-    UserProjectOverride types.Bool
+	BillingProject             types.String
+	Client                     *http.Client
+	Context                    context.Context
+	gRPCLoggingOptions         []option.ClientOption
+	PollInterval               time.Duration
+	Project                    types.String
+	Region                     types.String
+	Zone                       types.String
+	RequestBatcherIam          *transport_tpg.RequestBatcher
+	RequestBatcherServiceUsage *transport_tpg.RequestBatcher
+	Scopes                     types.List
+	TokenSource                oauth2.TokenSource
+	UserAgent                  string
+	UserProjectOverride        types.Bool
 
-    // paths for client setup
-    <% products.each do |product| -%>
-    <%= product[:definitions].name -%>BasePath string
-    <% end -%>
-}
-
-var defaultClientScopes = []string{
-	"https://www.googleapis.com/auth/cloud-platform",
-	"https://www.googleapis.com/auth/userinfo.email",
+	// paths for client setup
+	<% products.each do |product| -%>
+	<%= product[:definitions].name -%>BasePath string
+	<% end -%>
 }
 
 // LoadAndValidateFramework handles the bulk of configuring the provider
@@ -101,6 +96,7 @@ func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, 
 	p.BillingProject = data.BillingProject
 	p.Project = data.Project
 	p.Region = data.Region
+	p.Scopes = data.Scopes
 	p.Zone = data.Zone
 	p.UserProjectOverride = data.UserProjectOverride
 	p.PollInterval = 10 * time.Second
@@ -176,7 +172,7 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 
 	if len(data.Scopes.Elements()) == 0 {
 		var d diag.Diagnostics
-		data.Scopes, d = types.ListValueFrom(ctx, types.StringType, defaultClientScopes)
+		data.Scopes, d = types.ListValueFrom(ctx, types.StringType, transport_tpg.DefaultClientScopes)
 		diags.Append(d...)
 		if diags.HasError() {
 			return
