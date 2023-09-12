@@ -95,8 +95,6 @@ examples:
       ])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
-      vpc_compute_subnetwork_name: 'run-subnetwork'
-      compute_network_name: 'run-network'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_probes'
     primary_resource_id: 'default'
