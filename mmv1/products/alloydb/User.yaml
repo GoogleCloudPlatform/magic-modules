@@ -110,4 +110,3 @@ properties:
     item_type: Api::Type::String
     description: |
       List of database roles this database user has.
-
