@@ -47,7 +47,7 @@ steps:
         echo "Common ancestor commit: $base_commit"
         git diff $base_commit origin/main -- .ci/
         git diff $base_commit origin/main -- .ci/ > /workspace/ci.diff
-        git apply /workspace/ci.diff
+        git apply /workspace/ci.diff --allow-empty
 
   - name: "gcr.io/graphite-docker-images/go-plus"
     entrypoint: "/workspace/.ci/scripts/go-plus/magician/exec.sh"
