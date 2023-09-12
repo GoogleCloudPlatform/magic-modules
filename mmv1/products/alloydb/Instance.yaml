@@ -104,11 +104,6 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: 'User-defined labels for the alloydb instance.'
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: 'annotations'
-    description:
-      'Annotations to allow client tools to store small amount of arbitrary
-      data. This is distinct from labels.'
   - !ruby/object:Api::Type::String
     name: 'state'
     output: true
