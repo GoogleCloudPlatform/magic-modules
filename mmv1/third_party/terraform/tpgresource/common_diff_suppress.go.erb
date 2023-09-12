@@ -57,7 +57,6 @@ func EmptyOrDefaultStringSuppress(defaultVal string) schema.SchemaDiffSuppressFu
 
 func EmptyOrFalseSuppressBoolean(k, old, new string, d *schema.ResourceData) bool {
 		return (old == nil && new == "false" || old == "" && new == "false")
-	}
 }
 
 func IpCidrRangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
