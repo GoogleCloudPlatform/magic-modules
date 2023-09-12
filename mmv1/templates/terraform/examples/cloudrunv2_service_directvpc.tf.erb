@@ -9,6 +9,8 @@ resource "google_cloud_run_v2_service" "<%= ctx[:primary_resource_id] %>" {
     vpc_access{
       network_interfaces {
         network = "default"
+        subnetwork = "default"
+        tags = ["tag1"]
       }
       egress = "ALL_TRAFFIC"
     }
