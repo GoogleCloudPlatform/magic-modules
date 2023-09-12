@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	newProvider "google/provider/new/google"
-	oldProvider "google/provider/old/google"
+	newProvider "google/provider/new/google/provider"
+	oldProvider "google/provider/old/google/provider"
 
 	"io"
 	"os"
