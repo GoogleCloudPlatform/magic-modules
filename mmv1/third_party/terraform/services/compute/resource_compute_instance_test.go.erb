@@ -2563,7 +2563,6 @@ func TestAccComputeInstance_regionBootDisk(t *testing.T) {
 }
 
 <% unless version == 'ga' -%>
-// TODO(felipegc)
 func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigs(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
@@ -2592,7 +2591,6 @@ func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigs(t *test
 	})
 }
 
-// TODO(felipegc)
 func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsWithTwoDiffSecurityPolicies(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
 	var policyName = fmt.Sprintf("tf-test-policy-%s", acctest.RandString(t, 10))
@@ -2612,7 +2610,6 @@ func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsWithTwoD
 	})
 }
 
-// TODO(felipegc)
 func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsWithEmptyAndNullSecurityPolicies(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
@@ -2640,7 +2637,6 @@ func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsWithEmpt
 	})
 }
 
-// TODO(felipegc)
 func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateOnlyOnePolicy(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
@@ -2674,7 +2670,6 @@ func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateOn
 	})
 }
 
-// TODO(felipegc)
 func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateSecurityPoliciesWithStoppedMachine(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
@@ -2711,7 +2706,6 @@ func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateSe
 	})
 }
 
-// TODO(felipegc)
 func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateTwoPolicies(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
@@ -2754,7 +2748,6 @@ func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateTw
 	})
 }
 
-// TODO(felipegc)
 func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateRemoveAccessConfig(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
@@ -2797,7 +2790,6 @@ func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateRe
 	})
 }
 
-// TODO(felipegc)
 func TestAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateTwoPolicies(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
@@ -3586,7 +3578,6 @@ func testAccCheckComputeInstanceHasStatus(instance *compute.Instance, status str
 }
 
 <% unless version == 'ga' -%>
-// TODO(felipegc)
 func testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(instance *compute.Instance, securityPolicy string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, networkInterface := range instance.NetworkInterfaces {
@@ -3607,7 +3598,6 @@ func testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(instance *compu
 	}
 }
 
-// TODO(felipegc)
 func testAccCheckComputeInstanceNicAccessConfigHasNoSecurityPolicy(instance *compute.Instance) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, networkInterface := range instance.NetworkInterfaces {
@@ -7170,7 +7160,6 @@ resource "google_compute_disk" "debian" {
 }
 
 <% unless version == 'ga' -%>
-// TODO(felipegc)
 func testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigs(suffix, policy, instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -7283,7 +7272,6 @@ resource "google_compute_instance" "foobar" {
 `, suffix, suffix, suffix, suffix, suffix, suffix, suffix, policy, instance)
 }
 
-// TODO(felipegc)
 func testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsWithTwoSecurityPolicies(suffix, policy, policy2, instance, policyToSetOne, policyToSetTwo string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -7404,7 +7392,6 @@ resource "google_compute_instance" "foobar" {
 `, suffix, suffix, suffix, suffix, suffix, suffix, suffix, policy, policy2, instance, policyToSetOne, policyToSetTwo)
 }
 
-// TODO(felipegc)
 func testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsWithTwoSecurityPoliciesAndStatus(suffix, policy, policy2, instance, policyToSetOne, policyToSetTwo, desiredStatus string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -7527,7 +7514,6 @@ resource "google_compute_instance" "foobar" {
 `, suffix, suffix, suffix, suffix, suffix, suffix, suffix, policy, policy2, instance, policyToSetOne, policyToSetTwo, desiredStatus)
 }
 
-// TODO(felipegc)
 func testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsWithTwoSecurityPoliciesRemoveAccessConfig(suffix, policy, policy2, instance, policyToSetOne string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -7644,7 +7630,6 @@ resource "google_compute_instance" "foobar" {
 `, suffix, suffix, suffix, suffix, suffix, suffix, suffix, policy, policy2, instance, policyToSetOne)
 }
 
-// TODO(felipegc)
 func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateTwoPolicies(suffix, policy, policy2, instance, policyToSetOne, policyToSetTwo string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -7825,7 +7810,6 @@ resource "google_compute_instance" "foobar" {
 `, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, policy, policy2, instance, policyToSetOne, policyToSetOne, policyToSetTwo, policyToSetTwo)
 }
 
-// TODO(felipegc)
 func testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsWithEmptyAndNullSecurityPolicies(suffix, instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {

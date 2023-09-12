@@ -457,14 +457,6 @@ func ResourceComputeInstance() *schema.Resource {
 							ForceNew:    true,
 							Description: `The networking queue count that's specified by users for the network interface. Both Rx and Tx queues will be set to this number. It will be empty if not specified.`,
 						},
-						<% unless version == 'ga' -%>
-						// TODO(felipegc)
-						// "security_policy": {
-						//	Type:        schema.TypeString,
-						//	Optional:    true,
-						//	Description: `A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.`,
-						//},
-						<% end -%>
 					},
 				},
 			},
@@ -1297,9 +1289,7 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	<% unless version == 'ga' -%>
-	// TODO(felipegc)
-	// securityPolicies, err := computeInstanceMapSecurityPoliciesForCreate2(d, config)
-	securityPolicies, err := computeInstanceMapSecurityPoliciesForCreate3(d, config)
+	securityPolicies, err := computeInstanceMapSecurityPolicies(d, config)
 	if err != nil {
 		return err
 	}
@@ -1323,8 +1313,6 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	<% unless version == 'ga' -%>
-	// TODO(felipegc)
-	// securityPolicies := computeInstanceMapSecurityPoliciesForCreate(instance)
 	err = computeInstanceAddSecurityPolicy(d, config, securityPolicies, project, z, userAgent, instance.Name)
 	if err != nil {
 		return fmt.Errorf("Error creating instance while setting the security policies: %s", err)
@@ -1779,18 +1767,16 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		prefix := fmt.Sprintf("network_interface.%d", i)
 		if d.HasChange(prefix+".access_config") || d.HasChange(prefix+".ipv6_access_config") {
 			if instance.Status != "RUNNING" {
-				log.Print("[DEBUG] FELIPEGC LANCA EXCEPTION PQ PRECISA ESTA RODANDO")
 				return fmt.Errorf("Error to update security policy to the instance, the current status must be \"RUNNING\"")
 			}
 			updateSecurityPolicy = true
 		}
 	}
 
-	// TODO(felipegc)
 	securityPolicies := make(map[string][]string)
 	if updateSecurityPolicy {
 		// map the security policies to call SetSecurityPolicy because the code below removes and re-creates the access_config which ends up removing the security_policy.
-		securityPolicies, err = computeInstanceMapSecurityPoliciesForCreate3(d, config)
+		securityPolicies, err = computeInstanceMapSecurityPolicies(d, config)
 		if err != nil {
 			return err
 		}
@@ -2296,7 +2282,6 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
-	// TODO(felipegc)
 	// The access config must be updated only if the machine is still RUNNING and after each access_config for each interface has been re-created.
 	err = computeInstanceAddSecurityPolicy(d, config, securityPolicies, project, zone, userAgent, instance.Name)
 	if err != nil {

@@ -3,14 +3,11 @@ package compute
 
 import (
 	"fmt"
-	// TODO(felipegc) - remove log
-	"log"
 
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 <% unless version == 'ga' -%>
-	// TODO(felipegc)
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 <% end -%>
 
@@ -113,52 +110,7 @@ func computeInstanceAddSecurityPolicy(d *schema.ResourceData, config *transport_
 	return nil
 }
 
-func computeInstanceMapSecurityPoliciesForCreate(instance *compute.Instance) map[string][]string {
-	securityPolicies := make(map[string][]string)
-	for i := 0; i < len(instance.NetworkInterfaces); i++ {
-		ni := instance.NetworkInterfaces[i]
-		// Network interfaces use the nicN naming format and is only know after the instance is created.
-		nicName := fmt.Sprintf("nic%d", i)
-
-		for j := 0; j < len(ni.AccessConfigs); j++ {
-			log.Printf("[DEBUG] FELIPEGC OLHA A NETWORKINTERFACE[i].AccessConfig[j] SECURITY POLICY %#v", instance.NetworkInterfaces[i].AccessConfigs[j].SecurityPolicy)
-			ac := ni.AccessConfigs[j]
-			// Is not necessary to map empty security policy during the instance creation.
-			if ac.SecurityPolicy != "" {
-				securityPolicies[ac.SecurityPolicy] = append(securityPolicies[ac.SecurityPolicy], nicName)
-			}
-		}
-	}
-	log.Printf("[DEBUG] FELIPEGC OLHA O MAP DE SEC_POLICY X INTERFACE: %#v", securityPolicies)
-
-	return securityPolicies
-}
-
-func computeInstanceMapSecurityPoliciesForCreate2(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string][]string, error) {
-	configs := d.Get("network_interface").([]interface{})
-	securityPolicies := make(map[string][]string)
-	for i, raw := range configs {
-		data := raw.(map[string]interface{})
-		ac := expandAccessConfigs(data["access_config"].([]interface{}))
-		ipv6Ac := expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{}))
-		secPolicy := data["security_policy"].(string)
-
-		if secPolicy != "" && len(ac) == 0 && len(ipv6Ac) == 0 {
-			return securityPolicies, fmt.Errorf("At least one access config must exist to set the security policy")
-		}
-
-		if secPolicy != "" {
-			nicName := fmt.Sprintf("nic%d", i)
-			securityPolicies[secPolicy] = append(securityPolicies[secPolicy], nicName)
-		}
-	}
-	log.Printf("[DEBUG] FELIPEGC OLHA O MAP DE SEC_POLICY X INTERFACE: %#v", securityPolicies)
-
-	return securityPolicies, nil
-}
-
-// TODO(felipegc)
-func computeInstanceMapSecurityPoliciesForCreate3(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string][]string, error) {
+func computeInstanceMapSecurityPolicies(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string][]string, error) {
 	securityPolicies := make(map[string][]string)
 	configs := d.Get("network_interface").([]interface{})
 	for i, raw := range configs {
@@ -172,11 +124,9 @@ func computeInstanceMapSecurityPoliciesForCreate3(d tpgresource.TerraformResourc
 		uniqueSecPolicy := ""
 
 		for j := 0; j < len(acessConfigs); j++ {
-			log.Printf("[DEBUG] FELIPEGC OLHA A NETWORKINTERFACE[i].AccessConfig[j] SECURITY POLICY %#v", acessConfigs[j].SecurityPolicy)
 			ac := acessConfigs[j]
 
 			if uniqueSecPolicy != "" && ac.SecurityPolicy != uniqueSecPolicy {
-				log.Printf("[DEBUG] FELIPEGC ACCESS CONFIG SOU DIFERENTE: %s ---> %s", ac.SecurityPolicy, uniqueSecPolicy)
 				return securityPolicies, fmt.Errorf("Error to create security policy to the instance, all the security policies must be equal through all access configs for the same network interface")
 			}
 
@@ -185,12 +135,10 @@ func computeInstanceMapSecurityPoliciesForCreate3(d tpgresource.TerraformResourc
 		}
 
 		for j := 0; j < len(ipv6AccessConfigs); j++ {
-			log.Printf("[DEBUG] FELIPEGC OLHA A NETWORKINTERFACE[i].Ipv6AccessConfig[j] SECURITY POLICY %#v", ipv6AccessConfigs[j].SecurityPolicy)
 			ip6ac := ipv6AccessConfigs[j]
 			// Is not necessary to map empty security policy during the instance creation.
 
 			if uniqueSecPolicy != "" && ip6ac.SecurityPolicy != uniqueSecPolicy {
-				log.Printf("[DEBUG] FELIPEGC IPV6 ACCESS CONFIG SOU DIFERENTE: %s ---> %s", ip6ac.SecurityPolicy, uniqueSecPolicy)
 				return securityPolicies, fmt.Errorf("Error to create security policy to the instance, all the security policies must be equal through all access configs for the same network interface")
 			}
 
@@ -198,40 +146,6 @@ func computeInstanceMapSecurityPoliciesForCreate3(d tpgresource.TerraformResourc
 			uniqueSecPolicy = ip6ac.SecurityPolicy
 		}
 	}
-	log.Printf("[DEBUG] FELIPEGC OLHA O MAP DE SEC_POLICY X INTERFACE: %#v", securityPolicies)
-
-	return securityPolicies, nil
-}
-
-func computeInstanceMapSecurityPoliciesForUpdate(instance *compute.Instance, d *schema.ResourceData) (map[string][]string, error) {
-	securityPolicies := make(map[string][]string)
-	for i := 0; i < len(instance.NetworkInterfaces); i++ {
-		prefix := fmt.Sprintf("network_interface.%d", i)
-		if d.HasChange(prefix + ".access_config") {
-			o, n := d.GetChange(prefix + ".access_config")
-			log.Printf("[DEBUG] FELIPEGC OLHA O STATE DA INSTANCIA: %#v", instance.Status)
-			old := expandAccessConfigs(o.([]interface{}))
-			new := expandAccessConfigs(n.([]interface{}))
-			log.Printf("[DEBUG] FELIPEGC OLHA O ACCESS CONFIG OLD CONVERTIDO: %#v", old)
-			log.Printf("[DEBUG] FELIPEGC OLHA O ACCESS CONFIG NOVO CONVERTIDO: %#v", new)
-
-			// Right now there is a GCE limit of 1 accessConfig.
-			securityPolicyHasReplaced := len(new) > 0 && len(old) > 0 && new[0].SecurityPolicy != old[0].SecurityPolicy
-			securityPolicyHasAdded := len(new) > 0 && len(old) == 0 && new[0].SecurityPolicy != ""
-			securityPolicyHasChanged := securityPolicyHasReplaced || securityPolicyHasAdded
-			log.Printf("[DEBUG] FELIPEGC OLHA O ACCESS CONFIG SEC POLICY HAS CHANGED: %#v", securityPolicyHasChanged)
-			if securityPolicyHasChanged && instance.Status != "RUNNING" {
-				log.Print("[DEBUG] FELIPEGC LANCA EXCEPTION PQ PRECISA ESTA RODANDO")
-				return securityPolicies, fmt.Errorf("Error to update security policy to the instance, the current status must be \"RUNNING\"")
-			}
-
-			// Security policy can only exist if access config is present.
-			if len(new) > 0 {
-				securityPolicies[new[0].SecurityPolicy] = append(securityPolicies[new[0].SecurityPolicy], instance.NetworkInterfaces[i].Name)
-			}
-		}
-	}
-	log.Printf("[DEBUG] FELIPEGC OLHA O MAP DE SEC_POLICY X INTERFACE: %#v", securityPolicies)
 
 	return securityPolicies, nil
 }
