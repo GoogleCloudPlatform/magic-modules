@@ -39,6 +39,7 @@ examples:
       inspect_name: 'dialogflowcx-inspect-template'
       deidentify_name: 'dialogflowcx-deidentify-template'
       settings_name: 'dialogflowcx-security-settings'
+      bucket_name: 'dialogflowcx-bucket'
     test_env_vars:
       project: :PROJECT_NAME
 id_format: 'projects/{{project}}/locations/{{location}}/securitySettings/{{name}}'

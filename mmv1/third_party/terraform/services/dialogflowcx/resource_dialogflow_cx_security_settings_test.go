@@ -87,7 +87,7 @@ resource "google_data_loss_prevention_deidentify_template" "deidentify" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name                        = "tf-test%{random_suffix}"
+  name                        = "tf-test-dialogflowcx-bucket%{random_suffix}"
   location                    = "US"
   uniform_bucket_level_access = true
 }
