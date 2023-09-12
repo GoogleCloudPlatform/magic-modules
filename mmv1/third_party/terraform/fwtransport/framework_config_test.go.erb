@@ -999,7 +999,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_userProjectOverride(t *testi
 			if diags.HasError() && !tc.ExpectError {
 				for i, err := range diags.Errors() {
 					num := i + 1
-					t.Logf("unexpected error #%d : %s", num, err.Summary())
+					t.Logf("unexpected error #%d : %s : %s", num, err.Summary(), err.Detail())
 				}
 				t.Fatalf("did not expect error, but [%d] error(s) occurred", diags.ErrorsCount())
 			}
@@ -1100,7 +1100,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_impersonateServiceAccount(t 
 			if diags.HasError() && !tc.ExpectError {
 				for i, err := range diags.Errors() {
 					num := i + 1
-					t.Logf("unexpected error #%d : %s", num, err.Summary())
+					t.Logf("unexpected error #%d : %s : %s", num, err.Summary(), err.Detail())
 				}
 				t.Fatalf("did not expect error, but [%d] error(s) occurred", diags.ErrorsCount())
 			}
@@ -1196,7 +1196,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_impersonateServiceAccountDel
 			if diags.HasError() && !tc.ExpectError {
 				for i, err := range diags.Errors() {
 					num := i + 1
-					t.Logf("unexpected error #%d : %s", num, err.Summary())
+					t.Logf("unexpected error #%d : %s : %s", num, err.Summary(), err.Detail())
 				}
 				t.Fatalf("did not expect error, but [%d] error(s) occurred", diags.ErrorsCount())
 			}
@@ -1290,7 +1290,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_scopes(t *testing.T) {
 			if diags.HasError() && !tc.ExpectError {
 				for i, err := range diags.Errors() {
 					num := i + 1
-					t.Logf("unexpected error #%d : %s", num, err.Summary())
+					t.Logf("unexpected error #%d : %s : %s", num, err.Summary(), err.Detail())
 				}
 				t.Fatalf("did not expect error, but [%d] error(s) occurred", diags.ErrorsCount())
 			}
