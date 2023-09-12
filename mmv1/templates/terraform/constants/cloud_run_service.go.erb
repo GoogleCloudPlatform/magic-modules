@@ -28,17 +28,20 @@ func cloudrunAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) 
 	return false
 }
 
-var cloudRunGoogleProvidedTemplateAnnotations = regexp.MustCompile(`template\.0\.metadata\.0\.annotations\.run\.googleapis\.com/sandbox`)
-var cloudRunGoogleProvidedTemplateAnnotations_autoscaling_maxscale = regexp.MustCompile(`template\.0\.metadata\.0\.annotations\.autoscaling\.knative\.dev/maxScale`)
+var cloudRunGoogleProvidedTemplateAnnotations = []string{
+	"autoscaling.knative.dev/maxScale",
+	"run.googleapis.com/startup-cpu-boost",
+}
 
 func cloudrunTemplateAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// Suppress diffs for the annotations provided by API
-	if cloudRunGoogleProvidedTemplateAnnotations.MatchString(k) &&
-		old == "gvisor" && new == "" {
-		return true
+	for _, anno := range cloudRunGoogleProvidedTemplateAnnotations {
+		if strings.Contains(k, anno) && new == "" {
+			return true
+		}
 	}
-
-	if cloudRunGoogleProvidedTemplateAnnotations_autoscaling_maxscale.MatchString(k) && new == "" {
+	if strings.Contains(k, "run.googleapis.com/sandbox") &&
+		old == "gvisor" && new == "" {
 		return true
 	}
 
@@ -65,7 +68,6 @@ func cloudrunLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool 
 
 var cloudRunGoogleProvidedTemplateLabels = []string{
 	"run.googleapis.com/startupProbeType",
-	"run.googleapis.com/startup-cpu-boost",
 }
 
 func cloudrunTemplateLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
