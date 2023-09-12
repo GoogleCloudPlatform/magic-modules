@@ -15,7 +15,7 @@
 name: MonitoredProject
 base_url: v1/locations/global/metricsScopes
 create_url: v1/locations/global/metricsScopes/{{metrics_scope}}/projects
-delete_url: v1/locations/global/metricsScopes/{{metrics_scope}}/projects/{{name}}
+delete_url: v1/{{name}}
 self_link: v1/locations/global/metricsScopes/{{metrics_scope}}
 id_format: locations/global/metricsScopes/{{metrics_scope}}/projects/{{name}}
 schema_version: 1
