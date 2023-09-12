@@ -62,12 +62,6 @@ properties:
       The Firestore database id. Defaults to `"(default)"`.
     ignore_read: true
   - !ruby/object:Api::Type::String
-    name: collection
-    required: true
-    description: |
-      The collection being indexed.
-    ignore_read: true
-  - !ruby/object:Api::Type::String
     name: retention
     required: true
     description: |
