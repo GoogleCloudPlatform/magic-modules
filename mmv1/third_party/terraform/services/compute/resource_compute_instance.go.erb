@@ -2282,11 +2282,13 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
+	<% unless version == 'ga' -%>
 	// The access config must be updated only if the machine is still RUNNING and after each access_config for each interface has been re-created.
 	err = computeInstanceAddSecurityPolicy(d, config, securityPolicies, project, zone, userAgent, instance.Name)
 	if err != nil {
 		return fmt.Errorf("Error updating instance while setting the security policies: %s", err)
 	}
+	<% end -%>
 
 	// We made it, disable partial mode
 	d.Partial(false)
