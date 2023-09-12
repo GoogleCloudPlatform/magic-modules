@@ -117,7 +117,7 @@ properties:
     name: 'displayName'
     description: |
       Human-readable name for this resource.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description:
       'Client-specified labels that are applied to the resource and that are

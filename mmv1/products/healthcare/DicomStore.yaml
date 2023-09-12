@@ -73,7 +73,7 @@ properties:
       ** Changing this property may recreate the Dicom store (removing all data) **
     required: true
     immutable: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: labels
     required: false
     description: |

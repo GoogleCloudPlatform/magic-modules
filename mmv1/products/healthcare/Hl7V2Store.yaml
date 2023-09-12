@@ -129,7 +129,7 @@ properties:
           - :V1
           - :V2
           - :V3
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: labels
     required: false
     description: |

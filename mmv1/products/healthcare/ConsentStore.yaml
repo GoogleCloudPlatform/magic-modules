@@ -93,7 +93,7 @@ properties:
     required: false
     description: |
       If true, [consents.patch] [google.cloud.healthcare.v1.consent.UpdateConsent] creates the consent if it does not already exist.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: labels
     required: false
     description: |

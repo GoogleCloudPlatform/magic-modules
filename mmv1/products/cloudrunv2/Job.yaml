@@ -129,7 +129,7 @@ properties:
     output: true
     description: |
       A number that monotonically increases every time the user modifies the desired state.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |-
       Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component,

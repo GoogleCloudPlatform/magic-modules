@@ -153,7 +153,7 @@ properties:
           output: true
           description: |
             The port of this network endpoint.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     immutable: true
     description: Resource labels to represent user provided metadata.
