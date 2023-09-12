@@ -9,9 +9,9 @@ replace google/provider/new => ./new
 replace github.com/GoogleCloudPlatform/magic-modules/.ci/diff-processor => ./
 
 require (
-	github.com/golang/glog v1.1.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.0
 	github.com/spf13/cobra v1.7.0
+	github.com/stretchr/testify v1.8.3
 	google/provider/new v0.0.0-00010101000000-000000000000
 	google/provider/old v0.0.0-00010101000000-000000000000
 )
@@ -39,6 +39,7 @@ require (
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/gammazero/deque v0.0.0-20180920172122-f6adf94963e4 // indirect
 	github.com/gammazero/workerpool v0.0.0-20181230203049-86a96b5d5d92 // indirect
+	github.com/golang/glog v1.1.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
@@ -82,6 +83,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/oklog/run v1.0.0 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
@@ -103,4 +105,5 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230726155614-23370e0ffb3e // indirect
 	google.golang.org/grpc v1.57.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
