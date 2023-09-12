@@ -45,46 +45,13 @@ func TestAccDialogflowCXSecuritySettings_dialogflowcxSecuritySettings_update(t *
 
 func testAccDialogflowCXSecuritySettings_dialogflowcxSecuritySettings_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_data_loss_prevention_inspect_template" "inspect" {
-  parent       = "projects/%{project}"
-  display_name = "tf-test-dialogflowcx-inspect-template%{random_suffix}"
-  inspect_config {
-    info_types {
-      name = "EMAIL_ADDRESS"
-    }
-  }
-}
-
-resource "google_data_loss_prevention_deidentify_template" "deidentify" {
-  parent       = "projects/%{project}"
-  display_name = "tf-test-dialogflowcx-deidentify-template%{random_suffix}"
-  deidentify_config {
-    info_type_transformations {
-      transformations {
-        primitive_transformation {
-          replace_config {
-            new_value {
-              string_value = "[REDACTED]"
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-resource "google_storage_bucket" "bucket" {
-  name                        = "tf-test%{random_suffix}"
-  location                    = "US"
-  uniform_bucket_level_access = true
-}
-
 resource "google_dialogflow_cx_security_settings" "basic_security_settings" {
-  display_name        = "tf-test-dialogflowcx-security-settings%{random_suffix}"
-  location            = "global"
-  redaction_strategy  = "REDACTION_STRATEGY_UNSPECIFIED"
-  redaction_scope     = "REDACTION_SCOPE_UNSPECIFIED"
-  purge_data_types    = ["DIALOGFLOW_HISTORY"]
+  display_name          = "tf-test-dialogflowcx-security-settings%{random_suffix}"
+  location              = "global"
+  redaction_strategy    = "REDACTION_STRATEGY_UNSPECIFIED"
+  redaction_scope       = "REDACTION_SCOPE_UNSPECIFIED"
+  purge_data_types      = []
+  retention_window_days = 7
 }
 `, context)
 }
@@ -92,7 +59,7 @@ resource "google_dialogflow_cx_security_settings" "basic_security_settings" {
 func testAccDialogflowCXSecuritySettings_dialogflowcxSecuritySettings_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "inspect" {
-  parent       = "projects/%{project}"
+  parent       = "projects/%{project}/locations/global"
   display_name = "tf-test-dialogflowcx-inspect-template%{random_suffix}"
   inspect_config {
     info_types {
@@ -102,7 +69,7 @@ resource "google_data_loss_prevention_inspect_template" "inspect" {
 }
 
 resource "google_data_loss_prevention_deidentify_template" "deidentify" {
-  parent       = "projects/%{project}"
+  parent       = "projects/%{project}/locations/global"
   display_name = "tf-test-dialogflowcx-deidentify-template%{random_suffix}"
   deidentify_config {
     info_type_transformations {

@@ -1,5 +1,5 @@
 resource "google_data_loss_prevention_inspect_template" "inspect" {
-  parent       = "projects/<%= ctx[:test_env_vars]['project'] %>"
+  parent       = "projects/<%= ctx[:test_env_vars]['project'] %>/locations/global"
   display_name = "<%= ctx[:vars]['inspect_name'] %>"
   inspect_config {
     info_types {
@@ -9,7 +9,7 @@ resource "google_data_loss_prevention_inspect_template" "inspect" {
 }
 
 resource "google_data_loss_prevention_deidentify_template" "deidentify" {
-  parent       = "projects/<%= ctx[:test_env_vars]['project'] %>"
+  parent       = "projects/<%= ctx[:test_env_vars]['project'] %>/locations/global"
   display_name = "<%= ctx[:vars]['deidentify_name'] %>"
   deidentify_config {
     info_type_transformations {

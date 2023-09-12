@@ -28,6 +28,11 @@ timeouts: !ruby/object:Api::Timeouts
   update_minutes: 40
 examples:
   - !ruby/object:Provider::Terraform::Examples
+    name: 'dialogflowcx_security_settings_basic'
+    primary_resource_id: 'basic_security_settings'
+    vars:
+      settings_name: 'dialogflowcx-security-settings'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'dialogflowcx_security_settings_full'
     primary_resource_id: 'basic_security_settings'
     vars:
