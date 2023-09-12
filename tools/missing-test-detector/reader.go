@@ -28,56 +28,66 @@ type Test struct {
 	Steps []Step
 }
 
-// Return a slice of tests as well as a map of file names to errors encountered.
+func (t *Test) String() string {
+	return fmt.Sprintf("%s: %#v", t.Name, t.Steps)
+}
+
+// Return a slice of tests as well as a map of file or test names to errors encountered.
 func readAllTests(servicesDir string) ([]*Test, map[string]error) {
 	dirs, err := os.ReadDir(servicesDir)
 	if err != nil {
 		return nil, map[string]error{servicesDir: err}
 	}
 	allTests := make([]*Test, 0)
-	errs := make(map[string]error, 0)
+	allErrs := make(map[string]error)
 	for _, dir := range dirs {
 		servicePath := filepath.Join(servicesDir, dir.Name())
 		files, err := os.ReadDir(servicePath)
 		if err != nil {
 			return nil, map[string]error{servicePath: err}
 		}
+		var testFileNames []string
 		for _, file := range files {
 			if strings.HasSuffix(file.Name(), "_test.go") {
-				filePath := filepath.Join(servicePath, file.Name())
-				tests, err := readTestFile(filePath)
-				if err != nil {
-					errs[filePath] = err
-				}
-				allTests = append(allTests, tests...)
+				testFileNames = append(testFileNames, filepath.Join(servicePath, file.Name()))
 			}
 		}
+		serviceTests, serviceErrs := readTestFiles(testFileNames)
+		for fileName, err := range serviceErrs {
+			allErrs[fileName] = err
+		}
+		allTests = append(allTests, serviceTests...)
 	}
-	if len(errs) > 0 {
-		return allTests, errs
+	if len(allErrs) > 0 {
+		return allTests, allErrs
 	}
 	return allTests, nil
 }
 
-func readTestFile(filename string) ([]*Test, error) {
-	fset := token.NewFileSet()
-	f, err := parser.ParseFile(fset, filename, nil, 0)
-	if err != nil {
-		return nil, err
-	}
+// Read all the test files in a service directory together to capture cross-file function usage.
+func readTestFiles(filenames []string) ([]*Test, map[string]error) {
 	funcDecls := make(map[string]*ast.FuncDecl) // map of function names to function declarations
 	varDecls := make(map[string]*ast.BasicLit)  // map of variable names to value expressions
-	for _, decl := range f.Decls {
-		if funcDecl, ok := decl.(*ast.FuncDecl); ok {
-			// This is a function declaration.
-			funcDecls[funcDecl.Name.Name] = funcDecl
-		} else if genDecl, ok := decl.(*ast.GenDecl); ok {
-			// This is an import, constant, type, or variable declaration
-			for _, spec := range genDecl.Specs {
-				if valueSpec, ok := spec.(*ast.ValueSpec); ok {
-					if len(valueSpec.Values) > 0 {
-						if basicLit, ok := valueSpec.Values[0].(*ast.BasicLit); ok {
-							varDecls[valueSpec.Names[0].Name] = basicLit
+	errs := make(map[string]error)              // map of file or test names to errors encountered parsing
+	fset := token.NewFileSet()
+	for _, filename := range filenames {
+		f, err := parser.ParseFile(fset, filename, nil, 0)
+		if err != nil {
+			errs[filename] = err
+			continue
+		}
+		for _, decl := range f.Decls {
+			if funcDecl, ok := decl.(*ast.FuncDecl); ok {
+				// This is a function declaration.
+				funcDecls[funcDecl.Name.Name] = funcDecl
+			} else if genDecl, ok := decl.(*ast.GenDecl); ok {
+				// This is an import, constant, type, or variable declaration
+				for _, spec := range genDecl.Specs {
+					if valueSpec, ok := spec.(*ast.ValueSpec); ok {
+						if len(valueSpec.Values) > 0 {
+							if basicLit, ok := valueSpec.Values[0].(*ast.BasicLit); ok {
+								varDecls[valueSpec.Names[0].Name] = basicLit
+							}
 						}
 					}
 				}
@@ -85,27 +95,26 @@ func readTestFile(filename string) ([]*Test, error) {
 		}
 	}
 	tests := make([]*Test, 0)
-	errs := make([]error, 0)
 	for name, funcDecl := range funcDecls {
 		if strings.HasPrefix(name, "TestAcc") {
-			test, err := readTestFunc(funcDecl, funcDecls, varDecls)
+			funcTests, err := readTestFunc(funcDecl, funcDecls, varDecls)
 			if err != nil {
-				errs = append(errs, err)
+				errs[name] = err
 			}
-			if test != nil {
-				test.Name = name
-				tests = append(tests, test)
-			}
+			tests = append(tests, funcTests...)
 		}
 	}
 	if len(errs) > 0 {
-		return tests, fmt.Errorf("errors encountered parsing test file: %v", errs)
+		return tests, errs
 	}
 	return tests, nil
 }
 
-func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (*Test, error) {
+func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) ([]*Test, error) {
 	// This is an exported test function.
+	var tests []*Test
+	var errs []error
+	vars := make(map[string]*ast.CompositeLit, len(testFunc.Body.List)) // map of variable names to composite literal values in function body
 	for _, stmt := range testFunc.Body.List {
 		if exprStmt, ok := stmt.(*ast.ExprStmt); ok {
 			if callExpr, ok := exprStmt.X.(*ast.CallExpr); ok {
@@ -113,12 +122,64 @@ func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, va
 				ident, isIdent := callExpr.Fun.(*ast.Ident)
 				selExpr, isSelExpr := callExpr.Fun.(*ast.SelectorExpr)
 				if isIdent && ident.Name == "VcrTest" || isSelExpr && selExpr.Sel.Name == "VcrTest" {
-					return readVcrTestCall(callExpr, funcDecls, varDecls)
+					test, err := readVcrTestCall(callExpr, funcDecls, varDecls)
+					if err != nil {
+						errs = append(errs, err)
+					}
+					test.Name = testFunc.Name.Name
+					tests = append(tests, test)
+				}
+			}
+		} else if assignStmt, ok := stmt.(*ast.AssignStmt); ok {
+			if len(assignStmt.Lhs) == 1 && len(assignStmt.Rhs) == 1 {
+				// For now, only allow single assignment variables for serial test maps.
+				// e.g. testCases := map[string]func(t *testing.T) {...
+				if ident, ok := assignStmt.Lhs[0].(*ast.Ident); ok {
+					if rhsCompLit, ok := assignStmt.Rhs[0].(*ast.CompositeLit); ok {
+						vars[ident.Name] = rhsCompLit
+					}
+				}
+			}
+		} else if rangeStmt, ok := stmt.(*ast.RangeStmt); ok {
+			if ident, ok := rangeStmt.X.(*ast.Ident); ok {
+				if varCompLit, ok := vars[ident.Name]; ok {
+					serialTests, serialErrs := readSerialTestCompLit(varCompLit, funcDecls, varDecls)
+					errs = append(errs, serialErrs...)
+					tests = append(tests, serialTests...)
 				}
 			}
 		}
 	}
-	return nil, nil
+	if len(errs) > 0 {
+		return tests, fmt.Errorf("errors reading test func %s: %v", testFunc.Name.Name, errs)
+	}
+	return tests, nil
+}
+
+// Reads a composite literal which is either a slice or a map of serialized test functions.
+func readSerialTestCompLit(varCompLit *ast.CompositeLit, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) ([]*Test, []error) {
+	var tests []*Test
+	var errs []error
+	for _, elt := range varCompLit.Elts {
+		if eltKeyValueExpr, ok := elt.(*ast.KeyValueExpr); ok {
+			eltTests, err := readSerialTestEltKeyValueExpr(eltKeyValueExpr, funcDecls, varDecls)
+			if err != nil {
+				errs = append(errs, err)
+			}
+			tests = append(tests, eltTests...)
+		}
+	}
+	return tests, errs
+}
+
+func readSerialTestEltKeyValueExpr(eltKeyValueExpr *ast.KeyValueExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) ([]*Test, error) {
+	if ident, ok := eltKeyValueExpr.Value.(*ast.Ident); ok {
+		if testFunc, ok := funcDecls[ident.Name]; ok {
+			return readTestFunc(testFunc, funcDecls, varDecls)
+		}
+		return nil, fmt.Errorf("failed to find function with name %s", ident.Name)
+	}
+	return nil, fmt.Errorf("element key value expression with key %+v had non-ident value %+v", eltKeyValueExpr.Key, eltKeyValueExpr.Value)
 }
 
 func readVcrTestCall(vcrTestCall *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (*Test, error) {
