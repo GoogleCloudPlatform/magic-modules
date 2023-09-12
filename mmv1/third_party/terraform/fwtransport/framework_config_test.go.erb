@@ -1565,6 +1565,25 @@ func TestFrameworkProvider_LoadAndValidateFramework_batching(t *testing.T) {
 		// 	ExpectEnableBatchingValue: types.BoolValue(true),
 		// 	ExpectSendAfterValue:      types.StringValue("10s"),
 		// },
+		// Handling unknown values
+		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
+		// "when batching is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		// 	SetBatchingAsUnknown:      true,
+		// 	ExpectEnableBatchingValue: types.BoolValue(true),
+		// 	ExpectSendAfterValue:      types.StringValue("10s"),
+		// },
+		// "when batching is configured with send_after as an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		// 	EnableBatchingValue:       types.BoolValue(true),
+		// 	SendAfterValue:            types.StringUnknown(),
+		// 	ExpectEnableBatchingValue: types.BoolValue(true),
+		// 	ExpectSendAfterValue:      types.StringValue("10s"),
+		// },
+		// "when batching is configured with enable_batching as an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		// 	EnableBatchingValue:       types.BoolNull(),
+		// 	SendAfterValue:            types.StringValue("123s"),
+		// 	ExpectEnableBatchingValue: types.BoolValue(true),
+		// 	ExpectSendAfterValue:      types.StringValue("123s"),
+		// },
 		// Error states
 		"if batching is configured with send_after as an invalid value, there's an error": {
 			SendAfterValue: types.StringValue("invalid value"),
