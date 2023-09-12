@@ -664,10 +664,12 @@ properties:
                       name: 'network'
                       description: |-
                         The VPC network name to access to. Defaults to "default" network.
+                      default_from_api: true
                     - !ruby/object:Api::Type::String
                       name: 'subnetwork'
                       description: |-
                         The VPC subnetwork name to access to. Defaults to the same vaule of network.
+                      default_from_api: true
                     - !ruby/object:Api::Type::Array
                       name: 'tags'
                       description: |-

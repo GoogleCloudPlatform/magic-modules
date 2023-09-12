@@ -88,6 +88,16 @@ examples:
       vpc_compute_subnetwork_name: 'run-subnetwork'
       compute_network_name: 'run-network'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_service_directvpc'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+      vpc_compute_subnetwork_name: 'run-subnetwork'
+      compute_network_name: 'run-network'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_probes'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
@@ -301,6 +311,27 @@ properties:
             values:
               - :ALL_TRAFFIC
               - :PRIVATE_RANGES_ONLY
+          - !ruby/object:Api::Type::Array
+            name: 'networkInterfaces'
+            description: |-
+              VPC network to access to. Currently only single network interface is supported.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'network'
+                  description: |-
+                    The VPC network name to access to. Defaults to "default" network.
+                  default_from_api: true
+                - !ruby/object:Api::Type::String
+                  name: 'subnetwork'
+                  description: |-
+                    The VPC subnetwork name to access to. Defaults to the same vaule of network.
+                  default_from_api: true
+                - !ruby/object:Api::Type::Array
+                  name: 'tags'
+                  description: |-
+                    Network tags applied to this VPC network.
+                  item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'timeout'
         description: |-
