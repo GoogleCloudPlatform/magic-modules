@@ -157,6 +157,52 @@ func computeInstanceMapSecurityPoliciesForCreate2(d tpgresource.TerraformResourc
 	return securityPolicies, nil
 }
 
+// TODO(felipegc)
+func computeInstanceMapSecurityPoliciesForCreate3(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string][]string, error) {
+	securityPolicies := make(map[string][]string)
+	configs := d.Get("network_interface").([]interface{})
+	for i, raw := range configs {
+		data := raw.(map[string]interface{})
+		acessConfigs := expandAccessConfigs(data["access_config"].([]interface{}))
+		ipv6AccessConfigs := expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{}))
+
+		// Network interfaces use the nicN naming format and is only know after the instance is created.
+		nicName := fmt.Sprintf("nic%d", i)
+		// The security_policy must be unique through all the accessConfigs and ipv6AccessConfigs under the same networkInterface.
+		uniqueSecPolicy := ""
+
+		for j := 0; j < len(acessConfigs); j++ {
+			log.Printf("[DEBUG] FELIPEGC OLHA A NETWORKINTERFACE[i].AccessConfig[j] SECURITY POLICY %#v", acessConfigs[j].SecurityPolicy)
+			ac := acessConfigs[j]
+
+			if uniqueSecPolicy != "" && ac.SecurityPolicy != uniqueSecPolicy {
+				log.Printf("[DEBUG] FELIPEGC ACCESS CONFIG SOU DIFERENTE: %s ---> %s", ac.SecurityPolicy, uniqueSecPolicy)
+				return securityPolicies, fmt.Errorf("Error to create security policy to the instance, all the security policies must be equal through all access configs for the same network interface")
+			}
+
+			securityPolicies[ac.SecurityPolicy] = append(securityPolicies[ac.SecurityPolicy], nicName)
+			uniqueSecPolicy = ac.SecurityPolicy
+		}
+
+		for j := 0; j < len(ipv6AccessConfigs); j++ {
+			log.Printf("[DEBUG] FELIPEGC OLHA A NETWORKINTERFACE[i].Ipv6AccessConfig[j] SECURITY POLICY %#v", ipv6AccessConfigs[j].SecurityPolicy)
+			ip6ac := ipv6AccessConfigs[j]
+			// Is not necessary to map empty security policy during the instance creation.
+
+			if uniqueSecPolicy != "" && ip6ac.SecurityPolicy != uniqueSecPolicy {
+				log.Printf("[DEBUG] FELIPEGC IPV6 ACCESS CONFIG SOU DIFERENTE: %s ---> %s", ip6ac.SecurityPolicy, uniqueSecPolicy)
+				return securityPolicies, fmt.Errorf("Error to create security policy to the instance, all the security policies must be equal through all access configs for the same network interface")
+			}
+
+			securityPolicies[ip6ac.SecurityPolicy] = append(securityPolicies[ip6ac.SecurityPolicy], nicName)
+			uniqueSecPolicy = ip6ac.SecurityPolicy
+		}
+	}
+	log.Printf("[DEBUG] FELIPEGC OLHA O MAP DE SEC_POLICY X INTERFACE: %#v", securityPolicies)
+
+	return securityPolicies, nil
+}
+
 func computeInstanceMapSecurityPoliciesForUpdate(instance *compute.Instance, d *schema.ResourceData) (map[string][]string, error) {
 	securityPolicies := make(map[string][]string)
 	for i := 0; i < len(instance.NetworkInterfaces); i++ {

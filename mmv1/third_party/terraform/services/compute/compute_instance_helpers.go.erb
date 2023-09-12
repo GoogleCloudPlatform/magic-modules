@@ -380,13 +380,13 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 		<% unless version == 'ga' -%>
 		// TODO(felipegc)
 		// the security_policy for a network_interface is found in one of its accessConfigs.
-		if len(iface.AccessConfigs) > 0 && iface.AccessConfigs[0].SecurityPolicy != "" {
-			flattened[i]["security_policy"] = iface.AccessConfigs[0].SecurityPolicy
-		} else if len(iface.Ipv6AccessConfigs) > 0 && iface.Ipv6AccessConfigs[0].SecurityPolicy != "" {
-			flattened[i]["security_policy"] = iface.Ipv6AccessConfigs[0].SecurityPolicy
-		} else {
-			flattened[i]["security_policy"] = ""
-		}
+		//if len(iface.AccessConfigs) > 0 && iface.AccessConfigs[0].SecurityPolicy != "" {
+		//	flattened[i]["security_policy"] = iface.AccessConfigs[0].SecurityPolicy
+		//} else if len(iface.Ipv6AccessConfigs) > 0 && iface.Ipv6AccessConfigs[0].SecurityPolicy != "" {
+		//	flattened[i]["security_policy"] = iface.Ipv6AccessConfigs[0].SecurityPolicy
+		//} else {
+		//	flattened[i]["security_policy"] = ""
+		//}
 		<% end -%>
 	}
 	return flattened, region, internalIP, externalIP, nil
