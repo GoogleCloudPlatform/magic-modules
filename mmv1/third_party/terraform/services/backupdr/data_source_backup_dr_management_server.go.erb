@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package backupdr
+<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -99,3 +101,4 @@ func dataSourceGoogleCloudBackupDRServiceRead(d *schema.ResourceData, meta inter
 	d.Set("name", name)
 	return nil
 }
+<% end -%>

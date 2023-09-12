@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package backupdr_test
+<% unless version == 'ga' -%>
 
 import (
 	"testing"
@@ -65,3 +67,4 @@ func testAccDataSourceGoogleBackupDRManagementServer_basic(context map[string]in
      }
 `, context)
 }
+<% end -%>
