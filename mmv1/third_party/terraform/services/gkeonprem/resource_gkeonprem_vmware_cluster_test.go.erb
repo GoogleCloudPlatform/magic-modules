@@ -360,6 +360,15 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLbStart(context map[
         konnectivity_server_node_port = 30008
       }
     }
+    vcenter {
+      resource_pool = "test-resource-pool"
+      datastore = "test-datastore"
+      datacenter = "test-datacenter"
+      cluster = "test-cluster"
+      folder = "test-folder"
+      ca_cert_data = "test-ca-cert-data"
+      storage_policy_name = "test-storage-policy-name"
+    }
     dataplane_v2 {
       dataplane_v2_enabled = true
       windows_dataplane_v2_enabled = true
@@ -444,6 +453,15 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLb(context map[strin
         control_plane_node_port = 30008
         konnectivity_server_node_port = 30009
       }
+    }
+    vcenter {
+      resource_pool = "test-resource-pool-updated"
+      datastore = "test-datastore-updated"
+      datacenter = "test-datacenter-updated"
+      cluster = "test-cluster-updated"
+      folder = "test-folder-updated"
+      ca_cert_data = "test-ca-cert-data-updated"
+      storage_policy_name = "test-storage-policy-name-updated"
     }
     dataplane_v2 {
       dataplane_v2_enabled = true
