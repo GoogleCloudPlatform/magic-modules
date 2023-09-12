@@ -1,7 +1,5 @@
 - type: DIFF_SUPPRESS_FUNC
   field: management.auto_repair
   details:
-    diffsuppressfunc: tpgresource.EmptyOrDefaultStringSuppress("false")
-- type: ENUM_BOOL
-  field: management.auto_repair
-  
+    diffsuppressfunc: tpgresource.EmptyOrFalseSuppressBoolean
+    
