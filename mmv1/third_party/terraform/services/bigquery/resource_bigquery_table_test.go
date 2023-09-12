@@ -3038,29 +3038,29 @@ func testAccBigQueryTablePrimaryKey(datasetID, tableID string) string {
   }
 
   resource "google_bigquery_table" "test" {
-	  deletion_protection = false
+    deletion_protection = false
     table_id   = "%s"
     dataset_id = google_bigquery_dataset.foo.dataset_id
 
     table_constraints {
-		primary_key {
-			columns = ["id"]
-		}
+      primary_key {
+        columns = ["id"]
+      }
     }
 
     schema = <<EOH
-	[
-		{
-			"name": "ts",
-			"type": "TIMESTAMP"
-		},
-		{
-			"name": "id",
-			"type": "INTEGER"
-		}
-	]
-	EOH
-	}
+    [
+      {
+        "name": "ts",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "id",
+        "type": "INTEGER"
+      }
+    ]
+    EOH
+  }
   `, datasetID, tableID)
 }
 
@@ -3071,66 +3071,66 @@ func testAccBigQueryTableForeignKeys(projectID, datasetID, tableID_pk, tableID_f
   }
 
   resource "google_bigquery_table" "table_pk" {
-	deletion_protection = false
-    table_id   = "%s"
-    dataset_id = google_bigquery_dataset.foo.dataset_id
+    deletion_protection = false
+    table_id   	= "%s"
+    dataset_id 	= google_bigquery_dataset.foo.dataset_id
 
     table_constraints {
-		primary_key {
-			columns = ["id"]
-		}
+      primary_key {
+        columns = ["id"]
+      }
     }
 
     schema = <<EOH
-	[
-		{
-			"name": "ts",
-			"type": "TIMESTAMP"
-		},
-		{
-			"name": "id",
-			"type": "INTEGER"
-		},
-		{
-			"name": "str",
-			"type": "STRING"
-		}
-	]
-	EOH
+    [
+      {
+        "name": "ts",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "id",
+        "type": "INTEGER"
+      },
+      {
+        "name": "str",
+        "type": "STRING"
+      }
+    ]
+    EOH
   }
 
   resource "google_bigquery_table" "test" {
-	deletion_protection = false
-    table_id   = "%s"
-    dataset_id = google_bigquery_dataset.foo.dataset_id
+    deletion_protection = false
+    table_id   	= "%s"
+    dataset_id 	= google_bigquery_dataset.foo.dataset_id
 
     table_constraints {
-		foreign_keys {
-			name = "test_fk"
-			referenced_table {
-				project_id  = "%s"
-				dataset_id = google_bigquery_dataset.foo.dataset_id
-				table_id   = google_bigquery_table.table_pk.table_id
-			}
-			column_references {
-				referencing_column = "id2"
-				referenced_column = "id"
-			}
-		}
+      foreign_keys {
+        name = "test_fk"
+        referenced_table {
+          project_id  	= "%s"
+          dataset_id 	= google_bigquery_dataset.foo.dataset_id
+          table_id   	= google_bigquery_table.table_pk.table_id
+        }
+        column_references {
+          referencing_column 	= "id2"
+          referenced_column 	= "id"
+        }
+      }
     }
 
     schema = <<EOH
-	[
-		{
-			"name": "ts2",
-			"type": "TIMESTAMP"
-		},
-		{
-			"name": "id2",
-			"type": "INTEGER"
-		}
-	]
-	EOH
+    [
+      {
+        "name": "ts2",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "id2",
+        "type": "INTEGER"
+      }
+    ]
+    EOH
   }
   `, datasetID, tableID_pk, tableID_fk, projectID)
 }
@@ -3138,85 +3138,85 @@ func testAccBigQueryTableForeignKeys(projectID, datasetID, tableID_pk, tableID_f
 func testAccBigQueryTableTableConstraintsUpdate(projectID, datasetID, tableID_pk, tableID_fk string) string {
 	return fmt.Sprintf(`
   resource "google_bigquery_dataset" "foo" {
-    dataset_id = "%s"
+    dataset_id 	= "%s"
   }
 
   resource "google_bigquery_table" "table_pk" {
 	deletion_protection = false
-    table_id   = "%s"
-    dataset_id = google_bigquery_dataset.foo.dataset_id
+    table_id   	= "%s"
+    dataset_id 	= google_bigquery_dataset.foo.dataset_id
 
     table_constraints {
-		primary_key {
-			columns = ["str"]
-		}
-		foreign_keys {
-			name = "test_fk"
-			referenced_table {
-				project_id  = "%s"
-				dataset_id = google_bigquery_dataset.foo.dataset_id
-				table_id   = google_bigquery_table.test.table_id
-			}
-			column_references {
-				referencing_column = "id"
-				referenced_column = "id2"
-			}
-		}
-		foreign_keys {
-			name = "test_fk2"
-			referenced_table {
-				project_id  = "%s"
-				dataset_id = google_bigquery_dataset.foo.dataset_id
-				table_id   = google_bigquery_table.test.table_id
-			}
-			column_references {
-				referencing_column = "ts"
-				referenced_column = "ts2"
-			}
-		}
+      primary_key {
+        columns = ["str"]
+      }
+      foreign_keys {
+        name = "test_fk"
+        referenced_table {
+          project_id  	= "%s"
+          dataset_id 	= google_bigquery_dataset.foo.dataset_id
+          table_id   	= google_bigquery_table.test.table_id
+        }
+        column_references {
+        referencing_column = "id"
+        referenced_column = "id2"
+        }
+      }
+      foreign_keys {
+        name = "test_fk2"
+        referenced_table {
+          project_id  	= "%s"
+          dataset_id 	= google_bigquery_dataset.foo.dataset_id
+          table_id   	= google_bigquery_table.test.table_id
+        }
+        column_references {
+          referencing_column 	= "ts"
+          referenced_column 	= "ts2"
+        }
+      }
     }
 
     schema = <<EOH
-	[
-		{
-			"name": "ts",
-			"type": "TIMESTAMP"
-		},
-		{
-			"name": "id",
-			"type": "INTEGER"
-		},
-		{
-			"name": "str",
-			"type": "STRING"
-		}
-	]
-	EOH
+    [
+      {
+        "name": "ts",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "id",
+        "type": "INTEGER"
+      },
+      {
+        "name": "str",
+        "type": "INTEGER"
+      }
+    ]
+    EOH
   }
 
   resource "google_bigquery_table" "test" {
-	deletion_protection = false
-    table_id   = "%s"
-    dataset_id = google_bigquery_dataset.foo.dataset_id
+    deletion_protection = false
+    table_id   	= "%s"
+    dataset_id 	= google_bigquery_dataset.foo.dataset_id
 
     table_constraints {
-		primary_key {
-			columns = ["id2", "ts2"]
-		}
+      primary_key {
+        columns = ["id2", "ts2"]
+      }
     }
 
     schema = <<EOH
-	[
-		{
-			"name": "ts2",
-			"type": "TIMESTAMP"
-		},
-		{
-			"name": "id2",
-			"type": "INTEGER"
-		}
-	]
-	EOH
+    [
+      {
+        "name": "ts2",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "id2",
+        "type": "INTEGER"
+      }
+    ]
+    EOH
   }
   `, datasetID, tableID_pk, projectID, projectID, tableID_fk)
 }
