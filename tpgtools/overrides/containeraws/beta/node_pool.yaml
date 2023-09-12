@@ -10,3 +10,7 @@
   field: config.instance_placement.tenancy
   details:
     diffsuppressfunc: tpgresource.CompareCaseInsensitive
+- type: DIFF_SUPPRESS_FUNC
+  field: management.auto_repair
+  details:
+    diffsuppressfunc: tpgresource.EmptyOrFalseSuppressBoolean
