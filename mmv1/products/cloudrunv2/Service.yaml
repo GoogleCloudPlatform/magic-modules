@@ -639,7 +639,6 @@ properties:
               name: 'dependsOn'
               description: |-
                 Containers which should be started before this container. If specified the container will wait to start until all containers with the listed names are healthy.
-              min_version: beta
               item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'volumes'
@@ -707,7 +706,6 @@ properties:
               name: 'emptyDir'
               description: |-
                 Ephemeral storage used as a shared volume.
-              min_version: beta
               # exactly_one_of:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance
