@@ -1074,11 +1074,14 @@ func TestFrameworkProvider_LoadAndValidateFramework_impersonateServiceAccount(t 
 			ExpectedDataModelValue: types.StringValue("value-from-env@example.com"),
 		},
 		// Handling unknown values
-		"when impersonate_service_account is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		"when impersonate_service_account is an unknown value, the provider treats it as if it's unset and uses an environment variable instead": {
 			ConfigValues: fwmodels.ProviderModel{
 				ImpersonateServiceAccount: types.StringUnknown(),
 			},
-			ExpectedDataModelValue:    types.StringNull(),
+			EnvVariables: map[string]string{
+				"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT": "value-from-env@example.com",
+			},
+			ExpectedDataModelValue: types.StringValue("value-from-env@example.com"),
 		},
 	}
 

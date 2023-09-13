@@ -208,7 +208,7 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 		}
 	}
 
-	if data.ImpersonateServiceAccount.IsNull() && os.Getenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT") != "" {
+	if (data.ImpersonateServiceAccount.IsNull() || data.ImpersonateServiceAccount.IsUnknown()) && os.Getenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT") != "" {
 		data.ImpersonateServiceAccount = types.StringValue(os.Getenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT"))
 	}
 
@@ -595,7 +595,7 @@ func (p *FrameworkProviderConfig) logGoogleIdentities(ctx context.Context, data 
 	// a separate diagnostics here
 	var d diag.Diagnostics
 
-	if data.ImpersonateServiceAccount.IsNull() {
+	if data.ImpersonateServiceAccount.IsNull() || data.ImpersonateServiceAccount.IsUnknown() {
 
 		tokenSource := GetTokenSource(ctx, data, true, diags)
 		if diags.HasError() {
