@@ -54,6 +54,15 @@ examples:
       backend_service_name: 'backend-service'
       http_health_check_name: 'http-health-check'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'target_https_proxy_certificate_manager'
+    primary_resource_id: 'default'
+    vars:
+      target_https_proxy_name: 'test-proxy'
+      certificate_name: 'my-certificate'
+      url_map_name: 'url-map'
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'http-health-check'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'target_https_proxy_http_keep_alive_timeout'
     primary_resource_id: 'default'
     vars:
