@@ -695,6 +695,13 @@ func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) 
 	transferJob := &storagetransfer.TransferJob{}
 	fieldMask := []string{}
 
+	if d.HasChange("event_stream") {
+		fieldMask = append(fieldMask, "event_stream")
+		if v, ok := d.GetOk("event_stream"); ok {
+			transferJob.Description = expandEventStream(v.([]interface{}))
+		}
+	}
+
 	if d.HasChange("description") {
 		fieldMask = append(fieldMask, "description")
 		if v, ok := d.GetOk("description"); ok {
