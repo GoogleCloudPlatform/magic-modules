@@ -1376,11 +1376,14 @@ func TestFrameworkProvider_LoadAndValidateFramework_requestReason(t *testing.T) 
 			ExpectedDataModelValue: types.StringNull(),
 		},
 		// Handling unknown values
-		"when request_timeout is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		"when request_reason is an unknown value, the provider treats it as if it's unset and uses an environment variable instead": {
 			ConfigValues: fwmodels.ProviderModel{
 				RequestReason: types.StringUnknown(),
 			},
-			ExpectedDataModelValue: types.StringNull(),
+			EnvVariables: map[string]string{
+				"CLOUDSDK_CORE_REQUEST_REASON": "foo",
+			},
+			ExpectedDataModelValue: types.StringValue("foo"),
 		},
 	}
 
@@ -1469,11 +1472,11 @@ func TestFrameworkProvider_LoadAndValidateFramework_requestTimeout(t *testing.T)
 			ExpectedDataModelValue: types.StringValue("120s"),
 		},
 		// Handling unknown values
-		"when request_timeout is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		"when request_timeout is an unknown value, the provider treats it as if it's unset and uses the default value 120s": {
 			ConfigValues: fwmodels.ProviderModel{
 				RequestTimeout: types.StringUnknown(),
 			},
-			ExpectedDataModelValue: types.StringNull(),
+			ExpectedDataModelValue: types.StringValue("120s"),
 		},
 	}
 

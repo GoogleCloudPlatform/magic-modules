@@ -289,11 +289,11 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 		data.UserProjectOverride = types.BoolValue(override)
 	}
 
-	if data.RequestReason.IsNull() && os.Getenv("CLOUDSDK_CORE_REQUEST_REASON") != "" {
+	if (data.RequestReason.IsNull() || data.RequestReason.IsUnknown()) && os.Getenv("CLOUDSDK_CORE_REQUEST_REASON") != "" {
 		data.RequestReason = types.StringValue(os.Getenv("CLOUDSDK_CORE_REQUEST_REASON"))
 	}
 
-	if data.RequestTimeout.IsNull() {
+	if data.RequestTimeout.IsNull() || data.RequestTimeout.IsUnknown() {
 		data.RequestTimeout = types.StringValue("120s")
 	}
 
