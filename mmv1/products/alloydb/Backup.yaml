@@ -42,6 +42,8 @@ examples:
       alloydb_cluster_name: 'alloydb-cluster'
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "alloydb-backup-basic")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
@@ -53,6 +55,8 @@ examples:
       alloydb_cluster_name: 'alloydb-cluster'
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "alloydb-backup-full")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
