@@ -202,8 +202,8 @@ properties:
           - network
           - network_config.0.network
         description: |
-          The resource link for the VPC network in which cluster resources are created and from which they are accessible via Private IP. The network must belong to the same project as the cluster. 
-          It is specified in the form: "projects/{projectNumber}/global/networks/{network_id}". This is required to create a cluster. It can be updated, but it cannot be removed.
+          The resource link for the VPC network in which cluster resources are created and from which they are accessible via Private IP.
+          The network must belong to the same project as the cluster. It is specified in the form: "projects/{projectNumber}/global/networks/{network_id}".
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
       - !ruby/object:Api::Type::String
         name: allocatedIpRange
