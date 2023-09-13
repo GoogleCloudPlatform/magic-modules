@@ -1535,9 +1535,9 @@ func TestFrameworkProvider_LoadAndValidateFramework_batching(t *testing.T) {
 	}{
 		"batching can be configured with values for enable_batching and send_after": {
 			EnableBatchingValue:       types.BoolValue(true),
-			SendAfterValue:            types.StringValue("123s"),
+			SendAfterValue:            types.StringValue("45s"),
 			ExpectEnableBatchingValue: types.BoolValue(true),
-			ExpectSendAfterValue:      types.StringValue("123s"),
+			ExpectSendAfterValue:      types.StringValue("45s"),
 		},
 		"if batching is an empty block, it will set the default values for enable_batching and send_after": {
 			// In this test, we try to create a list containing only null values
@@ -1554,9 +1554,9 @@ func TestFrameworkProvider_LoadAndValidateFramework_batching(t *testing.T) {
 		},
 		"when batching is configured with only send_after, enable_batching will be set to a default value": {
 			EnableBatchingValue:       types.BoolNull(),
-			SendAfterValue:            types.StringValue("123s"),
+			SendAfterValue:            types.StringValue("45s"),
 			ExpectEnableBatchingValue: types.BoolValue(true),
-			ExpectSendAfterValue:      types.StringValue("123s"),
+			ExpectSendAfterValue:      types.StringValue("45s"),
 		},
 		// Handling empty strings in config
 		"when batching is configured with send_after as an empty string, send_after will be set to a default value": {
@@ -1580,9 +1580,9 @@ func TestFrameworkProvider_LoadAndValidateFramework_batching(t *testing.T) {
 		// },
 		// "when batching is configured with enable_batching as an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
 		// 	EnableBatchingValue:       types.BoolNull(),
-		// 	SendAfterValue:            types.StringValue("123s"),
+		// 	SendAfterValue:            types.StringValue("45s"),
 		// 	ExpectEnableBatchingValue: types.BoolValue(true),
-		// 	ExpectSendAfterValue:      types.StringValue("123s"),
+		// 	ExpectSendAfterValue:      types.StringValue("45s"),
 		// },
 		// Error states
 		"if batching is configured with send_after as an invalid value, there's an error": {

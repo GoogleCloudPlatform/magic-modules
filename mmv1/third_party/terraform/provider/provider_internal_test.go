@@ -1581,12 +1581,12 @@ func TestProvider_ProviderConfigure_batching(t *testing.T) {
 				"batching": []interface{}{
 					map[string]interface{}{
 						"enable_batching": true,
-						"send_after":      "123s",
+						"send_after":      "45s",
 					},
 				},
 			},
 			ExpectedEnableBatchingValue: true,
-			ExpectedSendAfterValue:      "123s",
+			ExpectedSendAfterValue:      "45s",
 		},
 		"if batching is an empty block, it will set the default values for enable_batching and send_after": {
 			ConfigValues: map[string]interface{}{
@@ -1617,12 +1617,12 @@ func TestProvider_ProviderConfigure_batching(t *testing.T) {
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 				"batching": []interface{}{
 					map[string]interface{}{
-						"send_after": "123s",
+						"send_after": "45s",
 					},
 				},
 			},
 			ExpectedEnableBatchingValue: false,
-			ExpectedSendAfterValue:      "123s",
+			ExpectedSendAfterValue:      "45s",
 		},
 		// Error states
 		"if batching is configured with send_after as an invalid value, there's an error": {
