@@ -35,6 +35,12 @@ func TestAccDataSourceGoogleCloudFunctions2Function_basic(t *testing.T) {
 
 func testAccDataSourceGoogleCloudFunctions2FunctionConfig(functionName, bucketName, zipFilePath string) string {
 	return fmt.Sprintf(`
+provider "google" {
+  default_labels = {
+    default_key1 = "default_value1"
+  }
+}
+
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
@@ -50,7 +56,9 @@ resource "google_cloudfunctions2_function" "function_http_v2" {
   name = "%s"
   location = "us-central1"
   description = "a new function"
-
+  labels = {
+	  env = "test"
+  }
   build_config {
     runtime = "nodejs12"
     entry_point = "helloHttp"

@@ -478,9 +478,7 @@ module Api
       end
 
       props << build_terraform_labels_field('labels', labels.field_min_version)
-      props << build_effective_labels_field(
-        'labels', labels.field_min_version, labels.update_verb, labels.update_url
-      )
+      props << build_effective_labels_field('labels', labels)
     end
 
     def add_annotations_fields(props, parent, annotations)
@@ -495,13 +493,10 @@ module Api
         @custom_diff.append('tpgresource.SetMetadataAnnotationsDiff')
       end
 
-      props << build_effective_labels_field(
-        'annotations', annotations.field_min_version,
-        annotations.update_verb, annotations.update_url
-      )
+      props << build_effective_labels_field('annotations', annotations)
     end
 
-    def build_effective_labels_field(name, min_version, update_verb, update_url)
+    def build_effective_labels_field(name, labels)
       description = "All of #{name} (key/value pairs)\
  present on the resource in GCP, including the #{name} configured through Terraform,\
  other clients and services."
@@ -511,9 +506,10 @@ module Api
         output: true,
         api_name: name,
         description:,
-        min_version:,
-        update_verb:,
-        update_url:
+        min_version: labels.field_min_version,
+        update_verb: labels.update_verb,
+        update_url: labels.update_url,
+        immutable: labels.immutable
       )
     end
 

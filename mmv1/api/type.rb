@@ -769,7 +769,7 @@ module Api
       attr_accessor :ignore_write
 
       def initialize(name: nil, output: nil, api_name: nil, description: nil, min_version: nil,
-                     ignore_write: nil, update_verb: nil, update_url: nil)
+                     ignore_write: nil, update_verb: nil, update_url: nil, immutable: nil)
         super()
 
         @name = name
@@ -780,6 +780,7 @@ module Api
         @ignore_write = ignore_write
         @update_verb = update_verb
         @update_url = update_url
+        @immutable = immutable
       end
 
       def validate
