@@ -566,12 +566,15 @@ func TestFrameworkProvider_LoadAndValidateFramework_region(t *testing.T) {
 			ExpectedConfigStructValue: types.StringValue("region-from-env"),
 		},
 		// Handling unknown values
-		"when region is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		"when region is an unknown value, the provider treats it as if it's unset and uses an environment variable instead": {
 			ConfigValues: fwmodels.ProviderModel{
 				Region: types.StringUnknown(),
 			},
-			ExpectedDataModelValue:    types.StringNull(),
-			ExpectedConfigStructValue: types.StringNull(),
+			EnvVariables: map[string]string{
+				"GOOGLE_REGION": "region-from-env",
+			},
+			ExpectedDataModelValue:    types.StringValue("region-from-env"),
+			ExpectedConfigStructValue: types.StringValue("region-from-env"),
 		},
 	}
 
@@ -713,12 +716,15 @@ func TestFrameworkProvider_LoadAndValidateFramework_zone(t *testing.T) {
 			ExpectedConfigStructValue: types.StringValue("zone-from-env"),
 		},
 		// Handling unknown values
-		"when zone is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		"when zone is an unknown value, the provider treats it as if it's unset and uses an environment variable instead": {
 			ConfigValues: fwmodels.ProviderModel{
 				Zone: types.StringUnknown(),
 			},
-			ExpectedDataModelValue:    types.StringNull(),
-			ExpectedConfigStructValue: types.StringNull(),
+			EnvVariables: map[string]string{
+				"GOOGLE_ZONE": "zone-from-env",
+			},
+			ExpectedDataModelValue:    types.StringValue("zone-from-env"),
+			ExpectedConfigStructValue: types.StringValue("zone-from-env"),
 		},
 	}
 

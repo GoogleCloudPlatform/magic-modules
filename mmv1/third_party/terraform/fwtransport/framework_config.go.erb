@@ -228,7 +228,7 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 		data.BillingProject = types.StringValue(os.Getenv("GOOGLE_BILLING_PROJECT"))
 	}
 
-	if data.Region.IsNull() {
+	if data.Region.IsNull() || data.Region.IsUnknown() {
 		region := transport_tpg.MultiEnvDefault([]string{
 			"GOOGLE_REGION",
 			"GCLOUD_REGION",
@@ -240,7 +240,7 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 		}
 	}
 
-	if data.Zone.IsNull() {
+	if data.Zone.IsNull() || data.Zone.IsUnknown() {
 		zone := transport_tpg.MultiEnvDefault([]string{
 			"GOOGLE_ZONE",
 			"GCLOUD_ZONE",
