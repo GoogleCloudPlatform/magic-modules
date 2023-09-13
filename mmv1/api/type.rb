@@ -266,6 +266,14 @@ module Api
       "#{__parent.lineage}.#{name&.underscore}"
     end
 
+    # Prints the access path of the field in the configration eg: metadata.0.labels
+    # The only intended purpose is to get the value of the labes field by calling d.Get().
+    def terraform_lineage
+      return name&.underscore if __parent.nil?
+
+      "#{__parent.terraform_lineage}.0.#{name&.underscore}"
+    end
+
     def to_json(opts = nil)
       # ignore fields that will contain references to parent resources and
       # those which will be added later
@@ -728,6 +736,8 @@ module Api
         @properties.reject(&:exclude)
       end
 
+      attr_writer :properties
+
       def nested_properties
         properties
       end
@@ -755,6 +765,63 @@ module Api
     # simpler property to generate and means we can avoid conditional logic
     # in Map.
     class KeyValuePairs < Composite
+      # Ignore writing the "effective_labels" and "effective_annotations" fields to API.
+      attr_accessor :ignore_write
+
+      def initialize(name: nil, output: nil, api_name: nil, description: nil, min_version: nil,
+                     ignore_write: nil, update_verb: nil, update_url: nil)
+        super()
+
+        @name = name
+        @output = output
+        @api_name = api_name
+        @description = description
+        @min_version = min_version
+        @ignore_write = ignore_write
+        @update_verb = update_verb
+        @update_url = update_url
+      end
+
+      def validate
+        super
+        check :ignore_write, type: :boolean, default: false
+      end
+
+      def field_min_version
+        @min_version
+      end
+    end
+
+    # An array of string -> string key -> value pairs used specifically for the "labels" field.
+    # The field name with this type should be "labels" literally.
+    class KeyValueLabels < KeyValuePairs
+      def validate
+        super
+        return unless @name != 'labels'
+
+        raise "The field #{name} has the type KeyValueLabels, but the field name is not 'labels'!"
+      end
+    end
+
+    # An array of string -> string key -> value pairs used for the "terraform_labels" field.
+    class KeyValueTerraformLabels < KeyValuePairs
+    end
+
+    # An array of string -> string key -> value pairs used for the "effective_labels"
+    # and "effective_annotations" fields.
+    class KeyValueEffectiveLabels < KeyValuePairs
+    end
+
+    # An array of string -> string key -> value pairs used specifically for the "annotations" field.
+    # The field name with this type should be "annotations" literally.
+    class KeyValueAnnotations < KeyValuePairs
+      def validate
+        super
+        return unless @name != 'annotations'
+
+        raise "The field #{name} has the type KeyValueAnnotations,\
+ but the field name is not 'annotations'!"
+      end
     end
 
     # Map from string keys -> nested object entries

@@ -381,6 +381,26 @@ func (r Resource) IDFunction() string {
 	return "tpgresource.ReplaceVarsForId"
 }
 
+// Check if the resource has the lables field for the resource
+func (r Resource) HasLabels() bool {
+	for _, p := range r.Properties {
+		if p.IsResourceLabels() {
+			return true
+		}
+	}
+	return false
+}
+
+// Check if the resource has the annotations field for the resource
+func (r Resource) HasAnnotations() bool {
+	for _, p := range r.Properties {
+		if p.IsResourceAnnotations() {
+			return true
+		}
+	}
+	return false
+}
+
 // ResourceInput is a Resource along with additional generation metadata.
 type ResourceInput struct {
 	Resource
@@ -810,6 +830,18 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 			sample.Name = &sampleName
 		}
 		sample.TestSlug = RenderedString(snakeToTitleCase(miscellaneousNameSnakeCase(sampleName)).titlecase() + "HandWritten")
+
+		// The "labels" and "annotations" fields in the state are decided by the configuration.
+		// During importing, as the configuration is unavailableafter, the "labels" and "annotations" fields in the state will be empty.
+		// So add the "labels" and the "annotations" fields to the ImportStateVerifyIgnore list.
+		if r.HasLabels() {
+			sample.IgnoreRead = append(sample.IgnoreRead, "labels")
+		}
+
+		if r.HasAnnotations() {
+			sample.IgnoreRead = append(sample.IgnoreRead, "annotations")
+		}
+
 		samples = append(samples, sample)
 	}
 
@@ -896,6 +928,18 @@ func (r *Resource) loadDCLSamples() []Sample {
 		}
 		sample.DependencyList = dependencies
 		sample.TestSlug = RenderedString(sampleNameToTitleCase(*sample.Name).titlecase())
+
+		// The "labels" and "annotations" fields in the state are decided by the configuration.
+		// During importing, as the configuration is unavailableafter, the "labels" and "annotations" fields in the state will be empty.
+		// So add the "labels" and the "annotations" fields to the ImportStateVerifyIgnore list.
+		if r.HasLabels() {
+			sample.IgnoreRead = append(sample.IgnoreRead, "labels")
+		}
+
+		if r.HasAnnotations() {
+			sample.IgnoreRead = append(sample.IgnoreRead, "annotations")
+		}
+
 		samples = append(samples, sample)
 	}
 

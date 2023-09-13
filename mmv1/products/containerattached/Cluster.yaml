@@ -202,7 +202,7 @@ properties:
     description: |
       The Kubernetes version of the cluster.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueAnnotations
     name: annotations
     description: |
       Optional. Annotations on the cluster. This field has the same
