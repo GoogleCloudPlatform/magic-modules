@@ -7,6 +7,9 @@ resource "google_edgenetwork_subnet" "<%= ctx[:primary_resource_id] %>" {
   network     = google_edgenetwork_network.example_network.id
   ipv6_cidr   = ["4444:4444:4444:4444::1/64"]
   vlan_id     = 44
+  labels      = {
+    "environment" : "dev"
+  }
 }
 
 resource "google_edgenetwork_network" "example_network" {

@@ -121,7 +121,6 @@ properties:
   - !ruby/object:Api::Type::Integer
     name: 'vlanId'
     default_from_api: true
-    send_empty_value: false
     description: |
       VLAN ID for this subnetwork. If not specified, one is assigned automatically.
   - !ruby/object:Api::Type::Enum
