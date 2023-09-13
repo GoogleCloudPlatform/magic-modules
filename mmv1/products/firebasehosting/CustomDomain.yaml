@@ -71,7 +71,7 @@ examples:
       # Use the default hosting site for the project in tests
       site_id: envvar.GetTestProjectFromEnv()
       # Don't add random suffix
-      custom_domain: '"custom.domain.com"'
+      custom_domain: '"basic.custom.domain.com"'
   - !ruby/object:Provider::Terraform::Examples
     name: "firebasehosting_customdomain_full"
     min_version: "beta"
@@ -84,7 +84,7 @@ examples:
       project_id: :PROJECT_NAME
     test_vars_overrides:
       # Don't add random suffix
-      custom_domain: '"source.domain.com"'
+      custom_domain: '"full.source.domain.com"'
       redirect_target: '"destination.domain.com"'
   - !ruby/object:Provider::Terraform::Examples
     name: "firebasehosting_customdomain_cloud_run"

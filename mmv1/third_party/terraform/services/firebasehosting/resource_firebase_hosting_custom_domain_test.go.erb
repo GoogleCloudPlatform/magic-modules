@@ -16,7 +16,7 @@ func TestAccFirebaseHostingCustomDomain_firebasehostingCustomdomainUpdate(t *tes
 	context := map[string]interface{}{
 		"project_id":      envvar.GetTestProjectFromEnv(),
 		"site_id":         envvar.GetTestProjectFromEnv(),
-		"custom_domain":   "source.domain.com",
+		"custom_domain":   "update.source.domain.com",
 		"random_suffix":   acctest.RandString(t, 10),
 	}
 
