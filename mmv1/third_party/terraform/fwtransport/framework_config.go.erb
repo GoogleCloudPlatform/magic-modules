@@ -188,7 +188,7 @@ func (p *FrameworkProviderConfig) HandleZeroValues(ctx context.Context, data *fw
 
 // HandleDefaults will handle all the defaults necessary in the provider
 func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmodels.ProviderModel, diags *diag.Diagnostics) {
-	if data.AccessToken.IsNull() && data.Credentials.IsNull() {
+	if (data.AccessToken.IsNull() || data.AccessToken.IsUnknown()) && (data.Credentials.IsNull() || data.Credentials.IsUnknown()) {
 		credentials := transport_tpg.MultiEnvDefault([]string{
 			"GOOGLE_CREDENTIALS",
 			"GOOGLE_CLOUD_KEYFILE_JSON",
@@ -667,7 +667,7 @@ func GetCredentials(ctx context.Context, data fwmodels.ProviderModel, initialCre
 		return googleoauth.Credentials{}
 	}
 
-	if !data.AccessToken.IsNull() {
+	if !data.AccessToken.IsNull() && !data.AccessToken.IsUnknown() {
 		contents, _, err := verify.PathOrContents(data.AccessToken.ValueString())
 		if err != nil {
 			diags.AddError("error loading access token", err.Error())
@@ -692,7 +692,7 @@ func GetCredentials(ctx context.Context, data fwmodels.ProviderModel, initialCre
 		}
 	}
 
-	if !data.Credentials.IsNull() {
+	if !data.Credentials.IsNull() && !data.Credentials.IsUnknown() {
 		contents, _, err := verify.PathOrContents(data.Credentials.ValueString())
 		if err != nil {
 			diags.AddError(fmt.Sprintf("error loading credentials: %s", err), err.Error())

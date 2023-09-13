@@ -826,11 +826,14 @@ func TestFrameworkProvider_LoadAndValidateFramework_accessToken(t *testing.T) {
 			ExpectedDataModelValue: types.StringValue("value-from-GOOGLE_OAUTH_ACCESS_TOKEN"),
 		},
 		// Handling unknown values
-		"when access_token is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		"when access_token is an unknown value, the provider treats it as if it's unset and uses an environment variable instead": {
 			ConfigValues: fwmodels.ProviderModel{
 				AccessToken: types.StringUnknown(),
 			},
-			ExpectedDataModelValue:    types.StringNull(),
+			EnvVariables: map[string]string{
+				"GOOGLE_OAUTH_ACCESS_TOKEN": "value-from-GOOGLE_OAUTH_ACCESS_TOKEN",
+			},
+			ExpectedDataModelValue: types.StringValue("value-from-GOOGLE_OAUTH_ACCESS_TOKEN"),
 		},
 	}
 
