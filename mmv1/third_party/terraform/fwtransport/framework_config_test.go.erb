@@ -962,12 +962,15 @@ func TestFrameworkProvider_LoadAndValidateFramework_userProjectOverride(t *testi
 			ExpectedConfigStructValue: types.BoolNull(),
 		},
 		// Handling unknown values
-		"when user_project_override is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		"when user_project_override is an unknown value, the provider treats it as if it's unset and uses an environment variable instead": {
 			ConfigValues: fwmodels.ProviderModel{
 				UserProjectOverride: types.BoolUnknown(),
 			},
-			ExpectedDataModelValue:    types.BoolNull(),
-			ExpectedConfigStructValue: types.BoolNull(),
+			EnvVariables: map[string]string{
+				"USER_PROJECT_OVERRIDE": "true",
+			},
+			ExpectedDataModelValue:    types.BoolValue(true),
+			ExpectedConfigStructValue: types.BoolValue(true),
 		},
 	}
 

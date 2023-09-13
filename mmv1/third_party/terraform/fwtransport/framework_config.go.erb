@@ -280,7 +280,7 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 		data.Batching, d = types.ListValueFrom(ctx, types.ObjectType{}.WithAttributeTypes(fwmodels.ProviderBatchingAttributes), pbConfigs)
 	}
 
-	if data.UserProjectOverride.IsNull() && os.Getenv("USER_PROJECT_OVERRIDE") != "" {
+	if (data.UserProjectOverride.IsNull() || data.UserProjectOverride.IsUnknown()) && os.Getenv("USER_PROJECT_OVERRIDE") != "" {
 		override, err := strconv.ParseBool(os.Getenv("USER_PROJECT_OVERRIDE"))
 		if err != nil {
 			diags.AddError(
