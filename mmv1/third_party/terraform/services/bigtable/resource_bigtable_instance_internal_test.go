@@ -41,7 +41,7 @@ func TestGetUnavailableClusterZones(t *testing.T) {
 	for tn, tc := range cases {
 		var clusters []interface{}
 		for _, zone := range tc.clusterZones {
-			clusters = append(clusters, map[string]string{"zone": zone})
+			clusters = append(clusters, map[string]interface{}{"zone": zone})
 		}
 		if got := getUnavailableClusterZones(clusters, tc.unavailableZones); !reflect.DeepEqual(got, tc.want) {
 			t.Errorf("bad: %s, got %q, want %q", tn, got, tc.want)
