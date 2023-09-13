@@ -16,7 +16,7 @@ require 'api/object'
 module Api
   class Product < Api::Object::Named
     # Represents any APIs that are required to be enabled to use this product
-    class ApiReference < Api::Object
+    class ApiReference < Api::Object::Named
       attr_reader :name
       attr_reader :url
 
