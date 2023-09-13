@@ -120,14 +120,13 @@ func TestFrameworkProvider_LoadAndValidateFramework_project(t *testing.T) {
 			ExpectedConfigStructValue: types.StringValue("project-from-GOOGLE_PROJECT"),
 		},
 		// Handling unknown values
-		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
-		// "when project is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
-		// 	ConfigValues: fwmodels.ProviderModel{
-		// 		Project: types.StringUnknown(),
-		// 	},
-		// 	ExpectedDataModelValue:    types.StringNull(),
-		// 	ExpectedConfigStructValue: types.StringNull(),
-		// },
+		"when project is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+			ConfigValues: fwmodels.ProviderModel{
+				Project: types.StringUnknown(),
+			},
+			ExpectedDataModelValue:    types.StringNull(),
+			ExpectedConfigStructValue: types.StringNull(),
+		},
 	}
 
 	for tn, tc := range cases {
@@ -333,62 +332,61 @@ func TestFrameworkProvider_LoadAndValidateFramework_credentials(t *testing.T) {
 	}
 }
 
-// TODO(SarahFrench) make this test pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
-// func TestFrameworkProvider_LoadAndValidateFramework_credentials_unknown(t *testing.T) {
-// 	// This test case is kept separate from other credentials tests, as it requires comparing
-// 	// error messages returned by two different error states:
-// 	// - When credentials = Null
-// 	// - When credentials = Unknown
+func TestFrameworkProvider_LoadAndValidateFramework_credentials_unknown(t *testing.T) {
+	// This test case is kept separate from other credentials tests, as it requires comparing
+	// error messages returned by two different error states:
+	// - When credentials = Null
+	// - When credentials = Unknown
 
-// 	t.Run("when project is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)", func(t *testing.T) {
+	t.Run("when project is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)", func(t *testing.T) {
 
-// 		// Arrange
-// 		acctest.UnsetTestProviderConfigEnvs(t)
+		// Arrange
+		acctest.UnsetTestProviderConfigEnvs(t)
 
-// 		ctx := context.Background()
-// 		tfVersion := "foobar"
-// 		providerversion := "999"
+		ctx := context.Background()
+		tfVersion := "foobar"
+		providerversion := "999"
 
-// 		impersonateServiceAccountDelegates, _ := types.ListValue(types.StringType, []attr.Value{}) // empty list
+		impersonateServiceAccountDelegates, _ := types.ListValue(types.StringType, []attr.Value{}) // empty list
 
-// 		// Null data and error collection
-// 		diagsNull := diag.Diagnostics{}
-// 		dataNull := fwmodels.ProviderModel{
-// 			Credentials: types.StringNull(),
-// 		}
-// 		dataNull.ImpersonateServiceAccountDelegates = impersonateServiceAccountDelegates
+		// Null data and error collection
+		diagsNull := diag.Diagnostics{}
+		dataNull := fwmodels.ProviderModel{
+			Credentials: types.StringNull(),
+		}
+		dataNull.ImpersonateServiceAccountDelegates = impersonateServiceAccountDelegates
 
-// 		// Unknown data and error collection
-// 		diagsUnknown := diag.Diagnostics{}
-// 		dataUnknown := fwmodels.ProviderModel{
-// 			Credentials: types.StringUnknown(),
-// 		}
-// 		dataUnknown.ImpersonateServiceAccountDelegates = impersonateServiceAccountDelegates
+		// Unknown data and error collection
+		diagsUnknown := diag.Diagnostics{}
+		dataUnknown := fwmodels.ProviderModel{
+			Credentials: types.StringUnknown(),
+		}
+		dataUnknown.ImpersonateServiceAccountDelegates = impersonateServiceAccountDelegates
 
-// 		pNull := fwtransport.FrameworkProviderConfig{}
-// 		pUnknown := fwtransport.FrameworkProviderConfig{}
+		pNull := fwtransport.FrameworkProviderConfig{}
+		pUnknown := fwtransport.FrameworkProviderConfig{}
 
-// 		// Act
-// 		pNull.LoadAndValidateFramework(ctx, &dataNull, tfVersion, &diagsNull, providerversion)
-// 		pUnknown.LoadAndValidateFramework(ctx, &dataUnknown, tfVersion, &diagsUnknown, providerversion)
+		// Act
+		pNull.LoadAndValidateFramework(ctx, &dataNull, tfVersion, &diagsNull, providerversion)
+		pUnknown.LoadAndValidateFramework(ctx, &dataUnknown, tfVersion, &diagsUnknown, providerversion)
 
-// 		// Assert
-// 		if !diagsNull.HasError() {
-// 			t.Fatalf("expect errors when credentials is null, but [%d] errors occurred", diagsNull.ErrorsCount())
-// 		}
-// 		if !diagsUnknown.HasError() {
-// 			t.Fatalf("expect errors when credentials is unknown, but [%d] errors occurred", diagsUnknown.ErrorsCount())
-// 		}
+		// Assert
+		if !diagsNull.HasError() {
+			t.Fatalf("expect errors when credentials is null, but [%d] errors occurred", diagsNull.ErrorsCount())
+		}
+		if !diagsUnknown.HasError() {
+			t.Fatalf("expect errors when credentials is unknown, but [%d] errors occurred", diagsUnknown.ErrorsCount())
+		}
 
-// 		errNull := diagsNull.Errors()
-// 		errUnknown := diagsUnknown.Errors()
-// 		for i := 0; i < len(errNull); i++ {
-// 			if errNull[i] != errUnknown[i] {
-// 				t.Fatalf("expect errors to be the same for null and unknown credentials values, instead got \nnull=`%s` \nunknown=%s", errNull[i], errUnknown[i])
-// 			}
-// 		}
-// 	})
-// }
+		errNull := diagsNull.Errors()
+		errUnknown := diagsUnknown.Errors()
+		for i := 0; i < len(errNull); i++ {
+			if errNull[i] != errUnknown[i] {
+				t.Fatalf("expect errors to be the same for null and unknown credentials values, instead got \nnull=`%s` \nunknown=%s", errNull[i], errUnknown[i])
+			}
+		}
+	})
+}
 
 func TestFrameworkProvider_LoadAndValidateFramework_billingProject(t *testing.T) {
 
@@ -565,14 +563,13 @@ func TestFrameworkProvider_LoadAndValidateFramework_region(t *testing.T) {
 			ExpectedConfigStructValue: types.StringValue("region-from-env"),
 		},
 		// Handling unknown values
-		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
-		// "when region is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
-		// 	ConfigValues: fwmodels.ProviderModel{
-		// 		Region: types.StringUnknown(),
-		// 	},
-		// 	ExpectedDataModelValue:    types.StringNull(),
-		// 	ExpectedConfigStructValue: types.StringNull(),
-		// },
+		"when region is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+			ConfigValues: fwmodels.ProviderModel{
+				Region: types.StringUnknown(),
+			},
+			ExpectedDataModelValue:    types.StringNull(),
+			ExpectedConfigStructValue: types.StringNull(),
+		},
 	}
 
 	for tn, tc := range cases {
@@ -713,14 +710,13 @@ func TestFrameworkProvider_LoadAndValidateFramework_zone(t *testing.T) {
 			ExpectedConfigStructValue: types.StringValue("zone-from-env"),
 		},
 		// Handling unknown values
-		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
-		// "when zone is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
-		// 	ConfigValues: fwmodels.ProviderModel{
-		// 		Zone: types.StringUnknown(),
-		// 	},
-		// 	ExpectedDataModelValue:    types.StringNull(),
-		// 	ExpectedConfigStructValue: types.StringNull(),
-		// },
+		"when zone is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+			ConfigValues: fwmodels.ProviderModel{
+				Zone: types.StringUnknown(),
+			},
+			ExpectedDataModelValue:    types.StringNull(),
+			ExpectedConfigStructValue: types.StringNull(),
+		},
 	}
 
 	for tn, tc := range cases {
@@ -827,13 +823,12 @@ func TestFrameworkProvider_LoadAndValidateFramework_accessToken(t *testing.T) {
 			ExpectedDataModelValue: types.StringValue("value-from-GOOGLE_OAUTH_ACCESS_TOKEN"),
 		},
 		// Handling unknown values
-		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
-		// "when access_token is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
-		// 	ConfigValues: fwmodels.ProviderModel{
-		// 		AccessToken: types.StringUnknown(),
-		// 	},
-		// 	ExpectedDataModelValue:    types.StringNull(),
-		// },
+		"when access_token is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+			ConfigValues: fwmodels.ProviderModel{
+				AccessToken: types.StringUnknown(),
+			},
+			ExpectedDataModelValue:    types.StringNull(),
+		},
 	}
 
 	for tn, tc := range cases {
@@ -955,14 +950,13 @@ func TestFrameworkProvider_LoadAndValidateFramework_userProjectOverride(t *testi
 			ExpectedConfigStructValue: types.BoolNull(),
 		},
 		// Handling unknown values
-		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
-		// "when user_project_override is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
-		// 	ConfigValues: fwmodels.ProviderModel{
-		// 		UserProjectOverride: types.BoolUnknown(),
-		// 	},
-		// 	ExpectedDataModelValue:    types.BoolNull(),
-		// 	ExpectedConfigStructValue: types.BoolNull(),
-		// },
+		"when user_project_override is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+			ConfigValues: fwmodels.ProviderModel{
+				UserProjectOverride: types.BoolUnknown(),
+			},
+			ExpectedDataModelValue:    types.BoolNull(),
+			ExpectedConfigStructValue: types.BoolNull(),
+		},
 	}
 
 	for tn, tc := range cases {
@@ -1065,13 +1059,12 @@ func TestFrameworkProvider_LoadAndValidateFramework_impersonateServiceAccount(t 
 			ExpectedDataModelValue: types.StringValue("value-from-env@example.com"),
 		},
 		// Handling unknown values
-		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
-		// "when impersonate_service_account is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
-		// 	ConfigValues: fwmodels.ProviderModel{
-		// 		ImpersonateServiceAccount: types.StringUnknown(),
-		// 	},
-		// 	ExpectedDataModelValue:    types.StringNull(),
-		// },
+		"when impersonate_service_account is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+			ConfigValues: fwmodels.ProviderModel{
+				ImpersonateServiceAccount: types.StringUnknown(),
+			},
+			ExpectedDataModelValue:    types.StringNull(),
+		},
 	}
 
 	for tn, tc := range cases {
@@ -1154,11 +1147,10 @@ func TestFrameworkProvider_LoadAndValidateFramework_impersonateServiceAccountDel
 			ExpectedDataModelValue:                  nil,
 		},
 		// Handling unknown values
-		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
-		// "when impersonate_service_account_delegates is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
-		// 	SetAsUnknown: true,
-		// 	// Currently this causes an error at google/fwtransport/framework_config.go:1518
-		// },
+		"when impersonate_service_account_delegates is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+			SetAsUnknown: true,
+			// Currently this causes an error at google/fwtransport/framework_config.go:1518
+		},
 	}
 
 	for tn, tc := range cases {
@@ -1366,13 +1358,12 @@ func TestFrameworkProvider_LoadAndValidateFramework_requestReason(t *testing.T) 
 			ExpectedDataModelValue: types.StringNull(),
 		},
 		// Handling unknown values
-		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
-		// "when request_timeout is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
-		// 	ConfigValues: fwmodels.ProviderModel{
-		// 		RequestReason: types.StringUnknown(),
-		// 	},
-		// 	ExpectedDataModelValue: types.StringNull(),
-		// },
+		"when request_timeout is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+			ConfigValues: fwmodels.ProviderModel{
+				RequestReason: types.StringUnknown(),
+			},
+			ExpectedDataModelValue: types.StringNull(),
+		},
 	}
 
 	for tn, tc := range cases {
@@ -1460,13 +1451,12 @@ func TestFrameworkProvider_LoadAndValidateFramework_requestTimeout(t *testing.T)
 			ExpectedDataModelValue: types.StringValue("120s"),
 		},
 		// Handling unknown values
-		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
-		// "when request_timeout is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
-		// 	ConfigValues: fwmodels.ProviderModel{
-		// 		RequestTimeout: types.StringUnknown(),
-		// 	},
-		// 	ExpectedDataModelValue: types.StringNull(),
-		// },
+		"when request_timeout is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+			ConfigValues: fwmodels.ProviderModel{
+				RequestTimeout: types.StringUnknown(),
+			},
+			ExpectedDataModelValue: types.StringNull(),
+		},
 	}
 
 	for tn, tc := range cases {
@@ -1566,24 +1556,23 @@ func TestFrameworkProvider_LoadAndValidateFramework_batching(t *testing.T) {
 			ExpectSendAfterValue:      types.StringValue("10s"), // When batching block is present but has missing arguments inside, default is 10s
 		},
 		// Handling unknown values
-		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
-		// "when batching is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
-		// 	SetBatchingAsUnknown:      true,
-		// 	ExpectEnableBatchingValue: types.BoolValue(true),
-		// 	ExpectSendAfterValue:      types.StringValue("10s"),
-		// },
-		// "when batching is configured with send_after as an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
-		// 	EnableBatchingValue:       types.BoolValue(true),
-		// 	SendAfterValue:            types.StringUnknown(),
-		// 	ExpectEnableBatchingValue: types.BoolValue(true),
-		// 	ExpectSendAfterValue:      types.StringValue("10s"),
-		// },
-		// "when batching is configured with enable_batching as an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
-		// 	EnableBatchingValue:       types.BoolNull(),
-		// 	SendAfterValue:            types.StringValue("45s"),
-		// 	ExpectEnableBatchingValue: types.BoolValue(true),
-		// 	ExpectSendAfterValue:      types.StringValue("45s"),
-		// },
+		"when batching is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+			SetBatchingAsUnknown:      true,
+			ExpectEnableBatchingValue: types.BoolValue(true),
+			ExpectSendAfterValue:      types.StringValue("3s"),
+		},
+		"when batching is configured with send_after as an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+			EnableBatchingValue:       types.BoolValue(true),
+			SendAfterValue:            types.StringUnknown(),
+			ExpectEnableBatchingValue: types.BoolValue(true),
+			ExpectSendAfterValue:      types.StringValue("3s"),
+		},
+		"when batching is configured with enable_batching as an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+			EnableBatchingValue:       types.BoolNull(),
+			SendAfterValue:            types.StringValue("45s"),
+			ExpectEnableBatchingValue: types.BoolValue(true),
+			ExpectSendAfterValue:      types.StringValue("45s"),
+		},
 		// Error states
 		"if batching is configured with send_after as an invalid value, there's an error": {
 			SendAfterValue: types.StringValue("invalid value"),
