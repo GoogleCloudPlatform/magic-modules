@@ -49,7 +49,7 @@ resource "google_compute_backend_service" "default" {
 }
 
 resource "google_compute_health_check" "default" {
-  name               = "<%= ctx[:vars]['health_check_name'] %>"
+  name = "<%= ctx[:vars]['health_check_name'] %>"
   http_health_check {
     port_specification = "USE_SERVING_PORT"
   }
