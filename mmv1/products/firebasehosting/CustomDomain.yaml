@@ -56,6 +56,7 @@ async: !ruby/object:Api::OpAsync
     message: "message"
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/firebasehosting_custom_domain_wait_dns_verification.erb
+  test_check_destroy: templates/terraform/custom_check_destroy/firebasehosting_custom_domain_soft_delete.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "firebasehosting_customdomain_basic"
