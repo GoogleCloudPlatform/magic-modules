@@ -1,6 +1,7 @@
 package bigtable
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -42,7 +43,7 @@ func TestGetUnavailableClusterZones(t *testing.T) {
 		for _, zone := range tc.clusterZones {
 			clusters = append(clusters, map[string]string{"zone": zone})
 		}
-		if got := getUnavailableClusterZones(clusters, tc.unavailableZones); !cmp.Equal(got, tc.want) {
+		if got := getUnavailableClusterZones(clusters, tc.unavailableZones); !reflect.DeepEqual(got, tc.want) {
 			t.Errorf("bad: %s, got %q, want %q", tn, got, tc.want)
 		}
 	}
