@@ -24,7 +24,7 @@ resource "google_gke_backup_backup_plan" "basic" {
 }
 
 resource "google_gke_backup_restore_plan" "rollback_ns" {
-  name = "rp-<%= ctx[:vars]['name'] %>"
+  name = "<%= ctx[:vars]['name'] %>-rp"
   location = "us-central1"
   backup_plan = google_gke_backup_backup_plan.basic.id
   cluster = google_container_cluster.primary.id
