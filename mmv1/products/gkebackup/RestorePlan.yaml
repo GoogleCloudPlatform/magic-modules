@@ -38,9 +38,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkebackup_restoreplan_all_namespaces'
     primary_resource_id: 'all_ns'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-allns-restoreplan%s\",
-      context[\"random_suffix\"\
-      ])"
     vars:
       name: 'restore-all-ns'
     test_env_vars:
@@ -48,9 +45,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkebackup_restoreplan_rollback_namespace'
     primary_resource_id: 'rollback_ns'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-rollbackns-restoreplan%s\",
-      context[\"random_suffix\"\
-      ])"
     vars:
       name: 'rollback-ns'
     test_env_vars:
@@ -58,9 +52,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkebackup_restoreplan_protected_application'
     primary_resource_id: 'rollback_protected_app'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-protectedapp-restoreplan%s\",
-      context[\"random_suffix\"\
-      ])"
     vars:
       name: 'rollback-protected-app'
     test_env_vars:
@@ -68,9 +59,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkebackup_restoreplan_all_cluster_resources'
     primary_resource_id: 'all_cluster_resources'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-allcluster-restoreplan%s\",
-      context[\"random_suffix\"\
-      ])"
     vars:
       name: 'all-groupkinds'
     test_env_vars:
@@ -78,11 +66,15 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkebackup_restoreplan_rename_namespace'
     primary_resource_id: 'rename_ns'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-renamens-restoreplan%s\",
-      context[\"random_suffix\"\
-      ])"
     vars:
       name: 'rename-ns'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'gkebackup_restoreplan_second_transformation'
+    primary_resource_id: 'transform_rule'
+    vars:
+      name: 'transform-rule'
     test_env_vars:
       project: :PROJECT_NAME
 skip_sweeper: true
