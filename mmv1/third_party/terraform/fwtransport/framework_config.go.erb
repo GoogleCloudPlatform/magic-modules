@@ -655,16 +655,20 @@ func GetCredentials(ctx context.Context, data fwmodels.ProviderModel, initialCre
 	var clientScopes []string
 	var delegates []string
 
-	d := data.Scopes.ElementsAs(ctx, &clientScopes, false)
-	diags.Append(d...)
-	if diags.HasError() {
-		return googleoauth.Credentials{}
+	if !data.Scopes.IsNull() && !data.Scopes.IsUnknown() {
+		d := data.Scopes.ElementsAs(ctx, &clientScopes, false)
+		diags.Append(d...)
+		if diags.HasError() {
+			return googleoauth.Credentials{}
+		}
 	}
 
-	d = data.ImpersonateServiceAccountDelegates.ElementsAs(ctx, &delegates, false)
-	diags.Append(d...)
-	if diags.HasError() {
-		return googleoauth.Credentials{}
+	if !data.ImpersonateServiceAccountDelegates.IsNull() && !data.ImpersonateServiceAccountDelegates.IsUnknown() {
+		d := data.ImpersonateServiceAccountDelegates.ElementsAs(ctx, &delegates, false)
+		diags.Append(d...)
+		if diags.HasError() {
+			return googleoauth.Credentials{}
+		}
 	}
 
 	if !data.AccessToken.IsNull() && !data.AccessToken.IsUnknown() {
