@@ -1559,13 +1559,12 @@ func TestFrameworkProvider_LoadAndValidateFramework_batching(t *testing.T) {
 			ExpectSendAfterValue:      types.StringValue("123s"),
 		},
 		// Handling empty strings in config
-		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14255
-		// "when batching is configured with send_after as an empty string, send_after will be set to a default value": {
-		// 	EnableBatchingValue:       types.BoolValue(true),
-		// 	SendAfterValue:            types.StringValue(""),
-		// 	ExpectEnableBatchingValue: types.BoolValue(true),
-		// 	ExpectSendAfterValue:      types.StringValue("10s"),
-		// },
+		"when batching is configured with send_after as an empty string, send_after will be set to a default value": {
+			EnableBatchingValue:       types.BoolValue(true),
+			SendAfterValue:            types.StringValue(""),
+			ExpectEnableBatchingValue: types.BoolValue(true),
+			ExpectSendAfterValue:      types.StringValue("10s"), // When batching block is present but has missing arguments inside, default is 10s
+		},
 		// Handling unknown values
 		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
 		// "when batching is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
