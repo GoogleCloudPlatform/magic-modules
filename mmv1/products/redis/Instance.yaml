@@ -28,6 +28,7 @@ timeouts: !ruby/object:Api::Timeouts
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+skip_default_cdiff: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/redis_location_id_for_fallback_zone.go.erb
   decoder: templates/terraform/decoders/redis_instance.go.erb
@@ -35,6 +36,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/redis_instance.go
 custom_diff: [
   'customdiff.ForceNewIfChange("redis_version", isRedisVersionDecreasing)',
+  'tpgresource.DefaultProviderProject',
 ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -65,8 +67,6 @@ examples:
       instance_name: 'private-cache'
       address_name: 'address'
       network_name: 'redis-test-network'
-    test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "redis-private-service")'
   - !ruby/object:Provider::Terraform::Examples
     name: 'redis_instance_mrr'
     primary_resource_id: 'cache'
