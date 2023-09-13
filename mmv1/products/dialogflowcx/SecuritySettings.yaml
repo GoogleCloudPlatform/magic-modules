@@ -55,7 +55,8 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'location'
     description: |
-      The location these settings are located in.
+      The location these settings are located in. Settings can only be applied to an agent in the same location.
+      See [Available Regions](https://cloud.google.com/dialogflow/cx/docs/concept/region#avail) for a list of supported locations.
     required: true
     immutable: true
     url_param_only: true
@@ -67,16 +68,20 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: 'redactionStrategy'
     description: |
-      Defines how we redact data.
+      Defines how we redact data. If not set, defaults to `REDACTION_STRATEGY_UNSPECIFIED`.
+      * REDACTION_STRATEGY_UNSPECIFIED: Do not redact.
       * REDACT_WITH_SERVICE: Call redaction service to clean up the data to be persisted.
     values:
+      - :REDACTION_STRATEGY_UNSPECIFIED
       - :REDACT_WITH_SERVICE
   - !ruby/object:Api::Type::Enum
     name: 'redactionScope'
     description: |
-      Defines what types of data to redact.
+      Defines what types of data to redact. If not set, defaults to `REDACTION_SCOPE_UNSPECIFIED`.
+      * REDACTION_SCOPE_UNSPECIFIED: Don't redact any kind of data.
       * REDACT_DISK_STORAGE: On data to be written to disk or similar devices that are capable of holding data even if power is disconnected. This includes data that are temporarily saved on disk.
     values:
+      - :REDACTION_SCOPE_UNSPECIFIED
       - :REDACT_DISK_STORAGE
   - !ruby/object:Api::Type::String
     name: 'inspectTemplate'
@@ -142,6 +147,7 @@ properties:
         name: 'enableInsightsExport'
         description: |
           If enabled, we will automatically exports conversations to Insights and Insights runs its analyzers.
+        required: true
   - !ruby/object:Api::Type::Integer
     name: 'retentionWindowDays'
     conflicts:
