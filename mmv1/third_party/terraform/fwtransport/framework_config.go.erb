@@ -157,31 +157,33 @@ func (p *FrameworkProviderConfig) HandleZeroValues(ctx context.Context, data *fw
 	}
 
 	// Batching implementation will change in future, but this code will be removed in 5.0.0 so may be unaffected
-	var pbConfigs []fwmodels.ProviderBatching
-	d := data.Batching.ElementsAs(ctx, &pbConfigs, true)
-	diags.Append(d...)
-	if diags.HasError() {
-		return
+	if !data.Batching.IsNull() && !data.Batching.IsUnknown() && (len(data.Batching.Elements()) > 0) {
+		var pbConfigs []fwmodels.ProviderBatching
+		d := data.Batching.ElementsAs(ctx, &pbConfigs, true)
+		diags.Append(d...)
+		if diags.HasError() {
+			return
+		}
+		if pbConfigs[0].SendAfter.Equal(types.StringValue("")) {
+			pbConfigs[0].SendAfter = types.StringNull() // Convert empty string to null
+		}
+		b, _ := types.ObjectValue(
+			map[string]attr.Type{
+				"enable_batching": types.BoolType,
+				"send_after":      types.StringType,
+			},
+			map[string]attr.Value{
+				"enable_batching": pbConfigs[0].EnableBatching,
+				"send_after":      pbConfigs[0].SendAfter,
+			},
+		)
+		newBatching, d := types.ListValue(types.ObjectType{}.WithAttributeTypes(fwmodels.ProviderBatchingAttributes), []attr.Value{b})
+		diags.Append(d...)
+		if diags.HasError() {
+			return
+		}
+		data.Batching = newBatching
 	}
-	if pbConfigs[0].SendAfter.Equal(types.StringValue("")) {
-		pbConfigs[0].SendAfter = types.StringNull() // Convert empty string to null
-	}
-	b, _ := types.ObjectValue(
-		map[string]attr.Type{
-			"enable_batching": types.BoolType,
-			"send_after":      types.StringType,
-		},
-		map[string]attr.Value{
-			"enable_batching": pbConfigs[0].EnableBatching,
-			"send_after":      pbConfigs[0].SendAfter,
-		},
-	)
-	newBatching, d := types.ListValue(types.ObjectType{}.WithAttributeTypes(fwmodels.ProviderBatchingAttributes), []attr.Value{b})
-	diags.Append(d...)
-	if diags.HasError() {
-		return
-	}
-	data.Batching = newBatching
 }
 
 // HandleDefaults will handle all the defaults necessary in the provider
