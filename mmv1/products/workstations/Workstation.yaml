@@ -122,7 +122,7 @@ properties:
     description:
       'Client-specified labels that are applied to the resource and that are
       also propagated to the underlying Compute Engine resources.'
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueAnnotations
     name: 'annotations'
     description: 'Client-specified annotations. This is distinct from labels.'
   - !ruby/object:Api::Type::Time
