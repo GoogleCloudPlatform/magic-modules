@@ -1586,7 +1586,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_batching(t *testing.T) {
 			EnableBatchingValue:       types.BoolValue(true),
 			SendAfterValue:            types.StringUnknown(),
 			ExpectEnableBatchingValue: types.BoolValue(true),
-			ExpectSendAfterValue:      types.StringValue("3s"),
+			ExpectSendAfterValue:      types.StringValue("10s"),
 		},
 		"when batching is configured with enable_batching as an unknown value, enable_batching will be set to a default value": {
 			EnableBatchingValue:       types.BoolUnknown(),

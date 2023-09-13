@@ -269,11 +269,11 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 			return
 		}
 
-		if pbConfigs[0].SendAfter.IsNull() {
+		if pbConfigs[0].SendAfter.IsNull() || pbConfigs[0].SendAfter.IsUnknown() {
 			pbConfigs[0].SendAfter = types.StringValue("10s")
 		}
 
-		if pbConfigs[0].EnableBatching.IsNull() {
+		if pbConfigs[0].EnableBatching.IsNull() || pbConfigs[0].EnableBatching.IsUnknown() {
 			pbConfigs[0].EnableBatching = types.BoolValue(true)
 		}
 
