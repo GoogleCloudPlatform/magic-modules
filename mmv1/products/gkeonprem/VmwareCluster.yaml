@@ -538,6 +538,14 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: 'enableControlPlaneV2'
     description: Enable control plane V2. Default to false.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'upgradePolicy'
+    description: Specifies upgrade policy for the cluster.
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'controlPlaneOnly'
+        description: |
+          Controls whether the upgrade applies to the control plane only.
   - !ruby/object:Api::Type::String
     name: 'uid'
     description: |
