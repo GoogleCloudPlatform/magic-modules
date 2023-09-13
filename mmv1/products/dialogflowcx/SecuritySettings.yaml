@@ -44,7 +44,6 @@ examples:
       project: :PROJECT_NAME
 id_format: 'projects/{{project}}/locations/{{location}}/securitySettings/{{name}}'
 import_format: ['projects/{{project}}/locations/{{location}}/securitySettings/{{name}}']
-skip_sweeper: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
