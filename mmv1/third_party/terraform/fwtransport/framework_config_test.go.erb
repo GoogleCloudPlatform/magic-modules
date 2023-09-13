@@ -999,7 +999,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_userProjectOverride(t *testi
 			if diags.HasError() && !tc.ExpectError {
 				for i, err := range diags.Errors() {
 					num := i + 1
-					t.Logf("unexpected error #%d : %s", num, err.Summary())
+					t.Logf("unexpected error #%d : %s : %s", num, err.Summary(), err.Detail())
 				}
 				t.Fatalf("did not expect error, but [%d] error(s) occurred", diags.ErrorsCount())
 			}
@@ -1100,7 +1100,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_impersonateServiceAccount(t 
 			if diags.HasError() && !tc.ExpectError {
 				for i, err := range diags.Errors() {
 					num := i + 1
-					t.Logf("unexpected error #%d : %s", num, err.Summary())
+					t.Logf("unexpected error #%d : %s : %s", num, err.Summary(), err.Detail())
 				}
 				t.Fatalf("did not expect error, but [%d] error(s) occurred", diags.ErrorsCount())
 			}
@@ -1196,7 +1196,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_impersonateServiceAccountDel
 			if diags.HasError() && !tc.ExpectError {
 				for i, err := range diags.Errors() {
 					num := i + 1
-					t.Logf("unexpected error #%d : %s", num, err.Summary())
+					t.Logf("unexpected error #%d : %s : %s", num, err.Summary(), err.Detail())
 				}
 				t.Fatalf("did not expect error, but [%d] error(s) occurred", diags.ErrorsCount())
 			}
@@ -1206,6 +1206,466 @@ func TestFrameworkProvider_LoadAndValidateFramework_impersonateServiceAccountDel
 				t.Fatalf("want impersonate_service_account in the `fwmodels.ProviderModel` struct to be `%s`, but got the value `%s`", expected, data.ImpersonateServiceAccountDelegates.String())
 			}
 			// fwtransport.FrameworkProviderConfig does not store impersonate_service_account info, so test does not make assertions on config struct
+		})
+	}
+}
+
+func TestFrameworkProvider_LoadAndValidateFramework_scopes(t *testing.T) {
+
+	// Note: In the test function we need to set the below fields in test case's fwmodels.ProviderModel value
+	// this is to stop the code under tests experiencing errors, and could be addressed in future refactoring.
+	// - Credentials: If we don't set this then the test looks for application default credentials and can fail depending on the machine running the test
+	// - ImpersonateServiceAccountDelegates: If we don't set this, we get a nil pointer exception ¯\_(ツ)_/¯
+
+	cases := map[string]struct {
+		ScopesValue               []string
+		EnvVariables              map[string]string
+		ExpectedDataModelValue    []string
+		ExpectedConfigStructValue []string
+		SetAsNull                 bool
+		SetAsUnknown              bool
+		ExpectError               bool
+	}{
+		"scopes are set in the provider config as a list": {
+			ScopesValue:               []string{"fizz", "buzz", "baz"},
+			ExpectedDataModelValue:    []string{"fizz", "buzz", "baz"},
+			ExpectedConfigStructValue: []string{"fizz", "buzz", "baz"},
+		},
+		"scopes can be left unset in the provider config without any issues, and a default value is used": {
+			SetAsNull:                 true,
+			ExpectedDataModelValue:    transport_tpg.DefaultClientScopes,
+			ExpectedConfigStructValue: transport_tpg.DefaultClientScopes,
+		},
+		// Handling empty values in config
+		"scopes set as an empty list the field is treated as if it's unset and a default value is used without errors": {
+			ScopesValue:               []string{},
+			ExpectedDataModelValue:    transport_tpg.DefaultClientScopes,
+			ExpectedConfigStructValue: transport_tpg.DefaultClientScopes,
+		},
+		// Handling unknown values
+		"when scopes is an unknown value, the provider treats it as if it's unset and a default value is used without errors (align to SDK behaviour)": {
+			SetAsUnknown:              true,
+			ExpectedDataModelValue:    transport_tpg.DefaultClientScopes,
+			ExpectedConfigStructValue: transport_tpg.DefaultClientScopes,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
+
+			ctx := context.Background()
+			tfVersion := "foobar"
+			providerversion := "999"
+			diags := diag.Diagnostics{}
+
+			data := fwmodels.ProviderModel{}
+			data.Credentials = types.StringValue(transport_tpg.TestFakeCredentialsPath)
+			impersonateServiceAccountDelegates, _ := types.ListValue(types.StringType, []attr.Value{}) // empty list
+			data.ImpersonateServiceAccountDelegates = impersonateServiceAccountDelegates
+			// Set ImpersonateServiceAccountDelegates depending on test case
+			if !tc.SetAsNull && !tc.SetAsUnknown {
+				s, _ := types.ListValueFrom(ctx, types.StringType, tc.ScopesValue)
+				data.Scopes = s
+			}
+			if tc.SetAsNull {
+				data.Scopes = types.ListNull(types.StringType)
+			}
+			if tc.SetAsUnknown {
+				data.Scopes = types.ListUnknown(types.StringType)
+			}
+
+			p := fwtransport.FrameworkProviderConfig{}
+
+			// Act
+			p.LoadAndValidateFramework(ctx, &data, tfVersion, &diags, providerversion)
+
+			// Assert
+			if diags.HasError() && tc.ExpectError {
+				return
+			}
+			if diags.HasError() && !tc.ExpectError {
+				for i, err := range diags.Errors() {
+					num := i + 1
+					t.Logf("unexpected error #%d : %s : %s", num, err.Summary(), err.Detail())
+				}
+				t.Fatalf("did not expect error, but [%d] error(s) occurred", diags.ErrorsCount())
+			}
+			// Checking mutation of the data model
+			expectedDm, _ := types.ListValueFrom(ctx, types.StringType, tc.ExpectedDataModelValue)
+			if !data.Scopes.Equal(expectedDm) {
+				t.Fatalf("want project in the `fwmodels.ProviderModel` struct to be `%s`, but got the value `%s`", tc.ExpectedDataModelValue, data.Scopes.String())
+			}
+			// Checking the value passed to the config structs
+			expectedFpc, _ := types.ListValueFrom(ctx, types.StringType, tc.ExpectedConfigStructValue)
+			if !p.Scopes.Equal(expectedFpc) {
+				t.Fatalf("want project in the `FrameworkProviderConfig` struct to be `%s`, but got the value `%s`", tc.ExpectedConfigStructValue, p.Scopes.String())
+			}
+		})
+	}
+}
+
+func TestFrameworkProvider_LoadAndValidateFramework_requestReason(t *testing.T) {
+
+	// Note: In the test function we need to set the below fields in test case's fwmodels.ProviderModel value
+	// this is to stop the code under tests experiencing errors, and could be addressed in future refactoring.
+	// - Credentials: If we don't set this then the test looks for application default credentials and can fail depending on the machine running the test
+	// - ImpersonateServiceAccountDelegates: If we don't set this, we get a nil pointer exception ¯\_(ツ)_/¯
+
+	cases := map[string]struct {
+		ConfigValues           fwmodels.ProviderModel
+		EnvVariables           map[string]string
+		ExpectedDataModelValue basetypes.StringValue
+		// ExpectedConfigStructValue not used here, as credentials info isn't stored in the config struct
+		ExpectError bool
+	}{
+		"when request_reason is unset in the config, environment variable CLOUDSDK_CORE_REQUEST_REASON is used": {
+			ConfigValues: fwmodels.ProviderModel{
+				RequestReason: types.StringNull(),
+			},
+			EnvVariables: map[string]string{
+				"CLOUDSDK_CORE_REQUEST_REASON": "foo",
+			},
+			ExpectedDataModelValue: types.StringValue("foo"),
+		},
+		"request_reason set in the config is not overridden by environment variables": {
+			ConfigValues: fwmodels.ProviderModel{
+				RequestReason: types.StringValue("value-from-config"),
+			},
+			EnvVariables: map[string]string{
+				"CLOUDSDK_CORE_REQUEST_REASON": "value-from-env",
+			},
+			ExpectedDataModelValue: types.StringValue("value-from-config"),
+		},
+		"when no request_reason is provided via config or environment variables, the field remains unset without error": {
+			ConfigValues: fwmodels.ProviderModel{
+				RequestReason: types.StringNull(),
+			},
+			ExpectedDataModelValue: types.StringNull(),
+		},
+		// Handling empty strings in config
+		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14255
+		// "when request_reason is set as an empty string in the config it is overridden by environment variables": {
+		// 	ConfigValues: fwmodels.ProviderModel{
+		// 		RequestReason: types.StringValue(""),
+		// 	},
+		// 	EnvVariables: map[string]string{
+		// 		"CLOUDSDK_CORE_REQUEST_REASON": "foo",
+		// 	},
+		// 	ExpectedDataModelValue: types.StringValue("foo"),
+		// },
+		// "when request_reason is set as an empty string in the config the field is treated as if it's unset, without error": {
+		// 	ConfigValues: fwmodels.ProviderModel{
+		// 		RequestReason: types.StringValue(""),
+		// 	},
+		// 	ExpectedDataModelValue: types.StringNull(),
+		// },
+		// Handling unknown values
+		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
+		// "when request_timeout is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		// 	ConfigValues: fwmodels.ProviderModel{
+		// 		RequestReason: types.StringUnknown(),
+		// 	},
+		// 	ExpectedDataModelValue: types.StringNull(),
+		// },
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
+
+			ctx := context.Background()
+			tfVersion := "foobar"
+			providerversion := "999"
+			diags := diag.Diagnostics{}
+
+			data := tc.ConfigValues
+			data.Credentials = types.StringValue(transport_tpg.TestFakeCredentialsPath)
+			impersonateServiceAccountDelegates, _ := types.ListValue(types.StringType, []attr.Value{}) // empty list
+			data.ImpersonateServiceAccountDelegates = impersonateServiceAccountDelegates
+
+			p := fwtransport.FrameworkProviderConfig{}
+
+			// Act
+			p.LoadAndValidateFramework(ctx, &data, tfVersion, &diags, providerversion)
+
+			// Assert
+			if diags.HasError() && tc.ExpectError {
+				return
+			}
+			if diags.HasError() && !tc.ExpectError {
+				for i, err := range diags.Errors() {
+					num := i + 1
+					t.Logf("unexpected error #%d : %s : %s", num, err.Summary(), err.Detail())
+				}
+				t.Fatalf("did not expect error, but [%d] error(s) occurred", diags.ErrorsCount())
+			}
+			// Checking mutation of the data model
+			if !data.RequestReason.Equal(tc.ExpectedDataModelValue) {
+				t.Fatalf("want request_reason in the `fwmodels.ProviderModel` struct to be `%s`, but got the value `%s`", tc.ExpectedDataModelValue, data.RequestReason.String())
+			}
+			// fwtransport.FrameworkProviderConfig does not store the request reason info, so test does not make assertions on config struct
+		})
+	}
+}
+
+func TestFrameworkProvider_LoadAndValidateFramework_requestTimeout(t *testing.T) {
+
+	// Note: In the test function we need to set the below fields in test case's fwmodels.ProviderModel value
+	// this is to stop the code under tests experiencing errors, and could be addressed in future refactoring.
+	// - Credentials: If we don't set this then the test looks for application default credentials and can fail depending on the machine running the test
+	// - ImpersonateServiceAccountDelegates: If we don't set this, we get a nil pointer exception ¯\_(ツ)_/¯
+
+	cases := map[string]struct {
+		ConfigValues           fwmodels.ProviderModel
+		EnvVariables           map[string]string
+		ExpectedDataModelValue basetypes.StringValue
+		// ExpectedConfigStructValue not used here, as credentials info isn't stored in the config struct
+		ExpectError bool
+	}{
+		"if a valid request_timeout is configured in the provider, no error will occur": {
+			ConfigValues: fwmodels.ProviderModel{
+				RequestTimeout: types.StringValue("10s"),
+			},
+			ExpectedDataModelValue: types.StringValue("10s"),
+		},
+		"if an invalid request_timeout is configured in the provider, an error will occur": {
+			ConfigValues: fwmodels.ProviderModel{
+				RequestTimeout: types.StringValue("timeout"),
+			},
+			ExpectError: true,
+		},
+		// In the SDK version of the provider config code, this scenario results in a value of "0s"
+		// instead of "120s", but the final 'effective' value is also "120s"
+		// See : https://github.com/hashicorp/terraform-provider-google/blob/09cb850ee64bcd78e4457df70905530c1ed75f19/google/transport/config.go#L1228-L1233
+		"when request_timeout is unset in the config, the default value is 120s.": {
+			ConfigValues: fwmodels.ProviderModel{
+				RequestTimeout: types.StringNull(),
+			},
+			ExpectedDataModelValue: types.StringValue("120s"),
+		},
+		// Handling empty strings in config
+		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14255
+		// "when request_timeout is set as an empty string, the default value is 120s.": {
+		// 	ConfigValues: fwmodels.ProviderModel{
+		// 		RequestTimeout: types.StringValue(""),
+		// 	},
+		// 	ExpectedDataModelValue: types.StringValue("120s"),
+		// },
+		// Handling unknown values
+		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
+		// "when request_timeout is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		// 	ConfigValues: fwmodels.ProviderModel{
+		// 		RequestTimeout: types.StringUnknown(),
+		// 	},
+		// 	ExpectedDataModelValue: types.StringNull(),
+		// },
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
+
+			ctx := context.Background()
+			tfVersion := "foobar"
+			providerversion := "999"
+			diags := diag.Diagnostics{}
+
+			data := tc.ConfigValues
+			data.Credentials = types.StringValue(transport_tpg.TestFakeCredentialsPath)
+			impersonateServiceAccountDelegates, _ := types.ListValue(types.StringType, []attr.Value{}) // empty list
+			data.ImpersonateServiceAccountDelegates = impersonateServiceAccountDelegates
+
+			p := fwtransport.FrameworkProviderConfig{}
+
+			// Act
+			p.LoadAndValidateFramework(ctx, &data, tfVersion, &diags, providerversion)
+
+			// Assert
+			if diags.HasError() && tc.ExpectError {
+				return
+			}
+			if diags.HasError() && !tc.ExpectError {
+				for i, err := range diags.Errors() {
+					num := i + 1
+					t.Logf("unexpected error #%d : %s : %s", num, err.Summary(), err.Detail())
+				}
+				t.Fatalf("did not expect error, but [%d] error(s) occurred", diags.ErrorsCount())
+			}
+			// Checking mutation of the data model
+			if !data.RequestTimeout.Equal(tc.ExpectedDataModelValue) {
+				t.Fatalf("want request_timeout in the `fwmodels.ProviderModel` struct to be `%s`, but got the value `%s`", tc.ExpectedDataModelValue, data.RequestTimeout.String())
+			}
+			// fwtransport.FrameworkProviderConfig does not store the request timeout info, so test does not make assertions on config struct
+		})
+	}
+}
+
+func TestFrameworkProvider_LoadAndValidateFramework_batching(t *testing.T) {
+
+	// Note: In the test function we need to set the below fields in test case's fwmodels.ProviderModel value
+	// this is to stop the code under tests experiencing errors, and could be addressed in future refactoring.
+	// - Credentials: If we don't set this then the test looks for application default credentials and can fail depending on the machine running the test
+	// - ImpersonateServiceAccountDelegates: If we don't set this, we get a nil pointer exception ¯\_(ツ)_/¯
+
+	cases := map[string]struct {
+		// It's not easy to create the value of Batching in the test case, so these inputs are used in the test function
+		SetBatchingAsNull    bool
+		SetBatchingAsUnknown bool
+		EnableBatchingValue  basetypes.BoolValue
+		SendAfterValue       basetypes.StringValue
+
+		EnvVariables map[string]string
+
+		ExpectBatchingNull        bool
+		ExpectBatchingUnknown     bool
+		ExpectEnableBatchingValue basetypes.BoolValue
+		ExpectSendAfterValue      basetypes.StringValue
+		ExpectError               bool
+	}{
+		"batching can be configured with values for enable_batching and send_after": {
+			EnableBatchingValue:       types.BoolValue(true),
+			SendAfterValue:            types.StringValue("123s"),
+			ExpectEnableBatchingValue: types.BoolValue(true),
+			ExpectSendAfterValue:      types.StringValue("123s"),
+		},
+		"if batching is an empty block, it will set the default values for enable_batching and send_after": {
+			// In this test, we try to create a list containing only null values
+			EnableBatchingValue:       types.BoolNull(),
+			SendAfterValue:            types.StringNull(),
+			ExpectEnableBatchingValue: types.BoolValue(true),
+			ExpectSendAfterValue:      types.StringValue("10s"),
+		},
+		"when batching is configured with only enable_batching, send_after will be set to a default value": {
+			EnableBatchingValue:       types.BoolValue(true),
+			SendAfterValue:            types.StringNull(),
+			ExpectEnableBatchingValue: types.BoolValue(true),
+			ExpectSendAfterValue:      types.StringValue("10s"),
+		},
+		"when batching is configured with only send_after, enable_batching will be set to a default value": {
+			EnableBatchingValue:       types.BoolNull(),
+			SendAfterValue:            types.StringValue("123s"),
+			ExpectEnableBatchingValue: types.BoolValue(true),
+			ExpectSendAfterValue:      types.StringValue("123s"),
+		},
+		// Handling empty strings in config
+		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14255
+		// "when batching is configured with send_after as an empty string, send_after will be set to a default value": {
+		// 	EnableBatchingValue:       types.BoolValue(true),
+		// 	SendAfterValue:            types.StringValue(""),
+		// 	ExpectEnableBatchingValue: types.BoolValue(true),
+		// 	ExpectSendAfterValue:      types.StringValue("10s"),
+		// },
+		// Handling unknown values
+		// TODO(SarahFrench) make these tests pass to address: https://github.com/hashicorp/terraform-provider-google/issues/14444
+		// "when batching is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		// 	SetBatchingAsUnknown:      true,
+		// 	ExpectEnableBatchingValue: types.BoolValue(true),
+		// 	ExpectSendAfterValue:      types.StringValue("10s"),
+		// },
+		// "when batching is configured with send_after as an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		// 	EnableBatchingValue:       types.BoolValue(true),
+		// 	SendAfterValue:            types.StringUnknown(),
+		// 	ExpectEnableBatchingValue: types.BoolValue(true),
+		// 	ExpectSendAfterValue:      types.StringValue("10s"),
+		// },
+		// "when batching is configured with enable_batching as an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		// 	EnableBatchingValue:       types.BoolNull(),
+		// 	SendAfterValue:            types.StringValue("123s"),
+		// 	ExpectEnableBatchingValue: types.BoolValue(true),
+		// 	ExpectSendAfterValue:      types.StringValue("123s"),
+		// },
+		// Error states
+		"if batching is configured with send_after as an invalid value, there's an error": {
+			SendAfterValue: types.StringValue("invalid value"),
+			ExpectError:    true,
+		},
+		"if batching is configured with send_after as number value without seconds (s), there's an error": {
+			SendAfterValue: types.StringValue("123"),
+			ExpectError:    true,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
+
+			ctx := context.Background()
+			tfVersion := "foobar"
+			providerversion := "999"
+			diags := diag.Diagnostics{}
+
+			data := fwmodels.ProviderModel{}
+			data.Credentials = types.StringValue(transport_tpg.TestFakeCredentialsPath)
+			impersonateServiceAccountDelegates, _ := types.ListValue(types.StringType, []attr.Value{}) // empty list
+			data.ImpersonateServiceAccountDelegates = impersonateServiceAccountDelegates
+
+			// TODO(SarahFrench) - this code will change when batching is reworked
+			// See https://github.com/GoogleCloudPlatform/magic-modules/pull/7668
+			if !tc.SetBatchingAsNull && !tc.SetBatchingAsUnknown {
+				b, _ := types.ObjectValue(
+					map[string]attr.Type{
+						"enable_batching": types.BoolType,
+						"send_after":      types.StringType,
+					},
+					map[string]attr.Value{
+						"enable_batching": tc.EnableBatchingValue,
+						"send_after":      tc.SendAfterValue,
+					},
+				)
+				batching, _ := types.ListValue(types.ObjectType{}.WithAttributeTypes(fwmodels.ProviderBatchingAttributes), []attr.Value{b})
+				data.Batching = batching
+			}
+			if tc.SetBatchingAsNull {
+				data.Batching = types.ListNull(types.ObjectType{}.WithAttributeTypes(fwmodels.ProviderBatchingAttributes))
+			}
+			if tc.SetBatchingAsUnknown {
+				data.Batching = types.ListUnknown(types.ObjectType{}.WithAttributeTypes(fwmodels.ProviderBatchingAttributes))
+			}
+
+			p := fwtransport.FrameworkProviderConfig{}
+
+			// Act
+			p.LoadAndValidateFramework(ctx, &data, tfVersion, &diags, providerversion)
+
+			// Assert
+			if diags.HasError() && tc.ExpectError {
+				return
+			}
+			if diags.HasError() && !tc.ExpectError {
+				for i, err := range diags.Errors() {
+					num := i + 1
+					t.Logf("unexpected error #%d : %s", num, err.Summary())
+				}
+				t.Fatalf("did not expect error, but [%d] error(s) occurred", diags.ErrorsCount())
+			}
+			// Checking mutation of the data model
+			if !data.Batching.IsNull() && tc.ExpectBatchingNull {
+				t.Fatalf("want batching in the `fwmodels.ProviderModel` struct to be null, but got the value `%s`", data.Batching.String())
+			}
+			if !data.Batching.IsUnknown() && tc.ExpectBatchingUnknown {
+				t.Fatalf("want batching in the `fwmodels.ProviderModel` struct to be unknown, but got the value `%s`", data.Batching.String())
+			}
+			var pbConfigs []fwmodels.ProviderBatching
+			_ = data.Batching.ElementsAs(ctx, &pbConfigs, true)
+			if !pbConfigs[0].EnableBatching.Equal(tc.ExpectEnableBatchingValue) {
+				t.Fatalf("want batching.enable_batching in the `fwmodels.ProviderModel` struct to be `%s`, but got the value `%s`", tc.ExpectEnableBatchingValue.String(), data.Batching.String())
+			}
+			if !pbConfigs[0].SendAfter.Equal(tc.ExpectSendAfterValue) {
+				t.Fatalf("want batching.send_after in the `fwmodels.ProviderModel` struct to be `%s`, but got the value `%s`", tc.ExpectSendAfterValue.String(), data.Batching.String())
+			}
 		})
 	}
 }
