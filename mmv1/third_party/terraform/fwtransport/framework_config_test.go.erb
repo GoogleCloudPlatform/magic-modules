@@ -1140,9 +1140,11 @@ func TestFrameworkProvider_LoadAndValidateFramework_impersonateServiceAccountDel
 		SetAsUnknown                            bool
 		ImpersonateServiceAccountDelegatesValue []string
 		EnvVariables                            map[string]string
-		ExpectedDataModelValue                  []string
-		// ExpectedConfigStructValue not used here, as impersonate_service_account_delegates info isn't stored in the config struct
-		ExpectError bool
+
+		ExpectedNull           bool
+		ExpectedUnknown        bool
+		ExpectedDataModelValue []string
+		ExpectError            bool
 	}{
 		"impersonate_service_account_delegates value can be set in the provider schema": {
 			ImpersonateServiceAccountDelegatesValue: []string{
@@ -1157,7 +1159,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_impersonateServiceAccountDel
 		// Note: no environment variables can be used for impersonate_service_account_delegates
 		"when no impersonate_service_account_delegates value is provided via config, the field remains unset without error": {
 			SetAsNull: true, // not setting impersonate_service_account_delegates
-			ExpectedDataModelValue: nil,
+			ExpectedNull: true,
 		},
 		// Handling empty values in config
 		"when impersonate_service_account_delegates is set as an empty array the field is treated as if it's unset, without error": {
@@ -1166,8 +1168,8 @@ func TestFrameworkProvider_LoadAndValidateFramework_impersonateServiceAccountDel
 		},
 		// Handling unknown values
 		"when impersonate_service_account_delegates is an unknown value, the provider treats it as if it's unset, without error": {
-			SetAsUnknown: true,
-			// Currently this causes an error at google/fwtransport/framework_config.go:1518
+			SetAsUnknown:    true,
+			ExpectedUnknown: true,
 		},
 	}
 
@@ -1214,7 +1216,16 @@ func TestFrameworkProvider_LoadAndValidateFramework_impersonateServiceAccountDel
 				t.Fatalf("did not expect error, but [%d] error(s) occurred", diags.ErrorsCount())
 			}
 			// Checking mutation of the data model
-			expected, _ := types.ListValueFrom(ctx, types.StringType, tc.ExpectedDataModelValue)
+			var expected attr.Value
+			if !tc.ExpectedNull && !tc.ExpectedUnknown {
+				expected, _ = types.ListValueFrom(ctx, types.StringType, tc.ExpectedDataModelValue)
+			}
+			if tc.ExpectedNull {
+				expected = types.ListNull(types.StringType)
+			}
+			if tc.ExpectedUnknown {
+				expected = types.ListUnknown(types.StringType)
+			}
 			if !data.ImpersonateServiceAccountDelegates.Equal(expected) {
 				t.Fatalf("want impersonate_service_account in the `fwmodels.ProviderModel` struct to be `%s`, but got the value `%s`", expected, data.ImpersonateServiceAccountDelegates.String())
 			}
