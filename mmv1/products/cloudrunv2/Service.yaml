@@ -106,7 +106,6 @@ examples:
       secret_id: 'secret-1'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_multicontainer'
-    min_version: 'beta'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service%s\", context[\"\
       random_suffix\"])"
