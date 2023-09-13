@@ -212,7 +212,7 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 		data.ImpersonateServiceAccount = types.StringValue(os.Getenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT"))
 	}
 
-	if data.Project.IsNull() {
+	if data.Project.IsNull() || data.Project.IsUnknown() {
 		project := transport_tpg.MultiEnvDefault([]string{
 			"GOOGLE_PROJECT",
 			"GOOGLE_CLOUD_PROJECT",

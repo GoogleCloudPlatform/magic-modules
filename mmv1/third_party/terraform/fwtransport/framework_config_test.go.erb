@@ -120,12 +120,15 @@ func TestFrameworkProvider_LoadAndValidateFramework_project(t *testing.T) {
 			ExpectedConfigStructValue: types.StringValue("project-from-GOOGLE_PROJECT"),
 		},
 		// Handling unknown values
-		"when project is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		"when project is an unknown value, the provider treats it as if it's unset and uses an environment variable instead": {
 			ConfigValues: fwmodels.ProviderModel{
 				Project: types.StringUnknown(),
 			},
-			ExpectedDataModelValue:    types.StringNull(),
-			ExpectedConfigStructValue: types.StringNull(),
+			EnvVariables: map[string]string{
+				"GOOGLE_PROJECT": "project-from-GOOGLE_PROJECT",
+			},
+			ExpectedDataModelValue:    types.StringValue("project-from-GOOGLE_PROJECT"),
+			ExpectedConfigStructValue: types.StringValue("project-from-GOOGLE_PROJECT"),
 		},
 	}
 
