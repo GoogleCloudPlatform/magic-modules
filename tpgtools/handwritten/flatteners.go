@@ -1,5 +1,10 @@
 package tpgdclresource
 
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+)
+
 // Returns the terraform representation of a three-state boolean value represented by a pointer to bool in DCL.
 func FlattenEnumBool(v interface{}) string {
 	b, ok := v.(*bool)
@@ -13,7 +18,7 @@ func FlattenEnumBool(v interface{}) string {
 }
 
 
-func flattenContainerAwsNodePoolManagement(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func FlattenContainerAwsNodePoolManagement(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return nil
 	}
