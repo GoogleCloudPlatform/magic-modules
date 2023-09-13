@@ -338,7 +338,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_credentials_unknown(t *testi
 	// - When credentials = Null
 	// - When credentials = Unknown
 
-	t.Run("when project is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)", func(t *testing.T) {
+	t.Run("the same error is returned whether credentials is set as a null or unknown value (and access_token isn't set)", func(t *testing.T) {
 
 		// Arrange
 		acctest.UnsetTestProviderConfigEnvs(t)
@@ -1147,7 +1147,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_impersonateServiceAccountDel
 			ExpectedDataModelValue:                  nil,
 		},
 		// Handling unknown values
-		"when impersonate_service_account_delegates is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		"when impersonate_service_account_delegates is an unknown value, the provider treats it as if it's unset, without error": {
 			SetAsUnknown: true,
 			// Currently this causes an error at google/fwtransport/framework_config.go:1518
 		},
@@ -1238,7 +1238,7 @@ func TestFrameworkProvider_LoadAndValidateFramework_scopes(t *testing.T) {
 			ExpectedConfigStructValue: transport_tpg.DefaultClientScopes,
 		},
 		// Handling unknown values
-		"when scopes is an unknown value, the provider treats it as if it's unset and a default value is used without errors (align to SDK behaviour)": {
+		"when scopes is an unknown value, the provider treats it as if it's unset and a default value is used without errors": {
 			SetAsUnknown:              true,
 			ExpectedDataModelValue:    transport_tpg.DefaultClientScopes,
 			ExpectedConfigStructValue: transport_tpg.DefaultClientScopes,
@@ -1561,14 +1561,14 @@ func TestFrameworkProvider_LoadAndValidateFramework_batching(t *testing.T) {
 			ExpectEnableBatchingValue: types.BoolValue(true),
 			ExpectSendAfterValue:      types.StringValue("3s"),
 		},
-		"when batching is configured with send_after as an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
+		"when batching is configured with send_after as an unknown value, send_after will be set to a default value": {
 			EnableBatchingValue:       types.BoolValue(true),
 			SendAfterValue:            types.StringUnknown(),
 			ExpectEnableBatchingValue: types.BoolValue(true),
 			ExpectSendAfterValue:      types.StringValue("3s"),
 		},
-		"when batching is configured with enable_batching as an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
-			EnableBatchingValue:       types.BoolNull(),
+		"when batching is configured with enable_batching as an unknown value, enable_batching will be set to a default value": {
+			EnableBatchingValue:       types.BoolUnknown(),
 			SendAfterValue:            types.StringValue("45s"),
 			ExpectEnableBatchingValue: types.BoolValue(true),
 			ExpectSendAfterValue:      types.StringValue("45s"),
