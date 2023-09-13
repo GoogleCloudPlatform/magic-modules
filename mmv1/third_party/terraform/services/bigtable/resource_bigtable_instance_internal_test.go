@@ -40,9 +40,9 @@ func TestGetUnavailableClusterZones(t *testing.T) {
 	for tn, tc := range cases {
 		clusters := []map[string]string{}
 		for _, zone := range tc.clusterZones {
-			clusters.append(map[string]string{"zone": tc.clusterZone})
+			clusters.append(map[string]string{"zone": zone})
 		}
-		if got := getUnavailableClusterZones(clusterstc.unavailableZones); got != tc.want {
+		if got := getUnavailableClusterZones(clusters, tc.unavailableZones); got != tc.want {
 			t.Errorf("bad: %s, got %q, want %q", tn, got, tc.want)
 		}
 	}
