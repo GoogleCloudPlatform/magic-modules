@@ -261,7 +261,7 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 		}
 	}
 
-	if !data.Batching.IsNull() {
+	if !data.Batching.IsNull() && !data.Batching.IsUnknown() {
 		var pbConfigs []fwmodels.ProviderBatching
 		d := data.Batching.ElementsAs(ctx, &pbConfigs, true)
 		diags.Append(d...)
@@ -751,7 +751,8 @@ func GetBatchingConfig(ctx context.Context, data types.List, diags *diag.Diagnos
 		EnableBatching: true,
 	}
 
-	if data.IsNull() {
+	// Handle if entire batching block is null/unknown
+	if data.IsNull() || data.IsUnknown() {
 		return bc
 	}
 
