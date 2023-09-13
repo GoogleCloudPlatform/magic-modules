@@ -269,6 +269,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::Time
         name: checkTime
+        output: true
         description: |
           The last time Hosting checked your CustomDomain's DNS records.
       - !ruby/object:Api::Type::Array
@@ -402,6 +403,7 @@ properties:
             properties:
               - !ruby/object:Api::Type::Time
                 name: checkTime
+                output: true
                 description: |
                   The last time Hosting checked your CustomDomain's DNS records.
               - !ruby/object:Api::Type::Array
@@ -495,6 +497,7 @@ properties:
                   specified path during its last check.
               - !ruby/object:Api::Type::Time
                 name: lastCheckTime
+                output: true
                 description: |
                   The last time Hosting systems checked for the file contents.
   - !ruby/object:Api::Type::Boolean
