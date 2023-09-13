@@ -444,26 +444,6 @@ resource "google_storage_transfer_job" "transfer_job" {
     }
   }
 
-  schedule {
-    schedule_start_date {
-      year  = 2018
-      month = 10
-      day   = 1
-    }
-    schedule_end_date {
-      year  = 2019
-      month = 10
-      day   = 1
-    }
-    start_time_of_day {
-      hours   = 0
-      minutes = 30
-      seconds = 0
-      nanos   = 0
-    }
-	  repeat_interval = "604800s"
-  }
-
   depends_on = [
     google_storage_bucket_iam_member.data_source,
     google_storage_bucket_iam_member.data_sink,

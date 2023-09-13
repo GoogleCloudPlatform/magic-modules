@@ -81,10 +81,10 @@ func ResourceStorageTransferJob() *schema.Resource {
 				Description: `The project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
 			"event_stream": {
-				Type:          schema.TypeList,
-				Optional:      true,
-				MaxItems:      1,
-				ConflictsWith: []string{"schedule"},
+				Type:         schema.TypeList,
+				Optional:     true,
+				MaxItems:     1,
+				ExactlyOneOf: []string{"schedule"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -220,10 +220,10 @@ func ResourceStorageTransferJob() *schema.Resource {
 				Description: `Notification configuration.`,
 			},
 			"schedule": {
-				Type:          schema.TypeList,
-				Optional:      true,
-				MaxItems:      1,
-				ConflictsWith: []string{"event_stream"},
+				Type:         schema.TypeList,
+				Optional:     true,
+				MaxItems:     1,
+				ExactlyOneOf: []string{"event_stream"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"schedule_start_date": {

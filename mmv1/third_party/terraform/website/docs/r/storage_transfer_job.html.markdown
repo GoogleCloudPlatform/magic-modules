@@ -116,11 +116,11 @@ The following arguments are supported:
 
 * `transfer_spec` - (Required) Transfer specification. Structure [documented below](#nested_transfer_spec).
 
-* `schedule` - (Required) Schedule specification defining when the Transfer Job should be scheduled to start, end and what time to run. Structure [documented below](#nested_schedule).
-
 - - -
 
-* `event_stream` - (Optional) Specifies the Event-driven transfer options. Event-driven transfers listen to an event stream to transfer updated files. Structure [documented below](#nested_event_stream)
+* `schedule` - (Optional) Schedule specification defining when the Transfer Job should be scheduled to start, end and what time to run. Structure [documented below](#nested_schedule). Either `schedule` or `event_stream` must be set.
+
+* `event_stream` - (Optional) Specifies the Event-driven transfer options. Event-driven transfers listen to an event stream to transfer updated files. Structure [documented below](#nested_event_stream) Either `event_stream` or `schedule` must be set.
 
 * `project` - (Optional) The project in which the resource belongs. If it
 	is not provided, the provider project is used.
