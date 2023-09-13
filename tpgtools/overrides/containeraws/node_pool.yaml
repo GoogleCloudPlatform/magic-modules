@@ -6,7 +6,7 @@
   field: config.taints.effect
   details:
     diffsuppressfunc: tpgresource.CompareCaseInsensitive
-- type: DIFF_SUPPRESS_FUNC
-  field: management.auto_repair
+- type: CUSTOM_STATE_SETTER
+  field: management
   details:
-    diffsuppressfunc: tpgresource.EmptyOrFalseSuppressBoolean
+    function: d.Set("management", tpgdclresource.flattenContainerAwsNodePoolManagement(res.Management, d, config))

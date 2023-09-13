@@ -11,3 +11,21 @@ func FlattenEnumBool(v interface{}) string {
 	}
 	return "FALSE"
 }
+
+
+func flattenContainerAwsNodePoolManagement(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+
+	original := v.(map[string]interface{})
+	transformed := make(map[string]interface{})
+
+	if original["node_repair"] == nil {
+		transformed["node_repair"] = false
+	} else {
+		transformed["node_repair"] = original["node_repair"]
+	}
+
+	return []interface{}{transformed}
+}
