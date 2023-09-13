@@ -25,6 +25,10 @@ resource "google_gke_backup_backup_plan" "basic" {
 
 resource "google_gke_backup_restore_plan" "transform_rule" {
   name = "<%= ctx[:vars]['name'] %>-rp"
+  description = "copy nginx env variables"
+  labels = {
+    "app" = "nginx"
+  }
   location = "us-central1"
   backup_plan = google_gke_backup_backup_plan.basic.id
   cluster = google_container_cluster.primary.id
