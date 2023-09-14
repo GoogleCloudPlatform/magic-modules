@@ -170,14 +170,24 @@ properties:
   - !ruby/object:Api::Type::Fingerprint
     name: etag
     description: |
-      This checksum is computed by the server based on the value of other fields,
+      Output only. This checksum is computed by the server based on the value of other fields,
       and may be sent on update and delete requests to ensure the client has an
       up-to-date value before proceeding.
     output: true
   - !ruby/object:Api::Type::String
     name: create_time
     description: |
-      The timestamp at which this database was created.
+      Output only. The timestamp at which this database was created.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: update_time
+    description: |
+      Output only. The timestamp at which this database was most recently updated.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: uid
+    description: |
+      Output only. The system-generated UUID4 for this Database.
     output: true
   - !ruby/object:Api::Type::String
     name: versionRetentionPeriod

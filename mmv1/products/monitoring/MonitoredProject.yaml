@@ -15,7 +15,7 @@
 name: MonitoredProject
 base_url: v1/locations/global/metricsScopes
 create_url: v1/locations/global/metricsScopes/{{metrics_scope}}/projects
-delete_url: v1/locations/global/metricsScopes/{{metrics_scope}}/projects/{{name}}
+delete_url: v1/{{name}}
 self_link: v1/locations/global/metricsScopes/{{metrics_scope}}
 id_format: locations/global/metricsScopes/{{metrics_scope}}/projects/{{name}}
 schema_version: 1
@@ -24,9 +24,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/monitoring/settings/manage-api'
   api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v1/locations.global.metricsScopes.projects'
-nested_query: !ruby/object:Api::Resource::NestedQuery
-  keys:
-    - monitoredProjects
 description: "A [project being monitored](https://cloud.google.com/monitoring/settings/multiple-projects#create-multi) by a Metrics Scope."
 immutable: true
 error_retry_predicates: ['transport_tpg.IsMonitoringPermissionError']
