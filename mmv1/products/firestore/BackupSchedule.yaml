@@ -43,9 +43,15 @@ docs: !ruby/object:Provider::Terraform::Docs
     the App Engine location specified.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'firestore_backup_schedule_basic'
+    name: 'firestore_backup_schedule_daily'
     primary_resource_id:
       'daily-backup'
+    test_env_vars:
+      project_id: :FIRESTORE_PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firestore_backup_schedule_weekly'
+    primary_resource_id:
+      'weekly-backup'
     test_env_vars:
       project_id: :FIRESTORE_PROJECT_NAME
 parameters:

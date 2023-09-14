@@ -1,7 +1,9 @@
 resource "google_firestore_backup_schedule" "<%= ctx[:primary_resource_id] %>" {
   project = "<%= ctx[:test_env_vars]['project_id'] %>"
 
-  retention = "604800s"
+  retention = "8467200s" // 14 weeks (maximum possible value for weekly backups)
 
-  daily_recurrence {}
+  weekly_recurrence {
+    day = "SUNDAY"
+  }
 }
