@@ -1,3 +1,6 @@
+# GKE MultiCloud uses a different set of locations than GCE, and our default
+# sweeper logic assumes that resources are in us-central1.
+- type: NO_SWEEPER
 - type: EXCLUDE
   field: monitoring_config
 - type: DIFF_SUPPRESS_FUNC
