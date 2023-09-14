@@ -460,7 +460,7 @@ module Api
         elsif p.is_a? Api::Type::KeyValueAnnotations
           add_annotations_fields(props, parent, p)
         elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
-          p.properties = add_labels_related_fields(p.all_properties, p.name)
+          p.properties = add_labels_related_fields(p.all_properties, p)
         end
       end
       props
@@ -471,9 +471,9 @@ module Api
       labels.ignore_write = true
 
       @custom_diff ||= []
-      if parent.nil?
+      if parent.nil? || parent.flatten_object
         @custom_diff.append('tpgresource.SetLabelsDiff')
-      elsif parent == 'metadata'
+      elsif parent.name == 'metadata'
         @custom_diff.append('tpgresource.SetMetadataLabelsDiff')
       end
 
@@ -489,7 +489,7 @@ module Api
       @custom_diff ||= []
       if parent.nil?
         @custom_diff.append('tpgresource.SetAnnotationsDiff')
-      elsif parent == 'metadata'
+      elsif parent.name == 'metadata'
         @custom_diff.append('tpgresource.SetMetadataAnnotationsDiff')
       end
 
@@ -525,6 +525,20 @@ module Api
         min_version:,
         ignore_write: true
       )
+    end
+
+    def igore_read_labels_fields(props)
+      fields = []
+      props.each do |p|
+        if (p.is_a? Api::Type::KeyValueLabels) ||
+           (p.is_a? Api::Type::KeyValueTerraformLabels) ||
+           (p.is_a? Api::Type::KeyValueAnnotations)
+          fields << p.terraform_lineage
+        elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
+          fields.concat(igore_read_labels_fields(p.all_properties))
+        end
+      end
+      fields
     end
 
     # ====================
