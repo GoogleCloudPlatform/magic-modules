@@ -115,6 +115,7 @@ properties:
         properties:
           - !ruby/object:Api::Type::Boolean
             name: enabled
+            custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_anonymous.go'
             required: true
             description: |
               Whether anonymous user auth is enabled for the project or not.
