@@ -633,7 +633,6 @@ func TestAccBigQueryTable_MaterializedView_WithView(t *testing.T) {
 			{
 				Config:      testAccBigQueryTableWithMatViewAndView(datasetID, tableID, materializedViewID, query),
 				ExpectError: regexp.MustCompile("\"materialized_view\": conflicts with view"),
->>>>>>> FEATURE-BRANCH-major-release-5.0.0
 			},
 		},
 	})
@@ -3552,7 +3551,7 @@ func testAccBigQueryTableTableConstraintsUpdate(projectID, datasetID, tableID_pk
   }
   `, datasetID, tableID_pk, projectID, projectID, tableID_fk)
 }
-	
+
 func testAccBigQueryTableWithSchema(datasetID, tableID, schema string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "test" {
