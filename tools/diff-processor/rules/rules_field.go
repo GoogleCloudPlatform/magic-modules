@@ -80,12 +80,12 @@ var fieldRule_BecomingRequired = FieldRule{
 }
 
 func fieldRule_BecomingRequired_func(old, new *schema.Schema, mc MessageContext) string {
-	// Ignore for removed fields
-	if new == nil {
+	// Ignore for added / removed fields
+	if old == nil || new == nil {
 		return ""
 	}
 	message := mc.message
-	if (old == nil || !old.Required) && new.Required {
+	if !old.Required && new.Required {
 		return populateMessageContext(message, mc)
 	}
 
