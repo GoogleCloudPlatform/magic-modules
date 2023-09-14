@@ -3,12 +3,11 @@ resource "google_alloydb_backup" "<%= ctx[:primary_resource_id] %>" {
   backup_id    = "<%= ctx[:vars]['alloydb_backup_id'] %>"
   cluster_name = google_alloydb_cluster.<%= ctx[:primary_resource_id] %>.name
 
+  description = "example description"
   type = "ON_DEMAND"
   labels = {
     "label" = "key"
   }
-  description = "backup example description"
-
   depends_on = [google_alloydb_instance.<%= ctx[:primary_resource_id] %>]
 }
 
