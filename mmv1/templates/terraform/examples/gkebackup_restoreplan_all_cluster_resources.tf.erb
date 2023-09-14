@@ -13,7 +13,7 @@ resource "google_container_cluster" "primary" {
 }
 
 resource "google_gke_backup_backup_plan" "basic" {
-  name = "bp-<%= ctx[:vars]['name'] %>"
+  name = "<%= ctx[:vars]['name'] %>"
   cluster = google_container_cluster.primary.id
   location = "us-central1"
   backup_config {
