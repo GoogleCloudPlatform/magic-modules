@@ -120,7 +120,6 @@ func computeInstanceMapSecurityPolicies(d tpgresource.TerraformResourceData, con
 		secPolicy := data["security_policy"].(string)
 
 		if secPolicy != "" && len(acessConfigs) == 0 && len(ipv6AccessConfigs) == 0 {
-			// TODO(felipegc) change the message to be more clear what happened.
 			return securityPolicies, fmt.Errorf("Error setting security policy to the instance since at least one access config must exist")
 		}
 
