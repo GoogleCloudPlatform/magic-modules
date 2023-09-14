@@ -176,6 +176,7 @@ properties:
       - :DELETE_PROTECTION_ENABLED
       - :DELETE_PROTECTION_DISABLED
     default_from_api: true
+    skip_test: true
   - !ruby/object:Api::Type::Fingerprint
     name: etag
     description: |
