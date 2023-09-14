@@ -309,6 +309,7 @@ properties:
             values:
               - :ALL_TRAFFIC
               - :PRIVATE_RANGES_ONLY
+            default_from_api: true
           - !ruby/object:Api::Type::Array
             name: 'networkInterfaces'
             description: |-
