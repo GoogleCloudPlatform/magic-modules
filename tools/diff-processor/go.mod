@@ -15,6 +15,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.0
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.3
+	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
 	google/provider/new v0.0.0-00010101000000-000000000000
 	google/provider/old v0.0.0-00010101000000-000000000000
 )
@@ -95,7 +96,7 @@ require (
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/oauth2 v0.10.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.10.0 // indirect
+	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/text v0.11.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/api v0.135.0 // indirect

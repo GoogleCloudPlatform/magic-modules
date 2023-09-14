@@ -3,6 +3,7 @@ package diff
 import (
 	"reflect"
 
+	"golang.org/x/exp/maps"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -29,47 +30,26 @@ type FieldDiff struct {
 }
 
 func ComputeSchemaDiff(oldResourceMap, newResourceMap map[string]*schema.Resource) SchemaDiff {
-	allResources := make(map[string]struct{})
 	schemaDiff := make(SchemaDiff)
-
-	for resource, _ := range oldResourceMap {
-		allResources[resource] = struct{}{}
-	}
-
-	for resource, _ := range newResourceMap {
-		allResources[resource] = struct{}{}
-	}
-
-	for resource, _ := range allResources {
+	for resource, _ := range union(maps.Keys(oldResourceMap), maps.Keys(newResourceMap)) {
+		// Compute diff between old and new resources and fields.
+		// TODO: add support for computing diff between resource configs, not just whether the
+		// resource was added/removed. b/300114839
 		resourceDiff := ResourceDiff{}
 		var flattenedOldSchema map[string]*schema.Schema
 		if oldResource, ok := oldResourceMap[resource]; ok {
 			flattenedOldSchema = flattenSchema("", oldResource.Schema)
-			// TODO: Allow computing diff between old and new resource config. For now just make it easier
-			// to detect whether a resource exists or not. b/300114839
 			resourceDiff.ResourceConfig.Old = &schema.Resource{}
 		}
 
 		var flattenedNewSchema map[string]*schema.Schema
 		if newResource, ok := newResourceMap[resource]; ok {
 			flattenedNewSchema = flattenSchema("", newResource.Schema)
-			// TODO: Allow computing diff between old and new resource config. For now just make it easier
-			// to detect whether a resource exists or not. b/300114839
 			resourceDiff.ResourceConfig.New = &schema.Resource{}
 		}
 
-		allFields := make(map[string]struct{})
-
-		for key, _ := range flattenedOldSchema {
-			allFields[key] = struct{}{}
-		}
-
-		for key, _ := range flattenedNewSchema {
-			allFields[key] = struct{}{}
-		}
-
 		resourceDiff.Fields = make(map[string]FieldDiff)
-		for key, _ := range allFields {
+		for key, _ := range union(maps.Keys(flattenedOldSchema), maps.Keys(flattenedNewSchema)) {
 			oldField := flattenedOldSchema[key]
 			newField := flattenedNewSchema[key]
 			if fieldChanged(oldField, newField) {
@@ -84,6 +64,17 @@ func ComputeSchemaDiff(oldResourceMap, newResourceMap map[string]*schema.Resourc
 		}
 	}
 	return schemaDiff
+}
+
+func union(keys1, keys2 []string) map[string]struct{} {
+	allKeys := make(map[string]struct{})
+	for _, key := range keys1 {
+		allKeys[key] = struct{}{}
+	}
+	for _, key := range keys2 {
+		allKeys[key] = struct{}{}
+	}
+	return allKeys
 }
 
 func flattenSchema(parentKey string, schemaObj map[string]*schema.Schema) map[string]*schema.Schema {
