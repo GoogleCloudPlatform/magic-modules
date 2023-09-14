@@ -38,7 +38,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkebackup_restoreplan_all_namespaces'
     primary_resource_id: 'all_ns'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-allns-restoreplan%s\",
+    primary_resource_name: "fmt.Sprintf(\"tf-test-restore-all-ns%s\",
       context[\"random_suffix\"\
       ])"
     vars:
