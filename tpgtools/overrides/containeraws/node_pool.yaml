@@ -9,4 +9,4 @@
 - type: CUSTOM_STATE_SETTER
   field: management
   details:
-    function: d.Set("management", tpgdclresource.FlattenContainerAwsNodePoolManagement(res.Management, d, config))
+    function: d.Set("management", tpgresource.FlattenContainerAwsNodePoolManagement(res.Management, d, config))
