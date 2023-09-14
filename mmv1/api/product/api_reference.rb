@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2019 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,16 +11,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Product
-name: NetworkConnectivity
-display_name: Network Connectivity
-scopes:
-  - https://www.googleapis.com/auth/cloud-platform
-versions:
-  - !ruby/object:Api::Product::Version
-    name: ga
-    base_url: https://networkconnectivity.googleapis.com/v1/
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Network Connectivity API
-    url: https://console.cloud.google.com/apis/library/networkconnectivity.googleapis.com/
+require 'api/object'
+
+module Api
+  class Product < Api::Object::Named
+    # Represents any APIs that are required to be enabled to use this product
+    class ApiReference < Api::Object
+      attr_reader :name
+      attr_reader :url
+
+      def validate
+        super
+        check :name, type: String, required: true
+        check :url, type: String, required: true
+      end
+    end
+  end
+end
