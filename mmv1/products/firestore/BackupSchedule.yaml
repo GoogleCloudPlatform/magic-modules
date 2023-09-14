@@ -15,7 +15,8 @@
 name: 'BackupSchedule'
 base_url: projects/{{project}}/databases/{{database}}/backupSchedules
 self_link: 'projects/{{project}}/databases/{{database}}/backupSchedules/{{name}}'
-immutable: true
+update_verb: :PATCH
+update_mask: true
 description: |
   A backup schedule for a Cloud Firestore Database.
   This resource is owned by the database it is backing up, and is deleted along with the database.
@@ -87,11 +88,13 @@ properties:
       - weekly_recurrence
     send_empty_value: true
     allow_empty_object: true
+    immutable: true
     properties: []
   - !ruby/object:Api::Type::NestedObject
     name: weeklyRecurrence
     description: |
       For a schedule that runs weekly on a specific day and time.
+    immutable: true
     exactly_one_of:
       - weekly_recurrence
       - daily_recurrence
