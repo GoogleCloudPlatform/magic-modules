@@ -313,3 +313,17 @@ properties:
             name: enabled
             description: |
               Enable Managed Collection.
+  - !ruby/object:Api::Type::NestedObject
+    name: binaryAuthorization
+    description: |
+      Binary Authorization configuration.
+    allow_empty_object: true
+    default_from_api: true
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: evaluationMode
+        description: |
+          Configure Binary Authorization evaluation mode.
+        values:
+          - :DISABLED
+          - :PROJECT_SINGLETON_POLICY_ENFORCE

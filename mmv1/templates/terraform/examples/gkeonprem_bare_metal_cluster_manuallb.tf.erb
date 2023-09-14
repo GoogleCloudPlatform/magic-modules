@@ -54,4 +54,10 @@ resource "google_gkeonprem_bare_metal_cluster" "<%= ctx[:primary_resource_id] %>
       }
     }
   }
+  binary_authorization {
+    evaluation_mode = "DISABLED"
+  }
+  upgrade_policy {
+    policy = "SERIAL"
+  }
 }
