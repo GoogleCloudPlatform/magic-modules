@@ -25,7 +25,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/firestore/docs/backups'
   api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.backupSchedules'
 skip_sweeper: true
-id_format: 'projects/{{project}}/databases/{{database}}/backupSchedules/{{name}}'
+id_format: '{{name}}'
 import_format:
   - 'projects/{{project}}/databases/{{database}}/backupSchedules/{{name}}'
   - '{{project}}/{{database}}/{{name}}'
