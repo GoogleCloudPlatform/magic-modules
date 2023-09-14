@@ -434,11 +434,6 @@ resource "google_alloydb_instance" "default" {
   cluster       = google_alloydb_cluster.default.name
   instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
-
-  database_flags = {
-	  "google_db_advisor.enabled" = "on"
-  }
-
   depends_on = [google_service_networking_connection.vpc_connection]
 }
 
