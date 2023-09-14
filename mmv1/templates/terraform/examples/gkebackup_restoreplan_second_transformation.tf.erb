@@ -57,7 +57,7 @@ resource "google_gke_backup_restore_plan" "transform_rule" {
       field_actions {
         op = "COPY"
         path = "/spec/initContainers/0/env"
-        from_path: "/spec/containers/0/env"
+        from_path = "/spec/containers/0/env"
       }
     }
   }
