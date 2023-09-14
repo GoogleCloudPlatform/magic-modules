@@ -117,7 +117,7 @@ properties:
     name: locationId
     required: true
     description: |
-      The location of the database. Available databases are listed at
+      The location of the database. Available locations are listed at
       https://cloud.google.com/firestore/docs/locations.
     immutable: true
   - !ruby/object:Api::Type::Enum
