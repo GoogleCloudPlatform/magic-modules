@@ -1092,3 +1092,52 @@ resource "google_kms_crypto_key_iam_binding" "crypto_key" {
   }
 `, context)
 }
+
+func TestAccAlloydbCluster_annotations(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbCluster_withAnnotations(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "annotations.hello", "world"),
+				),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+			},
+		},
+	})
+
+}
+
+func testAccAlloydbCluster_withAnnotations(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+	resource "google_alloydb_cluster" "default" {
+	  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+	  location   = "us-central1"
+	  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+	  annotations = {
+		hello = "world"
+	  }
+	}
+	  
+    data "google_project" "project" {
+	}
+	  
+	resource "google_compute_network" "default" {
+	  name = "tf-test-alloydb-cluster%{random_suffix}"
+	}
+	`, context)
+}

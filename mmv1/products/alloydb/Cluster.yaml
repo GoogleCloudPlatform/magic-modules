@@ -410,3 +410,6 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'sourceType'
         description: 'Type of migration source.'
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'annotations'
+    description: 'Annotations to allow client tools to store small amount of arbitrary data. This is distinct from labels.'    
