@@ -117,34 +117,16 @@ func computeInstanceMapSecurityPolicies(d tpgresource.TerraformResourceData, con
 		data := raw.(map[string]interface{})
 		acessConfigs := expandAccessConfigs(data["access_config"].([]interface{}))
 		ipv6AccessConfigs := expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{}))
+		secPolicy := data["security_policy"].(string)
+
+		if secPolicy != "" && len(acessConfigs) == 0 && len(ipv6AccessConfigs) == 0 {
+			// TODO(felipegc) change the message to be more clear what happened.
+			return securityPolicies, fmt.Errorf("Error setting security policy to the instance since at least one access config must exist")
+		}
 
 		// Network interfaces use the nicN naming format and is only know after the instance is created.
 		nicName := fmt.Sprintf("nic%d", i)
-		// The security_policy must be unique through all the accessConfigs and ipv6AccessConfigs under the same networkInterface.
-		uniqueSecPolicy := ""
-
-		for j := 0; j < len(acessConfigs); j++ {
-			ac := acessConfigs[j]
-
-			if uniqueSecPolicy != "" && ac.SecurityPolicy != uniqueSecPolicy {
-				return securityPolicies, fmt.Errorf("Error to create security policy to the instance, all the security policies must be equal through all access configs for the same network interface")
-			}
-
-			securityPolicies[ac.SecurityPolicy] = append(securityPolicies[ac.SecurityPolicy], nicName)
-			uniqueSecPolicy = ac.SecurityPolicy
-		}
-
-		for j := 0; j < len(ipv6AccessConfigs); j++ {
-			ip6ac := ipv6AccessConfigs[j]
-			// Is not necessary to map empty security policy during the instance creation.
-
-			if uniqueSecPolicy != "" && ip6ac.SecurityPolicy != uniqueSecPolicy {
-				return securityPolicies, fmt.Errorf("Error to create security policy to the instance, all the security policies must be equal through all access configs for the same network interface")
-			}
-
-			securityPolicies[ip6ac.SecurityPolicy] = append(securityPolicies[ip6ac.SecurityPolicy], nicName)
-			uniqueSecPolicy = ip6ac.SecurityPolicy
-		}
+		securityPolicies[secPolicy] = append(securityPolicies[secPolicy], nicName)
 	}
 
 	return securityPolicies, nil

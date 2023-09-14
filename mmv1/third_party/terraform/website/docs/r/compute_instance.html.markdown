@@ -314,6 +314,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `queue_count` - (Optional) The networking queue count that's specified by users for the network interface. Both Rx and Tx queues will be set to this number. It will be empty if not specified.
 
+* `security_policy` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.
 
 <a name="nested_access_config"></a>The `access_config` block supports:
 
@@ -328,8 +329,6 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `network_tier` - (Optional) The [networking tier][network-tier] used for configuring this instance.
     This field can take the following values: PREMIUM, FIXED_STANDARD or STANDARD. If this field is
     not specified, it is assumed to be PREMIUM.
-
-* `security_policy` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy. Note that all access_configs and ipv6_access_config under the same network_interface must have the same security_policy set.
 
 <a name="nested_ipv6_access_config"></a>The `ipv6_access_config` block supports:
 
@@ -348,8 +347,6 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `public_ptr_domain_name` - (Optional) The domain name to be used when creating DNSv6
     records for the external IPv6 ranges..
-
-* `security_policy` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy. Note that all access_configs and ipv6_access_config under the same network_interface must have the same security_policy set.
 
 <a name="nested_alias_ip_range"></a>The `alias_ip_range` block supports:
 
