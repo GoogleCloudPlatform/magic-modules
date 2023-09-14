@@ -48,6 +48,14 @@ examples:
       'daily-backup'
     test_env_vars:
       project_id: :FIRESTORE_PROJECT_NAME
+parameters:
+  - !ruby/object:Api::Type::String
+    name: database
+    description: |
+      The Firestore database id. Defaults to `"(default)"`.
+    default_value: '(default)'
+    immutable: true
+    url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -55,12 +63,6 @@ properties:
     description: |
       A server defined name for this index. Format:
       `projects/{{project}}/databases/{{database}}/backupSchedules/{{backupSchedule}}
-  - !ruby/object:Api::Type::String
-    name: database
-    default_value: '(default)'
-    description: |
-      The Firestore database id. Defaults to `"(default)"`.
-    ignore_read: true
   - !ruby/object:Api::Type::String
     name: retention
     required: true
