@@ -1580,6 +1580,11 @@ func TestFrameworkProvider_LoadAndValidateFramework_batching(t *testing.T) {
 			ExpectEnableBatchingValue: types.BoolValue(true),
 			ExpectSendAfterValue:      types.StringValue("45s"),
 		},
+		"when the whole batching block is a null value, the provider provides default values for send_after and enable_batching": {
+			SetBatchingAsNull:         true,
+			ExpectEnableBatchingValue: types.BoolValue(true),
+			ExpectSendAfterValue:      types.StringValue("3s"),
+		},
 		// Handling empty strings in config
 		"when batching is configured with send_after as an empty string, send_after will be set to a default value": {
 			EnableBatchingValue:       types.BoolValue(true),
