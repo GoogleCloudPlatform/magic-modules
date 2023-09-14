@@ -54,9 +54,9 @@ examples:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkebackup_restoreplan_protected_application'
-    primary_resource_id: 'rollback_protected_app'
+    primary_resource_id: 'rollback-app'
     vars:
-      name: 'rollback-protected-app'
+      name: 'rollback-app'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
