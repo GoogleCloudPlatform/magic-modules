@@ -41,10 +41,6 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
   labels = {
     test = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
   }
-  annotations = {
-    cluster_annotations_key = "cluster_annotations_value"
-  }
-  display_name = "cluster display name"
 }
 
 data "google_project" "project" {}

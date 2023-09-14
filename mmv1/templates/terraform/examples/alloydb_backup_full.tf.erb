@@ -5,12 +5,8 @@ resource "google_alloydb_backup" "<%= ctx[:primary_resource_id] %>" {
 
   type = "ON_DEMAND"
   labels = {
-    "backup_labels_key" = "backup_labels_value"
+    "label" = "key"
   }
-  annotations = {
-    "backup_annotations_key" = "backup_annotations_value"
-  }
-  display_name = "backup display name"
   description = "backup example description"
 
   depends_on = [google_alloydb_instance.<%= ctx[:primary_resource_id] %>]
