@@ -22,7 +22,3 @@ versions:
     base_url: https://publicca.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Public Certificate Authority API
-    url: https://console.cloud.google.com/apis/library/publicca.googleapis.com
