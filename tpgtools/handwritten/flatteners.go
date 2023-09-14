@@ -24,10 +24,10 @@ func FlattenContainerAwsNodePoolManagement(obj *containeraws.NodePoolManagement,
 	}
 	transformed := make(map[string]interface{})
 
-	if obj.auto_repair == nil {
+	if obj.AutoRepair == nil {
 		transformed["auto_repair"] = false
 	} else {
-		transformed["auto_repair"] = obj.auto_repair
+		transformed["auto_repair"] = obj.AutoRepair
 	}
 
 	return []interface{}{transformed}
@@ -39,10 +39,10 @@ func FlattenContainerAzureNodePoolManagement(obj *containerazure.NodePoolManagem
 	}
 	transformed := make(map[string]interface{})
 
-	if obj.auto_repair == nil {
+	if obj.AutoRepair == nil {
 		transformed["auto_repair"] = false
 	} else {
-		transformed["auto_repair"] = obj.auto_repair
+		transformed["auto_repair"] = obj.AutoRepair
 	}
 
 	return []interface{}{transformed}
