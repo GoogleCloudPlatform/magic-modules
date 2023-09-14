@@ -213,6 +213,7 @@ module "project-services" {
     "dataform.googleapis.com",
     "datafusion.googleapis.com",
     "datamigration.googleapis.com",
+    "datapipelines.googleapis.com",
     "dataplex.googleapis.com",
     "dataproc.googleapis.com",
     "datastore.googleapis.com",
