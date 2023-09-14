@@ -76,6 +76,8 @@ properties:
     exactly_one_of:
       - daily_recurrence
       - weekly_recurrence
+    send_empty_value: true
+    allow_empty_object: true
     properties: []
   - !ruby/object:Api::Type::NestedObject
     name: weeklyRecurrence
