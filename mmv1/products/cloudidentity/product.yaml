@@ -23,7 +23,3 @@ versions:
     base_url: https://cloudidentity.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-identity
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Cloud Identity API
-    url: https://console.cloud.google.com/apis/api/cloudidentity.googleapis.com/overview
