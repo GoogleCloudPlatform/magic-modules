@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'api/object'
+require 'api/product/api_reference'
 require 'api/product/version'
 require 'google/logger'
 require 'compile/core'
@@ -51,6 +52,10 @@ module Api
     # failures on operation_get. see github.com/hashicorp/terraform-provider-google/issues/9489
     attr_reader :operation_retry
 
+    # The APIs required to be enabled for this product.
+    # Usually just the product's API
+    attr_reader :apis_required
+
     attr_reader :async
 
     attr_reader :legacy_name
@@ -70,6 +75,7 @@ module Api
       check :display_name, type: String
       check :objects, type: Array, item_type: Api::Resource
       check :scopes, type: Array, item_type: String, required: true
+      check :apis_required, type: Array, item_type: Api::Product::ApiReference
       check :operation_retry, type: String
 
       check :async, type: Api::Async
