@@ -193,6 +193,12 @@ resource "google_alloydb_instance" "default" {
   machine_config {
 	  cpu_count = 4
   }
+  query_insights_config {
+    query_string_length = 300
+    record_application_tags = "false"
+    record_client_address = "true"
+    query_plans_per_minute = 10
+  }
   depends_on = [google_service_networking_connection.vpc_connection]
   lifecycle {
     ignore_changes = [
