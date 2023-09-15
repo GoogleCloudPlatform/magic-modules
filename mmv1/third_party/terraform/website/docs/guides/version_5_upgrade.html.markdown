@@ -271,11 +271,13 @@ resource "google_firebaserules_ruleset" "firestore" {
 
 These two unsupported fields were introduced incorrectly. They are now removed.
 
+
 ## Resource: `google_cloud_run_v2_service`
 
 ### `liveness_probe.tcp_socket` is now removed
 
 This unsupported field was introduced incorrectly. It is now removed.
+
 
 ## Resource: `google_container_cluster`
 
@@ -296,6 +298,18 @@ cluster and/or manually resolve the issues and untaint their failed clusters.
 
 Previously `network_policy.provider` defaulted to "PROVIDER_UNSPECIFIED". It no longer
 has a default value.
+
+
+## Resource: `google_container_node_pool`
+
+### `logging_variant` no longer has a provider default value
+
+Previously `logging_variant` defaulted to "DEFAULT". It no longerhas a default value.
+
+### `management.auto_repair` and `management.auto_upgrade` now default to true
+
+Previously both fields defaulted to false. They now default to true.
+
 
 ## Resource: `google_dataplex_datascan`
 
