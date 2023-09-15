@@ -103,9 +103,9 @@ func TestGetInstanceFromResponse(t *testing.T) {
 			wantId:           originalId,
 		}}
 	for tn, tc := range cases {
-		instanceResponse = []*bigtable.InstanceInfo{}
+		instancesResponse := []*bigtable.InstanceInfo{}
 		for _, existingInstance := range tc.instanceNames {
-			instanceResponse = append(instanceResponse, &bigtable.InstanceInfo{Name: existingInstance})
+			instancesResponse = append(instancesResponse, &bigtable.InstanceInfo{Name: existingInstance})
 		}
 		d := &schema.ResourceData{}
 		d.SetId(originalId)
