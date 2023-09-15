@@ -26,7 +26,7 @@ func TestAccCertificateManagerDnsAuthorization_update(t *testing.T) {
 				ResourceName:            "google_certificate_manager_dns_authorization.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name"},
+				ImportStateVerifyIgnore: []string{"name", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccCertificateManagerDnsAuthorization_update1(context),
@@ -35,7 +35,7 @@ func TestAccCertificateManagerDnsAuthorization_update(t *testing.T) {
 				ResourceName:            "google_certificate_manager_dns_authorization.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name"},
+				ImportStateVerifyIgnore: []string{"name", "labels", "terraform_labels"},
 			},
 		},
 	})
