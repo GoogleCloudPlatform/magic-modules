@@ -286,7 +286,7 @@ This unsupported field was introduced incorrectly. It is now removed.
 ### Default value of `network_policy.provider` is now removed
 
 Previously `network_policy.provider` defaulted to "PROVIDER_UNSPECIFIED". It no longer
-as a default value.
+has a default value.
 
 ## Resource: `google_dataplex_datascan`
 
