@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	tpgservicenetworking "github.com/hashicorp/terraform-provider-google-beta/google-beta/services/servicenetworking"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/privateca"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	tpgservicenetworking "github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 	"github.com/hashicorp/terraform-provider-google/google/services/sql"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -410,16 +410,17 @@ func BootstrapSharedTestGlobalAddress(t *testing.T, testId, networkId string) st
 	return address.Name
 }
 
-func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string) {
+func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string) string {
 	parentService := "services/servicenetworking.googleapis.com"
 	project := envvar.GetTestProjectFromEnv()
 
 	config := BootstrapConfig(t)
 	if config == nil {
-		return
+		return ""
 	}
 
-	networkId := fmt.Sprintf("projects/%v/global/networks/%v", project, BootstrapSharedTestNetwork(t, testId))
+	networkName := BootstrapSharedTestNetwork(t, testId)
+	networkId := fmt.Sprintf("projects/%v/global/networks/%v", project, networkName)
 	globalAddressName := BootstrapSharedTestGlobalAddress(t, testId, networkId)
 
 	readCall := config.NewServiceNetworkingClient(config.UserAgent).Services.Connections.List(parentService).Network(networkId)
@@ -463,6 +464,8 @@ func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string) {
 	}
 
 	log.Printf("[DEBUG] Getting shared test service networking connection")
+
+	return networkName
 }
 
 var SharedServicePerimeterProjectPrefix = "tf-bootstrap-sp-"

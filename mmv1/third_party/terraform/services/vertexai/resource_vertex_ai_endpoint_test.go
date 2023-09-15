@@ -18,7 +18,7 @@ func TestAccVertexAIEndpoint_vertexAiEndpointNetwork(t *testing.T) {
 	context := map[string]interface{}{
 		"endpoint_name": fmt.Sprint(acctest.RandInt(t) % 9999999999),
 		"kms_key_name":  acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
-		"network_name":  acctest.BootstrapSharedTestNetwork(t, "vertex-ai-endpoint-update"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "vertex-ai-endpoint-update"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 

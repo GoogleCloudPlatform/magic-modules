@@ -12,7 +12,7 @@ func TestAccVertexAIIndexEndpoint_updated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedTestNetwork(t, "vertex-ai-index-endpoint-update"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "vertex-ai-index-endpoint-update"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
