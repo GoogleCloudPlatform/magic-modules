@@ -24,7 +24,7 @@ func TestAccDataSourceGoogleCloudFunctions2Function_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleCloudFunctions2FunctionConfig(functionName,
 					bucketName, zipFilePath),
-				// As the value of "labels" and "terraform_lables" in the state is dpendent on the configuration,
+				// As the value of "labels" and "terraform_labels" in the state is dependent on the configuration,
 				// and these fields are not set in the configuration of the data source, so these fields are empty in the state of the data source.
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(funcDataNameHttp,
@@ -59,7 +59,7 @@ resource "google_cloudfunctions2_function" "function_http_v2" {
   location = "us-central1"
   description = "a new function"
   labels = {
-	  env = "test"
+    env = "test"
   }
   build_config {
     runtime = "nodejs12"

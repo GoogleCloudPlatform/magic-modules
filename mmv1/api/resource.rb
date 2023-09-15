@@ -527,6 +527,7 @@ module Api
       )
     end
 
+    # Return labels fields that should be added to ImportStateVerifyIgnore
     def ignore_read_labels_fields(props)
       fields = []
       props.each do |p|
