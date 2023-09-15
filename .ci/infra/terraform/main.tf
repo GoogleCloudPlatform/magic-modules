@@ -301,6 +301,7 @@ module "project-services" {
     "storage-api.googleapis.com",
     "storage-component.googleapis.com",
     "storage.googleapis.com",
+    "storageinsights.googleapis.com",
     "storagetransfer.googleapis.com",
     "test-file.sandbox.googleapis.com",
     "testing.googleapis.com",
