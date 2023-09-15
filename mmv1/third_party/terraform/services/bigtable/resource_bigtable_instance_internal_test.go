@@ -1,6 +1,7 @@
 package bigtable
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -55,6 +56,7 @@ func TestGetUnavailableClusterZones(t *testing.T) {
 
 func TestGetInstanceFromResponse(t *testing.T) {
 	instanceName := "test-instance"
+	originalId := "original_value"
 	cases := map[string]struct {
 		instanceNames      []string
 		listInstancesError error
@@ -62,45 +64,51 @@ func TestGetInstanceFromResponse(t *testing.T) {
 		wantError        string
 		wantInstanceName string
 		wantStop         bool
+		wantId           string
 	}{
-		instanceNames:      []string{"wrong", "also_wrong"},
-		listInstancesError: nil,
+		"not found": {
+			instanceNames:      []string{"wrong", "also_wrong"},
+			listInstancesError: nil,
 
-		wantError:        "",
-		wantStop:         true,
-		wantInstanceName: "",
-	},
-	{
-		instanceNames:      []string{"wrong", "also_wrong", instanceName},
-		listInstancesError: nil,
+			wantError:        "",
+			wantStop:         true,
+			wantInstanceName: "",
+			wantId:           "",
+		},
+		"found": {
+			instanceNames:      []string{"wrong", "also_wrong", instanceName},
+			listInstancesError: nil,
 
-		wantError:        "",
-		wantStop:         false,
-		wantInstanceName: instanceName,
-	},
-	{
-		instanceNames:      nil,
-		listInstancesError: fmt.Errorf("some error"),
+			wantError:        "",
+			wantStop:         false,
+			wantInstanceName: instanceName,
+			wantId:           originalId,
+		},
+		"error": {
+			instanceNames:      nil,
+			listInstancesError: fmt.Errorf("some error"),
 
-		wantError:        "Error retrieving instance.",
-		wantStop:         true,
-		wantInstanceName: "",
-	},
-	{
-		instanceNames:      []string{"wrong", "also_wrong"},
-		listInstancesError: bigtable.ErrPartiallyUnavailable{[]string{"some", "location"}},
+			wantError:        "Error retrieving instance.",
+			wantStop:         true,
+			wantInstanceName: "",
+			wantId:           originalId,
+		},
+		"unavailble error": {
+			instanceNames:      []string{"wrong", "also_wrong"},
+			listInstancesError: bigtable.ErrPartiallyUnavailable{[]string{"some", "location"}},
 
-		wantError:        "",
-		wantStop:         false,
-		wantInstanceName: "",
-	}
+			wantError:        "",
+			wantStop:         false,
+			wantInstanceName: "",
+			wantId:           originalId,
+		}}
 	for tn, tc := range cases {
 		instanceResponse = []*bigtable.InstanceInfo{}
 		for _, existingInstance := range tc.instanceNames {
 			instanceResponse = append(instanceResponse, &bigtable.InstanceInfo{Name: existingInstance})
 		}
 		d := &schema.ResourceData{}
-		d.SetId("original_value")
+		d.SetId(originalId)
 		gotInstance, gotStop, gotErr := getInstanceFromResponse(instancesResponse, instanceName, tc.listInstancesError, d)
 
 		if gotStop != tc.wantStop {
@@ -115,6 +123,10 @@ func TestGetInstanceFromResponse(t *testing.T) {
 			(gotInstance != nil && tc.wantInstanceName == "") ||
 			(gotInstance != nil && gotInstance.Name != tc.wantInstanceName) {
 			t.Errorf("bad instance: %s, got %v, want %q", tn, gotInstance, tc.wantInstanceName)
+		}
+		gotId := d.Id()
+		if gotId != tc.wantId {
+			t.Errorf("bad ID: %s, got %v, want %q", tn, gotId, tc.wantId)
 		}
 	}
 }
