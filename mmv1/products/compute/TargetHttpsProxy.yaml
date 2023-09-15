@@ -62,6 +62,18 @@ examples:
       url_map_name: 'url-map'
       backend_service_name: 'backend-service'
       http_health_check_name: 'http-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'target_https_proxy_mtls'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      target_https_proxy_name: 'test-mtls-proxy'
+      ssl_certificate_name: 'my-certificate'
+      url_map_name: 'url-map'
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'http-health-check'
+      server_tls_policy_name: 'my-tls-policy'
+      trust_config_name: 'my-trust-config'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -161,3 +173,17 @@ properties:
       external HTTP(S) load balancer, the minimum allowed value is 5 seconds and
       the maximum allowed value is 1200 seconds. For Global external HTTP(S)
       load balancer (classic), this option is not available publicly.
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'serverTlsPolicy'
+    resource: 'SslPolicy'
+    imports: 'selfLink'
+    description: |
+      A URL referring to a networksecurity.ServerTlsPolicy
+      resource that describes how the proxy should authenticate inbound
+      traffic. serverTlsPolicy only applies to a global TargetHttpsProxy
+      attached to globalForwardingRules with the loadBalancingScheme
+      set to INTERNAL_SELF_MANAGED or EXTERNAL or EXTERNAL_MANAGED.
+      For details which ServerTlsPolicy resources are accepted with
+      INTERNAL_SELF_MANAGED and which with EXTERNAL, EXTERNAL_MANAGED
+      loadBalancingScheme consult ServerTlsPolicy documentation.
+      If left blank, communications are not encrypted.
