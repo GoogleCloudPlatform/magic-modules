@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccIdentityPlatformConfig_update(t *testing.T) {
-	#acctest.SkipIfVcr(t)
+	// acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
