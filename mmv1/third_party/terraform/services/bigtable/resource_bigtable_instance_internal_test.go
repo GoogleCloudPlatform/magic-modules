@@ -116,7 +116,7 @@ func TestGetInstanceFromResponse(t *testing.T) {
 		}
 		if (gotErr != nil && tc.wantError == "") ||
 			(gotErr == nil && tc.wantError != "") ||
-			(gotErr != nil && strings.Contains(gotErr.Error(), tc.wantError)) {
+			(gotErr != nil && !strings.Contains(gotErr.Error(), tc.wantError)) {
 			t.Errorf("bad error: %s, got %q, want %q", tn, gotErr, tc.wantError)
 		}
 		if (gotInstance == nil && tc.wantInstanceName != "") ||
