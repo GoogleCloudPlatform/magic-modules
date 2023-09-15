@@ -166,23 +166,20 @@ properties:
       The IP address for the Instance. This is the connection endpoint for an end-user application.
   - !ruby/object:Api::Type::NestedObject
     name: 'queryInsightsConfig'
+    default_from_api: true
     description: 'Configuration for query insights.'
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'queryStringLength'
-        default_from_api: true
         description: 'Query string length. The default value is 1024. Any integer between 256 and 4500 is considered valid.'
       - !ruby/object:Api::Type::Boolean
         name: 'recordApplicationTags'
-        default_from_api: true
         description: 'Record application tags for an instance. This flag is turned "on" by default.'
       - !ruby/object:Api::Type::Boolean
         name: 'recordClientAddress'
-        default_from_api: true
         description: 'Record client address for an instance. Client address is PII information. This flag is turned "on" by default.'
       - !ruby/object:Api::Type::Integer
         name: 'queryPlansPerMinute'
-        default_from_api: true
         description: 'Number of query execution plans captured by Insights per minute for all queries combined. The default value is 5. Any integer between 0 and 20 is considered valid.'
   - !ruby/object:Api::Type::NestedObject
     name: 'readPoolConfig'
