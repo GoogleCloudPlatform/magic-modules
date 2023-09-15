@@ -110,12 +110,12 @@ properties:
               A map of <test phone number, fake code> that can be used for phone auth testing.
       - !ruby/object:Api::Type::NestedObject
         name: anonymous
+        custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_anonymous.go'
         description: |
           Configuration options related to authenticating an anonymous user.
         properties:
           - !ruby/object:Api::Type::Boolean
             name: enabled
-            custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_anonymous.go'
             required: true
             description: |
               Whether anonymous user auth is enabled for the project or not.
