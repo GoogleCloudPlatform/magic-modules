@@ -1312,7 +1312,7 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	<% unless version == 'ga' -%>
-	securityPolicies, err := computeInstanceMapSecurityPolicies(d, config)
+	securityPolicies, err := computeInstanceMapSecurityPoliciesCreate(d, config)
 	if err != nil {
 		return err
 	}
@@ -1801,7 +1801,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	securityPolicies := make(map[string][]string)
 	if updateSecurityPolicy {
 		// map the security policies to call SetSecurityPolicy because the code below removes and re-creates the access_config which ends up removing the security_policy.
-		securityPolicies, err = computeInstanceMapSecurityPolicies(d, config)
+		securityPolicies, err = computeInstanceMapSecurityPoliciesUpdate(d, config)
 		if err != nil {
 			return err
 		}

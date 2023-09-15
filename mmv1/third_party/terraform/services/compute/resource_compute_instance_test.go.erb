@@ -2863,6 +2863,24 @@ func TestAccComputeInstance_nic_securityPolicyCreateWithAccessConfigUpdateAccess
 	})
 }
 
+func TestAccComputeInstance_nic_securityPolicyCreateWithoutAccessConfig(t *testing.T) {
+	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
+	var policyName = fmt.Sprintf("tf-test-policy-%s", acctest.RandString(t, 10))
+	var suffix = acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsRemoveAccessConfig(suffix, policyName, instanceName),
+				ExpectError: regexp.MustCompile("Error setting security policy to the instance since at least one access config must exist"),
+			},
+		},
+	})
+}
+
 <% end -%>
 
 func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resource.TestCheckFunc {
