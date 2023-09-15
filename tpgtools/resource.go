@@ -586,6 +586,14 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		res.CustomizeDiff = cdiff.Functions
 	}
 
+	if res.HasLabels() {
+		res.CustomizeDiff = append(res.CustomizeDiff, "tpgresource.SetLabelsDiff")
+	}
+
+	if res.HasAnnotations() {
+		res.CustomizeDiff = append(res.CustomizeDiff, "tpgresource.SetAnnotationsDiff")
+	}
+
 	// ListFields
 	if parameters, ok := typeFetcher.doc.Paths["list"]; ok {
 		for _, param := range parameters.Parameters {
@@ -835,7 +843,7 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 		// During importing, as the configuration is unavailableafter, the "labels" and "annotations" fields in the state will be empty.
 		// So add the "labels" and the "annotations" fields to the ImportStateVerifyIgnore list.
 		if r.HasLabels() {
-			sample.IgnoreRead = append(sample.IgnoreRead, "labels")
+			sample.IgnoreRead = append(sample.IgnoreRead, "labels", "terraform_labels")
 		}
 
 		if r.HasAnnotations() {
@@ -930,10 +938,10 @@ func (r *Resource) loadDCLSamples() []Sample {
 		sample.TestSlug = RenderedString(sampleNameToTitleCase(*sample.Name).titlecase())
 
 		// The "labels" and "annotations" fields in the state are decided by the configuration.
-		// During importing, as the configuration is unavailableafter, the "labels" and "annotations" fields in the state will be empty.
+		// During importing, as the configuration is unavailable, the "labels" and "annotations" fields in the state will be empty.
 		// So add the "labels" and the "annotations" fields to the ImportStateVerifyIgnore list.
 		if r.HasLabels() {
-			sample.IgnoreRead = append(sample.IgnoreRead, "labels")
+			sample.IgnoreRead = append(sample.IgnoreRead, "labels", "terraform_labels")
 		}
 
 		if r.HasAnnotations() {

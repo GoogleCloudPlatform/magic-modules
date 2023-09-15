@@ -31,37 +31,32 @@ import (
 )
 
 type FrameworkProviderConfig struct {
-    BillingProject types.String
-    Client *http.Client
-    Context context.Context
-    gRPCLoggingOptions []option.ClientOption
-    PollInterval time.Duration
-    Project types.String
-    Region types.String
-    Zone types.String
-    RequestBatcherIam *transport_tpg.RequestBatcher
-    RequestBatcherServiceUsage *transport_tpg.RequestBatcher
-    Scopes []string
-    TokenSource oauth2.TokenSource
-    UserAgent string
-    UserProjectOverride bool
+	BillingProject             types.String
+	Client                     *http.Client
+	Context                    context.Context
+	gRPCLoggingOptions         []option.ClientOption
+	PollInterval               time.Duration
+	Project                    types.String
+	Region                     types.String
+	Zone                       types.String
+	RequestBatcherIam          *transport_tpg.RequestBatcher
+	RequestBatcherServiceUsage *transport_tpg.RequestBatcher
+	Scopes                     types.List
+	TokenSource                oauth2.TokenSource
+	UserAgent                  string
+	UserProjectOverride        types.Bool
 
-    // paths for client setup
-    <% products.each do |product| -%>
-    <%= product[:definitions].name -%>BasePath string
-    <% end -%>
-}
-
-var defaultClientScopes = []string{
-	"https://www.googleapis.com/auth/cloud-platform",
-	"https://www.googleapis.com/auth/userinfo.email",
+	// paths for client setup
+	<% products.each do |product| -%>
+	<%= product[:definitions].name -%>BasePath string
+	<% end -%>
 }
 
 // LoadAndValidateFramework handles the bulk of configuring the provider
 // it is pulled out so that we can manually call this from our testing provider as well
-func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, data fwmodels.ProviderModel, tfVersion string, diags *diag.Diagnostics, providerversion string) {
+func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, data *fwmodels.ProviderModel, tfVersion string, diags *diag.Diagnostics, providerversion string) {
 	// Set defaults if needed
-	p.HandleDefaults(ctx, &data, diags)
+	p.HandleDefaults(ctx, data, diags)
 	if diags.HasError() {
 		return
 	}
@@ -77,7 +72,7 @@ func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, 
 	}
 
 	// Set up client configuration
-	p.SetupClient(ctx, data, diags)
+	p.SetupClient(ctx, *data, diags)
 	if diags.HasError() {
 		return
 	}
@@ -98,10 +93,13 @@ func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, 
 	<% end -%>
 
 	p.Context = ctx
-	p.Region = data.Region
-	p.Zone = data.Zone
-	p.PollInterval = 10 * time.Second
+	p.BillingProject = data.BillingProject
 	p.Project = data.Project
+	p.Region = data.Region
+	p.Scopes = data.Scopes
+	p.Zone = data.Zone
+	p.UserProjectOverride = data.UserProjectOverride
+	p.PollInterval = 10 * time.Second
 	p.RequestBatcherServiceUsage = transport_tpg.NewRequestBatcher("Service Usage", ctx, batchingConfig)
 	p.RequestBatcherIam = transport_tpg.NewRequestBatcher("IAM", ctx, batchingConfig)
 }
@@ -174,7 +172,7 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 
 	if len(data.Scopes.Elements()) == 0 {
 		var d diag.Diagnostics
-		data.Scopes, d = types.ListValueFrom(ctx, types.StringType, defaultClientScopes)
+		data.Scopes, d = types.ListValueFrom(ctx, types.StringType, transport_tpg.DefaultClientScopes)
 		diags.Append(d...)
 		if diags.HasError() {
 			return
