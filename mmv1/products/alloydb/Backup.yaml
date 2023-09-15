@@ -120,6 +120,7 @@ properties:
     description: Output only. The current state of the backup.
   - !ruby/object:Api::Type::Enum
     name: 'type'
+    default_from_api: true
     description: 'The backup type, which suggests the trigger for the backup.'
     values:
       - :TYPE_UNSPECIFIED
