@@ -99,6 +99,10 @@ examples:
       - etag
     vars:
       project_id: 'my-project'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firestore_database_with_delete_protection'
+    primary_resource_id: 'database'
+    skip_test: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -176,7 +180,6 @@ properties:
       - :DELETE_PROTECTION_ENABLED
       - :DELETE_PROTECTION_DISABLED
     default_from_api: true
-    skip_test: true
   - !ruby/object:Api::Type::Fingerprint
     name: etag
     description: |
