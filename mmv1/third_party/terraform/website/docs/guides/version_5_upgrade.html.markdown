@@ -277,6 +277,17 @@ These two unsupported fields were introduced incorrectly. They are now removed.
 
 This unsupported field was introduced incorrectly. It is now removed.
 
+## Resource: `google_container_cluster`
+
+### `enable_binary_authorization` is now removed
+
+`enable_binary_authorization` has been removed in favor of `binary_authorization.enabled`.
+
+### Default value of `network_policy.provider` is now removed
+
+Previously `network_policy.provider` defaulted to "PROVIDER_UNSPECIFIED". It no longer
+has a default value.
+
 ## Resource: `google_dataplex_datascan`
 
 ### `dataQualityResult` and `dataProfileResult` output fields are now removed 
@@ -469,3 +480,33 @@ If you were relying on accessing an individual flag by index (for example, `goog
 ### `Create` endpoint is used to create the resource
 
 `google_service_networking_connection` now uses the Create endpoint instead of the Patch endpoint during the creation step. Previously, Patch was used as a workaround for an issue that has since been resolved.
+
+## Resource: `google_secret_manager_secret`
+
+### `replication.automatic` is now removed
+
+Deprecated in favor of field `replication.auto`. It is now removed.
+
+#### Old Config
+
+```hcl
+resource "google_secret_manager_secret" "my-secret" {
+  secret_id = "tf-secret"
+  
+  replication {
+    automatic = true
+  }
+}
+```
+
+#### New Config
+
+```hcl
+resource "google_secret_manager_secret" "my-secret" {
+  secret_id = "tf-secret"
+  
+  replication {
+    auto {}
+  }
+}
+```
