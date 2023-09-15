@@ -383,8 +383,6 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			flattened[i]["security_policy"] = iface.AccessConfigs[0].SecurityPolicy
 		} else if len(iface.Ipv6AccessConfigs) > 0 && iface.Ipv6AccessConfigs[0].SecurityPolicy != "" {
 			flattened[i]["security_policy"] = iface.Ipv6AccessConfigs[0].SecurityPolicy
-		} else {
-			flattened[i]["security_policy"] = ""
 		}
 		<% end -%>
 	}
@@ -405,7 +403,9 @@ func expandAccessConfigs(configs []interface{}) []*compute.AccessConfig {
 				acs[i].PublicPtrDomainName = ptr.(string)
 			}
 			<% unless version == 'ga' -%>
-			acs[i].SecurityPolicy = data["security_policy"].(string)
+			if sp, ok := data["security_policy"]; ok && sp != "" {
+				acs[i].SecurityPolicy = sp.(string)
+			}
 			<% end -%>
 		}
 	}
@@ -437,8 +437,8 @@ func expandIpv6AccessConfigs(configs []interface{}) []*compute.AccessConfig {
 			}
 			iacs[i].Type = "DIRECT_IPV6" // Currently only type supported
 			<% unless version == 'ga' -%>
-			if securityPolicy, ok := data["security_policy"]; ok && securityPolicy != "" {
-				iacs[i].SecurityPolicy = securityPolicy.(string)
+			if sp, ok := data["security_policy"]; ok && sp != "" {
+				iacs[i].SecurityPolicy = sp.(string)
 			}
 			<% end -%>
 		}
