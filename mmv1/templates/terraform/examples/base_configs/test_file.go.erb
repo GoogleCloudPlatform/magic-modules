@@ -47,7 +47,7 @@ object.examples
       .select{|p| p.url_param_only || p.ignore_read || p.is_a?(Api::Type::ResourceRef)}
       .map { |p| p.name.underscore }
       .concat(example.ignore_read_extra)
-      .concat(object.igore_read_labels_fields(object.properties_with_excluded))
+      .concat(object.ignore_read_labels_fields(object.properties_with_excluded))
 
     # Use explicit version for the example if given.
     # Otherwise, use object version.

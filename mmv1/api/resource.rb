@@ -527,7 +527,7 @@ module Api
       )
     end
 
-    def igore_read_labels_fields(props)
+    def ignore_read_labels_fields(props)
       fields = []
       props.each do |p|
         if (p.is_a? Api::Type::KeyValueLabels) ||
@@ -535,7 +535,7 @@ module Api
            (p.is_a? Api::Type::KeyValueAnnotations)
           fields << p.terraform_lineage
         elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
-          fields.concat(igore_read_labels_fields(p.all_properties))
+          fields.concat(ignore_read_labels_fields(p.all_properties))
         end
       end
       fields
