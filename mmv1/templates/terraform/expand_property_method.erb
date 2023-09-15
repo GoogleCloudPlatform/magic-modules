@@ -75,6 +75,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
   transformed := make(map[string]interface{})
 <%     property.nested_properties.each do |prop| -%>
+<%           next if prop.is_a?(Api::Type::KeyValuePairs) && prop.ignore_write -%>
   <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
   transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
   if err != nil {

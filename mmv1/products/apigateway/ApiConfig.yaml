@@ -120,7 +120,7 @@ properties:
     output: true
     description: |
       The ID of the associated Service Config (https://cloud.google.com/service-infrastructure/docs/glossary#config).
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels to represent user-provided metadata.

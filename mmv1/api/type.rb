@@ -269,7 +269,7 @@ module Api
     # Prints the access path of the field in the configration eg: metadata.0.labels
     # The only intended purpose is to get the value of the labes field by calling d.Get().
     def terraform_lineage
-      return name&.underscore if __parent.nil?
+      return name&.underscore if __parent.nil? || __parent.flatten_object
 
       "#{__parent.terraform_lineage}.0.#{name&.underscore}"
     end
@@ -769,7 +769,7 @@ module Api
       attr_accessor :ignore_write
 
       def initialize(name: nil, output: nil, api_name: nil, description: nil, min_version: nil,
-                     ignore_write: nil, update_verb: nil, update_url: nil)
+                     ignore_write: nil, update_verb: nil, update_url: nil, immutable: nil)
         super()
 
         @name = name
@@ -780,6 +780,7 @@ module Api
         @ignore_write = ignore_write
         @update_verb = update_verb
         @update_url = update_url
+        @immutable = immutable
       end
 
       def validate

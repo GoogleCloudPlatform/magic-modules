@@ -460,7 +460,7 @@ module Api
         elsif p.is_a? Api::Type::KeyValueAnnotations
           add_annotations_fields(props, parent, p)
         elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
-          p.properties = add_labels_related_fields(p.all_properties, p.name)
+          p.properties = add_labels_related_fields(p.all_properties, p)
         end
       end
       props
@@ -471,16 +471,14 @@ module Api
       labels.ignore_write = true
 
       @custom_diff ||= []
-      if parent.nil?
+      if parent.nil? || parent.flatten_object
         @custom_diff.append('tpgresource.SetLabelsDiff')
-      elsif parent == 'metadata'
+      elsif parent.name == 'metadata'
         @custom_diff.append('tpgresource.SetMetadataLabelsDiff')
       end
 
       props << build_terraform_labels_field('labels', labels.field_min_version)
-      props << build_effective_labels_field(
-        'labels', labels.field_min_version, labels.update_verb, labels.update_url
-      )
+      props << build_effective_labels_field('labels', labels)
     end
 
     def add_annotations_fields(props, parent, annotations)
@@ -491,17 +489,14 @@ module Api
       @custom_diff ||= []
       if parent.nil?
         @custom_diff.append('tpgresource.SetAnnotationsDiff')
-      elsif parent == 'metadata'
+      elsif parent.name == 'metadata'
         @custom_diff.append('tpgresource.SetMetadataAnnotationsDiff')
       end
 
-      props << build_effective_labels_field(
-        'annotations', annotations.field_min_version,
-        annotations.update_verb, annotations.update_url
-      )
+      props << build_effective_labels_field('annotations', annotations)
     end
 
-    def build_effective_labels_field(name, min_version, update_verb, update_url)
+    def build_effective_labels_field(name, labels)
       description = "All of #{name} (key/value pairs)\
  present on the resource in GCP, including the #{name} configured through Terraform,\
  other clients and services."
@@ -511,9 +506,10 @@ module Api
         output: true,
         api_name: name,
         description:,
-        min_version:,
-        update_verb:,
-        update_url:
+        min_version: labels.field_min_version,
+        update_verb: labels.update_verb,
+        update_url: labels.update_url,
+        immutable: labels.immutable
       )
     end
 
@@ -529,6 +525,21 @@ module Api
         min_version:,
         ignore_write: true
       )
+    end
+
+    # Return labels fields that should be added to ImportStateVerifyIgnore
+    def ignore_read_labels_fields(props)
+      fields = []
+      props.each do |p|
+        if (p.is_a? Api::Type::KeyValueLabels) ||
+           (p.is_a? Api::Type::KeyValueTerraformLabels) ||
+           (p.is_a? Api::Type::KeyValueAnnotations)
+          fields << p.terraform_lineage
+        elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
+          fields.concat(ignore_read_labels_fields(p.all_properties))
+        end
+      end
+      fields
     end
 
     # ====================
