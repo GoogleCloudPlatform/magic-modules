@@ -14,3 +14,13 @@
   field: management
   details:
     function: d.Set("management", tpgresource.FlattenContainerAwsNodePoolManagement(res.Management, d, config))
+- type: CUSTOM_SCHEMA_VALUES
+  field: management
+  details:
+    optional: true
+    computed: true
+- type: CUSTOM_SCHEMA_VALUES
+  field: management.auto_repair
+  details:
+    optional: true
+    computed: true
