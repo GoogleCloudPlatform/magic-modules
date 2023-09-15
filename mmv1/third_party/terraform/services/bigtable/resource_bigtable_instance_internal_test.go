@@ -2,7 +2,11 @@ package bigtable
 
 import (
 	"reflect"
+	"strings"
 	"testing"
+
+	"cloud.google.com/go/bigtable"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func TestGetUnavailableClusterZones(t *testing.T) {
@@ -45,6 +49,72 @@ func TestGetUnavailableClusterZones(t *testing.T) {
 		}
 		if got := getUnavailableClusterZones(clusters, tc.unavailableZones); !reflect.DeepEqual(got, tc.want) {
 			t.Errorf("bad: %s, got %q, want %q", tn, got, tc.want)
+		}
+	}
+}
+
+func TestGetInstanceFromResponse(t *testing.T) {
+	instanceName := "test-instance"
+	cases := map[string]struct {
+		instanceNames      []string
+		listInstancesError error
+
+		wantError        string
+		wantInstanceName string
+		wantStop         bool
+	}{
+		instanceNames:      []string{"wrong", "also_wrong"},
+		listInstancesError: nil,
+
+		wantError:        "",
+		wantStop:         true,
+		wantInstanceName: "",
+	},
+	{
+		instanceNames:      []string{"wrong", "also_wrong", instanceName},
+		listInstancesError: nil,
+
+		wantError:        "",
+		wantStop:         false,
+		wantInstanceName: instanceName,
+	},
+	{
+		instanceNames:      nil,
+		listInstancesError: fmt.Errorf("some error"),
+
+		wantError:        "Error retrieving instance.",
+		wantStop:         true,
+		wantInstanceName: "",
+	},
+	{
+		instanceNames:      []string{"wrong", "also_wrong"},
+		listInstancesError: bigtable.ErrPartiallyUnavailable{[]string{"some", "location"}},
+
+		wantError:        "",
+		wantStop:         false,
+		wantInstanceName: "",
+	}
+	for tn, tc := range cases {
+		instanceResponse = []*bigtable.InstanceInfo{}
+		for _, existingInstance := range tc.instanceNames {
+			instanceResponse = append(instanceResponse, &bigtable.InstanceInfo{Name: existingInstance})
+		}
+		d := &schema.ResourceData{}
+		d.SetId("original_value")
+		gotInstance, gotStop, gotErr := getInstanceFromResponse(instancesResponse, instanceName, tc.listInstancesError, d)
+
+		if gotStop != tc.wantStop {
+			t.Errorf("bad stop: %s, got %v, want %v", tn, gotStop, tc.wantStop)
+		}
+		if (gotErr != nil && tc.wantError == "") ||
+			(gotErr == nil && tc.wantError != "") ||
+			(gotErr != nil && strings.Contains(gotErr.Error(), tc.wantError)) {
+			t.Errorf("bad error: %s, got %q, want %q", tn, gotErr, tc.wantError)
+		}
+		if (gotInstance == nil && tc.wantInstanceName != "") ||
+			(gotInstance != nil && tc.wantInstanceName == "") ||
+			(gotInstance != nil && gotInstance.Name != tc.wantInstanceName) {
+			t.Errorf("bad instance: %s, got %v, want %q", tn, gotInstance, tc.wantInstanceName)
 		}
 	}
 }
