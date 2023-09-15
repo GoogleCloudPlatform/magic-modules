@@ -85,7 +85,7 @@ properties:
     required: true
     description: |
       A human readable description of this Bare Metal User Cluster.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueAnnotations
     name: "annotations"
     description: |
       Annotations on the Bare Metal User Cluster.
@@ -96,7 +96,6 @@ properties:
       Prefix must be a DNS subdomain.
       Name must be 63 characters or less, begin and end with alphanumerics,
       with dashes (-), underscores (_), dots (.), and alphanumerics between.
-    default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: "networkConfig"
     description: |
