@@ -117,6 +117,7 @@ properties:
           - !ruby/object:Api::Type::Boolean
             name: enabled
             required: true
+            send_empty_value: true
             description: |
               Whether anonymous user auth is enabled for the project or not.
       - !ruby/object:Api::Type::Boolean
