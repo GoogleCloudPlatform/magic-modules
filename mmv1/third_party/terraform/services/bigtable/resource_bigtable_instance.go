@@ -271,8 +271,13 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	clusters, err := c.Clusters(ctxWithTimeout, instanceName)
 	if err != nil {
 		partiallyUnavailableErr, ok := err.(bigtable.ErrPartiallyUnavailable)
-
 		if !ok {
+			// Clusters() fails with 404 if instance does not exist.
+			if tpgresource.IsNotFoundGrpcError(err) {
+				log.Printf("[WARN] Removing %s because it's gone", instanceName)
+				d.SetId("")
+				return nil
+			}
 			return fmt.Errorf("Error retrieving instance clusters. %s", err)
 		}
 
@@ -281,13 +286,6 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 		if len(unavailableClusterZones) > 0 {
 			return fmt.Errorf("Error retrieving instance clusters. The following zones are unavailable: %s", strings.Join(unavailableClusterZones, ", "))
 		}
-		// If there is no overlap, and we still couldn't find the instance, it doesn't exist.
-		if instance == nil {
-			log.Printf("[WARN] Removing %s because it's gone", instanceName)
-			d.SetId("")
-			return nil
-		}
-
 	}
 
 	clustersNewState := []map[string]interface{}{}
