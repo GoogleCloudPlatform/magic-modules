@@ -298,9 +298,6 @@ func flattenAccessConfigs(accessConfigs []*compute.AccessConfig) ([]map[string]i
 		flattened[i] = map[string]interface{}{
 			"nat_ip":       ac.NatIP,
 			"network_tier": ac.NetworkTier,
-			<% unless version == 'ga' -%>
-			"security_policy": ac.SecurityPolicy,
-			<% end -%>
 		}
 		if ac.SetPublicPtr {
 			flattened[i]["public_ptr_domain_name"] = ac.PublicPtrDomainName
@@ -308,6 +305,11 @@ func flattenAccessConfigs(accessConfigs []*compute.AccessConfig) ([]map[string]i
 		if natIP == "" {
 			natIP = ac.NatIP
 		}
+		<% unless version == 'ga' -%>
+		if ac.SecurityPolicy != "" {
+			flattened[i]["security_policy"] = ac.SecurityPolicy
+		}
+		<% end -%>
 	}
 	return flattened, natIP
 }
@@ -323,7 +325,9 @@ func flattenIpv6AccessConfigs(ipv6AccessConfigs []*compute.AccessConfig) []map[s
 		flattened[i]["external_ipv6_prefix_length"] = strconv.FormatInt(ac.ExternalIpv6PrefixLength, 10)
 		flattened[i]["name"] = ac.Name
 		<% unless version == 'ga' -%>
-		flattened[i]["security_policy"] = ac.SecurityPolicy
+		if ac.SecurityPolicy != "" {
+			flattened[i]["security_policy"] = ac.SecurityPolicy
+		}
 		<% end -%>
 	}
 	return flattened
