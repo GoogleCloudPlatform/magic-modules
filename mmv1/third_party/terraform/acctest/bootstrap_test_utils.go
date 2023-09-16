@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	tpgservicenetworking "github.com/hashicorp/terraform-provider-google-beta/google-beta/services/servicenetworking"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/privateca"
@@ -23,6 +24,7 @@ import (
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 	iam "google.golang.org/api/iam/v1"
 	"google.golang.org/api/iamcredentials/v1"
+	"google.golang.org/api/servicenetworking/v1"
 	"google.golang.org/api/serviceusage/v1"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
@@ -352,6 +354,115 @@ func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
 		t.Fatalf("Error getting shared test network %q: is nil", networkName)
 	}
 	return network.Name
+}
+
+const SharedTestGlobalAddressPrefix = "tf-bootstrap-addr-"
+
+func BootstrapSharedTestGlobalAddress(t *testing.T, testId, networkId string) string {
+	project := envvar.GetTestProjectFromEnv()
+	addressName := SharedTestGlobalAddressPrefix + testId
+
+	config := BootstrapConfig(t)
+	if config == nil {
+		return ""
+	}
+
+	log.Printf("[DEBUG] Getting shared test global address %q", addressName)
+	_, err := config.NewComputeClient(config.UserAgent).GlobalAddresses.Get(project, addressName).Do()
+	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		log.Printf("[DEBUG] Global address %q not found, bootstrapping", addressName)
+		url := fmt.Sprintf("%sprojects/%s/global/addresses", config.ComputeBasePath, project)
+		netObj := map[string]interface{}{
+			"name":          addressName,
+			"address_type":  "INTERNAL",
+			"purpose":       "VPC_PEERING",
+			"prefix_length": 16,
+			"network":       networkId,
+		}
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+			Body:      netObj,
+			Timeout:   4 * time.Minute,
+		})
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared test global address %q: %s", addressName, err)
+		}
+
+		log.Printf("[DEBUG] Waiting for global address creation to finish")
+		err = tpgcompute.ComputeOperationWaitTime(config, res, project, "Error bootstrapping shared test global address", config.UserAgent, 4*time.Minute)
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared test global address %q: %s", addressName, err)
+		}
+	}
+
+	address, err := config.NewComputeClient(config.UserAgent).GlobalAddresses.Get(project, addressName).Do()
+	if err != nil {
+		t.Errorf("Error getting shared test global address %q: %s", addressName, err)
+	}
+	if address == nil {
+		t.Fatalf("Error getting shared test global address %q: is nil", addressName)
+	}
+	return address.Name
+}
+
+func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string) {
+	parentService := "services/servicenetworking.googleapis.com"
+	project := envvar.GetTestProjectFromEnv()
+
+	config := BootstrapConfig(t)
+	if config == nil {
+		return
+	}
+
+	networkId := fmt.Sprintf("projects/%v/global/networks/%v", project, BootstrapSharedTestNetwork(t, testId))
+	globalAddressName := BootstrapSharedTestGlobalAddress(t, testId, networkId)
+
+	readCall := config.NewServiceNetworkingClient(config.UserAgent).Services.Connections.List(parentService).Network(networkId)
+	if config.UserProjectOverride {
+		readCall.Header().Add("X-Goog-User-Project", project)
+	}
+	response, err := readCall.Do()
+	if err != nil {
+		t.Errorf("Error getting shared test service networking connection: %s", err)
+	}
+
+	var connection *servicenetworking.Connection
+	for _, c := range response.Connections {
+		if c.Network == networkId {
+			connection = c
+			break
+		}
+	}
+
+	if connection == nil {
+		log.Printf("[DEBUG] Service networking connection not found, bootstrapping")
+
+		connection := &servicenetworking.Connection{
+			Network:               networkId,
+			ReservedPeeringRanges: []string{globalAddressName},
+		}
+
+		createCall := config.NewServiceNetworkingClient(config.UserAgent).Services.Connections.Create(parentService, connection)
+		if config.UserProjectOverride {
+			createCall.Header().Add("X-Goog-User-Project", project)
+		}
+		op, err := createCall.Do()
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared test service networking connection: %s", err)
+		}
+
+		log.Printf("[DEBUG] Waiting for service networking connection creation to finish")
+		if err := tpgservicenetworking.ServiceNetworkingOperationWaitTime(config, op, "Create Service Networking Connection", config.UserAgent, project, 4*time.Minute); err != nil {
+			t.Fatalf("Error bootstrapping shared test service networking connection: %s", err)
+		}
+	}
+
+	log.Printf("[DEBUG] Getting shared test service networking connection")
 }
 
 var SharedServicePerimeterProjectPrefix = "tf-bootstrap-sp-"
