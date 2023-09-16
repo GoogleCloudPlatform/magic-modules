@@ -179,7 +179,7 @@ func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *tes
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	addressName := "tf-test-" + acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "sql-instance-private-network-clone-2")
+	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "sql-instance-clone-2")
 
 	// 1. Create an instance.
 	// 2. Add a root@'%' user.
