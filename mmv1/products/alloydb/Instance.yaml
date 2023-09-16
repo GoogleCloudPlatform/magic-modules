@@ -49,6 +49,7 @@ skip_sweeper: true
 autogen_async: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/alloydb_instance.go.erb
+  # pre_create: templates/terraform/pre_create/alloydb_instance.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_instance_basic'
@@ -185,9 +186,10 @@ properties:
         default_from_api: true
   - !ruby/object:Api::Type::NestedObject
    name: 'clientConnectionConfig'
-   default_from_api: true
+   # default_from_api: true
    description: |
      Client connection specific configurations.
+   custom_expand: templates/terraform/custom_expand/alloydb_instance.go.erb
    properties:
      - !ruby/object:Api::Type::Boolean
        name: requireConnectors
@@ -195,13 +197,13 @@ properties:
          Configuration to enforce connectors only (ex: AuthProxy) connections to the database.
      - !ruby/object:Api::Type::NestedObject
        name: 'sslConfig'
-       default_from_api: true
+       # default_from_api: true
        description: |
          SSL config option for this instance.
        properties:
          - !ruby/object:Api::Type::Enum
            name: 'sslMode'
-           default_from_api: true
+           # default_from_api: true
            description: 'SSL mode. Specifies client-server SSL/TLS connection behavior.'
            values:
                 - :ENCRYPTED_ONLY

@@ -1,0 +1,53 @@
+<%# IsEmptyValue %>
+
+<%# obj[clientConnectionConfig]
+
+clientConnectionConfig, ok := obj["clientConnectionConfig"]
+if !ok {
+	clientConnectionConfig = make(map[string]interface{})
+}
+
+var sslConfig map[string]string
+if !ok {
+	clientConnectionConfig = make(map[string]interface{})
+}
+sslConfig = clientConnectionConfig.(map[string]string)
+
+if val, ok := d.GetOkExists("client_connection_config.0.ssl_config.0.ssl_mode"); !ok {
+		sslConfig["sslMode"] = "ENCRYPTED_ONLY"
+		clientConnectionConfig["sslConfig"] = sslConfig
+}
+
+obj["clientConnectionConfig"] = clientConnectionConfig %>
+
+
+<%# ------------ %>
+<%# IDK if this works below cause never tested it %>
+<%# setDefaultSSLMode := false
+
+if v, ok := d.GetOkExists("client_connection_config"); ok {
+	if v, ok := d.GetOkExists("client_connection_config.0.ssl_config"); ok {
+		if v, ok := d.GetOkExists("client_connection_config.0.ssl_config.0.ssl_mode"); ok {
+			setDefaultSSLMode = true
+		}
+	}
+} else {
+	setDefaultSSLMode = true
+}
+
+if setDefaultSSLMode { %>
+	<%# d.Set["client_connection_config.0.ssl_config.0.ssl_mode"] = 'ENCRYPTED_ONLY' %>
+<%# } %>
+
+
+<%# -------- %>
+
+
+<%# var clientConnectionConfig interface{}
+if val, ok := obj["clientConnectionConfig"]; ok {
+	clientConnectionConfig = val
+}
+
+if clientConnectionConfig == nil {
+	clientConnectionConfig.sslConfig.sslMode = 'ENCRYPTED_ONLY';
+} %>
