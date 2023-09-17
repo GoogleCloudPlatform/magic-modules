@@ -13,7 +13,7 @@ func TestAccAlloydbInstance_update(t *testing.T) {
 	random_suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"random_suffix": random_suffix,
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-update"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-instance-update-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -84,7 +84,7 @@ func TestAccAlloydbInstance_createInstanceWithMandatoryFields(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-mandatory"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-instance-mandatory-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -127,7 +127,7 @@ func TestAccAlloydbInstance_createInstanceWithMaximumFields(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-maximum"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-instance-maximum-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -190,7 +190,7 @@ func TestAccAlloydbInstance_createPrimaryAndReadPoolInstance(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-readpool"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-instance-readpool-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -243,7 +243,7 @@ func TestAccAlloydbInstance_updateDatabaseFlagInPrimaryInstance(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-updatedb"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-instance-updatedb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

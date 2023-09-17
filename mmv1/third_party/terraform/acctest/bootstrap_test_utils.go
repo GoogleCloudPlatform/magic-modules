@@ -410,9 +410,26 @@ func BootstrapSharedTestGlobalAddress(t *testing.T, testId, networkId string) st
 	return address.Name
 }
 
+// BootstrapSharedServiceNetworkingConnection will create a shared network
+// if it hasn't been created in the test project, a global address
+// if it hasn't been created in the test project, and a service networking connection
+// if it hasn't been created in the test project.
+//
+// BootstrapSharedServiceNetworkingConnection returns a persistent compute network name
+// for a test or set of tests.
+//
+// To delete a service networking conneciton, all of the service instances that use that connection
+// must be deleted first. After the service instances are deleted, some service producers delay the deletion
+// utnil a waiting period has passed. For example, after four days that you delete a SQL instance,
+// the service networking connection can be deleted.
+// That is the reason to use the shared service networking connection for thest resources.
+// https://cloud.google.com/vpc/docs/configure-private-services-access#removing-connection
+//
+// testId specifies the test for which a shared network and a gobal address are used/initialized.
 func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string) string {
 	parentService := "services/servicenetworking.googleapis.com"
 	project := envvar.GetTestProjectFromEnv()
+	projectNumber := envvar.GetTestProjectNumberFromEnv()
 
 	config := BootstrapConfig(t)
 	if config == nil {
@@ -420,7 +437,7 @@ func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string) str
 	}
 
 	networkName := BootstrapSharedTestNetwork(t, testId)
-	networkId := fmt.Sprintf("projects/%v/global/networks/%v", project, networkName)
+	networkId := fmt.Sprintf("projects/%v/global/networks/%v", projectNumber, networkName)
 	globalAddressName := BootstrapSharedTestGlobalAddress(t, testId, networkId)
 
 	readCall := config.NewServiceNetworkingClient(config.UserAgent).Services.Connections.List(parentService).Network(networkId)

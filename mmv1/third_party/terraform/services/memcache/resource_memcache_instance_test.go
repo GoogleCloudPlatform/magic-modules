@@ -13,7 +13,7 @@ func TestAccMemcacheInstance_update(t *testing.T) {
 
 	prefix := fmt.Sprintf("%d", acctest.RandInt(t))
 	name := fmt.Sprintf("tf-test-%s", prefix)
-	network := acctest.BootstrapSharedServiceNetworkingConnection(t, "memcache-instance-update")
+	network := acctest.BootstrapSharedServiceNetworkingConnection(t, "memcache-instance-update-1")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -45,7 +45,7 @@ func testAccMemcacheInstance_update(prefix, name, network string) string {
 resource "google_memcache_instance" "test" {
   name = "%s"
   region = "us-central1"
-  authorized_network = data.google_compute_network.memcache_network.self_link
+  authorized_network = data.google_compute_network.memcache_network.id
 
   node_config {
     cpu_count      = 1
@@ -72,7 +72,7 @@ func testAccMemcacheInstance_update2(prefix, name, network string) string {
 resource "google_memcache_instance" "test" {
   name = "%s"
   region = "us-central1"
-  authorized_network = data.google_compute_network.memcache_network.self_link
+  authorized_network = data.google_compute_network.memcache_network.id
 
   node_config {
     cpu_count      = 1

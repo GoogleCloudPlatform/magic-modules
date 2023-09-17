@@ -18,7 +18,7 @@ func TestAccCloudIdsEndpoint_basic(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "cloud-ids-endpoint"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "cloud-ids-endpoint-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

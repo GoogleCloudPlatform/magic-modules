@@ -8,11 +8,13 @@ import (
 	"strings"
 	"time"
 
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/servicenetworking/v1"
 )
 
@@ -285,42 +287,41 @@ func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta inte
 	}
 
 	if err := ServiceNetworkingOperationWaitTime(config, op, "Delete Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
-		return err
-		// obj := make(map[string]interface{})
-		// peering := d.Get("peering").(string)
-		// obj["name"] = peering
-		// url := fmt.Sprintf("%s%s/removePeering", config.ComputeBasePath, serviceNetworkingNetworkName)
+		obj := make(map[string]interface{})
+		peering := d.Get("peering").(string)
+		obj["name"] = peering
+		url := fmt.Sprintf("%s%s/removePeering", config.ComputeBasePath, serviceNetworkingNetworkName)
 
-		// networkFieldValue, err := tpgresource.ParseNetworkFieldValue(network, d, config)
-		// if err != nil {
-		// 	return errwrap.Wrapf("Failed to retrieve network field value, err: {{err}}", err)
-		// }
+		networkFieldValue, err := tpgresource.ParseNetworkFieldValue(network, d, config)
+		if err != nil {
+			return errwrap.Wrapf("Failed to retrieve network field value, err: {{err}}", err)
+		}
 
-		// project := networkFieldValue.Project
-		// res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		// 	Config:    config,
-		// 	Method:    "POST",
-		// 	Project:   project,
-		// 	RawURL:    url,
-		// 	UserAgent: userAgent,
-		// 	Body:      obj,
-		// 	Timeout:   d.Timeout(schema.TimeoutDelete),
-		// })
-		// if err != nil {
-		// 	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ServiceNetworkingConnection %q", d.Id()))
-		// }
+		project := networkFieldValue.Project
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: userAgent,
+			Body:      obj,
+			Timeout:   d.Timeout(schema.TimeoutDelete),
+		})
+		if err != nil {
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ServiceNetworkingConnection %q", d.Id()))
+		}
 
-		// op := &compute.Operation{}
-		// err = tpgresource.Convert(res, op)
-		// if err != nil {
-		// 	return err
-		// }
+		op := &compute.Operation{}
+		err = tpgresource.Convert(res, op)
+		if err != nil {
+			return err
+		}
 
-		// err = tpgcompute.ComputeOperationWaitTime(
-		// 	config, op, project, "Updating Network", userAgent, d.Timeout(schema.TimeoutDelete))
-		// if err != nil {
-		// 	return err
-		// }
+		err = tpgcompute.ComputeOperationWaitTime(
+			config, op, project, "Updating Network", userAgent, d.Timeout(schema.TimeoutDelete))
+		if err != nil {
+			return err
+		}
 	}
 
 	d.SetId("")
