@@ -8,10 +8,10 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func FlattenLabels(labels map[string]string, d *schema.ResourceData) map[string]interface{} {
+func FlattenLabels(labels map[string]string, d *schema.ResourceData, linage string) map[string]interface{} {
 	transformed := make(map[string]interface{})
 
-	if v, ok := d.GetOk("labels"); ok {
+	if v, ok := d.GetOk(linage); ok {
 		if labels != nil {
 			for k, _ := range v.(map[string]interface{}) {
 				transformed[k] = labels[k]
