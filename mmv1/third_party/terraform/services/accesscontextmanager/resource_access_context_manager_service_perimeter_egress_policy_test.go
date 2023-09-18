@@ -114,6 +114,10 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
 	perimeter = google_access_context_manager_service_perimeter.test-access.name
 	egress_from {
 		identity_type = "ANY_USER_ACCOUNT"
+		sources {
+			access_level = "some-level-name"
+		}
+		source_restriction = "SOURCE_RESTRICTION_ENABLED"
 	}
 }
 

@@ -138,14 +138,23 @@ resource "google_access_context_manager_access_levels" "test-access" {
     }
   }
 
+  resource "google_compute_network" "vpc_network" {
+    name = "tf-test"
+  }
+
   access_levels {
-	name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/%s"
-	title       = "%s"
-	description = "hello again"
-	basic {
-	  conditions {
-	    ip_subnetworks = ["176.0.4.0/24"]
-	  }
+    name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/%s"
+    title       = "%s"
+    description = "hello again"
+    basic {
+      conditions {
+        vpc_network_sources {
+          vpc_subnetwork {
+            network = "//compute.googleapis.com/${google_compute_network.vpc_network.id}"
+            vpc_ip_subnetworks = ["20.0.5.0/24"]
+          }
+        }
+      }
     }
   }
 }

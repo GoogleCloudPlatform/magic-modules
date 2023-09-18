@@ -154,6 +154,10 @@ resource "google_service_account" "created-later" {
   account_id = "%s"
 }
 
+resource "google_compute_network" "vpc_network" {
+	name = "tf-test"
+}
+
 resource "google_access_context_manager_access_level_condition" "access-level-condition" {
   access_level = google_access_context_manager_access_level.test-access.name
   ip_subnetworks = ["192.0.4.0/24"]
@@ -171,6 +175,13 @@ resource "google_access_context_manager_access_level_condition" "access-level-co
     "IT",
     "US",
   ]
+
+	vpc_network_sources {
+		vpc_subnetwork {
+      network = "//compute.googleapis.com/${google_compute_network.vpc_network.id}"
+      vpc_ip_subnetworks = ["20.0.5.0/24"]
+		}
+	}
 }
 `, org, policyTitle, levelTitleName, levelTitleName, saName)
 }
