@@ -35,7 +35,7 @@ resource "google_tpu_node" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_compute_network" "network" {
-  name = "default"
+  name = "<%= ctx[:vars]['network_name'] %>"
 }
 
 resource "google_compute_global_address" "service_range" {

@@ -3121,7 +3121,7 @@ resource "google_sql_database_instance" "instance" {
 `
 
 var testGoogleSqlDatabaseInstance_settings_checkServiceNetworking = `
-data "google_compute_network" "servicenet" {
+resource "google_compute_network" "servicenet" {
   name                    = "%s"
 }
 
@@ -3134,7 +3134,7 @@ resource "google_sql_database_instance" "instance" {
     tier = "db-f1-micro"
     ip_configuration {
       ipv4_enabled    = "false"
-      private_network = data.google_compute_network.servicenet.self_link
+      private_network = google_compute_network.servicenet.self_link
     }
   }
 }

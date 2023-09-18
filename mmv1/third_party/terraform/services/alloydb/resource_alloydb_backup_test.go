@@ -22,7 +22,7 @@ func TestAccAlloydbBackup_update(t *testing.T) {
 		CheckDestroy:             testAccCheckAlloydbBackupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAlloydbBackup_alloydbBackupFullExample(context),
+				Config: testAccAlloydbBackup_alloydbBackupBasic(context),
 			},
 			{
 				ResourceName:            "google_alloydb_backup.default",
@@ -43,7 +43,39 @@ func TestAccAlloydbBackup_update(t *testing.T) {
 	})
 }
 
-// Updates "label" field from testAccAlloydbBackup_alloydbBackupFullExample
+func testAccAlloydbBackup_alloydbBackupBasic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_backup" "default" {
+  location     = "us-central1"
+  backup_id    = "tf-test-alloydb-backup%{random_suffix}"
+  cluster_name = google_alloydb_cluster.default.name
+
+  description = "example description"
+  labels = {
+    "label" = "key"
+  }
+  depends_on = [google_alloydb_instance.default]
+}
+
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network    = data.google_compute_network.default.id
+}
+
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+}
+
+data "google_compute_network" "default" {
+  name = "%{network_name}"
+}
+`, context)
+}
+
+// Updates "label" field
 func testAccAlloydbBackup_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_backup" "default" {
