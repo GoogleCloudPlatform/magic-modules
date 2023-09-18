@@ -47,6 +47,9 @@ properties:
     name: 'displayName'
     immutable: true
     required: true
+    # API error for invalid display names is just "INVALID_ARGUMENT" with no details
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'verify.ValidateRegexp(`^[a-z][\w_]{0,127}$`)'
     description: |
       The display name of the Security Health Analytics custom module. This
       display name becomes the finding category for all findings that are
