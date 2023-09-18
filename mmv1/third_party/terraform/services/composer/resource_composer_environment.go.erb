@@ -1002,10 +1002,10 @@ func resourceComposerEnvironmentRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("config", flattenComposerEnvironmentConfig(res.Config)); err != nil {
 		return fmt.Errorf("Error setting Environment: %s", err)
 	}
-	if err := d.Set("labels", tpgresource.FlattenLabels(res.Labels, d, "labels")); err != nil {
+	if err := tpgresource.SetLabels(res.Labels, d, "labels"); err != nil {
 		return fmt.Errorf("Error setting Environment labels: %s", err)
 	}
-	if err := d.Set("terraform_labels", tpgresource.FlattenLabels(res.Labels, d, "terraform_labels")); err != nil {
+	if err := tpgresource.SetLabels(res.Labels, d, "terraform_labels"); err != nil {
 		return fmt.Errorf("Error setting terraform_labels: %s", err)
 	}
 	if err := d.Set("effective_labels", res.Labels); err != nil {

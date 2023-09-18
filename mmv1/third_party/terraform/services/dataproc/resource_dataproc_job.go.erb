@@ -335,10 +335,10 @@ func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("force_delete", d.Get("force_delete")); err != nil {
 		return fmt.Errorf("Error setting force_delete: %s", err)
 	}
-	if err := d.Set("labels", tpgresource.FlattenLabels(job.Labels, d, "labels")); err != nil {
+	if err := tpgresource.SetLabels(job.Labels, d, "labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
 	}
-	if err := d.Set("terraform_labels", tpgresource.FlattenLabels(job.Labels, d, "terraform_labels")); err != nil {
+	if err := tpgresource.SetLabels(job.Labels, d, "terraform_labels"); err != nil {
 		return fmt.Errorf("Error setting terraform_labels: %s", err)
 	}
 	if err := d.Set("effective_labels", job.Labels); err != nil {

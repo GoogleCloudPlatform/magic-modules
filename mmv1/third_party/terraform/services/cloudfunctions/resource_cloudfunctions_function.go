@@ -694,10 +694,10 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 	if err := d.Set("ingress_settings", function.IngressSettings); err != nil {
 		return fmt.Errorf("Error setting ingress_settings: %s", err)
 	}
-	if err := d.Set("labels", tpgresource.FlattenLabels(function.Labels, d, "labels")); err != nil {
+	if err := tpgresource.SetLabels(function.Labels, d, "labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
 	}
-	if err := d.Set("terraform_labels", tpgresource.FlattenLabels(function.Labels, d, "terraform_labels")); err != nil {
+	if err := tpgresource.SetLabels(function.Labels, d, "terraform_labels"); err != nil {
 		return fmt.Errorf("Error setting terraform_labels: %s", err)
 	}
 	if err := d.Set("effective_labels", function.Labels); err != nil {

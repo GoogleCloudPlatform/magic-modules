@@ -320,10 +320,10 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("display_name", instance.DisplayName); err != nil {
 		return fmt.Errorf("Error setting display_name: %s", err)
 	}
-	if err := d.Set("labels", tpgresource.FlattenLabels(instance.Labels, d, "labels")); err != nil {
+	if err := tpgresource.SetLabels(instance.Labels, d, "labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
 	}
-	if err := d.Set("terraform_labels", tpgresource.FlattenLabels(instance.Labels, d, "terraform_labels")); err != nil {
+	if err := tpgresource.SetLabels(instance.Labels, d, "terraform_labels"); err != nil {
 		return fmt.Errorf("Error setting terraform_labels: %s", err)
 	}
 	if err := d.Set("effective_labels", instance.Labels); err != nil {

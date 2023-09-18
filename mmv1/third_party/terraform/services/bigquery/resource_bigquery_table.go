@@ -1412,10 +1412,10 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("max_staleness", res.MaxStaleness); err != nil {
 		return fmt.Errorf("Error setting max_staleness: %s", err)
 	}
-	if err := d.Set("labels", tpgresource.FlattenLabels(res.Labels, d, "labels")); err != nil {
+	if err := tpgresource.SetLabels(res.Labels, d, "labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
 	}
-	if err := d.Set("terraform_labels", tpgresource.FlattenLabels(res.Labels, d, "terraform_labels")); err != nil {
+	if err := tpgresource.SetLabels(res.Labels, d, "terraform_labels"); err != nil {
 		return fmt.Errorf("Error setting terraform_labels: %s", err)
 	}
 	if err := d.Set("effective_labels", res.Labels); err != nil {

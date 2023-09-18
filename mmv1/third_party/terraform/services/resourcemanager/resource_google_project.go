@@ -308,10 +308,10 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("name", p.Name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
-	if err := d.Set("labels", tpgresource.FlattenLabels(p.Labels, d, "labels")); err != nil {
+	if err := tpgresource.SetLabels(p.Labels, d, "labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
 	}
-	if err := d.Set("terraform_labels", tpgresource.FlattenLabels(p.Labels, d, "terraform_labels")); err != nil {
+	if err := tpgresource.SetLabels(p.Labels, d, "terraform_labels"); err != nil {
 		return fmt.Errorf("Error setting terraform_labels: %s", err)
 	}
 	if err := d.Set("effective_labels", p.Labels); err != nil {

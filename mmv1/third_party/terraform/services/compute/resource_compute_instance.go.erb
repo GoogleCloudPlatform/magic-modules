@@ -1410,11 +1410,11 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	if err := d.Set("labels", tpgresource.FlattenLabels(instance.Labels, d, "labels")); err != nil {
+	if err := tpgresource.SetLabels(instance.Labels, d, "labels"); err != nil {
 		return err
 	}
 
-	if err := d.Set("terraform_labels", tpgresource.FlattenLabels(instance.Labels, d, "terraform_labels")); err != nil {
+	if err := tpgresource.SetLabels(instance.Labels, d, "terraform_labels"); err != nil {
 		return err
 	}
 
