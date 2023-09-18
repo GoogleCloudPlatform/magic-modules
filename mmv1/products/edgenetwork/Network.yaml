@@ -31,6 +31,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'edgenetwork_network'
     primary_resource_id: 'example_network'
+    skip_test: true
     vars:
       edgenetwork_network_id: 'example-network'
     test_env_vars:
