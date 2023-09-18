@@ -7275,7 +7275,7 @@ data "google_compute_image" "my_image" {
 
 # First activate advanced network DDoS protection for the desired region
 resource "google_compute_region_security_policy" "policyddosprotection" {
-  region      = "asia-northeast1"
+  region      = "europe-west1"
   name        = "tf-test-policyddosprotection-%s"
   description = "region security policy for instance"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -7285,7 +7285,7 @@ resource "google_compute_region_security_policy" "policyddosprotection" {
 }
 
 resource "google_compute_network_edge_security_service" "edge_sec_service" {
-  region          = "asia-northeast1"
+  region          = "europe-west1"
   name            = "tf-test-edgesecservice-%s"
   description     = "My basic resource using security policy"
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
@@ -7297,7 +7297,7 @@ resource "google_compute_network" "net" {
 }
 
 resource "google_compute_subnetwork" "subnet" {
-  region                     = "asia-northeast1"
+  region                     = "europe-west1"
   name                       = "tf-test-subnet-%s"
   ip_cidr_range              = "192.168.0.0/16"
   purpose                    = "PRIVATE"
@@ -7306,7 +7306,7 @@ resource "google_compute_subnetwork" "subnet" {
 }
 
 resource "google_compute_subnetwork" "subnet-ipv6" {
-  region                     = "asia-northeast1"
+  region                     = "europe-west1"
   name                       = "tf-test-subnet-ip6-%s"
   ip_cidr_range              = "10.0.0.0/22"
   purpose                    = "PRIVATE"
@@ -7316,7 +7316,7 @@ resource "google_compute_subnetwork" "subnet-ipv6" {
 }
 
 resource "google_compute_address" "ipv6-address" {
-  region             = "asia-northeast1"
+  region             = "europe-west1"
   name               = "tf-test-addr-ipv6-%s"
   address_type       = "EXTERNAL"
   ip_version         = "IPV6"
@@ -7326,7 +7326,7 @@ resource "google_compute_address" "ipv6-address" {
 }
 
 resource "google_compute_region_security_policy" "policyforinstance" {
-  region      = "asia-northeast1"
+  region      = "europe-west1"
   name        = "%s"
   description = "region security policy to set to instance"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -7336,7 +7336,7 @@ resource "google_compute_region_security_policy" "policyforinstance" {
 resource "google_compute_instance" "foobar" {
   name         = "%s"
   machine_type = "e2-medium"
-  zone         = "asia-northeast1-a"
+  zone         = "europe-west1-b"
   tags         = ["foo", "bar"]
 
   boot_disk {
@@ -7377,7 +7377,7 @@ data "google_compute_image" "my_image" {
 
 # First activate advanced network DDoS protection for the desired region
 resource "google_compute_region_security_policy" "policyddosprotection" {
-  region      = "asia-northeast1"
+  region      = "europe-west1"
   name        = "tf-test-policyddosprotection-%s"
   description = "region security policy for instance"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -7387,7 +7387,7 @@ resource "google_compute_region_security_policy" "policyddosprotection" {
 }
 
 resource "google_compute_network_edge_security_service" "edge_sec_service" {
-  region          = "asia-northeast1"
+  region          = "europe-west1"
   name            = "tf-test-edgesecservice-%s"
   description     = "My basic resource using security policy"
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
@@ -7399,7 +7399,7 @@ resource "google_compute_network" "net" {
 }
 
 resource "google_compute_subnetwork" "subnet" {
-  region                     = "asia-northeast1"
+  region                     = "europe-west1"
   name                       = "tf-test-subnet-%s"
   ip_cidr_range              = "192.168.0.0/16"
   purpose                    = "PRIVATE"
@@ -7408,7 +7408,7 @@ resource "google_compute_subnetwork" "subnet" {
 }
 
 resource "google_compute_region_security_policy" "policyforinstance" {
-  region      = "asia-northeast1"
+  region      = "europe-west1"
   name        = "%s"
   description = "region security policy to set to instance"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -7418,7 +7418,7 @@ resource "google_compute_region_security_policy" "policyforinstance" {
 resource "google_compute_instance" "foobar" {
   name         = "%s"
   machine_type = "e2-medium"
-  zone         = "asia-northeast1-a"
+  zone         = "europe-west1-b"
   tags         = ["foo", "bar"]
 
   boot_disk {
@@ -7454,7 +7454,7 @@ data "google_compute_image" "my_image" {
 
 # First activate advanced network DDoS protection for the desired region
 resource "google_compute_region_security_policy" "policyddosprotection" {
-  region      = "asia-northeast1"
+  region      = "europe-west1"
   name        = "tf-test-policyddosprotection-%s"
   description = "region security policy for instance"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -7464,7 +7464,7 @@ resource "google_compute_region_security_policy" "policyddosprotection" {
 }
 
 resource "google_compute_network_edge_security_service" "edge_sec_service" {
-  region          = "asia-northeast1"
+  region          = "europe-west1"
   name            = "tf-test-edgesecservice-%s"
   description     = "My basic resource using security policy"
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
@@ -7476,7 +7476,7 @@ resource "google_compute_network" "net" {
 }
 
 resource "google_compute_subnetwork" "subnet" {
-  region                     = "asia-northeast1"
+  region                     = "europe-west1"
   name                       = "tf-test-subnet-%s"
   ip_cidr_range              = "192.168.0.0/16"
   purpose                    = "PRIVATE"
@@ -7485,7 +7485,7 @@ resource "google_compute_subnetwork" "subnet" {
 }
 
 resource "google_compute_subnetwork" "subnet-ipv6" {
-  region                     = "asia-northeast1"
+  region                     = "europe-west1"
   name                       = "tf-test-subnet-ip6-%s"
   ip_cidr_range              = "10.0.0.0/22"
   purpose                    = "PRIVATE"
@@ -7495,12 +7495,12 @@ resource "google_compute_subnetwork" "subnet-ipv6" {
 }
 
 resource "google_compute_address" "normal-address" {
-  region   = "asia-northeast1"
+  region   = "europe-west1"
   name     = "tf-test-addr-normal-%s"
 }
 
 resource "google_compute_address" "ipv6-address" {
-  region             = "asia-northeast1"
+  region             = "europe-west1"
   name               = "tf-test-addr-ipv6-%s"
   address_type       = "EXTERNAL"
   ip_version         = "IPV6"
@@ -7515,7 +7515,7 @@ resource "google_compute_network" "net2" {
 }
 
 resource "google_compute_subnetwork" "subnet2" {
-  region                     = "asia-northeast1"
+  region                     = "europe-west1"
   name                       = "tf-test-subnet2-%s"
   ip_cidr_range              = "192.170.0.0/20"
   purpose                    = "PRIVATE"
@@ -7524,7 +7524,7 @@ resource "google_compute_subnetwork" "subnet2" {
 }
   
 resource "google_compute_subnetwork" "subnet-ipv62" {
-  region                     = "asia-northeast1"
+  region                     = "europe-west1"
   name                       = "tf-test-subnet-ip62-%s"
   ip_cidr_range              = "10.10.0.0/20"
   purpose                    = "PRIVATE"
@@ -7534,12 +7534,12 @@ resource "google_compute_subnetwork" "subnet-ipv62" {
 }
 
 resource "google_compute_address" "normal-address2" {
-  region   = "asia-northeast1"
+  region   = "europe-west1"
   name     = "tf-test-addr-normal2-%s"
 }
   
 resource "google_compute_address" "ipv6-address2" {
-  region             = "asia-northeast1"
+  region             = "europe-west1"
   name               = "tf-test-addr-ipv62-%s"
   address_type       = "EXTERNAL"
   ip_version         = "IPV6"
@@ -7549,7 +7549,7 @@ resource "google_compute_address" "ipv6-address2" {
 }
 
 resource "google_compute_region_security_policy" "policyforinstance" {
-  region      = "asia-northeast1"
+  region      = "europe-west1"
   name        = "%s"
   description = "region security policy to set to instance"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -7557,7 +7557,7 @@ resource "google_compute_region_security_policy" "policyforinstance" {
 }
 
 resource "google_compute_region_security_policy" "policyforinstance2" {
-  region      = "asia-northeast1"
+  region      = "europe-west1"
   name        = "%s"
   description = "region security policy 2 to set to instance"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -7567,7 +7567,7 @@ resource "google_compute_region_security_policy" "policyforinstance2" {
 resource "google_compute_instance" "foobar" {
   name         = "%s"
   machine_type = "e2-medium"
-  zone         = "asia-northeast1-a"
+  zone         = "europe-west1-b"
   tags         = ["foo", "bar"]
 
   boot_disk {
@@ -7626,7 +7626,7 @@ data "google_compute_image" "my_image" {
 
 # First activate advanced network DDoS protection for the desired region
 resource "google_compute_region_security_policy" "policyddosprotection" {
-  region      = "asia-northeast1"
+  region      = "europe-west1"
   name        = "tf-test-policyddosprotection-%s"
   description = "region security policy for instance"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -7636,7 +7636,7 @@ resource "google_compute_region_security_policy" "policyddosprotection" {
 }
 
 resource "google_compute_network_edge_security_service" "edge_sec_service" {
-  region          = "asia-northeast1"
+  region          = "europe-west1"
   name            = "tf-test-edgesecservice-%s"
   description     = "My basic resource using security policy"
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
@@ -7648,7 +7648,7 @@ resource "google_compute_network" "net" {
 }
 
 resource "google_compute_subnetwork" "subnet" {
-  region                     = "asia-northeast1"
+  region                     = "europe-west1"
   name                       = "tf-test-subnet-%s"
   ip_cidr_range              = "192.168.0.0/16"
   purpose                    = "PRIVATE"
@@ -7657,7 +7657,7 @@ resource "google_compute_subnetwork" "subnet" {
 }
 
 resource "google_compute_subnetwork" "subnet-ipv6" {
-  region                     = "asia-northeast1"
+  region                     = "europe-west1"
   name                       = "tf-test-subnet-ip6-%s"
   ip_cidr_range              = "10.0.0.0/22"
   purpose                    = "PRIVATE"
@@ -7667,12 +7667,12 @@ resource "google_compute_subnetwork" "subnet-ipv6" {
 }
 
 resource "google_compute_address" "normal-address" {
-  region   = "asia-northeast1"
+  region   = "europe-west1"
   name     = "tf-test-addr-normal-%s"
 }
 
 resource "google_compute_address" "ipv6-address" {
-  region             = "asia-northeast1"
+  region             = "europe-west1"
   name               = "tf-test-addr-ipv6-%s"
   address_type       = "EXTERNAL"
   ip_version         = "IPV6"
@@ -7687,7 +7687,7 @@ resource "google_compute_network" "net2" {
 }
 
 resource "google_compute_subnetwork" "subnet2" {
-  region                     = "asia-northeast1"
+  region                     = "europe-west1"
   name                       = "tf-test-subnet2-%s"
   ip_cidr_range              = "192.170.0.0/20"
   purpose                    = "PRIVATE"
@@ -7696,7 +7696,7 @@ resource "google_compute_subnetwork" "subnet2" {
 }
   
 resource "google_compute_subnetwork" "subnet-ipv62" {
-  region                     = "asia-northeast1"
+  region                     = "europe-west1"
   name                       = "tf-test-subnet-ip62-%s"
   ip_cidr_range              = "10.10.0.0/20"
   purpose                    = "PRIVATE"
@@ -7706,12 +7706,12 @@ resource "google_compute_subnetwork" "subnet-ipv62" {
 }
 
 resource "google_compute_address" "normal-address2" {
-  region   = "asia-northeast1"
+  region   = "europe-west1"
   name     = "tf-test-addr-normal2-%s"
 }
   
 resource "google_compute_address" "ipv6-address2" {
-  region             = "asia-northeast1"
+  region             = "europe-west1"
   name               = "tf-test-addr-ipv62-%s"
   address_type       = "EXTERNAL"
   ip_version         = "IPV6"
@@ -7721,7 +7721,7 @@ resource "google_compute_address" "ipv6-address2" {
 }
 
 resource "google_compute_region_security_policy" "policyforinstance" {
-  region      = "asia-northeast1"
+  region      = "europe-west1"
   name        = "%s"
   description = "region security policy to set to instance"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -7729,7 +7729,7 @@ resource "google_compute_region_security_policy" "policyforinstance" {
 }
 
 resource "google_compute_region_security_policy" "policyforinstance2" {
-  region      = "asia-northeast1"
+  region      = "europe-west1"
   name        = "%s"
   description = "region security policy 2 to set to instance"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -7739,7 +7739,7 @@ resource "google_compute_region_security_policy" "policyforinstance2" {
 resource "google_compute_instance" "foobar" {
   name         = "%s"
   machine_type = "e2-medium"
-  zone         = "asia-northeast1-a"
+  zone         = "europe-west1-b"
   tags         = ["foo", "bar"]
 
   boot_disk {
@@ -7796,7 +7796,7 @@ resource "google_compute_network" "net" {
 }
 
 resource "google_compute_subnetwork" "subnet" {
-  region                     = "asia-northeast1"
+  region                     = "europe-west1"
   name                       = "tf-test-subnet-%s"
   ip_cidr_range              = "192.168.0.0/16"
   purpose                    = "PRIVATE"
@@ -7810,7 +7810,7 @@ resource "google_compute_network" "net2" {
 }
 
 resource "google_compute_subnetwork" "subnet2" {
-  region                     = "asia-northeast1"
+  region                     = "europe-west1"
   name                       = "tf-test-subnet2-%s"
   ip_cidr_range              = "192.170.0.0/20"
   purpose                    = "PRIVATE"
@@ -7821,7 +7821,7 @@ resource "google_compute_subnetwork" "subnet2" {
 resource "google_compute_instance" "foobar" {
   name         = "%s"
   machine_type = "e2-medium"
-  zone         = "asia-northeast1-a"
+  zone         = "europe-west1-b"
   tags         = ["foo", "bar"]
 
   boot_disk {
@@ -7864,7 +7864,7 @@ data "google_compute_image" "my_image" {
 
 # First activate advanced network DDoS protection for the desired region
 resource "google_compute_region_security_policy" "policyddosprotection" {
-  region      = "asia-northeast1"
+  region      = "europe-west1"
   name        = "tf-test-policyddosprotection-%s"
   description = "region security policy for instance"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -7874,7 +7874,7 @@ resource "google_compute_region_security_policy" "policyddosprotection" {
 }
 
 resource "google_compute_network_edge_security_service" "edge_sec_service" {
-  region          = "asia-northeast1"
+  region          = "europe-west1"
   name            = "tf-test-edgesecservice-%s"
   description     = "My basic resource using security policy"
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
@@ -7886,7 +7886,7 @@ resource "google_compute_network" "net" {
 }
 
 resource "google_compute_subnetwork" "subnet" {
-  region                     = "asia-northeast1"
+  region                     = "europe-west1"
   name                       = "tf-test-subnet-%s"
   ip_cidr_range              = "192.168.0.0/16"
   purpose                    = "PRIVATE"
@@ -7895,7 +7895,7 @@ resource "google_compute_subnetwork" "subnet" {
 }
 
 resource "google_compute_subnetwork" "subnet-ipv6" {
-  region                     = "asia-northeast1"
+  region                     = "europe-west1"
   name                       = "tf-test-subnet-ip6-%s"
   ip_cidr_range              = "10.0.0.0/22"
   purpose                    = "PRIVATE"
@@ -7905,12 +7905,12 @@ resource "google_compute_subnetwork" "subnet-ipv6" {
 }
 
 resource "google_compute_address" "normal-address" {
-  region   = "asia-northeast1"
+  region   = "europe-west1"
   name     = "tf-test-addr-normal-%s"
 }
 
 resource "google_compute_address" "ipv6-address" {
-  region             = "asia-northeast1"
+  region             = "europe-west1"
   name               = "tf-test-addr-ipv6-%s"
   address_type       = "EXTERNAL"
   ip_version         = "IPV6"
@@ -7920,7 +7920,7 @@ resource "google_compute_address" "ipv6-address" {
 }
 
 resource "google_compute_region_security_policy" "policyforinstance" {
-  region      = "asia-northeast1"
+  region      = "europe-west1"
   name        = "%s"
   description = "region security policy to set to instance"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -7930,7 +7930,7 @@ resource "google_compute_region_security_policy" "policyforinstance" {
 resource "google_compute_instance" "foobar" {
   name         = "%s"
   machine_type = "e2-medium"
-  zone         = "asia-northeast1-a"
+  zone         = "europe-west1-b"
   tags         = ["foo", "bar"]
 
   boot_disk {
@@ -7972,7 +7972,7 @@ data "google_compute_image" "my_image" {
 
 # First activate advanced network DDoS protection for the desired region
 resource "google_compute_region_security_policy" "policyddosprotection" {
-  region      = "asia-northeast1"
+  region      = "europe-west1"
   name        = "tf-test-policyddosprotection-%s"
   description = "region security policy for instance"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -7982,7 +7982,7 @@ resource "google_compute_region_security_policy" "policyddosprotection" {
 }
 
 resource "google_compute_network_edge_security_service" "edge_sec_service" {
-  region          = "asia-northeast1"
+  region          = "europe-west1"
   name            = "tf-test-edgesecservice-%s"
   description     = "My basic resource using security policy"
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
@@ -7994,7 +7994,7 @@ resource "google_compute_network" "net" {
 }
 
 resource "google_compute_subnetwork" "subnet" {
-  region                     = "asia-northeast1"
+  region                     = "europe-west1"
   name                       = "tf-test-subnet-%s"
   ip_cidr_range              = "192.168.0.0/16"
   purpose                    = "PRIVATE"
@@ -8003,7 +8003,7 @@ resource "google_compute_subnetwork" "subnet" {
 }
 
 resource "google_compute_subnetwork" "subnet-ipv6" {
-  region                     = "asia-northeast1"
+  region                     = "europe-west1"
   name                       = "tf-test-subnet-ip6-%s"
   ip_cidr_range              = "10.0.0.0/22"
   purpose                    = "PRIVATE"
@@ -8013,12 +8013,12 @@ resource "google_compute_subnetwork" "subnet-ipv6" {
 }
 
 resource "google_compute_address" "normal-address" {
-  region   = "asia-northeast1"
+  region   = "europe-west1"
   name     = "tf-test-addr-normal-%s"
 }
 
 resource "google_compute_address" "ipv6-address" {
-  region             = "asia-northeast1"
+  region             = "europe-west1"
   name               = "tf-test-addr-ipv6-%s"
   address_type       = "EXTERNAL"
   ip_version         = "IPV6"
@@ -8028,7 +8028,7 @@ resource "google_compute_address" "ipv6-address" {
 }
 
 resource "google_compute_region_security_policy" "policyforinstance" {
-  region      = "asia-northeast1"
+  region      = "europe-west1"
   name        = "%s"
   description = "region security policy to set to instance"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -8038,7 +8038,7 @@ resource "google_compute_region_security_policy" "policyforinstance" {
 resource "google_compute_instance" "foobar" {
   name         = "%s"
   machine_type = "e2-medium"
-  zone         = "asia-northeast1-a"
+  zone         = "europe-west1-b"
   tags         = ["foo", "bar"]
 
   boot_disk {
