@@ -2629,19 +2629,17 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 <% if version == "beta"%>
 func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 	t.Parallel()
-
+	suffix := fmt.Sprintf("%s", acctest.RandString(t, 10))
 	var instance compute.Instance
 
-	testNetworkName := acctest.BootstrapSharedTestNetwork(t, "attachment-network")
-	testSubnetName := acctest.BootstrapSubnet(t, "attachment-subnetwork", testNetworkName)
-	testNetworkAttachmentName := acctest.BootstrapNetworkAttachment(t, "network-attachment", testSubnetName)
+	testNetworkAttachmentName := fmt.Sprintf("tf-test-network-attachment-%s", suffix)
 
 	// Need to have the full network attachment name in the format project/{project_id}/regions/{region_id}/networkAttachments/{testNetworkAttachmentName}
 	fullFormNetworkAttachmentName := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), testNetworkAttachmentName)
 
 	context := map[string]interface{}{
-		"suffix":             (acctest.RandString(t, 10)),
-		"network_attachment": fullFormNetworkAttachmentName,
+		"suffix":                  (acctest.RandString(t, 10)),
+		"network_attachment_name": testNetworkAttachmentName,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -7014,6 +7012,28 @@ data "google_compute_image" "my_image" {
   project = "debian-cloud"
 }
 
+resource "google_compute_network" "test-network"{
+	name = "tf-test-network-%{suffix}"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "test-subnetwork" {
+	name          = "tf-test-compute-subnet-%{suffix}"
+	ip_cidr_range = "10.0.0.0/16"
+	region        = "us-central1"
+	network       = google_compute_network.test-network.id
+}
+
+resource "google_compute_network_attachment" "test_network_attachment" {
+	name = "%{network_attachment_name}"
+    region = "us-central1"
+    description = "network attachment description"
+    connection_preference = "ACCEPT_AUTOMATIC"
+
+    subnetworks = [
+        google_compute_subnetwork.test-subnetwork.self_link
+    ]
+}
 
 resource "google_compute_instance" "foobar" {
   name         = "tf-test-instance-%{suffix}"
@@ -7029,8 +7049,8 @@ resource "google_compute_instance" "foobar" {
 		network = "default"
 	}
 
-	network_interface {
-		network_attachment = "%{network_attachment}"
+	network_interface{
+		network_attachment = google_compute_network_attachment.test_network_attachment.self_link
 	}
 
 	metadata = {
