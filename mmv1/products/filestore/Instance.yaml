@@ -99,7 +99,7 @@ properties:
       Possible values include: STANDARD, PREMIUM, BASIC_HDD, BASIC_SSD, HIGH_SCALE_SSD and ENTERPRISE
     required: true
     immutable: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels to represent user-provided metadata.
