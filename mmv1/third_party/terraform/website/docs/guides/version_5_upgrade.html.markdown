@@ -304,7 +304,7 @@ has a default value.
 
 ### `logging_variant` no longer has a provider default value
 
-Previously `logging_variant` defaulted to "DEFAULT". It no longerhas a default value.
+Previously `logging_variant` defaulted to "DEFAULT". It no longer has a default value.
 
 ### `management.auto_repair` and `management.auto_upgrade` now default to true
 
