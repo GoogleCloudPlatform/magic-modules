@@ -39,6 +39,15 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: repo
+          fetch-depth: 2
+      - name: Merge base branch
+        id: pull_request
+        run: |
+          cd repo
+          git config user.name "modular-magician"
+          git config user.email "magic-modules@google.com"
+          git fetch origin ${{ github.base_ref }} # Fetch the base branch
+          git merge --no-ff origin/${{ github.base_ref }} # Merge with the base branch
       - name: Set up Ruby
         uses: ruby/setup-ruby@ec02537da5712d66d4d50a0f33b7eb52773b5ed1
         with:

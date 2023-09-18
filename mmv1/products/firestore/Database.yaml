@@ -99,6 +99,10 @@ examples:
       - etag
     vars:
       project_id: 'my-project'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firestore_database_with_delete_protection'
+    primary_resource_id: 'database'
+    skip_test: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -117,7 +121,7 @@ properties:
     name: locationId
     required: true
     description: |
-      The location of the database. Available databases are listed at
+      The location of the database. Available locations are listed at
       https://cloud.google.com/firestore/docs/locations.
     immutable: true
   - !ruby/object:Api::Type::Enum
@@ -167,6 +171,15 @@ properties:
       that is returned from the Cloud Datastore APIs in Google App Engine first generation runtimes.
       This value may be empty in which case the appid to use for URL-encoded keys is the project_id (eg: foo instead of v~foo).
     output: true
+  - !ruby/object:Api::Type::Enum
+    name: deleteProtectionState
+    description: |
+      State of delete protection for the database.
+    values:
+      - :DELETE_PROTECTION_STATE_UNSPECIFIED
+      - :DELETE_PROTECTION_ENABLED
+      - :DELETE_PROTECTION_DISABLED
+    default_from_api: true
   - !ruby/object:Api::Type::Fingerprint
     name: etag
     description: |
