@@ -3098,7 +3098,7 @@ resource "google_bigquery_table" "test" {
 
   friendly_name = "bigquerytest"
   labels = {
-    "terrafrom_managed" = "true"
+    "terrafrom_managed" = "false"
   }
 
   schema = jsonencode(
