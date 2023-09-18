@@ -47,7 +47,7 @@ resource "google_scc_project_custom_module" "example" {
 	enablement_state = "DISABLED"
 	custom_config {
 		predicate {
-			expression = "resource.name.matches('^gcp-vm-(linux|windows)-v\\d+$')"
+			expression = "resource.name == \"updated-name\""
 			title = "Updated expression title"
 			description = "Updated description of the expression"
 			location = "Updated location of the expression"
@@ -56,7 +56,7 @@ resource "google_scc_project_custom_module" "example" {
 			properties {
 				name = "violation"
 				value_expression {
-					expression = "Excessive rotation period"
+					expression = "resource.name"
 					title = "Updated expression title"
 					description = "Updated description of the expression"
 					location = "Updated location of the expression"
