@@ -159,7 +159,7 @@ properties:
           Defines operating mode for this policy.
         values:
           - :OFF
-          - :ONLY_UP
+          - :ONLY_SCALE_OUT
           - :ON
       - !ruby/object:Api::Type::NestedObject
         name: 'scaleDownControl'
