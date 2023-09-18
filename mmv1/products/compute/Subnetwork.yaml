@@ -371,6 +371,11 @@ properties:
     description: |
       The range of internal IPv6 addresses that are owned by this subnetwork.
   - !ruby/object:Api::Type::String
+    name: 'internalIpv6Prefix'
+    output: true
+    description: |
+      The internal IPv6 address range that is assigned to this subnetwork.
+  - !ruby/object:Api::Type::String
     name: 'externalIpv6Prefix'
     output: true
     description: |
