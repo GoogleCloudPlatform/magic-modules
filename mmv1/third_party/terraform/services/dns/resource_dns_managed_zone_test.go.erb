@@ -32,6 +32,7 @@ func TestAccDNSManagedZone_update(t *testing.T) {
 				ResourceName:      "google_dns_managed_zone.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
 				Config: testAccDnsManagedZone_basic(zoneSuffix, "description2", map[string]string{"foo": "bar"}),
@@ -40,6 +41,7 @@ func TestAccDNSManagedZone_update(t *testing.T) {
 				ResourceName:      "google_dns_managed_zone.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})
@@ -174,6 +176,7 @@ func TestAccDNSManagedZone_cloudLoggingConfigUpdate(t *testing.T) {
 				ResourceName:      "google_dns_managed_zone.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
 				Config: testAccDnsManagedZone_cloudLoggingConfig_update(zoneSuffix, true),
@@ -182,6 +185,7 @@ func TestAccDNSManagedZone_cloudLoggingConfigUpdate(t *testing.T) {
 				ResourceName:      "google_dns_managed_zone.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
 				Config: testAccDnsManagedZone_cloudLoggingConfig_update(zoneSuffix, false),
@@ -190,6 +194,7 @@ func TestAccDNSManagedZone_cloudLoggingConfigUpdate(t *testing.T) {
 				ResourceName:      "google_dns_managed_zone.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})

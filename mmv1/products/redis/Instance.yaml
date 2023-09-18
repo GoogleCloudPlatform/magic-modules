@@ -156,7 +156,7 @@ properties:
       Hostname or IP address of the exposed Redis endpoint used by clients
       to connect to the service.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: Resource labels to represent user provided metadata.
   - !ruby/object:Api::Type::KeyValuePairs

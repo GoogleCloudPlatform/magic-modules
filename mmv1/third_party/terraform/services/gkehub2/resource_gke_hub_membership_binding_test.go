@@ -29,7 +29,7 @@ func TestAccGKEHub2MembershipBinding_gkehubMembershipBindingBasicExample_update(
 				ResourceName:            "google_gke_hub_membership_binding.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"membership_binding_id", "scope", "membership_id", "location"},
+				ImportStateVerifyIgnore: []string{"membership_binding_id", "scope", "membership_id", "location", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccGKEHub2MembershipBinding_gkehubMembershipBindingBasicExample_update(context),
@@ -38,7 +38,7 @@ func TestAccGKEHub2MembershipBinding_gkehubMembershipBindingBasicExample_update(
 				ResourceName:            "google_gke_hub_membership_binding.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"membership_binding_id", "scope", "membership_id", "location"},
+				ImportStateVerifyIgnore: []string{"membership_binding_id", "scope", "membership_id", "location", "labels", "terraform_labels"},
 			},
 		},
 	})
