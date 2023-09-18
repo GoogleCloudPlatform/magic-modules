@@ -1511,6 +1511,78 @@ resource "google_container_node_pool" "np" {
 `, cluster, np)
 }
 
+func TestAccContainerNodePool_fastSocket(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_fastSocket(cluster, np, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np",
+						"node_config.0.fast_socket.0.enabled", "true"),
+				),
+			},
+			{
+				ResourceName:      "google_container_node_pool.np",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerNodePool_fastSocket(cluster, np, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np",
+						"node_config.0.fast_socket.0.enabled", "false"),
+				),
+			},
+			{
+				ResourceName:      "google_container_node_pool.np",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccContainerNodePool_fastSocket(cluster, np string, enabled bool) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-f"
+  initial_node_count = 1
+  min_master_version = "1.25"
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "us-central1-f"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+
+  node_config {
+    machine_type = "n1-standard-8"
+    image_type = "COS_CONTAINERD"
+    guest_accelerator {
+      type  = "nvidia-tesla-p100"
+      count = 1
+      }
+    gvnic {
+      enabled = true
+    }
+    fast_socket {
+      enabled = %t
+    }
+  }
+}
+`, cluster, np, enabled)
+}
+
 func TestAccContainerNodePool_compactPlacement(t *testing.T) {
 	t.Parallel()
 
@@ -2751,6 +2823,11 @@ resource "google_compute_subnetwork" "subnet2" {
   network                  = google_compute_network.addn_net_2.name
   ip_cidr_range            = "10.0.38.0/24"
   region                   = "us-central1"
+
+  secondary_ip_range {
+    range_name    = "pod"
+    ip_cidr_range = "10.0.64.0/19"
+  }
 }
 
 resource "google_container_cluster" "cluster" {
@@ -2784,13 +2861,18 @@ resource "google_container_node_pool" "with_multi_nic" {
     create_pod_range = false
     enable_private_nodes = true
     pod_range = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
-	additional_node_network_configs {
-	  network    = google_compute_network.addn_net_1.name
+    additional_node_network_configs {
+      network    = google_compute_network.addn_net_1.name
       subnetwork = google_compute_subnetwork.subnet1.name
     }
     additional_node_network_configs {
-	  network    = google_compute_network.addn_net_2.name
-	  subnetwork = google_compute_subnetwork.subnet2.name
+      network    = google_compute_network.addn_net_2.name
+      subnetwork = google_compute_subnetwork.subnet2.name
+    }
+    additional_pod_network_configs {
+      subnetwork          = google_compute_subnetwork.subnet2.name
+      secondary_pod_range = "pod"
+      max_pods_per_node   = 32
     }
   }
   node_config {
@@ -3377,11 +3459,10 @@ resource "google_container_node_pool" "np" {
 `, clusterName, np)
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerNodePool_tpuTopology(t *testing.T) {
 	t.Parallel()
-	acctest.SkipIfVcr(t)
-
+	t.Skip("https://github.com/hashicorp/terraform-provider-google/issues/15254#issuecomment-1646277473")
+	
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	np1 := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
 	np2 := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
@@ -3447,6 +3528,7 @@ resource "google_container_node_pool" "with_tpu_topology" {
 `, cluster, np1, np2, tpuTopology)
 }
 
+<% unless version == 'ga' -%>
 func TestAccContainerNodePool_withHostMaintenancePolicy(t *testing.T) {
 	t.Parallel()
 

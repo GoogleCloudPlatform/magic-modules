@@ -426,7 +426,9 @@ Enable/Disable Security Posture API features for the cluster. Structure is [docu
     All cluster nodes running GKE 1.15 and higher are recreated.**
 
 * `gce_persistent_disk_csi_driver_config` - (Optional).
-    Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Defaults to disabled; set `enabled = true` to enabled.
+    Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Set `enabled = true` to enable.
+
+    **Note:** The Compute Engine persistent disk CSI Driver is enabled by default on newly created clusters for the following versions: Linux clusters: GKE version 1.18.10-gke.2100 or later, or 1.19.3-gke.2100 or later.
 
 *  `gke_backup_agent_config` -  (Optional).
     The status of the Backup for GKE agent addon. It is disabled by default; Set `enabled = true` to enable.
@@ -594,7 +596,7 @@ This block also contains several computed attributes, documented below.
 
 <a name="nested_monitoring_config"></a>The `monitoring_config` block supports:
 
-*  `enable_components` - (Optional) The GKE components exposing metrics. Supported values include: `SYSTEM_COMPONENTS`, `APISERVER`, `CONTROLLER_MANAGER`, and `SCHEDULER`. In beta provider, `WORKLOADS` is supported on top of those 4 values. (`WORKLOADS` is deprecated and removed in GKE 1.24.)
+*  `enable_components` - (Optional) The GKE components exposing metrics. Supported values include: `SYSTEM_COMPONENTS`, `APISERVER`, `SCHEDULER`, `CONTROLLER_MANAGER`, `STORAGE`, `HPA`, `POD`, `DAEMONSET`, `DEPLOYMENT` and `STATEFULSET`. In beta provider, `WORKLOADS` is supported on top of those 10 values. (`WORKLOADS` is deprecated and removed in GKE 1.24.)
 
 *  `managed_prometheus` - (Optional) Configuration for Managed Service for Prometheus. Structure is [documented below](#nested_managed_prometheus).
 
@@ -793,6 +795,10 @@ ephemeral_storage_local_ssd_config {
   local_ssd_count = 2
 }
 ```
+* `fast_socket` - (Optional) Parameters for the NCCL Fast Socket feature. If unspecified, NCCL Fast Socket will not be enabled on the node pool.
+     Node Pool must enable gvnic.
+     GKE version 1.25.2-gke.1700 or later.
+     Structure is [documented below](#nested_fast_socket).
 
 * `local_nvme_ssd_block_config` - (Optional) Parameters for the local NVMe SSDs. Structure is [documented below](#nested_local_nvme_ssd_block_config).
 
@@ -962,6 +968,10 @@ sole_tenant_config {
 <a name="nested_ephemeral_storage_local_ssd_config"></a>The `ephemeral_storage_local_ssd_config` block supports:
 
 * `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
+
+<a name="nasted_fast_socket"></a>The `fast_socket` block supports:
+
+* `enabled` (Required) - Whether or not the NCCL Fast Socket is enabled
 
 <a name="nested_local_nvme_ssd_block_config"></a>The `local_nvme_ssd_block_config` block supports:
 

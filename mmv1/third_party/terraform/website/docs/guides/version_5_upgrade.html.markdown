@@ -118,7 +118,15 @@ The new annotations model is similar to the new labels model and will be applied
 
 There are now two annotation-related fields with the new model, the `annotations` and the output-only `effective_annotations` fields.
 
+### Provider default values shown at plan-time
+
+`project`, `region`, and `zone` fields will now display their values during plan-time instead of the placeholder `(known after apply)` value normally displayed for fields without fixed Terraform default values. These values will be taken from either the Terraform resource config file, provider config, or local environment variables, depending on which variables are supplied by the user, matching the existing per-resource functionality for what default values are used in execution of a Terraform plan.
+
 ## Datasources
+
+### Datasources now error universally on 404
+
+All data sources have been updated to return an error when a target resource URI can not be reached. Previously this was inconsistent between different datasources in whether an empty value was returned to Terraform state upon 404 or if an error was returned, but this has been standardized. Any plans that reference datasources which no longer exist (or do not exist yet) will need to be revised to have these datasources removed from configuration files.
 
 ## Datasource: `google_product_datasource`
 
@@ -133,6 +141,59 @@ Description of the change and how users should adjust their configuration (if ne
 ### Resource-level change example header
 
 Description of the change and how users should adjust their configuration (if needed).
+
+## Resource: `google_access_context_manager_service_perimeters`
+
+### Fields changed from lists to sets where appropriate
+
+The following fields have been changed from a list to a set:
+
+`google_access_context_manager_service_perimeters.spec.access_levels`
+`google_access_context_manager_service_perimeters.spec.resources`
+`google_access_context_manager_service_perimeters.spec.restricted_services`
+`google_access_context_manager_service_perimeters.spec.vpc_accessible_services.allowed_services`
+`google_access_context_manager_service_perimeters.spec.egress_policies.egress_from.identities`
+`google_access_context_manager_service_perimeters.spec.egress_policies.egress_to.external_resources`
+`google_access_context_manager_service_perimeters.spec.egress_policies.egress_to.resources`
+`google_access_context_manager_service_perimeters.spec.ingress_policies.ingress_from.identities`
+`google_access_context_manager_service_perimeters.spec.ingress_policies.ingress_to.resources`
+`google_access_context_manager_service_perimeters.status.access_levels`
+`google_access_context_manager_service_perimeters.status.resources`
+`google_access_context_manager_service_perimeters.status.restricted_services`
+`google_access_context_manager_service_perimeters.status.egress_policies.egress_from.identities`
+`google_access_context_manager_service_perimeters.status.egress_policies.egress_to.external_resources`
+`google_access_context_manager_service_perimeters.status.egress_policies.egress_to.resources`
+`google_access_context_manager_service_perimeters.status.ingress_policies.ingress_from.identities`
+`google_access_context_manager_service_perimeters.status.ingress_policies.ingress_to.resources`
+
+If you were relying on accessing an individual field by index (for example, google_access_context_manager_service_perimeters.spec.access_levels.0, then that will now need to by hash (for example, google_access_context_manager_service_perimeters.spec.access_levels.\<some-hash\>).
+
+## Resource: `google_access_context_manager_service_perimeter`
+
+### Fields changed from lists to sets where appropriate
+
+The following fields have been changed from a list to a set:
+
+`google_access_context_manager_service_perimeter.spec.access_levels`
+`google_access_context_manager_service_perimeter.spec.resources`
+`google_access_context_manager_service_perimeter.spec.restricted_services`
+`google_access_context_manager_service_perimeter.spec.vpc_accessible_services.allowed_services`
+`google_access_context_manager_service_perimeter.spec.egress_policies.egress_from.identities`
+`google_access_context_manager_service_perimeter.spec.egress_policies.egress_to.external_resources`
+`google_access_context_manager_service_perimeter.spec.egress_policies.egress_to.resources`
+`google_access_context_manager_service_perimeter.spec.ingress_policies.ingress_from.identities`
+`google_access_context_manager_service_perimeter.spec.ingress_policies.ingress_to.resources`
+`google_access_context_manager_service_perimeter.status.access_levels`
+`google_access_context_manager_service_perimeter.status.resources`
+`google_access_context_manager_service_perimeter.status.restricted_services`
+`google_access_context_manager_service_perimeter.status.egress_policies.egress_from.identities`
+`google_access_context_manager_service_perimeter.status.egress_policies.egress_to.external_resources`
+`google_access_context_manager_service_perimeter.status.egress_policies.egress_to.resources`
+`google_access_context_manager_service_perimeter.status.ingress_policies.ingress_from.identities`
+`google_access_context_manager_service_perimeter.status.ingress_policies.ingress_to.resources`
+
+If you were relying on accessing an individual field by index (for example, google_access_context_manager_service_perimeter.spec.access_levels.0, then that will now need to by hash (for example, google_access_context_manager_service_perimeter.spec.access_levels.\<some-hash\>).
+
 
 ## Resource: `google_bigquery_table`
 
@@ -215,6 +276,17 @@ These two unsupported fields were introduced incorrectly. They are now removed.
 ### `liveness_probe.tcp_socket` is now removed
 
 This unsupported field was introduced incorrectly. It is now removed.
+
+## Resource: `google_container_cluster`
+
+### `enable_binary_authorization` is now removed
+
+`enable_binary_authorization` has been removed in favor of `binary_authorization.enabled`.
+
+### Default value of `network_policy.provider` is now removed
+
+Previously `network_policy.provider` defaulted to "PROVIDER_UNSPECIFIED". It no longer
+has a default value.
 
 ## Resource: `google_dataplex_datascan`
 
@@ -331,3 +403,116 @@ If you were relying on accessing an individual flag by index (for example, `goog
 ### `rule.rate_limit_options.encorce_on_key` no longer has default value
 
 Previously, the default value for `rule.rate_limit_options.encorce_on_key` is "ALL", now this field no longer has a default value.
+
+## Resource: `google_logging_metric`
+
+### Additional `bucket_options` subfields are now properly required
+
+When setting the `bucket_options` block, the following fields may be required:
+
+* `num_finite_buckets`, `width`, and `offset` are now required when `bucket_options.linear_buckets` is set.
+
+* `num_finite_buckets`, `growth_factor`, and `scale` are now required when `bucket_options.exponential_buckets` is set.
+
+Previously these fields should have been required but were not, which allowed for invalid `google_logging_metric` configurations.
+
+## Resource: `google_logging_project_sink`
+
+### `unique_writer_identity` now defaults to `TRUE`
+
+Previously, the default value of `unique_writer_identity` was `FALSE`. Now it will be `TRUE`.
+
+This will change the behavior for new sinks created using the default value. Previously, all sinks created using the default value had a `writer_identity` of `serviceAccount:cloud-logs@system.gserviceaccount.com`. Now sinks created using the default value will have a `writer_identity` that differs depending on the parent resource, for example: `serviceAccount:service-<PROJECT_NUMBER>@gcp-sa-logging.iam.gserviceaccount.com` for a project-level sink.
+
+IAM permissions that were manually configured for `cloud-logs@system.gserviceaccount.com` and `iam_bindings` that are hard-coded to use `cloud-logs@system.gserviceaccount.com` will not properly apply permissions to the `writer_identity` of new sinks created using the default value.  **If a sink is missing the proper permissions it will be successfully created but it will fail to export log data.**
+
+Currently there are only two types of log sinks that populate `writer_identity` and can be created with `unique_writer_identity = false`.  Only these types of sinks may be affected:
+* Sinks with a Cloud Pub/Sub topic `destination` for which the topic is in the same project as the sink.
+* Sinks for a BigQuery dataset `destination` for which the dataset is in the same project as the sink.
+
+To ensure that proper permissions are in place for new sinks created using the default value, check that the related `iam_bindings` are configured and reference the sink's `writer_identity` property.
+
+Here is an example of proper `iam_bindings`:
+
+```hcl
+resource "google_logging_project_sink" "gcs-bucket-sink" {
+  name        = "my-gcs-bucket-sink"
+  description = "Routes all admin activity logs to a GCS bucket"
+  destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
+  filter      = "log_id(\"cloudaudit.googleapis.com/activity\")"
+  # `unique_writer_identity is explicitly set to true here, but will now default to 'true'.
+  unique_writer_identity = true
+}
+
+# We must grant proper permissions for the log sink to access the GCS bucket.
+resource "google_project_iam_binding" "gcs-bucket-writer" {
+  project = "your-project-id"
+  role = "roles/storage.objectCreator"
+
+  members = [
+    google_logging_project_sink.gcs-bucket-sink.writer_identity,
+  ]
+}
+```
+
+## Resource: `google_cloudfunctions2_function`
+### `location` now a required field
+Deployment would fail if this field was unspecified. Marked this field as requied to align with implementation. This value cannot be inferred from any provider level config. No change is necessary for upgrade as this field is already needed for any deployments.
+
+## Resource: `google_cloud_run_v2_service`
+### transitioned `volumes.cloud_sql_instance.instances` to SET from ARRAY for `google_cloud_run_v2_service`
+Previously, `database_flags` was a list, making it order-dependent. It is now a set.
+
+If you were relying on accessing an individual flag by index (for example, `google_sql_database_instance.instance.settings.0.database_flags.0.name`), then that will now need to by hash (for example, `google_sql_database_instance.instance.settings.0.database_flags.<some-hash>.name`).
+
+## Product: `cloudiot`
+
+### resource `google_cloudiot_device` is now removed
+
+### resource `google_cloudiot_registry` is now removed
+
+### resource `google_cloudiot_registry_iam_*` is now removed
+
+### datasource `google_cloudiot_registry_iam_policy` is now removed
+
+## Resource: `google_service_networking_connection`
+
+### `Create` endpoint is used to create the resource
+
+`google_service_networking_connection` now uses the Create endpoint instead of the Patch endpoint during the creation step. Previously, Patch was used as a workaround for an issue that has since been resolved.
+
+## Resource: `google_secret_manager_secret`
+
+### `replication.automatic` is now removed
+
+Deprecated in favor of field `replication.auto`. It is now removed.
+
+#### Old Config
+
+```hcl
+resource "google_secret_manager_secret" "my-secret" {
+  secret_id = "tf-secret"
+  
+  replication {
+    automatic = true
+  }
+}
+```
+
+#### New Config
+
+```hcl
+resource "google_secret_manager_secret" "my-secret" {
+  secret_id = "tf-secret"
+  
+  replication {
+    auto {}
+  }
+}
+```
+
+## Resource: `google_identity_platform_project_default_config`
+
+### `google_identity_platform_project_default_config` has been removed from the provider
+
+Use the `google_identity_platform_config` resource instead. It contains a more comprehensive list of fields, and was created before `google_identity_platform_project_default_config` was added.
