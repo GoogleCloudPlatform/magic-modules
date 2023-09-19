@@ -112,6 +112,12 @@ There are now three label-related fields with the new model:
 
 After upgrading to `5.0.0`, and then running `terraform refresh` or `terraform apply`, these three fields should show in the state file of the resources with a self-applying `labels` field.
 
+#### Resource annotations
+
+The new annotations model is similar to the new labels model and will be applied to all of the resources with the top level `annotations` field or the nested `annotations` field inside the top level `metadata` field.
+
+There are now two annotation-related fields with the new model, the `annotations` and the output-only `effective_annotations` fields.
+
 ### Changes to how default `location`, `region` and `zone` values are obtained for resources
 
 Currently, when configuring resources that require a `location`, `region` or `zone` field you have the choice of specifying it in the resource block or allowing default values to be used. Default [region](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#region) or [zone](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#zone) values can be configured in the provider block or by providing values through environment variables.
@@ -132,12 +138,6 @@ Users will need to check for unexpected `location` changes for resources. If an 
 
 This will only affect users whose configuration contains resource blocks that have missing `location` values and whose [default zone](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#zone) value belongs to a region that's different than the [default region](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#region) value. For example, if you set `us-central1-a` as the default zone and `us-central2` as the default region on the provider you may see plans that contain unexpected diffs to move resources from `us-central1` to `us-central2`.
 
-
-#### Resource annotations
-
-The new annotations model is similar to the new labels model and will be applied to all of the resources with the top level `annotations` field or the nested `annotations` field inside the top level `metadata` field.
-
-There are now two annotation-related fields with the new model, the `annotations` and the output-only `effective_annotations` fields.
 
 ### Provider default values shown at plan-time
 
