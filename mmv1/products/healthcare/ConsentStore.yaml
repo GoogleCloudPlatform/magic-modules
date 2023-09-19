@@ -94,7 +94,7 @@ properties:
     description: |
       If true, [consents.patch] [google.cloud.healthcare.v1.consent.UpdateConsent] creates the consent if it does not already exist.
   - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
+    name: 'labels'
     required: false
     description: |
       User-supplied key-value pairs used to organize Consent stores.

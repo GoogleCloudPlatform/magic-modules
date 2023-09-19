@@ -206,6 +206,6 @@ properties:
     description: |
       The type of underlying resources used to create the connection.
   - !ruby/object:Api::Type::KeyValueLabels
-    name: "labels"
+    name: 'labels'
     description: |
       User-defined labels.
