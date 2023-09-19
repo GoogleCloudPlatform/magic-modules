@@ -367,7 +367,7 @@ proposed value to configuration (below) or apply `lifecycle.ignore_changes` to t
 +      key    = "sandbox.gke.io/runtime"
 +      value  = "gvisor"
 +      effect = "NO_SCHEDULE"
-+    {
++    }
 ```
 
 ### `enable_binary_authorization` is now removed
