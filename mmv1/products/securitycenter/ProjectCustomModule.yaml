@@ -25,6 +25,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/projects.securityHealthAnalyticsSettings.customModules'
 base_url: 'projects/{{project}}/securityHealthAnalyticsSettings/customModules'
 self_link: 'projects/{{project}}/securityHealthAnalyticsSettings/customModules/{{name}}'
+mutex: 'projects/{{project}}/securityHealthAnalyticsSettings/customModules'
 update_verb: :PATCH
 update_mask: true
 examples:
