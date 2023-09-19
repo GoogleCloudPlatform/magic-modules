@@ -240,7 +240,7 @@ properties:
             default_from_api: true
             properties:
               - !ruby/object:Api::Type::KeyValuePairs
-                name: labels
+                name: 'labels'
                 description: |-
                   Map of string keys and values that can be used to organize and categorize
                   (scope and select) objects.
@@ -279,7 +279,7 @@ properties:
                 default_from_api: true
                 custom_expand: 'templates/terraform/custom_expand/default_to_project.go.erb'
               - !ruby/object:Api::Type::KeyValuePairs
-                name: annotations
+                name: 'annotations'
                 description: |-
                   Annotations is a key value map stored with a resource that
                   may be set by external tools to store and retrieve arbitrary metadata. More
@@ -971,7 +971,7 @@ properties:
     default_from_api: true
     properties:
       - !ruby/object:Api::Type::KeyValuePairs
-        name: labels
+        name: 'labels'
         description: |-
           Map of string keys and values that can be used to organize and categorize
           (scope and select) objects. May match selectors of replication controllers
@@ -1013,7 +1013,7 @@ properties:
         custom_flatten: templates/terraform/custom_flatten/set_to_project.go.erb
         custom_expand: 'templates/terraform/custom_expand/default_to_project.go.erb'
       - !ruby/object:Api::Type::KeyValuePairs
-        name: annotations
+        name: 'annotations'
         description: |-
           Annotations is a key value map stored with a resource that
           may be set by external tools to store and retrieve arbitrary metadata. More
