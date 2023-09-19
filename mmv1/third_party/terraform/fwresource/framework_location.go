@@ -31,23 +31,23 @@ type LocationDescription struct {
 
 func (ld *LocationDescription) GetLocation() (types.String, error) {
 	// Location from resource config
-	if !ld.ResourceLocation.IsNull() && !ld.ResourceLocation.IsUnknown() && !ld.ResourceLocation.Equal(types.StringValue("")) {
+	if !ld.ResourceLocation.IsNull() && !ld.ResourceLocation.IsUnknown() {
 		return ld.ResourceLocation, nil
 	}
 
 	// Location from region in resource config
-	if !ld.ResourceRegion.IsNull() && !ld.ResourceRegion.IsUnknown() && !ld.ResourceRegion.Equal(types.StringValue("")) {
+	if !ld.ResourceRegion.IsNull() && !ld.ResourceRegion.IsUnknown() {
 		return ld.ResourceRegion, nil
 	}
 
 	// Location from zone in resource config
-	if !ld.ResourceZone.IsNull() && !ld.ResourceZone.IsUnknown() && !ld.ResourceZone.Equal(types.StringValue("")) {
+	if !ld.ResourceZone.IsNull() && !ld.ResourceZone.IsUnknown() {
 		location := tpgresource.GetResourceNameFromSelfLink(ld.ResourceZone.ValueString()) // Zone could be a self link
 		return types.StringValue(location), nil
 	}
 
 	// Location from zone in provider config
-	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() && !ld.ProviderZone.Equal(types.StringValue("")) {
+	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() {
 		return ld.ProviderZone, nil
 	}
 
@@ -65,21 +65,21 @@ func (ld *LocationDescription) GetRegion() (types.String, error) {
 	// For all checks in this function body
 
 	// Region from resource config
-	if !ld.ResourceRegion.IsNull() && !ld.ResourceRegion.IsUnknown() && !ld.ResourceRegion.Equal(types.StringValue("")) {
+	if !ld.ResourceRegion.IsNull() && !ld.ResourceRegion.IsUnknown() {
 		region := tpgresource.GetResourceNameFromSelfLink(ld.ResourceRegion.ValueString()) // Region could be a self link
 		return types.StringValue(region), nil
 	}
 	// Region from zone in resource config
-	if !ld.ResourceZone.IsNull() && !ld.ResourceZone.IsUnknown() && !ld.ResourceZone.Equal(types.StringValue("")) {
+	if !ld.ResourceZone.IsNull() && !ld.ResourceZone.IsUnknown() {
 		region := tpgresource.GetRegionFromZone(ld.ResourceZone.ValueString())
 		return types.StringValue(region), nil
 	}
 	// Region from provider config
-	if !ld.ProviderRegion.IsNull() && !ld.ProviderRegion.IsUnknown() && !ld.ProviderRegion.Equal(types.StringValue("")) {
+	if !ld.ProviderRegion.IsNull() && !ld.ProviderRegion.IsUnknown() {
 		return ld.ProviderRegion, nil
 	}
 	// Region from zone in provider config
-	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() && !ld.ProviderZone.Equal(types.StringValue("")) {
+	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() {
 		region := tpgresource.GetRegionFromZone(ld.ProviderZone.ValueString())
 		return types.StringValue(region), nil
 	}
@@ -97,12 +97,12 @@ func (ld *LocationDescription) GetZone() (types.String, error) {
 	// TODO(SarahFrench): Make empty strings not ignored, see https://github.com/hashicorp/terraform-provider-google/issues/14447
 	// For all checks in this function body
 
-	if !ld.ResourceZone.IsNull() && !ld.ResourceZone.IsUnknown() && !ld.ResourceZone.Equal(types.StringValue("")) {
+	if !ld.ResourceZone.IsNull() && !ld.ResourceZone.IsUnknown() {
 		// Zone could be a self link
 		zone := tpgresource.GetResourceNameFromSelfLink(ld.ResourceZone.ValueString())
 		return types.StringValue(zone), nil
 	}
-	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() && !ld.ProviderZone.Equal(types.StringValue("")) {
+	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() {
 		return ld.ProviderZone, nil
 	}
 
