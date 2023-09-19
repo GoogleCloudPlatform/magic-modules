@@ -2588,7 +2588,33 @@ func TestAccComputeInstance_regionBootDisk(t *testing.T) {
 }
 
 <% unless version == 'ga' -%>
-func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigs(t *testing.T) {
+// The tests related to security_policy use network_edge_security_service resource
+// which can only exist one per region. Because of that, all the following tests must run serially.
+func TestAccComputeInstanceNetworkIntefaceWithSecurityPolicy(t *testing.T) {
+	testCases := map[string]func(t *testing.T){
+		"two_access_config": testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigs,
+		"two_nics_access_config_with_empty_nil_security_policy":   testAccComputeInstance_nic_securityPolicyCreateWithEmptyAndNullSecurityPolicies,
+		"two_nics_two_access_configs_update_one_policy":           testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateOnlyOnePolicy,
+		"two_access_config_update_policy_with_stopped_machine":    testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateSecurityPoliciesWithStoppedMachine,
+		"two_nics_two_access_configs_update_remove_access_config": testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateRemoveAccessConfig,
+		"two_nics_two_access_configs_update_two_policies":         testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateSwapPolicies,
+		"access_config_update_access_config":                      testAccComputeInstance_nic_securityPolicyCreateWithAccessConfigUpdateAccessConfig,
+		"wit_no_access_config":                                    testAccComputeInstance_nic_securityPolicyCreateWithoutAccessConfig,
+	}
+
+	for name, tc := range testCases {
+		// shadow the tc variable into scope so that when
+		// the loop continues, if t.Run hasn't executed tc(t)
+		// yet, we don't have a race condition
+		// see https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			tc(t)
+		})
+	}
+}
+
+func testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigs(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
 	var policyName = fmt.Sprintf("tf-test-policy-%s", acctest.RandString(t, 10))
@@ -2600,7 +2626,7 @@ func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigs(t *test
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigs(suffix, policyName, instanceName),
+				Config: testAccComputeInstance_nic_securityPolicyCreateWithOneNicAndTwoAccessConfigs(suffix, policyName, instanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
@@ -2616,7 +2642,7 @@ func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigs(t *test
 	})
 }
 
-func TestAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndAccessConfigsWithEmptyAndNullSecurityPolicies(t *testing.T) {
+func testAccComputeInstance_nic_securityPolicyCreateWithEmptyAndNullSecurityPolicies(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
 	var suffix = acctest.RandString(t, 10)
@@ -2643,7 +2669,7 @@ func TestAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndAccessConfigsW
 	})
 }
 
-func TestAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateOnlyOnePolicy(t *testing.T) {
+func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateOnlyOnePolicy(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
 	var policyName = fmt.Sprintf("tf-test-policy-%s", acctest.RandString(t, 10))
@@ -2685,7 +2711,7 @@ func TestAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfi
 	})
 }
 
-func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateSecurityPoliciesWithStoppedMachine(t *testing.T) {
+func testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateSecurityPoliciesWithStoppedMachine(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
 	var policyName = fmt.Sprintf("tf-test-policy-%s", acctest.RandString(t, 10))
@@ -2720,7 +2746,7 @@ func TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateSe
 	})
 }
 
-func TestAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateRemoveAccessConfig(t *testing.T) {
+func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateRemoveAccessConfig(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
 	var policyName = fmt.Sprintf("tf-test-policy-%s", acctest.RandString(t, 10))
@@ -2762,7 +2788,7 @@ func TestAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfi
 	})
 }
 
-func TestAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateTwoPolicies(t *testing.T) {
+func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateSwapPolicies(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
 	var policyName = fmt.Sprintf("tf-test-policy-%s", acctest.RandString(t, 10))
@@ -2818,7 +2844,7 @@ func TestAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfi
 	})
 }
 
-func TestAccComputeInstance_nic_securityPolicyCreateWithAccessConfigUpdateAccessConfig(t *testing.T) {
+func testAccComputeInstance_nic_securityPolicyCreateWithAccessConfigUpdateAccessConfig(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
 	var policyName = fmt.Sprintf("tf-test-policy-%s", acctest.RandString(t, 10))
@@ -2830,7 +2856,7 @@ func TestAccComputeInstance_nic_securityPolicyCreateWithAccessConfigUpdateAccess
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigs(suffix, policyName, instanceName),
+				Config: testAccComputeInstance_nic_securityPolicyCreateWithOneNicAndTwoAccessConfigs(suffix, policyName, instanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
@@ -2863,7 +2889,7 @@ func TestAccComputeInstance_nic_securityPolicyCreateWithAccessConfigUpdateAccess
 	})
 }
 
-func TestAccComputeInstance_nic_securityPolicyCreateWithoutAccessConfig(t *testing.T) {
+func testAccComputeInstance_nic_securityPolicyCreateWithoutAccessConfig(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
 	var policyName = fmt.Sprintf("tf-test-policy-%s", acctest.RandString(t, 10))
 	var suffix = acctest.RandString(t, 10)
@@ -7266,33 +7292,7 @@ resource "google_compute_disk" "debian" {
 }
 
 <% unless version == 'ga' -%>
-// The tests related to security_policy use network_edge_security_service resource
-// which can only exist one per region. Because of that, all the following tests must run serially.
-func TestAccComputeInstanceNetworkIntefaceWithSecurityPolicy(t *testing.T) {
-	testCases := map[string]func(t *testing.T){
-		"two_access_config": TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigs,
-		"two_nics_access_config_with_empty_nil_security_policy":   TestAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndAccessConfigsWithEmptyAndNullSecurityPolicies,
-		"two_nics_two_access_configs_update_one_policy":           TestAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateOnlyOnePolicy,
-		"two_access_config_update_policy_with_stopped_machine":    TestAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateSecurityPoliciesWithStoppedMachine,
-		"two_nics_two_access_configs_update_remove_access_config": TestAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateRemoveAccessConfig,
-		"two_nics_two_access_configs_update_two_policies":         TestAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateTwoPolicies,
-		"access_config_update_access_config":                      TestAccComputeInstance_nic_securityPolicyCreateWithAccessConfigUpdateAccessConfig,
-		"wit_no_access_config":                                    TestAccComputeInstance_nic_securityPolicyCreateWithoutAccessConfig,
-	}
-
-	for name, tc := range testCases {
-		// shadow the tc variable into scope so that when
-		// the loop continues, if t.Run hasn't executed tc(t)
-		// yet, we don't have a race condition
-		// see https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
-		tc := tc
-		t.Run(name, func(t *testing.T) {
-			tc(t)
-		})
-	}
-}
-
-func testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigs(suffix, policy, instance string) string {
+func testAccComputeInstance_nic_securityPolicyCreateWithOneNicAndTwoAccessConfigs(suffix, policy, instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"
