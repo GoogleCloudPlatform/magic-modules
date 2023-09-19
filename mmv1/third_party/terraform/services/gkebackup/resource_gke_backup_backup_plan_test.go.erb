@@ -68,6 +68,9 @@ resource "google_gke_backup_backup_plan" "backupplan" {
 	include_secrets = false
 	all_namespaces = true
   }
+  labels = {
+    "some-key-1": "some-value-1"
+  }
 }
 `, context)
 }
@@ -112,6 +115,9 @@ resource "google_gke_backup_backup_plan" "backupplan" {
 	    namespace = "ns2"
 	  }
     }
+  }
+  labels = {
+    "some-key-2": "some-value-2"
   }
 }
 `, context)

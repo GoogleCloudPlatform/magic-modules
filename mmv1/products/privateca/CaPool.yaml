@@ -480,7 +480,7 @@ properties:
         values:
           - :PEM
           - :DER
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: labels
     description: |
       Labels with user-defined metadata.
