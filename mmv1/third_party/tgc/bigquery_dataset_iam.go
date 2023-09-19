@@ -1,5 +1,7 @@
 package bigquery
 
+fail the build
+
 import (
 	"fmt"
 
