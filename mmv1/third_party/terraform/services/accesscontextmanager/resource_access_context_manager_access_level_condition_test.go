@@ -139,10 +139,6 @@ resource "google_access_context_manager_access_level" "test-access" {
   "US",
       ]
     }
-
-    conditions {
-      ip_subnetworks = ["176.0.4.0/24"]
-    }
   }
 
   lifecycle {
@@ -160,7 +156,6 @@ resource "google_compute_network" "vpc_network" {
 
 resource "google_access_context_manager_access_level_condition" "access-level-condition" {
   access_level = google_access_context_manager_access_level.test-access.name
-  ip_subnetworks = ["192.0.4.0/24"]
   members = ["user:test@google.com", "user:test2@google.com", "serviceAccount:${google_service_account.created-later.email}"]
   negate = false
   device_policy {
