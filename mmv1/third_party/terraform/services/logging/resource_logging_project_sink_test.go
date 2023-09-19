@@ -142,6 +142,39 @@ func TestAccLoggingProjectSink_updatePreservesUniqueWriter(t *testing.T) {
 	})
 }
 
+func TestAccLoggingProjectSink_updatePreservesCustomWriter(t *testing.T) {
+	t.Parallel()
+
+	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
+	updatedBucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
+	account := "tf-test-sink-sa" + acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckLoggingProjectSinkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingProjectSink_customWriter(sinkName, bucketName, account),
+			},
+			{
+				ResourceName:      "google_logging_project_sink.custom_writer",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccLoggingProjectSink_customWriterUpdated(sinkName, updatedBucketName, account),
+			},
+			{
+				ResourceName:      "google_logging_project_sink.custom_writer",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccLoggingProjectSink_updateBigquerySink(t *testing.T) {
 	t.Parallel()
 
@@ -411,6 +444,66 @@ resource "google_storage_bucket" "gcs-bucket" {
   location = "US"
 }
 `, name, envvar.GetTestProjectFromEnv(), bucketName)
+}
+
+func testAccLoggingProjectSink_customWriter(name, bucketName string, serviceAccount string) string {
+	return fmt.Sprintf(`
+resource "google_service_account" "test-account1" {
+  account_id   = "%s"
+  display_name = "Log Sink Custom WriterIdentity Testing Account"
+}
+
+resource "google_project_iam_member" "custom-sa-logbucket-binding" {
+  project = "gchen-sharedvpc"
+  role   = "roles/logging.bucketWriter"
+  member = "serviceAccount:${google_service_account.test-account1.email}"
+}
+
+resource "google_service_account_iam_member" "loggingsa-customsa-binding" {
+	service_account_id = google_service_account.test-account1.name
+	role   = "roles/iam.serviceAccountTokenCreator"
+	member = "serviceAccount:service-%s@gcp-sa-logging.iam.gserviceaccount.com"
+}
+
+resource "google_logging_project_sink" "custom_writer" {
+  name        = "%s"
+  destination = "logging.googleapis.com/projects/gchen-sharedvpc/locations/us-central1/buckets/shared-logsink-bucket"
+  filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
+
+  unique_writer_identity = true
+  custom_writer_identity = "serviceAccount:${google_service_account.test-account1.email}"
+}
+`, serviceAccount, envvar.GetTestProjectNumberFromEnv(), name, envvar.GetTestProjectFromEnv())
+}
+
+func testAccLoggingProjectSink_customWriterUpdated(name, bucketName string,  serviceAccount string) string {
+	return fmt.Sprintf(`
+	resource "google_service_account" "test-account1" {
+		account_id   = "%s"
+		display_name = "Log Sink Custom WriterIdentity Testing Account"
+	  }
+	  
+	  resource "google_project_iam_member" "custom-sa-logbucket-binding" {
+		project = "gchen-sharedvpc"
+		role   = "roles/logging.bucketWriter"
+		member = "serviceAccount:${google_service_account.test-account1.email}"
+	  }
+	  
+	  resource "google_service_account_iam_member" "loggingsa-customsa-binding" {
+		service_account_id = google_service_account.test-account1.name
+		role   = "roles/iam.serviceAccountTokenCreator"
+		member = "serviceAccount:service-%s@gcp-sa-logging.iam.gserviceaccount.com"
+	  }
+	  
+	  resource "google_logging_project_sink" "custom_writer" {
+		name        = "%s"
+		destination = "logging.googleapis.com/projects/gchen-sharedvpc/locations/us-central1/buckets/shared-logsink-bucket"
+		filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=WARNING"
+	  
+		unique_writer_identity = true
+		custom_writer_identity = "serviceAccount:${google_service_account.test-account1.email}"
+	  }
+`, serviceAccount, envvar.GetTestProjectNumberFromEnv(), name, envvar.GetTestProjectFromEnv())
 }
 
 func testAccLoggingProjectSink_heredoc(name, project, bucketName string) string {

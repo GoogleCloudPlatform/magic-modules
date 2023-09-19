@@ -41,6 +41,12 @@ func ResourceLoggingProjectSink() *schema.Resource {
 		Default:     true,
 		Description: `Whether or not to create a unique identity associated with this sink. If false (the legacy behavior), then the writer_identity used is serviceAccount:cloud-logs@system.gserviceaccount.com. If true, then a unique service account is created and used for this sink. If you wish to publish logs across projects, you must set unique_writer_identity to true.`,
 	}
+	schm.Schema["custom_writer_identity"] = &schema.Schema{
+		Type:		schema.TypeString,
+		Optional: 	true,
+		Description: `A service account provided by the caller that will be used to write the log entries. The format must be serviceAccount:some@email. This field can only be specified if you are routing logs to a destination outside this sink's project. If not specified, a Logging service account will automatically be generated.`,
+		
+	}
 	return schm
 }
 
@@ -59,7 +65,14 @@ func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) 
 	id, sink := expandResourceLoggingSink(d, "projects", project)
 	uniqueWriterIdentity := d.Get("unique_writer_identity").(bool)
 
-	_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(uniqueWriterIdentity).Do()
+	customWriterIdentity := d.Get("custom_writer_identity").(string)
+
+	if (customWriterIdentity != ""){
+		_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(uniqueWriterIdentity).CustomWriterIdentity(customWriterIdentity).Do()
+	} else {
+		_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(uniqueWriterIdentity).Do()
+	}
+	
 	if err != nil {
 		return err
 	}
