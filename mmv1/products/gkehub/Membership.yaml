@@ -54,13 +54,6 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'gkehub_membership_basic'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
-    primary_resource_id: 'membership'
-    vars:
-      name: 'basic'
-      cluster_name: 'basiccluster'
-  - !ruby/object:Provider::Terraform::Examples
     name: 'gkehub_membership_regional'
     primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
     primary_resource_id: 'membership'
@@ -70,6 +63,13 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
       location: :REGION
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'gkehub_membership_basic'
+    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
+    primary_resource_id: 'membership'
+    vars:
+      name: 'basic'
+      cluster_name: 'basiccluster'
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkehub_membership_issuer'
     primary_resource_id: 'membership'
