@@ -65,6 +65,7 @@ import (
     client_name_lower = client_name.downcase
     has_project = object.base_url.include?('{{project}}') || (object.create_url && object.create_url.include?('{{project}}'))
     has_region = object.base_url.include?('{{region}}') && object.parameters.any?{ |p| p.name == 'region' && p.ignore_read }
+    has_zone = object.base_url.include?('{{zone}}') && object.parameters.any?{ |p| p.name == 'zone' && p.ignore_read }
     # In order of preference, use TF override,
     # general defined timeouts, or default Timeouts
     timeouts = object.timeouts
@@ -113,7 +114,7 @@ func Resource<%= resource_name -%>() *schema.Resource {
 <%      end -%>
         },
 <%  end -%>
-<%  if object.custom_diff.any? || object.settable_properties.any? {|p| p.unordered_list}-%>
+<% if ((has_project || has_region || has_zone) && !object.skip_default_cdiff) || object.custom_diff.any? || object.settable_properties.any? {|p| p.unordered_list}-%>
         CustomizeDiff: customdiff.All(
 <%      if object.settable_properties.any? {|p| p.unordered_list} -%>
         <%=
@@ -126,6 +127,15 @@ func Resource<%= resource_name -%>() *schema.Resource {
 <%          for cdiff in object.custom_diff-%>
         <%= cdiff%>,
 <%          end -%>
+<%      end -%>
+<%      if has_project && !object.skip_default_cdiff -%>
+            tpgresource.DefaultProviderProject,
+<%      end -%>
+<%      if has_region && !object.skip_default_cdiff  -%>
+            tpgresource.DefaultProviderRegion,
+<%      end -%>
+<%      if has_zone && !object.skip_default_cdiff  -%>
+            tpgresource.DefaultProviderZone,
 <%      end -%>
         ),
 <%  end -%>
@@ -636,6 +646,16 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         return err
     }
     if err := d.Set("region", region); err != nil {
+        return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
+    }
+<%  end -%>
+
+<%  if has_zone -%>
+    zone, err := tpgresource.GetZone(d, config)
+    if err != nil {
+        return err
+    }
+    if err := d.Set("zone", zone); err != nil {
         return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
     }
 <%  end -%>

@@ -143,6 +143,12 @@ func Provider() *schema.Provider {
 				Optional: true,
 			},
 
+			"default_labels": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
 			// Generated Products
 			<% products.each do |product| -%>
 			"<%= product[:definitions].name.underscore -%>_custom_endpoint": {
@@ -272,7 +278,6 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_container_registry_repository":             containeranalysis.DataSourceGoogleContainerRepo(),
 		"google_dataproc_metastore_service":                dataprocmetastore.DataSourceDataprocMetastoreService(),
 		"google_datastream_static_ips":                     datastream.DataSourceGoogleDatastreamStaticIps(),
-		"google_game_services_game_server_deployment_rollout":  gameservices.DataSourceGameServicesGameServerDeploymentRollout(),
 		"google_iam_policy":                                resourcemanager.DataSourceGoogleIamPolicy(),
 		"google_iam_role":                                  resourcemanager.DataSourceGoogleIamRole(),
 		"google_iam_testable_permissions":                  resourcemanager.DataSourceGoogleIamTestablePermissions(),
@@ -714,6 +719,13 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	}
 	for i, scope := range scopes {
 		config.Scopes[i] = scope.(string)
+	}
+
+	config.DefaultLabels = make(map[string]string)
+	defaultLabels := d.Get("default_labels").(map[string]interface{})
+
+	for k, v := range defaultLabels {
+		config.DefaultLabels[k] = v.(string)
 	}
 
 	batchCfg, err := transport_tpg.ExpandProviderBatchingConfig(d.Get("batching"))
