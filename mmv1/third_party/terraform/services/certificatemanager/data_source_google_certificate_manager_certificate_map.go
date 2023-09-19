@@ -12,6 +12,7 @@ func DataSourceGoogleCertificateManagerCertificateMap() *schema.Resource {
 
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceCertificateManagerCertificateMap().Schema)
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleCertificateManagerCertificateMapRead,
