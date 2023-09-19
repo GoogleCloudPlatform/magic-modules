@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# test change
+
 $LOAD_PATH.unshift File.dirname(__FILE__)
 
 # Run from compiler dir so all references are relative to compiler.rb
