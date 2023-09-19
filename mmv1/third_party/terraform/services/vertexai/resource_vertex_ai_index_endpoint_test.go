@@ -28,7 +28,7 @@ func TestAccVertexAIIndexEndpoint_updated(t *testing.T) {
 				ResourceName:            "google_vertex_ai_index_endpoint.index_endpoint",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "region"},
+				ImportStateVerifyIgnore: []string{"etag", "region", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccVertexAIIndexEndpoint_updated(context),
@@ -37,7 +37,7 @@ func TestAccVertexAIIndexEndpoint_updated(t *testing.T) {
 				ResourceName:            "google_vertex_ai_index_endpoint.index_endpoint",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "region"},
+				ImportStateVerifyIgnore: []string{"etag", "region", "labels", "terraform_labels"},
 			},
 		},
 	})
