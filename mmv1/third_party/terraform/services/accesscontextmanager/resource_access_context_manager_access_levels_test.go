@@ -123,6 +123,10 @@ resource "google_access_context_manager_access_policy" "test-access" {
   title  = "%s"
 }
 
+resource "google_compute_network" "vpc_network" {
+	name = "tf-test"
+}
+
 resource "google_access_context_manager_access_levels" "test-access" {
   parent      = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
 
@@ -136,10 +140,6 @@ resource "google_access_context_manager_access_levels" "test-access" {
 	    ip_subnetworks = ["192.0.2.0/24"]
 	  }
     }
-  }
-
-  resource "google_compute_network" "vpc_network" {
-    name = "tf-test"
   }
 
   access_levels {

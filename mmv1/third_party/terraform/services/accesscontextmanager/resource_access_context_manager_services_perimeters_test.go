@@ -139,7 +139,7 @@ resource "google_access_context_manager_service_perimeters" "test-access" {
         egress_from {
           identity_type = "ANY_USER_ACCOUNT"
           sources {
-            access_level = "some-level-name"
+            access_level = google_access_context_manager_access_level.test-access.name
           }
           source_restriction = "SOURCE_RESTRICTION_ENABLED"
         }
