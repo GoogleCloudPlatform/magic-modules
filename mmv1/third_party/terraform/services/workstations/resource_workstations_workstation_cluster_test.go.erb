@@ -28,7 +28,7 @@ func TestAccWorkstationsWorkstationCluster_update(t *testing.T) {
 				ResourceName:            "google_workstations_workstation_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag"},
+				ImportStateVerifyIgnore: []string{"etag", "annotations"},
 			},
 			{
 				Config: testAccWorkstationsWorkstationCluster_update(context),
@@ -37,7 +37,7 @@ func TestAccWorkstationsWorkstationCluster_update(t *testing.T) {
 				ResourceName:            "google_workstations_workstation_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag"},
+				ImportStateVerifyIgnore: []string{"etag", "annotations"},
 			},
 		},
 	})
@@ -62,7 +62,7 @@ func TestAccWorkstationsWorkstationCluster_Private_update(t *testing.T) {
 				ResourceName:            "google_workstations_workstation_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag"},
+				ImportStateVerifyIgnore: []string{"etag", "annotations"},
 			},
 			{
 				Config: testAccWorkstationsWorkstationCluster_private_update(context),
@@ -71,7 +71,7 @@ func TestAccWorkstationsWorkstationCluster_Private_update(t *testing.T) {
 				ResourceName:            "google_workstations_workstation_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag"},
+				ImportStateVerifyIgnore: []string{"etag", "annotations"},
 			},
 		},
 	})

@@ -168,7 +168,7 @@ properties:
         name: 'jobTimeoutMs'
         description: |
           Job timeout in milliseconds. If this time limit is exceeded, BigQuery may attempt to terminate the job.
-      - !ruby/object:Api::Type::KeyValuePairs
+      - !ruby/object:Api::Type::KeyValueLabels
         name: 'labels'
         description: |
           The labels associated with this job. You can use these to organize and group your jobs.

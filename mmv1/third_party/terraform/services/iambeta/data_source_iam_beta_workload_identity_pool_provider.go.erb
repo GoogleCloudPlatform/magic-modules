@@ -32,7 +32,15 @@ func dataSourceIAMBetaWorkloadIdentityPoolProviderRead(d *schema.ResourceData, m
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
-	return resourceIAMBetaWorkloadIdentityPoolProviderRead(d, meta)
+	err = resourceIAMBetaWorkloadIdentityPoolProviderRead(d, meta)
+	if err != nil {
+		return err
+	}
 
+	if d.Id() == "" {
+		return fmt.Errorf("%s not found", id)
+	}
+
+	return nil
 }
 <% end -%>
