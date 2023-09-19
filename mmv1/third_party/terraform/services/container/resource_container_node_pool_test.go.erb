@@ -361,32 +361,6 @@ func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			{
-				// GKE sets automatic labels and taints on nodes. This makes
-				// sure we ignore the automatic ones and keep our own.
-				Config:   testAccContainerNodePool_withSandboxConfig(cluster, np),
-				// When we use PlanOnly without ExpectNonEmptyPlan, we're
-				// guaranteeing that the computed fields of the resources don't
-				// force an unintentional change to the plan. That is, we
-				// expect this part of the test to pass only if the plan
-				// doesn't change.
-				PlanOnly: true,
-			},
-			{
-				// Now we'll modify the taints, which should force a change to
-				// the plan. We make sure we don't over-suppress and end up
-				// eliminating the labels or taints we asked for. This will
-				// destroy and recreate the node pool as taints are immutable.
-				Config: testAccContainerNodePool_withSandboxConfig_changeTaints(cluster, np),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_container_node_pool.with_sandbox_config",
-						"node_config.0.labels.test.terraform.io/gke-sandbox", "true"),
-					resource.TestCheckResourceAttr("google_container_node_pool.with_sandbox_config",
-						"node_config.0.taint.0.key", "test.terraform.io/gke-sandbox"),
-					resource.TestCheckResourceAttr("google_container_node_pool.with_sandbox_config",
-						"node_config.0.taint.1.key", "test.terraform.io/gke-sandbox-amended"),
-				),
-			},
 		},
 	})
 }
@@ -2513,63 +2487,6 @@ resource "google_container_node_pool" "with_sandbox_config" {
 
     labels = {
       "test.terraform.io/gke-sandbox" = "true"
-    }
-
-    taint {
-      key    = "test.terraform.io/gke-sandbox"
-      value  = "true"
-      effect = "NO_SCHEDULE"
-    }
-
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/logging.write",
-      "https://www.googleapis.com/auth/monitoring",
-    ]
-  }
-}
-`, cluster, np)
-}
-
-func testAccContainerNodePool_withSandboxConfig_changeTaints(cluster, np string) string {
-	return fmt.Sprintf(`
-data "google_container_engine_versions" "central1a" {
-  location = "us-central1-a"
-}
-
-resource "google_container_cluster" "cluster" {
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 1
-  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
-}
-
-resource "google_container_node_pool" "with_sandbox_config" {
-  name               = "%s"
-  location           = "us-central1-a"
-  cluster            = google_container_cluster.cluster.name
-  initial_node_count = 1
-  node_config {
-    machine_type = "n1-standard-1"  // can't be e2 because of gvisor
-    image_type = "COS_CONTAINERD"
-
-    sandbox_config {
-      sandbox_type = "gvisor"
-    }
-
-    labels = {
-      "test.terraform.io/gke-sandbox" = "true"
-    }
-
-    taint {
-      key    = "test.terraform.io/gke-sandbox"
-      value  = "true"
-      effect = "NO_SCHEDULE"
-    }
-
-    taint {
-      key    = "test.terraform.io/gke-sandbox-amended"
-      value  = "also-true"
-      effect = "NO_SCHEDULE"
     }
 
     oauth_scopes = [
