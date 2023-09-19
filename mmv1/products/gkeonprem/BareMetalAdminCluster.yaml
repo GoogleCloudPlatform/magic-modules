@@ -134,7 +134,7 @@ properties:
       through optimistic concurrency control.
     output: true
   - !ruby/object:Api::Type::KeyValueAnnotations
-    name: "annotations"
+    name: 'annotations'
     description: |
       Annotations on the Bare Metal Admin Cluster.
       This field has the same restrictions as Kubernetes annotations.
@@ -194,7 +194,7 @@ properties:
                         The default IPv4 address for SSH access and Kubernetes node.
                         Example: 192.168.0.1
                     - !ruby/object:Api::Type::KeyValuePairs
-                      name: "labels"
+                      name: 'labels'
                       description: |
                         The map of Kubernetes labels (key/value pairs) to be applied to
                         each node. These will added in addition to any default label(s)
@@ -233,7 +233,7 @@ properties:
                         - PREFER_NO_SCHEDULE
                         - NO_EXECUTE
               - !ruby/object:Api::Type::KeyValuePairs
-                name: "labels"
+                name: 'labels'
                 description: |
                   The map of Kubernetes labels (key/value pairs) to be applied to
                   each node. These will added in addition to any default label(s)

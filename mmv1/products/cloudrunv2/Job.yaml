@@ -138,7 +138,7 @@ properties:
       Cloud Run API v2 does not support labels with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
       All system labels in v1 now have a corresponding field in v2 Job.
   - !ruby/object:Api::Type::KeyValueAnnotations
-    name: "annotations"
+    name: 'annotations'
     description: |-
       Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 
@@ -229,7 +229,7 @@ properties:
           Cloud Run API v2 does not support labels with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
           All system labels in v1 now have a corresponding field in v2 ExecutionTemplate.
       - !ruby/object:Api::Type::KeyValuePairs
-        name: "annotations"
+        name: 'annotations'
         description: |-
           Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 

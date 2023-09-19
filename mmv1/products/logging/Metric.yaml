@@ -132,7 +132,7 @@ properties:
           - :CUMULATIVE
         required: true
       - !ruby/object:Api::Type::Array
-        name: labels
+        name: 'labels'
         description: |
           The set of labels that can be used to describe a specific instance of this metric type. For
           example, the appengine.googleapis.com/http/server/response_latencies metric type has a label
