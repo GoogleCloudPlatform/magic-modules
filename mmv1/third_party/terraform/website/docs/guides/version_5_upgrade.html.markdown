@@ -359,7 +359,16 @@ preventing a diff.
 
 A limited number of users may see a diff if they are using the `google-beta` provider
 and have specified a `sandbox_config` value. If that's the case, you can safely add the
-proposed value to configuration or apply `lifecycle.ignore_changes` to the field to resolve.
+proposed value to configuration (below) or apply `lifecycle.ignore_changes` to the field to resolve.
+
+
+```diff
++    taint {
++      key    = "sandbox.gke.io/runtime"
++      value  = "gvisor"
++      effect = "NO_SCHEDULE"
++    {
+```
 
 ### `enable_binary_authorization` is now removed
 
