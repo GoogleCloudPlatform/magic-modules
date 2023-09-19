@@ -490,6 +490,10 @@ If you were relying on accessing an individual flag by index (for example, `goog
 
 `google_service_networking_connection` now uses the Create endpoint instead of the Patch endpoint during the creation step. Previously, Patch was used as a workaround for an issue that has since been resolved.
 
+### `deleteConnection` method is used to delete the resource
+
+`google_service_networking_connection` now uses `deleteConnection` method instead of `removePeering` method during the deletion step. Previously, `removePeering` method was used because `deleteConnection` method was unavailable. Sometimes a private connection cannot be deleted immediately after the resource using that connectioin is deleted, and you have to delete the private connection manually after a waiting period.
+
 ## Resource: `google_secret_manager_secret`
 
 ### `replication.automatic` is now removed
