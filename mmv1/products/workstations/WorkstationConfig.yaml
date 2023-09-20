@@ -198,8 +198,7 @@ properties:
       - 'host.gceInstance.shieldedInstanceConfig.enableVtpm'
       - 'host.gceInstance.shieldedInstanceConfig.enableIntegrityMonitoring'
       - 'host.gceInstance.confidentialInstanceConfig.enableConfidentialCompute'
-      - 'host.gceInstance.accelerators.count'
-      - 'host.gceInstance.accelerators.type'
+      - 'host.gceInstance.accelerators'
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'gceInstance'
