@@ -150,6 +150,35 @@ func TestAccContainerCluster_withAddons(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withDeletionProtection(t *testing.T) {
+	t.Parallel()
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withDeletionProtection(clusterName, "false"),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withDeletionProtection(clusterName, "true"),
+				Destroy:     true,
+				ExpectError: regexp.MustCompile("Cannot destroy cluster because deletion_protection is set to true. Set it to false to proceed with instance deletion."),
+			},
+			{
+				Config: testAccContainerCluster_withDeletionProtection(clusterName, "false"),
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withNotificationConfig(t *testing.T) {
 	t.Parallel()
 
@@ -4583,6 +4612,17 @@ resource "google_container_cluster" "with_network_policy_enabled" {
 `, clusterName)
 }
 
+func testAccContainerCluster_withDeletionProtection(clusterName string, deletionProtection string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  deletion_protection = %s
+}
+`, clusterName, deletionProtection)
+}
 
 func testAccContainerCluster_withReleaseChannelEnabled(clusterName string, channel string) string {
 	return fmt.Sprintf(`
