@@ -655,7 +655,7 @@ func resourceBigtableInstanceClusterReorderTypeList(_ context.Context, diff *sch
 
 		currentState, _ := diff.GetChange(fmt.Sprintf("cluster.%d.state", i))
 		oST, nST := diff.GetChange(fmt.Sprintf("cluster.%d.storage_type", i))
-		if oST != nST && currentState != "CREATING" {
+		if oST != nST && currentState.(string) != "CREATING" {
 			err := diff.ForceNew(fmt.Sprintf("cluster.%d.storage_type", i))
 			if err != nil {
 				return fmt.Errorf("Error setting cluster diff: %s", err)
