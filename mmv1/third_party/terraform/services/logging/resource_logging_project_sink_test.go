@@ -154,7 +154,6 @@ func TestAccLoggingProjectSink_updatePreservesCustomWriter(t *testing.T) {
 	billingId := envvar.GetTestBillingAccountFromEnv(t)
 	project := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -168,15 +167,15 @@ func TestAccLoggingProjectSink_updatePreservesCustomWriter(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				// Logging sink create API doesn't return this field in response
-				ImportStateVerifyIgnore: []string{"custom_writer_identity"}, 
+				ImportStateVerifyIgnore: []string{"custom_writer_identity"},
 			},
 			{
 				Config: testAccLoggingProjectSink_customWriterUpdated(org, billingId, project, sinkName, account),
 			},
 			{
-				ResourceName:      "google_logging_project_sink.custom_writer",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_logging_project_sink.custom_writer",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"custom_writer_identity"},
 			},
 		},

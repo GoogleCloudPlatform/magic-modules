@@ -42,10 +42,9 @@ func ResourceLoggingProjectSink() *schema.Resource {
 		Description: `Whether or not to create a unique identity associated with this sink. If false (the legacy behavior), then the writer_identity used is serviceAccount:cloud-logs@system.gserviceaccount.com. If true, then a unique service account is created and used for this sink. If you wish to publish logs across projects, you must set unique_writer_identity to true.`,
 	}
 	schm.Schema["custom_writer_identity"] = &schema.Schema{
-		Type:		schema.TypeString,
-		Optional: 	true,
+		Type:        schema.TypeString,
+		Optional:    true,
 		Description: `A service account provided by the caller that will be used to write the log entries. The format must be serviceAccount:some@email. This field can only be specified if you are routing logs to a destination outside this sink's project. If not specified, a Logging service account will automatically be generated.`,
-		
 	}
 	return schm
 }
@@ -67,12 +66,16 @@ func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) 
 
 	customWriterIdentity := d.Get("custom_writer_identity").(string)
 
-	if (customWriterIdentity != ""){
-		_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(uniqueWriterIdentity).CustomWriterIdentity(customWriterIdentity).Do()
+	client := config.NewLoggingClient(userAgent).Projects.Sinks.Create(id.parent(), sink)
+
+	if customWriterIdentity != "" {
+		client = client.UniqueWriterIdentity(uniqueWriterIdentity).CustomWriterIdentity(customWriterIdentity)
 	} else {
-		_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(uniqueWriterIdentity).Do()
+		client = client.UniqueWriterIdentity(uniqueWriterIdentity)
 	}
-	
+
+	_, err = client.Do()
+
 	if err != nil {
 		return err
 	}
@@ -152,15 +155,14 @@ func resourceLoggingProjectSinkUpdate(d *schema.ResourceData, meta interface{}) 
 
 	customWriterIdentity := d.Get("custom_writer_identity").(string)
 
-	if (customWriterIdentity != ""){
+	if customWriterIdentity != "" {
 		_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Patch(d.Id(), sink).
-		UpdateMask(updateMask).UniqueWriterIdentity(uniqueWriterIdentity).CustomWriterIdentity(customWriterIdentity).Do()
+			UpdateMask(updateMask).UniqueWriterIdentity(uniqueWriterIdentity).CustomWriterIdentity(customWriterIdentity).Do()
 	} else {
 		_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Patch(d.Id(), sink).
-		UpdateMask(updateMask).UniqueWriterIdentity(uniqueWriterIdentity).Do()
+			UpdateMask(updateMask).UniqueWriterIdentity(uniqueWriterIdentity).Do()
 	}
 
-	
 	if err != nil {
 		return err
 	}

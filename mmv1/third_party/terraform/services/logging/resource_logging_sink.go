@@ -112,7 +112,7 @@ func expandResourceLoggingSink(d *schema.ResourceData, resourceType, resourceId 
 		Filter:          d.Get("filter").(string),
 		Description:     d.Get("description").(string),
 		Disabled:        d.Get("disabled").(bool),
-		WriterIdentity:	 d.Get("writer_identity").(string),
+		WriterIdentity:  d.Get("writer_identity").(string),
 		Exclusions:      expandLoggingSinkExclusions(d.Get("exclusions")),
 		BigqueryOptions: expandLoggingSinkBigqueryOptions(d.Get("bigquery_options")),
 	}
