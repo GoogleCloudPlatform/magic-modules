@@ -1,4 +1,10 @@
-resource "google_scc_project_custom_module" "<%= ctx[:primary_resource_id] %>" {
+resource "google_folder" "folder" {
+  parent       = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+  display_name = "Folder"
+}
+
+resource "google_scc_folder_custom_module" "<%= ctx[:primary_resource_id] %>" {
+	folder = google_folder.folder.folder_id
 	display_name = "<%= ctx[:vars]['display_name'] %>"
 	enablement_state = "ENABLED"
 	custom_config {
