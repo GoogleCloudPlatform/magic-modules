@@ -44,7 +44,7 @@ func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
 				ResourceName:            "google_dataflow_flex_template_job.flex_job",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path"},
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -83,7 +83,7 @@ func TestAccDataflowFlexTemplateJob_streamUpdate(t *testing.T) {
 				ResourceName:            "google_dataflow_flex_template_job.flex_job",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "transform_name_mapping", "state", "container_spec_gcs_path"},
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "transform_name_mapping", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -145,7 +145,7 @@ func TestAccDataflowFlexTemplateJob_FullUpdate(t *testing.T) {
 				ResourceName:            "google_dataflow_flex_template_job.flex_job_fullupdate",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path"},
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFullUpdate(job, bucket, topic),
@@ -154,7 +154,7 @@ func TestAccDataflowFlexTemplateJob_FullUpdate(t *testing.T) {
 				ResourceName:            "google_dataflow_flex_template_job.flex_job_fullupdate",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path"},
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -189,7 +189,7 @@ func TestAccDataflowFlexTemplateJob_withNetwork(t *testing.T) {
 				ResourceName:            "google_dataflow_flex_template_job.flex_job_network",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path"},
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccDataflowFlexTemplateJob_networkUpdate(job, network1, network2, bucket, topic),
@@ -202,7 +202,7 @@ func TestAccDataflowFlexTemplateJob_withNetwork(t *testing.T) {
 				ResourceName:            "google_dataflow_flex_template_job.flex_job_network",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path"},
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -238,7 +238,7 @@ func TestAccDataflowFlexTemplateJob_withSubNetwork(t *testing.T) {
 				ResourceName:            "google_dataflow_flex_template_job.flex_job_subnetwork",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path"},
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccDataflowFlexTemplateJob_subnetworkUpdate(job, network, subnetwork1, subnetwork2, bucket, topic),
@@ -251,7 +251,7 @@ func TestAccDataflowFlexTemplateJob_withSubNetwork(t *testing.T) {
 				ResourceName:            "google_dataflow_flex_template_job.flex_job_subnetwork",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path"},
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -285,7 +285,7 @@ func TestAccDataflowFlexTemplateJob_withIpConfig(t *testing.T) {
 				ResourceName:            "google_dataflow_flex_template_job.flex_job_ipconfig",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "ip_configuration", "state", "container_spec_gcs_path"},
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "ip_configuration", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -319,7 +319,7 @@ func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 				ResourceName:            "google_dataflow_flex_template_job.flex_job_kms",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path"},
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -353,7 +353,87 @@ func TestAccDataflowFlexTemplateJob_withAdditionalExperiments(t *testing.T) {
 				ResourceName:            "google_dataflow_flex_template_job.flex_job_experiments",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "additional_experiments", "container_spec_gcs_path"},
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "additional_experiments", "container_spec_gcs_path", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func TestAccDataflowFlexTemplateJob_withProviderDefaultLabels(t *testing.T) {
+	// This resource uses custom retry logic that cannot be sped up without
+	// modifying the actual resource
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	randStr := acctest.RandString(t, 10)
+	job := "tf-test-dataflow-job-" + randStr
+	bucket := "tf-test-dataflow-bucket-" + randStr
+	topic := "tf-test-topic" + randStr
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataflowFlexTemplateJob_withProviderDefaultLabels(job, bucket, topic),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_fullupdate", false),
+				),
+			},
+			{
+				ResourceName:            "google_dataflow_flex_template_job.flex_job_fullupdate",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccComputeAddress_resourceLabelsOverridesProviderDefaultLabels(job, bucket, topic),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_fullupdate", false),
+				),
+			},
+			{
+				ResourceName:            "google_dataflow_flex_template_job.flex_job_fullupdate",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccComputeAddress_moveResourceLabelToProviderDefaultLabels(job, bucket, topic),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_fullupdate", false),
+				),
+			},
+			{
+				ResourceName:            "google_dataflow_flex_template_job.flex_job_fullupdate",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccComputeAddress_resourceLabelsOverridesProviderDefaultLabels(job, bucket, topic),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_fullupdate", false),
+				),
+			},
+			{
+				ResourceName:            "google_dataflow_flex_template_job.flex_job_fullupdate",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job, bucket, topic),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_fullupdate", false),
+				),
+			},
+			{
+				ResourceName:            "google_dataflow_flex_template_job.flex_job_fullupdate",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -1185,6 +1265,260 @@ resource "google_dataflow_flex_template_job" "flex_job_experiments" {
 
 }
 `, topicName, bucket, job, strings.Join(experiments, `", "`))
+}
+
+func testAccDataflowFlexTemplateJob_withProviderDefaultLabels(job, bucket, topicName string) string {
+	return fmt.Sprintf(`
+
+provider "google" {
+  default_labels = {
+	default_key1 = "default_value1"
+  }
+}
+
+data "google_project" "project" {}
+
+resource "google_pubsub_topic" "example" {
+  name = "%s"
+}
+
+resource "google_service_account" "dataflow-sa" {
+  count = 2
+  account_id   = "dataflow-sa-${count.index}"
+  display_name = "DataFlow Service Account"
+}
+
+resource "google_project_iam_member" "dataflow-worker" {
+  count = 2
+  project = data.google_project.project.project_id
+  role   = "roles/dataflow.worker"
+  member = "serviceAccount:${google_service_account.dataflow-sa[count.index].email}"
+}
+
+resource "google_project_iam_member" "dataflow-storage" {
+  count = 2
+  project = data.google_project.project.project_id
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${google_service_account.dataflow-sa[count.index].email}"
+}
+
+data "google_storage_bucket_object" "flex_template" {
+  name   = "latest/flex/Streaming_Data_Generator"
+  bucket = "dataflow-templates"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name = "%s"
+  location = "US-CENTRAL1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "schema" {
+  name = "schema.json"
+  bucket = google_storage_bucket.bucket.name
+  content = <<EOF
+{
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
+}
+EOF
+}
+
+resource "google_dataflow_flex_template_job" "flex_job_fullupdate" {
+  name = "%s"
+  container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
+  on_delete = "cancel"
+  parameters = {
+    schemaLocation = "gs://${google_storage_bucket_object.schema.bucket}/schema.json"
+    qps = "1"
+    topic = google_pubsub_topic.example.id
+  }
+  labels = {
+    env       = "foo"
+    my_labels = "value"
+  }
+  service_account_email = google_service_account.dataflow-sa[0].email
+  machine_type = "n1-standard-2"
+}
+`, topicName, bucket, job)
+}
+
+func testAccComputeAddress_resourceLabelsOverridesProviderDefaultLabels(job, bucket, topicName string) string {
+	return fmt.Sprintf(`
+
+provider "google" {
+  default_labels = {
+	default_key1 = "default_value1"
+  }
+}
+
+data "google_project" "project" {}
+
+resource "google_pubsub_topic" "example" {
+  name = "%s"
+}
+
+resource "google_service_account" "dataflow-sa" {
+  count = 2
+  account_id   = "dataflow-sa-${count.index}"
+  display_name = "DataFlow Service Account"
+}
+
+resource "google_project_iam_member" "dataflow-worker" {
+  count = 2
+  project = data.google_project.project.project_id
+  role   = "roles/dataflow.worker"
+  member = "serviceAccount:${google_service_account.dataflow-sa[count.index].email}"
+}
+
+resource "google_project_iam_member" "dataflow-storage" {
+  count = 2
+  project = data.google_project.project.project_id
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${google_service_account.dataflow-sa[count.index].email}"
+}
+
+data "google_storage_bucket_object" "flex_template" {
+  name   = "latest/flex/Streaming_Data_Generator"
+  bucket = "dataflow-templates"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name = "%s"
+  location = "US-CENTRAL1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "schema" {
+  name = "schema.json"
+  bucket = google_storage_bucket.bucket.name
+  content = <<EOF
+{
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
+}
+EOF
+}
+
+resource "google_dataflow_flex_template_job" "flex_job_fullupdate" {
+  name = "%s"
+  container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
+  on_delete = "cancel"
+  parameters = {
+    schemaLocation = "gs://${google_storage_bucket_object.schema.bucket}/schema.json"
+    qps = "1"
+    topic = google_pubsub_topic.example.id
+  }
+  labels = {
+    env       = "foo"
+    my_labels = "value"
+	default_key1 = "value1"
+  }
+  service_account_email = google_service_account.dataflow-sa[0].email
+  machine_type = "n1-standard-2"
+}
+`, topicName, bucket, job)
+}
+
+func testAccComputeAddress_moveResourceLabelToProviderDefaultLabels(job, bucket, topicName string) string {
+	return fmt.Sprintf(`
+
+provider "google" {
+  default_labels = {
+	default_key1 = "default_value1"
+	env          = "foo"
+  }
+}
+
+data "google_project" "project" {}
+
+resource "google_pubsub_topic" "example" {
+  name = "%s"
+}
+
+resource "google_service_account" "dataflow-sa" {
+  count = 2
+  account_id   = "dataflow-sa-${count.index}"
+  display_name = "DataFlow Service Account"
+}
+
+resource "google_project_iam_member" "dataflow-worker" {
+  count = 2
+  project = data.google_project.project.project_id
+  role   = "roles/dataflow.worker"
+  member = "serviceAccount:${google_service_account.dataflow-sa[count.index].email}"
+}
+
+resource "google_project_iam_member" "dataflow-storage" {
+  count = 2
+  project = data.google_project.project.project_id
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${google_service_account.dataflow-sa[count.index].email}"
+}
+
+data "google_storage_bucket_object" "flex_template" {
+  name   = "latest/flex/Streaming_Data_Generator"
+  bucket = "dataflow-templates"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name = "%s"
+  location = "US-CENTRAL1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "schema" {
+  name = "schema.json"
+  bucket = google_storage_bucket.bucket.name
+  content = <<EOF
+{
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
+}
+EOF
+}
+
+resource "google_dataflow_flex_template_job" "flex_job_fullupdate" {
+  name = "%s"
+  container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
+  on_delete = "cancel"
+  parameters = {
+    schemaLocation = "gs://${google_storage_bucket_object.schema.bucket}/schema.json"
+    qps = "1"
+    topic = google_pubsub_topic.example.id
+  }
+  labels = {
+    my_labels = "value"
+	default_key1 = "value1"
+  }
+  service_account_email = google_service_account.dataflow-sa[0].email
+  machine_type = "n1-standard-2"
+}
+`, topicName, bucket, job)
 }
 
 func testAccDataflowFlexJobHasOption(t *testing.T, res, option, expectedValue string, wait bool) resource.TestCheckFunc {

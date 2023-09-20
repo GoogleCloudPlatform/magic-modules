@@ -1,6 +1,9 @@
+var domainMappingGoogleProvidedLocationLabel = "cloud.googleapis.com/location"
+var domainMappingGoogleProvidedOverrideLabel = "run.googleapis.com/overrideAt"
+
 var domainMappingGoogleProvidedLabels = []string{
-	"cloud.googleapis.com/location",
-	"run.googleapis.com/overrideAt",
+	domainMappingGoogleProvidedLocationLabel,
+	domainMappingGoogleProvidedOverrideLabel,
 }
 
 func DomainMappingLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {

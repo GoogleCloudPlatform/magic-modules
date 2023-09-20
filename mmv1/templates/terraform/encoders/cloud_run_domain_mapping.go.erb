@@ -13,8 +13,13 @@
 	# limitations under the License.
 -%>
 name := d.Get("name").(string)
-metadata := obj["metadata"].(map[string]interface{})
+raw := obj["metadata"]
+metadata := make(map[string]interface{})
+if raw != nil {
+	metadata = raw.(map[string]interface{})
+}
 metadata["name"] = name
+obj["metadata"] = metadata
 
 // The only acceptable version/kind right now
 obj["apiVersion"] = "domains.cloudrun.com/v1"
