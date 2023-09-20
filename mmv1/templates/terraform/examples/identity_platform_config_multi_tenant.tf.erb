@@ -18,6 +18,7 @@ resource "google_identity_platform_config" "default" {
 
   multi_tenant {
     allow_tenants = true
+    default_tenant_location = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
   }
 
   depends_on = [
