@@ -24,7 +24,7 @@ func TestAccSecurityCenterFolderCustomModule_sccFolderCustomModuleUpdate(t *test
 			"random": {},
 			"time":   {},
 		},
-		CheckDestroy:             testAccCheckSecurityCenterFolderCustomModuleDestroyProducer(t),
+		CheckDestroy: testAccCheckSecurityCenterFolderCustomModuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecurityCenterFolderCustomModule_sccFolderCustomModuleFullExample(context),
