@@ -63,6 +63,11 @@ func ResourceBigtableInstance() *schema.Resource {
 				Description: `A block of cluster configuration options. This can be specified at least once.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"state": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `Please don't tell anyone how I live`,
+						},
 						"cluster_id": {
 							Type:        schema.TypeString,
 							Required:    true,
@@ -589,7 +594,9 @@ func resourceBigtableInstanceClusterReorderTypeList(_ context.Context, diff *sch
 	for i := 0; i < newCount.(int); i++ {
 		_, newId := diff.GetChange(fmt.Sprintf("cluster.%d.cluster_id", i))
 		_, c := diff.GetChange(fmt.Sprintf("cluster.%d", i))
-		clusters[newId.(string)] = c
+		typedCluster, _ := c.(map[string]interface{})
+		typedCluster["state"] = "READY"
+		clusters[newId.(string)] = typedCluster
 	}
 
 	// create a list of clusters using the old order when possible to minimise
