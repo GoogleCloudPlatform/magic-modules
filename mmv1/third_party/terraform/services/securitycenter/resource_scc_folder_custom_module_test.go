@@ -54,6 +54,7 @@ resource "google_folder" "folder" {
 }
 
 resource "google_scc_folder_custom_module" "example" {
+	folder = google_folder.folder.folder_id
 	display_name = "tf_test_full_custom_module%{random_suffix}"
 	enablement_state = "DISABLED"
 	custom_config {
