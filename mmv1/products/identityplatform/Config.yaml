@@ -59,7 +59,6 @@ examples:
       org_id: :ORG_ID
       billing_acct:
         :BILLING_ACCT
-    skip_vcr: true
     skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_create: 'templates/terraform/custom_create/identity_platform_config.go'
@@ -77,6 +76,7 @@ properties:
     name: 'signIn'
     description: |
       Configuration related to local sign in methods.
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: email
