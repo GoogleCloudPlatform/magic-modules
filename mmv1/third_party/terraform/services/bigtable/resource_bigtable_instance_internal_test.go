@@ -202,7 +202,7 @@ func TestUnitBigtable_resourceBigtableInstanceClusterReorderTypeListFunc_error(t
 			"cluster.#": 0,
 		},
 	}
-	if _, err := resourceBigtableInstanceClusterReorderTypeListFunc(d); err == nil {
+	if err := resourceBigtableInstanceClusterReorderTypeListFunc(d, nil); err == nil {
 		t.Errorf("expected error, got success")
 	}
 }
@@ -347,7 +347,11 @@ func TestUnitBigtable_resourceBigtableInstanceClusterReorderTypeListFunc(t *test
 				Before: tc.before,
 				After:  tc.after,
 			}
-			clusters, err := resourceBigtableInstanceClusterReorderTypeListFunc(d)
+			var clusters []interface{}
+			err := resourceBigtableInstanceClusterReorderTypeListFunc(d, func(gotClusters []interface{}) error {
+				clusters = gotClusters
+				return nil
+			})
 			if err != nil {
 				t.Fatalf("bad: %s, error: %v", tn, err)
 			}

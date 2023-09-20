@@ -63,10 +63,6 @@ func ResourceBigtableInstance() *schema.Resource {
 				Description: `A block of cluster configuration options. This can be specified at least once.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"state": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"cluster_id": {
 							Type:        schema.TypeString,
 							Required:    true,
@@ -130,6 +126,11 @@ func ResourceBigtableInstance() *schema.Resource {
 									},
 								},
 							},
+						},
+						"state": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `The state of the cluster`,
 						},
 					},
 				},
@@ -566,28 +567,24 @@ func resourceBigtableInstanceUniqueClusterID(_ context.Context, diff *schema.Res
 // when they're changed.
 func resourceBigtableInstanceClusterReorderTypeList(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 	// separate func to allow unit testing
-	orderedClusters, err := resourceBigtableInstanceClusterReorderTypeListFunc(diff)
-	if err != nil {
-		return err
-	}
-	if err := diff.SetNew("cluster", orderedClusters); err != nil {
-		return fmt.Errorf("Error setting cluster diff: %s", err)
-	}
-	return nil
+	return resourceBigtableInstanceClusterReorderTypeListFunc(diff, func(orderedClusters []interface{}) error {
+		return diff.SetNew("cluster", orderedClusters)
+	})
+
 }
-func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.TerraformResourceDiff) ([]interface{}, error) {
+func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.TerraformResourceDiff, setNew func([]interface{}) error) error {
 	oldCount, newCount := diff.GetChange("cluster.#")
 
 	// Simulate Required:true, MinItems:1 for "cluster". This doesn't work
 	// when the whole `cluster` field is removed on update.
 	if newCount.(int) < 1 {
-		return nil, fmt.Errorf("config is invalid: Too few cluster blocks: Should have at least 1 \"cluster\" block")
+		return fmt.Errorf("config is invalid: Too few cluster blocks: Should have at least 1 \"cluster\" block")
 	}
 
 	// exit early if we're in create (name's old value is nil)
 	n, _ := diff.GetChange("name")
 	if n == nil || n == "" {
-		return nil, nil
+		return nil
 	}
 
 	oldIds := []string{}
@@ -642,6 +639,10 @@ func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.Terrafo
 		}
 	}
 
+	if err := setNew(orderedClusters); err != nil {
+		return err
+	}
+
 	// Clusters can't have their zone, storage_type or kms_key_name updated,
 	// ForceNew if it's changed. This will show a diff with the old state on
 	// the left side and the unmodified new state on the right and the ForceNew
@@ -661,7 +662,7 @@ func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.Terrafo
 		if oZone != nZone {
 			err := diff.ForceNew(fmt.Sprintf("cluster.%d.zone", i))
 			if err != nil {
-				return nil, fmt.Errorf("Error setting cluster diff: %s", err)
+				return fmt.Errorf("Error setting cluster diff: %s", err)
 			}
 		}
 
@@ -670,7 +671,7 @@ func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.Terrafo
 		if oST != nST && currentState.(string) != "CREATING" {
 			err := diff.ForceNew(fmt.Sprintf("cluster.%d.storage_type", i))
 			if err != nil {
-				return nil, fmt.Errorf("Error setting cluster diff: %s", err)
+				return fmt.Errorf("Error setting cluster diff: %s", err)
 			}
 		}
 
@@ -678,12 +679,12 @@ func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.Terrafo
 		if oKey != nKey {
 			err := diff.ForceNew(fmt.Sprintf("cluster.%d.kms_key_name", i))
 			if err != nil {
-				return nil, fmt.Errorf("Error setting cluster diff: %s", err)
+				return fmt.Errorf("Error setting cluster diff: %s", err)
 			}
 		}
 	}
 
-	return orderedClusters, nil
+	return nil
 }
 
 func resourceBigtableInstanceImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
