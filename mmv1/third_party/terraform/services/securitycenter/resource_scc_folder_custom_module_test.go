@@ -46,7 +46,7 @@ func testAccSecurityCenterFolderCustomModule_sccFolderCustomModuleUpdate(context
 	return acctest.Nprintf(`
 resource "google_folder" "folder" {
   parent       = "organizations/%{org_id}"
-  display_name = "Folder"
+  display_name = "tf-test-folder-display-name%{random_suffix}"
 }
 
 resource "google_scc_folder_custom_module" "example" {

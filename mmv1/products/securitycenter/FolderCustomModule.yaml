@@ -33,6 +33,7 @@ examples:
     name: "scc_folder_custom_module_basic"
     primary_resource_id: "example"
     vars:
+      folder_display_name: "folder-display-name"
       display_name: basic_custom_module
     test_env_vars:
       org_id: :ORG_ID
@@ -40,6 +41,7 @@ examples:
     name: "scc_folder_custom_module_full"
     primary_resource_id: "example"
     vars:
+      folder_display_name: "folder-display-name"
       display_name: full_custom_module
     test_env_vars:
       org_id: :ORG_ID
