@@ -2521,7 +2521,6 @@ func TestAccContainerCluster_autoprovisioningDefaultsUpgradeSettings(t *testing.
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_nodeAutoprovisioningNetworkTags(t *testing.T) {
 	t.Parallel()
 
@@ -2548,7 +2547,6 @@ func TestAccContainerCluster_nodeAutoprovisioningNetworkTags(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerCluster_withShieldedNodes(t *testing.T) {
 	t.Parallel()
@@ -2660,7 +2658,6 @@ func TestAccContainerCluster_errorAutopilotLocation(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withAutopilotNetworkTags(t *testing.T) {
 	t.Parallel()
 
@@ -2685,7 +2682,6 @@ func TestAccContainerCluster_withAutopilotNetworkTags(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 	t.Parallel()
