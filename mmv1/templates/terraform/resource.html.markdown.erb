@@ -195,6 +195,33 @@ This resource does not support import.
 
 ```
 <% import_id_formats_from_resource(object).map{ |id| id.gsub('%', '') }.each do |id_format| -%>
+<%= id_format %>
+<% end -%>
+```
+
+## Config-driven import
+<%= object.name -%> can be imported using [`import` blocks](https://developer.hashicorp.com/terraform/language/import) (available in Terraform 1.5+) using any of the accepted formats above. 
+For example:
+<% import_block_id = import_id_formats_from_resource(object).map{ |id| id.gsub('%', '') }[0] -%>
+
+```tf
+resource "<%= terraform_name -%>" "default" {
+<% object.root_properties.select(&:required).each do |prop| -%>
+  <%= prop.name.underscore %> = <value matching imported resource>
+<% end -%>
+}
+
+import {
+  id = <%= import_block_id %>
+  to = <%= terraform_name -%>.default
+}
+```
+
+## CLI-driven import
+<%= object.name -%> can be imported using [the `terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) and any of the accepted formats above:
+
+```
+<% import_id_formats_from_resource(object).map{ |id| id.gsub('%', '') }.each do |id_format| -%>
 $ terraform import <%= terraform_name -%>.default <%= id_format %>
 <% end -%>
 ```
