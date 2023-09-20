@@ -398,3 +398,4 @@ properties:
     values:
       - :PUBLIC
       - :PRIVATE
+    default_value: :PUBLIC
