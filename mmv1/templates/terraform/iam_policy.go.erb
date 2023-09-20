@@ -326,3 +326,9 @@ func (u *<%= resource_name -%>IamUpdater) GetMutexKey() string {
 func (u *<%= resource_name -%>IamUpdater) DescribeResource() string {
 	return fmt.Sprintf("<%= product_ns.downcase -%> <%= object.name.downcase -%> %q", u.GetResourceId())
 }
+
+<%  if object.iam_policy.schema_version && object.iam_policy.state_upgraders -%>
+<%= lines(compile(pwd + "/templates/terraform/state_migrations/#{product_ns.underscore}_#{object.name.underscore}_iam_member.go.erb")) -%>
+<%= lines(compile(pwd + "/templates/terraform/state_migrations/#{product_ns.underscore}_#{object.name.underscore}_iam_binding.go.erb")) -%>
+<%= lines(compile(pwd + "/templates/terraform/state_migrations/#{product_ns.underscore}_#{object.name.underscore}_iam_policy.go.erb")) -%>
+<%  end -%>

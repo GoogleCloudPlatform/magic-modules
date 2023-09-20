@@ -459,9 +459,63 @@ products.each do |product|
 		(iam_policy.min_version && iam_policy.min_version < version)
 	  iam_class_name = product_definition.name + object.name
 -%>
-	"<%= terraform_name -%>_iam_binding":              tpgiamresource.ResourceIamBinding(<%= service -%>.<%= iam_class_name -%>IamSchema, <%= service -%>.<%= iam_class_name -%>IamUpdaterProducer, <%= service -%>.<%= iam_class_name -%>IdParseFunc),
-	"<%= terraform_name -%>_iam_member":               tpgiamresource.ResourceIamMember(<%= service -%>.<%= iam_class_name -%>IamSchema, <%= service -%>.<%= iam_class_name -%>IamUpdaterProducer, <%= service -%>.<%= iam_class_name -%>IdParseFunc),
-	"<%= terraform_name -%>_iam_policy":               tpgiamresource.ResourceIamPolicy(<%= service -%>.<%= iam_class_name -%>IamSchema, <%= service -%>.<%= iam_class_name -%>IamUpdaterProducer, <%= service -%>.<%= iam_class_name -%>IdParseFunc),
+	"<%= terraform_name -%>_iam_binding": tpgiamresource.ResourceIamBinding(
+		<%= service -%>.<%= iam_class_name -%>IamSchema,
+		<%= service -%>.<%= iam_class_name -%>IamUpdaterProducer,
+		<%= service -%>.<%= iam_class_name -%>IdParseFunc,
+		<%- if iam_policy.schema_version%>
+		IamWithSchemaVersion(iam_policy.schema_version),
+		<% end -%>
+		<%- if iam_policy.state_upgraders %>
+		IamWithStateUpgraders([]schema.StateUpgrader{
+			<% for v in 0..object.schema_version-1 -%>
+			{
+				Type: <%= service -%>.Resource<%= "#{resource_name}ResourceV#{v}" -%>IamBinding().CoreConfigSchema().ImpliedType(),
+				Upgrade: <%= service -%>.Resource<%= "#{resource_name}UpgradeV#{v}" -%>IamBinding,
+				Version: <%= v -%>,
+			},
+			<% end -%>
+		}),
+		<% end -%>
+	),
+	"<%= terraform_name -%>_iam_member": tpgiamresource.ResourceIamMember(
+		<%= service -%>.<%= iam_class_name -%>IamSchema,
+		<%= service -%>.<%= iam_class_name -%>IamUpdaterProducer,
+		<%= service -%>.<%= iam_class_name -%>IdParseFunc,
+		<%- if iam_policy.schema_version%>
+		IamWithSchemaVersion(iam_policy.schema_version),
+		<% end -%>
+		<%- if iam_policy.state_upgraders %>
+		IamWithStateUpgraders([]schema.StateUpgrader{
+			<% for v in 0..object.schema_version-1 -%>
+			{
+				Type: <%= service -%>.Resource<%= "#{resource_name}ResourceV#{v}" -%>IamMember().CoreConfigSchema().ImpliedType(),
+				Upgrade: <%= service -%>.Resource<%= "#{resource_name}UpgradeV#{v}" -%>IamMember,
+				Version: <%= v -%>,
+			},
+			<% end -%>
+		}),
+		<% end -%>
+	),
+	"<%= terraform_name -%>_iam_policy": tpgiamresource.ResourceIamPolicy(
+		<%= service -%>.<%= iam_class_name -%>IamSchema,
+		<%= service -%>.<%= iam_class_name -%>IamUpdaterProducer,
+		<%= service -%>.<%= iam_class_name -%>IdParseFunc,
+		<%- if iam_policy.schema_version%>
+		IamWithSchemaVersion(iam_policy.schema_version),
+		<% end -%>
+		<%- if iam_policy.state_upgraders %>
+		IamWithStateUpgraders([]schema.StateUpgrader{
+			<% for v in 0..object.schema_version-1 -%>
+			{
+				Type: <%= service -%>.Resource<%= "#{resource_name}ResourceV#{v}" -%>IamPolicy().CoreConfigSchema().ImpliedType(),
+				Upgrade: <%= service -%>.Resource<%= "#{resource_name}UpgradeV#{v}" -%>IamPolicy,
+				Version: <%= v -%>,
+			},
+			<% end -%>
+		}),
+		<% end -%>
+	),
 <%
 	end # unless iam_policy.nil? || iam_policy.exclude
   end   # product_definition.objects.each do

@@ -114,6 +114,13 @@ module Api
       # Defaults to true
       attr_reader :substitute_zone_value
 
+      # Optional attributes for declaring IAM resource's current version and generating
+      # state_upgrader code to the output .go file from files stored at
+      # mmv1/templates/terraform/state_migrations/
+      # used for maintaining state stability with resources first provisioned on older api versions.
+      attr_reader :schema_version
+      attr_reader :state_upgraders
+
       def validate
         super
 
@@ -143,6 +150,8 @@ module Api
         check :iam_policy_version, type: String
         check :min_version, type: String
         check :substitute_zone_value, type: :boolean, default: true
+        check :schema_version, type: Integer
+        check :state_upgraders, type: :boolean, default: false
       end
     end
   end
