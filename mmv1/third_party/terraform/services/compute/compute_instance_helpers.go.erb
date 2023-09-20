@@ -440,15 +440,6 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 			return nil, fmt.Errorf("exactly one of network, subnetwork, or network_attachment must be provided")
 		}
 
-
-		if networkAttachment != "" {
-			if network != "" {
-				return nil, fmt.Errorf("Cannot have a network provided with networkAttachment given that networkAttachment is associated with a network already")
-			}
-			if subnetwork != "" {
-				return nil, fmt.Errorf("Cannot have a subnetwork provided with networkAttachment given that networkAttachment is associated with a subnetwork already")
-			}
-		}
 		<% else -%>
 
 		network := data["network"].(string)
