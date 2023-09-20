@@ -2659,15 +2659,14 @@ func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 	})
 }
 
-func TestAccComputeInstance_networkAttachmentUpdate(t *testing.T) {
+func TestAccComputeInstance_NetworkAttachmentUpdate(t *testing.T) {
 	t.Parallel()
-	suffix := fmt.Sprintf("%s", acctest.RandString(t, 10))
-	instanceName := fmt.Sprintf("tf-test-%s", suffix)
+	suffix := acctest.RandString(t, 10)
+	envRegion := envvar.GetTestRegionFromEnv()
+	instanceName := fmt.Sprintf("tf-test-compute-instance-%s", suffix)
 
-	context := map[string]interface{}{
-		"suffix":        suffix,
-		"instance_name": instanceName,
-	}
+	networkAttachmentSelflink1 := "google_compute_network_attachment.test_network_attachment_1.self_link"
+	networkAttachmentSelflink2 := "google_compute_network_attachment.test_network_attachment_2.self_link"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -2675,17 +2674,17 @@ func TestAccComputeInstance_networkAttachmentUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_networkAttachmentUpdate(context),
+				Config: testAccComputeInstance_networkAttachmentUpdate(networkAttachmentSelflink1, envRegion, suffix),
 			},
-			computeInstanceImportStep("us-east1-d", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
 			{
-				Config: testAccComputeInstance_networkAttachmentUpdateTwo(context),
+				Config: testAccComputeInstance_networkAttachmentUpdate(networkAttachmentSelflink2, envRegion, suffix),
 			},
-			computeInstanceImportStep("us-east1-d", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
 			{
-				Config: testAccComputeInstance_networkAttachmentUpdate(context),
+				Config: testAccComputeInstance_networkAttachmentUpdate(networkAttachmentSelflink1, envRegion, suffix),
 			},
-			computeInstanceImportStep("us-east1-d", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
 		},
 	})
 }
@@ -7060,58 +7059,63 @@ resource "google_compute_instance" "foobar" {
 `, context)
 }
 
-func testAccComputeInstance_networkAttachmentUpdate(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+func testAccComputeInstance_networkAttachmentUpdate(networkAttachment, region, suffix string) string {
+	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
 	family  = "debian-11"
 	project = "debian-cloud"
 }
 
-resource "google_compute_network" "test-network" {
-	name = "tf-test-network-%{suffix}"
+resource "google_compute_network" "consumer_vpc_1" {
+	name = "tf-test-consumer-net-1-%s"
 	auto_create_subnetworks = false
 }
 
-resource "google_compute_subnetwork" "test-subnetwork1" {
-	name          = "tf-test-compute-subnet-%{suffix}"
-	ip_cidr_range = "10.0.0.0/16"
-	region        = "us-central1"
-	network       = google_compute_network.test-network.id
+resource "google_compute_network" "consumer_vpc_2" {
+	name = "tf-test-consumer-net-2-%s"
+	auto_create_subnetworks = false
 }
 
-resource "google_compute_network_attachment" "test_network_attachment1" {
-	name = "tf-test-network-attachment1-%{suffix}"
-    region = "us-central1"
+resource "google_compute_subnetwork" "consumer_subnet_1" {
+	name          = "tf-test-consumer-subnet-1-%s"
+	ip_cidr_range = "10.0.0.0/16"
+	region        = "%s"
+	network       = google_compute_network.consumer_vpc_1.id
+}
+
+resource "google_compute_subnetwork" "consumer_subnet_2" {
+	name          = "tf-test-consumer-subnet-2-%s"
+	ip_cidr_range = "10.3.0.0/16"
+	region        = "%s"
+	network       = google_compute_network.consumer_vpc_2.id
+}
+
+resource "google_compute_network_attachment" "test_network_attachment_1" {
+	name = "tf-test-network-attachment-1-%s"
+    region = "%s"
     description = "network attachment 1 description"
     connection_preference = "ACCEPT_AUTOMATIC"
 
     subnetworks = [
-        google_compute_subnetwork.test-subnetwork1.self_link
+        google_compute_subnetwork.consumer_subnet_1.self_link
     ]
 }
 
-resource "google_compute_subnetwork" "test-subnetwork2" {
-	name          = "tf-test-compute-subnet2-%{suffix}"
-	ip_cidr_range = "10.3.0.0/16"
-	region        = "us-central1"
-	network       = google_compute_network.test-network.id
-}
-
-resource "google_compute_network_attachment" "test_network_attachment2" {
-	name = "tf-test-network-attachment2-%{suffix}"
-    region = "us-central1"
+resource "google_compute_network_attachment" "test_network_attachment_2" {
+	name = "tf-test-network-attachment-2-%s"
+    region = "%s"
     description = "network attachment 2 description"
     connection_preference = "ACCEPT_AUTOMATIC"
 
     subnetworks = [
-        google_compute_subnetwork.test-subnetwork2.self_link
+        google_compute_subnetwork.consumer_subnet_2.self_link
     ]
 }
 
 resource "google_compute_instance" "foobar" {
-	name         = "%{instance_name}"
+	name         = "tf-test-compute-instance-%s"
 	machine_type = "e2-medium"
-	zone         = "us-east1-d"
+	zone         = "%s-a"
 	allow_stopping_for_update = true
 
 	boot_disk {
@@ -7125,88 +7129,13 @@ resource "google_compute_instance" "foobar" {
 	}
 
 	network_interface{
-		network_attachment = google_compute_network_attachment.test_network_attachment1.self_link
+		network_attachment = %s
 	}
 
 	metadata = {
 		foo = "bar"
 	}
 }
-`, context)
-}
-
-func testAccComputeInstance_networkAttachmentUpdateTwo(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_compute_image" "my_image" {
-	family  = "debian-11"
-	project = "debian-cloud"
-}
-
-resource "google_compute_network" "test-network" {
-	name = "tf-test-network-%{suffix}"
-	auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "test-subnetwork1" {
-	name          = "tf-test-compute-subnet-%{suffix}"
-	ip_cidr_range = "10.0.0.0/16"
-	region        = "us-central1"
-	network       = google_compute_network.test-network.id
-}
-
-resource "google_compute_network_attachment" "test_network_attachment1" {
-	name = "tf-test-network-attachment1-%{suffix}"
-    region = "us-central1"
-    description = "network attachment 1 description"
-    connection_preference = "ACCEPT_AUTOMATIC"
-
-    subnetworks = [
-        google_compute_subnetwork.test-subnetwork1.self_link
-    ]
-}
-
-resource "google_compute_subnetwork" "test-subnetwork2" {
-	name          = "tf-test-compute-subnet2-%{suffix}"
-	ip_cidr_range = "10.3.0.0/16"
-	region        = "us-central1"
-	network       = google_compute_network.test-network.id
-}
-
-resource "google_compute_network_attachment" "test_network_attachment2" {
-	name = "tf-test-network-attachment2-%{suffix}"
-    region = "us-central1"
-    description = "network attachment 2 description"
-    connection_preference = "ACCEPT_AUTOMATIC"
-
-    subnetworks = [
-        google_compute_subnetwork.test-subnetwork2.self_link
-    ]
-}
-
-resource "google_compute_instance" "foobar" {
-	name         = "%{instance_name}"
-	machine_type = "e2-medium"
-	zone         = "us-east1-d"
-	allow_stopping_for_update = true
-
-	boot_disk {
-		initialize_params {
-			image = data.google_compute_image.my_image.id
-		}
-	}
-
-	network_interface {
-		network = "default"
-	}
-
-	network_interface{
-		network_attachment = google_compute_network_attachment.test_network_attachment2.self_link
-	}
-
-	metadata = {
-		foo = "bar"
-	}
-}
-`, context)
+`, suffix, suffix, suffix, region, suffix, region, suffix, region, suffix, region, suffix, region, networkAttachment)
 }
 <% end %>
