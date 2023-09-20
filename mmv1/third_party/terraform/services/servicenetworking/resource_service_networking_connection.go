@@ -285,8 +285,7 @@ func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta inte
 	}
 
 	if err := ServiceNetworkingOperationWaitTime(config, op, "Delete Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
-		log.Printf("[INFO] Error deleting Service Networking Connection: %s", err)
-		return nil
+		return errwrap.Wrapf("Unable to remove Service Networking Connection, err: {{err}}", err)
 	}
 
 	d.SetId("")

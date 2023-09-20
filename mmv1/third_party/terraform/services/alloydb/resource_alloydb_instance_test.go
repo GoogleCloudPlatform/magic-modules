@@ -1,10 +1,12 @@
 package alloydb_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccAlloydbInstance_update(t *testing.T) {
@@ -345,9 +347,17 @@ data "google_compute_network" "default" {
 func TestAccAlloydbInstance_createInstanceWithNetworkConfigAndAllocatedIPRange(t *testing.T) {
 	t.Parallel()
 
+	projectNumber := envvar.GetTestProjectNumberFromEnv()
+	testId := "alloydbinstance-network-config-1"
+	networkName := acctest.BootstrapSharedTestNetwork(t, testId)
+	networkId := fmt.Sprintf("projects/%v/global/networks/%v", projectNumber, networkName)
+	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId, networkId)
+	acctest.BootstrapSharedServiceNetworkingConnection(t, testId)
+
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedTestNetwork(t, "alloydbinstance-network-config"),
+		"network_name":  networkName,
+		"address_name":  addressName,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -368,7 +378,6 @@ resource "google_alloydb_instance" "default" {
   cluster       = google_alloydb_cluster.default.name
   instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "default" {
@@ -376,29 +385,16 @@ resource "google_alloydb_cluster" "default" {
   location   = "us-central1"
   network_config {
     network    = data.google_compute_network.default.id
-    allocated_ip_range = google_compute_global_address.private_ip_alloc.name
+    allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
   }
-  
 }
-
-data "google_project" "project" {}
 
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
 
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = data.google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = data.google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+data "google_compute_global_address" "private_ip_alloc" {
+  name =  "%{address_name}"
 }
 `, context)
 }
