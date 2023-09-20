@@ -51,18 +51,10 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
       'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}',
       '{{membership_id}}',
     ]
+  schema_version: 1
+  state_upgraders: true
 autogen_async: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'gkehub_membership_regional'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
-    primary_resource_id: 'membership'
-    vars:
-      name: 'basic'
-      cluster_name: 'basiccluster'
-    test_env_vars:
-      project: :PROJECT_NAME
-      location: :REGION
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkehub_membership_basic'
     primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'

@@ -1,0 +1,28 @@
+func ResourceGkehubMembershipIamMemberResourceV0() *schema.Resource {
+	return &schema.Resource{
+		Schema: tpgresource.MergeSchemas(tpgiamresource.IamMemberBaseSchema, map[string]*schema.Schema{
+			"project": {
+				Type:     schema.TypeString,
+				Computed: true,
+				Optional: true,
+				ForceNew: true,
+			},
+			"membership_id": {
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+			},
+		}),
+	}
+}
+
+func ResourceGkehubMembershipIamMemberUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+	log.Printf("[DEBUG] Attributes before migration: %#v", rawState)
+
+	// Version 0 didn't support location. Default it to global.
+	rawState["location"] = "global"
+
+	log.Printf("[DEBUG] Attributes after migration: %#v", rawState)
+	return rawState, nil
+}
