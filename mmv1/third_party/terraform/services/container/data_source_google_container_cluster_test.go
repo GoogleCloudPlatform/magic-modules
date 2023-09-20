@@ -66,6 +66,7 @@ resource "google_container_cluster" "kubes" {
   name               = "tf-test-cluster-%s"
   location           = "us-central1-a"
   initial_node_count = 1
+  deletion_protection = false
 }
 
 data "google_container_cluster" "kubes" {
@@ -81,6 +82,7 @@ resource "google_container_cluster" "kubes" {
   name               = "tf-test-cluster-%s"
   location           = "us-central1"
   initial_node_count = 1
+  deletion_protection = false
 }
 
 data "google_container_cluster" "kubes" {
