@@ -82,7 +82,6 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 			"parameters": {
 				Type:             schema.TypeMap,
 				Optional:         true,
-				DiffSuppressFunc: resourceDataflowFlexTemplateJobParameterDiffSuppress,
 			},
 
 			"project": {
@@ -752,7 +751,6 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	if p, ok := d.GetOk("parameters.autoscalingAlgorithm"); ok {
 		if d.HasChange("autoscaling_algorithm") {
 			e := d.Get("autoscaling_algorithm")
-			// p := d.Get("parameters.workerMachineType")
 			return fmt.Errorf("Error setting autoscaling_algorithm, value is supplied twice: autoscaling_algorithm=\"%s\", parameters.autoscalingAlgorithm=\"%s\"", e.(string), p.(string))
 		} else {
 			p := d.Get("parameters.autoscalingAlgorithm")
@@ -763,7 +761,6 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	if p, ok := d.GetOk("parameters.numWorkers"); ok {
 		if d.HasChange("num_workers") {
 			e := d.Get("num_workers")
-			// p := d.Get("parameters.workerMachineType")
 			return fmt.Errorf("Error setting num_workers, value is supplied twice: num_workers=%d, parameters.numWorkers=%d", e.(int), p.(int))
 		} else {
 			p := d.Get("parameters.numWorkers")
@@ -778,7 +775,6 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	if p, ok := d.GetOk("parameters.maxNumWorkers"); ok {
 		if d.HasChange("max_workers") {
 			e := d.Get("max_workers")
-			// p := d.Get("parameters.workerMachineType")
 			return fmt.Errorf("Error setting max_workers, value is supplied twice: max_workers=%d, parameters.maxNumWorkers=%d", e.(int), p.(int))
 		} else {
 			p := d.Get("parameters.maxNumWorkers")
@@ -793,7 +789,6 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	if p, ok := d.GetOk("parameters.network"); ok {
 		if d.HasChange("network") {
 			e := d.Get("network")
-			// p := d.Get("parameters.workerMachineType")
 			return fmt.Errorf("Error setting network, value is supplied twice: network=\"%s\", parameters.network=\"%s\"", e.(string), p.(string))
 		} else {
 			p := d.Get("parameters.network")
@@ -804,7 +799,6 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	if p, ok := d.GetOk("parameters.network"); ok {
 		if d.HasChange("network") {
 			e := d.Get("network")
-			// p := d.Get("parameters.workerMachineType")
 			return fmt.Errorf("Error setting network, value is supplied twice: network=\"%s\", parameters.network=\"%s\"", e.(string), p.(string))
 		} else {
 			p := d.Get("parameters.network")
@@ -815,7 +809,6 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	if p, ok := d.GetOk("parameters.serviceAccountEmail"); ok {
 		if d.HasChange("service_account_email") {
 			e := d.Get("service_account_email")
-			// p := d.Get("parameters.workerMachineType")
 			return fmt.Errorf("Error setting service_account_email, value is supplied twice: service_account_email=\"%s\", parameters.serviceAccountEmail=\"%s\"", e.(string), p.(string))
 		} else {
 			p := d.Get("parameters.serviceAccountEmail")
@@ -826,7 +819,6 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	if p, ok := d.GetOk("parameters.subnetwork"); ok {
 		if d.HasChange("subnetwork") {
 			e := d.Get("subnetwork")
-			// p := d.Get("parameters.workerMachineType")
 			return fmt.Errorf("Error setting subnetwork, value is supplied twice: subnetwork=\"%s\", parameters.subnetwork=\"%s\"", e.(string), p.(string))
 		} else {
 			p := d.Get("parameters.subnetwork")
@@ -837,7 +829,6 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	if p, ok := d.GetOk("parameters.tempLocation"); ok {
 		if d.HasChange("temp_location") {
 			e := d.Get("temp_location")
-			// p := d.Get("parameters.workerMachineType")
 			return fmt.Errorf("Error setting temp_location, value is supplied twice: temp_location=\"%s\", parameters.tempLocation=\"%s\"", e.(string), p.(string))
 		} else {
 			p := d.Get("parameters.tempLocation")
@@ -848,7 +839,6 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	if p, ok := d.GetOk("parameters.stagingLocation"); ok {
 		if d.HasChange("staging_location") {
 			e := d.Get("staging_location")
-			// p := d.Get("parameters.workerMachineType")
 			return fmt.Errorf("Error setting staging_location, value is supplied twice: staging_location=\"%s\", parameters.stagingLocation=\"%s\"", e.(string), p.(string))
 		} else {
 			p := d.Get("parameters.stagingLocation")
@@ -859,7 +849,6 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	if p, ok := d.GetOk("parameters.workerMachineType"); ok {
 		if d.HasChange("machine_type") {
 			e := d.Get("machine_type")
-			// p := d.Get("parameters.workerMachineType")
 			return fmt.Errorf("Error setting machine_type, value is supplied twice: machine_type=\"%s\", parameters.workerMachineType=\"%s\"", e.(string), p.(string))
 		} else {
 			p := d.Get("parameters.workerMachineType")
@@ -870,7 +859,6 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	if p, ok := d.GetOk("parameters.kmsKeyName"); ok {
 		if d.HasChange("kms_key_name") {
 			e := d.Get("kms_key_name")
-			// p := d.Get("parameters.workerMachineType")
 			return fmt.Errorf("Error setting kms_key_name, value is supplied twice: kms_key_name=\"%s\", parameters.kmsKeyName=\"%s\"", e.(string), p.(string))
 		} else {
 			p := d.Get("parameters.kmsKeyName")
@@ -881,7 +869,6 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	if p, ok := d.GetOk("parameters.ipConfiguration"); ok {
 		if d.HasChange("ip_configuration") {
 			e := d.Get("ip_configuration")
-			// p := d.Get("parameters.workerMachineType")
 			return fmt.Errorf("Error setting ip_configuration, value is supplied twice: ip_configuration=\"%s\", parameters.ipConfiguration=\"%s\"", e.(string), p.(string))
 		} else {
 			p := d.Get("parameters.ipConfiguration")
@@ -892,7 +879,6 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	if p, ok := d.GetOk("parameters.enableStreamingEngine"); ok {
 		if d.HasChange("enable_streaming_engine") {
 			e := d.Get("enable_streaming_engine")
-			// p := d.Get("parameters.workerMachineType")
 			return fmt.Errorf("Error setting enable_streaming_engine, value is supplied twice: enable_streaming_engine=%t, parameters.enableStreamingEngine=%t", e.(bool), p.(bool))
 		} else {
 			p := d.Get("parameters.enableStreamingEngine")
@@ -903,7 +889,6 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	if p, ok := d.GetOk("parameters.sdkContainerImage"); ok {
 		if d.HasChange("sdk_container_image") {
 			e := d.Get("sdk_container_image")
-			// p := d.Get("parameters.workerMachineType")
 			return fmt.Errorf("Error setting sdk_container_image, value is supplied twice: sdk_container_image=\"%s\", parameters.sdkContainerImage=\"%s\"", e.(string), p.(string))
 		} else {
 			p := d.Get("parameters.sdkContainerImage")
@@ -914,7 +899,6 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	if p, ok := d.GetOk("parameters.launcherMachineType"); ok {
 		if d.HasChange("launcher_machine_type") {
 			e := d.Get("launcher_machine_type")
-			// p := d.Get("parameters.workerMachineType")
 			return fmt.Errorf("Error setting launcher_machine_type, value is supplied twice: launcher_machine_type=\"%s\", parameters.launcherMachineType=\"%s\"", e.(string), p.(string))
 		} else {
 			p := d.Get("parameters.launcherMachineType")
@@ -943,30 +927,6 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	}
 
 	return nil
-}
-
-func resourceDataflowFlexTemplateJobParameterDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	if strings.HasPrefix(k, "parameters.") {
-		field, _ := strings.CutPrefix(k, "parameters.")
-		log.Printf("[DEBUG] I am suppressing differences: %s -- %s", k, field)
-		envParameter := d.Get(field)
-		if envParameter == nil {
-			return false
-		} else {
-			log.Printf("[DEBUG] New: %s -- Parameter: %s", new, envParameter.(string))
-			// if new != envParameter.(string) && envParameter.(string) != "" {
-			// 	//			if envParameter.(string) == "" {
-			// 	return true
-			// } else {
-			// 	return true
-			// }
-			return true
-		}
-	}
-	log.Printf("[DEBUG] Nothing to suppress: %s", k)
-
-	// For other keys, don't suppress diff.
-	return false
 }
 
 <% end -%>
