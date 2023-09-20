@@ -1,53 +1,30 @@
-<%# IsEmptyValue %>
+var requireConnectors interface{}
 
-<%# obj[clientConnectionConfig]
+setDefaultSSLMode := false
+clientConnectionConfig := make(map[string]interface{})
+sslConfig := make(map[string]interface{})
 
-clientConnectionConfig, ok := obj["clientConnectionConfig"]
-if !ok {
-	clientConnectionConfig = make(map[string]interface{})
-}
-
-var sslConfig map[string]string
-if !ok {
-	clientConnectionConfig = make(map[string]interface{})
-}
-sslConfig = clientConnectionConfig.(map[string]string)
-
-if val, ok := d.GetOkExists("client_connection_config.0.ssl_config.0.ssl_mode"); !ok {
-		sslConfig["sslMode"] = "ENCRYPTED_ONLY"
-		clientConnectionConfig["sslConfig"] = sslConfig
-}
-
-obj["clientConnectionConfig"] = clientConnectionConfig %>
-
-
-<%# ------------ %>
-<%# IDK if this works below cause never tested it %>
-<%# setDefaultSSLMode := false
-
-if v, ok := d.GetOkExists("client_connection_config"); ok {
-	if v, ok := d.GetOkExists("client_connection_config.0.ssl_config"); ok {
-		if v, ok := d.GetOkExists("client_connection_config.0.ssl_config.0.ssl_mode"); ok {
+// Only set the default SSL mode if the user does not specify it
+if obj["clientConnectionConfig"] != nil {
+	c := obj["clientConnectionConfig"].(map[string]interface{})
+	if c["requireConnectors"] != nil {
+		requireConnectors = c["requireConnectors"]
+	}
+	if c["sslConfig"] != nil {
+		s := c["sslConfig"].(map[string]interface{})
+		if s["sslMode"] == nil {
 			setDefaultSSLMode = true
 		}
+	} else {
+		setDefaultSSLMode = true
 	}
 } else {
 	setDefaultSSLMode = true
 }
 
-if setDefaultSSLMode { %>
-	<%# d.Set["client_connection_config.0.ssl_config.0.ssl_mode"] = 'ENCRYPTED_ONLY' %>
-<%# } %>
-
-
-<%# -------- %>
-
-
-<%# var clientConnectionConfig interface{}
-if val, ok := obj["clientConnectionConfig"]; ok {
-	clientConnectionConfig = val
+if setDefaultSSLMode {
+	sslConfig["sslMode"] = "ENCRYPTED_ONLY"
+	clientConnectionConfig["sslConfig"] = sslConfig
+	clientConnectionConfig["requireConnectors"] = requireConnectors
+	obj["clientConnectionConfig"] = clientConnectionConfig
 }
-
-if clientConnectionConfig == nil {
-	clientConnectionConfig.sslConfig.sslMode = 'ENCRYPTED_ONLY';
-} %>

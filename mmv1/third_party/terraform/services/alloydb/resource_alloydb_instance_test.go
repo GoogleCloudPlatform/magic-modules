@@ -466,6 +466,49 @@ func TestAccAlloydbInstance_clientConnectionConfig_sslModeDefault(t *testing.T) 
 	})
 }
 
+func TestAccAlloydbInstance_clientConnectionConfig_noChangeIfDefaultIsSet(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"network_name":  acctest.BootstrapSharedTestNetwork(t, "alloydbinstance-sslmodefaultset"),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbInstance_noClientConnectionConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "client_connection_config.0.ssl_config.0.ssl_mode", "ENCRYPTED_ONLY"),
+				),
+			},
+			{
+				ResourceName:      "google_alloydb_instance.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccAlloydbInstance_defaultClientConnectionConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "client_connection_config.0.ssl_config.0.ssl_mode", "ENCRYPTED_ONLY"),
+				),
+			},
+			{
+				ResourceName:      "google_alloydb_instance.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccAlloydbInstance_alloydbInstanceBasicExample(context),
+			},
+		},
+	})
+}
+
+
 func TestAccAlloydbInstance_clientConnectionConfig_noChangeIfRemoved(t *testing.T) {
 	t.Parallel()
 
@@ -616,13 +659,13 @@ resource "google_alloydb_instance" "default" {
   instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
 
-  depends_on = [google_service_networking_connection.vpc_connection]
+  client_connection_config {
+    ssl_config {
+      ssl_mode = "ENCRYPTED_ONLY"
+    }
+  }
 
-	client_connection_config {
-		ssl_config {
-			ssl_mode = "ENCRYPTED_ONLY"
-		}
-	}
+	depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "default" {
@@ -660,14 +703,14 @@ resource "google_alloydb_instance" "default" {
   instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
 
-  depends_on = [google_service_networking_connection.vpc_connection]
-
-	client_connection_config {
-		require_connectors = %{require_connectors}
-		ssl_config {
-			ssl_mode = %{ssl_mode}
-		}
-	}
+  client_connection_config {
+    require_connectors = %{require_connectors}
+    ssl_config {
+      ssl_mode = %{ssl_mode}
+    }
+  }
+	
+	depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "default" {
