@@ -1,4 +1,4 @@
-func ResourceGkehubMembershipIamPolicyResourceV0() *schema.Resource {
+func ResourceGKEHubMembershipIamPolicyResourceV0() *schema.Resource {
 	return &schema.Resource{
 		Schema: tpgresource.MergeSchemas(tpgiamresource.IamPolicyBaseSchema, map[string]*schema.Schema{
 			"project": {
@@ -17,7 +17,7 @@ func ResourceGkehubMembershipIamPolicyResourceV0() *schema.Resource {
 	}
 }
 
-func ResourceGkehubMembershipIamPolicyUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+func ResourceGKEHubMembershipIamPolicyUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
 	log.Printf("[DEBUG] Attributes before migration: %#v", rawState)
 
 	// Version 0 didn't support location. Default it to global.

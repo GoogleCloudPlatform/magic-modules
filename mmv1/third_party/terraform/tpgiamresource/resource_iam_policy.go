@@ -57,8 +57,8 @@ func ResourceIamPolicy(parentSpecificSchema map[string]*schema.Schema, newUpdate
 		Importer: &schema.ResourceImporter{
 			State: iamPolicyImport(resourceIdParser),
 		},
-		UseJSONNumber: true,
-		SchemaVersion: settings.SchemaVersion,
+		UseJSONNumber:  true,
+		SchemaVersion:  settings.SchemaVersion,
 		StateUpgraders: settings.StateUpgraders,
 	}
 }

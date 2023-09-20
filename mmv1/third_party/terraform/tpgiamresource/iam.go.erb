@@ -500,7 +500,7 @@ func IamWithSchemaVersion(v int) func(s *IamSettings) {
 }
 
 func IamWithStateUpgraders(upgraders []schema.StateUpgrader) func(s *IamSettings) {
-	return func(s *IamSettings) {}
+	return func(s *IamSettings) {
 		s.StateUpgraders = upgraders
 	}
 }

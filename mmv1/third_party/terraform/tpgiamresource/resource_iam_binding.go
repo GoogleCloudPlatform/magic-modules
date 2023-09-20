@@ -80,8 +80,8 @@ func ResourceIamBinding(parentSpecificSchema map[string]*schema.Schema, newUpdat
 		Importer: &schema.ResourceImporter{
 			State: iamBindingImport(newUpdaterFunc, resourceIdParser),
 		},
-		UseJSONNumber: true,
-		SchemaVersion: settings.SchemaVersion,
+		UseJSONNumber:  true,
+		SchemaVersion:  settings.SchemaVersion,
 		StateUpgraders: settings.StateUpgraders,
 	}
 }

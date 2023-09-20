@@ -464,14 +464,14 @@ products.each do |product|
 		<%= service -%>.<%= iam_class_name -%>IamUpdaterProducer,
 		<%= service -%>.<%= iam_class_name -%>IdParseFunc,
 		<%- if iam_policy.schema_version%>
-		IamWithSchemaVersion(iam_policy.schema_version),
+		tpgiamresource.IamWithSchemaVersion(<%= iam_policy.schema_version %>),
 		<% end -%>
 		<%- if iam_policy.state_upgraders %>
-		IamWithStateUpgraders([]schema.StateUpgrader{
-			<% for v in 0..object.schema_version-1 -%>
+		tpgiamresource.IamWithStateUpgraders([]schema.StateUpgrader{
+			<% for v in 0..iam_policy.schema_version-1 -%>
 			{
-				Type: <%= service -%>.Resource<%= "#{resource_name}ResourceV#{v}" -%>IamBinding().CoreConfigSchema().ImpliedType(),
-				Upgrade: <%= service -%>.Resource<%= "#{resource_name}UpgradeV#{v}" -%>IamBinding,
+				Type: <%= service -%>.Resource<%= "#{iam_class_name}IamBindingResourceV#{v}" -%>().CoreConfigSchema().ImpliedType(),
+				Upgrade: <%= service -%>.Resource<%= "#{iam_class_name}IamBindingUpgradeV#{v}" -%>,
 				Version: <%= v -%>,
 			},
 			<% end -%>
@@ -482,15 +482,15 @@ products.each do |product|
 		<%= service -%>.<%= iam_class_name -%>IamSchema,
 		<%= service -%>.<%= iam_class_name -%>IamUpdaterProducer,
 		<%= service -%>.<%= iam_class_name -%>IdParseFunc,
-		<%- if iam_policy.schema_version%>
-		IamWithSchemaVersion(iam_policy.schema_version),
+		<% if iam_policy.schema_version -%>
+		tpgiamresource.IamWithSchemaVersion(<%= iam_policy.schema_version %>),
 		<% end -%>
-		<%- if iam_policy.state_upgraders %>
-		IamWithStateUpgraders([]schema.StateUpgrader{
-			<% for v in 0..object.schema_version-1 -%>
+		<% if iam_policy.state_upgraders -%>
+		tpgiamresource.IamWithStateUpgraders([]schema.StateUpgrader{
+			<% for v in 0..iam_policy.schema_version-1 -%>
 			{
-				Type: <%= service -%>.Resource<%= "#{resource_name}ResourceV#{v}" -%>IamMember().CoreConfigSchema().ImpliedType(),
-				Upgrade: <%= service -%>.Resource<%= "#{resource_name}UpgradeV#{v}" -%>IamMember,
+				Type: <%= service -%>.Resource<%= "#{iam_class_name}IamMemberResourceV#{v}" -%>().CoreConfigSchema().ImpliedType(),
+				Upgrade: <%= service -%>.Resource<%= "#{iam_class_name}IamMemberUpgradeV#{v}" -%>,
 				Version: <%= v -%>,
 			},
 			<% end -%>
@@ -502,14 +502,14 @@ products.each do |product|
 		<%= service -%>.<%= iam_class_name -%>IamUpdaterProducer,
 		<%= service -%>.<%= iam_class_name -%>IdParseFunc,
 		<%- if iam_policy.schema_version%>
-		IamWithSchemaVersion(iam_policy.schema_version),
+		tpgiamresource.IamWithSchemaVersion(<%= iam_policy.schema_version %>),
 		<% end -%>
 		<%- if iam_policy.state_upgraders %>
-		IamWithStateUpgraders([]schema.StateUpgrader{
-			<% for v in 0..object.schema_version-1 -%>
+		tpgiamresource.IamWithStateUpgraders([]schema.StateUpgrader{
+			<% for v in 0..iam_policy.schema_version-1 -%>
 			{
-				Type: <%= service -%>.Resource<%= "#{resource_name}ResourceV#{v}" -%>IamPolicy().CoreConfigSchema().ImpliedType(),
-				Upgrade: <%= service -%>.Resource<%= "#{resource_name}UpgradeV#{v}" -%>IamPolicy,
+				Type: <%= service -%>.Resource<%= "#{iam_class_name}IamPolicyResourceV#{v}" -%>().CoreConfigSchema().ImpliedType(),
+				Upgrade: <%= service -%>.Resource<%= "#{iam_class_name}IamPolicyUpgradeV#{v}" -%>,
 				Version: <%= v -%>,
 			},
 			<% end -%>
