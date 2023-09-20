@@ -32,19 +32,27 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "scc_folder_custom_module_basic"
     primary_resource_id: "example"
+    pull_external: true
     vars:
-      folder_display_name: "folder-display-name"
+      folder_display_name: "folder-name"
       display_name: basic_custom_module
+      sleep: ""
     test_env_vars:
       org_id: :ORG_ID
+    test_vars_overrides:
+      sleep: "true"
   - !ruby/object:Provider::Terraform::Examples
     name: "scc_folder_custom_module_full"
     primary_resource_id: "example"
+    pull_external: true
     vars:
-      folder_display_name: "folder-display-name"
+      folder_display_name: "folder-name"
       display_name: full_custom_module
+      sleep: ""
     test_env_vars:
       org_id: :ORG_ID
+    test_vars_overrides:
+      sleep: "true"
 
 parameters:
   - !ruby/object:Api::Type::String

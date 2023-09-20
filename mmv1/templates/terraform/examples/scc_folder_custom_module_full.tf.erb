@@ -2,6 +2,13 @@ resource "google_folder" "folder" {
   parent       = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
   display_name = "<%= ctx[:vars]['folder_display_name'] %>"
 }
+<%- if ctx[:vars]['sleep'] %>
+resource "time_sleep" "wait_1_minute" {
+	depends_on = [google_folder.folder]
+
+	create_duration = "1m"
+}
+<% end -%>
 
 resource "google_scc_folder_custom_module" "<%= ctx[:primary_resource_id] %>" {
 	folder = google_folder.folder.folder_id
@@ -34,4 +41,8 @@ resource "google_scc_folder_custom_module" "<%= ctx[:primary_resource_id] %>" {
 		description = "Description of the custom module"
 		recommendation = "Steps to resolve violation"
 	}
+
+<%- if ctx[:vars]['sleep'] %>
+	depends_on = [time_sleep.wait_1_minute]
+<% end -%>
 }
