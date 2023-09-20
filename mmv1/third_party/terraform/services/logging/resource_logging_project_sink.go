@@ -150,8 +150,17 @@ func resourceLoggingProjectSinkUpdate(d *schema.ResourceData, meta interface{}) 
 	sink, updateMask := expandResourceLoggingSinkForUpdate(d)
 	uniqueWriterIdentity := d.Get("unique_writer_identity").(bool)
 
-	_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Patch(d.Id(), sink).
+	customWriterIdentity := d.Get("custom_writer_identity").(string)
+
+	if (customWriterIdentity != ""){
+		_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Patch(d.Id(), sink).
+		UpdateMask(updateMask).UniqueWriterIdentity(uniqueWriterIdentity).CustomWriterIdentity(customWriterIdentity).Do()
+	} else {
+		_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Patch(d.Id(), sink).
 		UpdateMask(updateMask).UniqueWriterIdentity(uniqueWriterIdentity).Do()
+	}
+
+	
 	if err != nil {
 		return err
 	}

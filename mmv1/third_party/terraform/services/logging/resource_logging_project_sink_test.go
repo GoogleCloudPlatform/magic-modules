@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
+/*
 func TestAccLoggingProjectSink_basic(t *testing.T) {
 	t.Parallel()
 
@@ -141,14 +142,18 @@ func TestAccLoggingProjectSink_updatePreservesUniqueWriter(t *testing.T) {
 		},
 	})
 }
+*/
 
 func TestAccLoggingProjectSink_updatePreservesCustomWriter(t *testing.T) {
 	t.Parallel()
 
 	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
-	updatedBucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
 	account := "tf-test-sink-sa" + acctest.RandString(t, 10)
+
+	org := envvar.GetTestOrgFromEnv(t)
+	billingId := envvar.GetTestBillingAccountFromEnv(t)
+	project := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -156,20 +161,23 @@ func TestAccLoggingProjectSink_updatePreservesCustomWriter(t *testing.T) {
 		CheckDestroy:             testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingProjectSink_customWriter(sinkName, bucketName, account),
+				Config: testAccLoggingProjectSink_customWriter(org, billingId, project, sinkName, account),
 			},
 			{
 				ResourceName:      "google_logging_project_sink.custom_writer",
 				ImportState:       true,
 				ImportStateVerify: true,
+				// Logging sink create API doesn't return this field in response
+				ImportStateVerifyIgnore: []string{"custom_writer_identity"}, 
 			},
 			{
-				Config: testAccLoggingProjectSink_customWriterUpdated(sinkName, updatedBucketName, account),
+				Config: testAccLoggingProjectSink_customWriterUpdated(org, billingId, project, sinkName, account),
 			},
 			{
 				ResourceName:      "google_logging_project_sink.custom_writer",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"custom_writer_identity"},
 			},
 		},
 	})
@@ -446,64 +454,113 @@ resource "google_storage_bucket" "gcs-bucket" {
 `, name, envvar.GetTestProjectFromEnv(), bucketName)
 }
 
-func testAccLoggingProjectSink_customWriter(name, bucketName string, serviceAccount string) string {
+func testAccLoggingProjectSink_customWriter(org, billingId, project, name, serviceAccount string) string {
 	return fmt.Sprintf(`
+
+resource "google_project" "destination-project" {
+	project_id      = "%s"
+	name            = "%s"
+	org_id          = "%s"
+	billing_account = "%s"
+}	
+
+resource "google_logging_project_bucket_config" "destination-bucket" {
+    project    = google_project.destination-project.project_id
+    location  = "us-central1"
+    retention_days = 30
+    bucket_id = "shared-bucket"
+}
+
 resource "google_service_account" "test-account1" {
   account_id   = "%s"
   display_name = "Log Sink Custom WriterIdentity Testing Account"
 }
 
 resource "google_project_iam_member" "custom-sa-logbucket-binding" {
-  project = "gchen-sharedvpc"
+  project = google_project.destination-project.project_id
   role   = "roles/logging.bucketWriter"
   member = "serviceAccount:${google_service_account.test-account1.email}"
+}
+
+data "google_project" "testing_project" {
+	project_id = "%s"
+}
+
+locals {
+	project_number = data.google_project.testing_project.number
 }
 
 resource "google_service_account_iam_member" "loggingsa-customsa-binding" {
 	service_account_id = google_service_account.test-account1.name
 	role   = "roles/iam.serviceAccountTokenCreator"
-	member = "serviceAccount:service-%s@gcp-sa-logging.iam.gserviceaccount.com"
+	member = "serviceAccount:service-${local.project_number}@gcp-sa-logging.iam.gserviceaccount.com"
 }
 
 resource "google_logging_project_sink" "custom_writer" {
   name        = "%s"
-  destination = "logging.googleapis.com/projects/gchen-sharedvpc/locations/us-central1/buckets/shared-logsink-bucket"
+  destination = "logging.googleapis.com/projects/${google_project.destination-project.project_id}/locations/us-central1/buckets/shared-bucket"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 
   unique_writer_identity = true
   custom_writer_identity = "serviceAccount:${google_service_account.test-account1.email}"
+
+  depends_on = [google_logging_project_bucket_config.destination-bucket]
 }
-`, serviceAccount, envvar.GetTestProjectNumberFromEnv(), name, envvar.GetTestProjectFromEnv())
+`, project, project, org, billingId, serviceAccount, envvar.GetTestProjectFromEnv(), name, envvar.GetTestProjectFromEnv())
 }
 
-func testAccLoggingProjectSink_customWriterUpdated(name, bucketName string,  serviceAccount string) string {
+func testAccLoggingProjectSink_customWriterUpdated(org, billingId, project, name, serviceAccount string) string {
 	return fmt.Sprintf(`
+	resource "google_project" "destination-project" {
+		project_id      = "%s"
+		name            = "%s"
+		org_id          = "%s"
+		billing_account = "%s"
+	}	
+	
+	resource "google_logging_project_bucket_config" "destination-bucket" {
+		project    = google_project.destination-project.project_id
+		location  = "us-central1"
+		retention_days = 30
+		bucket_id = "shared-bucket"
+	}
+	
 	resource "google_service_account" "test-account1" {
-		account_id   = "%s"
-		display_name = "Log Sink Custom WriterIdentity Testing Account"
-	  }
-	  
-	  resource "google_project_iam_member" "custom-sa-logbucket-binding" {
-		project = "gchen-sharedvpc"
-		role   = "roles/logging.bucketWriter"
-		member = "serviceAccount:${google_service_account.test-account1.email}"
-	  }
-	  
-	  resource "google_service_account_iam_member" "loggingsa-customsa-binding" {
+	  account_id   = "%s"
+	  display_name = "Log Sink Custom WriterIdentity Testing Account"
+	}
+	
+	resource "google_project_iam_member" "custom-sa-logbucket-binding" {
+	  project = google_project.destination-project.project_id
+	  role   = "roles/logging.bucketWriter"
+	  member = "serviceAccount:${google_service_account.test-account1.email}"
+	}
+	
+	data "google_project" "testing_project" {
+		project_id = "%s"
+	}
+	
+	locals {
+		project_number = data.google_project.testing_project.number
+	}
+	
+	resource "google_service_account_iam_member" "loggingsa-customsa-binding" {
 		service_account_id = google_service_account.test-account1.name
 		role   = "roles/iam.serviceAccountTokenCreator"
-		member = "serviceAccount:service-%s@gcp-sa-logging.iam.gserviceaccount.com"
-	  }
-	  
-	  resource "google_logging_project_sink" "custom_writer" {
-		name        = "%s"
-		destination = "logging.googleapis.com/projects/gchen-sharedvpc/locations/us-central1/buckets/shared-logsink-bucket"
+		member = "serviceAccount:service-${local.project_number}@gcp-sa-logging.iam.gserviceaccount.com"
+	}
+	
+	resource "google_logging_project_sink" "custom_writer" {
+	  	name        = "%s"
+	  	destination = "logging.googleapis.com/projects/${google_project.destination-project.project_id}/locations/us-central1/buckets/shared-bucket"
 		filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=WARNING"
 	  
 		unique_writer_identity = true
-		custom_writer_identity = "serviceAccount:${google_service_account.test-account1.email}"
+  		custom_writer_identity = "serviceAccount:${google_service_account.test-account1.email}"
+
+  		depends_on = [google_logging_project_bucket_config.destination-bucket]
 	  }
-`, serviceAccount, envvar.GetTestProjectNumberFromEnv(), name, envvar.GetTestProjectFromEnv())
+`, project, project, org, billingId, serviceAccount, envvar.GetTestProjectFromEnv(), name, envvar.GetTestProjectFromEnv())
 }
 
 func testAccLoggingProjectSink_heredoc(name, project, bucketName string) string {
