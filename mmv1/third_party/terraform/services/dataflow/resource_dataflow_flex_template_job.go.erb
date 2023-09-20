@@ -6,13 +6,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 	"google.golang.org/api/googleapi"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -79,8 +80,9 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 			},
 
 			"parameters": {
-				Type:     schema.TypeMap,
-				Optional: true,
+				Type:             schema.TypeMap,
+				Optional:         true,
+				DiffSuppressFunc: resourceDataflowFlexTemplateJobParameterDiffSuppress,
 			},
 
 			"project": {
@@ -111,6 +113,7 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 				Optional: true,
 				// ForceNew applies to both stream and batch jobs
 				ForceNew:    true,
+				Computed:    true,
 				Description: `The initial number of Google Compute Engine instances for the job.`,
 			},
 
@@ -119,6 +122,7 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 				Optional: true,
 				// ForceNew applies to both stream and batch jobs
 				ForceNew:    true,
+				Computed:    true,
 				Description: `The maximum number of Google Compute Engine instances to be made available to your pipeline during execution, from 1 to 1000.`,
 			},
 
@@ -146,12 +150,14 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 			"sdk_container_image": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: `Docker registry location of container image to use for the 'worker harness. Default is the container for the version of the SDK. Note this field is only valid for portable pipelines.`,
 			},
 
 			"network": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Computed:         true,
 				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 				Description:      `The network to which VMs will be assigned. If it is not provided, "default" will be used.`,
 			},
@@ -159,6 +165,7 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 			"subnetwork": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Computed:         true,
 				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 				Description:      `The subnetwork to which VMs will be assigned. Should be of the form "regions/REGION/subnetworks/SUBNETWORK".`,
 			},
@@ -166,12 +173,14 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 			"machine_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: `The machine type to use for the job.`,
 			},
 
 			"kms_key_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: `The name for the Cloud KMS key for the job. Key format is: projects/PROJECT_ID/locations/LOCATION/keyRings/KEY_RING/cryptoKeys/KEY`,
 			},
 
@@ -202,12 +211,14 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 			"autoscaling_algorithm": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: `The algorithm to use for autoscaling`,
 			},
 
 			"launcher_machine_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: `The machine type to use for launching the job. The default is n1-standard-1.`,
 			},
 
@@ -225,7 +236,7 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 // resourceDataflowFlexTemplateJobCreate creates a Flex Template Job from TF code.
 func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -240,7 +251,7 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	env, err := resourceDataflowFlexJobSetupEnv(d, config)
+	env, updatedParameters, err := resourceDataflowFlexJobSetupEnv(d, config)
 	if err != nil {
 		return err
 	}
@@ -249,7 +260,7 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
 			ContainerSpecGcsPath: d.Get("container_spec_gcs_path").(string),
 			JobName:              d.Get("name").(string),
-			Parameters:           tpgresource.ExpandStringMap(d, "parameters"),
+			Parameters:           updatedParameters,
 			Environment:          &env,
 		},
 	}
@@ -275,35 +286,185 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 	return resourceDataflowFlexTemplateJobRead(d, meta)
 }
 
-func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_tpg.Config) (dataflow.FlexTemplateRuntimeEnvironment, error) {
+func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_tpg.Config) (dataflow.FlexTemplateRuntimeEnvironment, map[string]string, error) {
+
+	updatedParameters := tpgresource.ExpandStringMap(d, "parameters")
 
 	additionalExperiments := tpgresource.ConvertStringSet(d.Get("additional_experiments").(*schema.Set))
 
+	var autoscalingAlgorithm string
+	if p, ok := d.GetOk("parameters.autoscalingAlgorithm"); ok {
+		delete(updatedParameters, "autoscalingAlgorithm")
+		autoscalingAlgorithm = p.(string)
+	} else {
+		if v, ok := d.GetOk("autoscaling_algorithm"); ok {
+			autoscalingAlgorithm = v.(string)
+		}
+	}
+
+	var numWorkers int
+	if p, ok := d.GetOk("parameters.numWorkers"); ok {
+		number, err := strconv.Atoi(p.(string))
+		if err != nil {
+			return dataflow.FlexTemplateRuntimeEnvironment{}, updatedParameters, fmt.Errorf("parameters.numWorkers must have a valid integer assigned to it, current value is %s", p.(string))
+		}
+		delete(updatedParameters, "numWorkers")
+		numWorkers = number
+	} else {
+		if v, ok := d.GetOk("num_workers"); ok {
+			numWorkers = v.(int)
+		}
+	}
+
+	var maxNumWorkers int
+	if p, ok := d.GetOk("parameters.maxNumWorkers"); ok {
+		number, err := strconv.Atoi(p.(string))
+		if err != nil {
+			return dataflow.FlexTemplateRuntimeEnvironment{}, updatedParameters, fmt.Errorf("parameters.maxNumWorkers must have a valid integer assigned to it, current value is %s", p.(string))
+		}
+		delete(updatedParameters, "maxNumWorkers")
+		maxNumWorkers = number
+	} else {
+		if v, ok := d.GetOk("max_workers"); ok {
+			maxNumWorkers = v.(int)
+		}
+	}
+
+	var network string
+	if p, ok := d.GetOk("parameters.network"); ok {
+		delete(updatedParameters, "network")
+		network = p.(string)
+	} else {
+		if v, ok := d.GetOk("network"); ok {
+			network = v.(string)
+		}
+	}
+
+	var serviceAccountEmail string
+	if p, ok := d.GetOk("parameters.serviceAccountEmail"); ok {
+		delete(updatedParameters, "serviceAccountEmail")
+		serviceAccountEmail = p.(string)
+	} else {
+		if v, ok := d.GetOk("service_account_email"); ok {
+			serviceAccountEmail = v.(string)
+		}
+	}
+
+	var subnetwork string
+	if p, ok := d.GetOk("parameters.subnetwork"); ok {
+		d.Set("parameters.subnetwork", nil)
+		subnetwork = p.(string)
+	} else {
+		if v, ok := d.GetOk("subnetwork"); ok {
+			subnetwork = v.(string)
+		}
+	}
+
+	var tempLocation string
+	if p, ok := d.GetOk("parameters.tempLocation"); ok {
+		delete(updatedParameters, "tempLocation")
+		tempLocation = p.(string)
+	} else {
+		if v, ok := d.GetOk("temp_location"); ok {
+			tempLocation = v.(string)
+		}
+	}
+
+	var stagingLocation string
+	if p, ok := d.GetOk("parameters.stagingLocation"); ok {
+		delete(updatedParameters, "stagingLocation")
+		stagingLocation = p.(string)
+	} else {
+		if v, ok := d.GetOk("staging_location"); ok {
+			stagingLocation = v.(string)
+		}
+	}
+
+	var machineType string
+	if p, ok := d.GetOk("parameters.workerMachineType"); ok {
+		delete(updatedParameters, "workerMachineType")
+		machineType = p.(string)
+	} else {
+		if v, ok := d.GetOk("machine_type"); ok {
+			machineType = v.(string)
+		}
+	}
+
+	var kmsKeyName string
+	if p, ok := d.GetOk("parameters.kmsKeyName"); ok {
+		delete(updatedParameters, "kmsKeyName")
+		kmsKeyName = p.(string)
+	} else {
+		if v, ok := d.GetOk("kms_key_name"); ok {
+			kmsKeyName = v.(string)
+		}
+	}
+
+	var ipConfiguration string
+	if p, ok := d.GetOk("parameters.ipConfiguration"); ok {
+		delete(updatedParameters, "ipConfiguration")
+		ipConfiguration = p.(string)
+	} else {
+		if v, ok := d.GetOk("ip_configuration"); ok {
+			ipConfiguration = v.(string)
+		}
+	}
+
+	var enableStreamingEngine bool
+	if p, ok := d.GetOk("parameters.enableStreamingEngine"); ok {
+		delete(updatedParameters, "enableStreamingEngine")
+		enableStreamingEngine = p.(bool)
+	} else {
+		if v, ok := d.GetOk("enable_streaming_engine"); ok {
+			enableStreamingEngine = v.(bool)
+		}
+	}
+
+	var sdkContainerImage string
+	if p, ok := d.GetOk("parameters.sdkContainerImage"); ok {
+		delete(updatedParameters, "sdkContainerImage")
+		sdkContainerImage = p.(string)
+	} else {
+		if v, ok := d.GetOk("sdk_container_image"); ok {
+			sdkContainerImage = v.(string)
+		}
+	}
+
+	var launcherMachineType string
+	if p, ok := d.GetOk("parameters.launcherMachineType"); ok {
+		delete(updatedParameters, "launcherMachineType")
+		launcherMachineType = p.(string)
+	} else {
+		if v, ok := d.GetOk("launcher_machine_type"); ok {
+			launcherMachineType = v.(string)
+		}
+	}
+
 	env := dataflow.FlexTemplateRuntimeEnvironment{
 		AdditionalUserLabels:  tpgresource.ExpandStringMap(d, "labels"),
-		AutoscalingAlgorithm:  d.Get("autoscaling_algorithm").(string),
-		NumWorkers:            int64(d.Get("num_workers").(int)),
-		MaxWorkers:            int64(d.Get("max_workers").(int)),
-		Network:               d.Get("network").(string),
-		ServiceAccountEmail:   d.Get("service_account_email").(string),
-		Subnetwork:            d.Get("subnetwork").(string),
-		TempLocation:          d.Get("temp_location").(string),
-		StagingLocation:       d.Get("staging_location").(string),
-		MachineType:           d.Get("machine_type").(string),
-		KmsKeyName:            d.Get("kms_key_name").(string),
-		IpConfiguration:       d.Get("ip_configuration").(string),
-		EnableStreamingEngine: d.Get("enable_streaming_engine").(bool),
+		AutoscalingAlgorithm:  autoscalingAlgorithm,
+		NumWorkers:            int64(numWorkers),
+		MaxWorkers:            int64(maxNumWorkers),
+		Network:               network,
+		ServiceAccountEmail:   serviceAccountEmail,
+		Subnetwork:            subnetwork,
+		TempLocation:          tempLocation,
+		StagingLocation:       stagingLocation,
+		MachineType:           machineType,
+		KmsKeyName:            kmsKeyName,
+		IpConfiguration:       ipConfiguration,
+		EnableStreamingEngine: enableStreamingEngine,
 		AdditionalExperiments: additionalExperiments,
-		SdkContainerImage:     d.Get("sdk_container_image").(string),
-		LauncherMachineType:   d.Get("launcher_machine_type").(string),
+		SdkContainerImage:     sdkContainerImage,
+		LauncherMachineType:   launcherMachineType,
 	}
-	return env, nil
+	return env, updatedParameters, nil
 }
 
 // resourceDataflowFlexTemplateJobRead reads a Flex Template Job resource.
 func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -365,7 +526,7 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 	if err := d.Set("num_workers", optionsMap["numWorkers"]); err != nil {
 		return fmt.Errorf("Error setting num_workers: %s", err)
 	}
-	if err := d.Set("max_workers", optionsMap["maxWorkers"]); err != nil {
+	if err := d.Set("max_workers", optionsMap["maxNumWorkers"]); err != nil {
 		return fmt.Errorf("Error setting max_workers: %s", err)
 	}
 	if err := d.Set("staging_location", optionsMap["stagingLocation"]); err != nil {
@@ -439,7 +600,7 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 	}
 
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -456,7 +617,7 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 
 	tnamemapping := tpgresource.ExpandStringMap(d, "transform_name_mapping")
 
-	env, err := resourceDataflowFlexJobSetupEnv(d, config)
+	env, _, err := resourceDataflowFlexJobSetupEnv(d, config)
 	if err != nil {
 		return err
 	}
@@ -470,12 +631,12 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 	request := dataflow.LaunchFlexTemplateRequest{
 		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
 
-			ContainerSpecGcsPath: d.Get("container_spec_gcs_path").(string),
-			JobName:              d.Get("name").(string),
-			Parameters:           tpgresource.ExpandStringMap(d, "parameters"),
+			ContainerSpecGcsPath:  d.Get("container_spec_gcs_path").(string),
+			JobName:               d.Get("name").(string),
+			Parameters:            tpgresource.ExpandStringMap(d, "parameters"),
 			TransformNameMappings: tnamemapping,
-			Environment:          &env,
-			Update:               true,
+			Environment:           &env,
+			Update:                true,
 		},
 	}
 
@@ -503,7 +664,7 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 
 func resourceDataflowFlexTemplateJobDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -585,6 +746,182 @@ func resourceDataflowFlexTemplateJobDelete(d *schema.ResourceData, meta interfac
 }
 
 func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+
+	log.Printf("[DEBUG] I am customizing differences: machine_type: %s", "test")
+
+	if p, ok := d.GetOk("parameters.autoscalingAlgorithm"); ok {
+		if d.HasChange("autoscaling_algorithm") {
+			e := d.Get("autoscaling_algorithm")
+			// p := d.Get("parameters.workerMachineType")
+			return fmt.Errorf("Error setting autoscaling_algorithm, value is supplied twice: autoscaling_algorithm=\"%s\", parameters.autoscalingAlgorithm=\"%s\"", e.(string), p.(string))
+		} else {
+			p := d.Get("parameters.autoscalingAlgorithm")
+			d.SetNew("autoscaling_algorithm", p.(string))
+		}
+	}
+
+	if p, ok := d.GetOk("parameters.numWorkers"); ok {
+		if d.HasChange("num_workers") {
+			e := d.Get("num_workers")
+			// p := d.Get("parameters.workerMachineType")
+			return fmt.Errorf("Error setting num_workers, value is supplied twice: num_workers=%d, parameters.numWorkers=%d", e.(int), p.(int))
+		} else {
+			p := d.Get("parameters.numWorkers")
+			number, err := strconv.Atoi(p.(string))
+			if err != nil {
+				return fmt.Errorf("parameters.maxNumWorkers must have a valid integer assigned to it, current value is %s", p.(string))
+			}
+			d.SetNew("num_workers", number)
+		}
+	}
+
+	if p, ok := d.GetOk("parameters.maxNumWorkers"); ok {
+		if d.HasChange("max_workers") {
+			e := d.Get("max_workers")
+			// p := d.Get("parameters.workerMachineType")
+			return fmt.Errorf("Error setting max_workers, value is supplied twice: max_workers=%d, parameters.maxNumWorkers=%d", e.(int), p.(int))
+		} else {
+			p := d.Get("parameters.maxNumWorkers")
+			number, err := strconv.Atoi(p.(string))
+			if err != nil {
+				return fmt.Errorf("parameters.maxNumWorkers must have a valid integer assigned to it, current value is %s", p.(string))
+			}
+			d.SetNew("max_workers", number)
+		}
+	}
+
+	if p, ok := d.GetOk("parameters.network"); ok {
+		if d.HasChange("network") {
+			e := d.Get("network")
+			// p := d.Get("parameters.workerMachineType")
+			return fmt.Errorf("Error setting network, value is supplied twice: network=\"%s\", parameters.network=\"%s\"", e.(string), p.(string))
+		} else {
+			p := d.Get("parameters.network")
+			d.SetNew("network", p.(string))
+		}
+	}
+
+	if p, ok := d.GetOk("parameters.network"); ok {
+		if d.HasChange("network") {
+			e := d.Get("network")
+			// p := d.Get("parameters.workerMachineType")
+			return fmt.Errorf("Error setting network, value is supplied twice: network=\"%s\", parameters.network=\"%s\"", e.(string), p.(string))
+		} else {
+			p := d.Get("parameters.network")
+			d.SetNew("network", p.(string))
+		}
+	}
+
+	if p, ok := d.GetOk("parameters.serviceAccountEmail"); ok {
+		if d.HasChange("service_account_email") {
+			e := d.Get("service_account_email")
+			// p := d.Get("parameters.workerMachineType")
+			return fmt.Errorf("Error setting service_account_email, value is supplied twice: service_account_email=\"%s\", parameters.serviceAccountEmail=\"%s\"", e.(string), p.(string))
+		} else {
+			p := d.Get("parameters.serviceAccountEmail")
+			d.SetNew("service_account_email", p.(string))
+		}
+	}
+
+	if p, ok := d.GetOk("parameters.subnetwork"); ok {
+		if d.HasChange("subnetwork") {
+			e := d.Get("subnetwork")
+			// p := d.Get("parameters.workerMachineType")
+			return fmt.Errorf("Error setting subnetwork, value is supplied twice: subnetwork=\"%s\", parameters.subnetwork=\"%s\"", e.(string), p.(string))
+		} else {
+			p := d.Get("parameters.subnetwork")
+			d.SetNew("subnetwork", p.(string))
+		}
+	}
+
+	if p, ok := d.GetOk("parameters.tempLocation"); ok {
+		if d.HasChange("temp_location") {
+			e := d.Get("temp_location")
+			// p := d.Get("parameters.workerMachineType")
+			return fmt.Errorf("Error setting temp_location, value is supplied twice: temp_location=\"%s\", parameters.tempLocation=\"%s\"", e.(string), p.(string))
+		} else {
+			p := d.Get("parameters.tempLocation")
+			d.SetNew("temp_location", p.(string))
+		}
+	}
+
+	if p, ok := d.GetOk("parameters.stagingLocation"); ok {
+		if d.HasChange("staging_location") {
+			e := d.Get("staging_location")
+			// p := d.Get("parameters.workerMachineType")
+			return fmt.Errorf("Error setting staging_location, value is supplied twice: staging_location=\"%s\", parameters.stagingLocation=\"%s\"", e.(string), p.(string))
+		} else {
+			p := d.Get("parameters.stagingLocation")
+			d.SetNew("staging_location", p.(string))
+		}
+	}
+
+	if p, ok := d.GetOk("parameters.workerMachineType"); ok {
+		if d.HasChange("machine_type") {
+			e := d.Get("machine_type")
+			// p := d.Get("parameters.workerMachineType")
+			return fmt.Errorf("Error setting machine_type, value is supplied twice: machine_type=\"%s\", parameters.workerMachineType=\"%s\"", e.(string), p.(string))
+		} else {
+			p := d.Get("parameters.workerMachineType")
+			d.SetNew("machine_type", p.(string))
+		}
+	}
+
+	if p, ok := d.GetOk("parameters.kmsKeyName"); ok {
+		if d.HasChange("kms_key_name") {
+			e := d.Get("kms_key_name")
+			// p := d.Get("parameters.workerMachineType")
+			return fmt.Errorf("Error setting kms_key_name, value is supplied twice: kms_key_name=\"%s\", parameters.kmsKeyName=\"%s\"", e.(string), p.(string))
+		} else {
+			p := d.Get("parameters.kmsKeyName")
+			d.SetNew("kms_key_name", p.(string))
+		}
+	}
+
+	if p, ok := d.GetOk("parameters.ipConfiguration"); ok {
+		if d.HasChange("ip_configuration") {
+			e := d.Get("ip_configuration")
+			// p := d.Get("parameters.workerMachineType")
+			return fmt.Errorf("Error setting ip_configuration, value is supplied twice: ip_configuration=\"%s\", parameters.ipConfiguration=\"%s\"", e.(string), p.(string))
+		} else {
+			p := d.Get("parameters.ipConfiguration")
+			d.SetNew("ip_configuration", p.(string))
+		}
+	}
+
+	if p, ok := d.GetOk("parameters.enableStreamingEngine"); ok {
+		if d.HasChange("enable_streaming_engine") {
+			e := d.Get("enable_streaming_engine")
+			// p := d.Get("parameters.workerMachineType")
+			return fmt.Errorf("Error setting enable_streaming_engine, value is supplied twice: enable_streaming_engine=%t, parameters.enableStreamingEngine=%t", e.(bool), p.(bool))
+		} else {
+			p := d.Get("parameters.enableStreamingEngine")
+			d.SetNew("enable_streaming_engine", p.(string))
+		}
+	}
+
+	if p, ok := d.GetOk("parameters.sdkContainerImage"); ok {
+		if d.HasChange("sdk_container_image") {
+			e := d.Get("sdk_container_image")
+			// p := d.Get("parameters.workerMachineType")
+			return fmt.Errorf("Error setting sdk_container_image, value is supplied twice: sdk_container_image=\"%s\", parameters.sdkContainerImage=\"%s\"", e.(string), p.(string))
+		} else {
+			p := d.Get("parameters.sdkContainerImage")
+			d.SetNew("sdk_container_image", p.(string))
+		}
+	}
+
+	if p, ok := d.GetOk("parameters.launcherMachineType"); ok {
+		if d.HasChange("launcher_machine_type") {
+			e := d.Get("launcher_machine_type")
+			// p := d.Get("parameters.workerMachineType")
+			return fmt.Errorf("Error setting launcher_machine_type, value is supplied twice: launcher_machine_type=\"%s\", parameters.launcherMachineType=\"%s\"", e.(string), p.(string))
+		} else {
+			p := d.Get("parameters.launcherMachineType")
+			d.SetNew("launcher_machine_type", p.(string))
+		}
+	}
+
 	// All non-virtual fields are ForceNew for batch jobs
 	if d.Get("type") == "JOB_TYPE_BATCH" {
 		resourceSchema := ResourceDataflowFlexTemplateJob().Schema
@@ -606,6 +943,30 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	}
 
 	return nil
+}
+
+func resourceDataflowFlexTemplateJobParameterDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if strings.HasPrefix(k, "parameters.") {
+		field, _ := strings.CutPrefix(k, "parameters.")
+		log.Printf("[DEBUG] I am suppressing differences: %s -- %s", k, field)
+		envParameter := d.Get(field)
+		if envParameter == nil {
+			return false
+		} else {
+			log.Printf("[DEBUG] New: %s -- Parameter: %s", new, envParameter.(string))
+			// if new != envParameter.(string) && envParameter.(string) != "" {
+			// 	//			if envParameter.(string) == "" {
+			// 	return true
+			// } else {
+			// 	return true
+			// }
+			return true
+		}
+	}
+	log.Printf("[DEBUG] Nothing to suppress: %s", k)
+
+	// For other keys, don't suppress diff.
+	return false
 }
 
 <% end -%>
