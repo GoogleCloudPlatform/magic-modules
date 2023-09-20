@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func TestGetUnavailableClusterZones(t *testing.T) {
+func TestUnitBigtable_getUnavailableClusterZones(t *testing.T) {
 	cases := map[string]struct {
 		clusterZones     []string
 		unavailableZones []string
@@ -54,7 +54,7 @@ func TestGetUnavailableClusterZones(t *testing.T) {
 	}
 }
 
-func TestGetInstanceFromResponse(t *testing.T) {
+func TestUnitBigtable_getInstanceFromResponse(t *testing.T) {
 	instanceName := "test-instance"
 	originalId := "original_value"
 	cases := map[string]struct {
@@ -127,6 +127,70 @@ func TestGetInstanceFromResponse(t *testing.T) {
 		gotId := d.Id()
 		if gotId != tc.wantId {
 			t.Errorf("bad ID: %s, got %v, want %q", tn, gotId, tc.wantId)
+		}
+	}
+}
+
+func TestUnitBigtable_flattenBigtableCluster(t *testing.T) {
+	cases := map[string]struct {
+		clusterInfo *bigtable.ClusterInfo
+		want        map[string]interface{}
+	}{
+		"SSD auto scaling": {
+			clusterInfo: &bigtable.ClusterInfo{
+				StorageType: bigtable.SSD,
+				Zone:        "zone1",
+				ServeNodes:  5,
+				Name:        "ssd-cluster",
+				KMSKeyName:  "KMS",
+				State:       "CREATING",
+				AutoscalingConfig: &bigtable.AutoscalingConfig{
+					MinNodes:                  3,
+					MaxNodes:                  7,
+					CPUTargetPercent:          50,
+					StorageUtilizationPerNode: 60,
+				},
+			},
+			want: map[string]interface{}{
+				"zone":         "zone1",
+				"num_nodes":    5,
+				"cluster_id":   "ssd-cluster",
+				"storage_type": "SSD",
+				"kms_key_name": "KMS",
+				"state":        "CREATING",
+				"autoscaling_config": []map[string]interface{}{
+					map[string]interface{}{
+						"min_nodes":      3,
+						"max_nodes":      7,
+						"cpu_target":     50,
+						"storage_target": 60,
+					},
+				},
+			},
+		},
+		"HDD manual scaling": {
+			clusterInfo: &bigtable.ClusterInfo{
+				StorageType: bigtable.HDD,
+				Zone:        "zone2",
+				ServeNodes:  7,
+				Name:        "hdd-cluster",
+				KMSKeyName:  "KMS",
+				State:       "READY",
+			},
+			want: map[string]interface{}{
+				"zone":         "zone2",
+				"num_nodes":    7,
+				"cluster_id":   "hdd-cluster",
+				"storage_type": "HDD",
+				"kms_key_name": "KMS",
+				"state":        "READY",
+			},
+		},
+	}
+
+	for tn, tc := range cases {
+		if got := flattenBigtableCluster(tc.clusterInfo); !reflect.DeepEqual(got, tc.want) {
+			t.Errorf("bad: %s, got %q, want %q", tn, got, tc.want)
 		}
 	}
 }

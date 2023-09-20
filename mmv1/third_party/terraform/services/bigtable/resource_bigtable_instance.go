@@ -64,9 +64,8 @@ func ResourceBigtableInstance() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"state": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: `Please don't tell anyone how I live`,
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"cluster_id": {
 							Type:        schema.TypeString,
