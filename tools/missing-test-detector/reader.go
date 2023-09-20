@@ -224,7 +224,11 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 							test.Steps = append(test.Steps, step)
 						} else if ident, ok := keyValueExpr.Value.(*ast.Ident); ok {
 							if configVar, ok := varDecls[ident.Name]; ok {
-								step, err := readConfigBasicLit(configVar)
+								configStr, err := strconv.Unquote(configVar.Value)
+								if err != nil {
+									errs = append(errs, err)
+								}
+								step, err := readConfigStr(configStr)
 								if err != nil {
 									errs = append(errs, err)
 								}
@@ -257,90 +261,109 @@ func readConfigFunc(configFunc *ast.FuncDecl) (Step, error) {
 	for _, stmt := range configFunc.Body.List {
 		if returnStmt, ok := stmt.(*ast.ReturnStmt); ok {
 			for _, result := range returnStmt.Results {
-				if basicLit, ok := result.(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
-					return readConfigBasicLit(basicLit)
+				configStr, err := readConfigFuncResult(result)
+				if err != nil {
+					return nil, err
 				}
-				if callExpr, ok := result.(*ast.CallExpr); ok {
-					return readConfigFuncCallExpr(callExpr)
+				if configStr != "" {
+					return readConfigStr(configStr)
 				}
 			}
-			return nil, fmt.Errorf("failed to find a call expression in results %v", returnStmt.Results)
+			return nil, fmt.Errorf("failed to find a config string in results %v", returnStmt.Results)
 		}
 	}
 	return nil, fmt.Errorf("failed to find a return statement in %v", configFunc.Body.List)
 }
 
+// Read the return result of a config func and return the config string.
+func readConfigFuncResult(result ast.Expr) (string, error) {
+	if basicLit, ok := result.(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
+		return strconv.Unquote(basicLit.Value)
+	} else if callExpr, ok := result.(*ast.CallExpr); ok {
+		return readConfigFuncCallExpr(callExpr)
+	} else if binaryExpr, ok := result.(*ast.BinaryExpr); ok {
+		xConfigStr, err := readConfigFuncResult(binaryExpr.X)
+		if err != nil {
+			return "", err
+		}
+		yConfigStr, err := readConfigFuncResult(binaryExpr.Y)
+		if err != nil {
+			return "", err
+		}
+		return xConfigStr + yConfigStr, nil
+	}
+	return "", fmt.Errorf("unknown config func result %v (%T)", result, result)
+}
+
 // Read the call expression in the config function that returns the config string.
 // The call expression can contain a nested call expression.
-func readConfigFuncCallExpr(configFuncCallExpr *ast.CallExpr) (Step, error) {
+// Return the config string.
+func readConfigFuncCallExpr(configFuncCallExpr *ast.CallExpr) (string, error) {
 	if len(configFuncCallExpr.Args) == 0 {
-		return nil, fmt.Errorf("no arguments found for call expression %v", configFuncCallExpr)
+		return "", fmt.Errorf("no arguments found for call expression %v", configFuncCallExpr)
 	}
 	if basicLit, ok := configFuncCallExpr.Args[0].(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
-		return readConfigBasicLit(basicLit)
+		return strconv.Unquote(basicLit.Value)
 	} else if nestedCallExpr, ok := configFuncCallExpr.Args[0].(*ast.CallExpr); ok {
 		return readConfigFuncCallExpr(nestedCallExpr)
 	}
-	return nil, fmt.Errorf("no string literal found in arguments to call expression %v", configFuncCallExpr)
+	return "", fmt.Errorf("no string literal found in arguments to call expression %v", configFuncCallExpr)
 }
 
-func readConfigBasicLit(configBasicLit *ast.BasicLit) (Step, error) {
-	if configStr, err := strconv.Unquote(configBasicLit.Value); err != nil {
-		return nil, err
-	} else {
-		// Remove template variables because they interfere with hcl parsing.
-		pattern := regexp.MustCompile("%{[^{}]*}")
-		// Replace with a value that can be parsed outside quotation marks.
-		configStr = pattern.ReplaceAllString(configStr, "true")
-		parser := hclparse.NewParser()
-		file, diagnostics := parser.ParseHCL([]byte(configStr), "config.hcl")
-		if diagnostics.HasErrors() {
-			return nil, fmt.Errorf("errors parsing hcl: %v", diagnostics.Errs())
-		}
-		content, diagnostics := file.Body.Content(&hcl.BodySchema{
-			Blocks: []hcl.BlockHeaderSchema{
-				{
-					Type:       "resource",
-					LabelNames: []string{"type", "name"},
-				},
-				{
-					Type:       "data",
-					LabelNames: []string{"type", "name"},
-				},
-				{
-					Type:       "output",
-					LabelNames: []string{"name"},
-				},
-				{
-					Type: "locals",
-				},
-			},
-		})
-		if diagnostics.HasErrors() {
-			return nil, fmt.Errorf("errors getting hcl body content: %v", diagnostics.Errs())
-		}
-		m := make(map[string]Resources)
-		errs := make([]error, 0)
-		for _, block := range content.Blocks {
-			if len(block.Labels) != 2 {
-				continue
-			}
-			if _, ok := m[block.Labels[0]]; !ok {
-				// Create an empty map for this resource type.
-				m[block.Labels[0]] = make(Resources)
-			}
-			// Use the resource name as a key.
-			resourceConfig, err := readHCLBlockBody(block.Body, file.Bytes)
-			if err != nil {
-				errs = append(errs, err)
-			}
-			m[block.Labels[0]][block.Labels[1]] = resourceConfig
-		}
-		if len(errs) > 0 {
-			return m, fmt.Errorf("errors reading hcl blocks: %v", errs)
-		}
-		return m, nil
+// Read the config string and return a test step.
+func readConfigStr(configStr string) (Step, error) {
+	// Remove template variables because they interfere with hcl parsing.
+	pattern := regexp.MustCompile("%{[^{}]*}")
+	// Replace with a value that can be parsed outside quotation marks.
+	configStr = pattern.ReplaceAllString(configStr, "true")
+	parser := hclparse.NewParser()
+	file, diagnostics := parser.ParseHCL([]byte(configStr), "config.hcl")
+	if diagnostics.HasErrors() {
+		return nil, fmt.Errorf("errors parsing hcl: %v", diagnostics.Errs())
 	}
+	content, diagnostics := file.Body.Content(&hcl.BodySchema{
+		Blocks: []hcl.BlockHeaderSchema{
+			{
+				Type:       "resource",
+				LabelNames: []string{"type", "name"},
+			},
+			{
+				Type:       "data",
+				LabelNames: []string{"type", "name"},
+			},
+			{
+				Type:       "output",
+				LabelNames: []string{"name"},
+			},
+			{
+				Type: "locals",
+			},
+		},
+	})
+	if diagnostics.HasErrors() {
+		return nil, fmt.Errorf("errors getting hcl body content: %v", diagnostics.Errs())
+	}
+	m := make(map[string]Resources)
+	errs := make([]error, 0)
+	for _, block := range content.Blocks {
+		if len(block.Labels) != 2 {
+			continue
+		}
+		if _, ok := m[block.Labels[0]]; !ok {
+			// Create an empty map for this resource type.
+			m[block.Labels[0]] = make(Resources)
+		}
+		// Use the resource name as a key.
+		resourceConfig, err := readHCLBlockBody(block.Body, file.Bytes)
+		if err != nil {
+			errs = append(errs, err)
+		}
+		m[block.Labels[0]][block.Labels[1]] = resourceConfig
+	}
+	if len(errs) > 0 {
+		return m, fmt.Errorf("errors reading hcl blocks: %v", errs)
+	}
+	return m, nil
 }
 
 func readHCLBlockBody(body hcl.Body, fileBytes []byte) (Resource, error) {
