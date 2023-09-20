@@ -7381,10 +7381,10 @@ resource "google_compute_instance" "foobar" {
       name                        = "external-ipv6-access-config"
       network_tier                = "PREMIUM"
     }
-	access_config {
-	  network_tier = "STANDARD"
+    access_config {
+      network_tier = "STANDARD"
     }
-	security_policy = google_compute_region_security_policy.policyforinstance.self_link
+    security_policy = google_compute_region_security_policy.policyforinstance.self_link
   }
 
   metadata = {
