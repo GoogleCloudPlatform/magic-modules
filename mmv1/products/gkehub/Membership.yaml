@@ -60,6 +60,11 @@ examples:
     vars:
       name: 'basic'
       cluster_name: 'basiccluster'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkehub_membership_issuer'
     primary_resource_id: 'membership'
