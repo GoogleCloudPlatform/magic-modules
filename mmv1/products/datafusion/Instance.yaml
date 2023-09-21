@@ -141,7 +141,7 @@ properties:
     name: 'enableRbac'
     description: |
       Option to enable granular role-based access control.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       The resource labels for instance to use to annotate any related underlying resources,

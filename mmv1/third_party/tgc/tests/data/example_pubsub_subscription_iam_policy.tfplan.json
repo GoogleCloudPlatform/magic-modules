@@ -14,6 +14,9 @@
           "values": {
             "ack_deadline_seconds": 20,
             "dead_letter_policy": [],
+            "effective_labels": {
+              "test-label1": "test-value1"
+            },
             "enable_message_ordering": null,
             "filter": null,
             "labels": {
@@ -30,6 +33,9 @@
             ],
             "retain_acked_messages": null,
             "retry_policy": [],
+            "terraform_labels": {
+              "test-label1": "test-value1"
+            },
             "timeouts": null,
             "topic": "example-pubsub-topic"
           },
@@ -76,6 +82,9 @@
         "after": {
           "ack_deadline_seconds": 20,
           "dead_letter_policy": [],
+          "effective_labels": {
+            "test-label1": "test-value1"
+          },
           "enable_message_ordering": null,
           "filter": null,
           "labels": {
@@ -92,11 +101,15 @@
           ],
           "retain_acked_messages": null,
           "retry_policy": [],
+          "terraform_labels": {
+            "test-label1": "test-value1"
+          },
           "timeouts": null,
           "topic": "example-pubsub-topic"
         },
         "after_unknown": {
           "dead_letter_policy": [],
+          "effective_labels": {},
           "expiration_policy": true,
           "id": true,
           "labels": {},
@@ -106,11 +119,13 @@
               "oidc_token": []
             }
           ],
-          "retry_policy": []
+          "retry_policy": [],
+          "terraform_labels": {}
         },
         "before_sensitive": false,
         "after_sensitive": {
           "dead_letter_policy": [],
+          "effective_labels": {},
           "expiration_policy": [],
           "labels": {},
           "push_config": [
@@ -118,7 +133,8 @@
               "oidc_token": []
             }
           ],
-          "retry_policy": []
+          "retry_policy": [],
+          "terraform_labels": {}
         }
       }
     },

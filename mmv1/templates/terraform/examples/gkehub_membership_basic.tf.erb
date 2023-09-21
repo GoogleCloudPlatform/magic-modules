@@ -11,4 +11,8 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
+
+  labels = {
+    env = "test"
+  }
 }
