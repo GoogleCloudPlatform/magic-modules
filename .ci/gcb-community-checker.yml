@@ -22,13 +22,6 @@ steps:
       - user.name
       - "Modular Magician Diff Process"
 
-  # Fetch main (only if it's not already present)
-  - name: "gcr.io/cloud-builders/git"
-    args:
-      - fetch
-      - origin
-      - main
-
   # Display commit log for clarity
   - name: "gcr.io/cloud-builders/git"
     args:
@@ -40,14 +33,22 @@ steps:
   - name: "gcr.io/cloud-builders/git"
     id: findMergeBase
     entrypoint: "bash"
+    env:
+      - BASE_BRANCH=$_BASE_BRANCH
     args:
       - "-c"
       - |
-        base_commit=$(git merge-base origin/main HEAD)
-        echo "Common ancestor commit: $base_commit"
-        git diff $base_commit origin/main -- .ci/
-        git diff $base_commit origin/main -- .ci/ > /workspace/ci.diff
-        git apply /workspace/ci.diff --allow-empty
+        git fetch origin main
+        if [ "$BASE_BRANCH" != "main" ]; then
+          echo "Checking out .ci/ folder from main"
+          git checkout origin/main -- .ci/
+        else
+          base_commit=$(git merge-base origin/main HEAD)
+          echo "Common ancestor commit: $base_commit"
+          git diff $base_commit upstream/main -- .ci/
+          git diff $base_commit upstream/main -- .ci/ > /workspace/ci.diff
+          git apply ./ci.diff --allow-empty
+        fi
 
   - name: 'gcr.io/graphite-docker-images/go-plus'
     entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
