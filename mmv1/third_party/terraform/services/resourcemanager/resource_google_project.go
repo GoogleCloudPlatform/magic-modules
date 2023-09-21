@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
@@ -39,6 +40,10 @@ func ResourceGoogleProject() *schema.Resource {
 		Read:   resourceGoogleProjectRead,
 		Update: resourceGoogleProjectUpdate,
 		Delete: resourceGoogleProjectDelete,
+
+		CustomizeDiff: customdiff.All(
+			tpgresource.SetLabelsDiff,
+		),
 
 		Importer: &schema.ResourceImporter{
 			State: resourceProjectImportState,
@@ -112,6 +117,13 @@ func ResourceGoogleProject() *schema.Resource {
 				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
 			},
 
+			"terraform_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `The combination of labels configured directly on the resource and default labels configured on the provider.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+
 			"effective_labels": {
 				Type:        schema.TypeMap,
 				Computed:    true,
@@ -147,8 +159,8 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	if _, ok := d.GetOk("labels"); ok {
-		project.Labels = tpgresource.ExpandLabels(d)
+	if _, ok := d.GetOk("effective_labels"); ok {
+		project.Labels = tpgresource.ExpandEffectiveLabels(d)
 	}
 
 	var op *cloudresourcemanager.Operation
@@ -296,8 +308,11 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("name", p.Name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
-	if err := d.Set("labels", tpgresource.FlattenLabels(p.Labels, d)); err != nil {
+	if err := tpgresource.SetLabels(p.Labels, d, "labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	if err := tpgresource.SetLabels(p.Labels, d, "terraform_labels"); err != nil {
+		return fmt.Errorf("Error setting terraform_labels: %s", err)
 	}
 	if err := d.Set("effective_labels", p.Labels); err != nil {
 		return fmt.Errorf("Error setting effective_labels: %s", err)
@@ -444,8 +459,8 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	// Project Labels have changed
-	if ok := d.HasChange("labels"); ok {
-		p.Labels = tpgresource.ExpandLabels(d)
+	if ok := d.HasChange("effective_labels"); ok {
+		p.Labels = tpgresource.ExpandEffectiveLabels(d)
 
 		// Do Update on project
 		if p, err = updateProject(config, d, project_name, userAgent, p); err != nil {

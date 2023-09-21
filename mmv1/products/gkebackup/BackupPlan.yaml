@@ -138,8 +138,8 @@ properties:
           If set to True, no further update is allowed on this policy, including
           the locked field itself.
         default_from_api: true
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: labels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description: |
       Description: A set of custom labels supplied by the user.
       A list of key->value pairs.

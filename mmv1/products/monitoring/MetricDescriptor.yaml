@@ -69,7 +69,7 @@ properties:
       the DNS name custom.googleapis.com, external.googleapis.com, or
       logging.googleapis.com/user/.
   - !ruby/object:Api::Type::Array
-    name: labels
+    name: 'labels'
     description:
       The set of labels that can be used to describe a specific instance of this
       metric type. In order to delete a label, the entire resource must be

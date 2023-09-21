@@ -31,12 +31,14 @@ func ResourceBigtableInstance() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(60 * time.Minute),
 			Update: schema.DefaultTimeout(60 * time.Minute),
+			Read:   schema.DefaultTimeout(60 * time.Minute),
 		},
 
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 			resourceBigtableInstanceClusterReorderTypeList,
 			resourceBigtableInstanceUniqueClusterID,
+			tpgresource.SetLabelsDiff,
 		),
 
 		SchemaVersion: 1,
@@ -163,6 +165,13 @@ func ResourceBigtableInstance() *schema.Resource {
 				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
 			},
 
+			"terraform_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `The combination of labels configured directly on the resource and default labels configured on the provider.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+
 			"effective_labels": {
 				Type:        schema.TypeMap,
 				Computed:    true,
@@ -206,8 +215,8 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	}
 	conf.DisplayName = displayName.(string)
 
-	if _, ok := d.GetOk("labels"); ok {
-		conf.Labels = tpgresource.ExpandLabels(d)
+	if _, ok := d.GetOk("effective_labels"); ok {
+		conf.Labels = tpgresource.ExpandEffectiveLabels(d)
 	}
 
 	switch d.Get("instance_type").(string) {
@@ -266,13 +275,11 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 
 	instanceName := d.Get("name").(string)
 
-	instance, err := c.InstanceInfo(ctx, instanceName)
-	if err != nil {
-		if tpgresource.IsNotFoundGrpcError(err) {
-			log.Printf("[WARN] Removing %s because it's gone", instanceName)
-			d.SetId("")
-			return nil
-		}
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, d.Timeout(schema.TimeoutRead))
+	defer cancel()
+	instancesResponse, err := c.Instances(ctxWithTimeout)
+	instance, stop, err := getInstanceFromResponse(instancesResponse, instanceName, err, d)
+	if stop {
 		return err
 	}
 
@@ -280,11 +287,16 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error setting project: %s", err)
 	}
 
-	clusters, err := c.Clusters(ctx, instance.Name)
+	clusters, err := c.Clusters(ctxWithTimeout, instanceName)
 	if err != nil {
 		partiallyUnavailableErr, ok := err.(bigtable.ErrPartiallyUnavailable)
-
 		if !ok {
+			// Clusters() fails with 404 if instance does not exist.
+			if tpgresource.IsNotFoundGrpcError(err) {
+				log.Printf("[WARN] Removing %s because it's gone", instanceName)
+				d.SetId("")
+				return nil
+			}
 			return fmt.Errorf("Error retrieving instance clusters. %s", err)
 		}
 
@@ -312,8 +324,11 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("display_name", instance.DisplayName); err != nil {
 		return fmt.Errorf("Error setting display_name: %s", err)
 	}
-	if err := d.Set("labels", tpgresource.FlattenLabels(instance.Labels, d)); err != nil {
+	if err := tpgresource.SetLabels(instance.Labels, d, "labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	if err := tpgresource.SetLabels(instance.Labels, d, "terraform_labels"); err != nil {
+		return fmt.Errorf("Error setting terraform_labels: %s", err)
 	}
 	if err := d.Set("effective_labels", instance.Labels); err != nil {
 		return fmt.Errorf("Error setting effective_labels: %s", err)
@@ -353,8 +368,8 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 	conf.DisplayName = displayName.(string)
 
-	if d.HasChange("labels") {
-		conf.Labels = tpgresource.ExpandLabels(d)
+	if d.HasChange("effective_labels") {
+		conf.Labels = tpgresource.ExpandEffectiveLabels(d)
 	}
 
 	switch d.Get("instance_type").(string) {
@@ -439,6 +454,42 @@ func flattenBigtableCluster(c *bigtable.ClusterInfo) map[string]interface{} {
 		autoscaling_config[0]["storage_target"] = c.AutoscalingConfig.StorageUtilizationPerNode
 	}
 	return cluster
+}
+
+func getInstanceFromResponse(instances []*bigtable.InstanceInfo, instanceName string, err error, d *schema.ResourceData) (*bigtable.InstanceInfo, bool, error) {
+	// Fail on any error other than ParrtiallyUnavailable.
+	isPartiallyUnavailableError := false
+	if err != nil {
+		_, isPartiallyUnavailableError = err.(bigtable.ErrPartiallyUnavailable)
+
+		if !isPartiallyUnavailableError {
+			return nil, true, fmt.Errorf("Error retrieving instance. %s", err)
+		}
+	}
+
+	// Get instance from response.
+	var instanceInfo *bigtable.InstanceInfo
+	for _, instance := range instances {
+		if instance.Name == instanceName {
+			instanceInfo = instance
+		}
+	}
+
+	// If instance found, it either wasn't affected by the outage, or there is no outage.
+	if instanceInfo != nil {
+		return instanceInfo, false, nil
+	}
+
+	// If instance wasn't found and error is PartiallyUnavailable,
+	// continue to clusters call that will reveal overlap between instance regions and unavailable regions.
+	if isPartiallyUnavailableError {
+		return nil, false, nil
+	}
+
+	// If instance wasn't found and error is not PartiallyUnavailable, instance doesn't exist.
+	log.Printf("[WARN] Removing %s because it's gone", instanceName)
+	d.SetId("")
+	return nil, true, nil
 }
 
 func getUnavailableClusterZones(clusters []interface{}, unavailableZones []string) []string {

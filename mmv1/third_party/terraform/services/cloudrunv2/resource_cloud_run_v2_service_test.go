@@ -30,7 +30,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceFullUpdate(t *testing.T) {
 				ResourceName:            "google_cloud_run_v2_service.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "location", "annotations"},
+				ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccCloudRunV2Service_cloudrunv2ServiceFullUpdate(context),
@@ -39,7 +39,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceFullUpdate(t *testing.T) {
 				ResourceName:            "google_cloud_run_v2_service.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "location", "annotations"},
+				ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -584,6 +584,82 @@ resource "google_cloud_run_v2_service" "default" {
           port = 8080
           service = "grpc.health.v1.Health"
         }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func TestAccCloudRunV2Service_cloudrunv2ServiceWithDirectVPCUpdate(t *testing.T) {
+	t.Parallel()
+
+	serviceName := fmt.Sprintf("tf-test-cloudrun-service%s", acctest.RandString(t, 10))
+	context := map[string]interface{}{
+		"service_name": serviceName,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudRunV2Service_cloudRunServiceWithDirectVPC(context),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location"},
+			},
+			{
+				Config: testAccCloudRunV2Service_cloudRunServiceWithDirectVPCUpdate(context),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location"},
+			},
+		},
+	})
+}
+
+func testAccCloudRunV2Service_cloudRunServiceWithDirectVPC(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name     = "%{service_name}"
+  location = "us-central1"
+  launch_stage = "BETA"
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+    vpc_access {
+      network_interfaces {
+        network = "default"
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccCloudRunV2Service_cloudRunServiceWithDirectVPCUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name     = "%{service_name}"
+  location = "us-central1"
+  launch_stage = "BETA"
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+    vpc_access {
+      network_interfaces {
+        subnetwork = "default"
+        tags = ["foo", "bar"]
       }
     }
   }

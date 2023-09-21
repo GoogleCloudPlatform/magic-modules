@@ -73,7 +73,7 @@ properties:
     output: true
     description: |
       Unique name of the peering in this scope including projects and location using the form: projects/{projectId}/locations/global/peerings/{peeringId}.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: 'Resource labels that can contain user-provided metadata'
   - !ruby/object:Api::Type::String

@@ -29,7 +29,7 @@ func TestAccGKEHub2MembershipBinding_gkehubMembershipBindingBasicExample_update(
 				ResourceName:            "google_gke_hub_membership_binding.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"membership_binding_id", "scope", "membership_id", "location"},
+				ImportStateVerifyIgnore: []string{"membership_binding_id", "scope", "membership_id", "location", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccGKEHub2MembershipBinding_gkehubMembershipBindingBasicExample_update(context),
@@ -38,7 +38,7 @@ func TestAccGKEHub2MembershipBinding_gkehubMembershipBindingBasicExample_update(
 				ResourceName:            "google_gke_hub_membership_binding.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"membership_binding_id", "scope", "membership_id", "location"},
+				ImportStateVerifyIgnore: []string{"membership_binding_id", "scope", "membership_id", "location", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -72,6 +72,11 @@ resource "google_gke_hub_membership_binding" "example" {
   scope = google_gke_hub_scope.example.name
   membership_id = "tf-test-membership%{random_suffix}"
   location = "global"
+  labels = {
+      keyb = "valueb"
+      keya = "valuea"
+      keyc = "valuec" 
+  }
   depends_on = [
     google_gke_hub_membership.example,
     google_gke_hub_scope.example
@@ -108,6 +113,11 @@ resource "google_gke_hub_membership_binding" "example" {
   scope = google_gke_hub_scope.example2.name
   membership_id = "tf-test-membership%{random_suffix}"
   location = "global"
+  labels = {
+      updated_keyb = "updated_valueb"
+      updated_keya = "updated_valuea"
+      updated_keyc = "updated_valuec" 
+  }
   depends_on = [
     google_gke_hub_membership.example,
     google_gke_hub_scope.example2

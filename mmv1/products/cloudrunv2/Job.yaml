@@ -85,6 +85,13 @@ examples:
       vpc_compute_subnetwork_name: 'run-subnetwork'
       compute_network_name: 'run-network'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_job_directvpc'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-job%s\", context[\"random_suffix\"\
+      ])"
+    vars:
+      cloud_run_job_name: 'cloudrun-job'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_secret'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
@@ -129,7 +136,7 @@ properties:
     output: true
     description: |
       A number that monotonically increases every time the user modifies the desired state.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |-
       Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component,
@@ -137,8 +144,8 @@ properties:
 
       Cloud Run API v2 does not support labels with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
       All system labels in v1 now have a corresponding field in v2 Job.
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: "annotations"
+  - !ruby/object:Api::Type::KeyValueAnnotations
+    name: 'annotations'
     description: |-
       Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 
@@ -229,7 +236,7 @@ properties:
           Cloud Run API v2 does not support labels with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
           All system labels in v1 now have a corresponding field in v2 ExecutionTemplate.
       - !ruby/object:Api::Type::KeyValuePairs
-        name: "annotations"
+        name: 'annotations'
         description: |-
           Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 
@@ -491,6 +498,32 @@ properties:
                 values:
                   - :ALL_TRAFFIC
                   - :PRIVATE_RANGES_ONLY
+                default_from_api: true
+              - !ruby/object:Api::Type::Array
+                name: 'networkInterfaces'
+                description: |-
+                  Direct VPC egress settings. Currently only single network interface is supported.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'network'
+                      description: |-
+                        The VPC network that the Cloud Run resource will be able to send traffic to. At least one of network or subnetwork must be specified. If both
+                        network and subnetwork are specified, the given VPC subnetwork must belong to the given VPC network. If network is not specified, it will be
+                        looked up from the subnetwork.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::String
+                      name: 'subnetwork'
+                      description: |-
+                        The VPC subnetwork that the Cloud Run resource will get IPs from. At least one of network or subnetwork must be specified. If both
+                        network and subnetwork are specified, the given VPC subnetwork must belong to the given VPC network. If subnetwork is not specified, the
+                        subnetwork with the same name with the network will be used.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Array
+                      name: 'tags'
+                      description: |-
+                        Network tags applied to this Cloud Run job.
+                      item_type: Api::Type::String
           - !ruby/object:Api::Type::Integer
             name: 'maxRetries'
             description: |-

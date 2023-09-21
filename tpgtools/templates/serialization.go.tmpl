@@ -126,7 +126,7 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 func {{ $res.TitleCaseFullName }}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLStructName}}, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"{{$res.TerraformName}}\" \"output\" {\n"
 		{{- range $field := $res.Properties}}
-			{{- if $field.Settable }}
+			{{- if $field.ShouldShowUpInSamples }}
 				{{- if eq $field.Type.String "TypeString" "TypeInt" "TypeBool" "TypeFloat" }}
 					{{- if $field.Type.IsDateTime }}
 	if !r.{{$field.PackageName}}.IsZero() {

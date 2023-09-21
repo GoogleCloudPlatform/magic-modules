@@ -79,7 +79,7 @@ custom_diff: [
 ]
 properties:
   - !ruby/object:Api::Type::KeyValuePairs
-    name: labels
+    name: 'labels'
     description: |
       Configuration fields that define the channel and its behavior. The
       permissible and required labels are specified in the
