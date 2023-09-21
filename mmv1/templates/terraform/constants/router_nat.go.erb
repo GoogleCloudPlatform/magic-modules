@@ -98,6 +98,10 @@ func computeRouterNatIPsHash(v interface{}) int {
 	return schema.HashString(tpgresource.GetResourceNameFromSelfLink(val))
 }
 
+func computeRouterNatRulesSubnetHash(v interface{}) int {
+	return computeRouterNatIPsHash(v)
+}
+
 func computeRouterNatRulesHash(v interface{}) int {
 	obj := v.(map[string]interface{})
 	ruleNumber := obj["rule_number"].(int)
@@ -112,6 +116,7 @@ func computeRouterNatRulesHash(v interface{}) int {
 
 	sourceNatActiveIpHash := 0
 	sourceNatDrainIpHash := 0
+	sourceNatActiveRangeHash := 0
 	if obj["action"] != nil {
 		actions := obj["action"].([]interface{})
 		if len(actions) != 0 && actions[0] != nil {
@@ -134,8 +139,17 @@ func computeRouterNatRulesHash(v interface{}) int {
 					sourceNatDrainIpHash += schema.HashString(sourceNatDrainIpStr)
 				}
 			}
+
+			sourceNatActiveRanges := action["source_nat_active_ranges"]
+			if sourceNatActiveRanges != nil {
+				sourceNatActiveRangesSet := sourceNatActiveRanges.(*schema.Set)
+				for _, sourceNatActiveRange := range sourceNatActiveRangesSet.List() {
+					sourceNatActiveRangeStr := fmt.Sprintf("source_nat_active_ranges-%d", computeRouterNatRulesSubnetHash(sourceNatActiveRange.(string)))
+					sourceNatActiveRangeHash += schema.HashString(sourceNatActiveRangeStr)
+				}
+			}
 		}
 	}
 
-	return ruleNumber + descriptionHash + schema.HashString(match) + sourceNatActiveIpHash + sourceNatDrainIpHash
+	return ruleNumber + descriptionHash + schema.HashString(match) + sourceNatActiveIpHash + sourceNatDrainIpHash + sourceNatActiveRangeHash
 }

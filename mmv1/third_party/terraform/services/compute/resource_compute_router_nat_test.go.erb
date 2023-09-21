@@ -236,6 +236,7 @@ func TestAccComputeRouterNat_withPortAllocationMethods(t *testing.T) {
 	})
 }
 
+// TODO(felipegc) base on this one
 <% unless version == 'ga' -%>
 func TestAccComputeRouterNat_withNatIpsAndDrainNatIps(t *testing.T) {
 	t.Parallel()
@@ -287,6 +288,7 @@ func TestAccComputeRouterNat_withNatIpsAndDrainNatIps(t *testing.T) {
 
 <% end -%>
 
+// TODO(felipegc) base on this one
 func TestAccComputeRouterNat_withNatRules(t *testing.T) {
 	t.Parallel()
 
@@ -457,6 +459,131 @@ func TestAccComputeRouterNat_withPrivateNat(t *testing.T) {
 				Check: testAccCheckComputeRouterNatDelete(
 					t, "google_compute_router_nat.foobar"),
 			},
+		},
+	})
+}
+
+// TODO(felipegc)
+func TestAccComputeRouterNat_withPrivateNatAndRules(t *testing.T) {
+	t.Parallel()
+
+	testId := acctest.RandString(t, 10)
+	routerName := fmt.Sprintf("tf-test-router-private-nat-%s", testId)
+	hubName := fmt.Sprintf("%s-hub", routerName)
+	pEnv := envvar.GetTestProjectFromEnv()
+	match := fmt.Sprintf("nexthop.hub == '//networkconnectivity.googleapis.com/projects/%s/locations/global/hubs/%s'", pEnv, hubName)
+	ruleDescription := acctest.RandString(t, 10)
+	// matchUpdate := "destination.ip == '1.1.0.1' || destination.ip == '8.8.8.8'"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRouterNatDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRouterNatRulesBasic_privateNatOmitRules(routerName, hubName),
+			},
+			{
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRouterNatRulesBasic_privateNatWithRules(routerName, hubName, 100, ruleDescription, match),
+			},
+			{
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// {
+			// 	Config: testAccComputeRouterNatRulesBasic(routerName, 65000, ruleDescription, match),
+			// },
+			// {
+			// 	ResourceName:      "google_compute_router_nat.foobar",
+			// 	ImportState:       true,
+			// 	ImportStateVerify: true,
+			// },
+			// {
+			// 	Config: testAccComputeRouterNatRulesBasic(routerName, 100, ruleDescription, match),
+			// },
+			// {
+			// 	ResourceName:      "google_compute_router_nat.foobar",
+			// 	ImportState:       true,
+			// 	ImportStateVerify: true,
+			// },
+			// {
+			// 	Config: testAccComputeRouterNatRulesBasic(routerName, 100, ruleDescriptionUpdate, match),
+			// },
+			// {
+			// 	ResourceName:      "google_compute_router_nat.foobar",
+			// 	ImportState:       true,
+			// 	ImportStateVerify: true,
+			// },
+			// {
+			// 	Config: testAccComputeRouterNatRulesBasic(routerName, 100, ruleDescriptionUpdate, matchUpdate),
+			// },
+			// {
+			// 	ResourceName:      "google_compute_router_nat.foobar",
+			// 	ImportState:       true,
+			// 	ImportStateVerify: true,
+			// },
+			// {
+			// 	Config: testAccComputeRouterNatRulesWithSourceActiveAndDrainIps(routerName, 100, ruleDescriptionUpdate, matchUpdate),
+			// },
+			// {
+			// 	ResourceName:      "google_compute_router_nat.foobar",
+			// 	ImportState:       true,
+			// 	ImportStateVerify: true,
+			// },
+			// {
+			// 	Config: testAccComputeRouterNatRulesWithDrainIps(routerName, 100, ruleDescriptionUpdate, matchUpdate),
+			// },
+			// {
+			// 	ResourceName:      "google_compute_router_nat.foobar",
+			// 	ImportState:       true,
+			// 	ImportStateVerify: true,
+			// },
+			// {
+			// 	Config: testAccComputeRouterNatMultiRules(routerName),
+			// },
+			// {
+			// 	ResourceName:      "google_compute_router_nat.foobar",
+			// 	ImportState:       true,
+			// 	ImportStateVerify: true,
+			// },
+			// {
+			// 	Config: testAccComputeRouterNatRulesBasic_omitAction(routerName, 100, ruleDescriptionUpdate, matchUpdate),
+			// },
+			// {
+			// 	ResourceName:      "google_compute_router_nat.foobar",
+			// 	ImportState:       true,
+			// 	ImportStateVerify: true,
+			// },
+			// {
+			// 	Config: testAccComputeRouterNatRulesBasic_omitDescription(routerName, 100, matchUpdate),
+			// },
+			// {
+			// 	ResourceName:      "google_compute_router_nat.foobar",
+			// 	ImportState:       true,
+			// 	ImportStateVerify: true,
+			// },
+			// {
+			// 	Config: testAccComputeRouterNatMultiRulesWithIpId(routerName),
+			// },
+			// {
+			// 	ResourceName:      "google_compute_router_nat.foobar",
+			// 	ImportState:       true,
+			// 	ImportStateVerify: true,
+			// },
+			// {
+			// 	Config: testAccComputeRouterNatRulesBasic_omitRules(routerName),
+			// },
+			// {
+			// 	ResourceName:      "google_compute_router_nat.foobar",
+			// 	ImportState:       true,
+			// 	ImportStateVerify: true,
+			// },
 		},
 	})
 }
@@ -1463,6 +1590,107 @@ resource "google_compute_router_nat" "foobar" {
   }
 }
 `, routerName, routerName, routerName, routerName)
+}
+
+// TODO(felipegc)
+func testAccComputeRouterNatBaseResourcesWithPrivateNatSubnetworks(routerName, hubName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "%s-net"
+  auto_create_subnetworks = "false"
+}
+
+resource "google_compute_subnetwork" "subnet1" {
+  name          = "%s-subnet1"
+  network       = google_compute_network.foobar.self_link
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  purpose       = "PRIVATE_NAT"
+}
+
+resource "google_compute_subnetwork" "subnet2" {
+  name          = "%s-subnet2"
+  network       = google_compute_network.foobar.self_link
+  ip_cidr_range = "10.10.1.0/24"
+  region        = "us-central1"
+  purpose       = "PRIVATE_NAT"
+}
+
+resource "google_network_connectivity_hub" "foobar" {
+  name        = "%s"
+  description = "vpc hub for inter vpc nat"
+}
+
+resource "google_network_connectivity_spoke" "primary" {
+  name        = "%s-spoke"
+  location    = "global"
+  description = "vpc spoke for inter vpc nat"
+  hub =  google_network_connectivity_hub.foobar.id
+  linked_vpc_network {
+    exclude_export_ranges = [
+      "10.10.0.0/16"
+    ]
+    uri = google_compute_network.foobar.self_link
+  }
+}
+
+resource "google_compute_router" "foobar" {
+  name     = "%s"
+  region   = google_compute_subnetwork.subnet1.region
+  network  = google_compute_network.foobar.self_link
+}
+`, routerName, routerName, routerName, hubName, routerName, routerName)
+}
+
+func testAccComputeRouterNatRulesBasic_privateNatOmitRules(routerName, hubName string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "google_compute_router_nat" "foobar" {
+  name                                = "%s"
+  router                              = google_compute_router.foobar.name
+  region                              = google_compute_router.foobar.region
+  source_subnetwork_ip_ranges_to_nat  = "LIST_OF_SUBNETWORKS"
+  type                                = "PRIVATE" 
+  enable_dynamic_port_allocation      = false
+  enable_endpoint_independent_mapping = false
+  min_ports_per_vm = 32
+  subnetwork {
+    name                    = google_compute_subnetwork.subnet1.id
+    source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
+  }
+}
+`, testAccComputeRouterNatBaseResourcesWithPrivateNatSubnetworks(routerName, hubName), routerName)
+}
+
+func testAccComputeRouterNatRulesBasic_privateNatWithRules(routerName, hubName string, ruleNumber int, ruleDescription, match string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "google_compute_router_nat" "foobar" {
+  name                                = "%s"
+  router                              = google_compute_router.foobar.name
+  region                              = google_compute_router.foobar.region
+  source_subnetwork_ip_ranges_to_nat  = "LIST_OF_SUBNETWORKS"
+  type                                = "PRIVATE" 
+  enable_dynamic_port_allocation      = false
+  enable_endpoint_independent_mapping = false
+  min_ports_per_vm = 32
+  subnetwork {
+    name                    = google_compute_subnetwork.subnet1.id
+    source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
+  }
+
+  rules {
+    rule_number = %d
+    description = "%s"
+    match       = "%s"
+    action {
+      source_nat_active_ranges = [google_compute_subnetwork.subnet1.self_link]
+    }
+  }
+}
+`, testAccComputeRouterNatBaseResourcesWithPrivateNatSubnetworks(routerName, hubName), routerName, ruleNumber, ruleDescription, match)
 }
 
 <% end -%>

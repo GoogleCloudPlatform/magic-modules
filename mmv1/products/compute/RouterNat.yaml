@@ -379,6 +379,22 @@ properties:
                 description:
                   'A reference to an address associated with this NAT'
               custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+            - !ruby/object:Api::Type::Array
+              name: 'sourceNatActiveRanges'
+              description: |
+                  A list of URLs of the subnetworks used as source ranges for this NAT Rule.
+                  These subnetworks must have purpose set to PRIVATE_NAT.
+                  This field is used for private NAT.
+              is_set: true
+              set_hash_func: computeRouterNatRulesSubnetHash
+              custom_flatten: 'templates/terraform/custom_flatten/nat_rules_subnets_set.erb'
+              item_type: !ruby/object:Api::Type::ResourceRef
+                name: 'subnet'
+                resource: 'Subnetwork'
+                imports: 'selfLink'
+                description:
+                  'A reference to a subnetwork address associated with this NAT'
+              custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Boolean
     name: enableEndpointIndependentMapping
     description: |
