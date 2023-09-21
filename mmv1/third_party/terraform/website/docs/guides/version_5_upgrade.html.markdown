@@ -519,6 +519,13 @@ Previously, `google_firebase_web_app` deletions default to `ABANDON`, which mean
 
 Previously, `metric.filter` doesn't have the defult value and causes a UI error.
 
+## Resource: `google_monitoring_metric_descriptor`
+
+### Changing `labels` now triggers replacement
+
+Previously, attempting to update `labels` failed and created a permadiff. The `labels` 
+field is now immutable without destroying and recreating the resource.
+
 ## Resource: `google_privateca_certificate`
 
 ### `config_values` is now removed
