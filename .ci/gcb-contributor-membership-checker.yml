@@ -29,7 +29,7 @@ steps:
       - "--oneline"
       - "-n 10"
 
-  # Find common ancestor commit and apply diff for the .ci folder
+  # Find common ancestor commit and apply diff for the .ci folder.
   - name: "gcr.io/cloud-builders/git"
     id: findMergeBase
     entrypoint: "bash"
