@@ -305,6 +305,17 @@ func ResourceComputeInstance() *schema.Resource {
 							Description:      `The name or self_link of the subnetwork attached to this interface.`,
 						},
 
+						<% if version == "beta" -%>
+						"network_attachment": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							ForceNew:     	  true,
+							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+							Description:      `The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.`,
+						},
+						<% end %>
+
 						"subnetwork_project": {
 							Type:        schema.TypeString,
 							Optional:    true,
@@ -1545,7 +1556,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	}
 <% unless version == 'ga' -%>
 	// Add extra check on Scheduling to prevent STOP instance setting MaxRunDuration.
-	// When Instance being stopped, GCE will wipe out the MaxRunDuration field. 
+	// When Instance being stopped, GCE will wipe out the MaxRunDuration field.
 	// And Terraform has no visiblity on this field after then. Given the infrastructure
 	// constraint, MaxRunDuration will only be supported with instance has
 	// DELETE InstanceTerminationAction
