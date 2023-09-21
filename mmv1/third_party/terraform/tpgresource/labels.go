@@ -36,7 +36,12 @@ func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) 
 		terraformLabels[k] = v
 	}
 
-	labels := d.Get("labels").(map[string]interface{})
+	raw := d.Get("labels")
+	if raw == nil {
+		return nil
+	}
+
+	labels := raw.(map[string]interface{})
 	for k, v := range labels {
 		terraformLabels[k] = v.(string)
 	}
@@ -71,6 +76,11 @@ func SetMetadataLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta inter
 		return nil
 	}
 
+	raw := d.Get("metadata.0.labels")
+	if raw == nil {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 
 	// Merge provider default labels with the user defined labels in the resource to get terraform managed labels
@@ -79,7 +89,7 @@ func SetMetadataLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta inter
 		terraformLabels[k] = v
 	}
 
-	labels := d.Get("metadata.0.labels").(map[string]interface{})
+	labels := raw.(map[string]interface{})
 	for k, v := range labels {
 		terraformLabels[k] = v.(string)
 	}
