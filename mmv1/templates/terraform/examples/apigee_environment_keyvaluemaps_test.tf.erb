@@ -114,6 +114,7 @@ resource "google_project" "project" {
    project_id                           = google_project.project.project_id 
    authorized_network                   = google_compute_network.apigee_network.id 
    billing_type                         = "EVALUATION" 
+   runtime_type                         = "CLOUD"
    runtime_database_encryption_key_name = google_kms_crypto_key.apigee_key.id 
    properties { 
      property { 
