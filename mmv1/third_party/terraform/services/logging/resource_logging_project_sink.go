@@ -66,7 +66,7 @@ func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) 
 
 	customWriterIdentity := d.Get("custom_writer_identity").(string)
 
-	client := config.NewLoggingClient(userAgent).Projects.Sinks.Create(id.parent(), sink)
+	projectSinkCreateRequest := config.NewLoggingClient(userAgent).Projects.Sinks.Create(id.parent(), sink)
 
 	if customWriterIdentity != "" {
 		client = client.UniqueWriterIdentity(uniqueWriterIdentity).CustomWriterIdentity(customWriterIdentity)
