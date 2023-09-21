@@ -36,6 +36,7 @@ steps:
     args:
       - "-c"
       - |
+        git remote -v
         git fetch origin main
         if [ "$_BASE_BRANCH" != "main" ]; then
           echo "Checking out .ci/ folder from main"
