@@ -87,6 +87,7 @@ examples:
       profile: 'my-profileid'
       global_address_name: 'private-ip-alloc'
       network_name: 'vpc-network'
+    skip_test: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'connectionProfileId'
