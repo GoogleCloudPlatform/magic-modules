@@ -1,6 +1,3 @@
-var domainMappingGoogleProvidedLocationLabel = "cloud.googleapis.com/location"
-var domainMappingGoogleProvidedOverrideLabel = "run.googleapis.com/overrideAt"
-
 var domainMappingGoogleProvidedLabels = []string{
 	domainMappingGoogleProvidedLocationLabel,
 	domainMappingGoogleProvidedOverrideLabel,
@@ -21,4 +18,14 @@ func DomainMappingLabelDiffSuppress(k, old, new string, d *schema.ResourceData) 
 
 	// For other keys, don't suppress diff.
 	return false
+}
+
+func hasMetadata(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	newCount := diff.Get("metadata.#")
+
+	if newCount.(int) < 1 {
+		return fmt.Errorf("Insufficient \"metadata\" blocks. 1 \"metadata\" block is required.")
+	}
+
+	return nil
 }

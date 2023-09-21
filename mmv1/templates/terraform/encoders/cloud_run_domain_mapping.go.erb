@@ -13,11 +13,7 @@
 	# limitations under the License.
 -%>
 name := d.Get("name").(string)
-raw := obj["metadata"]
-metadata := make(map[string]interface{})
-if raw != nil {
-	metadata = raw.(map[string]interface{})
-}
+metadata := obj["metadata"].(map[string]interface{})
 metadata["name"] = name
 obj["metadata"] = metadata
 
