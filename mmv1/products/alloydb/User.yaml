@@ -18,7 +18,6 @@ base_url: '{{cluster}}/users'
 create_url: '{{cluster}}/users?userId={{user_id}}'
 update_url: '{{cluster}}/users?userId={{user_id}}'
 update_verb: :POST
-update_mask: false
 description: 'A database user in an AlloyDB cluster.'
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
