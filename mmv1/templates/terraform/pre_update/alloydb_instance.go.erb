@@ -1,54 +1,34 @@
 // If the SSL mode isn't specified in the update, retain the SSL mode that's already present
-<%# if old, new := d.GetChange("client_connection_config.0.ssl_config.0.ssl_mode"); new == nil || tpgresource.IsEmptyValue(reflect.ValueOf(new)) { %>
-<%# if d.HasChange("client_connection_config") { %>
 if d.HasChange("client_connection_config.0.ssl_config.0.ssl_mode") {
   log.Printf("[DEBUG] nancyhong_debug SSL MODE CHANGED")
-  <%# new = old %>
-
-  <%# c := obj["clientConnectionConfig"].(map[string]interface{})
-  s := c["sslConfig"].(map[string]interface{})
-  s["sslMode"] = old
-  c["sslConfig"] = s
-  obj["clientConnectionConfig"] := c %>
-  <%# append(user.Things[:item.id], user.Things[item.id+1:]) %>
-  <%# updateMask = append(updateMask[:clientConnectionConfig], "clientConnectionConfig.*.sslConfig.*.sslMode") %>
-  <%# if d.HasChange("client_connection_config.0.require_connectors") {
-    updateMask = append(updateMask, "clientConnectionConfig.*.requireConnectors")
-  } %>
-  for i, field := range updateMask {
-      if field == "clientConnectionConfig" {
-          updateMask = append(updateMask[:i], updateMask[i+1:]...)
-          break
-      }
-  
-  }
-  updateMask = append(updateMask, "clientConnectionConfig.requireConnectors")
   old, new := d.GetChange("client_connection_config.0.ssl_config.0.ssl_mode")
   emptyValue := tpgresource.IsEmptyValue(reflect.ValueOf(new))
   if !emptyValue {
-    log.Printf("[DEBUG] nancyhong_debug, old: %v, new: %v", old, new)
-    log.Printf("[DEBUG] nancyhong_debug tpgresource.IsEmptyValue(new) = %v", emptyValue)
-    log.Printf("[DEBUG] nancyhong_debug new is nil? %v", new == nil)
-    updateMask = append(updateMask, "clientConnectionConfig.sslConfig.sslMode")
-  } else if emptyValue {
-    log.Printf("[DEBUG] nancyhong_debug tpgresource.IsEmptyValue(new) = %v", emptyValue)
-    log.Printf("[DEBUG] nancyhong_debug new is nil? %v", new == nil)
-  }
-  
-  
-  
-  <%# old, new := d.GetChange("client_connection_config.0.ssl_config.0.ssl_mode")
-  clientConnectionConfig := make(map[string]interface{})
-  clientConnectionConfig["require_connectors"] = d.Get("client_connection_config.0.require_connectors")
-  sslConfig := make(map[string]interface{})
-  if new == nil || tpgresource.IsEmptyValue(reflect.ValueOf(new)) {
-    sslConfig["sslMode"] = old
+    log.Printf("[DEBUG] nancyhong_debug - old: %v, new: %v", old, new)
+    log.Printf("[DEBUG] nancyhong_debug - tpgresource.IsEmptyValue(new) = %v", emptyValue)
+    log.Printf("[DEBUG] nancyhong_debug - keeping obj the same so SSL mode set to %v", new)
+    
+
   } else {
-    sslConfig["sslMode"] = new
+    log.Printf("[DEBUG] nancyhong_debug - tpgresource.IsEmptyValue(new) = %v", emptyValue)
+    log.Printf("[DEBUG] nancyhong_debug - didn't add anything to update mask")
+
+    log.Printf("[DEBUG] nancyhong_debug - modifying obj to have SSL mode set to %v", old)
+    c := obj["clientConnectionConfig"].(map[string]interface{})
+    var s map[string]interface{}
+    if c["sslConfig"] == nil {
+      s = make(map[string]interface{})
+    } else {
+      s = c["sslConfig"].(map[string]interface{})
+    }
+    if tpgresource.IsEmptyValue(reflect.ValueOf(old)) {
+      s["sslMode"] = "ENCRYPTED_ONLY"
+    } else {
+      s["sslMode"] = old
+    }
+    c["sslConfig"] = s
+    obj["clientConnectionConfig"] = c
   }
-  clientConnectionConfig["ssl_config"] = sslConfig  
-  
-  d.Set("client_connection_config", clientConnectionConfig) %>
 } else {
   log.Printf("[DEBUG] nancyhong_debug ssl mode is the same")
 }
