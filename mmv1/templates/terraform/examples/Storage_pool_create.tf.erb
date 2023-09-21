@@ -1,5 +1,5 @@
 
-resource "google_netapp_storage_pools" "<%= ctx[:primary_resource_id] %>" {
+resource "google_netapp_storage_pool" "<%= ctx[:primary_resource_id] %>" {
   storage_pool_id = "test-pool"
   location = "us-central1"
   service_level = "PREMIUM"

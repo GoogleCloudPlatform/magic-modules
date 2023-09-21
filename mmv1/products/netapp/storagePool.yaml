@@ -14,7 +14,7 @@
 
 --- !ruby/object:Api::Resource
 # API resource name
-name: 'storagePools'
+name: 'storagePool'
 # Resource description for the provider documentation.
 description: |
   StoragePool is a container for volumes with a service level and capacity. 

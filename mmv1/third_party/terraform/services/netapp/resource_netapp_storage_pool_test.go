@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccNetappstoragePools_storagePoolCreateExample_update(t *testing.T) {
+func TestAccNetappstoragePool_storagePoolCreateExample_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -20,19 +20,19 @@ func TestAccNetappstoragePools_storagePoolCreateExample_update(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetappstoragePools_storagePoolCreateExample_full(context),
+				Config: testAccNetappstoragePool_storagePoolCreateExample_full(context),
 			},
 			{
-				ResourceName:            "google_netapp_storage_pools.test_pool",
+				ResourceName:            "google_netapp_storage_pool.test_pool",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "storage_pool_id"},
 			},
 			{
-				Config: testAccNetappstoragePools_storagePoolCreateExample_update(context),
+				Config: testAccNetappstoragePool_storagePoolCreateExample_update(context),
 			},
 			{
-				ResourceName:            "google_netapp_storage_pools.test_pool",
+				ResourceName:            "google_netapp_storage_pool.test_pool",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "storage_pool_id"},
@@ -41,10 +41,10 @@ func TestAccNetappstoragePools_storagePoolCreateExample_update(t *testing.T) {
 	})
 }
 
-func testAccNetappstoragePools_storagePoolCreateExample_full(context map[string]interface{}) string {
+func testAccNetappstoragePool_storagePoolCreateExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 
-resource "google_netapp_storage_pools" "test_pool" {
+resource "google_netapp_storage_pool" "test_pool" {
   storage_pool_id = "tf-test-test-pool"
   location = "us-central1"
   service_level = "PREMIUM"
@@ -54,10 +54,10 @@ resource "google_netapp_storage_pools" "test_pool" {
 `, context)
 }
 
-func testAccNetappstoragePools_storagePoolCreateExample_update(context map[string]interface{}) string {
+func testAccNetappstoragePool_storagePoolCreateExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 
-resource "google_netapp_storage_pools" "test_pool" {
+resource "google_netapp_storage_pool" "test_pool" {
   storage_pool_id = "tf-test-test-pool"
   location = "us-central1"
   service_level = "PREMIUM"
