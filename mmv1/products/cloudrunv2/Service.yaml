@@ -88,6 +88,14 @@ examples:
       vpc_compute_subnetwork_name: 'run-subnetwork'
       compute_network_name: 'run-network'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_service_directvpc'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_probes'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
@@ -301,6 +309,32 @@ properties:
             values:
               - :ALL_TRAFFIC
               - :PRIVATE_RANGES_ONLY
+            default_from_api: true
+          - !ruby/object:Api::Type::Array
+            name: 'networkInterfaces'
+            description: |-
+              Direct VPC egress settings. Currently only single network interface is supported.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'network'
+                  description: |-
+                    The VPC network that the Cloud Run resource will be able to send traffic to. At least one of network or subnetwork must be specified. If both
+                    network and subnetwork are specified, the given VPC subnetwork must belong to the given VPC network. If network is not specified, it will be
+                    looked up from the subnetwork.
+                  default_from_api: true
+                - !ruby/object:Api::Type::String
+                  name: 'subnetwork'
+                  description: |-
+                    The VPC subnetwork that the Cloud Run resource will get IPs from. At least one of network or subnetwork must be specified. If both
+                    network and subnetwork are specified, the given VPC subnetwork must belong to the given VPC network. If subnetwork is not specified, the
+                    subnetwork with the same name with the network will be used.
+                  default_from_api: true
+                - !ruby/object:Api::Type::Array
+                  name: 'tags'
+                  description: |-
+                    Network tags applied to this Cloud Run service.
+                  item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'timeout'
         description: |-
@@ -687,7 +721,6 @@ properties:
                           The Cloud Secret Manager secret version. Can be 'latest' for the latest value or an integer for a specific version
                       - !ruby/object:Api::Type::Integer
                         name: 'mode'
-                        required: true
                         description: |-
                           Integer octal mode bits to use on this file, must be a value between 01 and 0777 (octal). If 0 or not set, the Volume's default mode will be used.
             - !ruby/object:Api::Type::NestedObject

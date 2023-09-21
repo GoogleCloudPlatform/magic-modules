@@ -624,6 +624,39 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 				},
+				"confidential_nodes": {
+					Type:        schema.TypeList,
+					Optional:    true,
+					Computed:    true,
+					ForceNew:    true,
+					MaxItems:    1,
+					Description: `Configuration for the confidential nodes feature, which makes nodes run on confidential VMs. Warning: This configuration can't be changed (or added/removed) after pool creation without deleting and recreating the entire pool.`,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"enabled": {
+								Type:        schema.TypeBool,
+								Required:    true,
+								ForceNew:    true,
+								Description: `Whether Confidential Nodes feature is enabled for all nodes in this pool.`,
+							},
+						},
+					},
+				},
+				"fast_socket": {
+					Type:     schema.TypeList,
+					Optional: true,
+					MaxItems: 1,
+					Description: `Enable or disable NCCL Fast Socket in the node pool.`,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"enabled": {
+								Type:        schema.TypeBool,
+								Required:    true,
+								Description: `Whether or not NCCL Fast Socket is enabled`,
+							},
+						},
+					},
+				},
 			},
 		},
 	}
@@ -757,6 +790,13 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 	if v, ok := nodeConfig["gvnic"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		nc.Gvnic = &container.VirtualNIC{
+			Enabled: conf["enabled"].(bool),
+		}
+	}
+
+	if v, ok := nodeConfig["fast_socket"]; ok && len(v.([]interface{})) > 0 {
+		conf := v.([]interface{})[0].(map[string]interface{})
+		nc.FastSocket = &container.FastSocket{
 			Enabled: conf["enabled"].(bool),
 		}
 	}
@@ -907,6 +947,11 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.HostMaintenancePolicy = expandHostMaintenancePolicy(v)
 	}
 	<% end -%>
+
+	if v, ok := nodeConfig["confidential_nodes"]; ok {
+		nc.ConfidentialNodes = expandConfidentialNodes(v)
+	}
+
 	return nc
 }
 
@@ -1024,6 +1069,17 @@ func expandHostMaintenancePolicy(v interface{}) *container.HostMaintenancePolicy
 }
 <% end -%>
 
+func expandConfidentialNodes(configured interface{}) *container.ConfidentialNodes {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	config := l[0].(map[string]interface{})
+	return &container.ConfidentialNodes{
+		Enabled: config["enabled"].(bool),
+	}
+}
+
 func flattenNodeConfigDefaults(c *container.NodeConfigDefaults) []map[string]interface{} {
         result := make([]map[string]interface{}, 0, 1)
 
@@ -1077,14 +1133,16 @@ func flattenNodeConfig(c *container.NodeConfig) []map[string]interface{} {
 		"workload_metadata_config": flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
 <% unless version == 'ga' -%>
 		"sandbox_config": 			 flattenSandboxConfig(c.SandboxConfig),
-		"host_maintenance_policy": flattenHostMaintenancePolicy(c.HostMaintenancePolicy),
+		"host_maintenance_policy":  flattenHostMaintenancePolicy(c.HostMaintenancePolicy),
 <% end -%>
+		"confidential_nodes":       flattenConfidentialNodes(c.ConfidentialNodes),
 		"boot_disk_kms_key": 		c.BootDiskKmsKey,
 		"kubelet_config":            flattenKubeletConfig(c.KubeletConfig),
 		"linux_node_config":         flattenLinuxNodeConfig(c.LinuxNodeConfig),
                 "node_group":                c.NodeGroup,
 		"advanced_machine_features": flattenAdvancedMachineFeaturesConfig(c.AdvancedMachineFeatures),
 		"sole_tenant_config":                 flattenSoleTenantConfig(c.SoleTenantConfig),
+		"fast_socket":              flattenFastSocket(c.FastSocket),
 	})
 
 	if len(c.OauthScopes) > 0 {
@@ -1387,6 +1445,16 @@ func flattenLinuxNodeConfig(c *container.LinuxNodeConfig) []map[string]interface
 	return result
 }
 
+func flattenConfidentialNodes(c *container.ConfidentialNodes) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"enabled": c.Enabled,
+		})
+	}
+	return result
+}
+
 func flattenSoleTenantConfig(c *container.SoleTenantConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c == nil {
@@ -1403,6 +1471,16 @@ func flattenSoleTenantConfig(c *container.SoleTenantConfig) []map[string]interfa
 	return append(result, map[string]interface{}{
 		"node_affinity": affinities,
 	})
+}
+
+func flattenFastSocket(c *container.FastSocket) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"enabled": c.Enabled,
+		})
+	}
+	return result
 }
 
 <% unless version == 'ga' -%>
