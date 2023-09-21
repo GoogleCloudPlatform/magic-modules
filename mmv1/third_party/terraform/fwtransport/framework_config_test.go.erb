@@ -1369,20 +1369,20 @@ func TestFrameworkProvider_LoadAndValidateFramework_requestReason(t *testing.T) 
 			ExpectedDataModelValue: types.StringNull(),
 		},
 		// Handling empty strings in config
-		"when request_reason is set as an empty string in the config it is overridden by environment variables": {
+		"when request_reason is set as an empty string, the empty string is not ignored in favor of an environment variable": {
 			ConfigValues: fwmodels.ProviderModel{
 				RequestReason: types.StringValue(""),
 			},
 			EnvVariables: map[string]string{
 				"CLOUDSDK_CORE_REQUEST_REASON": "foo",
 			},
-			ExpectedDataModelValue: types.StringValue("foo"),
+			ExpectedDataModelValue: types.StringValue(""),
 		},
-		"when request_reason is set as an empty string in the config the field is treated as if it's unset, without error": {
+		"when request_reason is set as an empty string the empty string is used and not ignored": {
 			ConfigValues: fwmodels.ProviderModel{
 				RequestReason: types.StringValue(""),
 			},
-			ExpectedDataModelValue: types.StringNull(),
+			ExpectedDataModelValue: types.StringValue(""),
 		},
 		// Handling unknown values
 		"when request_reason is an unknown value, the provider treats it as if it's unset and uses an environment variable instead": {
@@ -1464,19 +1464,18 @@ func TestFrameworkProvider_LoadAndValidateFramework_requestTimeout(t *testing.T)
 			},
 			ExpectError: true,
 		},
+		"when request_timeout is set as an empty string, the empty string isn't ignored and an error will occur": {
+			ConfigValues: fwmodels.ProviderModel{
+				RequestTimeout: types.StringValue(""),
+			},
+			ExpectError: true,
+		},
 		// In the SDK version of the provider config code, this scenario results in a value of "0s"
 		// instead of "120s", but the final 'effective' value is also "120s"
 		// See : https://github.com/hashicorp/terraform-provider-google/blob/09cb850ee64bcd78e4457df70905530c1ed75f19/google/transport/config.go#L1228-L1233
 		"when request_timeout is unset in the config, the default value is 120s.": {
 			ConfigValues: fwmodels.ProviderModel{
 				RequestTimeout: types.StringNull(),
-			},
-			ExpectedDataModelValue: types.StringValue("120s"),
-		},
-		// Handling empty strings in config
-		"when request_timeout is set as an empty string, the default value is 120s.": {
-			ConfigValues: fwmodels.ProviderModel{
-				RequestTimeout: types.StringValue(""),
 			},
 			ExpectedDataModelValue: types.StringValue("120s"),
 		},
@@ -1583,13 +1582,6 @@ func TestFrameworkProvider_LoadAndValidateFramework_batching(t *testing.T) {
 			ExpectEnableBatchingValue: types.BoolValue(true),
 			ExpectSendAfterValue:      types.StringValue("3s"),
 		},
-		// Handling empty strings in config
-		"when batching is configured with send_after as an empty string, send_after will be set to a default value": {
-			EnableBatchingValue:       types.BoolValue(true),
-			SendAfterValue:            types.StringValue(""),
-			ExpectEnableBatchingValue: types.BoolValue(true),
-			ExpectSendAfterValue:      types.StringValue("10s"), // When batching block is present but has missing arguments inside, default is 10s
-		},
 		// Handling unknown values
 		"when batching is an unknown value, the provider treats it as if it's unset (align to SDK behaviour)": {
 			SetBatchingAsUnknown:      true,
@@ -1609,6 +1601,11 @@ func TestFrameworkProvider_LoadAndValidateFramework_batching(t *testing.T) {
 			ExpectSendAfterValue:      types.StringValue("45s"),
 		},
 		// Error states
+		"when batching is configured with send_after as an empty string, the empty string is not ignored and results in an error": {
+			EnableBatchingValue: types.BoolValue(true),
+			SendAfterValue:      types.StringValue(""),
+			ExpectError:         true,
+		},
 		"if batching is configured with send_after as an invalid value, there's an error": {
 			SendAfterValue: types.StringValue("invalid value"),
 			ExpectError:    true,
@@ -1714,4 +1711,3 @@ func TestFrameworkProvider_LoadAndValidateFramework_batching(t *testing.T) {
 		})
 	}
 }
-
