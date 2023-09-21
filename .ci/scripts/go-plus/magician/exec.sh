@@ -14,5 +14,7 @@ GO_PROGRAM="$DIR/../../../magician/"
 
 pushd $GO_PROGRAM
 
+set -x
 # Pass all arguments to the child command
 go run . "$@"
+set +x
