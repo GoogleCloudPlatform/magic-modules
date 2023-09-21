@@ -1,10 +1,10 @@
-var requireConnectors interface{}
+// Only set the default SSL mode if the user does not explicitly specify it
 
+var requireConnectors interface{}
 setDefaultSSLMode := false
 clientConnectionConfig := make(map[string]interface{})
 sslConfig := make(map[string]interface{})
 
-// Only set the default SSL mode if the user does not specify it
 if obj["clientConnectionConfig"] != nil {
 	c := obj["clientConnectionConfig"].(map[string]interface{})
 	if c["requireConnectors"] != nil {
@@ -21,7 +21,6 @@ if obj["clientConnectionConfig"] != nil {
 } else {
 	setDefaultSSLMode = true
 }
-
 if setDefaultSSLMode {
 	sslConfig["sslMode"] = "ENCRYPTED_ONLY"
 	clientConnectionConfig["sslConfig"] = sslConfig
