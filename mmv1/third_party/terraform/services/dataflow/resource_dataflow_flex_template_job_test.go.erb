@@ -635,12 +635,13 @@ resource "google_dataflow_flex_template_job" "flex_job_fullupdate" {
     schemaLocation = "gs://${google_storage_bucket_object.schema.bucket}/schema.json"
     qps = "1"
     topic = google_pubsub_topic.example.id
+  	workerMachineType = "n1-standard-2"
+  	maxNumWorkers = 2
   }
   labels = {
    "my_labels" = "value-1"
   }
   service_account_email = google_service_account.dataflow-sa[0].email
-  machine_type = "n1-standard-2"
 }
 `, topicName, bucket, job)
 }
@@ -705,16 +706,17 @@ resource "google_dataflow_flex_template_job" "flex_job_fullupdate" {
   name = "%s"
   container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
   on_delete = "cancel"
+  machine_type = "n2-standard-2"
   parameters = {
     schemaLocation = "gs://${google_storage_bucket_object.schema.bucket}/schema.json"
     qps = "1"
     topic = google_pubsub_topic.example.id
+  	maxNumWorkers = 3
   }
   labels = {
    "my_labels" = "value-update"
   }
   service_account_email = google_service_account.dataflow-sa[1].email
-  machine_type = "n2-standard-2"
 }
 `, topicName, bucket, job)
 }
