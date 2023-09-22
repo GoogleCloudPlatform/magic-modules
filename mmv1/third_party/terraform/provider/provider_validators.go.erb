@@ -10,10 +10,18 @@ import (
 )
 
 func ValidateCredentials(v interface{}, k string) (warnings []string, errors []error) {
-	if v == nil || v.(string) == "" {
+	if v == nil {
 		return
 	}
 	creds := v.(string)
+
+	// reject empty strings
+	if v.(string) == "" {
+		errors = append(errors,
+			fmt.Errorf("please provide a value that isn't an empty string to this field"))
+		return
+	}
+
 	// if this is a path and we can stat it, assume it's ok
 	if _, err := os.Stat(creds); err == nil {
 		return

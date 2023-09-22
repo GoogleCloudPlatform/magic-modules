@@ -42,10 +42,17 @@ func TestProvider_ValidateCredentials(t *testing.T) {
 				return string(contents)
 			},
 		},
+		"configuring credentials as an empty string is not valid": {
+			ConfigValue: func(t *testing.T) interface{} {
+				return ""
+			},
+			ExpectedErrors: []error{
+				errors.New("please provide a value that isn't an empty string to this field"),
+			},
+		},
 		"leaving credentials unconfigured is valid": {
 			ValueNotProvided: true,
 		},
-		// configuring credentials as an empty string is handled by another validator
 	}
 
 	for tn, tc := range cases {
