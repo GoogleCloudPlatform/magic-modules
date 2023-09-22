@@ -338,7 +338,6 @@ func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_t
 	stagingLocation, updatedParameters = dataflowFlexJobTypeTransferVar("staging_location", "stagingLocation", updatedParameters, d)
 
 	var machineType string
-
 	machineType, updatedParameters = dataflowFlexJobTypeTransferVar("machine_type", "workerMachineType", updatedParameters, d)
 
 	var kmsKeyName string
