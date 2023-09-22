@@ -124,12 +124,12 @@ In 5.0.0+ any empty strings set in the `provider` block will be used and not ign
 
 Users should remove empty string arguments to avoid errors during plan/apply stages.
 
-```diff
+```tf
 provider "google" {
--  credentials = ""
+  credentials = "" # this line should be removed
   project = "my-project"
   region = "us-central1"
--  zone = ""
+  zone = "" # this line should be removed
 }
 ```
 
