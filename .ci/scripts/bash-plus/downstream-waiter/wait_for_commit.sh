@@ -26,7 +26,7 @@ fi
 while true; do
     if [ "$BASE_BRANCH" != "main" ]; then
         SYNC_HEAD="$(git rev-parse --short origin/$SYNC_BRANCH)"
-        BASE_PARENT="$(git rev-parse --short origin/$BASE_BRANCH~)"
+        BASE_PARENT="$(git rev-parse --short $SHA~)"
         if [ "$SYNC_HEAD" == "$BASE_PARENT" ]; then
             break;
         fi
