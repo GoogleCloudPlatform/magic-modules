@@ -315,7 +315,7 @@ func TestAccProviderEmptyStrings(t *testing.T) {
 				Config:             testAccProvider_checkPlanTimeErrors(`credentials = ""`, acctest.RandString(t, 10)),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
-				ExpectError:        regexp.MustCompile(`unexpected end of JSON input`),
+				ExpectError:        regexp.MustCompile(`please provide a value that isn't an empty string to this field`),
 			},
 			// access_token as an empty string causes a validation error
 			{
