@@ -118,6 +118,27 @@ The new annotations model is similar to the new labels model and will be applied
 
 There are now two annotation-related fields with the new model, the `annotations` and the output-only `effective_annotations` fields.
 
+### Changes to how default `location`, `region` and `zone` values are obtained for resources
+
+Currently, when configuring resources that require a `location`, `region` or `zone` field you have the choice of specifying it in the resource block or allowing default values to be used. Default [region](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#region) or [zone](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#zone) values can be configured in the provider block or by providing values through environment variables.
+
+Changes in 5.0.0 make the way the provider handles `location`/`region`/`zone` values more consistent:
+
+* Resources that have a `location` field will now use the default `region` value preferentially over the default `zone` value set on the provider. This is only relevant to resources where `location` is not provided in the resource block directly.
+* Previously, default `region` and `zone` values set as URIs were incompatible with resources that have `location` or `region` arguments. In 5.0.0+ those values will now be valid and won't result in errors during plan/apply stages.
+
+
+#### When you may need to take action
+
+There is only one change that we anticipate can lead to unexpected diffs in Terraform plans after upgrading to 5.0.0, which is:
+
+> Resources that have a `location` field will now use the default `region` value preferentially over the default `zone` value set on the provider. This is only relevant to resources where `location` is not provided in the resource block directly.
+
+Users will need to check for unexpected `location` changes for resources. If an unexpected change is seen, the solution is to explicitly set the `location` value in that resource's configuration block to match the desired value.
+
+This will only affect users whose configuration contains resource blocks that have missing `location` values and whose [default zone](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#zone) value belongs to a region that's different than the [default region](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#region) value. For example, if you set `us-central1-a` as the default zone and `us-central2` as the default region on the provider you may see plans that contain unexpected diffs to move resources from `us-central1` to `us-central2`.
+
+
 ### Provider default values shown at plan-time
 
 `project`, `region`, and `zone` fields will now display their values during plan-time instead of the placeholder `(known after apply)` value normally displayed for fields without fixed Terraform default values. These values will be taken from either the Terraform resource config file, provider config, or local environment variables, depending on which variables are supplied by the user, matching the existing per-resource functionality for what default values are used in execution of a Terraform plan.
@@ -271,13 +292,24 @@ resource "google_firebaserules_ruleset" "firestore" {
 
 These two unsupported fields were introduced incorrectly. They are now removed.
 
+
 ## Resource: `google_cloud_run_v2_service`
 
 ### `liveness_probe.tcp_socket` is now removed
 
 This unsupported field was introduced incorrectly. It is now removed.
 
+
 ## Resource: `google_container_cluster`
+
+### Clusters created in error states are now tainted rather than deleted
+
+GKE clusters that are created but do not become healthy will now be recorded in
+state and marked as tainted for cleanup on next apply rather than immediately
+deleted.
+
+This behavior was changed to allow users to collect internal logs from the
+cluster and/or manually resolve the issues and untaint their failed clusters.
 
 ### `enable_binary_authorization` is now removed
 
@@ -287,6 +319,18 @@ This unsupported field was introduced incorrectly. It is now removed.
 
 Previously `network_policy.provider` defaulted to "PROVIDER_UNSPECIFIED". It no longer
 has a default value.
+
+
+## Resource: `google_container_node_pool`
+
+### `logging_variant` no longer has a provider default value
+
+Previously `logging_variant` defaulted to "DEFAULT". It no longer has a default value.
+
+### `management.auto_repair` and `management.auto_upgrade` now default to true
+
+Previously both fields defaulted to false. They now default to true.
+
 
 ## Resource: `google_dataplex_datascan`
 
@@ -481,6 +525,10 @@ If you were relying on accessing an individual flag by index (for example, `goog
 
 `google_service_networking_connection` now uses the Create endpoint instead of the Patch endpoint during the creation step. Previously, Patch was used as a workaround for an issue that has since been resolved.
 
+### "terraform destroy" now fully deletes the resource instead of abandoning
+
+`google_service_networking_connection` now uses API `deleteConnection` method instead of `removePeering` method during the deletion step. Previously, `removePeering` method was used because `deleteConnection` method was unavailable. In some cases a private connection cannot be deleted immediately after the resource using that connection is deleted, and users may have to delete the private connection after a waiting period.
+
 ## Resource: `google_secret_manager_secret`
 
 ### `replication.automatic` is now removed
@@ -516,3 +564,9 @@ resource "google_secret_manager_secret" "my-secret" {
 ### `google_identity_platform_project_default_config` has been removed from the provider
 
 Use the `google_identity_platform_config` resource instead. It contains a more comprehensive list of fields, and was created before `google_identity_platform_project_default_config` was added.
+
+## Resource: `google_compute_service_attachment`
+
+### `reconcile_connections` now defaults from API
+
+`reconcile_connections` previously defaults to true. Now it will default from the API.

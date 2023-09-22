@@ -20,6 +20,7 @@ type GithubService interface {
 	RequestPullRequestReviewer(prNumber, assignee string) error
 	AddLabel(prNumber, label string) error
 	RemoveLabel(prNumber, label string) error
+	CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error
 }
 
 func NewGithubService() GithubService {
