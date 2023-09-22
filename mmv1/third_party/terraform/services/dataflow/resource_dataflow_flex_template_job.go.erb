@@ -292,14 +292,7 @@ func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_t
 	additionalExperiments := tpgresource.ConvertStringSet(d.Get("additional_experiments").(*schema.Set))
 
 	var autoscalingAlgorithm string
-	if p, ok := d.GetOk("parameters.autoscalingAlgorithm"); ok {
-		delete(updatedParameters, "autoscalingAlgorithm")
-		autoscalingAlgorithm = p.(string)
-	} else {
-		if v, ok := d.GetOk("autoscaling_algorithm"); ok {
-			autoscalingAlgorithm = v.(string)
-		}
-	}
+	autoscalingAlgorithm, updatedParameters = dataflowFlexJobTypeTransferVar("autoscaling_algorithm", "autoscalingAlgorithm", updatedParameters, d)
 
 	var numWorkers int
 	if p, ok := d.GetOk("parameters.numWorkers"); ok {
@@ -330,84 +323,29 @@ func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_t
 	}
 
 	var network string
-	if p, ok := d.GetOk("parameters.network"); ok {
-		delete(updatedParameters, "network")
-		network = p.(string)
-	} else {
-		if v, ok := d.GetOk("network"); ok {
-			network = v.(string)
-		}
-	}
+	network, updatedParameters = dataflowFlexJobTypeTransferVar("network", "network", updatedParameters, d)
 
 	var serviceAccountEmail string
-	if p, ok := d.GetOk("parameters.serviceAccountEmail"); ok {
-		delete(updatedParameters, "serviceAccountEmail")
-		serviceAccountEmail = p.(string)
-	} else {
-		if v, ok := d.GetOk("service_account_email"); ok {
-			serviceAccountEmail = v.(string)
-		}
-	}
+	serviceAccountEmail, updatedParameters = dataflowFlexJobTypeTransferVar("service_account_email", "serviceAccountEmail", updatedParameters, d)
 
 	var subnetwork string
-	if p, ok := d.GetOk("parameters.subnetwork"); ok {
-		d.Set("parameters.subnetwork", nil)
-		subnetwork = p.(string)
-	} else {
-		if v, ok := d.GetOk("subnetwork"); ok {
-			subnetwork = v.(string)
-		}
-	}
+	subnetwork, updatedParameters = dataflowFlexJobTypeTransferVar("subnetwork", "subnetwork", updatedParameters, d)
 
 	var tempLocation string
-	if p, ok := d.GetOk("parameters.tempLocation"); ok {
-		delete(updatedParameters, "tempLocation")
-		tempLocation = p.(string)
-	} else {
-		if v, ok := d.GetOk("temp_location"); ok {
-			tempLocation = v.(string)
-		}
-	}
+	tempLocation, updatedParameters = dataflowFlexJobTypeTransferVar("temp_location", "tempLocation", updatedParameters, d)
 
 	var stagingLocation string
-	if p, ok := d.GetOk("parameters.stagingLocation"); ok {
-		delete(updatedParameters, "stagingLocation")
-		stagingLocation = p.(string)
-	} else {
-		if v, ok := d.GetOk("staging_location"); ok {
-			stagingLocation = v.(string)
-		}
-	}
+	stagingLocation, updatedParameters = dataflowFlexJobTypeTransferVar("staging_location", "stagingLocation", updatedParameters, d)
 
 	var machineType string
-	if p, ok := d.GetOk("parameters.workerMachineType"); ok {
-		delete(updatedParameters, "workerMachineType")
-		machineType = p.(string)
-	} else {
-		if v, ok := d.GetOk("machine_type"); ok {
-			machineType = v.(string)
-		}
-	}
+
+	machineType, updatedParameters = dataflowFlexJobTypeTransferVar("machine_type", "workerMachineType", updatedParameters, d)
 
 	var kmsKeyName string
-	if p, ok := d.GetOk("parameters.kmsKeyName"); ok {
-		delete(updatedParameters, "kmsKeyName")
-		kmsKeyName = p.(string)
-	} else {
-		if v, ok := d.GetOk("kms_key_name"); ok {
-			kmsKeyName = v.(string)
-		}
-	}
+	kmsKeyName, updatedParameters = dataflowFlexJobTypeTransferVar("kms_key_name", "kmsKeyName", updatedParameters, d)
 
 	var ipConfiguration string
-	if p, ok := d.GetOk("parameters.ipConfiguration"); ok {
-		delete(updatedParameters, "ipConfiguration")
-		ipConfiguration = p.(string)
-	} else {
-		if v, ok := d.GetOk("ip_configuration"); ok {
-			ipConfiguration = v.(string)
-		}
-	}
+	ipConfiguration, updatedParameters = dataflowFlexJobTypeTransferVar("ip_configuration", "ipConfiguration", updatedParameters, d)
 
 	var enableStreamingEngine bool
 	if p, ok := d.GetOk("parameters.enableStreamingEngine"); ok {
@@ -420,24 +358,10 @@ func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_t
 	}
 
 	var sdkContainerImage string
-	if p, ok := d.GetOk("parameters.sdkContainerImage"); ok {
-		delete(updatedParameters, "sdkContainerImage")
-		sdkContainerImage = p.(string)
-	} else {
-		if v, ok := d.GetOk("sdk_container_image"); ok {
-			sdkContainerImage = v.(string)
-		}
-	}
+	sdkContainerImage, updatedParameters = dataflowFlexJobTypeTransferVar("sdk_container_image", "sdkContainerImage", updatedParameters, d)
 
 	var launcherMachineType string
-	if p, ok := d.GetOk("parameters.launcherMachineType"); ok {
-		delete(updatedParameters, "launcherMachineType")
-		launcherMachineType = p.(string)
-	} else {
-		if v, ok := d.GetOk("launcher_machine_type"); ok {
-			launcherMachineType = v.(string)
-		}
-	}
+	launcher_machine_type, updatedParameters = dataflowFlexJobTypeTransferVar("launcher_machine_type", "launcherMachineType", updatedParameters, d)
 
 	env := dataflow.FlexTemplateRuntimeEnvironment{
 		AdditionalUserLabels:  tpgresource.ExpandStringMap(d, "labels"),
@@ -746,16 +670,9 @@ func resourceDataflowFlexTemplateJobDelete(d *schema.ResourceData, meta interfac
 
 func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 
-	log.Printf("[DEBUG] I am customizing differences: machine_type: %s", "test")
-
-	if p, ok := d.GetOk("parameters.autoscalingAlgorithm"); ok {
-		if d.HasChange("autoscaling_algorithm") {
-			e := d.Get("autoscaling_algorithm")
-			return fmt.Errorf("Error setting autoscaling_algorithm, value is supplied twice: autoscaling_algorithm=\"%s\", parameters.autoscalingAlgorithm=\"%s\"", e.(string), p.(string))
-		} else {
-			p := d.Get("parameters.autoscalingAlgorithm")
-			d.SetNew("autoscaling_algorithm", p.(string))
-		}
+	err := resourceDataflowFlexJobTypeParameterOverride("autoscaling_algorithm", "autoscalingAlgorithm", d, meta)
+	if err != nil {
+		return err
 	}
 
 	if p, ok := d.GetOk("parameters.numWorkers"); ok {
@@ -786,94 +703,44 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 		}
 	}
 
-	if p, ok := d.GetOk("parameters.network"); ok {
-		if d.HasChange("network") {
-			e := d.Get("network")
-			return fmt.Errorf("Error setting network, value is supplied twice: network=\"%s\", parameters.network=\"%s\"", e.(string), p.(string))
-		} else {
-			p := d.Get("parameters.network")
-			d.SetNew("network", p.(string))
-		}
+	err := resourceDataflowFlexJobTypeParameterOverride("network", "network", d, meta)
+	if err != nil {
+		return err
 	}
 
-	if p, ok := d.GetOk("parameters.network"); ok {
-		if d.HasChange("network") {
-			e := d.Get("network")
-			return fmt.Errorf("Error setting network, value is supplied twice: network=\"%s\", parameters.network=\"%s\"", e.(string), p.(string))
-		} else {
-			p := d.Get("parameters.network")
-			d.SetNew("network", p.(string))
-		}
+	err := resourceDataflowFlexJobTypeParameterOverride("max_workers", "serviceAccountEmail", d, meta)
+	if err != nil {
+		return err
 	}
 
-	if p, ok := d.GetOk("parameters.serviceAccountEmail"); ok {
-		if d.HasChange("service_account_email") {
-			e := d.Get("service_account_email")
-			return fmt.Errorf("Error setting service_account_email, value is supplied twice: service_account_email=\"%s\", parameters.serviceAccountEmail=\"%s\"", e.(string), p.(string))
-		} else {
-			p := d.Get("parameters.serviceAccountEmail")
-			d.SetNew("service_account_email", p.(string))
-		}
+	err := resourceDataflowFlexJobTypeParameterOverride("subnetwork", "subnetwork", d, meta)
+	if err != nil {
+		return err
 	}
 
-	if p, ok := d.GetOk("parameters.subnetwork"); ok {
-		if d.HasChange("subnetwork") {
-			e := d.Get("subnetwork")
-			return fmt.Errorf("Error setting subnetwork, value is supplied twice: subnetwork=\"%s\", parameters.subnetwork=\"%s\"", e.(string), p.(string))
-		} else {
-			p := d.Get("parameters.subnetwork")
-			d.SetNew("subnetwork", p.(string))
-		}
+	err := resourceDataflowFlexJobTypeParameterOverride("temp_location", "tempLocation", d, meta)
+	if err != nil {
+		return err
 	}
 
-	if p, ok := d.GetOk("parameters.tempLocation"); ok {
-		if d.HasChange("temp_location") {
-			e := d.Get("temp_location")
-			return fmt.Errorf("Error setting temp_location, value is supplied twice: temp_location=\"%s\", parameters.tempLocation=\"%s\"", e.(string), p.(string))
-		} else {
-			p := d.Get("parameters.tempLocation")
-			d.SetNew("temp_location", p.(string))
-		}
+	err := resourceDataflowFlexJobTypeParameterOverride("staging_location", "stagingLocation", d, meta)
+	if err != nil {
+		return err
 	}
 
-	if p, ok := d.GetOk("parameters.stagingLocation"); ok {
-		if d.HasChange("staging_location") {
-			e := d.Get("staging_location")
-			return fmt.Errorf("Error setting staging_location, value is supplied twice: staging_location=\"%s\", parameters.stagingLocation=\"%s\"", e.(string), p.(string))
-		} else {
-			p := d.Get("parameters.stagingLocation")
-			d.SetNew("staging_location", p.(string))
-		}
+	err := resourceDataflowFlexJobTypeParameterOverride("machine_type", "workerMachineType", d, meta)
+	if err != nil {
+		return err
 	}
 
-	if p, ok := d.GetOk("parameters.workerMachineType"); ok {
-		if d.HasChange("machine_type") {
-			e := d.Get("machine_type")
-			return fmt.Errorf("Error setting machine_type, value is supplied twice: machine_type=\"%s\", parameters.workerMachineType=\"%s\"", e.(string), p.(string))
-		} else {
-			p := d.Get("parameters.workerMachineType")
-			d.SetNew("machine_type", p.(string))
-		}
+	err := resourceDataflowFlexJobTypeParameterOverride("kms_key_name", "kmsKeyName", d, meta)
+	if err != nil {
+		return err
 	}
 
-	if p, ok := d.GetOk("parameters.kmsKeyName"); ok {
-		if d.HasChange("kms_key_name") {
-			e := d.Get("kms_key_name")
-			return fmt.Errorf("Error setting kms_key_name, value is supplied twice: kms_key_name=\"%s\", parameters.kmsKeyName=\"%s\"", e.(string), p.(string))
-		} else {
-			p := d.Get("parameters.kmsKeyName")
-			d.SetNew("kms_key_name", p.(string))
-		}
-	}
-
-	if p, ok := d.GetOk("parameters.ipConfiguration"); ok {
-		if d.HasChange("ip_configuration") {
-			e := d.Get("ip_configuration")
-			return fmt.Errorf("Error setting ip_configuration, value is supplied twice: ip_configuration=\"%s\", parameters.ipConfiguration=\"%s\"", e.(string), p.(string))
-		} else {
-			p := d.Get("parameters.ipConfiguration")
-			d.SetNew("ip_configuration", p.(string))
-		}
+	err := resourceDataflowFlexJobTypeParameterOverride("ip_configuration", "ipConfiguration", d, meta)
+	if err != nil {
+		return err
 	}
 
 	if p, ok := d.GetOk("parameters.enableStreamingEngine"); ok {
@@ -886,24 +753,14 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 		}
 	}
 
-	if p, ok := d.GetOk("parameters.sdkContainerImage"); ok {
-		if d.HasChange("sdk_container_image") {
-			e := d.Get("sdk_container_image")
-			return fmt.Errorf("Error setting sdk_container_image, value is supplied twice: sdk_container_image=\"%s\", parameters.sdkContainerImage=\"%s\"", e.(string), p.(string))
-		} else {
-			p := d.Get("parameters.sdkContainerImage")
-			d.SetNew("sdk_container_image", p.(string))
-		}
+	err := resourceDataflowFlexJobTypeParameterOverride("sdk_container_image", "sdkContainerImage", d, meta)
+	if err != nil {
+		return err
 	}
 
-	if p, ok := d.GetOk("parameters.launcherMachineType"); ok {
-		if d.HasChange("launcher_machine_type") {
-			e := d.Get("launcher_machine_type")
-			return fmt.Errorf("Error setting launcher_machine_type, value is supplied twice: launcher_machine_type=\"%s\", parameters.launcherMachineType=\"%s\"", e.(string), p.(string))
-		} else {
-			p := d.Get("parameters.launcherMachineType")
-			d.SetNew("launcher_machine_type", p.(string))
-		}
+	err := resourceDataflowFlexJobTypeParameterOverride("launcher_machine_type", "launcherMachineType", d, meta)
+	if err != nil {
+		return err
 	}
 
 	// All non-virtual fields are ForceNew for batch jobs
@@ -926,6 +783,38 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 		}
 	}
 
+	return nil
+}
+
+func resourceDataflowFlexJobTypeTransferVar(ename, pname string, updatedParameters map[string]string, d *schema.ResourceData) (string, map[string]string) {
+
+	pstring := fmt.Sprintf("parameters.%s", pname)
+
+	if p, ok := d.GetOk(pstring); ok {
+		delete(updatedParameters, pname)
+		return p.(string), updatedParameters
+	} else {
+		if v, ok := d.GetOk(ename); ok {
+			return v.(string), updatedParameters
+		}else{
+			return _, updatedParameters
+		}
+	}
+}
+
+func resourceDataflowFlexJobTypeParameterOverride(ename, pname string, d *schema.ResourceDiff) error {
+
+	pstring := fmt.Sprintf("parameters.%s", pname)
+
+	if p, ok := d.GetOk(pstring); ok {
+		if d.HasChange(ename) {
+			e := d.Get(ename)
+			return fmt.Errorf("Error setting %s, value is supplied twice: %s=\"%s\", parameters.%s=\"%s\"", ename, ename, e.(string), pstring, p.(string))
+		} else {
+			p := d.Get(pstring)
+			d.SetNew(ename, p.(string))
+		}
+	}
 	return nil
 }
 
