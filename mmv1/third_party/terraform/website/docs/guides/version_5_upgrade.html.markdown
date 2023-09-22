@@ -594,7 +594,7 @@ Use the `google_identity_platform_config` resource instead. It contains a more c
 
 ### Fields that are a part of the [environment block](https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.locations.flexTemplates/launch#FlexTemplateRuntimeEnvironment) will be overriden to be sent via their fields even when supplied via parameters.
 
-Several fields within the `flex_template_job` resource can be supplied as part of the `parameters{}` block rather than configured directly as updates to their corresponding fields, which had Terraform support added in version 4.66. To resolve a conflict resulting from both values being included within Terraform state, all supplied key-value pair parameters with corresponding fields will be overridden to be sent to their direct field endpoint rather than included as part of `parameters{}` in the post request.
+Several fields within the `google_dataflow_flex_template_job` resource can be supplied through either the `parameters{}` block or a field on the resource object. Support for these fields on the resource object was added in the `4.66.0` release of the Google provider. That version introduced an issue where the values were being double-sent to the API due to being recorded in Terraform state in two places. To resolve this issue, these fields will be deduplicated and sent to the API through the resource object.
 
 Additionally, due to the API returning these fields to the user they will now be considered computed and users will see values twice within their state if they wish to continue supplying these fields' values via parameters.
 
