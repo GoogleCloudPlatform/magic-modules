@@ -236,7 +236,6 @@ func TestAccComputeRouterNat_withPortAllocationMethods(t *testing.T) {
 	})
 }
 
-// TODO(felipegc) base on this one
 <% unless version == 'ga' -%>
 func TestAccComputeRouterNat_withNatIpsAndDrainNatIps(t *testing.T) {
 	t.Parallel()
@@ -288,7 +287,6 @@ func TestAccComputeRouterNat_withNatIpsAndDrainNatIps(t *testing.T) {
 
 <% end -%>
 
-// TODO(felipegc) base on this one
 func TestAccComputeRouterNat_withNatRules(t *testing.T) {
 	t.Parallel()
 
@@ -463,7 +461,6 @@ func TestAccComputeRouterNat_withPrivateNat(t *testing.T) {
 	})
 }
 
-// TODO(felipegc)
 func TestAccComputeRouterNat_withPrivateNatAndRules(t *testing.T) {
 	t.Parallel()
 
@@ -471,9 +468,14 @@ func TestAccComputeRouterNat_withPrivateNatAndRules(t *testing.T) {
 	routerName := fmt.Sprintf("tf-test-router-private-nat-%s", testId)
 	hubName := fmt.Sprintf("%s-hub", routerName)
 	pEnv := envvar.GetTestProjectFromEnv()
-	match := fmt.Sprintf("nexthop.hub == '//networkconnectivity.googleapis.com/projects/%s/locations/global/hubs/%s'", pEnv, hubName)
 	ruleDescription := acctest.RandString(t, 10)
-	// matchUpdate := "destination.ip == '1.1.0.1' || destination.ip == '8.8.8.8'"
+	match := fmt.Sprintf("nexthop.hub == '//networkconnectivity.googleapis.com/projects/%s/locations/global/hubs/%s'", pEnv, hubName)
+	activeRangesNetworkOne := "google_compute_subnetwork.subnet1.self_link"
+	drainRangesEmpty := ""
+	activeRangesNetworkTwoAndThree := "google_compute_subnetwork.subnet2.self_link,google_compute_subnetwork.subnet3.self_link"
+	activeRangesNetworkThreeAndFour := "google_compute_subnetwork.subnet3.self_link,google_compute_subnetwork.subnet4.self_link"
+	drainRangesNetworkOne := "google_compute_subnetwork.subnet1.self_link"
+	drainRangesNetworkOneAndTwo := "google_compute_subnetwork.subnet1.self_link,google_compute_subnetwork.subnet2.self_link"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -489,101 +491,45 @@ func TestAccComputeRouterNat_withPrivateNatAndRules(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeRouterNatRulesBasic_privateNatWithRules(routerName, hubName, 100, ruleDescription, match),
+				Config: testAccComputeRouterNatRulesBasic_privateNatWithRuleAndActiveDrainRange(routerName, hubName, 100, ruleDescription, match, activeRangesNetworkOne, drainRangesEmpty),
 			},
 			{
 				ResourceName:      "google_compute_router_nat.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			// {
-			// 	Config: testAccComputeRouterNatRulesBasic(routerName, 65000, ruleDescription, match),
-			// },
-			// {
-			// 	ResourceName:      "google_compute_router_nat.foobar",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
-			// {
-			// 	Config: testAccComputeRouterNatRulesBasic(routerName, 100, ruleDescription, match),
-			// },
-			// {
-			// 	ResourceName:      "google_compute_router_nat.foobar",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
-			// {
-			// 	Config: testAccComputeRouterNatRulesBasic(routerName, 100, ruleDescriptionUpdate, match),
-			// },
-			// {
-			// 	ResourceName:      "google_compute_router_nat.foobar",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
-			// {
-			// 	Config: testAccComputeRouterNatRulesBasic(routerName, 100, ruleDescriptionUpdate, matchUpdate),
-			// },
-			// {
-			// 	ResourceName:      "google_compute_router_nat.foobar",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
-			// {
-			// 	Config: testAccComputeRouterNatRulesWithSourceActiveAndDrainIps(routerName, 100, ruleDescriptionUpdate, matchUpdate),
-			// },
-			// {
-			// 	ResourceName:      "google_compute_router_nat.foobar",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
-			// {
-			// 	Config: testAccComputeRouterNatRulesWithDrainIps(routerName, 100, ruleDescriptionUpdate, matchUpdate),
-			// },
-			// {
-			// 	ResourceName:      "google_compute_router_nat.foobar",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
-			// {
-			// 	Config: testAccComputeRouterNatMultiRules(routerName),
-			// },
-			// {
-			// 	ResourceName:      "google_compute_router_nat.foobar",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
-			// {
-			// 	Config: testAccComputeRouterNatRulesBasic_omitAction(routerName, 100, ruleDescriptionUpdate, matchUpdate),
-			// },
-			// {
-			// 	ResourceName:      "google_compute_router_nat.foobar",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
-			// {
-			// 	Config: testAccComputeRouterNatRulesBasic_omitDescription(routerName, 100, matchUpdate),
-			// },
-			// {
-			// 	ResourceName:      "google_compute_router_nat.foobar",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
-			// {
-			// 	Config: testAccComputeRouterNatMultiRulesWithIpId(routerName),
-			// },
-			// {
-			// 	ResourceName:      "google_compute_router_nat.foobar",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
-			// {
-			// 	Config: testAccComputeRouterNatRulesBasic_omitRules(routerName),
-			// },
-			// {
-			// 	ResourceName:      "google_compute_router_nat.foobar",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
+			{
+				Config: testAccComputeRouterNatRulesBasic_privateNatWithRuleAndActiveDrainRange(routerName, hubName, 100, ruleDescription, match, activeRangesNetworkTwoAndThree, drainRangesNetworkOne),
+			},
+			{
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRouterNatRulesBasic_privateNatWithRuleAndActiveDrainRange(routerName, hubName, 100, ruleDescription, match, activeRangesNetworkThreeAndFour, drainRangesNetworkOneAndTwo),
+			},
+			{
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRouterNatRulesBasic_privateNatWithRuleAndActiveDrainRange(routerName, hubName, 100, ruleDescription, match, activeRangesNetworkOne, drainRangesEmpty),
+			},
+			{
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRouterNatRulesBasic_privateNatOmitRules(routerName, hubName),
+			},
+			{
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -1592,7 +1538,6 @@ resource "google_compute_router_nat" "foobar" {
 `, routerName, routerName, routerName, routerName)
 }
 
-// TODO(felipegc)
 func testAccComputeRouterNatBaseResourcesWithPrivateNatSubnetworks(routerName, hubName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
@@ -1612,6 +1557,22 @@ resource "google_compute_subnetwork" "subnet2" {
   name          = "%s-subnet2"
   network       = google_compute_network.foobar.self_link
   ip_cidr_range = "10.10.1.0/24"
+  region        = "us-central1"
+  purpose       = "PRIVATE_NAT"
+}
+
+resource "google_compute_subnetwork" "subnet3" {
+  name          = "%s-subnet3"
+  network       = google_compute_network.foobar.self_link
+  ip_cidr_range = "10.158.1.0/24"
+  region        = "us-central1"
+  purpose       = "PRIVATE_NAT"
+}
+
+resource "google_compute_subnetwork" "subnet4" {
+  name          = "%s-subnet4"
+  network       = google_compute_network.foobar.self_link
+  ip_cidr_range = "10.168.1.0/24"
   region        = "us-central1"
   purpose       = "PRIVATE_NAT"
 }
@@ -1639,7 +1600,7 @@ resource "google_compute_router" "foobar" {
   region   = google_compute_subnetwork.subnet1.region
   network  = google_compute_network.foobar.self_link
 }
-`, routerName, routerName, routerName, hubName, routerName, routerName)
+`, routerName, routerName, routerName, routerName, routerName, hubName, routerName, routerName)
 }
 
 func testAccComputeRouterNatRulesBasic_privateNatOmitRules(routerName, hubName string) string {
@@ -1663,7 +1624,7 @@ resource "google_compute_router_nat" "foobar" {
 `, testAccComputeRouterNatBaseResourcesWithPrivateNatSubnetworks(routerName, hubName), routerName)
 }
 
-func testAccComputeRouterNatRulesBasic_privateNatWithRules(routerName, hubName string, ruleNumber int, ruleDescription, match string) string {
+func testAccComputeRouterNatRulesBasic_privateNatWithRuleAndActiveDrainRange(routerName, hubName string, ruleNumber int, ruleDescription, match, activeRanges, drainRanges string) string {
 	return fmt.Sprintf(`
 %s
 
@@ -1686,11 +1647,12 @@ resource "google_compute_router_nat" "foobar" {
     description = "%s"
     match       = "%s"
     action {
-      source_nat_active_ranges = [google_compute_subnetwork.subnet1.self_link]
+      source_nat_active_ranges = [%s]
+      source_nat_drain_ranges = [%s]
     }
   }
 }
-`, testAccComputeRouterNatBaseResourcesWithPrivateNatSubnetworks(routerName, hubName), routerName, ruleNumber, ruleDescription, match)
+`, testAccComputeRouterNatBaseResourcesWithPrivateNatSubnetworks(routerName, hubName), routerName, ruleNumber, ruleDescription, match, activeRanges, drainRanges)
 }
 
 <% end -%>

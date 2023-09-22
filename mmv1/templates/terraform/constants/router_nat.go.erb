@@ -98,9 +98,11 @@ func computeRouterNatIPsHash(v interface{}) int {
 	return schema.HashString(tpgresource.GetResourceNameFromSelfLink(val))
 }
 
+<% unless version == 'ga' -%>
 func computeRouterNatRulesSubnetHash(v interface{}) int {
 	return computeRouterNatIPsHash(v)
 }
+<% end -%>
 
 func computeRouterNatRulesHash(v interface{}) int {
 	obj := v.(map[string]interface{})
@@ -116,7 +118,12 @@ func computeRouterNatRulesHash(v interface{}) int {
 
 	sourceNatActiveIpHash := 0
 	sourceNatDrainIpHash := 0
+	<% unless version == 'ga' -%>
 	sourceNatActiveRangeHash := 0
+	sourceNatDrainRangeHash := 0
+	<% end -%>
+	routerNatRulesHash := 0
+
 	if obj["action"] != nil {
 		actions := obj["action"].([]interface{})
 		if len(actions) != 0 && actions[0] != nil {
@@ -140,6 +147,7 @@ func computeRouterNatRulesHash(v interface{}) int {
 				}
 			}
 
+			<% unless version == 'ga' -%>
 			sourceNatActiveRanges := action["source_nat_active_ranges"]
 			if sourceNatActiveRanges != nil {
 				sourceNatActiveRangesSet := sourceNatActiveRanges.(*schema.Set)
@@ -148,8 +156,22 @@ func computeRouterNatRulesHash(v interface{}) int {
 					sourceNatActiveRangeHash += schema.HashString(sourceNatActiveRangeStr)
 				}
 			}
+
+			sourceNatDrainRanges := action["source_nat_drain_ranges"]
+			if sourceNatDrainRanges != nil {
+				sourceNatDrainRangesSet := sourceNatDrainRanges.(*schema.Set)
+				for _, sourceNatDrainRange := range sourceNatDrainRangesSet.List() {
+					sourceNatDrainRangeStr := fmt.Sprintf("source_nat_drain_ranges-%d", computeRouterNatRulesSubnetHash(sourceNatDrainRange.(string)))
+					sourceNatDrainRangeHash += schema.HashString(sourceNatDrainRangeStr)
+				}
+			}
+			<% end -%>
 		}
 	}
 
-	return ruleNumber + descriptionHash + schema.HashString(match) + sourceNatActiveIpHash + sourceNatDrainIpHash + sourceNatActiveRangeHash
+	routerNatRulesHash = ruleNumber + descriptionHash + schema.HashString(match) + sourceNatActiveIpHash + sourceNatDrainIpHash
+	<% unless version == 'ga' -%>
+	routerNatRulesHash += sourceNatActiveRangeHash + sourceNatDrainRangeHash
+	<% end -%>
+	return routerNatRulesHash
 }
