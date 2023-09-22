@@ -118,6 +118,21 @@ The new annotations model is similar to the new labels model and will be applied
 
 There are now two annotation-related fields with the new model, the `annotations` and the output-only `effective_annotations` fields.
 
+### Updates to how empty strings are handled in the `provider` block
+
+In 5.0.0+ any empty strings set in the `provider` block will be used and not ignored. Previously any empty strings used as arguments in the `provider` block were ignored and did not contribute to configuration of the provider. 
+
+Users should remove empty string arguments to avoid errors during plan/apply stages.
+
+```tf
+provider "google" {
+  credentials = "" # this line should be removed
+  project = "my-project"
+  region = "us-central1"
+  zone = "" # this line should be removed
+}
+```
+
 ### Changes to how default `location`, `region` and `zone` values are obtained for resources
 
 Currently, when configuring resources that require a `location`, `region` or `zone` field you have the choice of specifying it in the resource block or allowing default values to be used. Default [region](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#region) or [zone](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#zone) values can be configured in the provider block or by providing values through environment variables.
@@ -574,6 +589,7 @@ Use the `google_identity_platform_config` resource instead. It contains a more c
 
 `reconcile_connections` previously defaults to true. Now it will default from the API.
 
+
 ## Resource: `google_dataflow_flex_template_job`
 
 ### Fields that are a part of the [environment block](https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.locations.flexTemplates/launch#FlexTemplateRuntimeEnvironment) will be overriden to be sent via their fields even when supplied via parameters.
@@ -597,3 +613,9 @@ It will now mirror its API functionality and serve as an output only field to sh
 ### One of `initial_size` or `autoscaling_policy{}` must be configured on resource creation.
 
 These fields will supply the base node-count for a node group and one of them will be required for successful resource creation. Both will be freely updateable or removable on future state changes that do not require recreation.
+
+## Resource: `google_looker_instance`
+
+### `LOOKER_MODELER` has been removed as a platform edition.
+
+Looker Modeler edition is deprecated as a platform edition.
