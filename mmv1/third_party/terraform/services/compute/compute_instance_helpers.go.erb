@@ -406,11 +406,6 @@ func expandAccessConfigs(configs []interface{}) []*compute.AccessConfig {
 				acs[i].SetPublicPtr = true
 				acs[i].PublicPtrDomainName = ptr.(string)
 			}
-			<% unless version == 'ga' -%>
-			if sp, ok := data["security_policy"]; ok && sp != "" {
-				acs[i].SecurityPolicy = sp.(string)
-			}
-			<% end -%>
 		}
 	}
 	return acs
@@ -440,11 +435,6 @@ func expandIpv6AccessConfigs(configs []interface{}) []*compute.AccessConfig {
 				iacs[i].Name = name.(string)
 			}
 			iacs[i].Type = "DIRECT_IPV6" // Currently only type supported
-			<% unless version == 'ga' -%>
-			if sp, ok := data["security_policy"]; ok && sp != "" {
-				iacs[i].SecurityPolicy = sp.(string)
-			}
-			<% end -%>
 		}
 	}
 	return iacs

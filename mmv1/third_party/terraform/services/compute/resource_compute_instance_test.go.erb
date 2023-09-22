@@ -2840,6 +2840,19 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfi
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateTwoPolicies(suffix, policyName, policyName2, instanceName, "\"\"", "\"\""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceNicAccessConfigHasNoSecurityPolicy(&instance),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
