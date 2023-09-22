@@ -15,7 +15,6 @@
 name := d.Get("name").(string)
 metadata := obj["metadata"].(map[string]interface{})
 metadata["name"] = name
-obj["metadata"] = metadata
 
 // The only acceptable version/kind right now
 obj["apiVersion"] = "domains.cloudrun.com/v1"

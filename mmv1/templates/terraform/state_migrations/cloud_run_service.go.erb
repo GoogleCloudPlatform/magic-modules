@@ -1,3 +1,41 @@
+var cloudRunGoogleProvidedAnnotations = regexp.MustCompile(`serving\.knative\.dev/(?:(?:creator)|(?:lastModifier))$|run\.googleapis\.com/(?:(?:ingress-status)|(?:operation-id))$|cloud\.googleapis\.com/(?:(?:location))`)
+
+func cloudrunAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Suppress diffs for the annotations provided by Google
+	if cloudRunGoogleProvidedAnnotations.MatchString(k) && new == "" {
+		return true
+	}
+
+  	if strings.HasSuffix(k, "run.googleapis.com/ingress") {
+	      	return old == "all" && new == ""
+	}
+
+	// Let diff be determined by annotations (above)
+	if strings.Contains(k, "annotations.%") {
+		return true
+	}
+
+	// For other keys, don't suppress diff.
+	return false
+}
+
+var cloudRunGoogleProvidedLabels = regexp.MustCompile(`cloud\.googleapis\.com/(?:(?:location))`)
+
+func cloudrunLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Suppress diffs for the labels provided by Google
+	if cloudRunGoogleProvidedLabels.MatchString(k) && new == "" {
+		return true
+	}
+
+	// Let diff be determined by labels (above)
+	if strings.Contains(k, "labels.%") {
+		return true
+	}
+
+	// For other keys, don't suppress diff.
+	return false
+}
+
 func resourceCloudRunServiceResourceV1() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
