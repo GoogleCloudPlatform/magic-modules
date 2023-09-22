@@ -191,7 +191,11 @@ func bigQueryTableConnectionIdSuppress(name, old, new string, _ *schema.Resource
 
 	re := regexp.MustCompile("projects/(.+)/(?:locations|regions)/(.+)/connections/(.+)")
 	if matches := re.FindStringSubmatch(new); matches != nil {
-		return old == matches[1]+"."+matches[2]+"."+matches[3]
+		// The Location or Region may be returned in Upper or Lower Case.
+		normalizedIdWithUpperCaseLocation := matches[1] + "." + strings.ToUpper(matches[2]) + "." + matches[3]
+		normalizedIdWithLowerCaseLocation := matches[1] + "." + strings.ToLower(matches[2]) + "." + matches[3]
+
+		return (old == normalizedIdWithUpperCaseLocation) || (old == normalizedIdWithLowerCaseLocation)
 	}
 	return false
 }
