@@ -1719,3 +1719,34 @@ func TestFrameworkProvider_LoadAndValidateFramework_batching(t *testing.T) {
 	}
 }
 
+
+func TestGetRegionFromRegionSelfLink(t *testing.T) {
+	cases := map[string]struct {
+		Input          basetypes.StringValue
+		ExpectedOutput basetypes.StringValue
+	}{
+		"A short region name is returned unchanged": {
+			Input:          types.StringValue("us-central1"),
+			ExpectedOutput: types.StringValue("us-central1"),
+		},
+		"A selflink is shortened to a region name": {
+			Input:          types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/regions/us-central1"),
+			ExpectedOutput: types.StringValue("us-central1"),
+		},
+		"Logic is specific to region selflinks; zone selflinks are not shortened": {
+			Input:          types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/asia-east1-a"),
+			ExpectedOutput: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/asia-east1-a"),
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			region := fwtransport.GetRegionFromRegionSelfLink(tc.Input)
+
+			if region != tc.ExpectedOutput {
+				t.Fatalf("want %s,  got %s", region, tc.ExpectedOutput)
+			}
+		})
+	}
+}
