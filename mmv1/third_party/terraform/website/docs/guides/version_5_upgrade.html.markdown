@@ -596,7 +596,7 @@ Use the `google_identity_platform_config` resource instead. It contains a more c
 
 Several fields within the `google_dataflow_flex_template_job` resource can be supplied through either the `parameters{}` block or a field on the resource object. Support for these fields on the resource object was added in the `4.66.0` release of the Google provider. That version introduced an issue where the values were being double-sent to the API due to being recorded in Terraform state in two places. To resolve this issue, these fields will be deduplicated and sent to the API through the resource object.
 
-Additionally, due to the API returning these fields to the user they will now be considered computed and users will see values twice within their state if they wish to continue supplying these fields' values via parameters.
+Additionally, due to the API returning these fields to the user they will now be considered computed and users will see values twice within their state when configuring these fields' values via the `parameters{}` block.
 
 ## Resource: `google_compute_node_group`
 
