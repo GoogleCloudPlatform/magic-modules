@@ -91,9 +91,8 @@ examples:
       address_name1: 'nat-address1'
       address_name2: 'nat-address2'
       address_name3: 'nat-address3'
-# TODO(felipegc) this example should be the final one which includes subnet, router_nat and all the things related to inter-vpc      
   - !ruby/object:Provider::Terraform::Examples
-    name: 'router_nat_type'
+    name: 'router_nat_private'
     primary_resource_id: 'nat_type'
     skip_test: true
     min_version: beta
@@ -102,6 +101,8 @@ examples:
       nat_name: 'my-router-nat'
       network_name: 'my-network'
       subnet_name: 'my-subnetwork'
+      hub_name: 'my-hub'
+      spoke_name: 'my-spoke'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/router_nat.go.erb'
 custom_diff: [
