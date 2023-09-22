@@ -1659,14 +1659,12 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		if err := tpgresource.SetLabels(instanceTemplate.Properties.Labels, d, "labels"); err != nil {
 			return fmt.Errorf("Error setting labels: %s", err)
 		}
-
-		if err := tpgresource.SetLabels(instanceTemplate.Properties.Labels, d, "terraform_labels"); err != nil {
-			return fmt.Errorf("Error setting terraform_labels: %s", err)
-		}
-
-		if err := d.Set("effective_labels", instanceTemplate.Properties.Labels); err != nil {
-			return fmt.Errorf("Error setting effective_labels: %s", err)
-		}
+	}
+	if err := tpgresource.SetLabels(instanceTemplate.Properties.Labels, d, "terraform_labels"); err != nil {
+		return fmt.Errorf("Error setting terraform_labels: %s", err)
+	}
+	if err := d.Set("effective_labels", instanceTemplate.Properties.Labels); err != nil {
+		return fmt.Errorf("Error setting effective_labels: %s", err)
 	}
 	if err = d.Set("self_link", instanceTemplate.SelfLink); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
