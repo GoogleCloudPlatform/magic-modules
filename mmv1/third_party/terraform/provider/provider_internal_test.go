@@ -70,15 +70,15 @@ func TestProvider_ValidateCredentials(t *testing.T) {
 
 			// Assert
 			if len(ws) != len(tc.ExpectedWarnings) {
-				t.Errorf("Expected %d warnings, got %d: %v", len(tc.ExpectedWarnings), len(ws), ws)
+				t.Fatalf("Expected %d warnings, got %d: %v", len(tc.ExpectedWarnings), len(ws), ws)
 			}
 			if len(es) != len(tc.ExpectedErrors) {
-				t.Errorf("Expected %d errors, got %d: %v", len(tc.ExpectedErrors), len(es), es)
+				t.Fatalf("Expected %d errors, got %d: %v", len(tc.ExpectedErrors), len(es), es)
 			}
 
-			if len(tc.ExpectedErrors) > 0 {
+			if len(tc.ExpectedErrors) > 0 && len(es) > 0 {
 				if es[0].Error() != tc.ExpectedErrors[0].Error() {
-					t.Errorf("Expected first error to be \"%s\", got \"%s\"", tc.ExpectedErrors[0], es[0])
+					t.Fatalf("Expected first error to be \"%s\", got \"%s\"", tc.ExpectedErrors[0], es[0])
 				}
 			}
 		})
@@ -120,15 +120,15 @@ func TestProvider_ValidateEmptyStrings(t *testing.T) {
 
 			// Assert
 			if len(ws) != len(tc.ExpectedWarnings) {
-				t.Errorf("Expected %d warnings, got %d: %v", len(tc.ExpectedWarnings), len(ws), ws)
+				t.Fatalf("Expected %d warnings, got %d: %v", len(tc.ExpectedWarnings), len(ws), ws)
 			}
 			if len(es) != len(tc.ExpectedErrors) {
-				t.Errorf("Expected %d errors, got %d: %v", len(tc.ExpectedErrors), len(es), es)
+				t.Fatalf("Expected %d errors, got %d: %v", len(tc.ExpectedErrors), len(es), es)
 			}
 
 			if len(tc.ExpectedErrors) > 0 && len(es) > 0 {
 				if es[0].Error() != tc.ExpectedErrors[0].Error() {
-					t.Errorf("Expected first error to be \"%s\", got \"%s\"", tc.ExpectedErrors[0], es[0])
+					t.Fatalf("Expected first error to be \"%s\", got \"%s\"", tc.ExpectedErrors[0], es[0])
 				}
 			}
 		})
