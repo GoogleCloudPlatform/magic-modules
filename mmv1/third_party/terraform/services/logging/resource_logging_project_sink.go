@@ -67,6 +67,8 @@ func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) 
 
 	projectSinkCreateRequest := config.NewLoggingClient(userAgent).Projects.Sinks.Create(id.parent(), sink)
 
+	// if custom-sa is specified, use it to write log and it reqiures uniqueWriterIdentity to be set as well
+	// otherwise set the uniqueWriter identity
 	if customWriterIdentity != "" {
 		projectSinkCreateRequest = projectSinkCreateRequest.UniqueWriterIdentity(uniqueWriterIdentity).CustomWriterIdentity(customWriterIdentity)
 	} else {
@@ -151,16 +153,19 @@ func resourceLoggingProjectSinkUpdate(d *schema.ResourceData, meta interface{}) 
 
 	sink, updateMask := expandResourceLoggingSinkForUpdate(d)
 	uniqueWriterIdentity := d.Get("unique_writer_identity").(bool)
-
 	customWriterIdentity := d.Get("custom_writer_identity").(string)
 
+	projectSinkUpdateRequest := config.NewLoggingClient(userAgent).Projects.Sinks.Patch(d.Id(), sink).UpdateMask(updateMask)
+
+	// if custom-sa is specified, use it to write log and it reqiures uniqueWriterIdentity to be set as well
+	// otherwise set the uniqueWriter identity
 	if customWriterIdentity != "" {
-		_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Patch(d.Id(), sink).
-			UpdateMask(updateMask).UniqueWriterIdentity(uniqueWriterIdentity).CustomWriterIdentity(customWriterIdentity).Do()
+		projectSinkUpdateRequest = projectSinkUpdateRequest.UniqueWriterIdentity(uniqueWriterIdentity).CustomWriterIdentity(customWriterIdentity)
 	} else {
-		_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Patch(d.Id(), sink).
-			UpdateMask(updateMask).UniqueWriterIdentity(uniqueWriterIdentity).Do()
+		projectSinkUpdateRequest = projectSinkUpdateRequest.UniqueWriterIdentity(uniqueWriterIdentity)
 	}
+
+	_, err = projectSinkUpdateRequest.Do()
 
 	if err != nil {
 		return err
