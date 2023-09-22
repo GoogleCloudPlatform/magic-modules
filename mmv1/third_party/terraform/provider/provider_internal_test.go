@@ -42,9 +42,7 @@ func TestProvider_ValidateCredentials(t *testing.T) {
 				return string(contents)
 			},
 		},
-		// There's a risk of changing the validator to saying "" is invalid, as it may mean that
-		// everyone not using the credentials field would get validation errors.
-		"configuring credentials as an empty string is not identified as invalid by the function, as it can't distinguish from zero values ": {
+		"configuring credentials as an empty string is valid": {
 			ConfigValue: func(t *testing.T) interface{} {
 				return ""
 			},
