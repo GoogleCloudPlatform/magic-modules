@@ -80,8 +80,8 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 			},
 
 			"parameters": {
-				Type:             schema.TypeMap,
-				Optional:         true,
+				Type:     schema.TypeMap,
+				Optional: true,
 			},
 
 			"project": {
@@ -361,7 +361,7 @@ func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_t
 	sdkContainerImage, updatedParameters = dataflowFlexJobTypeTransferVar("sdk_container_image", "sdkContainerImage", updatedParameters, d)
 
 	var launcherMachineType string
-	launcher_machine_type, updatedParameters = dataflowFlexJobTypeTransferVar("launcher_machine_type", "launcherMachineType", updatedParameters, d)
+	launcherMachineType, updatedParameters = dataflowFlexJobTypeTransferVar("launcher_machine_type", "launcherMachineType", updatedParameters, d)
 
 	env := dataflow.FlexTemplateRuntimeEnvironment{
 		AdditionalUserLabels:  tpgresource.ExpandStringMap(d, "labels"),
@@ -670,7 +670,7 @@ func resourceDataflowFlexTemplateJobDelete(d *schema.ResourceData, meta interfac
 
 func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 
-	err := resourceDataflowFlexJobTypeParameterOverride("autoscaling_algorithm", "autoscalingAlgorithm", d, meta)
+	err := dataflowFlexJobTypeParameterOverride("autoscaling_algorithm", "autoscalingAlgorithm", d)
 	if err != nil {
 		return err
 	}
@@ -703,42 +703,42 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 		}
 	}
 
-	err := resourceDataflowFlexJobTypeParameterOverride("network", "network", d, meta)
+	err = dataflowFlexJobTypeParameterOverride("network", "network", d)
 	if err != nil {
 		return err
 	}
 
-	err := resourceDataflowFlexJobTypeParameterOverride("max_workers", "serviceAccountEmail", d, meta)
+	err = dataflowFlexJobTypeParameterOverride("max_workers", "serviceAccountEmail", d)
 	if err != nil {
 		return err
 	}
 
-	err := resourceDataflowFlexJobTypeParameterOverride("subnetwork", "subnetwork", d, meta)
+	err = dataflowFlexJobTypeParameterOverride("subnetwork", "subnetwork", d)
 	if err != nil {
 		return err
 	}
 
-	err := resourceDataflowFlexJobTypeParameterOverride("temp_location", "tempLocation", d, meta)
+	err = dataflowFlexJobTypeParameterOverride("temp_location", "tempLocation", d)
 	if err != nil {
 		return err
 	}
 
-	err := resourceDataflowFlexJobTypeParameterOverride("staging_location", "stagingLocation", d, meta)
+	err = dataflowFlexJobTypeParameterOverride("staging_location", "stagingLocation", d)
 	if err != nil {
 		return err
 	}
 
-	err := resourceDataflowFlexJobTypeParameterOverride("machine_type", "workerMachineType", d, meta)
+	err = dataflowFlexJobTypeParameterOverride("machine_type", "workerMachineType", d)
 	if err != nil {
 		return err
 	}
 
-	err := resourceDataflowFlexJobTypeParameterOverride("kms_key_name", "kmsKeyName", d, meta)
+	err = dataflowFlexJobTypeParameterOverride("kms_key_name", "kmsKeyName", d)
 	if err != nil {
 		return err
 	}
 
-	err := resourceDataflowFlexJobTypeParameterOverride("ip_configuration", "ipConfiguration", d, meta)
+	err = dataflowFlexJobTypeParameterOverride("ip_configuration", "ipConfiguration", d)
 	if err != nil {
 		return err
 	}
@@ -753,12 +753,12 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 		}
 	}
 
-	err := resourceDataflowFlexJobTypeParameterOverride("sdk_container_image", "sdkContainerImage", d, meta)
+	err = dataflowFlexJobTypeParameterOverride("sdk_container_image", "sdkContainerImage", d)
 	if err != nil {
 		return err
 	}
 
-	err := resourceDataflowFlexJobTypeParameterOverride("launcher_machine_type", "launcherMachineType", d, meta)
+	err = dataflowFlexJobTypeParameterOverride("launcher_machine_type", "launcherMachineType", d)
 	if err != nil {
 		return err
 	}
@@ -786,7 +786,7 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	return nil
 }
 
-func resourceDataflowFlexJobTypeTransferVar(ename, pname string, updatedParameters map[string]string, d *schema.ResourceData) (string, map[string]string) {
+func dataflowFlexJobTypeTransferVar(ename, pname string, updatedParameters map[string]string, d *schema.ResourceData) (string, map[string]string) {
 
 	pstring := fmt.Sprintf("parameters.%s", pname)
 
@@ -796,20 +796,20 @@ func resourceDataflowFlexJobTypeTransferVar(ename, pname string, updatedParamete
 	} else {
 		if v, ok := d.GetOk(ename); ok {
 			return v.(string), updatedParameters
-		}else{
-			return _, updatedParameters
+		} else {
+			return "", updatedParameters
 		}
 	}
 }
 
-func resourceDataflowFlexJobTypeParameterOverride(ename, pname string, d *schema.ResourceDiff) error {
+func dataflowFlexJobTypeParameterOverride(ename, pname string, d *schema.ResourceDiff) error {
 
 	pstring := fmt.Sprintf("parameters.%s", pname)
 
 	if p, ok := d.GetOk(pstring); ok {
 		if d.HasChange(ename) {
 			e := d.Get(ename)
-			return fmt.Errorf("Error setting %s, value is supplied twice: %s=\"%s\", parameters.%s=\"%s\"", ename, ename, e.(string), pstring, p.(string))
+			return fmt.Errorf("Error setting %s, value is supplied twice: %s=\"%s\", %s=\"%s\"", ename, ename, e.(string), pstring, p.(string))
 		} else {
 			p := d.Get(pstring)
 			d.SetNew(ename, p.(string))
