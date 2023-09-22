@@ -439,7 +439,7 @@ data "google_storage_transfer_project_service_account" "default" {
 }
 
 resource "google_storage_bucket" "data_source" {
-  name          = "%s"
+  name          = "tf-test-%s"
   project       = "%s"
   location      = "US"
   force_destroy = true
