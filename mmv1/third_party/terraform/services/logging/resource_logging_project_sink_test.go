@@ -147,6 +147,7 @@ func TestAccLoggingProjectSink_updatePreservesCustomWriter(t *testing.T) {
 
 	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
 	account := "tf-test-sink-sa" + acctest.RandString(t, 10)
+	accountUpdated := "tf-test-sink-sa" + acctest.RandString(t, 10)
 
 	org := envvar.GetTestOrgFromEnv(t)
 	billingId := envvar.GetTestBillingAccountFromEnv(t)
@@ -168,7 +169,7 @@ func TestAccLoggingProjectSink_updatePreservesCustomWriter(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"custom_writer_identity"},
 			},
 			{
-				Config: testAccLoggingProjectSink_customWriterUpdated(org, billingId, project, sinkName, account),
+				Config: testAccLoggingProjectSink_customWriterUpdated(org, billingId, project, sinkName, accountUpdated),
 			},
 			{
 				ResourceName:            "google_logging_project_sink.custom_writer",
@@ -521,15 +522,15 @@ resource "google_logging_project_bucket_config" "destination-bucket" {
   bucket_id = "shared-bucket"
 }
 
-resource "google_service_account" "test-account1" {
+resource "google_service_account" "test-account2" {
   account_id   = "%s"
-  display_name = "Log Sink Custom WriterIdentity Testing Account"
+  display_name = "Updated Log Sink Custom WriterIdentity Testing Account"
 }
 
 resource "google_project_iam_member" "custom-sa-logbucket-binding" {
   project = google_project.destination-project.project_id
   role   = "roles/logging.bucketWriter"
-  member = "serviceAccount:${google_service_account.test-account1.email}"
+  member = "serviceAccount:${google_service_account.test-account2.email}"
 }
 
 data "google_project" "testing_project" {
@@ -541,7 +542,7 @@ locals {
 }
 
 resource "google_service_account_iam_member" "loggingsa-customsa-binding" {
-  service_account_id = google_service_account.test-account1.name
+  service_account_id = google_service_account.test-account2.name
   role   = "roles/iam.serviceAccountTokenCreator"
   member = "serviceAccount:service-${local.project_number}@gcp-sa-logging.iam.gserviceaccount.com"
 }
@@ -552,7 +553,7 @@ resource "google_logging_project_sink" "custom_writer" {
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=WARNING"
 
   unique_writer_identity = true
-  custom_writer_identity = "serviceAccount:${google_service_account.test-account1.email}"
+  custom_writer_identity = "serviceAccount:${google_service_account.test-account2.email}"
 
   depends_on = [google_logging_project_bucket_config.destination-bucket]
 }
