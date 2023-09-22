@@ -61,20 +61,18 @@ func TestAccComputeNodeGroup_fail(t *testing.T) {
 	groupName := fmt.Sprintf("group--%d", acctest.RandInt(t))
 	tmplPrefix := fmt.Sprintf("tmpl--%d", acctest.RandInt(t))
 
-	var timeCreated time.Time
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeNodeGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeNodeGroup_fail(groupName, tmplPrefix, "tmpl1"),
+				Config:      testAccComputeNodeGroup_fail(groupName, tmplPrefix, "tmpl1"),
 				ExpectError: regexp.MustCompile("An initial_size or autoscaling_policy must be configured on node group creation."),
 			},
 		},
 	})
 }
-
 
 func testAccCheckComputeNodeGroupCreationTimeBefore(prevTimeCreated *time.Time) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -167,7 +165,7 @@ resource "google_compute_node_group" "nodes" {
 `, tmplPrefix, tmplPrefix, groupName, tmplToUse)
 }
 
-func testAccComputeNodeGroup_update(groupName, tmplPrefix, tmplToUse string) string {
+func testAccComputeNodeGroup_fail(groupName, tmplPrefix, tmplToUse string) string {
 	return fmt.Sprintf(`
 resource "google_compute_node_template" "tmpl1" {
   name      = "%s-first"
@@ -183,5 +181,5 @@ resource "google_compute_node_group" "nodes" {
   node_template = google_compute_node_template.%s.self_link
 }
 
-`, tmplPrefix, tmplPrefix, groupName, tmplToUse)
+`, tmplPrefix, groupName, tmplToUse)
 }
