@@ -54,6 +54,18 @@ examples:
       workload_identity_pool_id: 'example-pool'
       workload_identity_pool_provider_id: 'example-prvdr'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'iam_workload_identity_pool_provider_saml_basic'
+    primary_resource_id: 'example'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+      workload_identity_pool_provider_id: 'example-prvdr'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'iam_workload_identity_pool_provider_saml_full'
+    primary_resource_id: 'example'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+      workload_identity_pool_provider_id: 'example-prvdr'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'iam_workload_identity_pool_provider_oidc_upload_key'
     primary_resource_id: 'example'
     vars:
@@ -288,5 +300,5 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: idpMetadataXml
-        description: The AWS account ID.
+        description: SAML Identity provider configuration metadata xml doc.
         required: true
