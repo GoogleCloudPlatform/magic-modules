@@ -523,15 +523,13 @@ func TestFrameworkProvider_LoadAndValidateFramework_region(t *testing.T) {
 			ExpectedDataModelValue:    types.StringValue("region-from-config"),
 			ExpectedConfigStructValue: types.StringValue("region-from-config"),
 		},
-		// This test currently fails - PF code doesn't behave like SDK code
-		// TODO(SarahFrench) - address https://github.com/hashicorp/terraform-provider-google/issues/15714
-		// "region values can be supplied as a self link": {
-		// 	ConfigValues: fwmodels.ProviderModel{
-		// 		Region: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/regions/us-central1"),
-		// 	},
-		// 	ExpectedDataModelValue:    types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/regions/us-central1"),
-		// 	ExpectedConfigStructValue: types.StringValue("us-central1"),
-		// },
+		"region values can be supplied as a self link": {
+			ConfigValues: fwmodels.ProviderModel{
+				Region: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/regions/us-central1"),
+			},
+			ExpectedDataModelValue:    types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/regions/us-central1"),
+			ExpectedConfigStructValue: types.StringValue("us-central1"),
+		},
 		"region value can be set by environment variable: GOOGLE_REGION is used": {
 			ConfigValues: fwmodels.ProviderModel{
 				Region: types.StringNull(),

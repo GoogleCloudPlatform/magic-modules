@@ -108,7 +108,7 @@ func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, 
 	p.Context = ctx
 	p.BillingProject = data.BillingProject
 	p.Project = data.Project
-	p.Region = data.Region
+	p.Region = GetRegionFromRegionSelfLink(data.Region)
 	p.Scopes = data.Scopes
 	p.Zone = data.Zone
 	p.UserProjectOverride = data.UserProjectOverride
