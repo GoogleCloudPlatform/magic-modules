@@ -27,6 +27,32 @@ func SetLabels(labels map[string]string, d *schema.ResourceData, lineage string)
 	return d.Set(lineage, transformed)
 }
 
+// Sets the "labels" field and "terraform_labels" with the value of the field "effective_labels" for data sources.
+// When reading data source, as the labels field is unavailable in the configuration of the data source,
+// the "labels" field will be empty. With this funciton, the labels "field" will have all of labels in the resource.
+func SetDataSourceLabels(d *schema.ResourceData) error {
+	effectiveLabels := d.Get("effective_labels")
+	if effectiveLabels == nil {
+		return nil
+	}
+
+	if d.Get("labels") == nil {
+		return fmt.Errorf("`labels` field is not present in the resource schema.")
+	}
+	if err := d.Set("labels", effectiveLabels); err != nil {
+		return fmt.Errorf("Error setting labels in data source: %s", err)
+	}
+
+	if d.Get("terraform_labels") == nil {
+		return fmt.Errorf("`terraform_labels` field is not present in the resource schema.")
+	}
+	if err := d.Set("terraform_labels", effectiveLabels); err != nil {
+		return fmt.Errorf("Error setting terraform_labels in data source: %s", err)
+	}
+
+	return nil
+}
+
 func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
@@ -36,7 +62,12 @@ func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) 
 		terraformLabels[k] = v
 	}
 
-	labels := d.Get("labels").(map[string]interface{})
+	raw := d.Get("labels")
+	if raw == nil {
+		return nil
+	}
+
+	labels := raw.(map[string]interface{})
 	for k, v := range labels {
 		terraformLabels[k] = v.(string)
 	}
@@ -71,6 +102,11 @@ func SetMetadataLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta inter
 		return nil
 	}
 
+	raw := d.Get("metadata.0.labels")
+	if raw == nil {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 
 	// Merge provider default labels with the user defined labels in the resource to get terraform managed labels
@@ -79,7 +115,7 @@ func SetMetadataLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta inter
 		terraformLabels[k] = v
 	}
 
-	labels := d.Get("metadata.0.labels").(map[string]interface{})
+	labels := raw.(map[string]interface{})
 	for k, v := range labels {
 		terraformLabels[k] = v.(string)
 	}

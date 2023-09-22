@@ -54,7 +54,7 @@ parameters:
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
     default_from_api: true
     validation: !ruby/object:Provider::Terraform::Validation
-      regex: '^[a-z0-9\-]+$'
+      regex: '^[a-zA-Z0-9\-_:.]+$'
 properties:
   - !ruby/object:Api::Type::String
     name: name

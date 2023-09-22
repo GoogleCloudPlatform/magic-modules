@@ -264,7 +264,7 @@ region are guaranteed to support the same version.
     to say "these are the _only_ node pools associated with this cluster", use the
     [google_container_node_pool](container_node_pool.html) resource instead of this property.
 
-* `node_pool_auto_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Node pool configs that apply to auto-provisioned node pools in
+* `node_pool_auto_config` - (Optional) Node pool configs that apply to auto-provisioned node pools in
     [autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison) clusters and
     [node auto-provisioning](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning)-enabled clusters. Structure is [documented below](#nested_node_pool_auto_config).
 
@@ -454,8 +454,7 @@ addons_config {
 * `enabled` - (DEPRECATED) Enable Binary Authorization for this cluster. Deprecated in favor of `evaluation_mode`.
 
 * `evaluation_mode` - (Optional) Mode of operation for Binary Authorization policy evaluation. Valid values are `DISABLED`
-  and `PROJECT_SINGLETON_POLICY_ENFORCE`. `PROJECT_SINGLETON_POLICY_ENFORCE` is functionally equivalent to the
-  deprecated `enable_binary_authorization` parameter being set to `true`.
+  and `PROJECT_SINGLETON_POLICY_ENFORCE`.
 
 <a name="nested_service_external_ips_config"></a>The `service_external_ips_config` block supports:
 
@@ -791,6 +790,10 @@ ephemeral_storage_local_ssd_config {
   local_ssd_count = 2
 }
 ```
+* `fast_socket` - (Optional) Parameters for the NCCL Fast Socket feature. If unspecified, NCCL Fast Socket will not be enabled on the node pool.
+     Node Pool must enable gvnic.
+     GKE version 1.25.2-gke.1700 or later.
+     Structure is [documented below](#nested_fast_socket).
 
 * `local_nvme_ssd_block_config` - (Optional) Parameters for the local NVMe SSDs. Structure is [documented below](#nested_local_nvme_ssd_block_config).
 
@@ -885,14 +888,13 @@ gvnic {
 * `tags` - (Optional) The list of instance tags applied to all nodes. Tags are used to identify
     valid sources or targets for network firewalls.
 
-* `taint` - (Optional) A list of [Kubernetes taints](https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/)
-to apply to nodes. GKE's API can only set this field on cluster creation.
-However, GKE will add taints to your nodes if you enable certain features such
-as GPUs. If this field is set, any diffs on this field will cause Terraform to
-recreate the underlying resource. Taint values can be updated safely in
-Kubernetes (eg. through `kubectl`), and it's recommended that you do not use
-this field to manage taints. If you do, `lifecycle.ignore_changes` is
-recommended. Structure is [documented below](#nested_taint).
+* `taint` - (Optional) A list of
+[Kubernetes taints](https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/)
+to apply to nodes. This field will only report drift on taint keys that are
+already managed with Terraform, use `effective_taints` to view the list of
+GKE-managed taints on the node pool from all sources. Importing this resource
+will not record any taints as being Terraform-managed, and will cause drift with
+any configured taints. Structure is [documented below](#nested_taint).
 
 * `workload_metadata_config` - (Optional) Metadata configuration to expose to workloads on the node pool.
     Structure is [documented below](#nested_workload_metadata_config).
@@ -961,6 +963,10 @@ sole_tenant_config {
 
 * `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
 
+<a name="nasted_fast_socket"></a>The `fast_socket` block supports:
+
+* `enabled` (Required) - Whether or not the NCCL Fast Socket is enabled
+
 <a name="nested_local_nvme_ssd_block_config"></a>The `local_nvme_ssd_block_config` block supports:
 
 * `local_ssd_count` (Required) - Number of raw-block local NVMe SSD disks to be attached to the node. Each local SSD is 375 GB in size. If zero, it means no raw-block local NVMe SSD disks to be attached to the node.
@@ -1015,11 +1021,11 @@ workload_identity_config {
 
 <a name="nested_node_pool_auto_config"></a>The `node_pool_auto_config` block supports:
 
-* `network_tags` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - The network tag config for the cluster's automatically provisioned node pools.
+* `network_tags` (Optional) - The network tag config for the cluster's automatically provisioned node pools.
 
 The `network_tags` block supports:
 
-* `tags` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - List of network tags applied to auto-provisioned node pools.
+* `tags` (Optional) - List of network tags applied to auto-provisioned node pools.
 
 ```hcl
 node_pool_auto_config {
@@ -1302,6 +1308,8 @@ exported:
   `/16` from the container CIDR.
 
 * `cluster_autoscaling.0.auto_provisioning_defaults.0.management.0.upgrade_options` - Specifies the [Auto Upgrade knobs](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/NodeManagement#AutoUpgradeOptions) for the node pool.
+
+* `node_config.0.effective_taints` - List of kubernetes taints applied to each node. Structure is [documented above](#nested_taint).
 
 ## Timeouts
 

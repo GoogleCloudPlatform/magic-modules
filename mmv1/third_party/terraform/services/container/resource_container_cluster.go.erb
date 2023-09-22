@@ -1368,11 +1368,10 @@ func ResourceContainerCluster() *schema.Resource {
 						},
 						"provider": {
 							Type:             schema.TypeString,
-							Default:          "PROVIDER_UNSPECIFIED",
 							Optional:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"PROVIDER_UNSPECIFIED", "CALICO"}, false),
 							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("PROVIDER_UNSPECIFIED"),
-							Description:      `The selected network policy provider. Defaults to PROVIDER_UNSPECIFIED.`,
+							Description:      `The selected network policy provider.`,
 						},
 					},
 				},
@@ -1394,7 +1393,6 @@ func ResourceContainerCluster() *schema.Resource {
 
 			"node_pool_defaults": clusterSchemaNodePoolDefaults(),
 
-<% unless version == "ga" -%>
 			"node_pool_auto_config": {
 				Type:             schema.TypeList,
 				Optional:         true,
@@ -1422,7 +1420,6 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 
 			"node_version": {
 				Type:        schema.TypeString,
@@ -2173,8 +2170,8 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		NotificationConfig: expandNotificationConfig(d.Get("notification_config")),
 		ConfidentialNodes: expandConfidentialNodes(d.Get("confidential_nodes")),
 		ResourceLabels: tpgresource.ExpandStringMap(d, "resource_labels"),
-<% unless version == 'ga' -%>
 		NodePoolAutoConfig: expandNodePoolAutoConfig(d.Get("node_pool_auto_config")),
+<% unless version == 'ga' -%>
 		ProtectConfig: expandProtectConfig(d.Get("protect_config")),
 <% end -%>
 		CostManagementConfig: expandCostManagementConfig(d.Get("cost_management_config")),
@@ -2309,11 +2306,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.MonitoringConfig = expandMonitoringConfig(v)
 	}
 
-<% unless version == 'ga' -%>
 	if err := validateNodePoolAutoConfig(cluster); err != nil {
 		return err
 	}
-<% end -%>
 
 	if err := validatePrivateClusterConfig(cluster); err != nil {
 		return err
@@ -2687,7 +2682,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 			return fmt.Errorf("Error setting default_max_pods_per_node: %s", err)
 		}
 	}
-	if err := d.Set("node_config", flattenNodeConfig(cluster.NodeConfig)); err != nil {
+	if err := d.Set("node_config", flattenNodeConfig(cluster.NodeConfig, d.Get("node_config"))); err != nil {
 		return err
 	}
 	if err := d.Set("project", project); err != nil {
@@ -2779,11 +2774,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-<% unless version == 'ga' -%>
 	if err := d.Set("node_pool_auto_config", flattenNodePoolAutoConfig(cluster.NodePoolAutoConfig)); err != nil {
 		return err
 	}
-<% end -%>
 
         if err := d.Set("node_pool_defaults", flattenNodePoolDefaults(cluster.NodePoolDefaults)); err != nil {
                 return err
@@ -3990,7 +3983,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s Security Posture Config has been updated to %#v", d.Id(), req.Update.DesiredSecurityPostureConfig)
 	}
 
-<% unless version == 'ga' -%>
 	if d.HasChange("node_pool_auto_config.0.network_tags.0.tags") {
 		tags := d.Get("node_pool_auto_config.0.network_tags.0.tags").([]interface{})
 
@@ -4011,7 +4003,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s node pool auto config network tags have been updated", d.Id())
 	}
-<% end -%>
 
 	d.Partial(false)
 
@@ -5224,7 +5215,6 @@ func flattenNodePoolDefaults(c *container.NodePoolDefaults) []map[string]interfa
 	return []map[string]interface{}{result}
 }
 
-<% unless version == 'ga' -%>
 func expandNodePoolAutoConfig(configured interface{}) *container.NodePoolAutoConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -5252,7 +5242,6 @@ func expandNodePoolAutoConfigNetworkTags(configured interface{}) *container.Netw
 	}
 	return nt
 }
-<% end -%>
 
 func flattenNotificationConfig(c *container.NotificationConfig) []map[string]interface{} {
 	if c == nil {
@@ -5978,7 +5967,6 @@ func flattenManagedPrometheusConfig(c *container.ManagedPrometheusConfig) []map[
 	}
 }
 
-<% unless version == 'ga' -%>
 func flattenNodePoolAutoConfig(c *container.NodePoolAutoConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -6003,7 +5991,6 @@ func flattenNodePoolAutoConfigNetworkTags(c *container.NetworkTags) []map[string
 	}
 	return []map[string]interface{}{result}
 }
-<% end -%>
 
 func resourceContainerClusterStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
@@ -6227,7 +6214,6 @@ func BinaryAuthorizationDiffSuppress(k, old, new string, r *schema.ResourceData)
 	return false
 }
 
-<% unless version == 'ga' -%>
 func validateNodePoolAutoConfig(cluster *container.Cluster) error {
 	if cluster == nil || cluster.NodePoolAutoConfig == nil {
 		return nil
@@ -6240,7 +6226,6 @@ func validateNodePoolAutoConfig(cluster *container.Cluster) error {
 
 	return nil
 }
-<% end -%>
 
 func containerClusterSurgeSettingsCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	if v, ok := d.GetOk("cluster_autoscaling.0.auto_provisioning_defaults.0.upgrade_settings.0.strategy"); ok {

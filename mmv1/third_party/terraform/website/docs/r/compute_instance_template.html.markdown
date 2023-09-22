@@ -6,6 +6,8 @@ description: |-
 
 # google\_compute\_instance\_template
 
+-> **Note**: Global instance templates can be used in any region. To lower the impact of outages outside your region and gain data residency within your region, use [google_compute_region_instance_template](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_instance_template).
+
 Manages a VM instance template resource within GCE. For more information see
 [the official documentation](https://cloud.google.com/compute/docs/instance-templates)
 and
@@ -305,6 +307,12 @@ The following arguments are supported:
 
 * `labels` - (Optional) A set of key/value label pairs to assign to instances
     created from this template.
+
+  **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+	Please refer to the field 'effective_labels' for all of the labels present on the resource.
+
+* `effective_labels` -
+  All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 
 * `metadata` - (Optional) Metadata key/value pairs to make available from
     within instances created from this template.

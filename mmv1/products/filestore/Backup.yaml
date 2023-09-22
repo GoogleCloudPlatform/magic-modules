@@ -113,6 +113,7 @@ properties:
       - :BASIC_HDD
       - :BASIC_SSD
       - :HIGH_SCALE_SSD
+      - :ZONAL
       - :ENTERPRISE
     output: true
   - !ruby/object:Api::Type::String

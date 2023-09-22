@@ -201,9 +201,9 @@ cluster.
 
 <a name="nested_management"></a>The `management` block supports:
 
-* `auto_repair` - (Optional) Whether the nodes will be automatically repaired.
+* `auto_repair` - (Optional) Whether the nodes will be automatically repaired. Enabled by default.
 
-* `auto_upgrade` - (Optional) Whether the nodes will be automatically upgraded.
+* `auto_upgrade` - (Optional) Whether the nodes will be automatically upgraded. Enabled by default.
 
 <a name="nested_network_config"></a>The `network_config` block supports:
 
@@ -273,7 +273,7 @@ cluster.
   The resource policy must be in the same project and region as the node pool.
   If not found, InvalidArgument error is returned.
 
-* `tpu_topology` - (Optional, Beta) The [TPU placement topology](https://cloud.google.com/tpu/docs/types-topologies#tpu_topologies) for pod slice node pool.
+* `tpu_topology` - (Optional) The [TPU placement topology](https://cloud.google.com/tpu/docs/types-topologies#tpu_topologies) for pod slice node pool.
 
 ## Attributes Reference
 

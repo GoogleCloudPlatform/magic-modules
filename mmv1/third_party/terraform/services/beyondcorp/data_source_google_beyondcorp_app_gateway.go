@@ -46,6 +46,10 @@ func dataSourceGoogleBeyondcorpAppGatewayRead(d *schema.ResourceData, meta inter
 		return err
 	}
 
+	if err := tpgresource.SetDataSourceLabels(d); err != nil {
+		return err
+	}
+
 	if d.Id() == "" {
 		return fmt.Errorf("%s not found", id)
 	}
