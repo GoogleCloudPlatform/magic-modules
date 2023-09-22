@@ -322,29 +322,21 @@ func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_t
 		}
 	}
 
-	var network string
-	network, updatedParameters = dataflowFlexJobTypeTransferVar("network", "network", updatedParameters, d)
+	network, updatedParameters := dataflowFlexJobTypeTransferVar("network", "network", updatedParameters, d)
 
-	var serviceAccountEmail string
-	serviceAccountEmail, updatedParameters = dataflowFlexJobTypeTransferVar("service_account_email", "serviceAccountEmail", updatedParameters, d)
+	serviceAccountEmail, updatedParameters := dataflowFlexJobTypeTransferVar("service_account_email", "serviceAccountEmail", updatedParameters, d)
 
-	var subnetwork string
-	subnetwork, updatedParameters = dataflowFlexJobTypeTransferVar("subnetwork", "subnetwork", updatedParameters, d)
+	subnetwork, updatedParameters := dataflowFlexJobTypeTransferVar("subnetwork", "subnetwork", updatedParameters, d)
 
-	var tempLocation string
-	tempLocation, updatedParameters = dataflowFlexJobTypeTransferVar("temp_location", "tempLocation", updatedParameters, d)
+	tempLocation, updatedParameters := dataflowFlexJobTypeTransferVar("temp_location", "tempLocation", updatedParameters, d)
 
-	var stagingLocation string
-	stagingLocation, updatedParameters = dataflowFlexJobTypeTransferVar("staging_location", "stagingLocation", updatedParameters, d)
+	stagingLocation, updatedParameters := dataflowFlexJobTypeTransferVar("staging_location", "stagingLocation", updatedParameters, d)
 
-	var machineType string
-	machineType, updatedParameters = dataflowFlexJobTypeTransferVar("machine_type", "workerMachineType", updatedParameters, d)
+	machineType, updatedParameters := dataflowFlexJobTypeTransferVar("machine_type", "workerMachineType", updatedParameters, d)
 
-	var kmsKeyName string
-	kmsKeyName, updatedParameters = dataflowFlexJobTypeTransferVar("kms_key_name", "kmsKeyName", updatedParameters, d)
+	kmsKeyName, updatedParameters := dataflowFlexJobTypeTransferVar("kms_key_name", "kmsKeyName", updatedParameters, d)
 
-	var ipConfiguration string
-	ipConfiguration, updatedParameters = dataflowFlexJobTypeTransferVar("ip_configuration", "ipConfiguration", updatedParameters, d)
+	ipConfiguration, updatedParameters := dataflowFlexJobTypeTransferVar("ip_configuration", "ipConfiguration", updatedParameters, d)
 
 	var enableStreamingEngine bool
 	if p, ok := d.GetOk("parameters.enableStreamingEngine"); ok {
@@ -356,11 +348,9 @@ func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_t
 		}
 	}
 
-	var sdkContainerImage string
-	sdkContainerImage, updatedParameters = dataflowFlexJobTypeTransferVar("sdk_container_image", "sdkContainerImage", updatedParameters, d)
+	sdkContainerImage, updatedParameters := dataflowFlexJobTypeTransferVar("sdk_container_image", "sdkContainerImage", updatedParameters, d)
 
-	var launcherMachineType string
-	launcherMachineType, updatedParameters = dataflowFlexJobTypeTransferVar("launcher_machine_type", "launcherMachineType", updatedParameters, d)
+	launcherMachineType, updatedParameters := dataflowFlexJobTypeTransferVar("launcher_machine_type", "launcherMachineType", updatedParameters, d)
 
 	env := dataflow.FlexTemplateRuntimeEnvironment{
 		AdditionalUserLabels:  tpgresource.ExpandStringMap(d, "labels"),
@@ -539,7 +529,7 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 
 	tnamemapping := tpgresource.ExpandStringMap(d, "transform_name_mapping")
 
-	env, _, err := resourceDataflowFlexJobSetupEnv(d, config)
+	env, updatedParameters, err := resourceDataflowFlexJobSetupEnv(d, config)
 	if err != nil {
 		return err
 	}
@@ -555,7 +545,7 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 
 			ContainerSpecGcsPath:  d.Get("container_spec_gcs_path").(string),
 			JobName:               d.Get("name").(string),
-			Parameters:            tpgresource.ExpandStringMap(d, "parameters"),
+			Parameters:            updatedParameters,
 			TransformNameMappings: tnamemapping,
 			Environment:           &env,
 			Update:                true,
