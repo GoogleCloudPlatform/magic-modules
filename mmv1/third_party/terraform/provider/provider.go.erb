@@ -58,21 +58,23 @@ func Provider() *schema.Provider {
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"credentials": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: ValidateCredentials,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  ValidateCredentials,
 				ConflictsWith: []string{"access_token"},
 			},
 
 			"access_token": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  ValidateEmptyStrings,
 				ConflictsWith: []string{"credentials"},
 			},
 
 			"impersonate_service_account": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: ValidateEmptyStrings,
 			},
 
 			"impersonate_service_account_delegates": {
@@ -82,23 +84,27 @@ func Provider() *schema.Provider {
 			},
 
 			"project": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: ValidateEmptyStrings,
 			},
 
 			"billing_project": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: ValidateEmptyStrings,
 			},
 
 			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: ValidateEmptyStrings,
 			},
 
 			"zone": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: ValidateEmptyStrings,
 			},
 
 			"scopes": {
