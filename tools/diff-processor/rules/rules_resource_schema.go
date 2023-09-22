@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/GoogleCloudPlatform/magic-modules/.ci/diff-processor/diff"
 )
 
 // ResourceSchemaRule provides structure for
@@ -14,7 +14,7 @@ type ResourceSchemaRule struct {
 	definition  string
 	message     string
 	identifier  string
-	isRuleBreak func(old, new map[string]*schema.Schema) []string
+	isRuleBreak func(resourceDiff diff.ResourceDiff) []string
 }
 
 // ResourceSchemaRules is a list of ResourceInventoryRule
@@ -41,15 +41,14 @@ var resourceSchemaRule_RemovingAField = ResourceSchemaRule{
 	isRuleBreak: resourceSchemaRule_RemovingAField_func,
 }
 
-func resourceSchemaRule_RemovingAField_func(old, new map[string]*schema.Schema) []string {
-	keysNotPresent := []string{}
-	for key := range old {
-		_, exists := new[key]
-		if !exists {
-			keysNotPresent = append(keysNotPresent, key)
+func resourceSchemaRule_RemovingAField_func(resourceDiff diff.ResourceDiff) []string {
+	fieldsRemoved := []string{}
+	for field, fieldDiff := range resourceDiff.Fields {
+		if fieldDiff.Old != nil && fieldDiff.New == nil {
+			fieldsRemoved = append(fieldsRemoved, field)
 		}
 	}
-	return keysNotPresent
+	return fieldsRemoved
 }
 
 func resourceSchemaRulesToRuleArray(rss []ResourceSchemaRule) []Rule {
@@ -88,11 +87,11 @@ func (rs ResourceSchemaRule) Message(resource, field string) string {
 
 // IsRuleBreak - compares the field entries and returns
 // a list of fields violating the rule
-func (rs ResourceSchemaRule) IsRuleBreak(old, new map[string]*schema.Schema) []string {
+func (rs ResourceSchemaRule) IsRuleBreak(resourceDiff diff.ResourceDiff) []string {
 	if rs.isRuleBreak == nil {
 		return []string{}
 	}
-	return rs.isRuleBreak(old, new)
+	return rs.isRuleBreak(resourceDiff)
 }
 
 // Undetectable - informs if there are functions in place

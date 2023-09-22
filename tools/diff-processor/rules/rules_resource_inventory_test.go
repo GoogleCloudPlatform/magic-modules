@@ -7,10 +7,10 @@ import (
 )
 
 type resourceInventoryTestCase struct {
-	name               string
-	oldResourceMap     map[string]*schema.Resource
-	newResourceMap     map[string]*schema.Resource
-	expectedViolations int
+	name     string
+	old      *schema.Resource
+	new      *schema.Resource
+	expected bool
 }
 
 func TestResourceInventoryRule_RemovingAResource(t *testing.T) {
@@ -21,113 +21,28 @@ func TestResourceInventoryRule_RemovingAResource(t *testing.T) {
 
 var resourceInventoryRule_RemovingAResourceTestCases = []resourceInventoryTestCase{
 	{
-		name: "control",
-		oldResourceMap: map[string]*schema.Resource{
-			"google-x": {
-				Schema: map[string]*schema.Schema{
-					"field-a": {Description: "beep", Optional: true},
-					"field-b": {Description: "beep", Optional: true},
-				},
-			},
-		},
-		newResourceMap: map[string]*schema.Resource{
-			"google-x": {
-				Schema: map[string]*schema.Schema{
-					"field-a": {Description: "beep", Optional: true},
-					"field-b": {Description: "beep", Optional: true},
-				},
-			},
-		},
-		expectedViolations: 0,
+		name:     "control",
+		old:      &schema.Resource{},
+		new:      &schema.Resource{},
+		expected: false,
 	},
 	{
-		name: "adding a resource",
-		oldResourceMap: map[string]*schema.Resource{
-			"google-x": {
-				Schema: map[string]*schema.Schema{
-					"field-a": {Description: "beep", Optional: true},
-					"field-b": {Description: "beep", Optional: true},
-				},
-			},
-		},
-		newResourceMap: map[string]*schema.Resource{
-			"google-x": {
-				Schema: map[string]*schema.Schema{
-					"field-a": {Description: "beep", Optional: true},
-					"field-b": {Description: "beep", Optional: true},
-				},
-			},
-			"google-y": {
-				Schema: map[string]*schema.Schema{
-					"field-a": {Description: "beep", Optional: true},
-				},
-			},
-		},
-		expectedViolations: 0,
+		name:     "resource added",
+		old:      nil,
+		new:      &schema.Resource{},
+		expected: false,
 	},
 	{
-		name: "resource missing",
-		oldResourceMap: map[string]*schema.Resource{
-			"google-x": {
-				Schema: map[string]*schema.Schema{
-					"field-a": {Description: "beep"},
-					"field-b": {Description: "beep"},
-				},
-			},
-		},
-		newResourceMap:     map[string]*schema.Resource{},
-		expectedViolations: 1,
-	},
-	{
-		name: "resource renamed",
-		oldResourceMap: map[string]*schema.Resource{
-			"google-x": {
-				Schema: map[string]*schema.Schema{
-					"field-a": {Description: "beep", Optional: true},
-					"field-b": {Description: "beep", Optional: true},
-				},
-			},
-		},
-		newResourceMap: map[string]*schema.Resource{
-			"google-y": {
-				Schema: map[string]*schema.Schema{
-					"field-a": {Description: "beep", Optional: true},
-					"field-b": {Description: "beep", Optional: true},
-				},
-			},
-		},
-		expectedViolations: 1,
-	},
-	{
-		name: "resource renamed and another removed",
-		oldResourceMap: map[string]*schema.Resource{
-			"google-x": {
-				Schema: map[string]*schema.Schema{
-					"field-a": {Description: "beep", Optional: true},
-					"field-b": {Description: "beep", Optional: true},
-				},
-			},
-			"google-z": {
-				Schema: map[string]*schema.Schema{
-					"field-a": {Description: "beep", Optional: true},
-				},
-			},
-		},
-		newResourceMap: map[string]*schema.Resource{
-			"google-y": {
-				Schema: map[string]*schema.Schema{
-					"field-a": {Description: "beep", Optional: true},
-					"field-b": {Description: "beep", Optional: true},
-				},
-			},
-		},
-		expectedViolations: 2,
+		name:     "resource removed",
+		old:      &schema.Resource{},
+		new:      nil,
+		expected: true,
 	},
 }
 
 func (tc *resourceInventoryTestCase) check(rule ResourceInventoryRule, t *testing.T) {
-	violations := rule.isRuleBreak(tc.oldResourceMap, tc.newResourceMap)
-	if tc.expectedViolations != len(violations) {
-		t.Errorf("Test `%s` failed: expected %d violations, got %d", tc.name, tc.expectedViolations, len(violations))
+	got := rule.isRuleBreak(tc.old, tc.new)
+	if tc.expected != got {
+		t.Errorf("Test `%s` failed: want %t, got %t", tc.name, tc.expected, got)
 	}
 }

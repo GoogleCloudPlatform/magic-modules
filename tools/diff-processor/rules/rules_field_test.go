@@ -71,6 +71,25 @@ var fieldRule_BecomingRequiredTestCases = []fieldTestCase{
 		},
 		expectedViolation: true,
 	},
+	{
+		// TODO: detect this as violation b/300515447
+		name:     "field added as required",
+		oldField: nil,
+		newField: &schema.Schema{
+			Description: "beep",
+			Required:    true,
+		},
+		expectedViolation: false,
+	},
+	{
+		name: "field removed",
+		oldField: &schema.Schema{
+			Description: "beep",
+			Optional:    true,
+		},
+		newField:          nil,
+		expectedViolation: false,
+	},
 }
 
 // !! min max ?
@@ -91,6 +110,22 @@ var fieldRule_ChangingTypeTestCases = []fieldTestCase{
 		newField: &schema.Schema{
 			Type: schema.TypeBool,
 		},
+		expectedViolation: false,
+	},
+	{
+		name:     "field added",
+		oldField: nil,
+		newField: &schema.Schema{
+			Type: schema.TypeBool,
+		},
+		expectedViolation: false,
+	},
+	{
+		name: "field removed",
+		oldField: &schema.Schema{
+			Type: schema.TypeBool,
+		},
+		newField:          nil,
 		expectedViolation: false,
 	},
 	{
@@ -222,6 +257,22 @@ var fieldRule_DefaultModificationTestCases = []fieldTestCase{
 		},
 		expectedViolation: true,
 	},
+	{
+		name:     "field added",
+		oldField: nil,
+		newField: &schema.Schema{
+			Default: "same",
+		},
+		expectedViolation: false,
+	},
+	{
+		name: "field removed",
+		oldField: &schema.Schema{
+			Default: "same",
+		},
+		newField:          nil,
+		expectedViolation: false,
+	},
 }
 
 func TestFieldRule_BecomingComputedOnly(t *testing.T) {
@@ -294,6 +345,22 @@ var fieldRule_BecomingComputedOnlyTestCases = []fieldTestCase{
 		},
 		expectedViolation: true,
 	},
+	{
+		name:     "added computed field",
+		oldField: nil,
+		newField: &schema.Schema{
+			Computed: true,
+		},
+		expectedViolation: false,
+	},
+	{
+		name: "removed computed field",
+		oldField: &schema.Schema{
+			Computed: true,
+		},
+		newField:          nil,
+		expectedViolation: false,
+	},
 }
 
 func TestFieldRule_OptionalComputedToOptional(t *testing.T) {
@@ -335,6 +402,23 @@ var fieldRule_OptionalComputedToOptionalTestCases = []fieldTestCase{
 			Optional: true,
 		},
 		expectedViolation: true,
+	},
+	{
+		name:     "field added",
+		oldField: nil,
+		newField: &schema.Schema{
+			Optional: true,
+		},
+		expectedViolation: false,
+	},
+	{
+		name: "field removed",
+		oldField: &schema.Schema{
+			Optional: true,
+			Computed: true,
+		},
+		newField:          nil,
+		expectedViolation: false,
 	},
 }
 
@@ -381,6 +465,22 @@ var fieldRule_GrowingMinTestCases = []fieldTestCase{
 		},
 		expectedViolation: true,
 	},
+	{
+		name:     "field added",
+		oldField: nil,
+		newField: &schema.Schema{
+			MaxItems: 1,
+		},
+		expectedViolation: false,
+	},
+	{
+		name: "field removed",
+		oldField: &schema.Schema{
+			MinItems: 1,
+		},
+		newField:          nil,
+		expectedViolation: false,
+	},
 }
 
 func TestFieldRule_ShrinkingMax(t *testing.T) {
@@ -425,6 +525,22 @@ var fieldRule_ShrinkingMaxTestCases = []fieldTestCase{
 			MaxItems: 2,
 		},
 		expectedViolation: true,
+	},
+	{
+		name:     "field added",
+		oldField: nil,
+		newField: &schema.Schema{
+			MaxItems: 2,
+		},
+		expectedViolation: false,
+	},
+	{
+		name: "field removed",
+		oldField: &schema.Schema{
+			MinItems: 2,
+		},
+		newField:          nil,
+		expectedViolation: false,
 	},
 }
 
