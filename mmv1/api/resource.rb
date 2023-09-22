@@ -469,6 +469,7 @@ module Api
     def add_labels_fields(props, parent, labels)
       # The effective_labels field is used to write to API, instead of the labels field.
       labels.ignore_write = true
+      labels.description = "#{labels.description}\n\n#{get_labels_field_note(labels.name)}"
 
       @custom_diff ||= []
       if parent.nil? || parent.flatten_object
@@ -540,6 +541,12 @@ module Api
         end
       end
       fields
+    end
+
+    def get_labels_field_note(title)
+      "**Note**: This field is non-authoritative, and will only manage the #{title} present " \
+"in your configuration.
+Please refer to the field `effective_#{title}` for all of the #{title} present on the resource."
     end
 
     # ====================
