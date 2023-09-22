@@ -707,7 +707,7 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 		return err
 	}
 
-	err = dataflowFlexJobTypeParameterOverride("max_workers", "serviceAccountEmail", d)
+	err = dataflowFlexJobTypeParameterOverride("service_account_email", "serviceAccountEmail", d)
 	if err != nil {
 		return err
 	}
