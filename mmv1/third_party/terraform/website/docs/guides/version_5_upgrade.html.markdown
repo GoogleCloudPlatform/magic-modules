@@ -606,9 +606,9 @@ Due to limitations in previous field configurations, the only field that could b
 
 ### `size` is now an output only field.
 
-`size` previously served as an alias for initial_size on resource creation and would force recreation if the size of the node_group ever adjusted due to either direct user update or auto-scaling adjustment outside of Terraform.
+`size` previously served as an alias for `initial_size` on resource creation and would force recreation if the `size` value ever adjusted due to either direct user update or auto-scaling adjustment outside of Terraform.
 
-It will now mirror its API functionality and serve as an output only field to show how many nodes currently exist within the resource.
+It will now mirror its API functionality and serve as an output only field to show how many nodes currently exist within the resource. All existing configurations which used `size` as an input field must be updated for its removal.
 
 ### One of `initial_size` or `autoscaling_policy{}` must be configured on resource creation.
 
