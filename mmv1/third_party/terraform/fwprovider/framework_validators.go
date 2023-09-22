@@ -108,7 +108,7 @@ func (v nonEmptyStringValidator) ValidateString(ctx context.Context, request val
 	value := request.ConfigValue.ValueString()
 
 	if value == "" {
-		response.Diagnostics.AddError("please provide a value that isn't an empty string to this field", fmt.Sprintf("%s was set to `%s`", request.Path, value))
+		response.Diagnostics.AddError("expected a non-empty string", fmt.Sprintf("%s was set to `%s`", request.Path, value))
 	}
 }
 

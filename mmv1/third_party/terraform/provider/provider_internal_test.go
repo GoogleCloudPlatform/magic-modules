@@ -47,7 +47,7 @@ func TestProvider_ValidateCredentials(t *testing.T) {
 				return ""
 			},
 			ExpectedErrors: []error{
-				errors.New("please provide a value that isn't an empty string to this field"),
+				errors.New("expected a non-empty string"),
 			},
 		},
 		"leaving credentials unconfigured is valid": {
@@ -101,7 +101,7 @@ func TestProvider_ValidateEmptyStrings(t *testing.T) {
 		"empty strings are not valid": {
 			ConfigValue: "",
 			ExpectedErrors: []error{
-				errors.New("please provide a value that isn't an empty string to this field"),
+				errors.New("expected a non-empty string"),
 			},
 		},
 	}

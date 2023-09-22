@@ -315,49 +315,49 @@ func TestAccProviderEmptyStrings(t *testing.T) {
 				Config:             testAccProvider_checkPlanTimeErrors(`credentials = ""`, acctest.RandString(t, 10)),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
-				ExpectError:        regexp.MustCompile(`please provide a value that isn't an empty string to this field`),
+				ExpectError:        regexp.MustCompile(`expected a non-empty string`),
 			},
 			// access_token as an empty string causes a validation error
 			{
 				Config:             testAccProvider_checkPlanTimeErrors(`access_token = ""`, acctest.RandString(t, 10)),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
-				ExpectError:        regexp.MustCompile(`please provide a value that isn't an empty string to this field`),
+				ExpectError:        regexp.MustCompile(`expected a non-empty string`),
 			},
 			// impersonate_service_account as an empty string causes a validation error
 			{
 				Config:             testAccProvider_checkPlanTimeErrors(`impersonate_service_account = ""`, acctest.RandString(t, 10)),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
-				ExpectError:        regexp.MustCompile(`please provide a value that isn't an empty string to this field`),
+				ExpectError:        regexp.MustCompile(`expected a non-empty string`),
 			},
 			// project as an empty string causes a validation error
 			{
 				Config:             testAccProvider_checkPlanTimeErrors(`project = ""`, acctest.RandString(t, 10)),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
-				ExpectError:        regexp.MustCompile(`please provide a value that isn't an empty string to this field`),
+				ExpectError:        regexp.MustCompile(`expected a non-empty string`),
 			},
 			// billing_project as an empty string causes a validation error
 			{
 				Config:             testAccProvider_checkPlanTimeErrors(`billing_project = ""`, acctest.RandString(t, 10)),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
-				ExpectError:        regexp.MustCompile(`please provide a value that isn't an empty string to this field`),
+				ExpectError:        regexp.MustCompile(`expected a non-empty string`),
 			},
 			// region as an empty string causes a validation error
 			{
 				Config:             testAccProvider_checkPlanTimeErrors(`region = ""`, acctest.RandString(t, 10)),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
-				ExpectError:        regexp.MustCompile(`please provide a value that isn't an empty string to this field`),
+				ExpectError:        regexp.MustCompile(`expected a non-empty string`),
 			},
 			// zone as an empty string causes a validation error
 			{
 				Config:             testAccProvider_checkPlanTimeErrors(`zone = ""`, acctest.RandString(t, 10)),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
-				ExpectError:        regexp.MustCompile(`please provide a value that isn't an empty string to this field`),
+				ExpectError:        regexp.MustCompile(`expected a non-empty string`),
 			},
 		},
 	})

@@ -18,7 +18,7 @@ func ValidateCredentials(v interface{}, k string) (warnings []string, errors []e
 	// reject empty strings
 	if v.(string) == "" {
 		errors = append(errors,
-			fmt.Errorf("please provide a value that isn't an empty string to this field"))
+			fmt.Errorf("expected a non-empty string"))
 		return
 	}
 
@@ -41,7 +41,7 @@ func ValidateEmptyStrings(v interface{}, k string) (warnings []string, errors []
 
 	if v.(string) == "" {
 		errors = append(errors,
-			fmt.Errorf("please provide a value that isn't an empty string to this field"))
+			fmt.Errorf("expected a non-empty string"))
 	}
 
 	return
