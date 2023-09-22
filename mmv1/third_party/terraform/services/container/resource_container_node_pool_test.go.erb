@@ -1537,6 +1537,7 @@ resource "google_container_cluster" "cluster" {
   location           = "us-central1-f"
   initial_node_count = 1
   min_master_version = "1.25"
+  deletion_protection = false
 }
 
 resource "google_container_node_pool" "np" {
