@@ -1,82 +1,60 @@
 package cai2hcl
 
 import (
-	"encoding/json"
-	"fmt"
-	"os"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
-
-	"github.com/google/go-cmp/cmp"
-	"go.uber.org/zap"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/common"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/services/compute"
+	cai2hclTesting "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/testing"
 )
 
-type TestCase struct {
-	name         string
-	sourceFolder string
-}
-
-var testDataFileNames = []string{
-	"compute_instance_iam",
-	"full_compute_instance",
-	"project_create",
-	"project_iam",
-	"full_compute_forwarding_rule",
-}
-
-func TestCai2HclConvert(t *testing.T) {
-	cases := []TestCase{}
-
-	for _, name := range testDataFileNames {
-		cases = append(cases, TestCase{name: name, sourceFolder: "./testdata"})
-	}
-
-	for i := range cases {
-		c := cases[i]
-
-		t.Run(c.name, func(t *testing.T) {
-			t.Parallel()
-
-			err := assertTestData(c)
-			if err != nil {
-				t.Fatal(err)
-			}
+func TestConvertCompute(t *testing.T) {
+	cai2hclTesting.AssertTestFiles(
+		t,
+		ConverterNames, ConverterMap,
+		"./services/compute/testdata",
+		[]string{
+			"full_compute_instance",
 		})
-	}
 }
 
-func assertTestData(testCase TestCase) (err error) {
-	fileName := testCase.name
-	folder := testCase.sourceFolder
+func TestConvertResourcemanager(t *testing.T) {
+	cai2hclTesting.AssertTestFiles(
+		t,
+		ConverterNames, ConverterMap,
+		"./services/resourcemanager/testdata",
+		[]string{
+			"project_create",
+		})
+}
 
-	assetFilePath := fmt.Sprintf("%s/%s.json", folder, fileName)
-	expectedTfFilePath := fmt.Sprintf("%s/%s.tf", folder, fileName)
-	assetPayload, err := os.ReadFile(assetFilePath)
-	if err != nil {
-		return fmt.Errorf("cannot open %s, got: %s", assetFilePath, err)
-	}
-	want, err := os.ReadFile(expectedTfFilePath)
-	if err != nil {
-		return fmt.Errorf("cannot open %s, got: %s", expectedTfFilePath, err)
-	}
-
-	var assets []*caiasset.Asset
-	if err := json.Unmarshal(assetPayload, &assets); err != nil {
-		return fmt.Errorf("cannot unmarshal: %s", err)
-	}
-
-	logger, err := zap.NewDevelopment()
-
-	got, err := Convert(assets, &Options{
-		ErrorLogger: logger,
+func TestConvertPanicsOnConverterNamesConflict(t *testing.T) {
+	assertPanic(t, func() {
+		joinConverterNames([]map[string]string{
+			{"compute.googleapis.com/Instance": "compute_instance_1"},
+			{"compute.googleapis.com/Instance": "compute_instance_2"},
+		})
 	})
-	if err != nil {
-		return err
-	}
-	if diff := cmp.Diff(string(want), string(got)); diff != "" {
-		return fmt.Errorf("cmp.Diff() got diff (-want +got): %s", diff)
-	}
+}
 
-	return nil
+func TestConvertPanicsOnConverterMapConflict(t *testing.T) {
+	assertPanic(t, func() {
+		joinConverterMaps([]map[string]common.Converter{
+			common.CreateConverterMap(map[string]common.ConverterFactory{
+				"google_compute_instance": compute.NewComputeInstanceConverter,
+			}),
+			common.CreateConverterMap(map[string]common.ConverterFactory{
+				"google_compute_instance": compute.NewComputeForwardingRuleConverter,
+			}),
+		})
+	})
+}
+
+func assertPanic(t *testing.T, f func()) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("The code did not panic")
+		}
+	}()
+	f()
 }
