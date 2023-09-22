@@ -63,18 +63,17 @@ func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) 
 
 	id, sink := expandResourceLoggingSink(d, "projects", project)
 	uniqueWriterIdentity := d.Get("unique_writer_identity").(bool)
-
 	customWriterIdentity := d.Get("custom_writer_identity").(string)
 
 	projectSinkCreateRequest := config.NewLoggingClient(userAgent).Projects.Sinks.Create(id.parent(), sink)
 
 	if customWriterIdentity != "" {
-		client = client.UniqueWriterIdentity(uniqueWriterIdentity).CustomWriterIdentity(customWriterIdentity)
+		projectSinkCreateRequest = projectSinkCreateRequest.UniqueWriterIdentity(uniqueWriterIdentity).CustomWriterIdentity(customWriterIdentity)
 	} else {
-		client = client.UniqueWriterIdentity(uniqueWriterIdentity)
+		projectSinkCreateRequest = projectSinkCreateRequest.UniqueWriterIdentity(uniqueWriterIdentity)
 	}
 
-	_, err = client.Do()
+	_, err = projectSinkCreateRequest.Do()
 
 	if err != nil {
 		return err
