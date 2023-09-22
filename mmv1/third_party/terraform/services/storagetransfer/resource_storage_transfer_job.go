@@ -81,10 +81,10 @@ func ResourceStorageTransferJob() *schema.Resource {
 				Description: `The project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
 			"event_stream": {
-				Type:         schema.TypeList,
-				Optional:     true,
-				MaxItems:     1,
-				ExactlyOneOf: []string{"schedule"},
+				Type:          schema.TypeList,
+				Optional:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"schedule"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -220,10 +220,10 @@ func ResourceStorageTransferJob() *schema.Resource {
 				Description: `Notification configuration.`,
 			},
 			"schedule": {
-				Type:         schema.TypeList,
-				Optional:     true,
-				MaxItems:     1,
-				ExactlyOneOf: []string{"event_stream"},
+				Type:          schema.TypeList,
+				Optional:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"event_stream"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"schedule_start_date": {
@@ -669,6 +669,11 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
+	err = d.Set("event_stream", flattenTransferEventStream(res.EventStream))
+	if err != nil {
+		return err
+	}
+
 	err = d.Set("transfer_spec", flattenTransferSpec(res.TransferSpec, d))
 	if err != nil {
 		return err
@@ -700,7 +705,7 @@ func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) 
 	if d.HasChange("event_stream") {
 		fieldMask = append(fieldMask, "event_stream")
 		if v, ok := d.GetOk("event_stream"); ok {
-			transferJob.Description = expandEventStream(v.([]interface{}))
+			transferJob.EventStream = expandEventStream(v.([]interface{}))
 		}
 	}
 
@@ -946,7 +951,7 @@ func expandEventStream(e []interface{}) *storagetransfer.EventStream {
 	}
 }
 
-func flattenEventStream(eventStream *storagetransfer.EventStream) []map[string]interface{} {
+func flattenTransferEventStream(eventStream *storagetransfer.EventStream) []map[string]interface{} {
 	if eventStream == nil || reflect.DeepEqual(eventStream, &storagetransfer.EventStream{}) {
 		return nil
 	}
