@@ -514,13 +514,11 @@ resource "google_firestore_database" "default" {
 
 Previously, `google_firebase_web_app` deletions default to `ABANDON`, which means to only stop tracking the WebApp in Terraform. The actual app is not deleted from the Firebase project. If you are relying on this behavior, set `deletion_policy` to `ABANDON` explicitly in the new version.
 
-
 ## Resource: `google_compute_autoscaler` (beta)
 
 ### `metric.filter` now defaults to `resource.type = gce_instance`
 
 Previously, `metric.filter` doesn't have the defult value and causes a UI error.
-
 
 ## Resource: `google_monitoring_dashboard`
 
@@ -529,7 +527,6 @@ Previously, `metric.filter` doesn't have the defult value and causes a UI error.
 To prevent permanent diffs from default values, Terraform will now attempt to suppress diffs where the value is returned in the JSON
 string but doesn't exist in the configuration. Consequently, legitmate remove-only diffs will also be suppressed.
 For Terraform to detect the diff, JSON key removals must also be accompanied by a non-removal change (trivial or not).
-
 
 ## Resource: `google_monitoring_metric_descriptor`
 
