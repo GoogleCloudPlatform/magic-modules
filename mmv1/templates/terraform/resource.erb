@@ -105,7 +105,7 @@ func Resource<%= resource_name -%>() *schema.Resource {
 <%  if object.state_upgraders -%>
 
         StateUpgraders: []schema.StateUpgrader{
-<%      for v in 0..object.schema_version-1 -%>
+<%      for v in object.state_upgrade_base_schema_version..object.schema_version-1 -%>
             {
                 Type: resource<%= "#{resource_name}ResourceV#{v}" -%>().CoreConfigSchema().ImpliedType(),
                 Upgrade: Resource<%= "#{resource_name}UpgradeV#{v}" -%>,

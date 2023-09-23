@@ -33,10 +33,19 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 		Update: resourceDataflowFlexTemplateJobUpdate,
 		Delete: resourceDataflowFlexTemplateJobDelete,
 		CustomizeDiff: customdiff.All(
+			tpgresource.SetLabelsDiff,
 			resourceDataflowFlexJobTypeCustomizeDiff,
 		),
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
+		},
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    resourceDataflowFlexTemplateJobResourceV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: ResourceDataflowFlexTemplateJobStateUpgradeV0,
+				Version: 0,
+			},
 		},
 		Schema: map[string]*schema.Schema{
 
@@ -75,8 +84,22 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 			"labels": {
 				Type:             schema.TypeMap,
 				Optional:         true,
-				DiffSuppressFunc: resourceDataflowJobLabelDiffSuppress,
-				Description:      `User labels to be specified for the job. Keys and values should follow the restrictions specified in the labeling restrictions page. NOTE: Google-provided Dataflow templates often provide default labels that begin with goog-dataflow-provided. Unless explicitly set in config, these labels will be ignored to prevent diffs on re-apply.`,
+				Description:      `User labels to be specified for the job. Keys and values should follow the restrictions specified in the labeling restrictions page. NOTE: This field is non-authoritative, and will only manage the labels present in your configuration.
+				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
+			},
+
+			"terraform_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `The combination of labels configured directly on the resource and default labels configured on the provider.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+
+			"effective_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 
 			"parameters": {
@@ -353,7 +376,7 @@ func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_t
 	launcherMachineType, updatedParameters := dataflowFlexJobTypeTransferVar("launcher_machine_type", "launcherMachineType", updatedParameters, d)
 
 	env := dataflow.FlexTemplateRuntimeEnvironment{
-		AdditionalUserLabels:  tpgresource.ExpandStringMap(d, "labels"),
+		AdditionalUserLabels:  tpgresource.ExpandStringMap(d, "effective_labels"),
 		AutoscalingAlgorithm:  autoscalingAlgorithm,
 		NumWorkers:            int64(numWorkers),
 		MaxWorkers:            int64(maxNumWorkers),
@@ -413,8 +436,14 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-	if err := d.Set("labels", job.Labels); err != nil {
+	if err := tpgresource.SetLabels(job.Labels, d, "labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	if err := tpgresource.SetLabels(job.Labels, d, "terraform_labels"); err != nil {
+		return fmt.Errorf("Error setting terraform_labels: %s", err)
+	}
+	if err := d.Set("effective_labels", job.Labels); err != nil {
+		return fmt.Errorf("Error setting effective_labels: %s", err)
 	}
 	if err := d.Set("kms_key_name", job.Environment.ServiceKmsKeyName); err != nil {
 		return fmt.Errorf("Error setting kms_key_name: %s", err)
@@ -759,12 +788,8 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 			if field == "on_delete" {
 				continue
 			}
-			// Labels map will likely have suppressed changes, so we check each key instead of the parent field
-			if field == "labels" {
-				if err := resourceDataflowJobIterateMapForceNew(field, d); err != nil {
-					return err
-				}
-			} else if d.HasChange(field) {
+
+			if field != "labels" && field != "terraform_labels" && d.HasChange(field) {
 				if err := d.ForceNew(field); err != nil {
 					return err
 				}
