@@ -124,7 +124,7 @@ properties:
       resource: 'SslCertificate'
       imports: 'selfLink'
       description: 'The SSL certificate URL or Certificate Manager certificate resource URL used by this TargetHttpsProxy'
-    custom_expand: 'templates/terraform/custom_expand/certificate_array_with_validation.go.erb'  
+    custom_expand: 'templates/terraform/custom_expand/certificate_array_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'certificateMap'
     description: |
