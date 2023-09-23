@@ -162,7 +162,6 @@ properties:
       Use sentence case without an ending period, for example "Request count".
   - !ruby/object:Api::Type::NestedObject
     name: metadata
-    immutable: true
     description: Metadata which can be used to guide usage of the metric.
     ignore_read: true
     properties:
