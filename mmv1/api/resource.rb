@@ -201,6 +201,10 @@ module Api
       # mmv1/templates/terraform/state_migrations/
       # used for maintaining state stability with resources first provisioned on older api versions.
       attr_reader :schema_version
+      # From this schema version on, state_upgrader code is generated for the resource.
+      # When unset, state_upgrade_base_schema_version defauts to 0.
+      # Normally, it is not needed to be set.
+      attr_reader :state_upgrade_base_schema_version
       attr_reader :state_upgraders
       # This block inserts the named function and its attribute into the
       # resource schema -- the code for the migrate_state function must
@@ -322,6 +326,7 @@ module Api
       check :error_retry_predicates, type: Array, item_type: String
       check :error_abort_predicates, type: Array, item_type: String
       check :schema_version, type: Integer
+      check :state_upgrade_base_schema_version, type: Integer, default: 0
       check :state_upgraders, type: :boolean, default: false
       check :migrate_state, type: String
       check :skip_delete, type: :boolean, default: false
