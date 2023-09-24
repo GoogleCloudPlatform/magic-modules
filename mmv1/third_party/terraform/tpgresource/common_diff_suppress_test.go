@@ -300,6 +300,11 @@ func TestInternalIpDiffSuppress(t *testing.T) {
 			New:                "2600:1900:4020:31cd:8000::/96",
 			ExpectDiffSuppress: true,
 		},
+		"same3 ipv6s": {
+			Old:                "2600:1900:4020:31cd:8000:0:0:0/96",
+			New:                "https://www.googleapis.com/compute/v1/projects/myproject/regions/us-central1/addresses/myaddress",
+			ExpectDiffSuppress: true,
+		},
 		"different1 ipv6s": {
 			Old:                "2600:1900:4020:31cd:8000:0:0:0",
 			New:                "2600:1900:4020:31cd:8001::",

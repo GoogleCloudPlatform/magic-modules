@@ -185,13 +185,15 @@ func InternalIpDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	olds := strings.Split(old, "/")
 	news := strings.Split(new, "/")
 
-	if len(olds) == len(news) {
-		if len(olds) == 2 {
+	if len(olds) == 2 {
+		if len(news) == 2 {
 			if bytes.Equal(net.ParseIP(olds[0]), net.ParseIP(news[0])) && olds[1] == news[1] {
 				return true
 			} else {
 				return false
 			}
+		} else {
+			return (net.ParseIP(olds[0]) != nil) && (net.ParseIP(new) == nil)
 		}
 	}
 
@@ -202,6 +204,7 @@ func InternalIpDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 			return false
 		}
 	}
+
 	return (net.ParseIP(old) != nil) && (net.ParseIP(new) == nil)
 }
 
