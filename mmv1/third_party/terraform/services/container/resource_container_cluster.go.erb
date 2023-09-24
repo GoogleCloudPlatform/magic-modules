@@ -196,6 +196,7 @@ func ResourceContainerCluster() *schema.Resource {
 			containerClusterNetworkPolicyEmptyCustomizeDiff,
 			containerClusterSurgeSettingsCustomizeDiff,
 			containerClusterEnableK8sBetaApisCustomizeDiff,
+			containerClusterNetworkingModeCustomizeDiff,
 		),
 
 		Timeouts: &schema.ResourceTimeout{
@@ -4313,10 +4314,7 @@ func expandIPAllocationPolicy(configured interface{}, networkingMode string, aut
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		if networkingMode == "VPC_NATIVE" {
-			if autopilot {
-				return nil, nil
-			}
-			return nil, fmt.Errorf("`ip_allocation_policy` block is required for VPC_NATIVE clusters.")
+			return nil, nil
 		}
 		return &container.IPAllocationPolicy{
 			UseIpAliases:    false,
@@ -6164,6 +6162,21 @@ func containerClusterAutopilotCustomizeDiff(_ context.Context, d *schema.Resourc
 		if err := d.SetNew("networking_mode", "VPC_NATIVE"); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// Default to VPC_NATIVE mode during initial creation
+func containerClusterNetworkingModeCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	// skip if not during initial creation
+	o, _ := d.GetChange("name")
+	if o != "" {
+		return nil
+	}
+
+	err := d.SetNew("networking_mode", "VPC_NATIVE")
+	if err != nil {
+		return fmt.Errorf("Error setting networking mode diff: %s", err)
 	}
 	return nil
 }
