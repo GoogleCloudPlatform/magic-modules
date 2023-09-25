@@ -74,9 +74,9 @@ parameters:
       [API reference](https://cloud.google.com/identity/docs/reference/rest/v1beta1/groups/create#initialgroupconfig)
       for possible values.
     values:
-      - 'INITIAL_GROUP_CONFIG_UNSPECIFIED'
-      - 'WITH_INITIAL_OWNER'
-      - 'EMPTY'
+      - :INITIAL_GROUP_CONFIG_UNSPECIFIED
+      - :WITH_INITIAL_OWNER
+      - :EMPTY
     default_value: :EMPTY
     url_param_only: true
     immutable: true
