@@ -19,12 +19,16 @@ service/artifactregistry:
 service/assuredworkloads:
   resources:
   - google_assured_workloads_workload
+service/backupdr:
+  resources:
+  - google_backup_dr_.*
 service/beyondcorp:
   resources:
   - google_beyondcorp_.*
 service/bigquery:
   team: bq-terraform-eng
   resources:
+  - google_biglake_.*
   - google_bigquery_.*
 service/bigtableadmin:
   resources:
@@ -60,6 +64,17 @@ service/cloudfunctions:
 service/cloudkms:
   resources:
   - google_kms_.*
+service/cloudresourcemanager-crm:
+  resources:
+  - google_folder
+  - google_folder_iam_.*
+  - google_folders
+  - google_project
+  - google_project_iam_.*
+  - google_projects
+  - google_organization
+  - google_organization_iam_.*
+  - google_resource_manager_lien
 service/cloudscheduler:
   resources:
   - google_cloud_scheduler_.*
@@ -242,6 +257,9 @@ service/monitoring-services:
 service/monitoring-uptime:
   resources:
   - google_monitoring_uptime_.*
+service/network-security:
+  resources:
+  - google_network_security_.*
 service/notebooks:
   resources:
   - google_notebooks_.*
@@ -251,6 +269,9 @@ service/orgpolicy:
 service/osconfig:
   resources:
   - google_os_config_.*
+service/oslogin:
+  resources:
+  - google_os_login_.*
 service/privateca:
   resources:
   - google_privateca_.*
@@ -278,6 +299,9 @@ service/run:
 service/secretmanager:
   resources:
   - google_secret_manager_.*
+service/serviceusage-quota:
+  resources:
+  - google_service_usage_consumer_quota_override
 service/sourcerepo:
   resources:
   - google_sourcerepo_.*
@@ -297,6 +321,7 @@ service/storage:
   - google_storage_project_service_account
   - google_storage_transfer_agent_pool
   - google_storage_transfer_job
+  - google_storage_transfer_project_service_account
 service/vmwareengine:
   resources:
   - google_vmwareengine_network
