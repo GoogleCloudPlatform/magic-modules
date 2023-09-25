@@ -203,5 +203,5 @@ properties:
             name: 'sslMode'
             description: 'SSL mode. Specifies client-server SSL/TLS connection behavior.'
             values:
-                 - :ENCRYPTED_ONLY
-                 - :ALLOW_UNENCRYPTED_AND_ENCRYPTED
+              - :ENCRYPTED_ONLY
+              - :ALLOW_UNENCRYPTED_AND_ENCRYPTED
