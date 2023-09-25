@@ -56,6 +56,7 @@ func testAccNetworkServicesGrpcRoute_basic(grpcRouteName string) string {
         headers {
           key = "key"
           value = "value"
+          type  = "TYPE_UNSPECIFIED"
         }
       }
       action {
@@ -103,6 +104,7 @@ func testAccNetworkServicesGrpcRoute_update(grpcRouteName string) string {
         headers {
           key = "key"
           value = "value"
+          type  = "TYPE_UNSPECIFIED"
         }
       }
       action {
