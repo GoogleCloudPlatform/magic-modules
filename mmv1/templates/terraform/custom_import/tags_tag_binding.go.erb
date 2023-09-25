@@ -16,4 +16,7 @@
         return nil, fmt.Errorf("Error setting parent, %s", err)
     }
 
+    name := d.Get("name").(string)
+    d.SetId(name)
+
     return []*schema.ResourceData{d}, nil
