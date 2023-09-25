@@ -213,6 +213,7 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_beyondcorp_app_gateway":                    beyondcorp.DataSourceGoogleBeyondcorpAppGateway(),
 		"google_billing_account":                           billing.DataSourceGoogleBillingAccount(),
 		"google_bigquery_default_service_account":          bigquery.DataSourceGoogleBigqueryDefaultServiceAccount(),
+		"google_certificate_manager_certificate_map":       certificatemanager.DataSourceGoogleCertificateManagerCertificateMap(),
 		"google_cloudbuild_trigger":                        cloudbuild.DataSourceGoogleCloudBuildTrigger(),
 		"google_cloudfunctions_function":                   cloudfunctions.DataSourceGoogleCloudFunctionsFunction(),
 		"google_cloudfunctions2_function":                  cloudfunctions2.DataSourceGoogleCloudFunctions2Function(),
@@ -250,9 +251,7 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_compute_regions":                           compute.DataSourceGoogleComputeRegions(),
 		"google_compute_region_network_endpoint_group":     compute.DataSourceGoogleComputeRegionNetworkEndpointGroup(),
 		"google_compute_region_instance_group":             compute.DataSourceGoogleComputeRegionInstanceGroup(),
-		<% unless version == 'ga' -%>
 		"google_compute_region_instance_template":          compute.DataSourceGoogleComputeRegionInstanceTemplate(),
-		<% end -%>
 		"google_compute_region_ssl_certificate":            compute.DataSourceGoogleRegionComputeSslCertificate(),
 		"google_compute_resource_policy":                   compute.DataSourceGoogleComputeResourcePolicy(),
 		"google_compute_router":                            compute.DataSourceGoogleComputeRouter(),
@@ -347,6 +346,10 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_tags_tag_key":                              tags.DataSourceGoogleTagsTagKey(),
 		"google_tags_tag_value":                            tags.DataSourceGoogleTagsTagValue(),
 		"google_tpu_tensorflow_versions":                   tpu.DataSourceTpuTensorflowVersions(),
+		<% unless version == 'ga' -%>
+		"google_tpu_v2_runtime_versions":                   tpuv2.DataSourceTpuV2RuntimeVersions(),
+		"google_tpu_v2_accelerator_types":                  tpuv2.DataSourceTpuV2AcceleratorTypes(),
+		<% end -%>
 		"google_vpc_access_connector":                      vpcaccess.DataSourceVPCAccessConnector(),
 		"google_redis_instance":                            redis.DataSourceGoogleRedisInstance(),
 		"google_vertex_ai_index":                           vertexai.DataSourceVertexAIIndex(),
@@ -495,9 +498,7 @@ end     # products.each do
 				"google_compute_project_metadata":              compute.ResourceComputeProjectMetadata(),
 				"google_compute_project_metadata_item":         compute.ResourceComputeProjectMetadataItem(),
 				"google_compute_region_instance_group_manager": compute.ResourceComputeRegionInstanceGroupManager(),
-				<% unless version == 'ga' -%>
 				"google_compute_region_instance_template":      compute.ResourceComputeRegionInstanceTemplate(),
-				<% end -%>
 				"google_compute_router_interface":              compute.ResourceComputeRouterInterface(),
 				"google_compute_security_policy":               compute.ResourceComputeSecurityPolicy(),
 				"google_compute_shared_vpc_host_project":       compute.ResourceComputeSharedVpcHostProject(),

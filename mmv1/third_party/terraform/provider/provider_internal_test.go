@@ -3,11 +3,10 @@ package provider_test
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/provider"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -83,59 +82,6 @@ func TestProvider_ValidateCredentials(t *testing.T) {
 	}
 }
 
-// ProviderConfigEnvNames returns a list of all the environment variables that could be set by a user to configure the provider
-func ProviderConfigEnvNames() []string {
-
-	envs := []string{}
-
-	// Use existing collections of ENV names
-	envVarsSets := [][]string{
-		envvar.CredsEnvVars,   // credentials field
-		envvar.ProjectEnvVars, // project field
-		envvar.RegionEnvVars,  //region field
-		envvar.ZoneEnvVars,    // zone field
-	}
-	for _, set := range envVarsSets {
-		envs = append(envs, set...)
-	}
-
-	// Add remaining ENVs
-	envs = append(envs, "GOOGLE_OAUTH_ACCESS_TOKEN")          // access_token field
-	envs = append(envs, "GOOGLE_BILLING_PROJECT")             // billing_project field
-	envs = append(envs, "GOOGLE_IMPERSONATE_SERVICE_ACCOUNT") // impersonate_service_account field
-	envs = append(envs, "USER_PROJECT_OVERRIDE")              // user_project_override field
-	envs = append(envs, "CLOUDSDK_CORE_REQUEST_REASON")       // request_reason field
-
-	return envs
-}
-
-// unsetProviderConfigEnvs unsets any ENVs in the test environment that
-// configure the provider.
-// The testing package will restore the original values after the test
-func unsetTestProviderConfigEnvs(t *testing.T) {
-	envs := ProviderConfigEnvNames()
-	if len(envs) > 0 {
-		for _, k := range envs {
-			t.Setenv(k, "")
-		}
-	}
-}
-
-func setupTestEnvs(t *testing.T, envValues map[string]string) {
-	// Set ENVs
-	if len(envValues) > 0 {
-		for k, v := range envValues {
-			t.Setenv(k, v)
-		}
-	}
-}
-
-// Returns a fake credentials JSON string with the client_email set to a test-specific value
-func generateFakeCredentialsJson(testId string) string {
-	json := fmt.Sprintf(`{"private_key_id": "foo","private_key": "bar","client_email": "%s@example.com","client_id": "id@foo.com","type": "service_account"}`, testId)
-	return json
-}
-
 func TestProvider_ProviderConfigure_credentials(t *testing.T) {
 
 	const pathToMissingFile string = "./this/path/doesnt/exist.json" // Doesn't exist
@@ -166,50 +112,50 @@ func TestProvider_ProviderConfigure_credentials(t *testing.T) {
 		},
 		"credentials set in the config are not overridden by environment variables": {
 			ConfigValues: map[string]interface{}{
-				"credentials": generateFakeCredentialsJson("test"),
+				"credentials": acctest.GenerateFakeCredentialsJson("test"),
 			},
 			EnvVariables: map[string]string{
-				"GOOGLE_CREDENTIALS":             generateFakeCredentialsJson("GOOGLE_CREDENTIALS"),
-				"GOOGLE_CLOUD_KEYFILE_JSON":      generateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
-				"GCLOUD_KEYFILE_JSON":            generateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
-				"GOOGLE_APPLICATION_CREDENTIALS": generateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
+				"GOOGLE_CREDENTIALS":             acctest.GenerateFakeCredentialsJson("GOOGLE_CREDENTIALS"),
+				"GOOGLE_CLOUD_KEYFILE_JSON":      acctest.GenerateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
+				"GCLOUD_KEYFILE_JSON":            acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
+				"GOOGLE_APPLICATION_CREDENTIALS": acctest.GenerateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
 			},
-			ExpectedSchemaValue: generateFakeCredentialsJson("test"),
-			ExpectedConfigValue: generateFakeCredentialsJson("test"),
+			ExpectedSchemaValue: acctest.GenerateFakeCredentialsJson("test"),
+			ExpectedConfigValue: acctest.GenerateFakeCredentialsJson("test"),
 		},
 		"when credentials is unset in the config, environment variables are used: GOOGLE_CREDENTIALS used first": {
 			EnvVariables: map[string]string{
-				"GOOGLE_CREDENTIALS":             generateFakeCredentialsJson("GOOGLE_CREDENTIALS"),
-				"GOOGLE_CLOUD_KEYFILE_JSON":      generateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
-				"GCLOUD_KEYFILE_JSON":            generateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
-				"GOOGLE_APPLICATION_CREDENTIALS": generateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
+				"GOOGLE_CREDENTIALS":             acctest.GenerateFakeCredentialsJson("GOOGLE_CREDENTIALS"),
+				"GOOGLE_CLOUD_KEYFILE_JSON":      acctest.GenerateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
+				"GCLOUD_KEYFILE_JSON":            acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
+				"GOOGLE_APPLICATION_CREDENTIALS": acctest.GenerateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
 			},
 			ExpectedSchemaValue: "",
-			ExpectedConfigValue: generateFakeCredentialsJson("GOOGLE_CREDENTIALS"),
+			ExpectedConfigValue: acctest.GenerateFakeCredentialsJson("GOOGLE_CREDENTIALS"),
 		},
 		"when credentials is unset in the config, environment variables are used: GOOGLE_CLOUD_KEYFILE_JSON used second": {
 			EnvVariables: map[string]string{
 				// GOOGLE_CREDENTIALS not set
-				"GOOGLE_CLOUD_KEYFILE_JSON":      generateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
-				"GCLOUD_KEYFILE_JSON":            generateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
-				"GOOGLE_APPLICATION_CREDENTIALS": generateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
+				"GOOGLE_CLOUD_KEYFILE_JSON":      acctest.GenerateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
+				"GCLOUD_KEYFILE_JSON":            acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
+				"GOOGLE_APPLICATION_CREDENTIALS": acctest.GenerateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
 			},
 			ExpectedSchemaValue: "",
-			ExpectedConfigValue: generateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
+			ExpectedConfigValue: acctest.GenerateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
 		},
 		"when credentials is unset in the config, environment variables are used: GCLOUD_KEYFILE_JSON used third": {
 			EnvVariables: map[string]string{
 				// GOOGLE_CREDENTIALS not set
 				// GOOGLE_CLOUD_KEYFILE_JSON not set
-				"GCLOUD_KEYFILE_JSON":            generateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
-				"GOOGLE_APPLICATION_CREDENTIALS": generateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
+				"GCLOUD_KEYFILE_JSON":            acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
+				"GOOGLE_APPLICATION_CREDENTIALS": acctest.GenerateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
 			},
 			ExpectedSchemaValue: "",
-			ExpectedConfigValue: generateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
+			ExpectedConfigValue: acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
 		},
 		"when credentials is unset in the config (and access_token unset), GOOGLE_APPLICATION_CREDENTIALS is used for auth but not to set values in the config": {
 			EnvVariables: map[string]string{
-				"GOOGLE_APPLICATION_CREDENTIALS": transport_tpg.TestFakeCredentialsPath,
+				"GOOGLE_APPLICATION_CREDENTIALS": transport_tpg.TestFakeCredentialsPath, // needs to be a path to a file when used
 			},
 			ExpectFieldUnset:    true,
 			ExpectedSchemaValue: "",
@@ -220,7 +166,7 @@ func TestProvider_ProviderConfigure_credentials(t *testing.T) {
 				"credentials": "",
 			},
 			EnvVariables: map[string]string{
-				"GOOGLE_APPLICATION_CREDENTIALS": transport_tpg.TestFakeCredentialsPath,
+				"GOOGLE_APPLICATION_CREDENTIALS": transport_tpg.TestFakeCredentialsPath, // needs to be a path to a file when used
 			},
 			ExpectFieldUnset:    true,
 			ExpectedSchemaValue: "",
@@ -234,13 +180,13 @@ func TestProvider_ProviderConfigure_credentials(t *testing.T) {
 		// 		"credentials": "",
 		// 	},
 		// 	EnvVariables: map[string]string{
-		// 		"GOOGLE_APPLICATION_CREDENTIALS": "", // setting to empty string to help test run in CI
+		// 		"GOOGLE_APPLICATION_CREDENTIALS": "",
 		// 	},
 		// 	ExpectError: true,
 		// },
 		// "error returned if neither credentials nor access_token set in the provider config, and GOOGLE_APPLICATION_CREDENTIALS is unset": {
 		// 	EnvVariables: map[string]string{
-		// 		"GOOGLE_APPLICATION_CREDENTIALS": "", // setting to empty string to help test run in CI
+		// 		"GOOGLE_APPLICATION_CREDENTIALS": "",
 		// 	},
 		// 	ExpectError: true,
 		// },
@@ -251,8 +197,8 @@ func TestProvider_ProviderConfigure_credentials(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -326,14 +272,14 @@ func TestProvider_ProviderConfigure_accessToken(t *testing.T) {
 			ExpectedSchemaValue: "value-from-config",
 			ExpectedConfigValue: "value-from-config",
 		},
-		"when access_token is unset in the config, an environment variable is used but doesn't update the schema data": {
+		"when access_token is unset in the config, the GOOGLE_OAUTH_ACCESS_TOKEN environment variable is used": {
 			EnvVariables: map[string]string{
 				"GOOGLE_OAUTH_ACCESS_TOKEN": "value-from-GOOGLE_OAUTH_ACCESS_TOKEN",
 			},
 			ExpectedSchemaValue: "",
 			ExpectedConfigValue: "value-from-GOOGLE_OAUTH_ACCESS_TOKEN",
 		},
-		"when no values are provided via config or environment variables, the field remains unset without error": {
+		"when no access_token values are provided via config or environment variables there's no error": {
 			ConfigValues: map[string]interface{}{
 				// access_token unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
@@ -354,7 +300,7 @@ func TestProvider_ProviderConfigure_accessToken(t *testing.T) {
 			ExpectedSchemaValue: "",
 			ExpectedConfigValue: "",
 		},
-		"when access_token is set as an empty string in the config, an environment variable is used but doesn't update the schema data": {
+		"when access_token is set as an empty string in the config, an environment variable is used": {
 			ConfigValues: map[string]interface{}{
 				"access_token": "",
 			},
@@ -371,8 +317,8 @@ func TestProvider_ProviderConfigure_accessToken(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -447,7 +393,7 @@ func TestProvider_ProviderConfigure_impersonateServiceAccount(t *testing.T) {
 			},
 			ExpectedValue: "value-from-env@example.com",
 		},
-		"when no values are provided via config or environment variables, the field remains unset without error": {
+		"when no impersonate_service_account values are provided via config or environment variables, the field remains unset without error": {
 			ConfigValues: map[string]interface{}{
 				// impersonate_service_account unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
@@ -457,7 +403,7 @@ func TestProvider_ProviderConfigure_impersonateServiceAccount(t *testing.T) {
 			ExpectedValue:    "",
 		},
 		// Handling empty strings in config
-		"when impersonate_service_account is set as an empty array the field is treated as if it's unset, without error": {
+		"when impersonate_service_account is set as an empty string the field is treated as if it's unset, without error": {
 			ConfigValues: map[string]interface{}{
 				"impersonate_service_account": "",
 				"credentials":                 transport_tpg.TestFakeCredentialsPath,
@@ -466,6 +412,16 @@ func TestProvider_ProviderConfigure_impersonateServiceAccount(t *testing.T) {
 			ExpectFieldUnset: true,
 			ExpectedValue:    "",
 		},
+		"when impersonate_service_account is set as an empty string in the config, an environment variable is used": {
+			ConfigValues: map[string]interface{}{
+				"impersonate_service_account": "",
+				"credentials":                 transport_tpg.TestFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT": "value-from-env@example.com",
+			},
+			ExpectedValue: "value-from-env@example.com",
+		},
 	}
 
 	for tn, tc := range cases {
@@ -473,8 +429,8 @@ func TestProvider_ProviderConfigure_impersonateServiceAccount(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -553,7 +509,7 @@ func TestProvider_ProviderConfigure_impersonateServiceAccountDelegates(t *testin
 			ExpectedValue:    nil,
 		},
 		// Handling empty values in config
-		"when project is set as an empty array the field is treated as if it's unset, without error": {
+		"when impersonate_service_account_delegates is set as an empty array the field is treated as if it's unset, without error": {
 			ConfigValues: map[string]interface{}{
 				"impersonate_service_account_delegates": []string{},
 				"credentials":                           transport_tpg.TestFakeCredentialsPath,
@@ -569,8 +525,8 @@ func TestProvider_ProviderConfigure_impersonateServiceAccountDelegates(t *testin
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -636,7 +592,7 @@ func TestProvider_ProviderConfigure_project(t *testing.T) {
 	}{
 		"project value set in the provider schema is not overridden by environment variables": {
 			ConfigValues: map[string]interface{}{
-				"project":     "my-project-from-config",
+				"project":     "project-from-config",
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
 			EnvVariables: map[string]string{
@@ -645,7 +601,7 @@ func TestProvider_ProviderConfigure_project(t *testing.T) {
 				"GCLOUD_PROJECT":        "project-from-GCLOUD_PROJECT",
 				"CLOUDSDK_CORE_PROJECT": "project-from-CLOUDSDK_CORE_PROJECT",
 			},
-			ExpectedValue: "my-project-from-config",
+			ExpectedValue: "project-from-config",
 		},
 		"project value can be set by environment variable: GOOGLE_PROJECT is used first": {
 			ConfigValues: map[string]interface{}{
@@ -733,8 +689,8 @@ func TestProvider_ProviderConfigure_project(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -791,25 +747,25 @@ func TestProvider_ProviderConfigure_billingProject(t *testing.T) {
 	}{
 		"billing_project value set in the provider config is not overridden by ENVs": {
 			ConfigValues: map[string]interface{}{
-				"billing_project": "my-billing-project-from-config",
+				"billing_project": "billing-project-from-config",
 				"credentials":     transport_tpg.TestFakeCredentialsPath,
 			},
 			EnvVariables: map[string]string{
-				"GOOGLE_BILLING_PROJECT": "my-billing-project-from-env",
+				"GOOGLE_BILLING_PROJECT": "billing-project-from-env",
 			},
-			ExpectedValue: "my-billing-project-from-config",
+			ExpectedValue: "billing-project-from-config",
 		},
-		"billing project can be set by environment variable, when no value supplied via the config": {
+		"billing_project can be set by environment variable, when no value supplied via the config": {
 			ConfigValues: map[string]interface{}{
 				// billing_project unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
 			EnvVariables: map[string]string{
-				"GOOGLE_BILLING_PROJECT": "my-billing-project-from-env",
+				"GOOGLE_BILLING_PROJECT": "billing-project-from-env",
 			},
-			ExpectedValue: "my-billing-project-from-env",
+			ExpectedValue: "billing-project-from-env",
 		},
-		"when no values are provided via config or environment variables, the field remains unset without error": {
+		"when no billing_project values are provided via config or environment variables, the field remains unset without error": {
 			ConfigValues: map[string]interface{}{
 				// billing_project unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
@@ -833,9 +789,9 @@ func TestProvider_ProviderConfigure_billingProject(t *testing.T) {
 				"credentials":     transport_tpg.TestFakeCredentialsPath,
 			},
 			EnvVariables: map[string]string{
-				"GOOGLE_BILLING_PROJECT": "my-billing-project-from-env",
+				"GOOGLE_BILLING_PROJECT": "billing-project-from-env",
 			},
-			ExpectedValue: "my-billing-project-from-env",
+			ExpectedValue: "billing-project-from-env",
 		},
 	}
 
@@ -844,8 +800,8 @@ func TestProvider_ProviderConfigure_billingProject(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -903,14 +859,14 @@ func TestProvider_ProviderConfigure_region(t *testing.T) {
 	}{
 		"region value set in the provider config is not overridden by ENVs": {
 			ConfigValues: map[string]interface{}{
-				"region":      "my-region-from-config",
+				"region":      "region-from-config",
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
 			EnvVariables: map[string]string{
 				"GOOGLE_REGION": "region-from-env",
 			},
-			ExpectedSchemaValue: "my-region-from-config",
-			ExpectedConfigValue: "my-region-from-config",
+			ExpectedSchemaValue: "region-from-config",
+			ExpectedConfigValue: "region-from-config",
 		},
 		"region values can be supplied as a self link": {
 			ConfigValues: map[string]interface{}{
@@ -931,7 +887,7 @@ func TestProvider_ProviderConfigure_region(t *testing.T) {
 			ExpectedSchemaValue: "region-from-env",
 			ExpectedConfigValue: "region-from-env",
 		},
-		"when no values are provided via config or environment variables, the field remains unset without error": {
+		"when no region values are provided via config or environment variables, the field remains unset without error": {
 			ConfigValues: map[string]interface{}{
 				// region unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
@@ -969,8 +925,8 @@ func TestProvider_ProviderConfigure_region(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -1084,7 +1040,7 @@ func TestProvider_ProviderConfigure_zone(t *testing.T) {
 			ExpectedSchemaValue: "zone-from-CLOUDSDK_COMPUTE_ZONE",
 			ExpectedConfigValue: "zone-from-CLOUDSDK_COMPUTE_ZONE",
 		},
-		"when no values are provided via config or environment variables, the field remains unset without error": {
+		"when no zone values are provided via config or environment variables, the field remains unset without error": {
 			ConfigValues: map[string]interface{}{
 				// zone unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
@@ -1122,8 +1078,8 @@ func TestProvider_ProviderConfigure_zone(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -1227,13 +1183,13 @@ func TestProvider_ProviderConfigure_userProjectOverride(t *testing.T) {
 			},
 			ExpectedValue: false,
 		},
-		"error returned due to non-boolean environment variables": {
+		"setting user_project_override using a non-boolean environment variables results in an error": {
 			EnvVariables: map[string]string{
 				"USER_PROJECT_OVERRIDE": "I'm not a boolean",
 			},
 			ExpectError: true,
 		},
-		"when no values are provided via config or environment variables, the field remains unset without error": {
+		"when no user_project_override values are provided via config or environment variables, the field remains unset without error": {
 			ConfigValues: map[string]interface{}{
 				// user_project_override unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
@@ -1250,8 +1206,8 @@ func TestProvider_ProviderConfigure_userProjectOverride(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -1309,22 +1265,10 @@ func TestProvider_ProviderConfigure_scopes(t *testing.T) {
 		"scopes are set in the provider config as a list": {
 			ConfigValues: map[string]interface{}{
 				"credentials": transport_tpg.TestFakeCredentialsPath,
-				"scopes": []string{
-					"fizz",
-					"buzz",
-					"fizzbuzz",
-				},
+				"scopes":      []string{"fizz", "buzz", "fizzbuzz"},
 			},
-			ExpectedSchemaValue: []string{
-				"fizz",
-				"buzz",
-				"fizzbuzz",
-			},
-			ExpectedConfigValue: []string{
-				"fizz",
-				"buzz",
-				"fizzbuzz",
-			},
+			ExpectedSchemaValue: []string{"fizz", "buzz", "fizzbuzz"},
+			ExpectedConfigValue: []string{"fizz", "buzz", "fizzbuzz"},
 		},
 		"scopes can be left unset in the provider config without any issues, and a default value is used": {
 			ConfigValues: map[string]interface{}{
@@ -1352,8 +1296,8 @@ func TestProvider_ProviderConfigure_scopes(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
-			unsetTestProviderConfigEnvs(t)
-			setupTestEnvs(t, tc.EnvVariables)
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
 			p := provider.Provider()
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
 
@@ -1412,6 +1356,356 @@ func TestProvider_ProviderConfigure_scopes(t *testing.T) {
 				if el != tc.ExpectedConfigValue[i] {
 					t.Fatalf("expected scopes value set in provider config data to be %v, got %v", tc.ExpectedConfigValue, config.Scopes)
 				}
+			}
+		})
+	}
+}
+
+func TestProvider_ProviderConfigure_requestTimeout(t *testing.T) {
+	cases := map[string]struct {
+		ConfigValues        map[string]interface{}
+		ExpectedValue       string
+		ExpectedSchemaValue string
+		ExpectError         bool
+		ExpectFieldUnset    bool
+	}{
+		"if a valid request_timeout is configured in the provider, no error will occur": {
+			ConfigValues: map[string]interface{}{
+				"request_timeout": "10s",
+				"credentials":     transport_tpg.TestFakeCredentialsPath,
+			},
+			ExpectedValue:       "10s",
+			ExpectedSchemaValue: "10s",
+		},
+		"if an invalid request_timeout is configured in the provider, an error will occur": {
+			ConfigValues: map[string]interface{}{
+				"request_timeout": "timeout",
+				"credentials":     transport_tpg.TestFakeCredentialsPath,
+			},
+			ExpectedValue:       "timeout",
+			ExpectedSchemaValue: "timeout",
+			ExpectError:         true,
+			ExpectFieldUnset:    false,
+		},
+		// RequestTimeout is "0s" if unset by the user, and logic elsewhere will supply a different value.
+		// This can be seen in this part of the config code where the default value is set to "120s"
+		// https://github.com/hashicorp/terraform-provider-google/blob/09cb850ee64bcd78e4457df70905530c1ed75f19/google/transport/config.go#L1228-L1233
+		"when request_timeout is unset in the config, the default value is 0s. (initially; this value is subsequently overwritten)": {
+			ConfigValues: map[string]interface{}{
+				"credentials": transport_tpg.TestFakeCredentialsPath,
+			},
+			ExpectedValue:    "0s",
+			ExpectFieldUnset: true,
+		},
+		"when request_timeout is set as an empty string, the default value is 0s. (initially; this value is subsequently overwritten)": {
+			ConfigValues: map[string]interface{}{
+				"request_timeout": "",
+				"credentials":     transport_tpg.TestFakeCredentialsPath,
+			},
+			ExpectedValue: "0s",
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			ctx := context.Background()
+			acctest.UnsetTestProviderConfigEnvs(t)
+			p := provider.Provider()
+			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
+
+			// Act
+			c, diags := provider.ProviderConfigure(ctx, d, p)
+
+			// Assert
+			if diags.HasError() && !tc.ExpectError {
+				t.Fatalf("unexpected error(s): %#v", diags)
+			}
+			if !diags.HasError() && tc.ExpectError {
+				t.Fatal("expected error(s) but got none")
+			}
+			if diags.HasError() && tc.ExpectError {
+				v, ok := d.GetOk("request_timeout")
+				if ok {
+					val := v.(string)
+					if val != tc.ExpectedSchemaValue {
+						t.Fatalf("expected request_timeout value set in provider data to be %s, got %s", tc.ExpectedSchemaValue, val)
+					}
+					if tc.ExpectFieldUnset {
+						t.Fatalf("expected request_timeout value to not be set in provider data, got %s", val)
+					}
+				}
+				// Return early in tests where errors expected
+				return
+			}
+
+			v := d.Get("request_timeout") // checks for an empty or "0" string in order to set the default value
+			val := v.(string)
+			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+
+			if val != tc.ExpectedSchemaValue {
+				t.Fatalf("expected request_timeout value set in provider data to be %s, got %s", tc.ExpectedSchemaValue, val)
+			}
+			if config.RequestTimeout.String() != tc.ExpectedValue {
+				t.Fatalf("expected request_timeout value in provider struct to be %s, got %v", tc.ExpectedValue, config.RequestTimeout.String())
+			}
+		})
+	}
+}
+
+func TestProvider_ProviderConfigure_requestReason(t *testing.T) {
+
+	cases := map[string]struct {
+		ConfigValues        map[string]interface{}
+		EnvVariables        map[string]string
+		ExpectError         bool
+		ExpectFieldUnset    bool
+		ExpectedSchemaValue string
+		ExpectedConfigValue string
+	}{
+		"when request_reason is unset in the config, environment variable CLOUDSDK_CORE_REQUEST_REASON is used": {
+			ConfigValues: map[string]interface{}{
+				// request_reason unset
+				"credentials": transport_tpg.TestFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"CLOUDSDK_CORE_REQUEST_REASON": "test",
+			},
+			ExpectedSchemaValue: "test",
+			ExpectedConfigValue: "test",
+		},
+		"request_reason set in the config is not overridden by environment variables": {
+			ConfigValues: map[string]interface{}{
+				"request_reason": "request test",
+				"credentials":    transport_tpg.TestFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"CLOUDSDK_CORE_REQUEST_REASON": "test",
+			},
+			ExpectedSchemaValue: "request test",
+			ExpectedConfigValue: "request test",
+		},
+		"when no request_reason is provided via config or environment variables, the field remains unset without error": {
+			ConfigValues: map[string]interface{}{
+				// request_reason unset
+				"credentials": transport_tpg.TestFakeCredentialsPath,
+			},
+			ExpectedSchemaValue: "",
+			ExpectedConfigValue: "",
+		},
+		// Handling empty values in config
+		"when request_reason is set as an empty string in the config it is overridden by environment variables": {
+			ConfigValues: map[string]interface{}{
+				"request_reason": "",
+				"credentials":    transport_tpg.TestFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"CLOUDSDK_CORE_REQUEST_REASON": "test",
+			},
+			ExpectedSchemaValue: "test",
+			ExpectedConfigValue: "test",
+		},
+		"when request_reason is set as an empty string in the config, the field remains unset without error": {
+			ConfigValues: map[string]interface{}{
+				"request_reason": "",
+				"credentials":    transport_tpg.TestFakeCredentialsPath,
+			},
+			ExpectedSchemaValue: "",
+			ExpectedConfigValue: "",
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			ctx := context.Background()
+			acctest.UnsetTestProviderConfigEnvs(t)
+			acctest.SetupTestEnvs(t, tc.EnvVariables)
+			p := provider.Provider()
+			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
+
+			// Act
+			c, diags := provider.ProviderConfigure(ctx, d, p)
+
+			// Assert
+			if diags.HasError() && !tc.ExpectError {
+				t.Fatalf("unexpected error(s): %#v", diags)
+			}
+			if !diags.HasError() && tc.ExpectError {
+				t.Fatal("expected error(s) but got none")
+			}
+			if diags.HasError() && tc.ExpectError {
+				v, ok := d.GetOk("request_reason")
+				if ok {
+					val := v.(string)
+					if val != tc.ExpectedSchemaValue {
+						t.Fatalf("expected request_reason value set in provider data to be %s, got %s", tc.ExpectedSchemaValue, val)
+					}
+					if tc.ExpectFieldUnset {
+						t.Fatalf("expected request_reason value to not be set in provider data, got %s", val)
+					}
+				}
+				// Return early in tests where errors expected
+				return
+			}
+
+			v := d.Get("request_reason")
+			val := v.(string)
+			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+
+			if v != tc.ExpectedSchemaValue {
+				t.Fatalf("expected request_reason value set in provider data to be %s, got %s", tc.ExpectedSchemaValue, val)
+			}
+			if config.RequestReason != tc.ExpectedConfigValue {
+				t.Fatalf("expected request_reason value in provider struct to be %s, got %s", tc.ExpectedConfigValue, config.Credentials)
+			}
+		})
+	}
+}
+
+func TestProvider_ProviderConfigure_batching(t *testing.T) {
+	//var batch []interface{}
+	cases := map[string]struct {
+		ConfigValues                map[string]interface{}
+		EnvVariables                map[string]string
+		ExpectError                 bool
+		ExpectFieldUnset            bool
+		ExpectedEnableBatchingValue bool
+		ExpectedSendAfterValue      string
+	}{
+		"batching can be configured with values for enable_batching and send_after": {
+			ConfigValues: map[string]interface{}{
+				"credentials": transport_tpg.TestFakeCredentialsPath,
+				"batching": []interface{}{
+					map[string]interface{}{
+						"enable_batching": true,
+						"send_after":      "45s",
+					},
+				},
+			},
+			ExpectedEnableBatchingValue: true,
+			ExpectedSendAfterValue:      "45s",
+		},
+		"if batching is an empty block, it will set the default values for enable_batching and send_after": {
+			ConfigValues: map[string]interface{}{
+				"credentials": transport_tpg.TestFakeCredentialsPath,
+				// batching not set
+			},
+			// Although at the schema level it's shown that by default it's set to false, the actual default value
+			// is true and can be seen in the `ExpanderProviderBatchingConfig` struct
+			// https://github.com/GoogleCloudPlatform/magic-modules/blob/8cd4a506f0ac4db7b07a8cce914449d34df6f20b/mmv1/third_party/terraform/transport/config.go.erb#L504-L508
+			ExpectedEnableBatchingValue: false,
+			ExpectedSendAfterValue:      "", // uses "" value to be able to set the default value of 30s
+			ExpectFieldUnset:            true,
+		},
+		"when batching is configured with only enable_batching, send_after will be set to a default value": {
+			ConfigValues: map[string]interface{}{
+				"credentials": transport_tpg.TestFakeCredentialsPath,
+				"batching": []interface{}{
+					map[string]interface{}{
+						"enable_batching": true,
+					},
+				},
+			},
+			ExpectedEnableBatchingValue: true,
+			ExpectedSendAfterValue:      "",
+		},
+		"when batching is configured with only send_after, enable_batching will be set to a default value": {
+			ConfigValues: map[string]interface{}{
+				"credentials": transport_tpg.TestFakeCredentialsPath,
+				"batching": []interface{}{
+					map[string]interface{}{
+						"send_after": "45s",
+					},
+				},
+			},
+			ExpectedEnableBatchingValue: false,
+			ExpectedSendAfterValue:      "45s",
+		},
+		// Error states
+		"if batching is configured with send_after as an invalid value, there's an error": {
+			ConfigValues: map[string]interface{}{
+				"credentials": transport_tpg.TestFakeCredentialsPath,
+				"batching": []interface{}{
+					map[string]interface{}{
+						"send_after": "invalid value",
+					},
+				},
+			},
+			ExpectedSendAfterValue: "invalid value",
+			ExpectError:            true,
+		},
+		"if batching is configured with send_after as number value without seconds (s), there's an error": {
+			ConfigValues: map[string]interface{}{
+				"credentials": transport_tpg.TestFakeCredentialsPath,
+				"batching": []interface{}{
+					map[string]interface{}{
+						"send_after": "10",
+					},
+				},
+			},
+			ExpectedSendAfterValue: "10",
+			ExpectError:            true,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			ctx := context.Background()
+			acctest.UnsetTestProviderConfigEnvs(t)
+			p := provider.Provider()
+			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
+
+			// Act
+			_, diags := provider.ProviderConfigure(ctx, d, p)
+
+			// Assert
+			if diags.HasError() && !tc.ExpectError {
+				t.Fatalf("unexpected error(s): %#v", diags)
+			}
+			if !diags.HasError() && tc.ExpectError {
+				t.Fatal("expected error(s) but got none")
+			}
+			if diags.HasError() && tc.ExpectError {
+				v, ok := d.GetOk("batching.0.enable_batching")
+				val := v.(bool)
+				if ok {
+					if val != tc.ExpectedEnableBatchingValue {
+						t.Fatalf("expected request_timeout value set in provider data to be %v, got %v", tc.ExpectedEnableBatchingValue, val)
+					}
+					if tc.ExpectFieldUnset {
+						t.Fatalf("expected request_timeout value to not be set in provider data, got %v", val)
+					}
+				}
+
+				v, ok = d.GetOk("batching.0.send_after")
+				if ok {
+					val := v.(string)
+					if val != tc.ExpectedSendAfterValue {
+						t.Fatalf("expected send_after value set in provider data to be %v, got %v", tc.ExpectedSendAfterValue, val)
+					}
+					if tc.ExpectFieldUnset {
+						t.Fatalf("expected send_after value to not be set in provider data, got %s", val)
+					}
+				}
+				// Return early in tests where errors expected
+				return
+			}
+
+			v := d.Get("batching.0.enable_batching")
+			enableBatching := v.(bool)
+			if enableBatching != tc.ExpectedEnableBatchingValue {
+				t.Fatalf("expected enable_batching value set in provider data to be %v, got %v", tc.ExpectedEnableBatchingValue, enableBatching)
+			}
+
+			v = d.Get("batching.0.send_after") // checks for an empty string in order to set the default value
+			sendAfter := v.(string)
+			if sendAfter != tc.ExpectedSendAfterValue {
+				t.Fatalf("expected send_after value set in provider data to be %s, got %s", tc.ExpectedSendAfterValue, sendAfter)
 			}
 		})
 	}
