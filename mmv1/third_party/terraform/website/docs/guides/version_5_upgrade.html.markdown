@@ -374,6 +374,42 @@ proposed value to configuration (below) or apply `lifecycle.ignore_changes` to t
 +    }
 ```
 
+### Cluster deletion now prevented by default with `deletion_protection`
+
+The field `deletion_protection` has been added with a default of `true`. This field prevents
+Terraform from destroying the resource or recreating it.
+**`deletion_protection` does NOT prevent deletion outside of Terraform.**
+To destroy a `google_container_cluster`, this field must be explicitly set to `false`.
+
+### `networking_mode` defaults to `VPC_NATIVE` for newly created clusters
+
+New clusters will default to VPC-native based instead of routes based unless otherwise specified.
+Previously, `google_container_cluster` would default to using routes as the networking mode unless
+`ip_allocation_policy` policy was set. Now if both `networking_mode` and `ip_allocation_policy` are
+not set in configuration, `networking_mode` will default to `VPC_NATIVE` and the server set the default
+`ip_allocation_policy`.
+
+#### New Minimal Config for VPC-native cluster
+
+```hcl
+resource "google_container_cluster" "primary" {
+  name               = "my_cluster"
+  location           = "us-central1-a"
+  initial_node_count = 1
+}
+```
+
+#### New Minimal Config for Routes-based cluster
+
+```hcl
+resource "google_container_cluster" "primary" {
+  name               = "my_cluster"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  networking_mode    = "ROUTES"
+}
+```
+
 ### `enable_binary_authorization` is now removed
 
 `enable_binary_authorization` has been removed in favor of `binary_authorization.enabled`.
