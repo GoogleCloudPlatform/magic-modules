@@ -2,6 +2,7 @@
   details:
     functions: 
     - tpgresource.DefaultProviderProject
+    - tpgdclresource.ResourceContainerAwsNodePoolCustomizeDiffFunc
 - type: DIFF_SUPPRESS_FUNC
   field: config.root_volume.volume_type
   details:
