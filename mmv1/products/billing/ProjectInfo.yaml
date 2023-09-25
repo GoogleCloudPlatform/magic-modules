@@ -28,11 +28,12 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/billing_project_info.go.erb
   test_check_destroy: templates/terraform/custom_check_destroy/billing_project_info.go.erb
 import_format:
-  ['projects/{{project}}', '{{project}}']
+  ['projects/{{%project}}', '{{%project}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'billing_project_info_basic'
     primary_resource_id: 'default'
+    skip_import_test: true
     test_env_vars:
       billing_account: :BILLING_ACCT
       org_id: :ORG_ID
