@@ -133,10 +133,11 @@ the cluster. Unless this field is set to false in Terraform state, a
 `false`. This field should only be enabled for Autopilot clusters (`enable_autopilot`
 set to `true`).
 
-* `cluster_ipv4_cidr` - (Optional) The IP address range of the Kubernetes pods
+* `cluster_ipv4_cidr` - (Optional, DEPRECATED) The IP address range of the Kubernetes pods
 in this cluster in CIDR notation (e.g. `10.96.0.0/14`). Leave blank to have one
 automatically chosen or specify a `/14` block in `10.0.0.0/8`. This field will
-only work for routes-based clusters, where `ip_allocation_policy` is not defined.
+default a new cluster to routes-based, where `ip_allocation_policy` is not defined.
+Deprecated in favor of `ip_allocation_policy.cluster_ipv4_cidr_block`. 
 
 * `cluster_autoscaling` - (Optional)
 Per-cluster configuration of Node Auto-Provisioning with Cluster Autoscaler to
@@ -200,8 +201,7 @@ making the cluster VPC-native instead of routes-based (unless `"networking_mode`
 below](#nested_ip_allocation_policy).
 
 * `networking_mode` - (Optional) Determines whether alias IPs or routes will be used for pod IPs in the cluster.
-Options are `VPC_NATIVE` or `ROUTES`. `VPC_NATIVE` enables [IP aliasing](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-aliases).
-Newly created clusters will default to `VPC_NATIVE`.
+Options are `VPC_NATIVE` or `ROUTES`. Newly created clusters will default to `VPC_NATIVE`.
 
 * `logging_config` - (Optional) Logging configuration for the cluster.
     Structure is [documented below](#nested_logging_config).
