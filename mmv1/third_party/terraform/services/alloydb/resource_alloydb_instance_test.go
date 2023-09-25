@@ -497,8 +497,8 @@ func TestAccAlloydbInstance_clientConnectionConfig_sslModeDefault(t *testing.T) 
 		"network_name":  networkName,
 	}
 	context2 := map[string]interface{}{
-		"random_suffix": suffix,
-		"network_name":  networkName,
+		"random_suffix":      suffix,
+		"network_name":       networkName,
 		"require_connectors": false,
 	}
 
@@ -518,9 +518,9 @@ func TestAccAlloydbInstance_clientConnectionConfig_sslModeDefault(t *testing.T) 
 				ExpectNonEmptyPlan: true,
 			},
 			{
-				ResourceName:      "google_alloydb_instance.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_instance.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
 			},
 			{
@@ -530,9 +530,9 @@ func TestAccAlloydbInstance_clientConnectionConfig_sslModeDefault(t *testing.T) 
 				),
 			},
 			{
-				ResourceName:      "google_alloydb_instance.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_instance.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
 			},
 			{
@@ -568,20 +568,20 @@ func TestAccAlloydbInstance_clientConnectionConfig_update(t *testing.T) {
 	suffix := acctest.RandString(t, 10)
 	networkName := acctest.BootstrapSharedTestNetwork(t, "alloydbinstance-clientconnectionconfigupdate")
 	context := map[string]interface{}{
-		"random_suffix": suffix,
-		"network_name":  networkName,
+		"random_suffix":      suffix,
+		"network_name":       networkName,
 		"require_connectors": true,
-		"ssl_mode": "ENCRYPTED_ONLY",
+		"ssl_mode":           "ENCRYPTED_ONLY",
 	}
 	context2 := map[string]interface{}{
-		"random_suffix": suffix,
-		"network_name":  networkName,
+		"random_suffix":      suffix,
+		"network_name":       networkName,
 		"require_connectors": false,
-		"ssl_mode": "ALLOW_UNENCRYPTED_AND_ENCRYPTED",
+		"ssl_mode":           "ALLOW_UNENCRYPTED_AND_ENCRYPTED",
 	}
 	context3 := map[string]interface{}{
-		"random_suffix": suffix,
-		"network_name":  networkName,
+		"random_suffix":      suffix,
+		"network_name":       networkName,
 		"require_connectors": false,
 	}
 
@@ -598,9 +598,9 @@ func TestAccAlloydbInstance_clientConnectionConfig_update(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_alloydb_instance.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_instance.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
 			},
 			{
@@ -611,9 +611,9 @@ func TestAccAlloydbInstance_clientConnectionConfig_update(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_alloydb_instance.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_instance.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
 			},
 			{
@@ -627,11 +627,11 @@ func TestAccAlloydbInstance_clientConnectionConfig_update(t *testing.T) {
 				// Terraform plan however will still show it changing to nil.
 				ExpectNonEmptyPlan: true,
 			},
-			
+
 			{
-				ResourceName:      "google_alloydb_instance.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_instance.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
 			},
 		},
