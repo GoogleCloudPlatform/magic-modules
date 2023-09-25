@@ -97,12 +97,7 @@ resource "google_cloud_run_service" "default" {
 resource "google_cloud_run_domain_mapping" "default" {
   location = "us-central1"
   name     = "tf-test-domain%{random_suffix}.gcp.tfacc.hashicorptest.com"
-  metadata {
-    namespace = "%{namespace}"
-    labels = {
-      "my-label" = "my-value"
-    }
-  }
+
   spec {
     route_name = google_cloud_run_service.default.name
   }
