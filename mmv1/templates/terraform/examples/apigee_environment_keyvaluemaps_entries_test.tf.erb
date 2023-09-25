@@ -134,6 +134,7 @@ resource "google_project" "project" {
  } 
 
 resource "google_apigee_environment" "apigee_environment" {
+  provider = google-beta
   org_id       = google_apigee_organization.apigee_org.id
   name         = "tf-test-env%{random_suffix}"
   description  = "Apigee Environment"
@@ -141,23 +142,27 @@ resource "google_apigee_environment" "apigee_environment" {
 }
 
 resource "google_apigee_instance" "apigee_instance" {
+  provider = google-beta
   name     = "tf-test%{random_suffix}"
   location = "us-central1"
   org_id   = google_apigee_organization.apigee_org.id
 }
 
 resource "google_apigee_instance_attachment" "apigee_instance_attachment" {
+  provider = google-beta
   instance_id  = google_apigee_instance.apigee_instance.id
   environment  = google_apigee_environment.apigee_environment.name
 }
 
 resource "google_apigee_environment_keyvaluemaps" "apigee_environment_keyvaluemaps" {
+  provider = google-beta
   env_id    = google_apigee_environment.apigee_environment.id
   name      = "tf-test-env-kvms%{random_suffix}"
   encrypted = true
 }
 
 resource "google_apigee_environment_keyvaluemaps_entries" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
   env_keyvaluemap_id = google_apigee_environment_keyvaluemaps.apigee_environment_keyvaluemaps.id
   name           = "testName"
   value          = "testValue"
