@@ -102,15 +102,31 @@ Provider-level default annotations are not supported.
 
 #### Resource labels
 
+Labels and annotations fields on Terraform google provider were authoritative and treat Terraform being the only owner of the fields. This model worked well at the beginning. But with the introduction of the service system labels and other clients managed labels, it shows diff of these service system labels and other clients managed labels when the user updates the labels or annotations fields with Terraform. However, the diff is unexpected because the user does not modify these labels on Terraform. The new labels model will be the solution for this problem.
+
 The new labels model will be applied to all of the resources with the top level `labels` field or the nested `labels` field inside the top level `metadata` field. Some labels fields are for child resources, so the new model will not be applied to labels fields for child resources.
 
 There are now three label-related fields with the new model:
 
-* The `labels` field will be non-authoritative and only manage the labels defined by the users on the resource through Terraform.
+* The `labels` field will be non-authoritative and only manage the labels defined by the users on the resource through Terraform. If a label was added out of band, Terraform will not manage it, unless it is added to the `labels` field in the configuration. The out of band labels will be listed in the `effective_labels` field.
 * The output-only `effective_labels` will list all of labels present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 * The output-only `terraform_labels` will merge the labels defined by the users on the resource through Terraform and the default labels configured on the provider. If the same label exists on both the resource labels and provider default labels, the label on the resource will override the provider label.
 
-After upgrading to `5.0.0`, and then running `terraform refresh` or `terraform apply`, these three fields should show in the state file of the resources with a self-applying `labels` field.
+The following changes will be observed after upgrading to `5.0.0`.
+* After upgrading to `5.0.0`, and then running `terraform import`, these three fields should show in the state file of the resources with empty `labels` and `terraform_labels`. `effective_labels` will have all of labels present on the resource in GCP.
+* After upgrading to `5.0.0`, and then running `terraform refresh`, these three fields should show in the state file of the resources with a self-applying `labels` field and empty `terraform_labels`. `effective_labels` will have all of labels present on the resource in GCP.
+* After upgrading to `5.0.0`, and then running `terraform plan` or `terraform apply`, the plan shows that a new block `terraform_labels` will be added to the state. After running `terraform apply`, these three fields should show in the state file of the resources with a self-applying `labels` field. In the state file, `terraform_labels` will have the merged labels and `effective_labels` will have all of labels present on the resource in GCP.
+* In the resource `google_cloud_run_domain_mapping`, the system labels `cloud.googleapis.com/location` and `run.googleapis.com/overrideAt` are removed from `labels` inside `metadata` field in the state file. After upgrading to `5.0.0`, if any of these label keys are in the configration, the Terraform plan shows that the keys will be added.
+* In the resource `google_cloud_run_service`, the system label `cloud.googleapis.com/location` is removed from `labels` inside `metadata` field in the state file. After upgrading to `5.0.0`, if this system label key is in the configration, the Terraform plan shows that this key will be added.
+* In the resource `google_dataflow_flex_template_job`, the system labels with the prefix `goog-dataflow-provided` are removed from the `labels` field in the state file. After upgrading to `5.0.0`, if any of these system label keys are in the configration, the Terraform plan shows that the keys will be added.
+* In the resource `google_dataflow_job`, the system labels with the prefix `goog-dataflow-provided` are removed from the `labels` field in the state file. After upgrading to `5.0.0`, if any of these system label keys are in the configration, the Terraform plan shows that the keys will be added.
+* In the resource `google_dataproc_cluster`, the system labels with the prefix `goog-dataproc` are removed from the `labels` field in the state file. After upgrading to `5.0.0`, if any of these system label keys are in the configration, the Terraform plan shows that the keys will be added.
+* In the resource `google_notebooks_instance`, the system labels with the prefix `goog-caip-notebook` are removed from the `labels` field in the state file. After upgrading to `5.0.0`, if any of these system label keys are in the configration, the Terraform plan shows that the keys will be added.
+* In the resource `google_storage_bucket`, the system labels with the prefix `goog-dataplex` are removed from the `labels` field in the state file. After upgrading to `5.0.0`, if any of these system label keys are in the configration, the Terraform plan shows that the keys will be added.
+
+#### Data source labels
+
+If the resource has been applied with the new labels model, there are now three label-related fields, `labels`, `effective_labels` and `terraform_labels`, on the corresponding data source. All of these three fields will list all of labels present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 
 #### Resource annotations
 
@@ -118,49 +134,58 @@ The new annotations model is similar to the new labels model and will be applied
 
 There are now two annotation-related fields with the new model, the `annotations` and the output-only `effective_annotations` fields.
 
-### Updates to how empty strings are handled in the `provider` block
+The following changes will be observed after upgrading to `5.0.0`.
+* After upgrading to `5.0.0`, and then running `terraform import`, these two fields should show in the state file of the resources with empty `annotations`. `effective_annotations` will have all of annotations present on the resource in GCP.
+* After upgrading to `5.0.0`, and then running `terraform refresh`, these three fields should show in the state file of the resources with a self-applying `annotations` field. `effective_annotations` will have all of annotations present on the resource in GCP.
+* After upgrading to `5.0.0`, and then running `terraform plan` or `terraform apply`, these two fields should show in the state file of the resources with a self-applying `annotations` field. In the state file `effective_annotations` will have all of labels present on the resource in GCP.
+* In the resource `google_cloud_run_domain_mapping`, the system annotations `serving.knative.dev/creator`, `serving.knative.dev/lastModifier`, `run.googleapis.com/operation-id`, `run.googleapis.com/ingress-status`, `run.googleapis.com/ingress` with the value `all` are removed from `annotations` inside `metadata` field in the state file. After upgrading to `5.0.0`, if any of these system annotations are in the configration, the Terraform plan shows that these keys will be added.
+* In the resource `google_cloud_run_service`, tthe system annotations `serving.knative.dev/creator`, `serving.knative.dev/lastModifier`, `run.googleapis.com/operation-id`, `run.googleapis.com/ingress-status`, `run.googleapis.com/ingress` with the value `all` are removed from `annotations` inside `metadata` field in the state file. After upgrading to `5.0.0`, if any of these system annotations are in the configration, the Terraform plan shows that these keys will be added.
 
-In 5.0.0+ any empty strings set in the `provider` block will be used and not ignored. Previously any empty strings used as arguments in the `provider` block were ignored and did not contribute to configuration of the provider. 
+#### Data source annotations
 
-Users should remove empty string arguments to avoid errors during plan/apply stages.
+If the resource has been applied with the new annotations model, there are now two annotation-related fields, `annotations`, and `effective_annotations`, on the corresponding data source. Both fields will list all of annotations present on the resource in GCP, including the annotations configured through Terraform, other clients and services.
 
-```tf
+#### Examples
+```hcl
 provider "google" {
-  credentials = "" # this line should be removed
-  project = "my-project"
+  default_labels = {
+    default_key = "default_value"
+  }
+}
+
+resource "google_dataproc_cluster" "with_labels" {
+  name   = "tf-test-dproc-test-1"
   region = "us-central1"
-  zone = "" # this line should be removed
+
+  labels = {
+    key1 = "value1"
+    key2 = "value2"
+  }
 }
 ```
+After the configration is applied, Terraform is managing `key1` and `key2` in the `labels` field. `terraform_labels` field has label `default_key`, `key1` and `key2`. `effective_labels` has label `default_key`, `key1`, `key2` and system labels.
 
-### Changes to how default `location`, `region` and `zone` values are obtained for resources
+```hcl
+provider "google" {
+  default_labels = {
+    default_key = "default_value"
+  }
+}
 
-Currently, when configuring resources that require a `location`, `region` or `zone` field you have the choice of specifying it in the resource block or allowing default values to be used. Default [region](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#region) or [zone](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#zone) values can be configured in the provider block or by providing values through environment variables.
+resource "google_dataproc_cluster" "with_labels" {
+  name   = "tf-test-dproc-test-1"
+  region = "us-central1"
 
-Changes in 5.0.0 make the way the provider handles `location`/`region`/`zone` values more consistent:
-
-* Resources that have a `location` field will now use the default `region` value preferentially over the default `zone` value set on the provider. This is only relevant to resources where `location` is not provided in the resource block directly.
-* Previously, default `region` and `zone` values set as URIs were incompatible with resources that have `location` or `region` arguments. In 5.0.0+ those values will now be valid and won't result in errors during plan/apply stages.
-
-
-#### When you may need to take action
-
-There is only one change that we anticipate can lead to unexpected diffs in Terraform plans after upgrading to 5.0.0, which is:
-
-> Resources that have a `location` field will now use the default `region` value preferentially over the default `zone` value set on the provider. This is only relevant to resources where `location` is not provided in the resource block directly.
-
-Users will need to check for unexpected `location` changes for resources. If an unexpected change is seen, the solution is to explicitly set the `location` value in that resource's configuration block to match the desired value.
-
-This will only affect users whose configuration contains resource blocks that have missing `location` values and whose [default zone](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#zone) value belongs to a region that's different than the [default region](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#region) value. For example, if you set `us-central1-a` as the default zone and `us-central2` as the default region on the provider you may see plans that contain unexpected diffs to move resources from `us-central1` to `us-central2`.
-
+  labels = {
+    key1 = "value1"
+  }
+}
+```
+After the configration is applied, Terraform stops managing `key2` and is managing `key1` in the `labels` field. `terraform_labels` field has label `default_key` and `key1`. `effective_labels` has label `default_key`, `key1` and system labels.
 
 ### Provider default values shown at plan-time
 
 `project`, `region`, and `zone` fields will now display their values during plan-time instead of the placeholder `(known after apply)` value normally displayed for fields without fixed Terraform default values. These values will be taken from either the Terraform resource config file, provider config, or local environment variables, depending on which variables are supplied by the user, matching the existing per-resource functionality for what default values are used in execution of a Terraform plan.
-
-### Resource import formats have improved validation
-
-Throughout the provider there were many resources which erroneously gave false positives to poorly formatted import input if a subset of the provided input was valid to their configured import formats. All GCP resource IDs supplied to "terraform import" must match the documentation specified import formats exactly.
 
 ## Datasources
 
@@ -311,13 +336,11 @@ resource "google_firebaserules_ruleset" "firestore" {
 
 These two unsupported fields were introduced incorrectly. They are now removed.
 
-
 ## Resource: `google_cloud_run_v2_service`
 
 ### `liveness_probe.tcp_socket` is now removed
 
 This unsupported field was introduced incorrectly. It is now removed.
-
 
 ## Resource: `google_container_cluster`
 
@@ -330,50 +353,6 @@ deleted.
 This behavior was changed to allow users to collect internal logs from the
 cluster and/or manually resolve the issues and untaint their failed clusters.
 
-### `node_config.0.taint` and `node_pool.0.node_config.0.taint` field change
-
-The `taint` field has been changed to manage a subset of the taint keys on a node pool
-and the `effective_taints` output field has been added to record the complete set of
-taints applied to the node pool by GKE.
-
-Previously, the field was authoritative and would require every taint on the node pool
-to be recorded, causing friction when users used GPUs or configured sandbox settings,
-actions which added taints. After this change, only "Terraform-managed" taints will be
-managed by the `taint` field. Other taints, including new taints injected by the
-server, will not have drift detected.
-
-Currently, the set of managed taints and their values are immutable in Terraform, and
-any changes will cause a recreate to be planned. However, taints can be unmanaged by
-simultaneously removing the taint entry from GKE and your Terraform configuration at
-the same time.
-
-The set of taints Terraform manages (and their values) will be determined based on
-how the cluster or node pool resource was added to your Terraform state file:
-
-* If you created the cluster or node pool with Terraform with Google provider 5.0.0
-or later, the set of taints specified during resource creation will be managed.
-* If you imported the cluster or node pool with Google provider 5.0.0 or later, no
-taints will be managed by Terraform
-* If you upgraded from an earlier version, the complete set of taint values applied to the
-node pool at the time of your last refresh will be managed by Terraform
-
-Most existing configurations will not be affected with this change as they already specify
-the whole set of managed taints, or are already ignoring changes with `lifecycle.ignore_changes`,
-preventing a diff.
-
-A limited number of users may see a diff if they are using the `google-beta` provider
-and have specified a `sandbox_config` value. If that's the case, you can safely add the
-proposed value to configuration (below) or apply `lifecycle.ignore_changes` to the field to resolve.
-
-
-```diff
-+    taint {
-+      key    = "sandbox.gke.io/runtime"
-+      value  = "gvisor"
-+      effect = "NO_SCHEDULE"
-+    }
-```
-
 ### `enable_binary_authorization` is now removed
 
 `enable_binary_authorization` has been removed in favor of `binary_authorization.enabled`.
@@ -382,60 +361,6 @@ proposed value to configuration (below) or apply `lifecycle.ignore_changes` to t
 
 Previously `network_policy.provider` defaulted to "PROVIDER_UNSPECIFIED". It no longer
 has a default value.
-
-## Resource: `google_container_node_pool`
-
-### `logging_variant` no longer has a provider default value
-
-Previously `logging_variant` defaulted to "DEFAULT". It no longer has a default value.
-
-### `management.auto_repair` and `management.auto_upgrade` now default to true
-
-Previously both fields defaulted to false. They now default to true.
-
-### `node_config.0.taint` field change
-
-The `taint` field has been changed to manage a subset of the taint keys on a node pool
-and the `effective_taints` output field has been added to record the complete set of
-taints applied to the node pool by GKE.
-
-Previously, the field was authoritative and would require every taint on the node pool
-to be recorded, causing friction when users used GPUs or configured sandbox settings,
-actions which added taints. After this change, only "Terraform-managed" taints will be
-managed by the `taint` field. Other taints, including new taints injected by the
-server, will not have drift detected.
-
-Currently, the set of managed taints and their values are immutable in Terraform, and
-any changes will cause a recreate to be planned. However, taints can be unmanaged by
-simultaneously removing the taint entry from GKE and your Terraform configuration at
-the same time.
-
-The set of taints Terraform manages (and their values) will be determined based on
-how the cluster or node pool resource was added to your Terraform state file:
-
-* If you created the cluster or node pool with Terraform with Google provider 5.0.0
-or later, the set of taints specified during resource creation will be managed.
-* If you imported the cluster or node pool with Google provider 5.0.0 or later, no
-taints will be managed by Terraform
-* If you upgraded from an earlier version, the complete set of taint values applied to the
-node pool at the time of your last refresh will be managed by Terraform
-
-Most existing configurations will not be affected with this change as they already specify
-the whole set of managed taints, or are already ignoring changes with `lifecycle.ignore_changes`,
-preventing a diff.
-
-A limited number of users may see a diff if they are using the `google-beta` provider
-and have specified a `sandbox_config` value. If that's the case, you can safely add the
-proposed value to configuration (below) or apply `lifecycle.ignore_changes` to the field to resolve.
-
-
-```diff
-+    taint {
-+      key    = "sandbox.gke.io/runtime"
-+      value  = "gvisor"
-+      effect = "NO_SCHEDULE"
-+    }
-```
 
 ## Resource: `google_dataplex_datascan`
 
@@ -451,6 +376,7 @@ Previously, the default value of `enable_endpoint_independent_mapping` was `TRUE
 it will use the default value from the API which is `FALSE`. If you want to
 enable endpoint independent mapping, then explicity set the value of
 `enable_endpoint_independent_mapping` field to `TRUE`.
+
 
 ## Resource: `google_firebase_project_location`
 
@@ -629,10 +555,6 @@ If you were relying on accessing an individual flag by index (for example, `goog
 
 `google_service_networking_connection` now uses the Create endpoint instead of the Patch endpoint during the creation step. Previously, Patch was used as a workaround for an issue that has since been resolved.
 
-### "terraform destroy" now fully deletes the resource instead of abandoning
-
-`google_service_networking_connection` now uses API `deleteConnection` method instead of `removePeering` method during the deletion step. Previously, `removePeering` method was used because `deleteConnection` method was unavailable. In some cases a private connection cannot be deleted immediately after the resource using that connection is deleted, and users may have to delete the private connection after a waiting period.
-
 ## Resource: `google_secret_manager_secret`
 
 ### `replication.automatic` is now removed
@@ -663,39 +585,14 @@ resource "google_secret_manager_secret" "my-secret" {
 }
 ```
 
+## Resource: `google_identity_platform_project_default_config`
+
+### `google_identity_platform_project_default_config` has been removed from the provider
+
+Use the `google_identity_platform_config` resource instead. It contains a more comprehensive list of fields, and was created before `google_identity_platform_project_default_config` was added.
+
 ## Resource: `google_compute_service_attachment`
 
 ### `reconcile_connections` now defaults from API
 
 `reconcile_connections` previously defaults to true. Now it will default from the API.
-
-
-## Resource: `google_dataflow_flex_template_job`
-
-### Fields that are a part of the [environment block](https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.locations.flexTemplates/launch#FlexTemplateRuntimeEnvironment) will be overriden to be sent via their fields even when supplied via parameters.
-
-Several fields within the `google_dataflow_flex_template_job` resource can be supplied through either the `parameters{}` block or a field on the resource object. Support for these fields on the resource object was added in the `4.66.0` release of the Google provider. That version introduced an issue where the values were being double-sent to the API due to being recorded in Terraform state in two places. To resolve this issue, these fields will be deduplicated and sent to the API through the resource object.
-
-Additionally, due to the API returning these fields to the user they will now be considered computed and users will see values twice within their state when configuring these fields' values via the `parameters{}` block.
-
-## Resource: `google_compute_node_group`
-
-### Node groups are now mutable
-
-Due to limitations in previous field configurations, the only field that could be updated previously was `node_template`. It is now possible to adjust the `autoscaling_policy` without recreating the group, nor will any adjustment to the `size` of the nodepool prompt resource recration.
-
-### `size` is now an output only field.
-
-`size` previously served as an alias for `initial_size` on resource creation, and users would be required to recreate the resource if the `size` value ever adjusted due to either direct user update or auto-scaling adjustment outside of Terraform.
-
-It will now mirror its API functionality and serve as an output only field to show how many nodes currently exist within the resource. All existing configurations which used `size` as an input field must be updated for its removal.
-
-### One of `initial_size` or `autoscaling_policy{}` must be configured on resource creation.
-
-These fields will supply the base node-count for a node group and one of them will be required for successful resource creation. Both will be freely updateable or removable on future state changes that do not require recreation.
-
-## Resource: `google_looker_instance`
-
-### `LOOKER_MODELER` has been removed as a platform edition.
-
-Looker Modeler edition is deprecated as a platform edition.
