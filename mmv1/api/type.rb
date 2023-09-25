@@ -23,7 +23,7 @@ module Api
       include Api::Object::Named::Properties
 
       attr_reader :default_value
-      attr_reader :description
+      attr_accessor :description
       attr_reader :exclude
 
       # Add a deprecation message for a field that's been deprecated in the API
