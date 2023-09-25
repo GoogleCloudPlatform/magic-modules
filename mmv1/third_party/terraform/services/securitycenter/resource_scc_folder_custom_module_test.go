@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccSecurityCenterFolderCustomModule_sccFolderCustomModuleUpdate(t *testing.T) {
+func TestAccSecurityCenterOrganizationCustomModule_sccOrganizationCustomModuleUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -20,25 +20,21 @@ func TestAccSecurityCenterFolderCustomModule_sccFolderCustomModuleUpdate(t *test
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time":   {},
-		},
-		CheckDestroy: testAccCheckSecurityCenterFolderCustomModuleDestroyProducer(t),
+		CheckDestroy:             testAccCheckSecurityCenterOrganizationCustomModuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecurityCenterFolderCustomModule_sccFolderCustomModuleFullExample(context),
+				Config: testAccSecurityCenterOrganizationCustomModule_sccOrganizationCustomModuleFullExample(context),
 			},
 			{
-				ResourceName:      "google_scc_folder_custom_module.example",
+				ResourceName:      "google_scc_organization_custom_module.example",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccSecurityCenterFolderCustomModule_sccFolderCustomModuleUpdate(context),
+				Config: testAccSecurityCenterOrganizationCustomModule_sccOrganizationCustomModuleUpdate(context),
 			},
 			{
-				ResourceName:      "google_scc_folder_custom_module.example",
+				ResourceName:      "google_scc_organization_custom_module.example",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -46,15 +42,10 @@ func TestAccSecurityCenterFolderCustomModule_sccFolderCustomModuleUpdate(t *test
 	})
 }
 
-func testAccSecurityCenterFolderCustomModule_sccFolderCustomModuleUpdate(context map[string]interface{}) string {
+func testAccSecurityCenterOrganizationCustomModule_sccOrganizationCustomModuleUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_folder" "folder" {
-  parent       = "organizations/%{org_id}"
-  display_name = "tf-test-folder-name%{random_suffix}"
-}
-
-resource "google_scc_folder_custom_module" "example" {
-	folder = google_folder.folder.folder_id
+resource "google_scc_organization_custom_module" "example" {
+	organization = "%{org_id}"
 	display_name = "tf_test_full_custom_module%{random_suffix}"
 	enablement_state = "DISABLED"
 	custom_config {
