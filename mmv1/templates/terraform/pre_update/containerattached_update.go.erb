@@ -9,9 +9,12 @@ if d.HasChange("logging_config") {
 if d.HasChange("monitoring_config") {
     newUpdateMask = append(newUpdateMask, "monitoring_config.managed_prometheus_config.enabled")
 }
+if d.HasChange("binary_authorization") {
+    newUpdateMask = append(newUpdateMask, "binary_authorization.evaluation_mode")
+}
 // Pull out any other set fields from the generated mask.
 for _, mask := range updateMask {
-    if mask == "authorization" || mask == "loggingConfig" || mask == "monitoringConfig" {
+    if mask == "authorization" || mask == "loggingConfig" || mask == "monitoringConfig" || mask == "binaryAuthorization" {
         continue
     }
     newUpdateMask = append(newUpdateMask, mask)

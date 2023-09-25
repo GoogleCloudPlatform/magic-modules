@@ -142,6 +142,7 @@ If no value is set, Cloud Bigtable automatically allocates nodes based on your d
 In addition to the arguments listed above, the following computed attributes are exported:
 
 * `id` - an identifier for the resource with format `projects/{{project}}/instances/{{name}}`
+* `cluster.0.state` - describes the current state of the cluster.
 
 ## Timeouts
 
@@ -150,6 +151,7 @@ This resource provides the following
 
 - `create` - Default is 60 minutes.
 - `update` - Default is 60 minutes.
+- `read` - Default is 60 minutes.
 
 Adding clusters to existing instances can take a long time. Consider setting a higher value to timeouts if you plan on doing that.
 
