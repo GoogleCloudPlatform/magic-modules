@@ -82,6 +82,13 @@ resource "google_identity_platform_config" "basic" {
         }
     }
   }
+  sms_region_config {
+    allow_by_default {
+      disallowed_regions = [
+        "US",
+      ]
+    }
+  }
 }
 `, context)
 }
@@ -120,6 +127,13 @@ resource "google_identity_platform_config" "basic" {
         test_phone_numbers = {
 	    "+17651212343" = "111111"
         }
+    }
+  }
+  sms_region_config {
+    allowlist_only {
+      allowed_regions = [
+        "US",
+      ]
     }
   }
 }
