@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package storagetransfer_test
 
 import (
@@ -206,6 +208,8 @@ func TestAccStorageTransferJob_eventStream(t *testing.T) {
 	testDataSinkName := acctest.RandString(t, 10)
 	testTransferJobDescription := acctest.RandString(t, 10)
 	testPubSubTopicName := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+	testEventStreamPubSubTopicName := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+	testPubSubSubscriptionName := fmt.Sprintf("tf-test-subscription-%s", acctest.RandString(t, 10))
 	eventStreamStart := []string{"2014-10-02T15:01:23Z", "2019-10-02T15:01:23Z"}
 	eventStreamEnd := []string{"2022-10-02T15:01:23Z", "2032-10-02T15:01:23Z"}
 
@@ -223,7 +227,7 @@ func TestAccStorageTransferJob_eventStream(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferJob_eventStream(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, eventStreamStart[0], eventStreamEnd[0]),
+				Config: testAccStorageTransferJob_eventStream(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testEventStreamPubSubTopicName, testPubSubSubscriptionName, testTransferJobDescription, eventStreamStart[0], eventStreamEnd[0]),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -231,7 +235,7 @@ func TestAccStorageTransferJob_eventStream(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferJob_eventStream(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, eventStreamStart[1], eventStreamEnd[0]),
+				Config: testAccStorageTransferJob_eventStream(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testEventStreamPubSubTopicName, testPubSubSubscriptionName, testTransferJobDescription, eventStreamStart[1], eventStreamEnd[0]),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -239,7 +243,7 @@ func TestAccStorageTransferJob_eventStream(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferJob_eventStream(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, eventStreamStart[1], eventStreamEnd[1]),
+				Config: testAccStorageTransferJob_eventStream(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testEventStreamPubSubTopicName, testPubSubSubscriptionName, testTransferJobDescription, eventStreamStart[1], eventStreamEnd[1]),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -432,14 +436,14 @@ resource "google_storage_transfer_job" "transfer_job" {
 `, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project)
 }
 
-func testAccStorageTransferJob_eventStream(project string, dataSourceBucketName string, dataSinkBucketName string, transferJobDescription string, eventStreamStart string, eventStreamEnd string) string {
+func testAccStorageTransferJob_eventStream(project string, dataSourceBucketName string, dataSinkBucketName string, pubsubTopicName string, pubsubSubscriptionName string, transferJobDescription string, eventStreamStart string, eventStreamEnd string) string {
 	return fmt.Sprintf(`
 data "google_storage_transfer_project_service_account" "default" {
   project = "%s"
 }
 
 resource "google_storage_bucket" "data_source" {
-  name          = "tf-test-%s"
+  name          = "%s"
   project       = "%s"
   location      = "US"
   force_destroy = true
@@ -473,11 +477,11 @@ resource "google_pubsub_subscription_iam_member" "editor" {
 }
 
 resource "google_pubsub_topic" "example" {
-  name = "example-topic"
+  name = "%s"
 }
 
 resource "google_pubsub_subscription" "example" {
-  name  = "example-subscription"
+  name  = "%s"
   topic = google_pubsub_topic.example.name
 
   ack_deadline_seconds = 20
@@ -522,7 +526,7 @@ resource "google_storage_transfer_job" "transfer_job" {
     google_pubsub_subscription_iam_member.editor,
   ]
 }
-`, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project, eventStreamStart, eventStreamEnd)
+`, project, dataSourceBucketName, project, dataSinkBucketName, project, pubsubTopicName, pubsubSubscriptionName, transferJobDescription, project, eventStreamStart, eventStreamEnd)
 }
 
 func testAccStorageTransferJob_omitNotificationConfig(project string, dataSourceBucketName string, dataSinkBucketName string, transferJobDescription string) string {
