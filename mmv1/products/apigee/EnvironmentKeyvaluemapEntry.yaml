@@ -43,7 +43,7 @@ examples:
       billing_account: :BILLING_ACCT
     skip_docs: true
     min_version:
-      beta    
+      beta
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 1
   delete_minutes: 1
