@@ -157,7 +157,7 @@ properties:
     description: |
       A string that represents the current state of the `CustomDomain` and
       allows you to confirm its initial state in requests that would modify it.
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: hostState
     output: true
     description: |
@@ -185,12 +185,6 @@ properties:
           All requests against your `CustomDomain`'s domain name are served by
           Hosting. If the `CustomDomain`'s `OwnershipState` is also `ACTIVE`, Hosting
           serves your Hosting Site's content on the domain name.
-    values:
-      - :HOST_UNHOSTED
-      - :HOST_UNREACHABLE
-      - :HOST_MISMATCH
-      - :HOST_CONFLICT
-      - :HOST_ACTIVE
   - !ruby/object:Api::Type::Enum
     name: ownershipState
     output: true
