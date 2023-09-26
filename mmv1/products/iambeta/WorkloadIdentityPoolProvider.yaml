@@ -302,3 +302,4 @@ properties:
         name: idpMetadataXml
         description: SAML Identity provider configuration metadata xml doc.
         required: true
+        
