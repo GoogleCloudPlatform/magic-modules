@@ -2062,16 +2062,34 @@ func ResourceContainerCluster() *schema.Resource {
 							Optional:          true,
 							Description:       `The Fleet host project of the cluster.`,
 						},
-                                          	"membership": {
-                                                	Type:             schema.TypeString,
-                                                	Computed:         true,
-                                                	Description:      `Full resource name of the registered fleet membership of the cluster.`,
+						"membership": {
+							Type:             schema.TypeString,
+							Computed:         true,
+							Description:      `Full resource name of the registered fleet membership of the cluster.`,
                                           	},
-                                          	"pre_registered": {
-                                                	Type:             schema.TypeBool,
-                                                	Computed:         true,
-                                                	Description:      `Whether the cluster has been registered via the fleet API.`,
-                                          	},
+						"pre_registered": {
+							Type:             schema.TypeBool,
+							Computed:         true,
+							Description:      `Whether the cluster has been registered via the fleet API.`,
+						},
+					},
+				},
+			},
+			"cluster_network_performance_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `Configuration of all network bandwidth tiers.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"totalEgressBandwidthTier": {
+							Type:         schema.TypeString,
+							Required:     true,
+							Default:     "TIER_UNSPECIFIED",
+							ValidateFunc: validation.StringInSlice([]string{"TIER_UNSPECIFIED", "TIER_1"}, false),
+							Description:  `Node network tier.`,
+						},
 					},
 				},
 			},
@@ -2223,6 +2241,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			EnableL4ilbSubsetting:     d.Get("enable_l4_ilb_subsetting").(bool),
 			DnsConfig:                 expandDnsConfig(d.Get("dns_config")),
 			GatewayApiConfig:          expandGatewayApiConfig(d.Get("gateway_api_config")),
+			ClusterNetworkPerformanceConfig:  expandNetworkPerformanceConfig(d.Get("cluster_network_performance_config")),
 <% unless version == "ga" -%>
 			EnableMultiNetworking:     d.Get("enable_multi_networking").(bool),
 			EnableFqdnNetworkPolicy:   d.Get("enable_fqdn_network_policy").(bool),
@@ -2828,6 +2847,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 	if err := d.Set("fleet", flattenFleet(cluster.Fleet)); err != nil {
+		return err
+	}
+	if err := d.Set("cluster_network_performance_config", flattenNetworkPerformanceConfig(cluster.NetworkConfig.NetworkPerformanceConfig)); err != nil {
 		return err
 	}
 	if err := d.Set("enable_k8s_beta_apis", flattenEnableK8sBetaApis(cluster.EnableK8sBetaApis)); err != nil {
@@ -3972,6 +3994,24 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			return err
 		}
 		log.Printf("[INFO] GKE cluster %s fleet config has been updated", d.Id())
+	}
+
+	if d.HasChange("cluster_network_performance_config") {
+		if cnpc, ok := d.GetOk("cluster_network_performance_config"); ok {
+			req := &container.UpdateClusterRequest{
+				Update: &container.ClusterUpdate{
+					DesiredClusterNetworkPerformanceConfig: expandNetworkPerformanceConfig(cnpc),
+				},
+			}
+
+			updateF := updateFunc(req, "updating GKE Cluster Network Performance Config")
+			// Call update serially.
+			if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] GKE cluster %s Cluster Network Performance Config has been updated", d.Id())
+		}
 	}
 
 	if d.HasChange("enable_k8s_beta_apis") {
@@ -5202,6 +5242,19 @@ func expandEnableK8sBetaApis(configured interface{}, enabledAPIs []string) *cont
 	return result
 }
 
+func expandNetworkPerformanceConfig(configured interface{}) *container.ClusterNetworkPerformanceConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+
+	config := l[0].(map[string]interface{})
+	return &container.ClusterNetworkPerformanceConfig{
+		TotalEgressBandwidthTier: config["totalEgressBandwidthTier"].(string),
+	}
+}
+
+
 func expandContainerClusterLoggingConfig(configured interface{}) *container.LoggingConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 {
@@ -6006,17 +6059,29 @@ func flattenGatewayApiConfig(c *container.GatewayAPIConfig) []map[string]interfa
 }
 
 func flattenFleet(c *container.Fleet) []map[string]interface{} {
-      if c == nil {
-                return nil
-      }         
-      return []map[string]interface{}{
-                {
-                      "project": c.Project,
-                      "membership": c.Membership,
-		      "pre_registered": c.PreRegistered,
-                },
-      }       
+	if c == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"project": c.Project,
+			"membership": c.Membership,
+			"pre_registered": c.PreRegistered,
+		},
+	}
 }
+
+func flattenNetworkPerformanceConfig(c *container.ClusterNetworkPerformanceConfig) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"totalEgressBandwidthTier":        c.TotalEgressBandwidthTier,
+		},
+	}
+}
+
 
 func flattenEnableK8sBetaApis(c *container.K8sBetaAPIConfig) []map[string]interface{} {
 	if c == nil {
