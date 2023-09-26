@@ -453,7 +453,7 @@ In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashico
 
 ```tf
 import {
-  id = projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}
+  id = "projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}"
   to = google_bigquery_table.default
 }
 ```

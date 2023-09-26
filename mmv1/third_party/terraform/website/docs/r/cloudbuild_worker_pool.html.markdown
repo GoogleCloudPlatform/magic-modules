@@ -159,7 +159,7 @@ In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashico
 
 ```tf
 import {
-  id = projects/{{project}}/locations/{{location}}/workerPools/{{name}}
+  id = "projects/{{project}}/locations/{{location}}/workerPools/{{name}}"
   to = google_cloudbuild_worker_pool.default
 }
 ```

@@ -1062,7 +1062,7 @@ In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashico
 
 ```tf
 import {
-  id = projects/{{project}}/locations/{{region}}/environments/{{name}}
+  id = "projects/{{project}}/locations/{{region}}/environments/{{name}}"
   to = google_composer_environment.default
 }
 ```

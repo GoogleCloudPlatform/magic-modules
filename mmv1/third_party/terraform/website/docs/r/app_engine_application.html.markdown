@@ -111,7 +111,7 @@ In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashico
 
 ```tf
 import {
-  id = {{project-id}}
+  id = "{{project-id}}"
   to = google_app_engine_application.default
 }
 ```

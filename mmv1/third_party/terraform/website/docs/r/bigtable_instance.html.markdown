@@ -167,7 +167,7 @@ In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashico
 
 ```tf
 import {
-  id = projects/{{project}}/instances/{{name}}
+  id = "projects/{{project}}/instances/{{name}}"
   to = google_bigtable_instance.default
 }
 ```

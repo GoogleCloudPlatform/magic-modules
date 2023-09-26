@@ -72,7 +72,7 @@ In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashico
 
 ```tf
 import {
-  id = organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}
+  id = "organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}"
   to = google_apigee_flowhook.default
 }
 ```

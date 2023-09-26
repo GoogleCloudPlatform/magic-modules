@@ -95,7 +95,7 @@ In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashico
 
 ```tf
 import {
-  id = {{org_id}}/sharedflows/{{name}}
+  id = "{{org_id}}/sharedflows/{{name}}"
   to = google_apigee_sharedflow.default
 }
 ```

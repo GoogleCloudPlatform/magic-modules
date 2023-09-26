@@ -250,7 +250,7 @@ In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashico
 
 ```tf
 import {
-  id = {{project}}/{{region}}/{{name}}
+  id = "{{project}}/{{region}}/{{name}}"
   to = google_cloudfunctions_function.default
 }
 ```
