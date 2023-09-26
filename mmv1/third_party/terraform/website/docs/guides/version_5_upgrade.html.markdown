@@ -311,7 +311,3 @@ Deprecated in favor of field `x509_description`. It is now removed.
 ### `pem_certificates` is now removed
 
 Deprecated in favor of field `pem_certificate_chain`. It is now removed.
-
-## Resource: `google_gkeonprem_bare_metal_admin_cluster`
-
-Delete operation is disabled. The command `terraform destroy` maps to no-op. Users need to delete resource manually. Please refer to the [user guide](https://cloud.google.com/anthos/clusters/docs/bare-metal/latest/how-to/reset-nodes) for the instructions of cluster deletion.
