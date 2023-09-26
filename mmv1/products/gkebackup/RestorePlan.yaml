@@ -107,7 +107,7 @@ properties:
     name: description
     description: |
       User specified descriptive string for this RestorePlan.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: labels
     description: |
       Description: A set of custom labels supplied by the user.
