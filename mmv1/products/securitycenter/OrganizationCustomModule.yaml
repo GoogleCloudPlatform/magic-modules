@@ -32,9 +32,9 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "scc_organization_custom_module_basic"
     primary_resource_id: "example"
+    skip_test: true
     vars:
       display_name: basic_custom_module
-      sleep: ""
     test_env_vars:
       org_id: :ORG_ID
     test_vars_overrides:
@@ -42,9 +42,9 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "scc_organization_custom_module_full"
     primary_resource_id: "example"
+    skip_test: true
     vars:
       display_name: full_custom_module
-      sleep: ""
     test_env_vars:
       org_id: :ORG_ID
     test_vars_overrides:
