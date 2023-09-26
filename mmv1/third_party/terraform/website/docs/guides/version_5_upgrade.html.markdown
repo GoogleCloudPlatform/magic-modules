@@ -685,6 +685,11 @@ resource "google_secret_manager_secret" "my-secret" {
 
 `reconcile_connections` previously defaults to true. Now it will default from the API.
 
+### Retyped `consumer_accept_lists` to SET from ARRAY
+
+Previously, `consumer_accept_lists` was a list, making it order-dependent. It is now a set.
+
+If you were relying on accessing an individual flag by index (for example, `google_compute_service_attachment.consumer_accept_lists.0.project_id_or_num`), then that will now need to by hash (for example, `google_compute_service_attachment.consumer_accept_lists.<some-hash>.project_id_or_num`).
 
 ## Resource: `google_dataflow_flex_template_job`
 
@@ -715,3 +720,9 @@ These fields will supply the base node-count for a node group and one of them wi
 ### `LOOKER_MODELER` has been removed as a platform edition.
 
 Looker Modeler edition is deprecated as a platform edition.
+
+Deprecated in favor of field `pem_certificate_chain`. It is now removed.
+
+## Resource: `google_gkeonprem_bare_metal_admin_cluster`
+
+Delete operation is disabled. The command `terraform destroy` maps to no-op. Users need to delete resource manually. Please refer to the [user guide](https://cloud.google.com/anthos/clusters/docs/bare-metal/latest/how-to/reset-nodes) for the instructions of cluster deletion.
