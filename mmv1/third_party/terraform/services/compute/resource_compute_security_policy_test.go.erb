@@ -1129,9 +1129,9 @@ resource "google_compute_security_policy" "policy" {
       ]
     }
     log_level    = "VERBOSE"
-	user_ip_request_headers = [
-	  "x-custom-ip",
-	]
+    user_ip_request_headers = [
+      "x-custom-ip",
+    ]
   }
 }
 `, spName)
