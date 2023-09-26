@@ -193,11 +193,10 @@ This resource does not support import.
 
 <%= object.name -%> can be imported using any of these accepted formats:
 
-```
 <% import_id_formats_from_resource(object).map{ |id| id.gsub('%', '') }.each do |id_format| -%>
-<%= id_format %>
+* `<%= id_format %>`
 <% end -%>
-```
+
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import <%= object.name -%> using one of the formats above. For example:
 
