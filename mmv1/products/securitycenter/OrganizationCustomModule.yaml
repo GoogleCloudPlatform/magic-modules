@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'ProjectCustomModule'
+name: 'OrganizationCustomModule'
 description: |
   Represents an instance of a Security Health Analytics custom module, including
   its full module name, display name, enablement state, and last updated time.
@@ -22,25 +22,42 @@ description: |
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Overview of custom modules for Security Health Analytics': 'https://cloud.google.com/security-command-center/docs/custom-modules-sha-overview'
-  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/projects.securityHealthAnalyticsSettings.customModules'
-base_url: 'projects/{{project}}/securityHealthAnalyticsSettings/customModules'
-self_link: 'projects/{{project}}/securityHealthAnalyticsSettings/customModules/{{name}}'
-mutex: 'projects/{{project}}/securityHealthAnalyticsSettings/customModules'
+  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/organizations.securityHealthAnalyticsSettings.customModules'
+base_url: 'organizations/{{organization}}/securityHealthAnalyticsSettings/customModules'
+self_link: 'organizations/{{organization}}/securityHealthAnalyticsSettings/customModules/{{name}}'
+mutex: 'organizations/{{organization}}/securityHealthAnalyticsSettings/customModules'
 update_verb: :PATCH
 update_mask: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "scc_project_custom_module_basic"
+    name: "scc_organization_custom_module_basic"
     primary_resource_id: "example"
     skip_test: true
     vars:
       display_name: basic_custom_module
+    test_env_vars:
+      org_id: :ORG_ID
+    test_vars_overrides:
+      sleep: "true"
   - !ruby/object:Provider::Terraform::Examples
-    name: "scc_project_custom_module_full"
+    name: "scc_organization_custom_module_full"
     primary_resource_id: "example"
     skip_test: true
     vars:
       display_name: full_custom_module
+    test_env_vars:
+      org_id: :ORG_ID
+    test_vars_overrides:
+      sleep: "true"
+
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'organization'
+    immutable: true
+    required: true
+    url_param_only: true
+    description: |
+      Numerical ID of the parent organization.
 
 properties:
   - !ruby/object:Api::Type::String
@@ -48,7 +65,7 @@ properties:
     output: true
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
     description: |
-      The resource name of the custom module. Its format is "projects/{project}/securityHealthAnalyticsSettings/customModules/{customModule}".
+      The resource name of the custom module. Its format is "organizations/{org_id}/securityHealthAnalyticsSettings/customModules/{customModule}".
       The id {customModule} is server-generated and is not user settable. It will be a numeric id containing 1-20 digits.
   - !ruby/object:Api::Type::String
     name: 'displayName'
@@ -88,7 +105,7 @@ properties:
     name: 'ancestorModule'
     output: true
     description: |
-      If empty, indicates that the custom module was created in the organization,folder,
+      If empty, indicates that the custom module was created in the organization, folder,
       or project in which you are viewing the custom module. Otherwise, ancestor_module
       specifies the organization or folder from which the custom module is inherited.
   - !ruby/object:Api::Type::NestedObject
