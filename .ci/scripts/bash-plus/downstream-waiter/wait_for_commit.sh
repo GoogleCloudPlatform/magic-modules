@@ -29,8 +29,8 @@ while true; do
     if [ "$SYNC_HEAD" == "$BASE_PARENT" ]; then
         break;
     else
-        echo "git log says waiting on: $commits"
-        echo "command says waiting on $SHA"
+        echo "sync branch at: $SYNC_HEAD"
+        echo "base branch at: $BASE_BRANCH"
         git fetch origin $SYNC_BRANCH
     fi
     sleep 5
