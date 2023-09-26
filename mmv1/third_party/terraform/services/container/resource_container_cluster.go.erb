@@ -205,8 +205,15 @@ func ResourceContainerCluster() *schema.Resource {
 			Delete: schema.DefaultTimeout(40 * time.Minute),
 		},
 
-		SchemaVersion: 1,
+		SchemaVersion: 2,
 		MigrateState:  resourceContainerClusterMigrateState,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    resourceContainerClusterResourceV1().CoreConfigSchema().ImpliedType(),
+				Upgrade: ResourceContainerClusterUpgradeV1,
+				Version: 1,
+			},
+		},
 
 		Importer: &schema.ResourceImporter{
 			State: resourceContainerClusterStateImporter,
