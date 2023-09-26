@@ -97,6 +97,11 @@ examples:
       zone_name: 'private-zone'
       network_1_name: 'network-1'
       cluster_1_name: 'cluster-1'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'dns_managed_zone_private_peering'
     primary_resource_id: 'peering-zone'

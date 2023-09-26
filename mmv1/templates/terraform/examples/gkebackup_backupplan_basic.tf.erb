@@ -10,6 +10,7 @@ resource "google_container_cluster" "primary" {
       enabled = true
     }
   }
+  deletion_protection  = "<%= ctx[:vars]['deletion_protection'] %>"
 }
 
 resource "google_gke_backup_backup_plan" "basic" {
