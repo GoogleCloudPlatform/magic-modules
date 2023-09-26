@@ -268,7 +268,7 @@ region are guaranteed to support the same version.
     to say "these are the _only_ node pools associated with this cluster", use the
     [google_container_node_pool](container_node_pool.html) resource instead of this property.
 
-* `node_pool_auto_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Node pool configs that apply to auto-provisioned node pools in
+* `node_pool_auto_config` - (Optional) Node pool configs that apply to auto-provisioned node pools in
     [autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison) clusters and
     [node auto-provisioning](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning)-enabled clusters. Structure is [documented below](#nested_node_pool_auto_config).
 
@@ -409,7 +409,9 @@ Enable/Disable Security Posture API features for the cluster. Structure is [docu
 
 * `gcs_fuse_csi_driver_config` - (Optional) The status of the GCSFuse CSI driver addon,
     which allows the usage of a gcs bucket as volumes.
-    It is disabled by default; set `enabled = true` to enable.
+    It is disabled by default for Standard clusters; set `enabled = true` to enable.
+    It is enabled by default for Autopilot clusters with version 1.24 or later; set `enabled = true` to enable it explicitly.
+    See [Enable the Cloud Storage FUSE CSI driver](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/cloud-storage-fuse-csi-driver#enable) for more information.
 
 * `cloudrun_config` - (Optional). Structure is [documented below](#nested_cloudrun_config).
 
@@ -426,7 +428,9 @@ Enable/Disable Security Posture API features for the cluster. Structure is [docu
     All cluster nodes running GKE 1.15 and higher are recreated.**
 
 * `gce_persistent_disk_csi_driver_config` - (Optional).
-    Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Defaults to disabled; set `enabled = true` to enabled.
+    Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Set `enabled = true` to enable.
+
+    **Note:** The Compute Engine persistent disk CSI Driver is enabled by default on newly created clusters for the following versions: Linux clusters: GKE version 1.18.10-gke.2100 or later, or 1.19.3-gke.2100 or later.
 
 *  `gke_backup_agent_config` -  (Optional).
     The status of the Backup for GKE agent addon. It is disabled by default; Set `enabled = true` to enable.
@@ -793,6 +797,10 @@ ephemeral_storage_local_ssd_config {
   local_ssd_count = 2
 }
 ```
+* `fast_socket` - (Optional) Parameters for the NCCL Fast Socket feature. If unspecified, NCCL Fast Socket will not be enabled on the node pool.
+     Node Pool must enable gvnic.
+     GKE version 1.25.2-gke.1700 or later.
+     Structure is [documented below](#nested_fast_socket).
 
 * `local_nvme_ssd_block_config` - (Optional) Parameters for the local NVMe SSDs. Structure is [documented below](#nested_local_nvme_ssd_block_config).
 
@@ -963,6 +971,10 @@ sole_tenant_config {
 
 * `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
 
+<a name="nasted_fast_socket"></a>The `fast_socket` block supports:
+
+* `enabled` (Required) - Whether or not the NCCL Fast Socket is enabled
+
 <a name="nested_local_nvme_ssd_block_config"></a>The `local_nvme_ssd_block_config` block supports:
 
 * `local_ssd_count` (Required) - Number of raw-block local NVMe SSD disks to be attached to the node. Each local SSD is 375 GB in size. If zero, it means no raw-block local NVMe SSD disks to be attached to the node.
@@ -1017,11 +1029,11 @@ workload_identity_config {
 
 <a name="nested_node_pool_auto_config"></a>The `node_pool_auto_config` block supports:
 
-* `network_tags` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - The network tag config for the cluster's automatically provisioned node pools.
+* `network_tags` (Optional) - The network tag config for the cluster's automatically provisioned node pools.
 
 The `network_tags` block supports:
 
-* `tags` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - List of network tags applied to auto-provisioned node pools.
+* `tags` (Optional) - List of network tags applied to auto-provisioned node pools.
 
 ```hcl
 node_pool_auto_config {

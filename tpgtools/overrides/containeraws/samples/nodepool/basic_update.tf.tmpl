@@ -145,6 +145,10 @@ resource "google_container_aws_node_pool" "primary" {
     label-two = "value-two"
   }
 
+  management {
+    auto_repair = false
+  }
+
   project = "{{project}}"
 }
 
