@@ -119,6 +119,7 @@ func testAccCloudIdentityGroup_cloudIdentityGroupsBasicExample(context map[strin
 	return acctest.Nprintf(`
 resource "google_cloud_identity_group" "cloud_identity_group_basic" {
   display_name         = "tf-test-my-identity-group%{random_suffix}"
+  initial_group_config = "WITH_INITIAL_OWNER"
 
   parent = "customers/%{cust_id}"
 
@@ -206,7 +207,6 @@ func testAccCloudIdentityGroup_cloudIdentityGroupsDynamicExample(context map[str
 	return acctest.Nprintf(`
 resource "google_cloud_identity_group" "cloud_identity_groups_dynamic" {
   display_name         = "tf-test-my-identity-dynamic-group%{random_suffix}"
-  initial_group_config = "WITH_INITIAL_OWNER"
 
   parent = "customers/%{cust_id}"
 
