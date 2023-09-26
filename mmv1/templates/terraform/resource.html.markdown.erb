@@ -206,7 +206,7 @@ In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashico
   -%>
 ```tf
 import {
-  id = <%= import_block_id %>
+  id = "<%= import_block_id %>"
   to = <%= terraform_name -%>.default
 }
 ```
