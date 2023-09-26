@@ -377,7 +377,7 @@ proposed value to configuration (below) or apply `lifecycle.ignore_changes` to t
 ### Cluster deletion now prevented by default with `deletion_protection`
 
 The field `deletion_protection` has been added with a default of `true`. This field prevents
-Terraform from destroying the resource or recreating it.
+Terraform from destroying or recreating the cluster.
 **`deletion_protection` does NOT prevent deletion outside of Terraform.**
 To destroy a `google_container_cluster`, this field must be explicitly set to `false`.
 
