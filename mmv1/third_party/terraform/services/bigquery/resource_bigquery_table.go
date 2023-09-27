@@ -761,7 +761,7 @@ func ResourceBigQueryTable() *schema.Resource {
 			"max_staleness": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: `The maximum staleness of data that could be returned when the table (or stale MV) is queried. Staleness encoded as a string encoding of sql IntervalValue type.`,
+				Description: `The maximum staleness of data that could be returned when the table (or stale MV) is queried. Staleness encoded as a string encoding of [SQL IntervalValue type](https://cloud.google.com/bigquery/docs/reference/standard-sql/lexical#interval_literal_single).`,
 			},
 
 			// Labels: [Experimental] The labels associated with this table. You can
