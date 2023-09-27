@@ -109,7 +109,7 @@ The following arguments are supported:
 * `max_staleness`: (Optional) The maximum staleness of data that could be
   returned when the table (or stale MV) is queried. Staleness encoded as a
   string encoding of [SQL IntervalValue
-  type](https://cloud.google.com/bigquery/docs/reference/standard-sql/lexical#interval_literal_single).`
+  type](https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types#interval_type).
 
 * `encryption_configuration` - (Optional) Specifies how the table should be encrypted.
     If left blank, the table will be encrypted with a Google-managed key; that process
