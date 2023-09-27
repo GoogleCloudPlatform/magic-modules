@@ -116,7 +116,7 @@ properties:
       - :CREATING
       - :DELETING
       - :ACTION_REQUIRED
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       User-defined labels for the task.

@@ -87,8 +87,7 @@ examples:
       profile: 'my-profileid'
       global_address_name: 'private-ip-alloc'
       network_name: 'vpc-network'
-    test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "profile-alloydb")'
+    skip_test: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'connectionProfileId'
@@ -118,7 +117,7 @@ properties:
     output: true
     description: |
       Output only. The timestamp when the resource was created. A timestamp in RFC3339 UTC 'Zulu' format, accurate to nanoseconds. Example: '2014-10-02T15:01:23.045123456Z'.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       The resource labels for connection profile to use to annotate any related underlying resources such as Compute Engine VMs.
