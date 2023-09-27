@@ -54,3 +54,8 @@ func (m *mockGithub) PostBuildStatus(prNumber string, title string, state string
 	m.calledMethods["PostBuildStatus"] = true
 	return nil
 }
+
+func (m *mockGithub) CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error {
+	m.calledMethods["CreateWorkflowDispatchEvent"] = true
+	return nil
+}

@@ -43,8 +43,8 @@ steps:
         else
           base_commit=$(git merge-base origin/main HEAD)
           echo "Common ancestor commit: $base_commit"
-          git diff $base_commit upstream/main -- .ci/
-          git diff $base_commit upstream/main -- .ci/ > /workspace/ci.diff
+          git diff $base_commit origin/main -- .ci/
+          git diff $base_commit origin/main -- .ci/ > /workspace/ci.diff
           git apply ./ci.diff --allow-empty
         fi
 

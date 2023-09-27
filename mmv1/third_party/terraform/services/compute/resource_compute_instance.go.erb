@@ -305,6 +305,17 @@ func ResourceComputeInstance() *schema.Resource {
 							Description:      `The name or self_link of the subnetwork attached to this interface.`,
 						},
 
+						<% if version == "beta" -%>
+						"network_attachment": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							ForceNew:     	  true,
+							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+							Description:      `The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.`,
+						},
+						<% end %>
+
 						"subnetwork_project": {
 							Type:        schema.TypeString,
 							Optional:    true,
@@ -356,6 +367,13 @@ func ResourceComputeInstance() *schema.Resource {
 										Optional:    true,
 										Description: `The DNS domain name for the public PTR record.`,
 									},
+									<% unless version == 'ga' -%>
+									"security_policy": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: `A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.`,
+									},
+									<% end -%>
 								},
 							},
 						},
@@ -433,6 +451,13 @@ func ResourceComputeInstance() *schema.Resource {
 										ForceNew:    true,
 										Description: `The name of this access configuration. In ipv6AccessConfigs, the recommended name is External IPv6.`,
 									},
+									<% unless version == 'ga' -%>
+									"security_policy": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: `A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.`,
+									},
+									<% end -%>
 								},
 							},
 						},
@@ -458,6 +483,14 @@ func ResourceComputeInstance() *schema.Resource {
 							ForceNew:    true,
 							Description: `The networking queue count that's specified by users for the network interface. Both Rx and Tx queues will be set to this number. It will be empty if not specified.`,
 						},
+
+						<% unless version == 'ga' -%>
+						"security_policy": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.`,
+						},
+						<% end -%>
 					},
 				},
 			},
@@ -1309,6 +1342,13 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
+	<% unless version == 'ga' -%>
+	securityPolicies, err := computeInstanceMapSecurityPoliciesCreate(d, config)
+	if err != nil {
+		return err
+	}
+	<% end -%>
+
 	log.Printf("[INFO] Requesting instance creation")
 	op, err := config.NewComputeClient(userAgent).Instances.Insert(project, zone.Name, instance).Do()
 	if err != nil {
@@ -1326,6 +1366,13 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		return waitErr
 	}
 
+	<% unless version == 'ga' -%>
+	err = computeInstanceAddSecurityPolicy(d, config, securityPolicies, project, z, userAgent, instance.Name)
+	if err != nil {
+		return fmt.Errorf("Error creating instance while setting the security policies: %s", err)
+	}
+	<% end -%>
+	
 	err = waitUntilInstanceHasDesiredStatus(config, d)
 	if err != nil {
 		return fmt.Errorf("Error waiting for status: %s", err)
@@ -1537,7 +1584,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	}
 <% unless version == 'ga' -%>
 	// Add extra check on Scheduling to prevent STOP instance setting MaxRunDuration.
-	// When Instance being stopped, GCE will wipe out the MaxRunDuration field. 
+	// When Instance being stopped, GCE will wipe out the MaxRunDuration field.
 	// And Terraform has no visiblity on this field after then. Given the infrastructure
 	// constraint, MaxRunDuration will only be supported with instance has
 	// DELETE InstanceTerminationAction
@@ -1775,6 +1822,30 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if len(networkInterfaces) != len(instance.NetworkInterfaces) {
 		return fmt.Errorf("Instance had unexpected number of network interfaces: %d", len(instance.NetworkInterfaces))
 	}
+
+	<% unless version == 'ga' -%>	
+	updateSecurityPolicy := false
+	for i := 0; i < len(instance.NetworkInterfaces); i++ {
+		prefix := fmt.Sprintf("network_interface.%d", i)
+		// check if sec policy has been changed
+		// check if access config has been changed because it may be deleted and needs to be re-created.
+		if d.HasChange(prefix+".security_policy") || d.HasChange(prefix+".access_config") || d.HasChange(prefix+".ipv6_access_config") {
+			if instance.Status != "RUNNING" {
+				return fmt.Errorf("Error to update security policy because the current instance status must be \"RUNNING\". The security policy or some access config may have changed which requires the security policy to be re-applied")
+			}
+			updateSecurityPolicy = true
+		}
+	}
+
+	securityPolicies := make(map[string][]string)
+	if updateSecurityPolicy {
+		// map the security policies to call SetSecurityPolicy because the next section of the code removes and re-creates the access_config which ends up removing the security_policy.
+		securityPolicies, err = computeInstanceMapSecurityPoliciesUpdate(d, config)
+		if err != nil {
+			return err
+		}
+	}
+	<% end -%>
 
 	var updatesToNIWhileStopped []func(inst *compute.Instance) error
 	for i := 0; i < len(networkInterfaces); i++ {
@@ -2316,6 +2387,14 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			}
 		}
 	}
+
+	<% unless version == 'ga' -%>
+	// The access config must be updated only if the machine is still RUNNING and after each access_config for each interface has been re-created.
+	err = computeInstanceAddSecurityPolicy(d, config, securityPolicies, project, zone, userAgent, instance.Name)
+	if err != nil {
+		return fmt.Errorf("Error updating instance while setting the security policies: %s", err)
+	}
+	<% end -%>
 
 	// We made it, disable partial mode
 	d.Partial(false)

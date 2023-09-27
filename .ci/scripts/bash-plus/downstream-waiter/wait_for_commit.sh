@@ -24,21 +24,14 @@ if git merge-base --is-ancestor $SHA origin/$SYNC_BRANCH; then
 fi
 
 while true; do
-    if [ "$BASE_BRANCH" != "main" ]; then
-        SYNC_HEAD="$(git rev-parse --short origin/$SYNC_BRANCH)"
-        BASE_PARENT="$(git rev-parse --short origin/$BASE_BRANCH~)"
-        if [ "$SYNC_HEAD" == "$BASE_PARENT" ]; then
-            break;
-        fi
-    else 
-        commits="$(git log --pretty=%H origin/$SYNC_BRANCH..origin/$BASE_BRANCH | tail -n 1)"
-        if [ "$commits" == "$SHA" ]; then
-            break
-        else
-            echo "git log says waiting on: $commits"
-            echo "command says waiting on $SHA"
-            git fetch origin $SYNC_BRANCH
-        fi
+    SYNC_HEAD="$(git rev-parse --short origin/$SYNC_BRANCH)"
+    BASE_PARENT="$(git rev-parse --short origin/$BASE_BRANCH~)"
+    if [ "$SYNC_HEAD" == "$BASE_PARENT" ]; then
+        break;
+    else
+        echo "sync branch at: $SYNC_HEAD"
+        echo "base branch at: $BASE_BRANCH"
+        git fetch origin $SYNC_BRANCH
     fi
     sleep 5
 done
