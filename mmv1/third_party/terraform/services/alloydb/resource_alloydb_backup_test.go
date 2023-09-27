@@ -69,11 +69,11 @@ resource "google_alloydb_instance" "default" {
   instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
 	client_connection_config {
-		require_connectors = false
-		ssl_config {
-			ssl_mode = "ENCRYPTED_ONLY"
-		}
-	}
+    require_connectors = false
+    ssl_config {
+      ssl_mode = "ENCRYPTED_ONLY"
+    }
+  }
 
   depends_on = [google_service_networking_connection.vpc_connection]
 }
@@ -145,11 +145,11 @@ resource "google_alloydb_instance" "default" {
   instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
 	client_connection_config {
-		require_connectors = false
-		ssl_config {
-			ssl_mode = "ENCRYPTED_ONLY"
-		}
-	}
+    require_connectors = false
+    ssl_config {
+      ssl_mode = "ENCRYPTED_ONLY"
+    }
+  }
 
   depends_on = [google_service_networking_connection.vpc_connection]
 }
@@ -235,11 +235,11 @@ resource "google_alloydb_instance" "default" {
 	instance_id   = "tf-test-alloydb-instance%{random_suffix}"
 	instance_type = "PRIMARY"
 	client_connection_config {
-		require_connectors = false
-		ssl_config {
-			ssl_mode = "ENCRYPTED_ONLY"
-		}
-	}
+    require_connectors = false
+    ssl_config {
+      ssl_mode = "ENCRYPTED_ONLY"
+    }
+  }
 	  
 	depends_on = [google_service_networking_connection.vpc_connection]
 }
