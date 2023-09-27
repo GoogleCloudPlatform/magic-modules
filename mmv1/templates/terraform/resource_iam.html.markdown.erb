@@ -217,6 +217,9 @@ resource "<%= resource_ns_iam -%>_member" "member" {
 
 The following arguments are supported:
 
+<% object.root_properties.select(&:required).each do |prop| -%>
+<%= lines(build_property_documentation(prop, pwd)) -%>
+<% end -%>
 <% url_properties.each do |param| -%>
 <% if param.name == "name" -%>
 * `<%= object.iam_policy.parent_resource_attribute || object.name.underscore -%>` - (Required) Used to find the parent resource to bind the IAM policy to
