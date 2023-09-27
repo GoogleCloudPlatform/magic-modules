@@ -106,6 +106,35 @@ See [Enabling CMEK for Logging Buckets](https://cloud.google.com/logging/docs/ro
 			},
 		},
 	},
+	"index_configs": &schema.Schema{
+		Type:        schema.TypeSet,
+		MaxItems:    20,
+		Optional:    true,
+		Description: `A list of indexed fields and related configuration data.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"field_path": &schema.Schema{
+					Type:        schema.TypeString,
+					Required: true,
+					Description: `The LogEntry field path to index.`,
+				},
+				"type": &schema.Schema{
+					Type:     schema.TypeString,
+					Required: true,
+					Description: `The type of data in this index
+Note that some paths are automatically indexed, and other paths are not eligible for indexing. See [indexing documentation]( https://cloud.google.com/logging/docs/view/advanced-queries#indexed-fields) for details.
+For example: jsonPayload.request.status`,
+				},
+				"create_time": &schema.Schema{
+					Type:     schema.TypeString,
+					Computed: true,
+					Description: `The timestamp when the index was last modified..
+This is used to return the timestamp, and will be ignored if supplied during update.
+A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".`,
+				},
+			},
+		},
+	},
 }
 
 func projectBucketConfigID(d *schema.ResourceData, config *transport_tpg.Config) (string, error) {
@@ -192,6 +221,11 @@ func resourceLoggingProjectBucketConfigCreate(d *schema.ResourceData, meta inter
 	obj["retentionDays"] = d.Get("retention_days")
 	obj["analyticsEnabled"] = d.Get("enable_analytics")
 	obj["cmekSettings"] = expandCmekSettings(d.Get("cmek_settings"))
+	expandedIndexConfigs, err := expandIndexConfigs(d.Get("index_configs").(*schema.Set).List())
+	obj["indexConfigs"] = expandedIndexConfigs
+	if err != nil {
+		return err
+	}
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}/buckets?bucketId={{bucket_id}}")
 	if err != nil {
@@ -282,6 +316,13 @@ func resourceLoggingProjectBucketConfigRead(d *schema.ResourceData, meta interfa
 		return fmt.Errorf("Error setting cmek_settings: %s", err)
 	}
 
+	indexConfigs, ok := res["indexConfigs"]
+	if ok {
+		if err := d.Set("index_configs", flattenIndexConfigs(indexConfigs.([]interface{}))); err != nil {
+			return fmt.Errorf("Error setting index_configs: %s", err)
+		}
+	}
+
 	return nil
 }
 
@@ -325,6 +366,13 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 	obj["retentionDays"] = d.Get("retention_days")
 	obj["description"] = d.Get("description")
 	obj["cmekSettings"] = expandCmekSettings(d.Get("cmek_settings"))
+
+	expandedIndexConfigs, err := expandIndexConfigs(d.Get("index_configs").(*schema.Set).List())
+	obj["indexConfigs"] = expandedIndexConfigs
+	if err != nil {
+		return err
+	}
+
 	updateMask := []string{}
 	if d.HasChange("retention_days") {
 		updateMask = append(updateMask, "retentionDays")
@@ -335,6 +383,10 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 	if d.HasChange("cmek_settings") {
 		updateMask = append(updateMask, "cmekSettings")
 	}
+	if d.HasChange("index_configs") {
+		updateMask = append(updateMask, "indexConfigs")
+	}
+
 	url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 	if err != nil {
 		return err

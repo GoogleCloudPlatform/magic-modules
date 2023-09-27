@@ -11,6 +11,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+var indexTypes = []string{"INDEX_TYPE_UNSPECIFIED", "INDEX_TYPE_STRING", "INDEX_TYPE_INTEGER"}
+
 var loggingBucketConfigSchema = map[string]*schema.Schema{
 	"name": {
 		Type:        schema.TypeString,
@@ -84,6 +86,35 @@ This is a read-only field used to convey the specific configured CryptoKeyVersio
 					Description: `The service account associated with a project for which CMEK will apply.
 Before enabling CMEK for a logging bucket, you must first assign the cloudkms.cryptoKeyEncrypterDecrypter role to the service account associated with the project for which CMEK will apply. Use [v2.getCmekSettings](https://cloud.google.com/logging/docs/reference/v2/rest/v2/TopLevel/getCmekSettings#google.logging.v2.ConfigServiceV2.GetCmekSettings) to obtain the service account ID.
 See [Enabling CMEK for Logging Buckets](https://cloud.google.com/logging/docs/routing/managed-encryption-storage) for more information.`,
+				},
+			},
+		},
+	},
+	"index_configs": &schema.Schema{
+		Type:        schema.TypeSet,
+		MaxItems:    20,
+		Optional:    true,
+		Description: `A list of indexed fields and related configuration data.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"field_path": &schema.Schema{
+					Type:        schema.TypeString,
+					Required: true,
+					Description: `The LogEntry field path to index.`,
+				},
+				"type": &schema.Schema{
+					Type:     schema.TypeString,
+					Required: true,
+					Description: `The type of data in this index
+Note that some paths are automatically indexed, and other paths are not eligible for indexing. See [indexing documentation]( https://cloud.google.com/logging/docs/view/advanced-queries#indexed-fields) for details.
+For example: jsonPayload.request.status`,
+				},
+				"create_time": &schema.Schema{
+					Type:     schema.TypeString,
+					Computed: true,
+					Description: `The timestamp when the index was last modified..
+This is used to return the timestamp, and will be ignored if supplied during update.
+A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".`,
 				},
 			},
 		},
@@ -203,6 +234,11 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{},
 	obj["description"] = d.Get("description")
 	obj["retentionDays"] = d.Get("retention_days")
 	obj["cmekSettings"] = expandCmekSettings(d.Get("cmek_settings"))
+	expandedIndexConfigs, err := expandIndexConfigs(d.Get("index_configs").(*schema.Set).List())
+	obj["indexConfigs"] = expandedIndexConfigs
+	if err != nil {
+		return err
+	}
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}/buckets?bucketId={{bucket_id}}")
 	if err != nil {
@@ -287,6 +323,13 @@ func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error setting cmek_settings: %s", err)
 	}
 
+	indexConfigs, ok := res["indexConfigs"]
+	if ok {
+		if err := d.Set("index_configs", flattenIndexConfigs(indexConfigs.([]interface{}))); err != nil {
+			return fmt.Errorf("Error setting index_configs: %s", err)
+		}
+	}
+
 	return nil
 }
 
@@ -308,6 +351,12 @@ func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{})
 	obj["description"] = d.Get("description")
 	obj["cmekSettings"] = expandCmekSettings(d.Get("cmek_settings"))
 
+	expandedIndexConfigs, err := expandIndexConfigs(d.Get("index_configs").(*schema.Set).List())
+	obj["indexConfigs"] = expandedIndexConfigs
+	if err != nil {
+		return err
+	}
+
 	updateMask := []string{}
 	if d.HasChange("retention_days") {
 		updateMask = append(updateMask, "retentionDays")
@@ -318,6 +367,10 @@ func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{})
 	if d.HasChange("cmek_settings") {
 		updateMask = append(updateMask, "cmekSettings")
 	}
+	if d.HasChange("index_configs") {
+		updateMask = append(updateMask, "indexConfigs")
+	}
+	
 	url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 	if err != nil {
 		return err
@@ -404,4 +457,41 @@ func flattenCmekSettings(cmekSettings interface{}) []map[string]interface{} {
 	}
 
 	return []map[string]interface{}{data}
+}
+
+func expandIndexConfigs(originalIndexConfigs []interface{}) ([]map[string]interface{}, error) {
+	transformedIndexConfigs := make([]map[string]interface{}, 0, len(originalIndexConfigs))
+	for _, entry := range originalIndexConfigs {
+		original := entry.(map[string]interface{})
+		var validIndexType = false
+		for _, indexType := range indexTypes {
+			if indexType == fmt.Sprintf("%v", original["type"]) {
+				validIndexType = true
+			}
+		}
+		if !validIndexType {
+			return nil, fmt.Errorf("Invalid index type, should be one of %s", indexTypes)
+		}
+
+		transformed := map[string]interface{}{
+			"fieldPath":  original["field_path"],
+			"type":       original["type"],
+		}
+		transformedIndexConfigs = append(transformedIndexConfigs, transformed)
+	}
+	return transformedIndexConfigs, nil
+}
+
+func flattenIndexConfigs(indexConfigs []interface{}) []map[string]interface{} {
+	flattenedIndexConfigs := make([]map[string]interface{}, 0, len(indexConfigs))
+	for _, entry := range indexConfigs {
+		indexConfig := entry.(map[string]interface{})
+		data := map[string]interface{}{
+			"field_path":  indexConfig["fieldPath"],
+			"type":        indexConfig["type"],
+			"create_time": indexConfig["createTime"],
+		}
+		flattenedIndexConfigs = append(flattenedIndexConfigs, data)
+	}
+	return flattenedIndexConfigs
 }
