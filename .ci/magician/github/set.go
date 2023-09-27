@@ -94,3 +94,23 @@ func (gh *github) RemoveLabel(prNumber, label string) error {
 
 	return nil
 }
+
+func (gh *github) CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error {
+	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/actions/workflows/%s/dispatches", workflowFileName)
+	resp, err := utils.RequestCall(url, "POST", gh.token, nil, map[string]any{
+		"ref":    "main",
+		"inputs": inputs,
+	})
+
+	if resp != 200 {
+		return fmt.Errorf("server returned %d creating workflow dispatch event", resp)
+	}
+
+	if err != nil {
+		return fmt.Errorf("failed to create workflow dispatch event: %s", err)
+	}
+
+	fmt.Printf("Successfully created workflow dispatch event for %s with inputs %v", workflowFileName, inputs)
+
+	return nil
+}

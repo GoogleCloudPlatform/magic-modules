@@ -860,6 +860,12 @@ properties:
                   - :FRIDAY
                   - :SATURDAY
                   - :SUNDAY
+              - !ruby/object:Api::Type::Integer
+                name: 'dayOffset'
+                description: |
+                  Represents the number of days before or after the given week day of month that the patch deployment is scheduled for.
+                validation: !ruby/object:Provider::Terraform::Validation
+                  function: 'validation.IntBetween(-30,30)'
           - !ruby/object:Api::Type::Integer
             name: 'monthDay'
             exactly_one_of:
