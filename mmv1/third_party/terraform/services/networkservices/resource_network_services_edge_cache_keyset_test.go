@@ -26,7 +26,7 @@ func TestAccNetworkServicesEdgeCacheKeyset_update(t *testing.T) {
 				ResourceName:            "google_network_services_edge_cache_keyset.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name"},
+				ImportStateVerifyIgnore: []string{"name", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetworkServicesEdgeCacheKeyset_update(context),
@@ -35,7 +35,7 @@ func TestAccNetworkServicesEdgeCacheKeyset_update(t *testing.T) {
 				ResourceName:            "google_network_services_edge_cache_keyset.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name"},
+				ImportStateVerifyIgnore: []string{"name", "labels", "terraform_labels"},
 			},
 		},
 	})

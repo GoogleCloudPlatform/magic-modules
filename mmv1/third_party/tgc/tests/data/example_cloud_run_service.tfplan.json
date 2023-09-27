@@ -19,6 +19,9 @@
                 "annotations": {
                   "generated-by": "magic-modules"
                 },
+                "effective_annotations": {
+                  "generated-by": "magic-modules"
+                },
                 "namespace": "{{.Provider.project}}"
               }
             ],
@@ -86,6 +89,9 @@
               "annotations": {
                 "generated-by": "magic-modules"
               },
+              "effective_annotations": {
+                "generated-by": "magic-modules"
+              },
               "namespace": "{{.Provider.project}}"
             }
           ],
@@ -134,6 +140,7 @@
           "metadata": [
             {
               "annotations": {},
+              "effective_annotations": {},
               "generation": true,
               "labels": true,
               "resource_version": true,

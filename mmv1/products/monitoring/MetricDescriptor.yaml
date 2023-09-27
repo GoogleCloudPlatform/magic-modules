@@ -69,11 +69,12 @@ properties:
       the DNS name custom.googleapis.com, external.googleapis.com, or
       logging.googleapis.com/user/.
   - !ruby/object:Api::Type::Array
-    name: labels
+    name: 'labels'
     description:
       The set of labels that can be used to describe a specific instance of this
       metric type. In order to delete a label, the entire resource must be
       deleted, then created with the desired labels.
+    immutable: true
     is_set: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
@@ -161,7 +162,6 @@ properties:
       Use sentence case without an ending period, for example "Request count".
   - !ruby/object:Api::Type::NestedObject
     name: metadata
-    immutable: true
     description: Metadata which can be used to guide usage of the metric.
     ignore_read: true
     properties:
