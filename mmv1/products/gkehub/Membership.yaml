@@ -53,6 +53,8 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
     ]
   schema_version: 1
   state_upgraders: true
+schema_version: 1
+state_upgraders: true
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
