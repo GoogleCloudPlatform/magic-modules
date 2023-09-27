@@ -398,6 +398,10 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: 'allowSubnetCidrRoutesOverlap'
     default_from_api: true
+    update_verb: :PATCH
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    fingerprint_name: 'fingerprint'
+    update_id: 'allowSubnetCidrRoutesOverlap'
     min_version: beta
     description: |
       Typically packets destined to IPs within the subnetwork range that do not match
