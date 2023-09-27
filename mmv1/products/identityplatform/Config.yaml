@@ -230,8 +230,9 @@ properties:
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'allowByDefault'
-        conflicts:
-          - smsRegionConfig.allowlistOnly
+        exactly_one_of:
+          - sms_region_config.0.allow_by_default
+          - sms_region_config.0.allowlist_only
         description: |
           A policy of allowing SMS to every region by default and adding disallowed regions to a disallow list.
         properties:
@@ -242,8 +243,9 @@ properties:
             item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: 'allowlistOnly'
-        conflicts:
-          - smsRegionConfig.allowByDefault
+        exactly_one_of:
+          - sms_region_config.0.allow_by_default
+          - sms_region_config.0.allowlist_only
         description: |
           A policy of only allowing regions by explicitly adding them to an allowlist.
         properties:

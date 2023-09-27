@@ -85,6 +85,7 @@ resource "google_identity_platform_config" "basic" {
   sms_region_config {
     allow_by_default {
       disallowed_regions = [
+        "CA",
         "US",
       ]
     }
@@ -132,7 +133,8 @@ resource "google_identity_platform_config" "basic" {
   sms_region_config {
     allowlist_only {
       allowed_regions = [
-        "US",
+        "AU",
+        "NZ",
       ]
     }
   }
