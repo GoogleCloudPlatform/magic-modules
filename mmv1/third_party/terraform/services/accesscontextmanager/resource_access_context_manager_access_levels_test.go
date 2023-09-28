@@ -17,6 +17,7 @@ import (
 
 func testAccAccessContextManagerAccessLevels_basicTest(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
+	vpcName := fmt.Sprintf("test-vpc-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -32,7 +33,7 @@ func testAccAccessContextManagerAccessLevels_basicTest(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccAccessContextManagerAccessLevels_basicUpdated(org, "my new policy", "corpnet_access", "prodnet_access"),
+				Config: testAccAccessContextManagerAccessLevels_basicUpdated(org, "my new policy", "corpnet_access", "prodnet_access", vpcName),
 			},
 			{
 				ResourceName:      "google_access_context_manager_access_levels.test-access",
@@ -116,7 +117,7 @@ resource "google_access_context_manager_access_levels" "test-access" {
 `, org, policyTitle, levelTitleName1, levelTitleName1, levelTitleName2, levelTitleName2)
 }
 
-func testAccAccessContextManagerAccessLevels_basicUpdated(org, policyTitle, levelTitleName1, levelTitleName2 string) string {
+func testAccAccessContextManagerAccessLevels_basicUpdated(org, policyTitle, levelTitleName1, levelTitleName2, vpcName string) string {
 	return fmt.Sprintf(`
 resource "google_access_context_manager_access_policy" "test-access" {
   parent = "organizations/%s"
@@ -124,7 +125,7 @@ resource "google_access_context_manager_access_policy" "test-access" {
 }
 
 resource "google_compute_network" "vpc_network" {
-	name = "tf-test-vpc"
+	name = "%s"
 }
 
 resource "google_access_context_manager_access_levels" "test-access" {
@@ -158,7 +159,7 @@ resource "google_access_context_manager_access_levels" "test-access" {
     }
   }
 }
-`, org, policyTitle, levelTitleName1, levelTitleName1, levelTitleName2, levelTitleName2)
+`, org, policyTitle, vpcName, levelTitleName1, levelTitleName1, levelTitleName2, levelTitleName2)
 }
 
 func testAccAccessContextManagerAccessLevel_empty(org, policyTitle string) string {
