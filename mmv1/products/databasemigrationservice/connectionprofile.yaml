@@ -91,6 +91,8 @@ examples:
       sqldb_cert: 'my-cert'
       sqldb_user: 'my-username'
       sqldb_pass: 'my-password'
+      private_connection: 'my-connection'
+      network_name: 'my-network'
       profile: 'my-profileid'
   - !ruby/object:Provider::Terraform::Examples
     name: 'database_migration_service_connection_profile_oracle'

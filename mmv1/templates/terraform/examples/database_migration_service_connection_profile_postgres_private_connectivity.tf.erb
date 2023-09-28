@@ -26,7 +26,7 @@ resource "google_sql_user" "sqldb_user" {
 resource "google_datastream_private_connection" "private_connection" {
   display_name          = "Connection profile"
   location              = "us-central1"
-  private_connection_id = "<%= ctx[:vars]['private_connection_id'] %>"
+  private_connection_id = "<%= ctx[:vars]['private_connection'] %>"
 
   labels = {
     key = "value"
