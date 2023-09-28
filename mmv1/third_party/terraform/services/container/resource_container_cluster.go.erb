@@ -781,10 +781,9 @@ func ResourceContainerCluster() *schema.Resource {
 				Optional:      true,
 				Computed:      true,
 				ForceNew:      true,
-				Deprecated:    "Deprecated in favor of ip_allocation_policy.cluster_ipv4_cidr_block",
 				ValidateFunc:  verify.OrEmpty(verify.ValidateRFC1918Network(8, 32)),
 				ConflictsWith: []string{"ip_allocation_policy"},
-				Description:   `The IP address range of the Kubernetes pods in this cluster in CIDR notation (e.g. 10.96.0.0/14). Leave blank to have one automatically chosen or specify a /14 block in 10.0.0.0/8. This field will only work for routes-based clusters, where ip_allocation_policy is not defined. Deprecated in favor of ip_allocation_policy.cluster_ipv4_cidr_block`,
+				Description:   `The IP address range of the Kubernetes pods in this cluster in CIDR notation (e.g. 10.96.0.0/14). Leave blank to have one automatically chosen or specify a /14 block in 10.0.0.0/8. This field will only work for routes-based clusters, where ip_allocation_policy is not defined.`,
 			},
 
 			"description": {
