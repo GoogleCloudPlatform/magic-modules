@@ -10,6 +10,7 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
     port = 1521
     username = "username"
     password = "password"
+    database_provider = "dbprovider"
     forward_ssh_connectivity {
       hostname = "hostnamessh"
       username = "usernamessh"

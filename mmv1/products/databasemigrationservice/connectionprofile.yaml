@@ -79,28 +79,21 @@ examples:
       sqldb_pass: 'my-password'
       profile: 'my-profileid'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'database_migration_service_connection_profile_postgres_private_connectivity'
-    primary_resource_id: 'postgresprofilepc'
-    ignore_read_extra:
-      - 'postgresql.0.password'
-      - 'postgresql.0.ssl.0.ca_certificate'
-      - 'postgresql.0.ssl.0.client_certificate'
-      - 'postgresql.0.ssl.0.client_key'
-    vars:
-      sqldb: 'my-database'
-      sqldb_cert: 'my-cert'
-      sqldb_user: 'my-username'
-      sqldb_pass: 'my-password'
-      private_connection: 'my-connection'
-      network_name: 'my-network'
-      profile: 'my-profileid'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'database_migration_service_connection_profile_oracle'
+    name: 'database_migration_service_connection_profile_oracle_forward_ssh'
     primary_resource_id: 'oracleprofile'
     ignore_read_extra:
       - 'oracle.0.password'
     vars:
       profile: 'my-profileid'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'database_migration_service_connection_profile_oracle_private'
+    primary_resource_id: 'oracleprofile'
+    ignore_read_extra:
+      - 'oracle.0.password'
+    vars:
+      profile: 'my-profileid'
+      network_name: 'my_network'
+      private_connection: 'my_private_connection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'database_migration_service_connection_profile_alloydb'
     primary_resource_id: 'alloydbprofile'
@@ -364,30 +357,28 @@ properties:
           - :NETWORK_ARCHITECTURE_OLD_CSQL_PRODUCER
           - :NETWORK_ARCHITECTURE_NEW_CSQL_PRODUCER
       - !ruby/object:Api::Type::NestedObject
-        name: 'staticServiceIpConnectivity'
+        name: 'staticIpConnectivity'
         send_empty_value: true
         allow_empty_object: true
         description: |
-          This object has no nested fields.
+          This type has no fields.
 
-          Static IP address connectivity configured on service project.
+          The source database will allow incoming connections from the public IP of the destination database, default configuration.
         properties: []
-        exactly_one_of:
-          - postgresql.0.static_service_ip_connectivity
-          - postgresql.0.private_connectivity
+        conflicts:
+          - postgresql.0.private_service_connect_connectivity
       - !ruby/object:Api::Type::NestedObject
-        name: 'privateConnectivity'
+        name: 'privateServiceConnectConnectivity'
         description: |
-          SSL configuration for the destination to connect to the source database.
-        exactly_one_of:
-          - static_service_ip_connectivity
-          - private_connectivity
+          A service attachment that exposes the database, and has the following format: projects/{project}/regions/{region}/serviceAttachments/{service_attachment_name}
+        conflicts:
+          - postgresql.0.static_ip_connectivity
         properties:
           - !ruby/object:Api::Type::String
-            name: 'privateConnection'
+            name: 'serviceAttachment'
             required: true
             description: |
-              Required. The resource name (URI) of the private connection.
+              URI of the service attachment.
   - !ruby/object:Api::Type::NestedObject
     name: 'oracle'
     description: |
@@ -428,6 +419,11 @@ properties:
         output: true
         description: |
           Output only. Indicates If this connection profile password is stored.
+      - !ruby/object:Api::Type::String
+        name: 'databaseService'
+        required: true
+        description: |
+          Required. Database service for the Oracle connection.
       - !ruby/object:Api::Type::NestedObject
         name: 'ssl'
         description: |

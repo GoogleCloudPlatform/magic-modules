@@ -40,6 +40,41 @@ func TestAccDatabaseMigrationServiceConnectionProfile_update(t *testing.T) {
 	})
 }
 
+func TestAccDatabaseMigrationServiceConnectionProfile_Postgres_PSC(t *testing.T) {
+	t.Parallel()
+
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	projectId := "psctestproject" + acctest.RandString(t, 10)
+	orgId := envvar.GetTestOrgFromEnv(t)
+	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
+	certName := "sqlcert" + acctest.RandString(t, 10)
+	userName := "username" + acctest.RandString(t, 10)
+	passWord := "password" + acctest.RandString(t, 10)
+	profileName := "dbmsprofile" + acctest.RandString(t, 10)
+	profileDisplay:= "profiledisplay" + acctest.RandString(t, 10)
+
+
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDatabaseMigrationServiceConnectionProfile_Postgres_PSC(instanceName, projectId, orgId, billingAccount, suffix),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{envvar.GetTestProjectFromEnv()})),
+			},
+			{
+				ResourceName:            "google_database_migration_service_connection_profile.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func testAccDatabaseMigrationServiceConnectionProfile_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_database_migration_service_connection_profile" "default" {
@@ -76,4 +111,78 @@ resource "google_database_migration_service_connection_profile" "default" {
 	}
 }
 `, context)
+}
+
+func testAccDatabaseMigrationServiceConnectionProfile_Postgres_PSC(instanceName string, projectId string, orgId string, billingAccount string) string {
+	return fmt.Sprintf(`
+resource "google_project" "testproject" {
+  name                = "%s"
+  project_id          = "%s"
+  org_id              = "%s"
+  billing_account     = "%s"
+}
+
+resource "google_sql_database_instance" "postgresqldb" {
+  project             = google_project.testproject.project_id
+  name                = "%s"
+  region              = "us-south1"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+		psc_config {
+			psc_enabled = true
+			allowed_consumer_projects = ["%s"]
+		}
+		ipv4_enabled = false
+    }
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	}
+	availability_type = "REGIONAL"
+  }
+}
+
+resource "google_sql_ssl_cert" "sql_client_cert" {
+  common_name = "%s"
+  instance    = google_sql_database_instance.postgresqldb.name
+
+  depends_on = [google_sql_database_instance.postgresqldb]
+}
+
+resource "google_sql_user" "sqldb_user" {
+  name     = "%s"
+  instance = google_sql_database_instance.postgresqldb.name
+  password = %s"
+
+
+  depends_on = [google_sql_ssl_cert.sql_client_cert]
+}
+
+resource "google_database_migration_service_connection_profile" "dbms_profile" {
+  location = "us-central1"
+  connection_profile_id = "%s"
+  display_name          = "%s"
+  labels = { 
+    foo = "bar" 
+  }
+  postgresql {
+    host = google_sql_database_instance.postgresqldb.ip_address.0.ip_address
+    port = 5432
+	username = "%s"
+	password = "%s"
+    ssl {
+      client_key = google_sql_ssl_cert.sql_client_cert.private_key
+      client_certificate = google_sql_ssl_cert.sql_client_cert.cert
+      ca_certificate = google_sql_ssl_cert.sql_client_cert.server_ca_cert
+    }
+    cloud_sql_id = "%s"
+    private_service_connect_connectivity {
+      service_attachment = google_sql_database_instance.postgresqldb.psc_service_attachment_link
+    }
+  }
+
+`, projectId, projectId, orgId, billingAccount, instanceName, projectId, certName, userName, passWord, profileName, profileDisplay, userName, passWord, instanceName)
 }

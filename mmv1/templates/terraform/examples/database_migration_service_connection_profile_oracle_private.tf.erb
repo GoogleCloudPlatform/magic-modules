@@ -1,0 +1,37 @@
+resource "google_datastream_private_connection" "private_connection" {
+  display_name          = "Connection profile"
+  location              = "us-central1"
+  private_connection_id = "<%= ctx[:vars]['private_connection'] %>"
+
+  labels = {
+    key = "value"
+  }
+
+  vpc_peering_config {
+    vpc = google_compute_network.default.id
+    subnet = "10.0.0.0/29"
+  }
+}
+
+resource "google_compute_network" "default" {
+  name = "<%= ctx[:vars]['network_name'] %>"
+}
+
+resource "google_database_migration_service_connection_profile" "<%= ctx[:primary_resource_id] %>" {
+  location = "us-central1"
+  connection_profile_id = "<%= ctx[:vars]["profile"] %>"
+  display_name = "<%= ctx[:vars]["profile"] %>_display"
+  labels = { 
+    foo = "bar" 
+  }
+  oracle {
+    host = "host"
+    port = 1521
+    username = "username"
+    password = "password"
+    database_provider = "dbprovider"
+    private_connectivity {
+      private_connection = google_datastream_private_connection.private_connection.id
+    }
+  }
+}
