@@ -348,17 +348,10 @@ properties:
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                       - !ruby/object:Api::Type::String
-                        name: 'access_level'
+                        name: 'accessLevel'
                         description: 'An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.'
-                        conflicts:
-                          - resource
-                      - !ruby/object:Api::Type::String
-                        name: 'resource'
-                        description: 'A Google Cloud resource that is allowed to egress the perimeter. Requests from these resources are allowed to access data outside the perimeter. Only projects and VPCs are allowed.'
-                        conflicts:
-                          - access_level
                 - !ruby/object:Api::Type::Enum
-                  name: 'source_restriction'
+                  name: 'sourceRestriction'
                   description: 'Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.'
                   values:
                     - :SOURCE_RESTRICTION_UNSPECIFIED
@@ -634,17 +627,10 @@ properties:
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                       - !ruby/object:Api::Type::String
-                        name: 'access_level'
+                        name: 'accessLevel'
                         description: 'An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.'
-                        conflicts:
-                          - resource
-                      - !ruby/object:Api::Type::String
-                        name: 'resource'
-                        description: 'A Google Cloud resource that is allowed to egress the perimeter. Requests from these resources are allowed to access data outside the perimeter. Only projects and VPCs are allowed.'
-                        conflicts:
-                          - access_level
                 - !ruby/object:Api::Type::Enum
-                  name: 'source_restriction'
+                  name: 'sourceRestriction'
                   description: 'Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.'
                   values:
                     - :SOURCE_RESTRICTION_UNSPECIFIED

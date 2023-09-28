@@ -151,7 +151,7 @@ resource "google_service_account" "created-later" {
 }
 
 resource "google_compute_network" "vpc_network" {
-	name = "tf-test"
+	name = "tf-test-vpc"
 }
 
 resource "google_access_context_manager_access_level_condition" "access-level-condition" {

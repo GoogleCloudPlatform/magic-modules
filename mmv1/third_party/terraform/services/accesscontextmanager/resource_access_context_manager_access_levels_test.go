@@ -124,7 +124,7 @@ resource "google_access_context_manager_access_policy" "test-access" {
 }
 
 resource "google_compute_network" "vpc_network" {
-	name = "tf-test"
+	name = "tf-test-vpc"
 }
 
 resource "google_access_context_manager_access_levels" "test-access" {
