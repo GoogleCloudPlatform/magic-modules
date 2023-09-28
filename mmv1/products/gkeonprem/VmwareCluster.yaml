@@ -89,7 +89,7 @@ properties:
     required: true
     description: |
       The Anthos clusters on the VMware version for your user cluster.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueAnnotations
     name: 'annotations'
     description: |
       Annotations on the VMware User Cluster.
@@ -100,7 +100,6 @@ properties:
       Prefix must be a DNS subdomain.
       Name must be 63 characters or less, begin and end with alphanumerics,
       with dashes (-), underscores (_), dots (.), and alphanumerics between.
-    default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'controlPlaneNode'
     description: |

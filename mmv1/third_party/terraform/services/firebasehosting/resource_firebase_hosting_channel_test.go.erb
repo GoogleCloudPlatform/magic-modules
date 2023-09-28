@@ -75,7 +75,7 @@ func TestAccFirebaseHostingChannel_firebasehostingChannelUpdate(t *testing.T) {
 				ResourceName:            "google_firebase_hosting_channel.update",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id"},
+				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccFirebaseHostingChannel_firebasehostingChannelMultipleFields(context),
@@ -84,7 +84,7 @@ func TestAccFirebaseHostingChannel_firebasehostingChannelUpdate(t *testing.T) {
 				ResourceName:            "google_firebase_hosting_channel.update",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id"},
+				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccFirebaseHostingChannel_firebasehostingChannelBasic(context),

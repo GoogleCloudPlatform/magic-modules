@@ -251,6 +251,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
     immutable: true
+    required: true
     url_param_only: true
     description: The location of this cloud function.
 properties:
@@ -629,7 +630,7 @@ properties:
     name: 'updateTime'
     output: true
     description: 'The last update timestamp of a Cloud Function.'
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       A set of key/value label pairs associated with this Cloud Function.
