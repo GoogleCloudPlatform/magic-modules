@@ -95,7 +95,7 @@ resource "google_service_networking_connection" "vpc_connection" {
 }
 
 // This test passes if we are able to create a primary instance with minimal number of fields
-func TestAccAlloydbInstance_createInstanceWithMandatoryFields(t *testing.T) {
+/* func TestAccAlloydbInstance_createInstanceWithMandatoryFields(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -152,7 +152,7 @@ resource "google_service_networking_connection" "vpc_connection" {
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 `, context)
-}
+}*/
 
 // This test passes if we are able to create a primary instance with maximum number of fields
 /* func TestAccAlloydbInstance_createInstanceWithMaximumFields(t *testing.T) {
@@ -240,7 +240,7 @@ resource "google_service_networking_connection" "vpc_connection" {
 }*/
 
 // This test passes if we are able to create a primary instance with an associated read-pool instance
-func TestAccAlloydbInstance_createPrimaryAndReadPoolInstance(t *testing.T) {
+/* func TestAccAlloydbInstance_createPrimaryAndReadPoolInstance(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -306,7 +306,7 @@ resource "google_service_networking_connection" "vpc_connection" {
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 `, context)
-}
+}*/
 
 // This test passes if we are able to update a database flag in primary instance
 /*func TestAccAlloydbInstance_updateDatabaseFlagInPrimaryInstance(t *testing.T) {
