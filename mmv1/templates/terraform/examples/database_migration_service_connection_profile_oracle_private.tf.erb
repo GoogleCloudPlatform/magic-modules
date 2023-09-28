@@ -29,7 +29,7 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
     port = 1521
     username = "username"
     password = "password"
-    database_provider = "dbprovider"
+    database_service = "dbprovider"
     private_connectivity {
       private_connection = google_datastream_private_connection.private_connection.id
     }

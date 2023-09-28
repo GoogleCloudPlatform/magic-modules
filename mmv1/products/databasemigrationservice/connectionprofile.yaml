@@ -358,7 +358,6 @@ properties:
           - :NETWORK_ARCHITECTURE_NEW_CSQL_PRODUCER
       - !ruby/object:Api::Type::NestedObject
         name: 'staticIpConnectivity'
-        send_empty_value: true
         allow_empty_object: true
         description: |
           This type has no fields.
@@ -468,7 +467,6 @@ properties:
               The replica will use this certificate to verify it's connecting to the right host.
       - !ruby/object:Api::Type::NestedObject
         name: 'staticServiceIpConnectivity'
-        send_empty_value: true
         allow_empty_object: true
         description: |
           This object has no nested fields.
