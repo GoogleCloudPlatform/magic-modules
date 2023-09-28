@@ -19,7 +19,7 @@ func TestAccAlloydbCluster_restore(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedTestNetwork(t, "alloydbinstance-restore"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-instance-restore-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -99,8 +99,6 @@ resource "google_alloydb_instance" "source" {
       ssl_mode = "ENCRYPTED_ONLY"
     }
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_backup" "default" {
@@ -115,20 +113,6 @@ data "google_project" "project" {}
 
 data "google_compute_network" "default" {
   name = "%{network_name}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = data.google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = data.google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 `, context)
 }
@@ -152,8 +136,6 @@ resource "google_alloydb_instance" "source" {
       ssl_mode = "ENCRYPTED_ONLY"
     }
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_backup" "default" {
@@ -186,20 +168,6 @@ data "google_project" "project" {}
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = data.google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = data.google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
-}
 `, context)
 }
 
@@ -222,8 +190,6 @@ resource "google_alloydb_instance" "source" {
       ssl_mode = "ENCRYPTED_ONLY"
     }
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_backup" "default" {
@@ -253,20 +219,6 @@ data "google_project" "project" {}
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = data.google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = data.google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
-}
 `, context)
 }
 
@@ -288,8 +240,6 @@ resource "google_alloydb_instance" "source" {
       ssl_mode = "ENCRYPTED_ONLY"
     }
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_backup" "default" {
@@ -317,20 +267,6 @@ data "google_project" "project" {}
 
 data "google_compute_network" "default" {
   name = "%{network_name}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = data.google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = data.google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 `, context)
 }
@@ -355,8 +291,6 @@ resource "google_alloydb_instance" "source" {
       ssl_mode = "ENCRYPTED_ONLY"
     }
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_backup" "default" {
@@ -398,20 +332,6 @@ data "google_project" "project" {}
 
 data "google_compute_network" "default" {
   name = "%{network_name}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = data.google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = data.google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 `, context)
 }
@@ -436,8 +356,6 @@ resource "google_alloydb_instance" "source" {
       ssl_mode = "ENCRYPTED_ONLY"
     }
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_backup" "default" {
@@ -490,20 +408,6 @@ data "google_project" "project" {}
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = data.google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = data.google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
-}
 `, context)
 }
 
@@ -527,8 +431,6 @@ resource "google_alloydb_instance" "source" {
       ssl_mode = "ENCRYPTED_ONLY"
     }
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_backup" "default" {
@@ -591,20 +493,6 @@ data "google_project" "project" {}
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = data.google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = data.google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
-}
 `, context)
 }
 
@@ -628,8 +516,6 @@ resource "google_alloydb_instance" "source" {
       ssl_mode = "ENCRYPTED_ONLY"
     }
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_backup" "default" {
@@ -663,20 +549,6 @@ data "google_project" "project" {}
 
 data "google_compute_network" "default" {
   name = "%{network_name}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = data.google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = data.google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 `, context)
 }

@@ -38,6 +38,13 @@ resource "google_workstations_workstation_config" "<%= ctx[:primary_resource_id]
   running_timeout = "21600s"
 
   replica_zones = ["us-central1-a", "us-central1-b"]
+  annotations = {
+    label-one = "value-one"
+  }
+
+  labels = {
+    "label" = "key"
+  }
 
   host {
     gce_instance {
