@@ -151,7 +151,7 @@ The following arguments are supported:
 * `deletion_protection` - (Optional) Whether or not to allow Terraform to destroy the instance. Unless this field is set to false
 in Terraform state, a `terraform destroy` or `terraform apply` that would delete the instance will fail.
 
-* `table_constraints` - (Optional) Defines the primary key and foreign keys.
+* `table_constraints` - (Optional) Defines the primary key and foreign keys. 
     Structure is [documented below](#nested_table_constraints).
 
 <a name="nested_external_data_configuration"></a>The `external_data_configuration` block supports:
@@ -221,7 +221,7 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 * `source_format` (Optional) - The data format. Please see sourceFormat under
     [ExternalDataConfiguration](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#externaldataconfiguration)
     in Bigquery's public API documentation for supported formats. To use "GOOGLE_SHEETS"
-    the `scopes` must include "<https://www.googleapis.com/auth/drive.readonly>".
+    the `scopes` must include "https://www.googleapis.com/auth/drive.readonly".
 
 * `source_uris` - (Required) A list of the fully-qualified URIs that point to
     your data in Google Cloud.
@@ -280,12 +280,12 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 * `mode` (Optional) - When set, what mode of hive partitioning to use when
     reading data. The following modes are supported.
-  * AUTO: automatically infer partition key name(s) and type(s).
-  * STRINGS: automatically infer partition key name(s). All types are
+    * AUTO: automatically infer partition key name(s) and type(s).
+    * STRINGS: automatically infer partition key name(s). All types are
       Not all storage formats support hive partitioning. Requesting hive
       partitioning on an unsupported format will lead to an error.
       Currently supported formats are: JSON, CSV, ORC, Avro and Parquet.
-  * CUSTOM: when set to `CUSTOM`, you must encode the partition key schema within the `source_uri_prefix` by setting `source_uri_prefix` to `gs://bucket/path_to_table/{key1:TYPE1}/{key2:TYPE2}/{key3:TYPE3}`.
+    * CUSTOM: when set to `CUSTOM`, you must encode the partition key schema within the `source_uri_prefix` by setting `source_uri_prefix` to `gs://bucket/path_to_table/{key1:TYPE1}/{key2:TYPE2}/{key3:TYPE3}`.
 
 * `require_partition_filter` - (Optional) If set to true, queries over this table
     require a partition filter that can be used for partition elimination to be
@@ -405,10 +405,10 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 * `dataset_id`: (Required) The ID of the dataset containing this table.
 
 * `table_id`: (Required) The ID of the table. The ID must contain only
- letters (a-z, A-Z), numbers (0-9), or underscores (_). The maximum
- length is 1,024 characters. Certain operations allow suffixing of
- the table ID with a partition decorator, such as
- sample_table$20190123.
+	letters (a-z, A-Z), numbers (0-9), or underscores (_). The maximum
+	length is 1,024 characters. Certain operations allow suffixing of
+	the table ID with a partition decorator, such as
+	sample_table$20190123.
 
 <a name="nested_column_references"></a>The `column_references` block supports:
 
@@ -449,7 +449,7 @@ exported:
 BigQuery tables imported using any of these accepted formats:
 
 ```
-terraform import google_bigquery_table.default projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}
-terraform import google_bigquery_table.default {{project}}/{{dataset_id}}/{{table_id}}
-terraform import google_bigquery_table.default {{dataset_id}}/{{table_id}}
+$ terraform import google_bigquery_table.default projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}
+$ terraform import google_bigquery_table.default {{project}}/{{dataset_id}}/{{table_id}}
+$ terraform import google_bigquery_table.default {{dataset_id}}/{{table_id}}
 ```
