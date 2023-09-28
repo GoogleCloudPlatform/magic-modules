@@ -480,9 +480,9 @@ properties:
           Static IP address connectivity configured on service project.
         properties: []
         exactly_one_of:
-        - static_service_ip_connectivity
-        - forward_ssh_connectivity
-        - private_connectivity
+          - static_service_ip_connectivity
+          - forward_ssh_connectivity
+          - private_connectivity
       - !ruby/object:Api::Type::NestedObject
         name: 'forwardSshConnectivity'
         description: |
