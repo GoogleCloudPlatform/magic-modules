@@ -31,7 +31,9 @@ resource "google_alloydb_backup" "<%= ctx[:primary_resource_id] %>" {
 resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "<%= ctx[:vars]['alloydb_backup_restored_cluster_name'] %>"
   location              = "us-central1"
-  network               = data.google_compute_network.default.id
+  network_config {
+    network = data.google_compute_network.default.id
+  }
   restore_backup_source {
     backup_name = google_alloydb_backup.<%= ctx[:primary_resource_id] %>.name
   }
