@@ -51,9 +51,7 @@ func TestAccDatabaseMigrationServiceConnectionProfile_Postgres_PSC(t *testing.T)
 	userName := "username" + acctest.RandString(t, 10)
 	passWord := "password" + acctest.RandString(t, 10)
 	profileName := "dbmsprofile" + acctest.RandString(t, 10)
-	profileDisplay:= "profiledisplay" + acctest.RandString(t, 10)
-
-
+	profileDisplay := "profiledisplay" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
