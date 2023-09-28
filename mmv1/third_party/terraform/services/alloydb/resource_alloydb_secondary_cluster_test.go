@@ -35,12 +35,12 @@ resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
   network      = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  cluster_type = "SECONDARY"
 
   continuous_backup_config {
     enabled = false
   }
 
-  cluster_type = "SECONDARY"
 
   secondary_config {
     primary_cluster_name = google_alloydb_cluster.default.name
@@ -53,6 +53,7 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  cluster_type = "PRIMARY"
 }
 
 data "google_project" "project" {}
@@ -90,12 +91,11 @@ resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
   network      = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  cluster_type = "SECONDARY"
 
   continuous_backup_config {
     enabled = false
   }
-
-  cluster_type = "SECONDARY"
 
   depends_on = [google_alloydb_cluster.default]
 }
@@ -104,6 +104,7 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  cluster_type = "PRIMARY"
 }
 
 data "google_project" "project" {}
