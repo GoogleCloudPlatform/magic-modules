@@ -26,7 +26,7 @@ func TestAccAlloydbCluster_update(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccAlloydbCluster_update(context),
@@ -35,7 +35,7 @@ func TestAccAlloydbCluster_update(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
