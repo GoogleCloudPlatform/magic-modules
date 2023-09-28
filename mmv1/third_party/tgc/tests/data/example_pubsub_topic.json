@@ -10,6 +10,9 @@
             "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
             "data": {
                 "kmsKeyName": "projects/{{.Provider.project}}/locations/australia-southeast1/keyRings/default_kms_keyring_name/cryptoKeys/default_kms_key_name",
+                "labels": {
+                    "test-key": "test-value"
+                },
                 "messageStoragePolicy": {
                     "allowedPersistenceRegions": [
                         "australia-southeast1"
