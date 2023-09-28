@@ -244,7 +244,8 @@ func verifyPscOperation(resourceName string, isPscConfigExpected bool, expectedP
 
 		return nil
 	}
-  
+}
+
 func TestAccDatabaseMigrationServiceConnectionProfile_databaseMigrationServiceConnectionProfileAlloydb(t *testing.T) {
 	t.Parallel()
 
