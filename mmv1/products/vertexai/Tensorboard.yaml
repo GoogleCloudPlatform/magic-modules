@@ -113,7 +113,7 @@ properties:
     output: true
     description: |
       The timestamp of when the Tensorboard was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       The labels with user-defined metadata to organize your Tensorboards.
