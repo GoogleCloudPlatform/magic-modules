@@ -16,3 +16,7 @@
     required: false
     optional: true
     computed: true
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - tpgresource.DefaultProviderProject

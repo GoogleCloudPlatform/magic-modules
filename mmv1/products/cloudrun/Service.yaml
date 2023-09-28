@@ -152,7 +152,9 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 custom_diff: [
   'revisionNameCustomizeDiff',
 ]
-schema_version: 1
+state_upgraders: true
+state_upgrade_base_schema_version: 1
+schema_version: 2
 parameters:
   - !ruby/object:Api::Type::String
     name: location
@@ -240,7 +242,7 @@ properties:
             default_from_api: true
             properties:
               - !ruby/object:Api::Type::KeyValuePairs
-                name: labels
+                name: 'labels'
                 description: |-
                   Map of string keys and values that can be used to organize and categorize
                   (scope and select) objects.
@@ -279,7 +281,7 @@ properties:
                 default_from_api: true
                 custom_expand: 'templates/terraform/custom_expand/default_to_project.go.erb'
               - !ruby/object:Api::Type::KeyValuePairs
-                name: annotations
+                name: 'annotations'
                 description: |-
                   Annotations is a key value map stored with a resource that
                   may be set by external tools to store and retrieve arbitrary metadata. More
@@ -970,14 +972,12 @@ properties:
       and annotations.
     default_from_api: true
     properties:
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: labels
+      - !ruby/object:Api::Type::KeyValueLabels
+        name: 'labels'
         description: |-
           Map of string keys and values that can be used to organize and categorize
           (scope and select) objects. May match selectors of replication controllers
           and routes.
-        default_from_api: true
-        diff_suppress_func: 'cloudrunLabelDiffSuppress'
       - !ruby/object:Api::Type::Integer
         name: generation
         description: |-
@@ -1012,8 +1012,8 @@ properties:
         default_from_api: true
         custom_flatten: templates/terraform/custom_flatten/set_to_project.go.erb
         custom_expand: 'templates/terraform/custom_expand/default_to_project.go.erb'
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: annotations
+      - !ruby/object:Api::Type::KeyValueAnnotations
+        name: 'annotations'
         description: |-
           Annotations is a key value map stored with a resource that
           may be set by external tools to store and retrieve arbitrary metadata. More
@@ -1036,5 +1036,3 @@ properties:
             for the Service. For example, `"run.googleapis.com/ingress" = "all"`.
           - `run.googleapis.com/launch-stage` sets the [launch stage](https://cloud.google.com/run/docs/troubleshooting#launch-stage-validation)
             when a preview feature is used. For example, `"run.googleapis.com/launch-stage": "BETA"`
-        default_from_api: true
-        diff_suppress_func: 'cloudrunAnnotationDiffSuppress'
