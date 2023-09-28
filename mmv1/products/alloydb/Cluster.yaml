@@ -106,7 +106,7 @@ properties:
     output: true
     description: |
       The system-generated UID of the resource.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: 'User-defined labels for the alloydb cluster.'
   - !ruby/object:Api::Type::NestedObject

@@ -110,7 +110,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, secondGen bool)
 		PricingPlan:         _settings["pricing_plan"].(string),
 		UserLabels:          tpgresource.ConvertStringMap(_settings["user_labels"].(map[string]interface{})),
 		BackupConfiguration: expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
-		DatabaseFlags:       expandDatabaseFlags(_settings["database_flags"].([]interface{})),
+		DatabaseFlags:       expandDatabaseFlags(_settings["database_flags"].(*schema.Set).List()),
 		IpConfiguration:     expandIpConfiguration(_settings["ip_configuration"].([]interface{})),
 		LocationPreference:  expandLocationPreference(_settings["location_preference"].([]interface{})),
 		MaintenanceWindow:   expandMaintenanceWindow(_settings["maintenance_window"].([]interface{})),

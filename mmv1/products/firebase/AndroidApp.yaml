@@ -89,14 +89,16 @@ examples:
       - project
       - deletion_policy
 virtual_fields:
-  # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
-  - !ruby/object:Api::Type::String
+  - !ruby/object:Api::Type::Enum
     name: 'deletion_policy'
     description: |
       (Optional) Set to `ABANDON` to allow the AndroidApp to be untracked from terraform state
       rather than deleted upon `terraform destroy`. This is useful because the AndroidApp may be
       serving traffic. Set to `DELETE` to delete the AndroidApp. Defaults to `DELETE`.
-    default_value: DELETE
+    default_value: :DELETE
+    values:
+      - :DELETE
+      - :ABANDON
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_delete: templates/terraform/custom_delete/firebase_app_deletion_policy.erb
 properties:
