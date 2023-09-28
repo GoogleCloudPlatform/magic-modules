@@ -13,9 +13,6 @@
         "datasetReference": {
           "datasetId": "test-dataset"
         },
-        "labels": {
-          "env": "dev"
-        },
         "location": "EU",
         "defaultTableExpirationMs": 3.6e+06
       }
