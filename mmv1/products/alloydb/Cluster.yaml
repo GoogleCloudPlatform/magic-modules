@@ -87,6 +87,7 @@ examples:
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_create: templates/terraform/pre_create/alloydb_cluster.go.erb
+  pre_delete: templates/terraform/pre_delete/alloydb_cluster.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'clusterId'
