@@ -2,6 +2,7 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
   cluster_id   = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
   location     = "us-central1"
   network      = google_compute_network.default.id
+  cluster_type = "PRIMARY"
 
   initial_user {
     user     = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
@@ -37,8 +38,6 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
       test = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
     }
   }
-
-  cluster_type = "PRIMARY"
 
   labels = {
     test = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
