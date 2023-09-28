@@ -1,0 +1,42 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/myproj/global/forwardingRules/fr",
+        "asset_type": "compute.googleapis.com/GlobalForwardingRule",
+        "ancestry_path": "organizations/123/folders/456/project/myproj",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+            "discovery_name": "GlobalForwardingRule",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/myproj",
+            "data": {
+                "IPProtocol": "TCP",
+                "ipVersion": "IPV4",
+                "loadBalancingScheme": "EXTERNAL",
+                "name": "fr",
+                "networkTier": "PREMIUM",
+                "portRange": "443",
+                "target": "projects/myproj/global/targetSslProxies/tp"
+            }
+        }
+    },
+    {
+        "name": "//compute.googleapis.com/projects/myproj/global/forwardingRules/fr",
+        "asset_type": "compute.googleapis.com/GlobalForwardingRule",
+        "ancestry_path": "organizations/123/folders/456/project/myproj",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+            "discovery_name": "GlobalForwardingRule",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/myproj",
+            "data": {
+                "IPAddress": "projects/cn-fe-playground/global/addresses/ipaddr",
+                "IPProtocol": "TCP",
+                "loadBalancingScheme": "EXTERNAL_MANAGED",
+                "name": "fr",
+                "networkTier": "PREMIUM",
+                "portRange": "25",
+                "target": "projects/cn-fe-playground/global/targetTcpProxies/tp"
+            }
+        }
+    }
+]

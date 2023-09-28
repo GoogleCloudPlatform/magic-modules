@@ -5,12 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
 	hashicorpcty "github.com/hashicorp/go-cty/cty"
-	"github.com/hashicorp/hcl/hcl/printer"
-	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/provider"
+	tpg_transport "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 	"github.com/zclconf/go-cty/cty"
 	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
@@ -40,10 +37,14 @@ func DecodeJSON(data map[string]interface{}, v interface{}) error {
 
 // Converts resource from untyped map format to TF JSON.
 func MapToCtyValWithSchema(m map[string]interface{}, s map[string]*schema.Schema) (cty.Value, error) {
+	// Normalize non-marshable properties manually.
+	m = normalizeFlattenedMap(m, s).(map[string]interface{})
+
 	b, err := json.Marshal(&m)
 	if err != nil {
 		return cty.NilVal, fmt.Errorf("error marshaling map as JSON: %v", err)
 	}
+
 	ty, err := hashicorpCtyTypeToZclconfCtyType(schema.InternalMap(s).CoreConfigSchema().ImpliedType())
 	if err != nil {
 		return cty.NilVal, fmt.Errorf("error casting type: %v", err)
@@ -55,101 +56,9 @@ func MapToCtyValWithSchema(m map[string]interface{}, s map[string]*schema.Schema
 	return ret, nil
 }
 
-// Initializes map of converters.
-func CreateConverterMap(converterFactories map[string]ConverterFactory) map[string]Converter {
-	tpgProvider := tpg.Provider()
-
-	result := make(map[string]Converter, len(converterFactories))
-	for name, factory := range converterFactories {
-		result[name] = factory(name, tpgProvider.ResourcesMap[name].Schema)
-	}
-
-	return result
-}
-
-func Convert(assets []*caiasset.Asset, converterNames map[string]string, converterMap map[string]Converter) ([]byte, error) {
-	// Group resources from the same tf resource type for convert.
-	// tf -> cai has 1:N mappings occasionally
-	groups := make(map[string][]*caiasset.Asset)
-	for _, asset := range assets {
-		name, ok := converterNames[asset.Type]
-		if !ok {
-			continue
-		}
-		groups[name] = append(groups[name], asset)
-	}
-
-	f := hclwrite.NewFile()
-	rootBody := f.Body()
-	for name, v := range groups {
-		converter, ok := converterMap[name]
-		if !ok {
-			continue
-		}
-		items, err := converter.Convert(v)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, resourceBlock := range items {
-			hclBlock := rootBody.AppendNewBlock("resource", resourceBlock.Labels)
-			if err := hclWriteBlock(resourceBlock.Value, hclBlock.Body()); err != nil {
-				return nil, err
-			}
-		}
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return printer.Format(f.Bytes())
-}
-
-func hclWriteBlock(val cty.Value, body *hclwrite.Body) error {
-	if val.IsNull() {
-		return nil
-	}
-	if !val.Type().IsObjectType() {
-		return fmt.Errorf("expect object type only, but type = %s", val.Type().FriendlyName())
-	}
-	it := val.ElementIterator()
-	for it.Next() {
-		objKey, objVal := it.Element()
-		if objVal.IsNull() {
-			continue
-		}
-		objValType := objVal.Type()
-		switch {
-		case objValType.IsObjectType():
-			newBlock := body.AppendNewBlock(objKey.AsString(), nil)
-			if err := hclWriteBlock(objVal, newBlock.Body()); err != nil {
-				return err
-			}
-		case objValType.IsCollectionType():
-			if objVal.LengthInt() == 0 {
-				continue
-			}
-			// Presumes map should not contain object type.
-			if !objValType.IsMapType() && objValType.ElementType().IsObjectType() {
-				listIterator := objVal.ElementIterator()
-				for listIterator.Next() {
-					_, listVal := listIterator.Element()
-					subBlock := body.AppendNewBlock(objKey.AsString(), nil)
-					if err := hclWriteBlock(listVal, subBlock.Body()); err != nil {
-						return err
-					}
-				}
-				continue
-			}
-			fallthrough
-		default:
-			if objValType.FriendlyName() == "string" && objVal.AsString() == "" {
-				continue
-			}
-			body.SetAttributeValue(objKey.AsString(), objVal)
-		}
-	}
-	return nil
+func NewConfig() *tpg_transport.Config {
+	// Currently its not needed, but it may change in future.
+	return &tpg_transport.Config{}
 }
 
 func hashicorpCtyTypeToZclconfCtyType(t hashicorpcty.Type) (cty.Type, error) {
@@ -162,4 +71,46 @@ func hashicorpCtyTypeToZclconfCtyType(t hashicorpcty.Type) (cty.Type, error) {
 		return cty.NilType, err
 	}
 	return ret, nil
+}
+
+// Normalizes the output map by eliminating unmarshallable objects like schema.Set
+func normalizeFlattenedMap(obj interface{}, resourceSchema map[string]*schema.Schema) interface{} {
+	switch obj.(type) {
+	case []interface{}:
+		arrObj := obj.([]interface{})
+		newArrObj := make([]interface{}, len(arrObj))
+
+		for i := range arrObj {
+			newArrObj[i] = normalizeFlattenedMap(arrObj[i], resourceSchema)
+		}
+
+		return newArrObj
+	case map[string]interface{}:
+		mapObj := obj.(map[string]interface{})
+		newMapObj := map[string]interface{}{}
+
+		if resourceSchema == nil {
+			return obj
+		}
+
+		for key, value := range mapObj {
+			propertySchema := resourceSchema[key]
+			if propertySchema == nil {
+				// In future: report partial error about unknown field.
+				continue
+			}
+
+			switch propertySchema.Elem.(type) {
+			case *schema.Resource:
+				newMapObj[key] = normalizeFlattenedMap(value, propertySchema.Elem.(*schema.Resource).Schema)
+			default:
+				newMapObj[key] = normalizeFlattenedMap(value, nil)
+			}
+		}
+		return newMapObj
+	case *schema.Set:
+		return normalizeFlattenedMap(obj.(*schema.Set).List(), resourceSchema)
+	default:
+		return obj
+	}
 }

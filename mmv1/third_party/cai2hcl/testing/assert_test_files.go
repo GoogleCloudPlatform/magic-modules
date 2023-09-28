@@ -18,7 +18,7 @@ type _TestCase struct {
 	sourceFolder string
 }
 
-func AssertTestFiles(t *testing.T, converterNames map[string]string, converterMap map[string]common.Converter, folder string, fileNames []string) {
+func AssertTestFiles(t *testing.T, converter common.Converter, folder string, fileNames []string) {
 	cases := []_TestCase{}
 
 	for _, name := range fileNames {
@@ -31,7 +31,7 @@ func AssertTestFiles(t *testing.T, converterNames map[string]string, converterMa
 		t.Run(c.name, func(t *testing.T) {
 			t.Parallel()
 
-			err := assertTestData(c, converterNames, converterMap)
+			err := assertTestData(c, converter)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -39,7 +39,7 @@ func AssertTestFiles(t *testing.T, converterNames map[string]string, converterMa
 	}
 }
 
-func assertTestData(testCase _TestCase, converterNames map[string]string, converterMap map[string]common.Converter) (err error) {
+func assertTestData(testCase _TestCase, converter common.Converter) (err error) {
 	fileName := testCase.name
 	folder := testCase.sourceFolder
 
@@ -64,7 +64,12 @@ func assertTestData(testCase _TestCase, converterNames map[string]string, conver
 		return err
 	}
 
-	got, err := common.Convert(assets, converterNames, converterMap)
+	blocks, err := converter.Convert(assets)
+	if err != nil {
+		return err
+	}
+
+	got, err := common.HclWriteBlocks(blocks)
 	if err != nil {
 		return err
 	}
