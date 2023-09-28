@@ -153,6 +153,7 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  cluster_type = "PRIMARY"
 }
 
 data "google_project" "project" {}
