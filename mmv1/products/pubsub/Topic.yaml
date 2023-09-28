@@ -93,7 +93,7 @@ properties:
       (`service-{{PROJECT_NUMBER}}@gcp-sa-pubsub.iam.gserviceaccount.com`) must have
       `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
       The expected format is `projects/*/locations/*/keyRings/*/cryptoKeys/*`
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       A set of key/value label pairs to assign to this Topic.
