@@ -1,0 +1,32 @@
+resource "google_alloydb_cluster" "<%= ctx[:vars]['secondary_resource_id'] %>" {
+  cluster_id   = "<%= ctx[:vars]['alloydb_secondary_cluster_name'] %>"
+  location     = "us-east1"
+  network      = google_compute_network.default.id
+
+  continuous_backup_config {
+    enabled = false
+  }
+
+  cluster_type = "SECONDARY"
+
+  secondary_config {
+    primary_cluster_name = google_alloydb_cluster.<%= ctx[:primary_resource_id] %>.name
+  }
+
+  labels = {
+    test = "<%= ctx[:vars]['alloydb_secondary_cluster_name'] %>"
+  }
+
+}
+
+data "google_project" "project" {}
+
+resource "google_compute_network" "default" {
+  name = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
+}
+
+resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
+  cluster_id = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
+  location   = "us-central1"
+  network    = google_compute_network.default.id
+}

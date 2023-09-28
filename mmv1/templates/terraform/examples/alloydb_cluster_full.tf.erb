@@ -38,6 +38,8 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 
+  cluster_type = "PRIMARY"
+
   labels = {
     test = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
   }
