@@ -4313,7 +4313,7 @@ resource "google_container_cluster" "secondary" {
 	name               = "%s"
 	location           = "us-central1-a"
 	initial_node_count = 1
-	cluster_ipv4_cidr  = 10.96.0.0/14
+	cluster_ipv4_cidr  = "10.96.0.0/14"
 	deletion_protection = false
   }
 `, firstName, secondName)
