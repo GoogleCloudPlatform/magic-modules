@@ -463,10 +463,10 @@ properties:
         description: 'Type of migration source.'
   - !ruby/object:Api::Type::Enum
     name: clusterType
-    required: true
     values:
       - :PRIMARY
       - :SECONDARY
+    default_value: :PRIMARY
     description: |
       The type of cluster. If not set, defaults to PRIMARY. If cluster is of type SECONDARY, provide the associated PRIMARY cluster in the `depends on` meta-data attribute.
   - !ruby/object:Api::Type::NestedObject
