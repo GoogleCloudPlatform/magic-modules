@@ -14,9 +14,6 @@
         "expirationPolicy": {
           "ttl": "300000.5s"
         },
-        "labels": {
-          "test-label2": "test-value2"
-        },
         "messageRetentionDuration": "1200s",
         "retainAckedMessages": true,
         "retryPolicy": {
@@ -39,9 +36,6 @@
         "ackDeadlineSeconds": 20,
         "deadLetterPolicy": null,
         "expirationPolicy": null,
-        "labels": {
-          "test-label1": "test-value1"
-        },
         "messageRetentionDuration": "604800s",
         "pushConfig": {
           "pushEndpoint": "https://example.com/push"
