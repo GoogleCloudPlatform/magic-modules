@@ -12,9 +12,6 @@
         "apiVersion": "serving.knative.dev/v1",
         "kind": "Service",
         "metadata": {
-          "annotations": {
-            "generated-by": "magic-modules"
-          },
           "name": "cloudrun-to-get-cai",
           "namespace": "{{.Provider.project}}"
         },

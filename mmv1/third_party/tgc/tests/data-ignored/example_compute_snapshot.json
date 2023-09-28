@@ -9,9 +9,6 @@
       "discovery_name": "Snapshot",
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
-        "labels": {
-          "test-name": "test-value"
-        },
         "name": "test-instance",
         "sourceDisk": "projects/{{.Provider.project}}/zones/us-central1-a/disks/debian-disk",
         "storageLocations": [

@@ -13,9 +13,6 @@
           "datasetId": "test-dataset"
         },
         "defaultTableExpirationMs": 3600000,
-        "labels": {
-          "env": "dev"
-        },
         "location": "EU",
         "friendlyName": ""
       }
@@ -23,9 +20,9 @@
     "iam_policy": {
       "bindings": [
         {
-          "role": "roles/bigquery.dataViewer",
+          "role": "roles/editor",
           "members": [
-            "allUsers",
+            "serviceAccount:998476993360@cloudservices.gserviceaccount.com",
             "allAuthenticatedUsers"
           ]
         }
