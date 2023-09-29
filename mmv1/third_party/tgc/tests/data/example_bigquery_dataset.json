@@ -9,23 +9,16 @@
       "discovery_name": "Dataset",
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
+        "friendlyName": "",
         "datasetReference": {
           "datasetId": "test-dataset"
         },
-        "defaultTableExpirationMs": 3600000,
+        "labels": {
+          "env": "dev"
+        },
         "location": "EU",
-        "friendlyName": ""
+        "defaultTableExpirationMs": 3.6e+06
       }
-    },
-    "iam_policy": {
-      "bindings": [
-        {
-          "role": "roles/bigquery.dataEditor",
-          "members": [
-            "allAuthenticatedUsers"
-          ]
-        }
-      ]
     }
   }
 ]
