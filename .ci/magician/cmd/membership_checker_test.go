@@ -26,7 +26,7 @@ func TestExecMembershipChecker_CoreContributorFlow(t *testing.T) {
 	method := "TriggerMMPresubmitRuns"
 	expected := [][]any{{"sha1", map[string]string{"BRANCH_NAME": "branch1", "_BASE_BRANCH": "base1", "_HEAD_BRANCH": "head1", "_HEAD_REPO_URL": "url1", "_PR_NUMBER": "pr1"}}}
 	if calls, ok := cb.calledMethods[method]; !ok {
-		t.Fatal("presubmit runs not triggered for core author")
+		t.Fatal("Presubmit runs not triggered for core author")
 	} else if !reflect.DeepEqual(calls, expected) {
 		t.Fatalf("Wrong calls for %s, got %v, expected %v", method, calls, expected)
 	}
@@ -34,7 +34,7 @@ func TestExecMembershipChecker_CoreContributorFlow(t *testing.T) {
 	method = "ApproveCommunityChecker"
 	expected = [][]any{{"pr1", "sha1"}}
 	if calls, ok := cb.calledMethods[method]; !ok {
-		t.Fatal("community checker not approved for core author")
+		t.Fatal("Community checker not approved for core author")
 	} else if !reflect.DeepEqual(calls, expected) {
 		t.Fatalf("Wrong calls for %s, got %v, expected %v", method, calls, expected)
 	}
