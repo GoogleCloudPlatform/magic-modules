@@ -25,7 +25,7 @@ func testAccAccessContextManagerAccessLevelCondition_basicTest(t *testing.T) {
 	vpcName := fmt.Sprintf("test-vpc-%s", acctest.RandString(t, 10))
 
 	expected := map[string]interface{}{
-		"members":       []interface{}{"user:test@google.com", "user:test2@google.com", fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", serviceAccountName, project)},
+		"members": []interface{}{"user:test@google.com", "user:test2@google.com", fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", serviceAccountName, project)},
 		"devicePolicy": map[string]interface{}{
 			"requireCorpOwned": true,
 			"osConstraints": []interface{}{
