@@ -55,6 +55,13 @@ resource "google_alloydb_instance" "default" {
   machine_config {
     cpu_count = 2
   }
+	
+	client_connection_config {
+		require_connectors = false
+		ssl_config {
+			ssl_mode = "ENCRYPTED_ONLY"
+		}
+	}
 }
 
 resource "google_alloydb_cluster" "default" {
