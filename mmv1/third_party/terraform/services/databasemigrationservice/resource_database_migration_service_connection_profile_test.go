@@ -1,15 +1,11 @@
 package databasemigrationservice_test
 
 import (
-	"fmt"
-	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDatabaseMigrationServiceConnectionProfile_update(t *testing.T) {
