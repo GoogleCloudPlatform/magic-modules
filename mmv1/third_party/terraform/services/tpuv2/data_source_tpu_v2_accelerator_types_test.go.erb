@@ -1,5 +1,7 @@
+<% autogen_exception -%>
 package tpuv2_test
 
+<% unless version == 'ga' -%>
 import (
 	"errors"
 	"fmt"
@@ -11,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccTpuV2RuntimeVersions_basic(t *testing.T) {
+func TestAccTpuV2AcceleratorTypes_basic(t *testing.T) {
 	t.Parallel()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -19,50 +21,51 @@ func TestAccTpuV2RuntimeVersions_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccTpuV2RuntimeVersionsConfig,
+				Config: testAccTpuV2AcceleratorTypesConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTpuV2RuntimeVersions("data.google_tpu_v2_runtime_versions.available"),
+					testAccCheckTpuV2AcceleratorTypes("data.google_tpu_v2_accelerator_types.available"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckTpuV2RuntimeVersions(n string) resource.TestCheckFunc {
+func testAccCheckTpuV2AcceleratorTypes(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("can't find TPU v2 runtime versions data source: %s", n)
+			return fmt.Errorf("can't find TPU v2 accelerator types data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
 			return errors.New("data source id not set")
 		}
 
-		count, ok := rs.Primary.Attributes["versions.#"]
+		count, ok := rs.Primary.Attributes["types.#"]
 		if !ok {
-			return errors.New("can't find 'versions' attribute")
+			return errors.New("can't find 'types' attribute")
 		}
 
 		cnt, err := strconv.Atoi(count)
 		if err != nil {
-			return errors.New("failed to read number of versions")
+			return errors.New("failed to read number of types")
 		}
 		if cnt < 2 {
-			return fmt.Errorf("expected at least 2 versions, received %d, this is most likely a bug", cnt)
+			return fmt.Errorf("expected at least 2 types, received %d, this is most likely a bug", cnt)
 		}
 
 		for i := 0; i < cnt; i++ {
-			idx := fmt.Sprintf("versions.%d", i)
+			idx := fmt.Sprintf("types.%d", i)
 			_, ok := rs.Primary.Attributes[idx]
 			if !ok {
-				return fmt.Errorf("expected %q, version not found", idx)
+				return fmt.Errorf("expected %q, type not found", idx)
 			}
 		}
 		return nil
 	}
 }
 
-const testAccTpuV2RuntimeVersionsConfig = `
-data "google_tpu_v2_runtime_versions" "available" {}
+const testAccTpuV2AcceleratorTypesConfig = `
+data "google_tpu_v2_accelerator_types" "available" {}
 `
+<% end -%>
