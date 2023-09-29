@@ -66,6 +66,8 @@ func testAccCheckTpuV2AcceleratorTypes(n string) resource.TestCheckFunc {
 }
 
 const testAccTpuV2AcceleratorTypesConfig = `
-data "google_tpu_v2_accelerator_types" "available" {}
+data "google_tpu_v2_accelerator_types" "available" {
+	provider = google-beta
+}
 `
 <% end -%>

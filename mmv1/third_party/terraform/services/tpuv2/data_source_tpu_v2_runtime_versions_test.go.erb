@@ -66,6 +66,8 @@ func testAccCheckTpuV2RuntimeVersions(n string) resource.TestCheckFunc {
 }
 
 const testAccTpuV2RuntimeVersionsConfig = `
-data "google_tpu_v2_runtime_versions" "available" {}
+data "google_tpu_v2_runtime_versions" "available" {
+	provider = google-beta
+}
 `
 <% end -%>
