@@ -100,7 +100,7 @@ exported:
 
 ### Importing IAM members
 
-IAM member imports use space-delimited identifiers that contain the resource's `instance`, `role`, and member. For example:
+IAM member imports use space-delimited identifiers that contain the resource's `instance`, `role`, and `member`. For example:
 
 * `"projects/{project}/instances/{instance} roles/editor user:jane@example.com"`
 

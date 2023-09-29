@@ -221,7 +221,7 @@ exported:
 
 ### Importing IAM members
 
-IAM member imports use space-delimited identifiers that contain the resource's `folder_id`, `role`, and member e.g.
+IAM member imports use space-delimited identifiers that contain the resource's `folder_id`, `role`, and `member` e.g.
 
 * `"folders/{{folder_id}} roles/viewer user:foo@example.com"`
 
