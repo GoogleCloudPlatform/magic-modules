@@ -94,6 +94,8 @@ examples:
       profile: 'my-profileid'
       network_name: 'my_network'
       private_connection: 'my_private_connection'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "dbms_oracle_profile")'
   - !ruby/object:Provider::Terraform::Examples
     name: 'database_migration_service_connection_profile_alloydb'
     primary_resource_id: 'alloydbprofile'
@@ -355,28 +357,6 @@ properties:
         values:
           - :NETWORK_ARCHITECTURE_OLD_CSQL_PRODUCER
           - :NETWORK_ARCHITECTURE_NEW_CSQL_PRODUCER
-      - !ruby/object:Api::Type::NestedObject
-        name: 'staticIpConnectivity'
-        allow_empty_object: true
-        description: |
-          This type has no fields.
-
-          The source database will allow incoming connections from the public IP of the destination database, default configuration.
-        properties: []
-        conflicts:
-          - postgresql.0.private_service_connect_connectivity
-      - !ruby/object:Api::Type::NestedObject
-        name: 'privateServiceConnectConnectivity'
-        description: |
-          A service attachment that exposes the database, and has the following format: projects/{project}/regions/{region}/serviceAttachments/{service_attachment_name}
-        conflicts:
-          - postgresql.0.static_ip_connectivity
-        properties:
-          - !ruby/object:Api::Type::String
-            name: 'serviceAttachment'
-            required: true
-            description: |
-              URI of the service attachment.
   - !ruby/object:Api::Type::NestedObject
     name: 'oracle'
     description: |
