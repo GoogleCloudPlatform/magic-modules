@@ -83,13 +83,19 @@ resource "google_compute_region_backend_service" "default" {
   protocol    = "HTTP"
   timeout_sec = 10
 
-  health_checks = [google_compute_http_health_check.default.id]
+  load_balancing_scheme = "EXTERNAL"
+
+  health_checks = [google_compute_region_health_check.default.id]
 }
 
-resource "google_compute_http_health_check" "default" {
+resource "google_compute_region_health_check" "default" {
   provider           = google-beta
+  region             = "us-central1"
   name               = "<%= ctx[:vars]['http_health_check_name'] %>"
-  request_path       = "/"
   check_interval_sec = 1
   timeout_sec        = 1
+
+  http_health_check {
+    port = 80
+  }
 }
