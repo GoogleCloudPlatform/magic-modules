@@ -120,7 +120,7 @@ IAM binding imports use space-delimited identifiers that contain the resource's 
 
 * `"{{billing_account_id}} roles/billing.user"`
 
-An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM members:
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM bindings:
 
 ```tf
 import {
@@ -141,7 +141,7 @@ IAM policy imports use the `billing_account_id` identifier of the Billing Accoun
 
 * `{{billing_account_id}}`
 
-An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM members:
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM policies:
 
 ```tf
 import {

@@ -92,7 +92,7 @@ exported:
 
 ## Import
 
-Pubsub subscription IAM resources can be imported using the project, subscription name, role and member.
+Pubsub subscription IAM resources can be imported using the project, subscription name, role and `member`.
 
 ```
 $ terraform import google_pubsub_subscription_iam_policy.editor projects/{your-project-id}/subscriptions/{your-subscription-name}

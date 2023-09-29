@@ -129,7 +129,7 @@ IAM binding imports use space-delimited identifiers that contain the resource's 
 
 * `"projects/{project}/regions/{region}/clusters/{cluster} roles/editor"`
 
-An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM members:
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM bindings:
 
 ```tf
 import {
@@ -150,7 +150,7 @@ IAM policy imports use the `cluster` identifier of the Dataproc Cluster resource
 
 * `projects/{project}/regions/{region}/clusters/{cluster}`
 
-An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM members:
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM policies:
 
 ```tf
 import {
