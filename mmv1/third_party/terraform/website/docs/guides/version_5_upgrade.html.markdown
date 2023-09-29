@@ -365,7 +365,7 @@ Previously, the default value for `rule.rate_limit_options.encorce_on_key` is "A
 
 ### `reconcile_connections` now defaults from API
 
-`reconcile_connections` previously defaults to true. Now it will default from the API.
+`reconcile_connections` previously defaulted to true. Now it will default from the API.
 
 ### Retyped `consumer_accept_lists` to SET from ARRAY
 
