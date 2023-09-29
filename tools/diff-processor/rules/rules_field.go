@@ -45,6 +45,10 @@ var fieldRule_ChangingType = FieldRule{
 }
 
 func fieldRule_ChangingType_func(old, new *schema.Schema, mc MessageContext) string {
+	// Type change doesn't matter for added / removed fields
+	if old == nil || new == nil {
+		return ""
+	}
 	message := mc.message
 	if old.Type != new.Type {
 		oldType := getValueType(old.Type)
@@ -69,15 +73,19 @@ func fieldRule_ChangingType_func(old, new *schema.Schema, mc MessageContext) str
 
 var fieldRule_BecomingRequired = FieldRule{
 	name:        "Field becoming Required Field",
-	definition:  "A field cannot become required as existing configs may not have this field defined. Thus, breaking configs in sequential plan or applies. If you are adding Required to a field so a block won't remain empty, this can cause two issues. First if it's a singular nested field the block may gain more fields later and it's not clear whether the field is actually required so it may be misinterpreted by future contributors. Second if users are defining empty blocks in existing configurations this change will break them. Consider these points in admittance of this type of change.",
+	definition:  "A field cannot become or be added as required. Existing configs may not have this field defined thus breaking them in sequential plan or applies. If you are adding Required to a field so a block won't remain empty, this can cause two issues. First if it's a singular nested field the block may gain more fields later and it's not clear whether the field is actually required so it may be misinterpreted by future contributors. Second if users are defining empty blocks in existing configurations this change will break them. Consider these points in admittance of this type of change.",
 	message:     "Field {{field}} changed from optional to required on {{resource}}",
 	identifier:  "field-optional-to-required",
 	isRuleBreak: fieldRule_BecomingRequired_func,
 }
 
 func fieldRule_BecomingRequired_func(old, new *schema.Schema, mc MessageContext) string {
+	// Ignore for removed fields
+	if new == nil {
+		return ""
+	}
 	message := mc.message
-	if !old.Required && new.Required {
+	if (old == nil || !old.Required) && new.Required {
 		return populateMessageContext(message, mc)
 	}
 
@@ -93,6 +101,10 @@ var fieldRule_BecomingComputedOnly = FieldRule{
 }
 
 func fieldRule_BecomingComputedOnly_func(old, new *schema.Schema, mc MessageContext) string {
+	// ignore for added / removed fields
+	if old == nil || new == nil {
+		return ""
+	}
 	message := mc.message
 	// if the field is computed only already
 	// this rule doesn't apply
@@ -115,6 +127,10 @@ var fieldRule_OptionalComputedToOptional = FieldRule{
 }
 
 func fieldRule_OptionalComputedToOptional_func(old, new *schema.Schema, mc MessageContext) string {
+	// ignore for added / removed fields
+	if old == nil || new == nil {
+		return ""
+	}
 	message := mc.message
 	if (old.Computed && old.Optional) && (new.Optional && !new.Computed) {
 		return populateMessageContext(message, mc)
@@ -131,6 +147,10 @@ var fieldRule_DefaultModification = FieldRule{
 }
 
 func fieldRule_DefaultModification_func(old, new *schema.Schema, mc MessageContext) string {
+	// ignore for added / removed fields
+	if old == nil || new == nil {
+		return ""
+	}
 	message := mc.message
 	if old.Default != new.Default {
 		oldDefault := fmt.Sprintf("%v", old.Default)
@@ -152,6 +172,10 @@ var fieldRule_GrowingMin = FieldRule{
 }
 
 func fieldRule_GrowingMin_func(old, new *schema.Schema, mc MessageContext) string {
+	// ignore for added / removed fields
+	if old == nil || new == nil {
+		return ""
+	}
 	message := mc.message
 	if old.MinItems < new.MinItems {
 		oldMin := fmt.Sprint(old.MinItems)
@@ -172,6 +196,10 @@ var fieldRule_ShrinkingMax = FieldRule{
 }
 
 func fieldRule_ShrinkingMax_func(old, new *schema.Schema, mc MessageContext) string {
+	// ignore for added / removed fields
+	if old == nil || new == nil {
+		return ""
+	}
 	message := mc.message
 	if old.MaxItems > new.MaxItems {
 		oldMax := fmt.Sprint(old.MinItems)

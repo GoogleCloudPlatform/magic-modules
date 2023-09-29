@@ -2,6 +2,7 @@ resource "google_container_cluster" "primary" {
   name               = "<%= ctx[:vars]['cluster_name'] %>"
   location           = "us-central1-a"
   initial_node_count = 1
+  deletion_protection  = "<%= ctx[:vars]['deletion_protection'] %>"
 }
 
 resource "google_gke_hub_membership" "<%= ctx[:primary_resource_id] %>" {
@@ -24,6 +25,11 @@ resource "google_gke_hub_membership_binding" "<%= ctx[:primary_resource_id] %>" 
   scope = google_gke_hub_scope.<%= ctx[:primary_resource_id] %>.name
   membership_id = "tf-test-membership%{random_suffix}"
   location = "global"
+  labels = {
+      keyb = "valueb"
+      keya = "valuea"
+      keyc = "valuec" 
+  }
   depends_on = [
     google_gke_hub_membership.<%= ctx[:primary_resource_id] %>,
     google_gke_hub_scope.<%= ctx[:primary_resource_id] %>

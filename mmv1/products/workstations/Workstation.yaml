@@ -117,14 +117,18 @@ properties:
     name: 'displayName'
     description: |
       Human-readable name for this resource.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description:
       'Client-specified labels that are applied to the resource and that are
       also propagated to the underlying Compute Engine resources.'
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueAnnotations
     name: 'annotations'
     description: 'Client-specified annotations. This is distinct from labels.'
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'env'
+    description: |
+      'Client-specified environment variables passed to the workstation container's entrypoint.'
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: |
