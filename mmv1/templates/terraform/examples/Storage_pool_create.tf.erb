@@ -4,5 +4,5 @@ resource "google_netapp_storage_pool" "<%= ctx[:primary_resource_id] %>" {
   location = "us-central1"
   service_level = "PREMIUM"
   capacity_gib = "2048"
-  network = "projects/{{project_number}}/global/networks/cxo-automation-vpc-01"
+  network = ""
 }
