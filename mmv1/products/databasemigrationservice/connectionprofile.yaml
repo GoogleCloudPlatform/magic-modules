@@ -336,8 +336,30 @@ properties:
           Output only. If the source is a Cloud SQL database, this field indicates the network architecture it's associated with.
         values:
           - :NETWORK_ARCHITECTURE_OLD_CSQL_PRODUCER
-          - :NETWORK_ARCHITECTURE_NEW_CSQL_PRODUCER -
-            !ruby/object:Api::Type::NestedObject
+          - :NETWORK_ARCHITECTURE_NEW_CSQL_PRODUCER
+      - !ruby/object:Api::Type::NestedObject
+        name: 'staticIpConnectivity'
+        allow_empty_object: true
+        ignore_read: true
+        description: |
+          This type has no fields.
+
+          The source database will allow incoming connections from the public IP of the destination database, default configuration.
+        properties: []
+        conflicts:
+          - postgresql.0.private_service_connect_connectivity
+      - !ruby/object:Api::Type::NestedObject
+        name: 'privateServiceConnectConnectivity'
+        description: |
+          A service attachment that exposes the database, and has the following format: projects/{project}/regions/{region}/serviceAttachments/{service_attachment_name}
+        conflicts:
+          - postgresql.0.static_ip_connectivity
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'serviceAttachment'
+            required: true
+            description: |
+              URI of the service attachment.
   - !ruby/object:Api::Type::NestedObject
     name: 'cloudsql'
     description: |
