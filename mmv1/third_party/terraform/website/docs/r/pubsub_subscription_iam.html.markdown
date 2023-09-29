@@ -139,7 +139,7 @@ $ terraform import google_pubsub_subscription_iam_binding.default "projects/{{pr
 
 ### Importing IAM policies
 
-IAM policy imports use the identifier of the resource in question. Policy resources can be imported using the `subscription`, `role`, and `member`. For example:
+IAM policy imports use the identifier of the Pubsub Subscription resource. For example:
 
 * `"projects/{{project_id}}/subscriptions/{{subscription}}"`
 

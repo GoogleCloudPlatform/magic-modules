@@ -4,7 +4,7 @@ description: |-
  Collection of resources to manage IAM policy for a BigQuery dataset.
 ---
 
-# IAM policy for BigQuery dataset
+# IAM policy for BigQuery Dataset
 
 Three different resources help you manage your IAM policy for BigQuery dataset. Each of these resources serves a different use case:
 
@@ -158,7 +158,7 @@ $ terraform import google_bigquery_dataset_iam_binding.default "projects/{{proje
 
 ### Importing IAM policies
 
-IAM policy imports use the identifier of the resource in question. Policy resources can be imported using the `dataset_id`, `role`, and `member`. For example:
+IAM policy imports use the identifier of the BigQuery Dataset resource. For example:
 
 * `projects/{{project_id}}/datasets/{{dataset_id}}`
 

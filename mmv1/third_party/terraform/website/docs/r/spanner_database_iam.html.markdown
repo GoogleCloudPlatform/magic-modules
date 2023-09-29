@@ -4,7 +4,7 @@ description: |-
  Collection of resources to manage IAM policy for a Spanner database.
 ---
 
-# IAM policy for Spanner databases
+# IAM policy for Spanner Databases
 
 Three different resources help you manage your IAM policy for a Spanner database. Each of these resources serves a different use case:
 
@@ -152,7 +152,7 @@ $ terraform import google_spanner_database_iam_binding.default "{{project}}/{{in
 
 ### Importing IAM policies
 
-IAM policy imports use the identifier of the resource in question. Policy resources can be imported using the `database`, `role`, and `member`. For example:
+IAM policy imports use the identifier of the Spanner Database resource in question. For example:
 
 * `{{project}}/{{instance}}/{{database}}`
 
