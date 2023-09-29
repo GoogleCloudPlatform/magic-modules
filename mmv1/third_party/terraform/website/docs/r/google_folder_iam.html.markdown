@@ -290,7 +290,7 @@ An audit config can be imported into a `google_folder_iam_audit_config` resource
 * `"folder/{{folder_id}} foo.googleapis.com"`
 
 
-An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM policies:
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import audit configs:
 
 ```tf
 import {
