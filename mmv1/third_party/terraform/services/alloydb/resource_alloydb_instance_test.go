@@ -592,8 +592,6 @@ resource "google_alloydb_instance" "default" {
   cluster       = google_alloydb_cluster.default.name
   instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "default" {
@@ -614,12 +612,6 @@ resource "google_compute_global_address" "private_ip_alloc" {
   purpose       = "VPC_PEERING"
   prefix_length = 16
   network       = data.google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = data.google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 `, context)
 }
@@ -633,9 +625,7 @@ resource "google_alloydb_instance" "default" {
 
   client_connection_config {
     require_connectors = %{require_connectors}
-  }
-	
-	depends_on = [google_service_networking_connection.vpc_connection]
+  }	
 }
 
 resource "google_alloydb_cluster" "default" {
@@ -656,12 +646,6 @@ resource "google_compute_global_address" "private_ip_alloc" {
   purpose       = "VPC_PEERING"
   prefix_length = 16
   network       = data.google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = data.google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 `, context)
 }
@@ -678,8 +662,6 @@ resource "google_alloydb_instance" "default" {
       ssl_mode = "ENCRYPTED_ONLY"
     }
   }
-
-	depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "default" {
@@ -700,12 +682,6 @@ resource "google_compute_global_address" "private_ip_alloc" {
   purpose       = "VPC_PEERING"
   prefix_length = 16
   network       = data.google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = data.google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 `, context)
 }
@@ -722,9 +698,7 @@ resource "google_alloydb_instance" "default" {
     ssl_config {
       ssl_mode = "%{ssl_mode}"
     }
-  }
-	
-	depends_on = [google_service_networking_connection.vpc_connection]
+  }	
 }
 
 resource "google_alloydb_cluster" "default" {
@@ -745,12 +719,6 @@ resource "google_compute_global_address" "private_ip_alloc" {
   purpose       = "VPC_PEERING"
   prefix_length = 16
   network       = data.google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = data.google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 `, context)
 }
