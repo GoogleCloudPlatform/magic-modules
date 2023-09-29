@@ -25,7 +25,6 @@ func testAccAccessContextManagerAccessLevelCondition_basicTest(t *testing.T) {
 	vpcName := fmt.Sprintf("test-vpc-%s", acctest.RandString(t, 10))
 
 	expected := map[string]interface{}{
-		"ipSubnetworks": []interface{}{"192.0.4.0/24"},
 		"members":       []interface{}{"user:test@google.com", "user:test2@google.com", fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", serviceAccountName, project)},
 		"devicePolicy": map[string]interface{}{
 			"requireCorpOwned": true,
@@ -39,11 +38,11 @@ func testAccAccessContextManagerAccessLevelCondition_basicTest(t *testing.T) {
 		"vpcNetworkSources": []interface{}{
 			map[string]interface{}{
 				"vpcSubnetwork": map[string]interface{}{
-					"network": fmt.Sprintf("//compute.googleapis.com/projects/%s/global/networks/%s", project, vpcName),
-					"vpcIpSubnetworks": []interface{}{"20.0.5.0/24"}
-				}
-			}
-		}
+					"network":          fmt.Sprintf("//compute.googleapis.com/projects/%s/global/networks/%s", project, vpcName),
+					"vpcIpSubnetworks": []interface{}{"20.0.5.0/24"},
+				},
+			},
+		},
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
