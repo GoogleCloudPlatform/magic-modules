@@ -166,8 +166,8 @@ properties:
       ** This property can be changed manually in the Google Cloud Healthcare admin console without recreating the FHIR store **
     required: false
     immutable: true
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: labels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     required: false
     description: |
       User-supplied key-value pairs used to organize FHIR stores.

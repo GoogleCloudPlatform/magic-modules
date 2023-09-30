@@ -42,6 +42,11 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: 'templates/terraform/encoders/cloud_run_domain_mapping.go.erb'
   decoder: 'templates/terraform/decoders/cloud_run.go.erb'
   constants: templates/terraform/constants/cloud_run_domain_mapping.go.erb
+custom_diff: [
+  'hasMetadata',
+]
+state_upgraders: true
+schema_version: 1
 parameters:
   - !ruby/object:Api::Type::String
     name: location
@@ -154,18 +159,16 @@ properties:
         default_value: :AUTOMATIC
   - !ruby/object:Api::Type::NestedObject
     name: metadata
-    required: true
+    default_from_api: true
     description: Metadata associated with this DomainMapping.
     properties:
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: labels
+      - !ruby/object:Api::Type::KeyValueLabels
+        name: 'labels'
         description: |-
           Map of string keys and values that can be used to organize and categorize
           (scope and select) objects. May match selectors of replication controllers
           and routes.
           More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
-        default_from_api: true
-        diff_suppress_func: 'DomainMappingLabelDiffSuppress'
       - !ruby/object:Api::Type::Integer
         name: generation
         description: |-
@@ -203,8 +206,8 @@ properties:
           In Cloud Run the namespace must be equal to either the
           project ID or project number.
         custom_flatten: templates/terraform/custom_flatten/set_to_project.go.erb
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: annotations
+      - !ruby/object:Api::Type::KeyValueAnnotations
+        name: 'annotations'
         description: |-
           Annotations is a key value map stored with a resource that
           may be set by external tools to store and retrieve arbitrary metadata. More
@@ -213,5 +216,3 @@ properties:
           **Note**: The Cloud Run API may add additional annotations that were not provided in your config.
           If terraform plan shows a diff where a server-side annotation is added, you can add it to your config
           or apply the lifecycle.ignore_changes rule to the metadata.0.annotations field.
-        default_from_api: true
-        diff_suppress_func: 'cloudrunAnnotationDiffSuppress'

@@ -52,6 +52,12 @@ resource "google_dataplex_asset" "primary" {
     name = "projects/{{project}}/buckets/{{bucket}}"
     type = "STORAGE_BUCKET"
   }
+
+  labels = {
+    env     = "foo"
+    my-asset = "exists"
+  }
+
  
   project = "{{project}}"
   depends_on = [
