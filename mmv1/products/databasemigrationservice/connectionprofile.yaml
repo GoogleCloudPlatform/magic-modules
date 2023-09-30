@@ -446,6 +446,7 @@ properties:
               The replica will use this certificate to verify it's connecting to the right host.
       - !ruby/object:Api::Type::NestedObject
         name: 'staticServiceIpConnectivity'
+        send_empty_value: true
         allow_empty_object: true
         description: |
           This object has no nested fields.

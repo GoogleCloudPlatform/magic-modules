@@ -1,4 +1,4 @@
-resource "google_datastream_private_connection" "private_connection" {
+resource "google_database_migration_service_private_connection" "private_connection" {
   display_name          = "Connection profile"
   location              = "us-central1"
   private_connection_id = "<%= ctx[:vars]['private_connection'] %>"
@@ -8,12 +8,12 @@ resource "google_datastream_private_connection" "private_connection" {
   }
 
   vpc_peering_config {
-    vpc = google_compute_network.default.id
+    vpc_name = data.google_compute_network.default.id
     subnet = "10.0.0.0/29"
   }
 }
 
-resource "google_compute_network" "default" {
+data "google_compute_network" "default" {
   name = "<%= ctx[:vars]['network_name'] %>"
 }
 
