@@ -13,8 +13,8 @@ import (
 )
 
 type ccGithub interface {
-	GetPullRequestAuthor(string) (string, error)
-	GetUserType(string) github.UserType
+	GetPullRequestAuthor(prNumber string) (string, error)
+	GetUserType(user string) github.UserType
 	RemoveLabel(prNumber string, label string) error
 	PostBuildStatus(prNumber string, title string, state string, targetUrl string, commitSha string) error
 }

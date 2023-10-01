@@ -26,7 +26,7 @@ func TestAccContainerAttachedCluster_update(t *testing.T) {
 				ResourceName:            "google_container_attached_cluster.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "annotations"},
 			},
 			{
 				Config: testAccContainerAttachedCluster_containerAttachedCluster_update(context),
@@ -35,7 +35,7 @@ func TestAccContainerAttachedCluster_update(t *testing.T) {
 				ResourceName:            "google_container_attached_cluster.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "annotations"},
 			},
 			{
 				Config: testAccContainerAttachedCluster_containerAttachedCluster_destroy(context),
@@ -44,7 +44,7 @@ func TestAccContainerAttachedCluster_update(t *testing.T) {
 				ResourceName:            "google_container_attached_cluster.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "annotations"},
 			},
 		},
 	})

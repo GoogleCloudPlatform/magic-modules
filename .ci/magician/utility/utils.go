@@ -9,7 +9,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-func RequestCall(url, method, credentials string, result interface{}, body interface{}) (int, error) {
+func RequestCall(url, method, credentials string, result any, body any) (int, error) {
 	client := &http.Client{}
 	jsonBody, err := json.Marshal(body)
 	if err != nil {
