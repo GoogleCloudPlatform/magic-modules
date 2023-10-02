@@ -39,12 +39,13 @@ func TestAccNetworkServicesGrpcRoute_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
       {
-				Config: testAccNetworkServicesGrpcRoute_update(grpcRouteName),
+				Config: testAccNetworkServicesGrpcRoute_update2(grpcRouteName),
 			},
 			{
 				ResourceName:      "google_network_services_grpc_route.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})
