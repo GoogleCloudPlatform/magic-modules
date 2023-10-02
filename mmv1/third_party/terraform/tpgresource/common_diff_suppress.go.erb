@@ -116,20 +116,20 @@ func EmptyOrUnsetBlockDiffSuppress(k, old, new string, d *schema.ResourceData) b
 }
 
 func ListStringsSuppress(values []string) schema.SchemaDiffSuppressFunc {
-       return func(k, old, new string, d *schema.ResourceData) bool {
-               return (old == "" && implContains(values, new)) || (new == "" && implContains(values, old))
-       }
+	return func(k, old, new string, d *schema.ResourceData) bool {
+		return (old == "" && implContains(values, new)) || (new == "" && implContains(values, old))
+	}
 }
 
 // fuction to check given string is in array or not
 func implContains(sl []string, name string) bool {
-       // iterate over the array and compare given string to each element
-       for _, value := range sl {
-               if value == name {
-                       return true
-               }
-       }
-       return false
+	// iterate over the array and compare given string to each element
+	for _, value := range sl {
+		if value == name {
+			return true
+		}
+	}
+	return false
 }
 
 // The core logic for EmptyOrUnsetBlockDiffSuppress, in a format that is more conducive

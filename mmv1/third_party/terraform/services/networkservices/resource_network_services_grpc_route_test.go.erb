@@ -38,6 +38,14 @@ func TestAccNetworkServicesGrpcRoute_update(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
+      {
+				Config: testAccNetworkServicesGrpcRoute_update(grpcRouteName),
+			},
+			{
+				ResourceName:      "google_network_services_grpc_route.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -131,6 +139,48 @@ func testAccNetworkServicesGrpcRoute_update(grpcRouteName string) string {
   }
 `, grpcRouteName)
 }
+
+func testAccNetworkServicesGrpcRoute_update2(grpcRouteName string) string {
+	return fmt.Sprintf(`
+  resource "google_network_services_grpc_route" "foobar" {
+    name                   = "%s"
+    labels                 = {
+      foo = "bar"
+    }
+    description             = "updated description"
+    hostnames               = ["example"]
+    rules                   {
+      matches {
+        headers {
+          key = "key"
+          value = "value"
+        }
+      }
+      action {
+        retry_policy {
+            retry_conditions = ["cancelled"]
+            num_retries = 2
+        }
+      }
+    }
+    rules                   {
+      matches {
+        headers {
+          key = "key1"
+          value = "value1"
+        }
+      }
+      action {
+        retry_policy {
+            retry_conditions = ["connect-failure"]
+            num_retries = 1
+        }
+      }
+    }
+  }
+`, grpcRouteName)
+}
+
 
 <% end -%>
 

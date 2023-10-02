@@ -149,7 +149,7 @@ properties:
                         - :EXACT
                         - :REGULAR_EXPRESSION
                       default_value: :EXACT
-                diff_suppress_func: 'tpgresource.ListStringsSuppress([]string{"TYPE_UNSPECIFIED", "EXACT"})'
+                diff_suppress_func: 'tpgresource.ListStringsSuppress([]string{"TYPE_UNSPECIFIED", "EXACT", ""})'
               - !ruby/object:Api::Type::NestedObject
                 name: method
                 description: |
