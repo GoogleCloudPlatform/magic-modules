@@ -1212,7 +1212,7 @@ resource "google_dataflow_flex_template_job" "flex_job_kms" {
 `, topicName, bucket, key_ring, crypto_key, job)
 }
 
-func testAccDataflowFlexTemplateJob_additionalExperiments(job, bucket, topicName, randStr string, experiments []string) string {
+func testAccDataflowFlexTemplateJob_additionalExperiments(job, bucket, topicName string, experiments []string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
