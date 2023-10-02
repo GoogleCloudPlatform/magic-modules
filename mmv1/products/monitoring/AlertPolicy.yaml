@@ -859,7 +859,7 @@ properties:
                 alerting rule, then this value should be taken from the enclosing
                 rule group.
             - !ruby/object:Api::Type::KeyValuePairs
-              name: labels
+              name: 'labels'
               description: |
                 Labels to add to or overwrite in the PromQL query result. Label names
                 must be valid.

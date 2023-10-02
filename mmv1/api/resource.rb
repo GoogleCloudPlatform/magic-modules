@@ -201,6 +201,10 @@ module Api
       # mmv1/templates/terraform/state_migrations/
       # used for maintaining state stability with resources first provisioned on older api versions.
       attr_reader :schema_version
+      # From this schema version on, state_upgrader code is generated for the resource.
+      # When unset, state_upgrade_base_schema_version defauts to 0.
+      # Normally, it is not needed to be set.
+      attr_reader :state_upgrade_base_schema_version
       attr_reader :state_upgraders
       # This block inserts the named function and its attribute into the
       # resource schema -- the code for the migrate_state function must
@@ -216,6 +220,10 @@ module Api
       # Set to true for resources that are unable to be read from the API, such as
       # public ca external account keys
       attr_reader :skip_read
+
+      # Set to true for resources that wish to disable automatic generation of default provider
+      # value customdiff functions
+      attr_reader :skip_default_cdiff
 
       # This enables resources that get their project via a reference to a different resource
       # instead of a project field to use User Project Overrides
@@ -318,10 +326,12 @@ module Api
       check :error_retry_predicates, type: Array, item_type: String
       check :error_abort_predicates, type: Array, item_type: String
       check :schema_version, type: Integer
+      check :state_upgrade_base_schema_version, type: Integer, default: 0
       check :state_upgraders, type: :boolean, default: false
       check :migrate_state, type: String
       check :skip_delete, type: :boolean, default: false
       check :skip_read, type: :boolean, default: false
+      check :skip_default_cdiff, type: :boolean, default: false
       check :supports_indirect_user_project_override, type: :boolean, default: false
       check :legacy_long_form_project, type: :boolean, default: false
       check :read_error_transform, type: String
@@ -340,6 +350,10 @@ module Api
     # excluded. This is used for PropertyOverride validation
     def all_properties
       ((@properties || []) + (@parameters || []))
+    end
+
+    def properties_with_excluded
+      @properties || []
     end
 
     def properties
@@ -385,8 +399,13 @@ module Api
     # At Create, they have no value but they can just be read in anyways, and after a Read
     # they will need to be set in every Update.
     def settable_properties
-      all_user_properties.reject { |v| v.output && !v.is_a?(Api::Type::Fingerprint) }
-                         .reject(&:url_param_only)
+      props = all_user_properties.reject do |v|
+        v.output && !v.is_a?(Api::Type::Fingerprint) && !v.is_a?(Api::Type::KeyValueEffectiveLabels)
+      end
+      props = props.reject(&:url_param_only)
+      props.reject do |v|
+        v.is_a?(Api::Type::KeyValueLabels) || v.is_a?(Api::Type::KeyValueAnnotations)
+      end
     end
 
     # Properties that will be returned in the API body
@@ -437,6 +456,104 @@ module Api
 
     def decoder?
       !@transport&.decoder.nil?
+    end
+
+    def add_labels_related_fields(props, parent)
+      props.each do |p|
+        if p.is_a? Api::Type::KeyValueLabels
+          add_labels_fields(props, parent, p)
+        elsif p.is_a? Api::Type::KeyValueAnnotations
+          add_annotations_fields(props, parent, p)
+        elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
+          p.properties = add_labels_related_fields(p.all_properties, p)
+        end
+      end
+      props
+    end
+
+    def add_labels_fields(props, parent, labels)
+      # The effective_labels field is used to write to API, instead of the labels field.
+      labels.ignore_write = true
+      labels.description = "#{labels.description}\n\n#{get_labels_field_note(labels.name)}"
+
+      @custom_diff ||= []
+      if parent.nil? || parent.flatten_object
+        @custom_diff.append('tpgresource.SetLabelsDiff')
+      elsif parent.name == 'metadata'
+        @custom_diff.append('tpgresource.SetMetadataLabelsDiff')
+      end
+
+      props << build_terraform_labels_field('labels', labels.field_min_version)
+      props << build_effective_labels_field('labels', labels)
+    end
+
+    def add_annotations_fields(props, parent, annotations)
+      # The effective_annotations field is used to write to API,
+      # instead of the annotations field.
+      annotations.ignore_write = true
+      note = get_labels_field_note(annotations.name)
+      annotations.description = "#{annotations.description}\n\n#{note}"
+
+      @custom_diff ||= []
+      if parent.nil?
+        @custom_diff.append('tpgresource.SetAnnotationsDiff')
+      elsif parent.name == 'metadata'
+        @custom_diff.append('tpgresource.SetMetadataAnnotationsDiff')
+      end
+
+      props << build_effective_labels_field('annotations', annotations)
+    end
+
+    def build_effective_labels_field(name, labels)
+      description = "All of #{name} (key/value pairs)\
+ present on the resource in GCP, including the #{name} configured through Terraform,\
+ other clients and services."
+
+      Api::Type::KeyValueEffectiveLabels.new(
+        name: "effective#{name.capitalize}",
+        output: true,
+        api_name: name,
+        description:,
+        min_version: labels.field_min_version,
+        update_verb: labels.update_verb,
+        update_url: labels.update_url,
+        immutable: labels.immutable
+      )
+    end
+
+    def build_terraform_labels_field(name, min_version)
+      description = "The combination of #{name} configured directly on the resource
+ and default #{name} configured on the provider."
+
+      Api::Type::KeyValueTerraformLabels.new(
+        name: "terraform#{name.capitalize}",
+        output: true,
+        api_name: name,
+        description:,
+        min_version:,
+        ignore_write: true
+      )
+    end
+
+    # Return labels fields that should be added to ImportStateVerifyIgnore
+    def ignore_read_labels_fields(props)
+      fields = []
+      props.each do |p|
+        if (p.is_a? Api::Type::KeyValueLabels) ||
+           (p.is_a? Api::Type::KeyValueTerraformLabels) ||
+           (p.is_a? Api::Type::KeyValueAnnotations)
+          fields << p.terraform_lineage
+        elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
+          fields.concat(ignore_read_labels_fields(p.all_properties))
+        end
+      end
+      fields
+    end
+
+    def get_labels_field_note(title)
+      "**Note**: This field is non-authoritative, and will only manage the #{title} present " \
+"in your configuration.
+Please refer to the field `effective_#{title}` for all of the #{title} present on the resource."
     end
 
     # ====================
