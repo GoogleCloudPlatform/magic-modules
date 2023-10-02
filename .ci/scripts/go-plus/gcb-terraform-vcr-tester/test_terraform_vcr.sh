@@ -327,5 +327,3 @@ fi
 set -e
 
 update_status ${test_state}
-
-# No provider change but still trigger tests due to a bug in CI
