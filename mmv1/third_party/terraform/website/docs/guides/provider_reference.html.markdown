@@ -244,14 +244,10 @@ following ordered by precedence.
 
 * `default_labels` (Optional) Labels that will be applied to all resources
 with a top level `labels` field or a `labels` field nested inside a top level
-`metadata` field.
-
-Setting the same key as a default label at the resource level will override the
-default value for that label.
-
-These values will be recorded in individual resource plans through the
-`terraform_labels` and `effective_labels` fields.
-
+`metadata` field. Setting the same key as a default label at the resource level
+will override the default value for that label. These values will be recorded in 
+individual resource plans through the `terraform_labels` and `effective_labels`
+fields.
 
 ```
 provider "google" {
