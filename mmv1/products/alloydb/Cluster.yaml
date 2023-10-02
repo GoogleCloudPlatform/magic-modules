@@ -228,7 +228,7 @@ properties:
     name: 'state'
     output: true
     description: 'Output only. The current serving state of the cluster.'
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueAnnotations
     name: 'annotations'
     description: |
       Annotations to allow client tools to store small amount of arbitrary data. This is distinct from labels. https://google.aip.dev/128
