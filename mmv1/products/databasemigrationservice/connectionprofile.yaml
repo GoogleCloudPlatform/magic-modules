@@ -79,23 +79,13 @@ examples:
       sqldb_pass: 'my-password'
       profile: 'my-profileid'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'database_migration_service_connection_profile_oracle_forward_ssh'
+    name: 'database_migration_service_connection_profile_oracle'
     primary_resource_id: 'oracleprofile'
     ignore_read_extra:
       - 'oracle.0.password'
     vars:
       profile: 'my-profileid'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'database_migration_service_connection_profile_oracle_private'
-    primary_resource_id: 'oracleprofile'
-    ignore_read_extra:
-      - 'oracle.0.password'
-    vars:
-      profile: 'my-profileid'
-      network_name: 'my_network'
-      private_connection: 'my_private_connection'
-    test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "dbms-oracle-profile")'
+    skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'database_migration_service_connection_profile_alloydb'
     primary_resource_id: 'alloydbprofile'

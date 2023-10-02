@@ -11,11 +11,6 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
     username = "username"
     password = "password"
     database_service = "dbprovider"
-    forward_ssh_connectivity {
-      hostname = "hostnamessh"
-      username = "usernamessh"
-      port = 22
-      password = "passwordssh"
-    }
+    static_service_ip_connectivity {}
   }
 }
