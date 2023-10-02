@@ -97,7 +97,7 @@ immediately, with more details in dedicated headers below:
 !> For resources with **any** `labels` values previously defined, running
 `terraform plan` or `terraform apply` on Google provider `5.0.0` or later with
 an existing pre-`5.0.0` resource before an `apply`, the plan will show an
-updated adding your current `labels` values to `terraform_labels`. This change
+update adding your current `labels` values to `terraform_labels`. This change
 may result in a no-op update call to the API depending on the resource
 implementation, but can otherwise be safely applied.
 
@@ -106,7 +106,7 @@ with an empty value (`""`) should be avoided, as they will be ignored and not
 included in requests to the API. Replacing those labels' values with `_` or
 `true` are recommended.
 
-Not all of Google cloud resources support labels and annotations. Please check
+Not all of Google Cloud resources support labels and annotations. Please check
 the Terraform Google provider resource documentation to figure out if a given
 resource supports `labels` or `annotations` fields.
 
@@ -196,7 +196,7 @@ field that affects child resources.
 Resources that previously contained a single `labels` field will now contain
 three fields:
 
-* The `labels` field is now non-authoritative and only manage the label keys
+* The `labels` field is now non-authoritative and only manages the label keys
 defined in your configuration for the resource. If a label was added outside of
 Terraform, it will not be managed by Terraform, unless it is added to the
 `labels` field in the configuration.
