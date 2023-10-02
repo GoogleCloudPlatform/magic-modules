@@ -1,7 +1,7 @@
 ---
 subcategory: "Tags"
 description: |-
-  A LocationTagBinding represents a connection between a TagValue and a non-global cloud resourcec.
+  A LocationTagBinding represents a connection between a TagValue and a non-global cloud resource.
 ---
 
 # google\_tags\_location\_tag\_binding
