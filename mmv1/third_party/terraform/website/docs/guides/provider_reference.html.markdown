@@ -240,9 +240,9 @@ following ordered by precedence.
     * GCLOUD_ZONE
     * CLOUDSDK_COMPUTE_ZONE
 
-### Provider Default Labels
+---
 
-`default_labels` configured on the provider will be applied to all resources
+* `default_labels` (Optional) Labels that will be applied to all resources
 with a top level `labels` field or a `labels` field nested inside a top level
 `metadata` field.
 
@@ -252,7 +252,6 @@ default value for that label.
 These values will be recorded in individual resource plans through the
 `terraform_labels` and `effective_labels` fields.
 
-### Example Usage - Using `default_labels` with `google_compute_address`
 
 ```
 provider "google" {
@@ -272,8 +271,6 @@ resource "google_compute_address" "my_address" {
   }
 }
 ```
-
-Provider-level default annotations are not supported at this time.
 
 ## Advanced Settings Configuration
 
