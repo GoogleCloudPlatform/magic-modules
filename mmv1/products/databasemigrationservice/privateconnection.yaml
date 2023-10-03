@@ -120,4 +120,4 @@ properties:
         name: 'subnet'
         required: true
         description: |
-          A free subnet for peering. (CIDR of /29) 
+          A free subnet for peering. (CIDR of /29)
