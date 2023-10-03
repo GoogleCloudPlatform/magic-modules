@@ -556,6 +556,14 @@ module Api
 Please refer to the field `effective_#{title}` for all of the #{title} present on the resource."
     end
 
+    def terraform_labels?
+      terraform_label = root_properties.select do |p|
+        p.is_a?(Api::Type::KeyValueTerraformLabels)
+      end
+
+      terraform_label.length.positive?
+    end
+
     # ====================
     # Version-related methods
     # ====================
