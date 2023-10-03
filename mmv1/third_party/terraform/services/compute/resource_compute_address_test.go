@@ -1,5 +1,3 @@
-<% autogen_exception -%>
-
 package compute_test
 
 import (
@@ -59,7 +57,6 @@ func TestAccComputeAddress_internal(t *testing.T) {
 	})
 }
 
-<% unless version == "ga" -%>
 func TestAccComputeAddress_networkTier_withLabels(t *testing.T) {
 	t.Parallel()
 
@@ -113,9 +110,9 @@ func TestAccComputeAddress_networkTier_withLabels(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_compute_address.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_address.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
@@ -138,26 +135,18 @@ func TestAccComputeAddress_networkTier_withProvider5(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	oldVersion := map[string]resource.ExternalProvider{
-		"google": {
-			VersionConstraint: "4.75.0", // a version that doesn't separate user defined labels and system labels
-			Source:            "registry.terraform.io/hashicorp/google",
-		},
-	}
-
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		PreCheck: func() { acctest.AccTestPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeAddress_networkTier(acctest.RandString(t, 10)),
-				ExternalProviders: oldVersion,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_compute_address.foobar", "labels.%"),
 					resource.TestCheckNoResourceAttr("google_compute_address.foobar", "effective_labels.%"),
 				),
 			},
 			{
-				Config: testAccComputeAddress_networkTier_withLabels(acctest.RandString(t, 10)),
+				Config:                   testAccComputeAddress_networkTier_withLabels(acctest.RandString(t, 10)),
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.%", "2"),
@@ -175,7 +164,7 @@ func TestAccComputeAddress_networkTier_withProvider5(t *testing.T) {
 
 func TestAccComputeAddress_withProviderDefaultLabels(t *testing.T) {
 	// The test failed if VCR testing is enabled, because the cached provider config is used.
-	// With the cached provider config, any changes in the provider default labels will not be applied. 
+	// With the cached provider config, any changes in the provider default labels will not be applied.
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
@@ -200,9 +189,9 @@ func TestAccComputeAddress_withProviderDefaultLabels(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_compute_address.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_address.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
@@ -245,9 +234,9 @@ func TestAccComputeAddress_withProviderDefaultLabels(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_compute_address.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_address.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
@@ -267,9 +256,9 @@ func TestAccComputeAddress_withProviderDefaultLabels(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_compute_address.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_address.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
@@ -377,7 +366,6 @@ resource "google_compute_address" "foobar" {
 }
 `, i)
 }
-<% end -%>
 
 func testAccComputeAddress_internal(i string) string {
 	return fmt.Sprintf(`
