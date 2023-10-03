@@ -12,23 +12,39 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
+// terraform resource config
 config := meta.(*transport_tpg.Config)
 
-expectedName, _ := expandNestedMonitoringMonitoredProjectName(d.Get("name"), d, config)
-expectedFlattenedName := flattenNestedMonitoringMonitoredProjectName(expectedName, d, config)
-_, isNumErr := tpgresource.StringToFixed64(expectedFlattenedName.(string))
-expectProjectNumber := isNumErr == nil
+// The API returns all monitored projects
+monitoredProjects, _ := res["monitoredProjects"].([]interface{})
 
-name := res["name"].(string)
-name = tpgresource.GetResourceNameFromSelfLink(name)
-
-if expectProjectNumber {
-	res["name"] = name
-} else if name != "" {
-	project, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(name).Do()
-	if err != nil {
-		return nil, err
-	}
-	res["name"] = project.ProjectId
+// Convert configured terraform monitored_project resource name to a ProjectNumber
+expectedProject, configProjectErr := config.NewResourceManagerClient(config.UserAgent).Projects.Get(d.Get("name").(string)).Do()
+if configProjectErr != nil {
+	return nil, configProjectErr
 }
-return res, nil
+expectedProjectNumber := strconv.FormatInt(expectedProject.ProjectNumber, 10)
+
+log.Printf("[DEBUG] Scanning for ProjectNumber: %s.", expectedProjectNumber)
+
+// Iterate through the list of monitoredProjects to make sure one matches the configured monitored_project
+for _, monitoredProjectRaw := range monitoredProjects {
+	if monitoredProjectRaw == nil {
+		continue
+	}
+	monitoredProject := monitoredProjectRaw.(map[string]interface{})
+
+	// MonitoredProject names have the format locations/global/metricsScopes/[metricScopeProjectNumber]/projects/[projectNumber]
+	monitoredProjectName := monitoredProject["name"]
+
+	// `res` contains the MonitoredProjects of the relevant metrics scope
+	log.Printf("[DEBUG] Matching ProjectNumbers: %s to %s.", expectedProjectNumber, monitoredProjectName)
+	if strings.HasSuffix(monitoredProjectName.(string), fmt.Sprintf("/%s", expectedProjectNumber)) {
+		// Match found - set response object name to match
+		res["name"] = monitoredProjectName
+		log.Printf("[DEBUG] Matched ProjectNumbers: %s and %s.", expectedProjectNumber, monitoredProjectName)
+		return res, nil
+	}
+}
+log.Printf("[DEBUG] MonitoringMonitoredProject couldn't be matched.")
+return nil, nil

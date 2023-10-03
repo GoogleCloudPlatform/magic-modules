@@ -32,6 +32,7 @@ require 'provider/terraform'
 require 'provider/terraform_kcc'
 require 'provider/terraform_oics'
 require 'provider/terraform_tgc'
+require 'provider/terraform_tgc_cai2hcl'
 
 products_to_generate = nil
 all_products = false
@@ -223,6 +224,9 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
       end
       res_yaml = File.read(file_path)
       resource = Api::Compiler.new(res_yaml).run
+      resource.properties = resource.add_labels_related_fields(
+        resource.properties_with_excluded, nil
+      )
       resource.validate
       resources.push(resource)
     end
@@ -277,6 +281,7 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
       'oics' => Provider::TerraformOiCS,
       'validator' => Provider::TerraformGoogleConversion,
       'tgc' => Provider::TerraformGoogleConversion,
+      'tgc_cai2hcl' => Provider::CaiToTerraformConversion,
       'kcc' => Provider::TerraformKCC
     }
 
