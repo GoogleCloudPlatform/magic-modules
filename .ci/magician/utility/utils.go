@@ -21,6 +21,11 @@ func RequestCall(url, method, credentials string, result any, body any) (int, er
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", credentials))
 	req.Header.Set("Content-Type", "application/json")
+	fmt.Println("")
+	fmt.Println("request url: ", url)
+	fmt.Println("request body: ", jsonBody)
+	fmt.Println("")
+
 	resp, err := client.Do(req)
 	if err != nil {
 		return 3, err
@@ -32,6 +37,10 @@ func RequestCall(url, method, credentials string, result any, body any) (int, er
 			return 4, err
 		}
 	}
+
+	fmt.Println("response status-code: ", resp.StatusCode)
+	fmt.Println("response body: ", resp.Body)
+	fmt.Println("")
 
 	return resp.StatusCode, nil
 }
