@@ -622,7 +622,7 @@ The `web_server_network_access_control` supports:
 
 * `cidr_block` -
   (Required)
-  `cidr_block< must be specified in CIDR notation.
+  `cidr_block` must be specified in CIDR notation.
 
 ## Argument Reference - Cloud Composer 2
 
@@ -707,6 +707,11 @@ The `config` block supports:
   Kubernetes master through HTTPS except traffic from the given CIDR blocks,
   Google Compute Engine Public IPs and Google Prod IPs. Structure is
   documented below.
+
+* `storage_config` -
+  (Optional)
+  Configuration options for storage used by Composeer environment.
+  [documented below](#nested_storage_config).
 
 The `node_config` block supports:
 
@@ -1029,6 +1034,12 @@ The `worker` block supports:
   The maximum number of Airflow workers that the environment can run. The number of workers in the
   environment does not go above this number, even if a higher number of workers is required to
   handle the load.
+
+<a name="nested_storage_config"></a>The `storage_config` supports:
+
+* `bucket_name` -
+  (Optional)
+  `bucket_name` Name of an existing Cloud Storage bucket to be used by the environment.
 
 ## Attributes Reference
 
