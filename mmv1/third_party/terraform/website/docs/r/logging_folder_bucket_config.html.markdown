@@ -16,15 +16,15 @@ Manages a folder-level logging bucket config. For more information see
 
 ```hcl
 resource "google_folder" "default" {
-	display_name = "some-folder-name"
-	parent       = "organizations/123456789"
+  display_name = "some-folder-name"
+  parent       = "organizations/123456789"
 }
 
 resource "google_logging_folder_bucket_config" "basic" {
-	folder    = google_folder.default.name
-	location  = "global"
-	retention_days = 30
-	bucket_id = "_Default"
+  folder         = google_folder.default.name
+  location       = "global"
+  retention_days = 30
+  bucket_id      = "_Default"
 }
 ```
 
@@ -32,15 +32,15 @@ Create logging bucket with index configs
 
 ```hcl
 resource "google_logging_folder_bucket_config" "example-folder-bucket-index-configs" {
-	folder          = google_folder.default.name
-	location        = "global"
-	retention_days  = 30
-	bucket_id       = "_Default"
+  folder          = google_folder.default.name
+  location        = "global"
+  retention_days  = 30
+  bucket_id       = "_Default"
 	
-	index_configs   = {
-      file_path   = "jsonPayload.request.status"
-      type        = "INDEX_TYPE_STRING"
-    }
+  index_configs   = {
+    file_path   = "jsonPayload.request.status"
+    type        = "INDEX_TYPE_STRING"
+  }
 }
 ```
 
@@ -65,11 +65,7 @@ The following arguments are supported:
 * `field_path` - The LogEntry field path to index.
   Note that some paths are automatically indexed, and other paths are not eligible for indexing. See [indexing documentation]( https://cloud.google.com/logging/docs/view/advanced-queries#indexed-fields) for details.
 
-* `type` - The type of data in this index.
-
-* `create_time` - The timestamp when the index was last modified.
-  This is used to return the timestamp, and will be ignored if supplied during update.
-  A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+* `type` - The type of data in this index. Allowed types include `INDEX_TYPE_UNSPECIFIED`, `INDEX_TYPE_STRING` and `INDEX_TYPE_INTEGER`.
 
 ## Attributes Reference
 

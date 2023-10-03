@@ -11,8 +11,6 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-var indexTypes = []string{"INDEX_TYPE_UNSPECIFIED", "INDEX_TYPE_STRING", "INDEX_TYPE_INTEGER"}
-
 var loggingBucketConfigSchema = map[string]*schema.Schema{
 	"name": {
 		Type:        schema.TypeString,
@@ -99,7 +97,7 @@ See [Enabling CMEK for Logging Buckets](https://cloud.google.com/logging/docs/ro
 			Schema: map[string]*schema.Schema{
 				"field_path": &schema.Schema{
 					Type:        schema.TypeString,
-					Required: true,
+					Required:    true,
 					Description: `The LogEntry field path to index.`,
 				},
 				"type": &schema.Schema{
@@ -108,13 +106,6 @@ See [Enabling CMEK for Logging Buckets](https://cloud.google.com/logging/docs/ro
 					Description: `The type of data in this index
 Note that some paths are automatically indexed, and other paths are not eligible for indexing. See [indexing documentation]( https://cloud.google.com/logging/docs/view/advanced-queries#indexed-fields) for details.
 For example: jsonPayload.request.status`,
-				},
-				"create_time": &schema.Schema{
-					Type:     schema.TypeString,
-					Computed: true,
-					Description: `The timestamp when the index was last modified..
-This is used to return the timestamp, and will be ignored if supplied during update.
-A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".`,
 				},
 			},
 		},
@@ -370,7 +361,7 @@ func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{})
 	if d.HasChange("index_configs") {
 		updateMask = append(updateMask, "indexConfigs")
 	}
-	
+
 	url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 	if err != nil {
 		return err
@@ -463,19 +454,10 @@ func expandIndexConfigs(originalIndexConfigs []interface{}) ([]map[string]interf
 	transformedIndexConfigs := make([]map[string]interface{}, 0, len(originalIndexConfigs))
 	for _, entry := range originalIndexConfigs {
 		original := entry.(map[string]interface{})
-		var validIndexType = false
-		for _, indexType := range indexTypes {
-			if indexType == fmt.Sprintf("%v", original["type"]) {
-				validIndexType = true
-			}
-		}
-		if !validIndexType {
-			return nil, fmt.Errorf("Invalid index type, should be one of %s", indexTypes)
-		}
 
 		transformed := map[string]interface{}{
-			"fieldPath":  original["field_path"],
-			"type":       original["type"],
+			"fieldPath": original["field_path"],
+			"type":      original["type"],
 		}
 		transformedIndexConfigs = append(transformedIndexConfigs, transformed)
 	}
