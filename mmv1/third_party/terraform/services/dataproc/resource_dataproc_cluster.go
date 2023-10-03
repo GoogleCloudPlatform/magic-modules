@@ -738,8 +738,8 @@ func ResourceDataprocCluster() *schema.Resource {
 							},
 						},
 
-						"master_config": instanceConfigSchema("master_config"),
-						"worker_config": instanceConfigSchema("worker_config"),
+						"master_config": masterInstanceConfigSchema(),
+						"worker_config": primaryWorkerInstanceConfigSchema(),
 						// preemptible_worker_config has a slightly different config
 						"preemptible_worker_config": {
 							Type:         schema.TypeList,
@@ -1175,15 +1175,21 @@ func metricsSchema() *schema.Resource {
 	}
 }
 
-func instanceConfigSchema(parent string) *schema.Schema {
-	var instanceConfigKeys = []string{
+// min_num_instances will be picked up only by primary worker instance groups
+func instanceConfigSchemaKeys(parent string) []string {
+	instanceConfigKeys := []string{
 		"cluster_config.0." + parent + ".0.num_instances",
 		"cluster_config.0." + parent + ".0.image_uri",
 		"cluster_config.0." + parent + ".0.machine_type",
-		"cluster_config.0." + parent + ".0.min_cpu_platform",
-		"cluster_config.0." + parent + ".0.disk_config",
 		"cluster_config.0." + parent + ".0.accelerators",
 	}
+	if !strings.Contains(parent, "master") {
+		instanceConfigKeys = append(instanceConfigKeys, "cluster_config.0."+parent+".0.min_num_instances")
+	}
+	return instanceConfigKeys
+}
+
+func instanceConfigSchema(parent string, instanceConfigKeys []string) *schema.Schema {
 
 	masterConfig := strings.Contains(parent, "master")
 
@@ -1302,6 +1308,29 @@ func instanceConfigSchema(parent string) *schema.Schema {
 			},
 		},
 	}
+}
+
+func masterInstanceConfigSchema() *schema.Schema {
+	master_keys := instanceConfigSchemaKeys("master_config")
+	return instanceConfigSchema("master_config", master_keys)
+}
+
+// min_num_instances will be picked up only by primary worker instance groups
+// append elem min_num_instances in primary worker instance groups schemas
+func primaryWorkerInstanceConfigSchema() *schema.Schema {
+	worker_keys := instanceConfigSchemaKeys("worker_config")
+	worker_schema := instanceConfigSchema("worker_config", worker_keys)
+	elements_elem := worker_schema.Elem.(*schema.Resource)
+	elements_elem.Schema["min_num_instances"] = &schema.Schema{
+		Type:         schema.TypeInt,
+		Optional:     true,
+		Computed:     true,
+		ForceNew:     true,
+		AtLeastOneOf: worker_keys,
+		Description:  `The minimum number of primary worker instances to create.`,
+	}
+	worker_schema.Elem = elements_elem
+	return worker_schema
 }
 
 // We need to pull accelerators' schema out so we can use it to make a set hash func
@@ -1934,6 +1963,9 @@ func expandInstanceGroupConfig(cfg map[string]interface{}) *dataproc.InstanceGro
 	if v, ok := cfg["min_cpu_platform"]; ok {
 		icg.MinCpuPlatform = v.(string)
 	}
+	if v, ok := cfg["min_num_instances"]; ok {
+		icg.MinNumInstances = int64(v.(int))
+	}
 	if v, ok := cfg["image_uri"]; ok {
 		icg.ImageUri = v.(string)
 	}
@@ -2557,6 +2589,9 @@ func flattenInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.InstanceGr
 		data["num_instances"] = icg.NumInstances
 		data["machine_type"] = tpgresource.GetResourceNameFromSelfLink(icg.MachineTypeUri)
 		data["min_cpu_platform"] = icg.MinCpuPlatform
+		if icg.MinNumInstances != 0 {
+			data["min_num_instances"] = icg.MinNumInstances
+		}
 		data["image_uri"] = icg.ImageUri
 		data["instance_names"] = icg.InstanceNames
 		if icg.DiskConfig != nil {

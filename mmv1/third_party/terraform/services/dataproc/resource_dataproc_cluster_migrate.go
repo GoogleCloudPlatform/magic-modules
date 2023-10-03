@@ -561,8 +561,8 @@ func resourceDataprocClusterResourceV0() *schema.Resource {
 							},
 						},
 
-						"master_config": instanceConfigSchema("master_config"),
-						"worker_config": instanceConfigSchema("worker_config"),
+						"master_config": masterInstanceConfigSchema(),
+						"worker_config": primaryWorkerInstanceConfigSchema(),
 						// preemptible_worker_config has a slightly different config
 						"preemptible_worker_config": {
 							Type:         schema.TypeList,
