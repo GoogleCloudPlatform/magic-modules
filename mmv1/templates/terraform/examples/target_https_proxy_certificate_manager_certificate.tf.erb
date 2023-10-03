@@ -2,7 +2,7 @@
 resource "google_compute_target_https_proxy" "<%= ctx[:primary_resource_id] %>" {
   name             = "<%= ctx[:vars]['target_https_proxy_name'] %>"
   url_map          = google_compute_url_map.default.id
-  certificate_manager_certificates =  [google_certificate_manager_certificate.default.id]
+  certificate_manager_certificates =  ["//certificatemanager.googleapis.com/${google_certificate_manager_certificate.default.id}"] # [google_certificate_manager_certificate.default.id] is also acceptable
 }
 
 resource "google_certificate_manager_certificate" "default" {
