@@ -43,6 +43,8 @@ module Api
       # not attempt to read the field from the API response.
       # NOTE - this doesn't work for nested fields
       attr_reader :url_param_only
+
+      # For nested fields, this only applies within the parent.
       attr_reader :required
 
       # [Additional query Parameters to append to GET calls.
@@ -121,6 +123,8 @@ module Api
       # if true, then we get the default value from the Google API if no value
       # is set in the terraform configuration for this field.
       # It translates to setting the field to Computed & Optional in the schema.
+      # For nested fields, this also needs to be set on each ancestor (ie. self,
+      # parent, etc.).
       attr_reader :default_from_api
 
       # https://github.com/hashicorp/terraform/pull/20837
