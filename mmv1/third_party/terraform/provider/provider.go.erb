@@ -41,8 +41,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
-
-	googleoauth "golang.org/x/oauth2/google"
 )
 
 // Provider returns a *schema.Provider.
@@ -62,21 +60,23 @@ func Provider() *schema.Provider {
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"credentials": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: ValidateCredentials,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  ValidateCredentials,
 				ConflictsWith: []string{"access_token"},
 			},
 
 			"access_token": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  ValidateEmptyStrings,
 				ConflictsWith: []string{"credentials"},
 			},
 
 			"impersonate_service_account": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: ValidateEmptyStrings,
 			},
 
 			"impersonate_service_account_delegates": {
@@ -86,23 +86,27 @@ func Provider() *schema.Provider {
 			},
 
 			"project": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: ValidateEmptyStrings,
 			},
 
 			"billing_project": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: ValidateEmptyStrings,
 			},
 
 			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: ValidateEmptyStrings,
 			},
 
 			"zone": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: ValidateEmptyStrings,
 			},
 
 			"scopes": {
@@ -148,6 +152,12 @@ func Provider() *schema.Provider {
 			"request_reason": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+
+			"default_labels": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
 			// Generated Products
@@ -220,6 +230,7 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_beyondcorp_app_gateway":                    beyondcorp.DataSourceGoogleBeyondcorpAppGateway(),
 		"google_billing_account":                           billing.DataSourceGoogleBillingAccount(),
 		"google_bigquery_default_service_account":          bigquery.DataSourceGoogleBigqueryDefaultServiceAccount(),
+		"google_certificate_manager_certificate_map":       certificatemanager.DataSourceGoogleCertificateManagerCertificateMap(),
 		"google_cloudbuild_trigger":                        cloudbuild.DataSourceGoogleCloudBuildTrigger(),
 		"google_cloudfunctions_function":                   cloudfunctions.DataSourceGoogleCloudFunctionsFunction(),
 		"google_cloudfunctions2_function":                  cloudfunctions2.DataSourceGoogleCloudFunctions2Function(),
@@ -279,7 +290,6 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_container_registry_repository":             containeranalysis.DataSourceGoogleContainerRepo(),
 		"google_dataproc_metastore_service":                dataprocmetastore.DataSourceDataprocMetastoreService(),
 		"google_datastream_static_ips":                     datastream.DataSourceGoogleDatastreamStaticIps(),
-		"google_game_services_game_server_deployment_rollout":  gameservices.DataSourceGameServicesGameServerDeploymentRollout(),
 		"google_iam_policy":                                resourcemanager.DataSourceGoogleIamPolicy(),
 		"google_iam_role":                                  resourcemanager.DataSourceGoogleIamRole(),
 		"google_iam_testable_permissions":                  resourcemanager.DataSourceGoogleIamTestablePermissions(),
@@ -352,6 +362,10 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_tags_tag_key":                              tags.DataSourceGoogleTagsTagKey(),
 		"google_tags_tag_value":                            tags.DataSourceGoogleTagsTagValue(),
 		"google_tpu_tensorflow_versions":                   tpu.DataSourceTpuTensorflowVersions(),
+		<% unless version == 'ga' -%>
+		"google_tpu_v2_runtime_versions":                   tpuv2.DataSourceTpuV2RuntimeVersions(),
+		"google_tpu_v2_accelerator_types":                  tpuv2.DataSourceTpuV2AcceleratorTypes(),
+		<% end -%>
 		"google_vpc_access_connector":                      vpcaccess.DataSourceVPCAccessConnector(),
 		"google_redis_instance":                            redis.DataSourceGoogleRedisInstance(),
 		"google_vertex_ai_index":                           vertexai.DataSourceVertexAIIndex(),
@@ -755,6 +769,13 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		config.Scopes[i] = scope.(string)
 	}
 
+	config.DefaultLabels = make(map[string]string)
+	defaultLabels := d.Get("default_labels").(map[string]interface{})
+
+	for k, v := range defaultLabels {
+		config.DefaultLabels[k] = v.(string)
+	}
+
 	batchCfg, err := transport_tpg.ExpandProviderBatchingConfig(d.Get("batching"))
 	if err != nil {
 		return nil, diag.FromErr(err)
@@ -795,23 +816,6 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	}
 
 	return transport_tpg.ProviderDCLConfigure(d, &config), nil
-}
-
-func ValidateCredentials(v interface{}, k string) (warnings []string, errors []error) {
-	if v == nil || v.(string) == "" {
-		return
-	}
-	creds := v.(string)
-	// if this is a path and we can stat it, assume it's ok
-	if _, err := os.Stat(creds); err == nil {
-		return
-	}
-	if _, err := googleoauth.CredentialsFromJSON(context.Background(), []byte(creds)); err != nil {
-		errors = append(errors,
-			fmt.Errorf("JSON credentials are not valid: %s", err))
-	}
-
-	return
 }
 
 func mergeResourceMaps(ms ...map[string]*schema.Resource) (map[string]*schema.Resource, error) {
