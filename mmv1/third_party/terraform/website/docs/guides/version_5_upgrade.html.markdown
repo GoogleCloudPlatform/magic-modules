@@ -68,7 +68,7 @@ For example, given this previous configuration:
 terraform {
   required_providers {
     google = {
-      version = "~> 4.70.0"
+      version = "~> 4.84.0"
     }
   }
 }
@@ -90,33 +90,252 @@ terraform {
 
 ### Provider-level Labels Rework
 
-Labels and annotations are key-value pairs attached on Google cloud resources. Cloud labels are used for organizing resources, filtering resources, breaking down billing, and so on. Annotations are used to attach metadata to Kubernetes resources.
+Label and annotation fields across the provider have been reworked with impact
+across numerous resources. Two notable cases from this upgrade are covered
+immediately, with more details in dedicated headers below:
 
-Not all of Google cloud resources support labels and annotations. Please check the Terraform Google provider resource documentation to figure out if the resource supports the `labels` and `annotations` fields.
+!> For resources with **any** `labels` values previously defined, running
+`terraform plan` or `terraform apply` on Google provider `5.0.0` or later with
+an existing pre-`5.0.0` resource before an `apply`, the plan will show an
+update adding your current `labels` values to `terraform_labels`. This change
+may result in a no-op update call to the API depending on the resource
+implementation, but can otherwise be safely applied.
+
+!> This change introduced a regression we were unable to resolve, and labels
+with an empty value (`""`) should be avoided, as they will be ignored and not
+included in requests to the API. Replacing those labels' values with `_` or
+`true` are recommended.
+
+Not all of Google Cloud resources support labels and annotations. Please check
+the Terraform Google provider resource documentation to figure out if a given
+resource supports `labels` or `annotations` fields.
 
 #### Provider default labels
 
-Default labels configured on the provider through the new `default_labels` field are now supported. The default labels configured on the provider will be applied to all of the resources with the top level `labels` field or the nested `labels` field inside the top level `metadata` field.
+Default labels configured on the provider through a new `default_labels` field
+are now supported. The default labels configured on the provider will be applied
+to all  resources with a top level `labels` field or a `labels` field nested
+inside a top level `metadata` field.
 
-Provider-level default annotations are not supported.
+Setting the same key as a default label at the resource level will override the
+default value for that label.
+
+These values will be recorded in individual resource plans through the
+`terraform_labels` and `effective_labels` fields.
+
+```
+provider "google" {
+  default_labels = {
+    my_global_key = "one"
+    my_default_key = "two"
+  }
+}
+
+resource "google_compute_address" "my_address" {
+  name     = "my-address"
+
+  labels = {
+    my_key = "three"
+    # overrides provider-wide setting
+    my_default_key = "four"
+  }
+}
+```
+
+```
+# google_compute_address.my_address will be created
+  + resource "google_compute_address" "my_address" {
+      + address            = (known after apply)
+      + address_type       = "EXTERNAL"
+      + creation_timestamp = (known after apply)
+      + effective_labels   = {
+          + "my_default_key" = "four"
+          + "my_global_key"  = "one"
+          + "my_key"         = "three"
+        }
+      + id                 = (known after apply)
+      + label_fingerprint  = (known after apply)
+      + labels             = {
+          + "my_default_key" = "four"
+          + "my_key"         = "three"
+        }
+      + name               = "my-address"
+      + network_tier       = (known after apply)
+      + prefix_length      = (known after apply)
+      + project            = "my-project"
+      + purpose            = (known after apply)
+      + region             = (known after apply)
+      + self_link          = (known after apply)
+      + subnetwork         = (known after apply)
+      + terraform_labels   = {
+          + "my_default_key" = "four"
+          + "my_global_key"  = "one"
+          + "my_key"         = "three"
+        }
+      + users              = (known after apply)
+    }
+
+Plan: 1 to add, 0 to change, 0 to destroy.
+```
+
+Provider-level default annotations are not supported at this time.
 
 #### Resource labels
 
-The new labels model will be applied to all of the resources with the top level `labels` field or the nested `labels` field inside the top level `metadata` field. Some labels fields are for child resources, so the new model will not be applied to labels fields for child resources.
+Previously, `labels` and `annotations` fields in the Terraform Google provider
+were authoritative and Terraform thought it was the only owner of the fields.
+This model worked well initially, but with the introduction of system labels and
+other client-managed labels, Terraform would conflict with their labels and show
+a diff. We've reworked the `labels` field to resolve this class of problem.
 
-There are now three label-related fields with the new model:
+This reworked labels model has been applied to all resources with a top level
+`labels` field or a nested `labels` field inside a top level `metadata` field.
+Non-standard labels fields are unaffected, for example the `node_labels` GKE
+field that affects child resources.
 
-* The `labels` field will be non-authoritative and only manage the labels defined by the users on the resource through Terraform.
-* The output-only `effective_labels` will list all of labels present on the resource in GCP, including the labels configured through Terraform, other clients and services.
-* The output-only `terraform_labels` will merge the labels defined by the users on the resource through Terraform and the default labels configured on the provider. If the same label exists on both the resource labels and provider default labels, the label on the resource will override the provider label.
+Resources that previously contained a single `labels` field will now contain
+three fields:
 
-After upgrading to `5.0.0`, and then running `terraform refresh` or `terraform apply`, these three fields should show in the state file of the resources with a self-applying `labels` field.
+* The `labels` field is now non-authoritative and only manages the label keys
+defined in your configuration for the resource. If a label was added outside of
+Terraform, it will not be managed by Terraform, unless it is added to the
+`labels` field in the configuration.
+* The `terraform_labels` cannot be specified directly by the user. It merges the
+labels defined in the resource's configuration and the default labels configured
+in the provider block. If the same label key exists on both the resource level
+and provider level, the value on the resource will override the
+provider-level default.
+* The output-only `effective_labels` will list all the labels present on the
+resource in GCP, including the labels configured through Terraform, the system,
+and other clients.
+
+~> **Note:** `ignore_changes` can be applied to `labels` field to ignore the
+changes of the user defined labels. It is not recommended to apply
+`ignore_changes` to `terraform_labels` or `effective_labels`, as it may
+unintuitively affect the final API call.
+
+The following changes will be observed in applicable resources after upgrading to `5.0.0`:
+* Running `terraform refresh` on Google provider `5.0.0` or later with an existing pre-`5.0.0` resource before an `apply`, these three fields will show in the state file. `labels` field will have your current labels, `terraform_labels` will be empty, and `effective_labels` will have all of labels present on the resource in GCP.
+* For resources with **any** `labels` values previously defined, running `terraform plan` or `terraform apply` on Google provider `5.0.0` or later with an existing pre-`5.0.0` resource before an `apply`, the plan will show an updated adding your current labels to `terraform_labels`. After running `terraform apply`, these three fields will show in the state file. `labels` will have your current labels, `terraform_labels` will have the combination of `labels` and your provider-default labels, and `effective_labels` will have all of labels present on the resource in GCP.
+* Running `terraform import` on Google provider `5.0.0` or later, these three fields will show in the state file with an empty `labels` and `terraform_labels` value. `effective_labels` will have all the labels present on the resource in GCP. You can update the resource to bring labels defined in your configuration under management by Terraform.
+
+The following are resource-specific label changes:
+* In the resource `google_cloud_run_domain_mapping`, the system labels `cloud.googleapis.com/location` and `run.googleapis.com/overrideAt` will be removed from `labels` inside `metadata` field in the state file as part of a one-time resource schema upgrade. If any of these label keys are in the configuration, after upgrading to `5.0.0`, the plan will show that these keys will be added. You can safely accept this change, and Terraform will begin to manage them again.
+* In the resource `google_cloud_run_service`, the system label `cloud.googleapis.com/location` will be removed from `labels` inside `metadata` field in the state file as part of a one-time resource schema upgrade. If this system label key is in the configuration, after upgrading to `5.0.0`, the plan will show that this key will be added. You can safely accept this change, and Terraform will begin to manage it again.
+* In the resource `google_dataflow_flex_template_job`, the system labels with the prefix `goog-dataflow-provided` are removed from `labels` field in the state file as part of a one-time resource schema upgrade. If any of these label keys are in the configuration, after upgrading to `5.0.0`, the plan will show that these keys will be added. You can safely accept this change, and Terraform will begin to manage them again.
+* In the resource `google_dataflow_job`, the system labels with the prefix `goog-dataflow-provided` will be removed from `labels` field in the state file as part of a one-time resource schema upgrade. If any of these label keys are in the configuration, after upgrading to `5.0.0`, the plan will show that these keys will be added. You can safely accept this change, and Terraform will begin to manage them again.
+* In the resource `google_dataproc_cluster`, the system labels with the prefix `goog-dataproc` will be removed from `labels` field in the state file as part of a one-time resource schema upgrade. If any of these label keys are in the configuration, after upgrading to `5.0.0`, the plan will show that these keys will be added. You can safely accept this change.
+* In the resource `google_notebooks_instance`, the system labels with the prefix `goog-caip-notebook` will be removed from `labels` field in the state file as part of a one-time resource schema upgrade. If any of these label keys are in the configuration, after upgrading to `5.0.0`, the plan will show that these keys will be added. You can safely accept this change, and Terraform will begin to manage them again.
+* In the resource `google_storage_bucket`, the system labels with the prefix `goog-dataplex` will be removed from `labels` field in the state file as part of a one-time resource schema upgrade. If any of these label keys are in the configuration, after upgrading to `5.0.0`, the plan will show that these keys will be added. You can safely accept this change, and Terraform will begin to manage them again.
+
+#### Data source labels
+
+For most resource-based datasources, all three of `labels`, `effective_labels`
+and `terraform_labels` will now be present. All of these three fields include
+all of the labels present on the resource in GCP including the labels configured
+through Terraform, the system, and other clients, equivalent to
+`effective_labels` on the resource.
 
 #### Resource annotations
 
-The new annotations model is similar to the new labels model and will be applied to all of the resources with the top level `annotations` field or the nested `annotations` field inside the top level `metadata` field.
+Annotations have been reworked similarly to `labels`, and `annotations` fields
+will now manage only the keys included in configuration. This model has been
+applied to top level `annotations` fields and those nested in `metadata` blocks.
 
-There are now two annotation-related fields with the new model, the `annotations` and the output-only `effective_annotations` fields.
+Resources that previously contained a single `annotations` field will now contain
+two fields:
+
+* The `annotations` field is now non-authoritative and only manage the keys
+defined in your configuration for the resource. If an annotations entry was
+added outside of Terraform, it will not be managed by Terraform, unless it is
+added to the `annotations` field in the configuration.
+* The output-only `effective_annotations` will list all the annotations present
+on the resource in GCP, including the entries configured through Terraform, the
+system, and other clients.
+
+**Note:** `ignore_changes` can be applied to `annotations` field to ignore the
+changes of the user defined annotations. It is not recommended to apply
+`ignore_changes` to `effective_annotations`, as it may unintuitively affect the
+final API call.
+
+The following changes will be observed after upgrading to `5.0.0`.
+* Running `terraform import` on Google provider `5.0.0` or later, these two fields will show in the state file with an empty `annotations` value. `effective_annotations` will have all of annotations present on the resource in GCP. You can update the resource to bring annotations defined in your configuration under management by Terraform.
+* Running `terraform refresh` on Google provider `5.0.0` or later with an existing pre-`5.0.0` resource before an `apply`, these two fields will show in the state file. `annotations` field will have your current annotations and `effective_annotations` will have all of annotations present on the resource in GCP.
+* Running `terraform apply` on Google provider `5.0.0` or later with an existing pre-`5.0.0` resource before an `apply`, these two fields will show in the state file. `annotations` field will have your current annotations and `effective_annotations` will have all of annotations present on the resource in GCP.
+* In the resource `google_cloud_run_domain_mapping`, the system annotations `serving.knative.dev/creator`, `serving.knative.dev/lastModifier`, `run.googleapis.com/operation-id`, `run.googleapis.com/ingress-status`, `run.googleapis.com/ingress` with the value `all` will be removed from `annotations` inside `metadata` field in the state file as part of a one-time resource schema upgrade. If any of these annotation keys are in the configuration, after upgrading to `5.0.0`, the plan will show that these keys will be added. You can safely accept this change, and Terraform will begin to manage them again.
+* In the resource `google_cloud_run_service`, the system annotations `serving.knative.dev/creator`, `serving.knative.dev/lastModifier`, `run.googleapis.com/operation-id`, `run.googleapis.com/ingress-status`, `run.googleapis.com/ingress` with the value `all` will be removed from `annotations` inside `metadata` field in the state file as part of a one-time resource schema upgrade. If any of these annotation keys are in the configuration, after upgrading to `5.0.0`, the plan will show that these keys will be added. You can safely accept this change, and Terraform will begin to manage them again.
+
+#### Data source annotations
+
+For most resource-based datasources, both `annotations` and
+`effective_annotations` will now be present. Both fields will have all the
+annotations present on the resource in GCP including the annotations configured
+through Terraform, the system, and other clients, equivalent to
+`effective_annotations` on the resource.
+
+#### Example
+
+##### Mixing resource, provider, and system labels
+
+```hcl
+provider "google" {
+  default_labels = {
+    default_key = "default_value"
+  }
+}
+
+resource "google_dataproc_cluster" "with_labels" {
+  name   = "tf-test-dproc-test-1"
+  region = "us-central1"
+
+  labels = {
+    key1 = "value1"
+    key2 = "value2"
+  }
+}
+```
+
+After the configuration is applied, Terraform is managing `key1` and `key2` in
+the `labels` field. `terraform_labels` field has the keys `default_key`, `key1`
+and `key2`. `effective_labels` has the keys `default_key`, `key1`, `key2` and
+any system labels added by GCP.
+
+##### Removing a key
+
+```hcl
+provider "google" {
+  default_labels = {
+    default_key = "default_value"
+  }
+}
+
+resource "google_dataproc_cluster" "with_labels" {
+  name   = "tf-test-dproc-test-1"
+  region = "us-central1"
+
+  labels = {
+    key1 = "value1"
+  }
+}
+```
+
+Applying this configuration **after** the previous example, Terraform will clear
+the value of `key2`. Other values are unaffected.
+
+```
+      ~ effective_labels   = {
+          - "key2" = "value2" -> null
+            # (5 unchanged elements hidden)
+        }
+      ~ labels             = {
+          - "key2" = "value2" -> null
+            # (1 unchanged element hidden)
+        }
+      ~ terraform_labels   = {
+          - "key2" = "value2" -> null
+            # (2 unchanged elements hidden)
+        }
+```
 
 ### Updates to how empty strings are handled in the `provider` block
 
@@ -156,79 +375,77 @@ This will only affect users whose configuration contains resource blocks that ha
 
 ### Provider default values shown at plan-time
 
-`project`, `region`, and `zone` fields will now display their values during plan-time instead of the placeholder `(known after apply)` value normally displayed for fields without fixed Terraform default values. These values will be taken from either the Terraform resource config file, provider config, or local environment variables, depending on which variables are supplied by the user, matching the existing per-resource functionality for what default values are used in execution of a Terraform plan.
+The `project`, `region`, and `zone` fields will now display their values during
+plan-time instead of the placeholder `(known after apply)` value normally
+displayed for fields without fixed Terraform default values. These values will
+be taken from either the Terraform resource config file, provider config, or
+local environment variables, depending on which variables are supplied by the
+user, matching the existing per-resource functionality for what default values
+are used in execution of a Terraform plan.
 
-## Datasources
+Before `5.0.0`:
+
+```
+project = (known after apply)
+```
+
+After `5.0.0` (when possible):
+
+```
+project = "my-project"
+```
+
+### Resource import formats have improved validation
+
+Throughout the provider there were many resources which erroneously gave false positives to poorly formatted import input if a subset of the provided input was valid to their configured import formats. All GCP resource IDs supplied to "terraform import" must match the documentation specified import formats exactly.
 
 ### Datasources now error universally on 404
 
-All data sources have been updated to return an error when a target resource URI can not be reached. Previously this was inconsistent between different datasources in whether an empty value was returned to Terraform state upon 404 or if an error was returned, but this has been standardized. Any plans that reference datasources which no longer exist (or do not exist yet) will need to be revised to have these datasources removed from configuration files.
+All non-IAM data sources have been updated to return an error when a target resource URI can not be reached. Previously this was inconsistent between different datasources in whether an empty value was returned to Terraform state upon 404 or if an error was returned, but this has been standardized. Any plans that reference datasources which no longer exist (or do not exist yet) will need to be revised to have these datasources removed from configuration files.
 
-## Datasource: `google_product_datasource`
+## Removals
 
-### Datasource-level change example header
+### Product: `gameservices` is now removed
 
-Description of the change and how users should adjust their configuration (if needed).
+This change involved the following resources: `google_game_services_game_server_cluster`, `google_game_services_game_server_deployment`, `google_game_services_game_server_config`, `google_game_services_realm` and `google_game_services_game_server_deployment_rollout`.
 
-## Resources
+### Product: `cloudiot` is now removed
 
-## Resource: `google_product_resource`
+This change involved the following: `google_cloudiot_device`, `google_cloudiot_registry`, `google_cloudiot_registry_iam_*`, and `data.google_cloudiot_registry_iam_policy`.
 
-### Resource-level change example header
 
-Description of the change and how users should adjust their configuration (if needed).
-
-## Resource: `google_access_context_manager_service_perimeters`
+## Resource: `google_access_context_manager_service_perimeters` and `google_access_context_manager_service_perimeter`
 
 ### Fields changed from lists to sets where appropriate
 
-The following fields have been changed from a list to a set:
+The following fields have been changed from a list to a set in both `google_access_context_manager_service_perimeters` and `google_access_context_manager_service_perimeter`:
 
-`google_access_context_manager_service_perimeters.spec.access_levels`
-`google_access_context_manager_service_perimeters.spec.resources`
-`google_access_context_manager_service_perimeters.spec.restricted_services`
-`google_access_context_manager_service_perimeters.spec.vpc_accessible_services.allowed_services`
-`google_access_context_manager_service_perimeters.spec.egress_policies.egress_from.identities`
-`google_access_context_manager_service_perimeters.spec.egress_policies.egress_to.external_resources`
-`google_access_context_manager_service_perimeters.spec.egress_policies.egress_to.resources`
-`google_access_context_manager_service_perimeters.spec.ingress_policies.ingress_from.identities`
-`google_access_context_manager_service_perimeters.spec.ingress_policies.ingress_to.resources`
-`google_access_context_manager_service_perimeters.status.access_levels`
-`google_access_context_manager_service_perimeters.status.resources`
-`google_access_context_manager_service_perimeters.status.restricted_services`
-`google_access_context_manager_service_perimeters.status.egress_policies.egress_from.identities`
-`google_access_context_manager_service_perimeters.status.egress_policies.egress_to.external_resources`
-`google_access_context_manager_service_perimeters.status.egress_policies.egress_to.resources`
-`google_access_context_manager_service_perimeters.status.ingress_policies.ingress_from.identities`
-`google_access_context_manager_service_perimeters.status.ingress_policies.ingress_to.resources`
+`spec.access_levels`
+`spec.resources`
+`spec.restricted_services`
+`spec.vpc_accessible_services.allowed_services`
+`spec.egress_policies.egress_from.identities`
+`spec.egress_policies.egress_to.external_resources`
+`spec.egress_policies.egress_to.resources`
+`spec.ingress_policies.ingress_from.identities`
+`spec.ingress_policies.ingress_to.resources`
+`status.access_levels`
+`status.resources`
+`status.restricted_services`
+`status.egress_policies.egress_from.identities`
+`status.egress_policies.egress_to.external_resources`
+`status.egress_policies.egress_to.resources`
+`status.ingress_policies.ingress_from.identities`
+`status.ingress_policies.ingress_to.resources`
 
 If you were relying on accessing an individual field by index (for example, google_access_context_manager_service_perimeters.spec.access_levels.0, then that will now need to by hash (for example, google_access_context_manager_service_perimeters.spec.access_levels.\<some-hash\>).
 
-## Resource: `google_access_context_manager_service_perimeter`
 
-### Fields changed from lists to sets where appropriate
+## Resource: `google_bigquery_routine`
 
-The following fields have been changed from a list to a set:
+### `routine_type` is now required.
 
-`google_access_context_manager_service_perimeter.spec.access_levels`
-`google_access_context_manager_service_perimeter.spec.resources`
-`google_access_context_manager_service_perimeter.spec.restricted_services`
-`google_access_context_manager_service_perimeter.spec.vpc_accessible_services.allowed_services`
-`google_access_context_manager_service_perimeter.spec.egress_policies.egress_from.identities`
-`google_access_context_manager_service_perimeter.spec.egress_policies.egress_to.external_resources`
-`google_access_context_manager_service_perimeter.spec.egress_policies.egress_to.resources`
-`google_access_context_manager_service_perimeter.spec.ingress_policies.ingress_from.identities`
-`google_access_context_manager_service_perimeter.spec.ingress_policies.ingress_to.resources`
-`google_access_context_manager_service_perimeter.status.access_levels`
-`google_access_context_manager_service_perimeter.status.resources`
-`google_access_context_manager_service_perimeter.status.restricted_services`
-`google_access_context_manager_service_perimeter.status.egress_policies.egress_from.identities`
-`google_access_context_manager_service_perimeter.status.egress_policies.egress_to.external_resources`
-`google_access_context_manager_service_perimeter.status.egress_policies.egress_to.resources`
-`google_access_context_manager_service_perimeter.status.ingress_policies.ingress_from.identities`
-`google_access_context_manager_service_perimeter.status.ingress_policies.ingress_to.resources`
-
-If you were relying on accessing an individual field by index (for example, google_access_context_manager_service_perimeter.spec.access_levels.0, then that will now need to by hash (for example, google_access_context_manager_service_perimeter.spec.access_levels.\<some-hash\>).
+The provider will now enforce at plan time that `routine_type` be set.
 
 
 ## Resource: `google_bigquery_table`
@@ -241,65 +458,6 @@ The provider will now enforce at plan time that at most one of these fields be s
 
 The provider will now enforce at plan time that `schema` is a valid JSON array with non-null elements.
 
-## Resource: `google_bigquery_routine`
-
-### `routine_type` is now required.
-
-The provider will now enforce at plan time that `routine_type` be set.
-
-## Resource: `google_firebaserules_release`
-
-### Changing `ruleset_name` now triggers replacement
-
-In 4.X.X, changing the `ruleset_name` in `google_firebaserules_release` updates the `Release` in place, which prevents the old `Ruleset` referred to by `ruleset_name` from being destroyed. A workaround is to use a `replace_triggered_by` lifecycle field on the `google_firebaserules_release`. In version 5.0.0, changing `ruleset_name` will trigger a replacement, which allows the `Ruleset` to be deleted. The `replace_triggered_by` workaround becomes unnecessary.
-
-#### Old Config
-
-```hcl
-resource "google_firebaserules_release" "primary" {
-  name         = "cloud.firestore"
-  ruleset_name = "projects/my-project-name/rulesets/${google_firebaserules_ruleset.firestore.name}"
-  project      = "my-project-name"
-
-  lifecycle {
-    replace_triggered_by = [
-      google_firebaserules_ruleset.firestore
-    ]
-  }
-}
-
-resource "google_firebaserules_ruleset" "firestore" {
-  source {
-    files {
-      content = "service cloud.firestore {match /databases/{database}/documents { match /{document=**} { allow read, write: if false; } } }"
-      name    = "firestore.rules"
-    }
-  }
-
-  project = "my-project-name"
-}
-```
-
-#### New Config
-
-```hcl
-resource "google_firebaserules_release" "primary" {
-  name         = "cloud.firestore"
-  ruleset_name = "projects/my-project-name/rulesets/${google_firebaserules_ruleset.firestore.name}"
-  project      = "my-project-name"
-}
-
-resource "google_firebaserules_ruleset" "firestore" {
-  source {
-    files {
-      content = "service cloud.firestore {match /databases/{database}/documents { match /{document=**} { allow read, write: if false; } } }"
-      name    = "firestore.rules"
-    }
-  }
-
-  project = "my-project-name"
-}
-```
 
 ## Resource: `google_cloud_run_v2_job`
 
@@ -314,8 +472,84 @@ These two unsupported fields were introduced incorrectly. They are now removed.
 
 This unsupported field was introduced incorrectly. It is now removed.
 
+### retyped `volumes.cloud_sql_instance.instances` to SET from ARRAY for `google_cloud_run_v2_service`
+
+Previously, `database_flags` was a list, making it order-dependent. It is now a set.
+
+If you were relying on accessing an individual flag by index (for example, `google_sql_database_instance.instance.settings.0.database_flags.0.name`), then that will now need to by hash (for example, `google_sql_database_instance.instance.settings.0.database_flags.<some-hash>.name`).
+
+## Resource: `google_cloudfunctions2_function`
+
+### `location` now a required field
+Deployment would fail if this field was unspecified. Marked this field as requied to align with implementation. This value cannot be inferred from any provider level config. No change is necessary for upgrade as this field is already needed for any deployments.
+
+
+## Resource: `google_compute_autoscaler`
+
+### `metric.filter` now defaults to `resource.type = gce_instance` (beta-only)
+
+Previously, `metric.filter` doesn't have the defult value and causes a UI error.
+
+
+## Resource: `google_compute_node_group`
+
+### Node groups are now mutable
+
+Due to limitations in previous field configurations, the only field that could be updated previously was `node_template`. It is now possible to adjust the `autoscaling_policy` without recreating the group, nor will any adjustment to the `size` of the nodepool prompt resource recration.
+
+### `size` is now an output only field.
+
+`size` previously served as an alias for `initial_size` on resource creation, and users would be required to recreate the resource if the `size` value ever adjusted due to either direct user update or auto-scaling adjustment outside of Terraform.
+
+It will now mirror its API functionality and serve as an output only field to show how many nodes currently exist within the resource. All existing configurations which used `size` as an input field must be updated for its removal.
+
+### One of `initial_size` or `autoscaling_policy{}` must be configured on resource creation.
+
+These fields will supply the base node-count for a node group and one of them will be required for successful resource creation. Both will be freely updateable or removable on future state changes that do not require recreation.
+
+
+## Resource: `google_compute_router_nat`
+
+### `enable_endpoint_independent_mapping` now defaults to API's default value which is `FALSE`
+
+Previously, the default value of `enable_endpoint_independent_mapping` was `TRUE`. Now,
+it will use the default value from the API which is `FALSE`. If you want to
+enable endpoint independent mapping, then explicity set the value of
+`enable_endpoint_independent_mapping` field to `TRUE`.
+
+
+## Resource: `google_compute_security_policy`
+
+### `rule.rate_limit_options.encorce_on_key` no longer has default value
+
+Previously, the default value for `rule.rate_limit_options.encorce_on_key` is "ALL", now this field no longer has a default value.
+
+
+## Resource: `google_compute_service_attachment`
+
+### `reconcile_connections` now defaults from API
+
+`reconcile_connections` previously defaulted to true. Now it will default from the API.
+
+### Retyped `consumer_accept_lists` to SET from ARRAY
+
+Previously, `consumer_accept_lists` was a list, making it order-dependent. It is now a set.
+
+If you were relying on accessing an individual flag by index (for example, `google_compute_service_attachment.consumer_accept_lists.0.project_id_or_num`), then that will now need to by hash (for example, `google_compute_service_attachment.consumer_accept_lists.<some-hash>.project_id_or_num`).
+
 
 ## Resource: `google_container_cluster`
+
+### Cluster deletion now prevented by default with `deletion_protection`
+
+The field `deletion_protection` has been added with a default of `true`. This field prevents
+Terraform from destroying or recreating the cluster. In 5.0.0, existing clusters will have 
+`deletion_protection` set to `true` during the next refresh unless otherwise set in configuration.
+
+**`deletion_protection` does NOT prevent deletion outside of Terraform.**
+
+To disable deletion protection, explicitly set this field to `false` in configuration
+and then run `terraform apply` to apply the change.
 
 ### Clusters created in error states are now tainted rather than deleted
 
@@ -370,6 +604,34 @@ proposed value to configuration (below) or apply `lifecycle.ignore_changes` to t
 +    }
 ```
 
+### `networking_mode` defaults to `VPC_NATIVE` for newly created clusters
+
+New clusters will default to `VPC_NATIVE` which enables [IP aliasing](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-aliases). Previously, `google_container_cluster` would default to using routes as
+the networking mode unless `ip_allocation_policy` policy was set. Now, `networking_mode` will
+default to `VPC_NATIVE` and `ip_allocation_policy` will be set by the server if unset in
+configuration. Existing clusters should not be affected.
+
+#### New Minimal Config for VPC-native cluster
+
+```hcl
+resource "google_container_cluster" "primary" {
+  name               = "my_cluster"
+  location           = "us-central1-a"
+  initial_node_count = 1
+}
+```
+
+#### New Minimal Config for Routes-based cluster
+
+```hcl
+resource "google_container_cluster" "primary" {
+  name               = "my_cluster"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  networking_mode    = "ROUTES"
+}
+```
+
 ### `enable_binary_authorization` is now removed
 
 `enable_binary_authorization` has been removed in favor of `binary_authorization.enabled`.
@@ -379,15 +641,18 @@ proposed value to configuration (below) or apply `lifecycle.ignore_changes` to t
 Previously `network_policy.provider` defaulted to "PROVIDER_UNSPECIFIED". It no longer
 has a default value.
 
+
 ## Resource: `google_container_node_pool`
-
-### `logging_variant` no longer has a provider default value
-
-Previously `logging_variant` defaulted to "DEFAULT". It no longer has a default value.
 
 ### `management.auto_repair` and `management.auto_upgrade` now default to true
 
-Previously both fields defaulted to false. They now default to true.
+Previously both fields defaulted to false if `management` was set as an empty block.
+They now default to true.
+
+### `logging_variant` no longer has a provider default value
+
+The provider no longer shows a default value at plan-time, and defers to the 
+API server default.
 
 ### `node_config.0.taint` field change
 
@@ -433,20 +698,20 @@ proposed value to configuration (below) or apply `lifecycle.ignore_changes` to t
 +    }
 ```
 
+## Resource: `google_dataflow_flex_template_job`
+
+### Fields that are a part of the [environment block](https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.locations.flexTemplates/launch#FlexTemplateRuntimeEnvironment) will be overriden to be sent via their fields even when supplied via parameters.
+
+Several fields within the `google_dataflow_flex_template_job` resource can be supplied through either the `parameters{}` block or a field on the resource object. Support for these fields on the resource object was added in the `4.66.0` release of the Google provider. That version introduced an issue where the values were being double-sent to the API due to being recorded in Terraform state in two places. To resolve this issue, these fields will be deduplicated and sent to the API through the resource object.
+
+Additionally, due to the API returning these fields to the user they will now be considered computed and users will see values twice within their state when configuring these fields' values via the `parameters{}` block.
+
+
 ## Resource: `google_dataplex_datascan`
 
 ### `dataQualityResult` and `dataProfileResult` output fields are now removed 
 
 `dataQualityResult` and `dataProfileResult` were output-only fields which listed results for the latest job created under a Datascan. These were problematic fields that are unlikely to be relevant in a Terraform context. Removing them reduces the likelihood of additional parsing errors, and reduces maintenance overhead for the API surface.
-
-## Resource: `google_compute_router_nat`
-
-### `enable_endpoint_independent_mapping` now defaults to API's default value which is `FALSE`
-
-Previously, the default value of `enable_endpoint_independent_mapping` was `TRUE`. Now,
-it will use the default value from the API which is `FALSE`. If you want to
-enable endpoint independent mapping, then explicity set the value of
-`enable_endpoint_independent_mapping` field to `TRUE`.
 
 
 ## Resource: `google_firebase_project_location`
@@ -508,46 +773,73 @@ resource "google_firestore_database" "default" {
 }
 ```
 
+
 ## Resource: `google_firebase_web_app`
 
 ### `deletion_policy` now defaults to `DELETE`
 
 Previously, `google_firebase_web_app` deletions default to `ABANDON`, which means to only stop tracking the WebApp in Terraform. The actual app is not deleted from the Firebase project. If you are relying on this behavior, set `deletion_policy` to `ABANDON` explicitly in the new version.
-## Resource: `google_compute_autoscaler` (beta)
 
-### `metric.filter` now defaults to `resource.type = gce_instance`
 
-Previously, `metric.filter` doesn't have the defult value and causes a UI error.
+## Resource: `google_firebaserules_release`
 
-## Resource: `google_privateca_certificate`
+### Changing `ruleset_name` now triggers replacement
 
-### `config_values` is now removed
+In 4.X.X, changing the `ruleset_name` in `google_firebaserules_release` updates the `Release` in place, which prevents the old `Ruleset` referred to by `ruleset_name` from being destroyed. A workaround is to use a `replace_triggered_by` lifecycle field on the `google_firebaserules_release`. In version 5.0.0, changing `ruleset_name` will trigger a replacement, which allows the `Ruleset` to be deleted. The `replace_triggered_by` workaround becomes unnecessary.
 
-Deprecated in favor of field `x509_description`. It is now removed.
+#### Old Config
 
-### `pem_certificates` is now removed
+```hcl
+resource "google_firebaserules_release" "primary" {
+  name         = "cloud.firestore"
+  ruleset_name = "projects/my-project-name/rulesets/${google_firebaserules_ruleset.firestore.name}"
+  project      = "my-project-name"
 
-Deprecated in favor of field `pem_certificate_chain`. It is now removed.
+  lifecycle {
+    replace_triggered_by = [
+      google_firebaserules_ruleset.firestore
+    ]
+  }
+}
 
-## Product: `gameservices`
+resource "google_firebaserules_ruleset" "firestore" {
+  source {
+    files {
+      content = "service cloud.firestore {match /databases/{database}/documents { match /{document=**} { allow read, write: if false; } } }"
+      name    = "firestore.rules"
+    }
+  }
 
-### `gameservices` is now removed
+  project = "my-project-name"
+}
+```
 
-This change involved the following resources: `google_game_services_game_server_cluster`, `google_game_services_game_server_deployment`, `google_game_services_game_server_config`, `google_game_services_realm` and `google_game_services_game_server_deployment_rollout`.
+#### New Config
 
-## Resource: `google_sql_database`
+```hcl
+resource "google_firebaserules_release" "primary" {
+  name         = "cloud.firestore"
+  ruleset_name = "projects/my-project-name/rulesets/${google_firebaserules_ruleset.firestore.name}"
+  project      = "my-project-name"
+}
 
-### `database_flags` is now a set
+resource "google_firebaserules_ruleset" "firestore" {
+  source {
+    files {
+      content = "service cloud.firestore {match /databases/{database}/documents { match /{document=**} { allow read, write: if false; } } }"
+      name    = "firestore.rules"
+    }
+  }
 
-Previously, `database_flags` was a list, making it order-dependent. It is now a set.
+  project = "my-project-name"
+}
+```
 
-If you were relying on accessing an individual flag by index (for example, `google_sql_database_instance.instance.settings.0.database_flags.0.name`), then that will now need to by hash (for example, `google_sql_database_instance.instance.settings.0.database_flags.<some-hash>.name`).
 
-## Resource: `google_compute_security_policy`
+## Resource: `google_gkeonprem_bare_metal_admin_cluster`
 
-### `rule.rate_limit_options.encorce_on_key` no longer has default value
+Delete operation is disabled. The command `terraform destroy` maps to no-op. Users need to delete resource manually. Please refer to the [user guide](https://cloud.google.com/anthos/clusters/docs/bare-metal/latest/how-to/reset-nodes) for the instructions of cluster deletion.
 
-Previously, the default value for `rule.rate_limit_options.encorce_on_key` is "ALL", now this field no longer has a default value.
 
 ## Resource: `google_logging_metric`
 
@@ -560,6 +852,7 @@ When setting the `bucket_options` block, the following fields may be required:
 * `num_finite_buckets`, `growth_factor`, and `scale` are now required when `bucket_options.exponential_buckets` is set.
 
 Previously these fields should have been required but were not, which allowed for invalid `google_logging_metric` configurations.
+
 
 ## Resource: `google_logging_project_sink`
 
@@ -600,25 +893,41 @@ resource "google_project_iam_binding" "gcs-bucket-writer" {
 }
 ```
 
-## Resource: `google_cloudfunctions2_function`
-### `location` now a required field
-Deployment would fail if this field was unspecified. Marked this field as requied to align with implementation. This value cannot be inferred from any provider level config. No change is necessary for upgrade as this field is already needed for any deployments.
 
-## Resource: `google_cloud_run_v2_service`
-### transitioned `volumes.cloud_sql_instance.instances` to SET from ARRAY for `google_cloud_run_v2_service`
-Previously, `database_flags` was a list, making it order-dependent. It is now a set.
+## Resource: `google_looker_instance`
 
-If you were relying on accessing an individual flag by index (for example, `google_sql_database_instance.instance.settings.0.database_flags.0.name`), then that will now need to by hash (for example, `google_sql_database_instance.instance.settings.0.database_flags.<some-hash>.name`).
+### `LOOKER_MODELER` has been removed as a platform edition.
 
-## Product: `cloudiot`
+Looker Modeler edition is deprecated as a platform edition.
 
-### resource `google_cloudiot_device` is now removed
 
-### resource `google_cloudiot_registry` is now removed
+## Resource: `google_monitoring_dashboard`
 
-### resource `google_cloudiot_registry_iam_*` is now removed
+### `dashboard_json` suppresses removal diffs more aggressively
 
-### datasource `google_cloudiot_registry_iam_policy` is now removed
+To prevent permanent diffs from default values, Terraform will now attempt to suppress diffs where the value is returned in the JSON
+string but doesn't exist in the configuration. Consequently, legitmate remove-only diffs will also be suppressed.
+For Terraform to detect the diff, JSON key removals must also be accompanied by a non-removal change (trivial or not).
+
+
+## Resource: `google_monitoring_metric_descriptor`
+
+### Changing `labels` now triggers replacement
+
+Previously, attempting to update `labels` failed and created a permadiff. The `labels` 
+field is now immutable without destroying and recreating the resource.
+
+
+## Resource: `google_privateca_certificate`
+
+### `config_values` is now removed
+
+Removed in favor of field `x509_description`.
+
+### `pem_certificates` is now removed
+
+Removed in favor of field `pem_certificate_chain`.
+
 
 ## Resource: `google_service_networking_connection`
 
@@ -630,11 +939,12 @@ If you were relying on accessing an individual flag by index (for example, `goog
 
 `google_service_networking_connection` now uses API `deleteConnection` method instead of `removePeering` method during the deletion step. Previously, `removePeering` method was used because `deleteConnection` method was unavailable. In some cases a private connection cannot be deleted immediately after the resource using that connection is deleted, and users may have to delete the private connection after a waiting period.
 
+
 ## Resource: `google_secret_manager_secret`
 
 ### `replication.automatic` is now removed
 
-Deprecated in favor of field `replication.auto`. It is now removed.
+Removed in favor of field `replication.auto`.
 
 #### Old Config
 
@@ -660,14 +970,12 @@ resource "google_secret_manager_secret" "my-secret" {
 }
 ```
 
-## Resource: `google_compute_service_attachment`
 
-### `reconcile_connections` now defaults from API
+## Resource: `google_sql_database`
 
-`reconcile_connections` previously defaults to true. Now it will default from the API.
+### `database_flags` is now a set
 
-## Resource: `google_looker_instance`
+Previously, `database_flags` was a list, making it order-dependent. It is now a set.
 
-### `LOOKER_MODELER` has been removed as a platform edition.
+If you were relying on accessing an individual flag by index (for example, `google_sql_database_instance.instance.settings.0.database_flags.0.name`), then that will now need to by hash (for example, `google_sql_database_instance.instance.settings.0.database_flags.<some-hash>.name`).
 
-Looker Modeler edition is deprecated as a platform edition.

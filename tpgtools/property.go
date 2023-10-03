@@ -311,6 +311,10 @@ func (p Property) DefaultStateSetter() string {
 	case SchemaTypeFloat:
 		fallthrough
 	case SchemaTypeMap:
+		if p.IsResourceLabels() || p.IsResourceAnnotations() {
+			return fmt.Sprintf("d.Set(%q, flatten%s%s(res.%s, d))", p.Name(), p.resource.PathType(), p.PackagePath(), p.PackageName)
+		}
+
 		return fmt.Sprintf("d.Set(%q, res.%s)", p.Name(), p.PackageName)
 	case SchemaTypeList, SchemaTypeSet:
 		if p.typ.Items != nil && ((p.typ.Items.Type == "string" && len(p.typ.Items.Enum) == 0) || p.typ.Items.Type == "integer") {
@@ -438,6 +442,18 @@ func (p Property) Objects() (props []Property) {
 	}
 
 	return props
+}
+
+func (p Property) IsResourceLabels() bool {
+	return p.Name() == "labels" && p.parent == nil
+}
+
+func (p Property) IsResourceAnnotations() bool {
+	return p.Name() == "annotations" && p.parent == nil
+}
+
+func (p Property) ShouldShowUpInSamples() bool {
+	return (p.Settable && p.Name() != "effective_labels" && p.Name() != "effective_annotations") || p.IsResourceLabels() || p.IsResourceAnnotations()
 }
 
 // collapsedProperties returns the input list of properties with nested objects collapsed if needed.
@@ -878,6 +894,21 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			resource.ReusedTypes = resource.RegisterReusedType(p)
 		}
 
+		// Add the "effective_labels" property when the current property is top level "labels" or
+		// add the "effective_annotations" property when the current property is top level "annotations"
+
+		if p.IsResourceLabels() || p.IsResourceAnnotations() {
+			p.Description = fmt.Sprintf("%s\n\n%s", p.Description, get_labels_field_note(p.title))
+			p.Settable = false
+			p.StateGetter = nil
+
+			props = append(props, build_effective_labels_field(p, resource, parent))
+
+			if p.IsResourceLabels() {
+				props = append(props, build_terraform_labels_field(p, resource, parent))
+			}
+		}
+
 		props = append(props, p)
 	}
 
@@ -900,4 +931,49 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 	sort.SliceStable(props, propComparator(props))
 
 	return props, nil
+}
+
+func build_effective_labels_field(p Property, resource *Resource, parent *Property) Property {
+	title := fmt.Sprintf("effective_%s", p.title)
+	description := fmt.Sprintf("All of %s (key/value pairs) present on the resource in GCP, including the %s configured through Terraform, other clients and services.", p.title, p.title)
+	stateSetter := fmt.Sprintf("d.Set(%q, res.%s)", title, p.PackageName)
+
+	effectiveLabels := Property{
+		title:       title,
+		Type:        p.Type,
+		Description: description,
+		resource:    resource,
+		parent:      parent,
+		Optional:    false,
+		Computed:    true,
+		ForceNew:    p.ForceNew, // Add ForceNew property if labels field has it
+		PackageName: p.PackageName,
+		Settable:    true,
+		StateSetter: &stateSetter,
+	}
+
+	stateGetter := effectiveLabels.DefaultStateGetter()
+	effectiveLabels.StateGetter = &stateGetter
+	return effectiveLabels
+}
+
+func build_terraform_labels_field(p Property, resource *Resource, parent *Property) Property {
+	title := fmt.Sprintf("terraform_%s", p.title)
+	description := fmt.Sprintf("The combination of %s configured directly on the resource and default %s configured on the provider.", p.title, p.title)
+	stateSetter := fmt.Sprintf("d.Set(%q, flatten%sTerraform%s(res.%s, d))", title, p.resource.PathType(), p.PackagePath(), p.PackageName)
+
+	return Property{
+		title:       title,
+		Type:        p.Type,
+		Description: description,
+		resource:    resource,
+		parent:      parent,
+		Computed:    true,
+		PackageName: p.PackageName,
+		StateSetter: &stateSetter,
+	}
+}
+
+func get_labels_field_note(title string) string {
+	return fmt.Sprintf("**Note**: This field is non-authoritative, and will only manage the %s present in your configuration.\nPlease refer to the field `effective_%s` for all of the %s present on the resource.", title, title, title)
 }

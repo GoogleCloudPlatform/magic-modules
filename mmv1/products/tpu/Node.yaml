@@ -36,6 +36,7 @@ examples:
     vars:
       node_name: 'test-tpu'
       global_address_name: 'my-global-address'
+      network_name: 'tpu-node-network'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/tpu_node.erb'
 custom_diff: [
@@ -153,7 +154,7 @@ properties:
           output: true
           description: |
             The port of this network endpoint.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     immutable: true
     description: Resource labels to represent user provided metadata.

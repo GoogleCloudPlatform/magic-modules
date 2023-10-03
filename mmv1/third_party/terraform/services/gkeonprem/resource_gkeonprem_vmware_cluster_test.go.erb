@@ -27,6 +27,7 @@ func TestAccGkeonpremVmwareCluster_vmwareClusterUpdateBasic(t *testing.T) {
         ResourceName:      "google_gkeonprem_vmware_cluster.cluster",
         ImportState:       true,
         ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"annotations"},
       },
       {
         Config: testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLb(context),
@@ -35,6 +36,7 @@ func TestAccGkeonpremVmwareCluster_vmwareClusterUpdateBasic(t *testing.T) {
         ResourceName:      "google_gkeonprem_vmware_cluster.cluster",
         ImportState:       true,
         ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"annotations"},
       },
     },
   })
@@ -117,7 +119,9 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLbStart(context map[s
     admin_cluster_membership = "projects/870316890899/locations/global/memberships/gkeonprem-terraform-test"
     description = "test cluster"
     on_prem_version = "1.13.1-gke.35"
-    annotations = {}
+    annotations = {
+      env = "test"
+    }
     network_config {
       service_address_cidr_blocks = ["10.96.0.0/12"]
       pod_address_cidr_blocks = ["192.168.0.0/16"]
@@ -165,7 +169,9 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLb(context map[string
     admin_cluster_membership = "projects/870316890899/locations/global/memberships/gkeonprem-terraform-test"
     description = "test cluster updated"
     on_prem_version = "1.13.1-gke.36"
-    annotations = {}
+    annotations = {
+      env = "test-update"
+    }
     network_config {
       service_address_cidr_blocks = ["10.96.0.0/16"]
       pod_address_cidr_blocks = ["192.168.0.0/20"]
@@ -360,6 +366,15 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLbStart(context map[
         konnectivity_server_node_port = 30008
       }
     }
+    vcenter {
+      resource_pool = "test-resource-pool"
+      datastore = "test-datastore"
+      datacenter = "test-datacenter"
+      cluster = "test-cluster"
+      folder = "test-folder"
+      ca_cert_data = "test-ca-cert-data"
+      storage_policy_name = "test-storage-policy-name"
+    }
     dataplane_v2 {
       dataplane_v2_enabled = true
       windows_dataplane_v2_enabled = true
@@ -444,6 +459,15 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLb(context map[strin
         control_plane_node_port = 30008
         konnectivity_server_node_port = 30009
       }
+    }
+    vcenter {
+      resource_pool = "test-resource-pool-updated"
+      datastore = "test-datastore-updated"
+      datacenter = "test-datacenter-updated"
+      cluster = "test-cluster-updated"
+      folder = "test-folder-updated"
+      ca_cert_data = "test-ca-cert-data-updated"
+      storage_policy_name = "test-storage-policy-name-updated"
     }
     dataplane_v2 {
       dataplane_v2_enabled = true
