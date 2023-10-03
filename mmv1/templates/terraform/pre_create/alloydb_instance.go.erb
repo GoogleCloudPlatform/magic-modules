@@ -1,0 +1,19 @@
+// Read the config and call createsecondary api if instance_type is SECONDARY
+
+var instanceType interface{}
+var cluster interface{}
+
+if val, ok := obj["instanceType"]; ok {
+    instanceType = val
+}
+
+cluster = d.Get("cluster")
+
+if instanceType == "SECONDARY" {
+    if cluster != nil {
+        url = strings.Replace(url, "instances?instanceId", "instances:createsecondary?instanceId", 1)
+    } else {
+        return fmt.Errorf("Ill defined cluster name when creating secondary instance.")
+    }
+}
+
