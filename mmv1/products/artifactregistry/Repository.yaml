@@ -143,7 +143,7 @@ properties:
     name: description
     description: |-
       The user-provided description of the repository.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels with user-defined metadata.

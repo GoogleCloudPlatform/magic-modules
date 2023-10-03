@@ -292,13 +292,11 @@ func testAccLoggingProjectSink_basic(name, project, bucketName string) string {
 resource "google_logging_project_sink" "basic" {
   name        = "%s"
   project     = "%s"
-  destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
+  destination = "storage.googleapis.com/${google_storage_bucket.gcs-bucket.name}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
-
-  unique_writer_identity = false
 }
 
-resource "google_storage_bucket" "log-bucket" {
+resource "google_storage_bucket" "gcs-bucket" {
   name     = "%s"
   location = "US"
 }
@@ -310,14 +308,14 @@ func testAccLoggingProjectSink_described(name, project, bucketName string) strin
 resource "google_logging_project_sink" "described" {
   name        = "%s"
   project     = "%s"
-  destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
+  destination = "storage.googleapis.com/${google_storage_bucket.gcs-bucket.name}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
   description = "this is a description for a project level logging sink"
-
+  
   unique_writer_identity = false
 }
 
-resource "google_storage_bucket" "log-bucket" {
+resource "google_storage_bucket" "gcs-bucket" {
   name     = "%s"
   location = "US"
 }
@@ -329,14 +327,14 @@ func testAccLoggingProjectSink_described_update(name, project, bucketName string
 resource "google_logging_project_sink" "described" {
   name        = "%s"
   project     = "%s"
-  destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
+  destination = "storage.googleapis.com/${google_storage_bucket.gcs-bucket.name}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
   description = "description updated"
-
+  
   unique_writer_identity = true
 }
 
-resource "google_storage_bucket" "log-bucket" {
+resource "google_storage_bucket" "gcs-bucket" {
   name     = "%s"
   location = "US"
 }
@@ -348,14 +346,14 @@ func testAccLoggingProjectSink_disabled(name, project, bucketName string) string
 resource "google_logging_project_sink" "disabled" {
   name        = "%s"
   project     = "%s"
-  destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
+  destination = "storage.googleapis.com/${google_storage_bucket.gcs-bucket.name}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
   disabled    = true
 
   unique_writer_identity = false
 }
 
-resource "google_storage_bucket" "log-bucket" {
+resource "google_storage_bucket" "gcs-bucket" {
   name     = "%s"
   location = "US"
 }
@@ -367,14 +365,14 @@ func testAccLoggingProjectSink_disabled_update(name, project, bucketName, disabl
 resource "google_logging_project_sink" "disabled" {
   name        = "%s"
   project     = "%s"
-  destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
+  destination = "storage.googleapis.com/${google_storage_bucket.gcs-bucket.name}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
   disabled    = "%s"
 
   unique_writer_identity = true
 }
 
-resource "google_storage_bucket" "log-bucket" {
+resource "google_storage_bucket" "gcs-bucket" {
   name     = "%s"
   location = "US"
 }
@@ -385,13 +383,13 @@ func testAccLoggingProjectSink_uniqueWriter(name, bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_logging_project_sink" "unique_writer" {
   name        = "%s"
-  destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
+  destination = "storage.googleapis.com/${google_storage_bucket.gcs-bucket.name}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 
   unique_writer_identity = true
 }
 
-resource "google_storage_bucket" "log-bucket" {
+resource "google_storage_bucket" "gcs-bucket" {
   name     = "%s"
   location = "US"
 }
@@ -402,13 +400,13 @@ func testAccLoggingProjectSink_uniqueWriterUpdated(name, bucketName string) stri
 	return fmt.Sprintf(`
 resource "google_logging_project_sink" "unique_writer" {
   name        = "%s"
-  destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
+  destination = "storage.googleapis.com/${google_storage_bucket.gcs-bucket.name}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=WARNING"
 
   unique_writer_identity = true
 }
 
-resource "google_storage_bucket" "log-bucket" {
+resource "google_storage_bucket" "gcs-bucket" {
   name     = "%s"
   location = "US"
 }
@@ -420,7 +418,7 @@ func testAccLoggingProjectSink_heredoc(name, project, bucketName string) string 
 resource "google_logging_project_sink" "heredoc" {
   name        = "%s"
   project     = "%s"
-  destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
+  destination = "storage.googleapis.com/${google_storage_bucket.gcs-bucket.name}"
 
   filter = <<EOS
 
@@ -433,7 +431,7 @@ EOS
   unique_writer_identity = false
 }
 
-resource "google_storage_bucket" "log-bucket" {
+resource "google_storage_bucket" "gcs-bucket" {
   name     = "%s"
   location = "US"
 }
@@ -444,7 +442,7 @@ func testAccLoggingProjectSink_bigquery_before(sinkName, bqDatasetID string) str
 	return fmt.Sprintf(`
 resource "google_logging_project_sink" "bigquery" {
   name        = "%s"
-  destination = "bigquery.googleapis.com/projects/%s/datasets/${google_bigquery_dataset.logging_sink.dataset_id}"
+  destination = "bigquery.googleapis.com/projects/%s/datasets/${google_bigquery_dataset.bq_dataset.dataset_id}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 
   unique_writer_identity = true
@@ -454,7 +452,7 @@ resource "google_logging_project_sink" "bigquery" {
   }
 }
 
-resource "google_bigquery_dataset" "logging_sink" {
+resource "google_bigquery_dataset" "bq_dataset" {
   dataset_id  = "%s"
   description = "Log sink (generated during acc test of terraform-provider-google(-beta))."
 }
@@ -465,13 +463,13 @@ func testAccLoggingProjectSink_bigquery_after(sinkName, bqDatasetID string) stri
 	return fmt.Sprintf(`
 resource "google_logging_project_sink" "bigquery" {
   name        = "%s"
-  destination = "bigquery.googleapis.com/projects/%s/datasets/${google_bigquery_dataset.logging_sink.dataset_id}"
+  destination = "bigquery.googleapis.com/projects/%s/datasets/${google_bigquery_dataset.bq_dataset.dataset_id}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=WARNING"
 
   unique_writer_identity = true
 }
 
-resource "google_bigquery_dataset" "logging_sink" {
+resource "google_bigquery_dataset" "bq_dataset" {
   dataset_id  = "%s"
   description = "Log sink (generated during acc test of terraform-provider-google(-beta))."
 }
@@ -495,8 +493,6 @@ resource "google_logging_project_sink" "loggingbucket" {
     description = "test-2"
     filter = "resource.type = k8s_container"
   }
-
-  unique_writer_identity = true
 }
 
 `, name, project, project)
