@@ -124,7 +124,7 @@ These values will be recorded in individual resource plans through the
 `terraform_labels` and `effective_labels` fields.
 
 ```
-provider "google" {
+provider "google-beta" {
   default_labels = {
     my_global_key = "one"
     my_default_key = "two"
@@ -132,6 +132,7 @@ provider "google" {
 }
 
 resource "google_compute_address" "my_address" {
+  provider = google-beta
   name     = "my-address"
 
   labels = {
