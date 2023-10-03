@@ -131,7 +131,7 @@ properties:
     description: |
       A list of Certificate Manager certificate URLs that are used to authenticate
       connections between users and the load balancer. At least one resource must be specified.
-      Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificates/{resourceName}`
+      Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificates/{resourceName}` or just the self_link projects/{project}/locations/{location}/certificates/{resourceName}
     update_verb: :POST
     update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setSslCertificates'
     item_type: Api::Type::String
