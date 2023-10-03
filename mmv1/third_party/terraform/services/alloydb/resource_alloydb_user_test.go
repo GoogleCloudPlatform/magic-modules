@@ -19,7 +19,7 @@ func TestAccAlloydbUser_updateRoles_BuiltIn(t *testing.T) {
 		"alloydb_user_name":            "user_3",
 		"alloydb_user_pass":            "user_3_pass",
 		"random_suffix":                acctest.RandString(t, 10),
-		"network_name":                 acctest.BootstrapSharedTestNetwork(t, "alloydb-user-updaterole-builtin"),
+		"network_name":                 "alloydb-user-updaterole-builtin-" + acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -62,7 +62,7 @@ resource "google_alloydb_instance" "%{alloydb_instance_resource_id}" {
 resource "google_alloydb_cluster" "%{alloydb_cluster_resource_id}" {
   cluster_id = "%{alloydb_cluster_name}"
   location   = "us-central1"
-  network    = data.google_compute_network.default.id
+  network    = google_compute_network.default.id
 
   initial_user {
     password = "%{alloydb_cluster_pass}"
@@ -71,7 +71,7 @@ resource "google_alloydb_cluster" "%{alloydb_cluster_resource_id}" {
 
 data "google_project" "project" {}
 
-data "google_compute_network" "default" {
+resource "google_compute_network" "default" {
   name = "%{network_name}"
 }
 
@@ -80,11 +80,11 @@ resource "google_compute_global_address" "private_ip_alloc" {
   address_type  = "INTERNAL"
   purpose       = "VPC_PEERING"
   prefix_length = 16
-  network       = data.google_compute_network.default.id
+  network       = google_compute_network.default.id
 }
 
 resource "google_service_networking_connection" "vpc_connection" {
-  network                 = data.google_compute_network.default.id
+  network                 = google_compute_network.default.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
@@ -112,7 +112,7 @@ func TestAccAlloydbUser_updatePassword_BuiltIn(t *testing.T) {
 		"alloydb_user_name":            "user_3",
 		"alloydb_user_pass":            "user_3_pass",
 		"random_suffix":                acctest.RandString(t, 10),
-		"network_name":                 acctest.BootstrapSharedTestNetwork(t, "alloydb-user-updatepass-builtin"),
+		"network_name":                 "alloydb-user-updatepass-builtin-" + acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -155,7 +155,7 @@ resource "google_alloydb_instance" "%{alloydb_instance_resource_id}" {
 resource "google_alloydb_cluster" "%{alloydb_cluster_resource_id}" {
   cluster_id = "%{alloydb_cluster_name}"
   location   = "us-central1"
-  network    = data.google_compute_network.default.id
+  network    = google_compute_network.default.id
 
   initial_user {
     password = "%{alloydb_cluster_pass}"
@@ -164,7 +164,7 @@ resource "google_alloydb_cluster" "%{alloydb_cluster_resource_id}" {
 
 data "google_project" "project" {}
 
-data "google_compute_network" "default" {
+resource "google_compute_network" "default" {
   name = "%{network_name}"
 }
 
@@ -173,11 +173,11 @@ resource "google_compute_global_address" "private_ip_alloc" {
   address_type  = "INTERNAL"
   purpose       = "VPC_PEERING"
   prefix_length = 16
-  network       = data.google_compute_network.default.id
+  network       = google_compute_network.default.id
 }
 
 resource "google_service_networking_connection" "vpc_connection" {
-  network                 = data.google_compute_network.default.id
+  network                 = google_compute_network.default.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
@@ -205,7 +205,7 @@ func TestAccAlloydbUser_updateRoles_IAM(t *testing.T) {
 		"alloydb_user_name":            "user_3@foo.com",
 		"alloydb_user_pass":            "user_3_pass",
 		"random_suffix":                acctest.RandString(t, 10),
-		"network_name":                 acctest.BootstrapSharedTestNetwork(t, "alloydb-user-updaterole-iam"),
+		"network_name":                 "alloydb-user-updaterole-iam" + acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -246,13 +246,13 @@ resource "google_alloydb_instance" "%{alloydb_instance_resource_id}" {
 resource "google_alloydb_cluster" "%{alloydb_cluster_resource_id}" {
   cluster_id = "%{alloydb_cluster_name}"
   location   = "us-central1"
-  network    = data.google_compute_network.default.id
+  network    = google_compute_network.default.id
   initial_user {
     password = "%{alloydb_cluster_pass}"
   }
 }
 data "google_project" "project" {}
-data "google_compute_network" "default" {
+resource "google_compute_network" "default" {
   name = "%{network_name}"
 }
 resource "google_compute_global_address" "private_ip_alloc" {
@@ -260,10 +260,10 @@ resource "google_compute_global_address" "private_ip_alloc" {
   address_type  = "INTERNAL"
   purpose       = "VPC_PEERING"
   prefix_length = 16
-  network       = data.google_compute_network.default.id
+  network       = google_compute_network.default.id
 }
 resource "google_service_networking_connection" "vpc_connection" {
-  network                 = data.google_compute_network.default.id
+  network                 = google_compute_network.default.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }

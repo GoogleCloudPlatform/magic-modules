@@ -49,7 +49,7 @@ examples:
       alloydb_instance_resource_id: '"test-instance1"'
       alloydb_user_name: '"user_1"'
       alloydb_user_pass: '"user_1_pass"'
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "alloydb-user-builtin")'
+      network_name: '"alloydb-user-builtin-" + acctest.RandString(t, 10)'
     ignore_read_extra:
       - 'password'
   - !ruby/object:Provider::Terraform::Examples
@@ -70,7 +70,7 @@ examples:
       alloydb_instance_name: '"tf-test-instance2"'
       alloydb_instance_resource_id: '"test-instance2"'
       alloydb_user_name: '"user2@foo.com"'
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "alloydb-user-iam")'
+      network_name: '"alloydb-user-iam-" + acctest.RandString(t, 10)'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'cluster'
