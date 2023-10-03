@@ -57,14 +57,10 @@ examples:
       network_name: 'my-network'
     test_vars_overrides:
       network_name: 'acctest.BootstrapSharedTestNetwork(t, "dbms-privateconnection")'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/dbms_private_connection.go.erb
-  post_create: templates/terraform/post_create/private_connection.go.erb
-  post_import: templates/terraform/post_import/private_connection.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: privateConnectionId
-    description: |-
+    description: |
       The private connectivity identifier.
     required: true
     immutable: true
@@ -86,19 +82,13 @@ properties:
     description: Labels.
   - !ruby/object:Api::Type::String
     name: 'displayName'
-    required: true
     description: Display name.
-  - !ruby/object:Api::Type::Enum
+    default_from_api: true
+  - !ruby/object:Api::Type::String
     name: 'state'
     description: |
       State of the PrivateConnection.
     output: true
-    values:
-      - :CREATING
-      - :CREATED
-      - :FAILED
-      - :DELETING
-      - :FAILED_TO_DELETE
   - !ruby/object:Api::Type::NestedObject
     name: 'error'
     output: true
