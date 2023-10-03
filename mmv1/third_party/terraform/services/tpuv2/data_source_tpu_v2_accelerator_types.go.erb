@@ -1,5 +1,7 @@
+<% autogen_exception -%>
 package tpuv2
 
+<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"log"
@@ -91,3 +93,4 @@ func flattenTpuV2AcceleratorTypes(resp map[string]interface{}) []interface{} {
 	}
 	return types
 }
+<% end -%>
