@@ -207,7 +207,6 @@ properties:
       internally during updates.
     update_url: 'projects/{{project}}/regions/{{region}}/addresses/{{name}}/setLabels'
     update_verb: :POST
-    min_version: beta
   - !ruby/object:Api::Type::ResourceRef
     name: 'network'
     resource: 'Network'
