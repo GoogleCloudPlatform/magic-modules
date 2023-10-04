@@ -28,7 +28,6 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
   set_iam_policy_verb: :POST
-min_version: beta
 description: |
   An individual service. A service contains a name and optional metadata.
 import_format:

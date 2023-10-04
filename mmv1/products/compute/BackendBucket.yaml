@@ -48,7 +48,6 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  min_version: beta
   parent_resource_attribute: 'name'
   import_format:
     ['projects/{{project}}/global/backendBuckets/{{name}}', '{{name}}']
