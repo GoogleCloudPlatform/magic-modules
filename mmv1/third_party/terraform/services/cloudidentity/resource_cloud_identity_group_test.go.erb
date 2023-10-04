@@ -34,6 +34,7 @@ func TestAccCloudIdentityGroup(t *testing.T) {
 <% end -%>
 		"data_source_basic":            testAccDataSourceCloudIdentityGroups_basicTest,
 		"data_source_membership_basic": testAccDataSourceCloudIdentityGroupMemberships_basicTest,
+		"data_source_group_lookup":     testAccDataSourceCloudIdentityGroupLookup_basicTest,
 	}
 
 	for name, tc := range testCases {
