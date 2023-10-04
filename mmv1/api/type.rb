@@ -36,7 +36,11 @@ module Api
       # a different version.
       attr_reader :removed_message
 
-      attr_reader :output # If set value will not be sent to server on sync
+      # If set value will not be sent to server on sync.
+      # For nested fields, this also needs to be set on each descendant (ie. self,
+      # child, etc.).
+      attr_reader :output
+
       attr_reader :immutable # If set to true value is used only on creation
 
       # url_param_only will not send the field in the resource body and will
