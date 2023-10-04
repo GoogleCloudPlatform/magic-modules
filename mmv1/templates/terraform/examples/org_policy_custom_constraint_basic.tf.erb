@@ -1,5 +1,4 @@
 resource "google_org_policy_custom_constraint" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
 
   name         = "custom.disableGkeAutoUpgrade"
   parent       = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
