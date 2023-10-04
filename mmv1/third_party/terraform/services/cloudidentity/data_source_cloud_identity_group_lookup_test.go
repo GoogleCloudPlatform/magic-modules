@@ -38,6 +38,9 @@ data "google_cloud_identity_group_lookup" "lookup" {
   group_key {
     id = "tf-test-my-identity-group%{random_suffix}@%{org_domain}"
   }
+  depends_on = [
+	google_cloud_identity_group.cloud_identity_group_basic,
+  ]
 }
 `, context)
 }
