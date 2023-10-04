@@ -35,21 +35,10 @@ examples:
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
       alloydb_cluster_pass: 'cluster_secret'
-      alloydb_cluster_resource_id: 'default'
       alloydb_instance_name: 'alloydb-instance'
-      alloydb_instance_resource_id: 'default'
       alloydb_user_name: 'user1'
       alloydb_user_pass: 'user_secret'
       network_name: 'alloydb-network'
-    test_vars_overrides:
-      alloydb_cluster_name: '"tf-test-user-cluster-" + acctest.RandString(t, 10)'
-      alloydb_cluster_pass: '"cluster_secret1"'
-      alloydb_cluster_resource_id: '"test-cluster1"'
-      alloydb_instance_name: '"tf-test-instance1"'
-      alloydb_instance_resource_id: '"test-instance1"'
-      alloydb_user_name: '"user_1"'
-      alloydb_user_pass: '"user_1_pass"'
-      network_name: '"alloydb-user-builtin-" + acctest.RandString(t, 10)'
     ignore_read_extra:
       - 'password'
   - !ruby/object:Provider::Terraform::Examples
@@ -57,20 +46,10 @@ examples:
     primary_resource_id: 'user2'
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_cluster_resource_id: 'default'
       alloydb_instance_name: 'alloydb-instance'
-      alloydb_instance_resource_id: 'default'
       alloydb_cluster_pass: 'cluster_secret'
       alloydb_user_name: 'user2@foo.com'
       network_name: 'alloydb-network'
-    test_vars_overrides:
-      alloydb_cluster_name: '"tf-test-user-cluster-" + acctest.RandString(t, 10)'
-      alloydb_cluster_pass: '"cluster_secret2"'
-      alloydb_cluster_resource_id: '"test-cluster2"'
-      alloydb_instance_name: '"tf-test-instance2"'
-      alloydb_instance_resource_id: '"test-instance2"'
-      alloydb_user_name: '"user2@foo.com"'
-      network_name: '"alloydb-user-iam-" + acctest.RandString(t, 10)'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'cluster'
@@ -99,6 +78,11 @@ parameters:
       - :ALLOYDB_BUILT_IN
       - :ALLOYDB_IAM_USER
 properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    output: true
+    description: |
+      Name of the resource in the form of projects/{project}/locations/{location}/clusters/{cluster}/users/{user}.
   - !ruby/object:Api::Type::String
     name: 'password'
     ignore_read: true

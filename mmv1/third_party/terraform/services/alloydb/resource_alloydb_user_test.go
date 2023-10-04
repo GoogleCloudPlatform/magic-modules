@@ -11,15 +11,7 @@ func TestAccAlloydbUser_updateRoles_BuiltIn(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"alloydb_cluster_name":         "tf-test-user-cluster-" + acctest.RandString(t, 10),
-		"alloydb_cluster_pass":         "cluster_secret3",
-		"alloydb_cluster_resource_id":  "test-cluster3",
-		"alloydb_instance_name":        "tf-test-instance3",
-		"alloydb_instance_resource_id": "test-instance3",
-		"alloydb_user_name":            "user_3",
-		"alloydb_user_pass":            "user_3_pass",
-		"random_suffix":                acctest.RandString(t, 10),
-		"network_name":                 "alloydb-user-updaterole-builtin-" + acctest.RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -51,32 +43,32 @@ func TestAccAlloydbUser_updateRoles_BuiltIn(t *testing.T) {
 
 func testAccAlloydbUser_updateRoles_BuiltIn(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_alloydb_instance" "%{alloydb_instance_resource_id}" {
-  cluster       = google_alloydb_cluster.%{alloydb_cluster_resource_id}.name
-  instance_id   = "%{alloydb_instance_name}"
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
 
   depends_on = [google_service_networking_connection.vpc_connection]
 }
 
-resource "google_alloydb_cluster" "%{alloydb_cluster_resource_id}" {
-  cluster_id = "%{alloydb_cluster_name}"
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = google_compute_network.default.id
 
   initial_user {
-    password = "%{alloydb_cluster_pass}"
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
 }
 
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
-  name = "%{network_name}"
+  name = "tf-test-alloydb-network%{random_suffix}"
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {
-  name          = "%{alloydb_cluster_name}"
+  name          = "tf-test-alloydb-cluster%{random_suffix}"
   address_type  = "INTERNAL"
   purpose       = "VPC_PEERING"
   prefix_length = 16
@@ -90,13 +82,13 @@ resource "google_service_networking_connection" "vpc_connection" {
 }
 
 resource "google_alloydb_user" "user1" {
-  cluster = google_alloydb_cluster.%{alloydb_cluster_resource_id}.name
-  user_id = "%{alloydb_user_name}"
+  cluster = google_alloydb_cluster.default.name
+  user_id = "user1%{random_suffix}"
   user_type = "ALLOYDB_BUILT_IN"
 
-  password = "%{alloydb_user_pass}"
+  password = "tf_test_user_secret%{random_suffix}"
   database_roles = []
-  depends_on = [google_alloydb_instance.%{alloydb_instance_resource_id}]
+  depends_on = [google_alloydb_instance.default]
 }`, context)
 }
 
@@ -104,15 +96,7 @@ func TestAccAlloydbUser_updatePassword_BuiltIn(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"alloydb_cluster_name":         "tf-test-user-cluster-" + acctest.RandString(t, 10),
-		"alloydb_cluster_pass":         "cluster_secret3",
-		"alloydb_cluster_resource_id":  "test-cluster3",
-		"alloydb_instance_name":        "tf-test-instance3",
-		"alloydb_instance_resource_id": "test-instance3",
-		"alloydb_user_name":            "user_3",
-		"alloydb_user_pass":            "user_3_pass",
-		"random_suffix":                acctest.RandString(t, 10),
-		"network_name":                 "alloydb-user-updatepass-builtin-" + acctest.RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -144,32 +128,32 @@ func TestAccAlloydbUser_updatePassword_BuiltIn(t *testing.T) {
 
 func testAccAlloydbUser_updatePass_BuiltIn(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_alloydb_instance" "%{alloydb_instance_resource_id}" {
-  cluster       = google_alloydb_cluster.%{alloydb_cluster_resource_id}.name
-  instance_id   = "%{alloydb_instance_name}"
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
 
   depends_on = [google_service_networking_connection.vpc_connection]
 }
 
-resource "google_alloydb_cluster" "%{alloydb_cluster_resource_id}" {
-  cluster_id = "%{alloydb_cluster_name}"
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = google_compute_network.default.id
 
   initial_user {
-    password = "%{alloydb_cluster_pass}"
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
 }
 
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
-  name = "%{network_name}"
+  name = "tf-test-alloydb-network%{random_suffix}"
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {
-  name          = "%{alloydb_cluster_name}"
+  name          = "tf-test-alloydb-cluster%{random_suffix}"
   address_type  = "INTERNAL"
   purpose       = "VPC_PEERING"
   prefix_length = 16
@@ -183,13 +167,13 @@ resource "google_service_networking_connection" "vpc_connection" {
 }
 
 resource "google_alloydb_user" "user1" {
-  cluster = google_alloydb_cluster.%{alloydb_cluster_resource_id}.name
-  user_id = "%{alloydb_user_name}"
+  cluster = google_alloydb_cluster.default.name
+  user_id = "user1%{random_suffix}"
   user_type = "ALLOYDB_BUILT_IN"
 
-  password = "%{alloydb_user_pass}-foo"
+  password = "tf_test_user_secret%{random_suffix}-foo"
   database_roles = ["alloydbsuperuser"]
-  depends_on = [google_alloydb_instance.%{alloydb_instance_resource_id}]
+  depends_on = [google_alloydb_instance.default]
 }`, context)
 }
 
@@ -197,15 +181,7 @@ func TestAccAlloydbUser_updateRoles_IAM(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"alloydb_cluster_name":         "tf-test-user-cluster-" + acctest.RandString(t, 10),
-		"alloydb_cluster_pass":         "cluster_secret3",
-		"alloydb_cluster_resource_id":  "test-cluster3",
-		"alloydb_instance_name":        "tf-test-instance3",
-		"alloydb_instance_resource_id": "test-instance3",
-		"alloydb_user_name":            "user_3@foo.com",
-		"alloydb_user_pass":            "user_3_pass",
-		"random_suffix":                acctest.RandString(t, 10),
-		"network_name":                 "alloydb-user-updaterole-iam" + acctest.RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -237,26 +213,26 @@ func TestAccAlloydbUser_updateRoles_IAM(t *testing.T) {
 
 func testAccAlloydbUser_updateRoles_Iam(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_alloydb_instance" "%{alloydb_instance_resource_id}" {
-  cluster       = google_alloydb_cluster.%{alloydb_cluster_resource_id}.name
-  instance_id   = "%{alloydb_instance_name}"
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
   depends_on = [google_service_networking_connection.vpc_connection]
 }
-resource "google_alloydb_cluster" "%{alloydb_cluster_resource_id}" {
-  cluster_id = "%{alloydb_cluster_name}"
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = google_compute_network.default.id
   initial_user {
-    password = "%{alloydb_cluster_pass}"
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
 }
 data "google_project" "project" {}
 resource "google_compute_network" "default" {
-  name = "%{network_name}"
+  name = "tf-test-alloydb-network%{random_suffix}"
 }
 resource "google_compute_global_address" "private_ip_alloc" {
-  name          = "%{alloydb_cluster_name}"
+  name          = "tf-test-alloydb-cluster%{random_suffix}"
   address_type  = "INTERNAL"
   purpose       = "VPC_PEERING"
   prefix_length = 16
@@ -268,10 +244,10 @@ resource "google_service_networking_connection" "vpc_connection" {
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 resource "google_alloydb_user" "user2" {
-  cluster = google_alloydb_cluster.%{alloydb_cluster_resource_id}.name
-  user_id = "%{alloydb_user_name}"
+  cluster = google_alloydb_cluster.default.name
+  user_id = "user2@foo.com%{random_suffix}"
   user_type = "ALLOYDB_IAM_USER"
   database_roles = ["alloydbiamuser", "alloydbsuperuser"]
-  depends_on = [google_alloydb_instance.%{alloydb_instance_resource_id}]
+  depends_on = [google_alloydb_instance.default]
 }`, context)
 }
