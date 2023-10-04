@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package cloudrunv2_test
 
 import (
@@ -666,3 +667,87 @@ resource "google_cloud_run_v2_service" "default" {
 }
 `, context)
 }
+
+<% unless version == "ga" -%>
+func TestAccCloudRunV2Service_cloudrunv2ServiceCustomAudienceUpdate(t *testing.T) {
+	t.Parallel()
+
+  serviceName := fmt.Sprintf("tf-test-cloudrun-service%s", acctest.RandString(t, 10))
+	context := map[string]interface{}{
+		"service_name": serviceName,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithoutCustomAudience(context),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "annotations"},
+			},
+			{
+				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithCustomAudience(context),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "annotations"},
+			},
+		},
+	})
+}
+
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithoutCustomAudience(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  provider     = google-beta
+  name         = "%{service_name}"
+  location     = "us-central1"
+  launch_stage = "BETA"
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      ports {
+        container_port = 8080
+      }
+      liveness_probe {
+        grpc {}
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithCustomAudience(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  provider         = google-beta
+  name             = "%{service_name}"
+  location         = "us-central1"
+  launch_stage     = "BETA"
+  custom_audiences = ["test"]
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      ports {
+        container_port = 8080
+      }
+      liveness_probe {
+        grpc {}
+      }
+    }
+  }
+}
+`, context)
+}
+<% end -%>
