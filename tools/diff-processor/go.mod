@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/magic-modules/.ci/diff-processor
+module github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor
 
 go 1.19
 
@@ -6,7 +6,8 @@ replace google/provider/old => ./old
 
 replace google/provider/new => ./new
 
-replace github.com/GoogleCloudPlatform/magic-modules/.ci/diff-processor => ./
+replace github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor => ./
+replace github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler => ../issue-labeler
 
 require (
 	github.com/davecgh/go-spew v1.1.1

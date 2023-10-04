@@ -78,7 +78,7 @@ func getIssues(since string) []Issue {
 	return issues
 }
 
-func computeIssueUpdates(issues []Issue, regexpLabels []regexpLabel) []IssueUpdate {
+func computeIssueUpdates(issues []Issue, regexpLabels []RegexpLabel) []IssueUpdate {
 	var issueUpdates []IssueUpdate
 
 	for _, issue := range issues {
@@ -104,7 +104,7 @@ func computeIssueUpdates(issues []Issue, regexpLabels []regexpLabel) []IssueUpda
 		}
 
 		affectedResources := extractAffectedResources(issue.Body)
-		for _, needed := range computeLabels(affectedResources, regexpLabels) {
+		for _, needed := range ComputeLabels(affectedResources, regexpLabels) {
 			desired[needed] = struct{}{}
 		}
 
@@ -126,7 +126,7 @@ func computeIssueUpdates(issues []Issue, regexpLabels []regexpLabel) []IssueUpda
 	return issueUpdates
 }
 
-func updateIssues(issueUpdates []IssueUpdate, dryRun bool) {
+func UpdateIssues(issueUpdates []IssueUpdate, dryRun bool) {
 	client := &http.Client{}
 	for _, issueUpdate := range issueUpdates {
 		url := fmt.Sprintf("https://api.github.com/repos/hashicorp/terraform-provider-google/issues/%d", issueUpdate.Number)

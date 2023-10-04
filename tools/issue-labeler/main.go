@@ -16,7 +16,7 @@ var flagDryRun = flag.Bool("backfill-dry-run", false, "when combined with backfi
 func main() {
 	flag.Parse()
 
-	regexpLabels, err := buildRegexLabels(enrolledTeamsYaml)
+	regexpLabels, err := BuildRegexLabels(EnrolledTeamsYaml)
 	if err != nil {
 		glog.Exitf("Error building regex labels: %v", err)
 	}
@@ -24,7 +24,7 @@ func main() {
 	if *flagBackfillDate == "" {
 		issueBody := os.Getenv("ISSUE_BODY")
 		affectedResources := extractAffectedResources(issueBody)
-		labels := computeLabels(affectedResources, regexpLabels)
+		labels := ComputeLabels(affectedResources, regexpLabels)
 
 		if len(labels) > 0 {
 			labels = append(labels, "forward/review")
@@ -34,6 +34,6 @@ func main() {
 	} else {
 		issues := getIssues(*flagBackfillDate)
 		issueUpdates := computeIssueUpdates(issues, regexpLabels)
-		updateIssues(issueUpdates, *flagDryRun)
+		UpdateIssues(issueUpdates, *flagDryRun)
 	}
 }

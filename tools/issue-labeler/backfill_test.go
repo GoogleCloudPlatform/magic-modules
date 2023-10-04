@@ -20,7 +20,7 @@ func testIssueBodyWithResources(resources []string) string {
 }
 
 func TestComputeIssueUpdates(t *testing.T) {
-	defaultRegexpLabels := []regexpLabel{
+	defaultRegexpLabels := []RegexpLabel{
 		{
 			Regexp: regexp.MustCompile("google_service1_.*"),
 			Label:  "service/service1",
@@ -36,7 +36,7 @@ func TestComputeIssueUpdates(t *testing.T) {
 	}
 	cases := map[string]struct {
 		issues               []Issue
-		regexpLabels         []regexpLabel
+		regexpLabels         []RegexpLabel
 		expectedIssueUpdates []IssueUpdate
 	}{
 		"no issues -> no updates": {

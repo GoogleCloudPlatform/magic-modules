@@ -45,7 +45,7 @@ func TestExtractAffectedResources(t *testing.T) {
 
 func TestEnrolledTeamsData(t *testing.T) {
 	// Smoke test to make sure enrolled teams data can be converted to a regex -> label map
-	_, err := buildRegexLabels(enrolledTeamsYaml)
+	_, err := BuildRegexLabels(EnrolledTeamsYaml)
 	if err != nil {
 		t.Logf("Error converting enrolled_teams.yml to regexpLabels: %s", err)
 		t.FailNow()
@@ -55,11 +55,11 @@ func TestEnrolledTeamsData(t *testing.T) {
 func TestBuildRegexLabels(t *testing.T) {
 	cases := map[string]struct {
 		yaml                 []byte
-		expectedRegexpLabels []regexpLabel
+		expectedRegexpLabels []RegexpLabel
 	}{
 		"empty yaml": {
 			yaml:                 []byte{},
-			expectedRegexpLabels: []regexpLabel{},
+			expectedRegexpLabels: []RegexpLabel{},
 		},
 		"labels with resources": {
 			yaml: []byte(`
@@ -70,7 +70,7 @@ service/service2:
   resources:
   - google_service2_resource1
   - google_service2_resource2`),
-			expectedRegexpLabels: []regexpLabel{
+			expectedRegexpLabels: []RegexpLabel{
 				{
 					Regexp: regexp.MustCompile("^google_service1_.*$"),
 					Label:  "service/service1",
@@ -91,7 +91,7 @@ service/service1:
   team: service1-team
   resources:
     - google_service1_resource1`),
-			expectedRegexpLabels: []regexpLabel{
+			expectedRegexpLabels: []RegexpLabel{
 				{
 					Regexp: regexp.MustCompile("^google_service1_resource1$"),
 					Label:  "service/service1",
@@ -104,7 +104,7 @@ service/service1:
 		tc := tc
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
-			regexpLabels, err := buildRegexLabels(tc.yaml)
+			regexpLabels, err := BuildRegexLabels(tc.yaml)
 			if err != nil {
 				t.Logf("Unable to read enrolled teams: %s", err)
 				t.FailNow()
@@ -117,7 +117,7 @@ service/service1:
 }
 
 func TestComputeLabels(t *testing.T) {
-	defaultRegexpLabels := []regexpLabel{
+	defaultRegexpLabels := []RegexpLabel{
 		{
 			Regexp: regexp.MustCompile("^google_service1_.*$"),
 			Label:  "service/service1",
@@ -141,7 +141,7 @@ func TestComputeLabels(t *testing.T) {
 	}
 	cases := map[string]struct {
 		resources      []string
-		regexpLabels   []regexpLabel
+		regexpLabels   []RegexpLabel
 		expectedLabels []string
 	}{
 		"empty resources -> empty labels": {
@@ -156,7 +156,7 @@ func TestComputeLabels(t *testing.T) {
 		},
 		"empty regexpLabels -> empty labels": {
 			resources:      []string{"google_service1_resource1"},
-			regexpLabels:   []regexpLabel{},
+			regexpLabels:   []RegexpLabel{},
 			expectedLabels: []string{},
 		},
 		"single matched resource": {
@@ -195,7 +195,7 @@ func TestComputeLabels(t *testing.T) {
 		tc := tc
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
-			labels := computeLabels(tc.resources, tc.regexpLabels)
+			labels := ComputeLabels(tc.resources, tc.regexpLabels)
 			if !slices.Equal(labels, tc.expectedLabels) {
 				t.Errorf("want %v; got %v", tc.expectedLabels, labels)
 			}
