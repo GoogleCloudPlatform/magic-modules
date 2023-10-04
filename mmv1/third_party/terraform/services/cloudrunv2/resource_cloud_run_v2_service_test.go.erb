@@ -707,7 +707,6 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceCustomAudienceUpdate(t *testing.T
 func testAccCloudRunV2Service_cloudRunServiceUpdateWithoutCustomAudience(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
-  provider     = google-beta
   name         = "%{service_name}"
   location     = "us-central1"
   launch_stage = "BETA"
@@ -718,9 +717,6 @@ resource "google_cloud_run_v2_service" "default" {
       ports {
         container_port = 8080
       }
-      liveness_probe {
-        grpc {}
-      }
     }
   }
 }
@@ -730,7 +726,6 @@ resource "google_cloud_run_v2_service" "default" {
 func testAccCloudRunV2Service_cloudRunServiceUpdateWithCustomAudience(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
-  provider         = google-beta
   name             = "%{service_name}"
   location         = "us-central1"
   launch_stage     = "BETA"
@@ -741,9 +736,6 @@ resource "google_cloud_run_v2_service" "default" {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
       ports {
         container_port = 8080
-      }
-      liveness_probe {
-        grpc {}
       }
     }
   }
