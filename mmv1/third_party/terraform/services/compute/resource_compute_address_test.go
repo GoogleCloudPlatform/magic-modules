@@ -136,7 +136,8 @@ func TestAccComputeAddress_networkTier_withProvider5(t *testing.T) {
 	t.Parallel()
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck: func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeAddress_networkTier(acctest.RandString(t, 10)),
@@ -146,8 +147,7 @@ func TestAccComputeAddress_networkTier_withProvider5(t *testing.T) {
 				),
 			},
 			{
-				Config:                   testAccComputeAddress_networkTier_withLabels(acctest.RandString(t, 10)),
-				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+				Config: testAccComputeAddress_networkTier_withLabels(acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.%", "2"),
 					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.env", "foo"),
