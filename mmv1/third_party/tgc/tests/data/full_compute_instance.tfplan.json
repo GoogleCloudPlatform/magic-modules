@@ -354,7 +354,8 @@
             "foo"
           ],
           "timeouts": null,
-          "zone": "us-central1-a"
+          "zone": "us-central1-a",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "advanced_machine_features": [],
@@ -421,7 +422,6 @@
               "network_ip": true
             }
           ],
-          "project": true,
           "reservation_affinity": true,
           "scheduling": [
             {
@@ -506,7 +506,8 @@
           "shielded_instance_config": [],
           "tags": null,
           "timeouts": null,
-          "zone": "us-central1-a"
+          "zone": "us-central1-a",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "advanced_machine_features": [],
@@ -538,7 +539,6 @@
               "subnetwork_project": true
             }
           ],
-          "project": true,
           "reservation_affinity": true,
           "scheduling": true,
           "scratch_disk": [],
