@@ -6,6 +6,8 @@ description: |-
 
 # google\_compute\_instance\_template
 
+-> **Note**: Global instance templates can be used in any region. To lower the impact of outages outside your region and gain data residency within your region, use [google_compute_region_instance_template](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_instance_template).
+
 Manages a VM instance template resource within GCE. For more information see
 [the official documentation](https://cloud.google.com/compute/docs/instance-templates)
 and
@@ -286,7 +288,7 @@ The following arguments are supported:
 
 * `machine_type` - (Required) The machine type to create.
 
-    To create a machine with a [custom type][custom-vm-types] (such as extended memory), format the value like `custom-VCPUS-MEM_IN_MB` like `custom-6-20480` for 6 vCPU and 20GB of RAM.
+    To create a machine with a [custom type](https://cloud.google.com/dataproc/docs/concepts/compute/custom-machine-types) (such as extended memory), format the value like `custom-VCPUS-MEM_IN_MB` like `custom-6-20480` for 6 vCPU and 20GB of RAM.
 
 - - -
 * `name` - (Optional) The name of the instance template. If you leave
@@ -306,6 +308,15 @@ The following arguments are supported:
 * `labels` - (Optional) A set of key/value label pairs to assign to instances
     created from this template.
 
+    **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+    Please refer to the field 'effective_labels' for all of the labels present on the resource.
+
+* `terraform_labels` -
+  The combination of labels configured directly on the resource and default labels configured on the provider.
+
+* `effective_labels` -
+  All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
+
 * `metadata` - (Optional) Metadata key/value pairs to make available from
     within instances created from this template.
 
@@ -318,8 +329,7 @@ The following arguments are supported:
     this template. This can be specified multiple times for multiple networks.
     Structure is [documented below](#nested_network_interface).
 
-* `network_performance_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)
-    Configures network performance settings for the instance created from the
+* `network_performance_config` (Optional, Configures network performance settings for the instance created from the
     template. Structure is [documented below](#nested_network_performance_config). **Note**: [`machine_type`](#machine_type)
     must be a [supported type](https://cloud.google.com/compute/docs/networking/configure-vm-with-high-bandwidth-configuration),
     the [`image`](#image) used must include the [`GVNIC`](https://cloud.google.com/compute/docs/networking/using-gvnic#create-instance-gvnic-image)
@@ -505,7 +515,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `nat_ip` - (Optional) The IP address that will be 1:1 mapped to the instance's
     network ip. If not given, one will be generated.
 
-* `network_tier` - (Optional) The [networking tier][network-tier] used for configuring
+* `network_tier` - (Optional) The [networking tier](https://cloud.google.com/network-tiers/docs/overview) used for configuring
     this instance template. This field can take the following values: PREMIUM,
     STANDARD or FIXED_STANDARD. If this field is not specified, it is assumed to be PREMIUM.
 
@@ -676,11 +686,23 @@ This resource provides the following
 
 Instance templates can be imported using any of these accepted formats:
 
+* `projects/{{project}}/global/instanceTemplates/{{name}}`
+* `{{project}}/{{name}}`
+* `{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import instance templates using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/global/instanceTemplates/{{name}}"
+  to = google_compute_instance_template.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), instance templates can be imported using one of the formats above. For example:
+
 ```
 $ terraform import google_compute_instance_template.default projects/{{project}}/global/instanceTemplates/{{name}}
 $ terraform import google_compute_instance_template.default {{project}}/{{name}}
 $ terraform import google_compute_instance_template.default {{name}}
 ```
-
-[custom-vm-types]: https://cloud.google.com/dataproc/docs/concepts/compute/custom-machine-types
-[network-tier]: https://cloud.google.com/network-tiers/docs/overview

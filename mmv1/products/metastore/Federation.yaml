@@ -92,7 +92,7 @@ properties:
     output: true
     description: |
       The relative resource name of the metastore federation.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: 'User-defined labels for the metastore federation.'
   - !ruby/object:Api::Type::String

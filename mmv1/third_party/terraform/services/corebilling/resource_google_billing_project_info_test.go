@@ -29,6 +29,7 @@ func TestAccBillingProjectInfo_update(t *testing.T) {
 				ResourceName:      "google_billing_project_info.info",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateId:     fmt.Sprintf("projects/%s", projectId),
 			},
 			{
 				Config: testAccBillingProjectInfo_basic(projectId, orgId, ""),
@@ -37,6 +38,7 @@ func TestAccBillingProjectInfo_update(t *testing.T) {
 				ResourceName:      "google_billing_project_info.info",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateId:     fmt.Sprintf("projects/%s", projectId),
 			},
 			{
 				Config: testAccBillingProjectInfo_basic(projectId, orgId, billingAccount),
@@ -45,6 +47,7 @@ func TestAccBillingProjectInfo_update(t *testing.T) {
 				ResourceName:      "google_billing_project_info.info",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateId:     fmt.Sprintf("projects/%s", projectId),
 			},
 		},
 	})

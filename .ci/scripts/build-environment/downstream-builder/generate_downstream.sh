@@ -1,6 +1,7 @@
 #! /bin/bash
 
 set -e
+NEWLINE=$'\n'
 
 function clone_repo() {
     SCRATCH_OWNER=modular-magician
@@ -96,7 +97,8 @@ elif [ "$COMMAND" == "base" ]; then
     COMMIT_MESSAGE="Old generated code for MM PR $REFERENCE."
 elif [ "$COMMAND" == "downstream" ]; then
     BRANCH=downstream-pr-$REFERENCE
-    COMMIT_MESSAGE="$(git log -1 --pretty=%B "$REFERENCE")"
+    ORIGINAL_MESSAGE="$(git log -1 --pretty=%B "$REFERENCE")"
+    COMMIT_MESSAGE="$ORIGINAL_MESSAGE$NEWLINE[upstream:$REFERENCE]"
 fi
 
 if [ "$REPO" == "terraform" ]; then
@@ -107,6 +109,7 @@ if [ "$REPO" == "terraform" ]; then
 fi
 
 if [ "$REPO" == "terraform-google-conversion" ]; then
+    # Generate tfplan2cai
     pushd $LOCAL_PATH
     # clear out the templates as they are copied during
     # generation from mmv1/third_party/validator/tests/data
@@ -118,6 +121,17 @@ if [ "$REPO" == "terraform-google-conversion" ]; then
     popd
 
     bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH/tfplan2cai -v $VERSION
+
+    # Ignore 'tgc-base' step, because this is a new provider.
+    # TODO: remove this condition on next cai2hcl-related PR.
+    if [ "$COMMAND" != "base" ]; then
+    # Generate cai2hcl
+        pushd $LOCAL_PATH
+        rm -rf ./cai2hcl/*
+        popd
+
+        bundle exec compiler.rb -a -e terraform -f tgc_cai2hcl -o $LOCAL_PATH/cai2hcl -v $VERSION
+    fi
 
     if [ "$COMMAND" == "downstream" ]; then
       pushd $LOCAL_PATH

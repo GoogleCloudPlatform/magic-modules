@@ -62,8 +62,8 @@ resource "google_compute_instance" "my-logged-instance" {
   }
 }
 
-# A bucket to store logs in
-resource "google_storage_bucket" "log-bucket" {
+# A gcs bucket to store logs in
+resource "google_storage_bucket" "gcs-bucket" {
   name     = "my-unique-logging-bucket"
   location = "US"
 }
@@ -72,14 +72,14 @@ resource "google_storage_bucket" "log-bucket" {
 resource "google_logging_project_sink" "instance-sink" {
   name        = "my-instance-sink"
   description = "some explanation on what this is"
-  destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
+  destination = "storage.googleapis.com/${google_storage_bucket.gcs-bucket.name}"
   filter      = "resource.type = gce_instance AND resource.labels.instance_id = \"${google_compute_instance.my-logged-instance.instance_id}\""
 
   unique_writer_identity = true
 }
 
 # Because our sink uses a unique_writer, we must grant that writer access to the bucket.
-resource "google_project_iam_binding" "log-writer" {
+resource "google_project_iam_binding" "gcs-bucket-writer" {
   project = "your-project-id"
   role = "roles/storage.objectCreator"
 
@@ -180,6 +180,19 @@ exported:
 
 Project-level logging sinks can be imported using their URI, e.g.
 
+* `projects/{{project_id}}/sinks/{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import project-level logging sinks using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project_id}}/sinks/{{name}}"
+  to = google_logging_project_sink.default
+}
 ```
-$ terraform import google_logging_project_sink.my_sink projects/my-project/sinks/my-sink
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), project-level logging sinks can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_logging_project_sink.default projects/{{project_id}}/sinks/{{name}}
 ```

@@ -15,8 +15,10 @@
 name: 'Namespace'
 base_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces'
 create_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/?scope_namespace_id={{scope_namespace_id}}'
+update_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/{{scope_namespace_id}}'
 self_link: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/{{scope_namespace_id}}'
-immutable: true
+update_verb: :PATCH
+update_mask: true
 description: |
   Namespace represents a namespace across the Fleet.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -123,3 +125,15 @@ properties:
           - :READY
           - :DELETING
           - :UPDATING
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'namespaceLabels'
+    description: |
+      Namespace-level cluster namespace labels. These labels are applied
+      to the related namespace of the member clusters bound to the parent
+      Scope. Scope-level labels (`namespace_labels` in the Fleet Scope
+      resource) take precedence over Namespace-level labels if they share
+      a key. Keys and values must be Kubernetes-conformant.
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
+    description: |
+      Labels for this Namespace.

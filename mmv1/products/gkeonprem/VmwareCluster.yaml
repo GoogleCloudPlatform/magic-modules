@@ -89,7 +89,7 @@ properties:
     required: true
     description: |
       The Anthos clusters on the VMware version for your user cluster.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueAnnotations
     name: 'annotations'
     description: |
       Annotations on the VMware User Cluster.
@@ -100,7 +100,6 @@ properties:
       Prefix must be a DNS subdomain.
       Name must be 63 characters or less, begin and end with alphanumerics,
       with dashes (-), underscores (_), dots (.), and alphanumerics between.
-    default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'controlPlaneNode'
     description: |
@@ -538,6 +537,14 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: 'enableControlPlaneV2'
     description: Enable control plane V2. Default to false.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'upgradePolicy'
+    description: Specifies upgrade policy for the cluster.
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'controlPlaneOnly'
+        description: |
+          Controls whether the upgrade applies to the control plane only.
   - !ruby/object:Api::Type::String
     name: 'uid'
     description: |
@@ -621,33 +628,26 @@ properties:
     description: |
       VmwareVCenterConfig specifies vCenter config for the user cluster.
       Inherited from the admin cluster.
-    output: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'resourcePool'
         description: The name of the vCenter resource pool for the user cluster.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'datastore'
         description: The name of the vCenter datastore for the user cluster.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'datacenter'
         description: The name of the vCenter datacenter for the user cluster.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'cluster'
         description: The name of the vCenter cluster for the user cluster.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'folder'
         description: The name of the vCenter folder for the user cluster.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'caCertData'
         description:
           Contains the vCenter CA certificate public key for SSL verification.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'address'
         description: The vCenter IP address.
@@ -655,7 +655,6 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'storagePolicyName'
         description: The name of the vCenter storage policy for the user cluster.
-        output: true
   - !ruby/object:Api::Type::NestedObject
     name: status
     description: ResourceStatus representing detailed cluster state.

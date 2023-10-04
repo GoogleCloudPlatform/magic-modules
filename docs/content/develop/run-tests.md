@@ -92,7 +92,7 @@ aliases:
 1. Run acceptance tests for only modified resources. (Full test runs can take over 9 hours.) See [Go's documentation](https://pkg.go.dev/cmd/go#hdr-Testing_flags) for more information about `-run` and other flags.
 
     ```bash
-    make testacc TEST=./google-beta TESTARGS='-run=TestAccContainerNodePool'
+    make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool'
     ```
 
 
@@ -100,7 +100,7 @@ aliases:
 1. Optional: Save verbose test output to a file for analysis.
 
     ```bash
-    TF_LOG=DEBUG make testacc TEST=./google-beta TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
+    TF_LOG=DEBUG make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
     ```
 
 1. Optional: Debug tests with [Delve](https://github.com/go-delve/delve). See [`dlv test` documentation](https://github.com/go-delve/delve/blob/master/Documentation/usage/dlv_test.md) for information about available flags.
@@ -292,6 +292,4 @@ Terraform will resume its normal behaviour of pulling published provider version
 
 
 ## What's next?
-- [Create a pull request](https://docs.github.com/en/get-started/quickstart/github-flow#create-a-pull-request)
-- [Write release notes]({{< ref "/contribute/release-notes" >}})
-- [Review a pull request]({{< ref "/contribute/review-pr" >}})
+- [Create a pull request]({{< ref "/contribute/create-pr" >}})
