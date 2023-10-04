@@ -26,7 +26,6 @@ references:
   guides:
     "Use AddressGroups": "https://cloud.google.com/vpc/docs/use-address-groups-firewall-policies"
   api: "https://cloud.google.com/traffic-director/docs/reference/network-security/rest/v1beta1/organizations.locations.addressGroups"
-# Prevent the operation from being generated so we can call the custom one.
 autogen_async: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
