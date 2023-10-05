@@ -79,6 +79,14 @@ examples:
       sqldb_pass: 'my-password'
       profile: 'my-profileid'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'database_migration_service_connection_profile_oracle'
+    primary_resource_id: 'oracleprofile'
+    ignore_read_extra:
+      - 'oracle.0.password'
+    vars:
+      profile: 'my-profileid'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
     name: 'database_migration_service_connection_profile_alloydb'
     primary_resource_id: 'alloydbprofile'
     ignore_read_extra:
@@ -170,6 +178,7 @@ properties:
     exactly_one_of:
       - mysql
       - postgresql
+      - oracle
       - cloudsql
       - alloydb
     properties:
@@ -251,6 +260,7 @@ properties:
     exactly_one_of:
       - mysql
       - postgresql
+      - oracle
       - cloudsql
       - alloydb
     properties:
@@ -336,8 +346,165 @@ properties:
           Output only. If the source is a Cloud SQL database, this field indicates the network architecture it's associated with.
         values:
           - :NETWORK_ARCHITECTURE_OLD_CSQL_PRODUCER
-          - :NETWORK_ARCHITECTURE_NEW_CSQL_PRODUCER -
-            !ruby/object:Api::Type::NestedObject
+          - :NETWORK_ARCHITECTURE_NEW_CSQL_PRODUCER
+  - !ruby/object:Api::Type::NestedObject
+    name: 'oracle'
+    description: |
+      Specifies connection parameters required specifically for Oracle databases.
+    exactly_one_of:
+      - mysql
+      - postgresql
+      - oracle
+      - cloudsql
+      - alloydb
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'host'
+        required: true
+        description: |
+          Required. The IP or hostname of the source Oracle database.
+      - !ruby/object:Api::Type::Integer
+        name: 'port'
+        required: true
+        description: |
+          Required. The network port of the source Oracle database.
+      - !ruby/object:Api::Type::String
+        name: 'username'
+        required: true
+        description: |
+          Required. The username that Database Migration Service will use to connect to the database. The value is encrypted when stored in Database Migration Service.
+      - !ruby/object:Api::Type::String
+        name: 'password'
+        required: true
+        immutable: true
+        description: |
+          Required. Input only. The password for the user that Database Migration Service will be using to connect to the database.
+          This field is not returned on request, and the value is encrypted when stored in Database Migration Service.
+        sensitive: true
+        custom_flatten: templates/terraform/custom_flatten/database_migration_service_connection_profile_oracle_password.go.erb
+      - !ruby/object:Api::Type::Boolean
+        name: 'passwordSet'
+        output: true
+        description: |
+          Output only. Indicates If this connection profile password is stored.
+      - !ruby/object:Api::Type::String
+        name: 'databaseService'
+        required: true
+        description: |
+          Required. Database service for the Oracle connection.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'ssl'
+        description: |
+          SSL configuration for the destination to connect to the source database.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'type'
+            output: true
+            description: |
+              The current connection profile state.
+            values:
+              - :SERVER_ONLY
+              - :SERVER_CLIENT
+          - !ruby/object:Api::Type::String
+            name: 'clientKey'
+            immutable: true
+            required_with:
+              - client_certificate
+            description: |
+              Input only. The unencrypted PKCS#1 or PKCS#8 PEM-encoded private key associated with the Client Certificate.
+              If this field is used then the 'clientCertificate' field is mandatory.
+            sensitive: true
+            custom_flatten: templates/terraform/custom_flatten/database_migration_service_connection_profile_oracle_ssl_client_key.go.erb
+          - !ruby/object:Api::Type::String
+            name: 'clientCertificate'
+            immutable: true
+            required_with:
+              - client_key
+            description: |
+              Input only. The x509 PEM-encoded certificate that will be used by the replica to authenticate against the source database server.
+              If this field is used then the 'clientKey' field is mandatory
+            sensitive: true
+            custom_flatten: templates/terraform/custom_flatten/database_migration_service_connection_profile_oracle_ssl_client_certificate.go.erb
+          - !ruby/object:Api::Type::String
+            name: 'caCertificate'
+            immutable: true
+            required: true
+            sensitive: true
+            custom_flatten: templates/terraform/custom_flatten/database_migration_service_connection_profile_oracle_ssl_ca_certificate.go.erb
+            description: |
+              Required. Input only. The x509 PEM-encoded certificate of the CA that signed the source database server's certificate.
+              The replica will use this certificate to verify it's connecting to the right host.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'staticServiceIpConnectivity'
+        send_empty_value: true
+        allow_empty_object: true
+        description: |
+          This object has no nested fields.
+
+          Static IP address connectivity configured on service project.
+        properties: []
+        exactly_one_of:
+          - static_service_ip_connectivity
+          - forward_ssh_connectivity
+          - private_connectivity
+      - !ruby/object:Api::Type::NestedObject
+        name: 'forwardSshConnectivity'
+        description: |
+          SSL configuration for the destination to connect to the source database.
+        exactly_one_of:
+          - static_service_ip_connectivity
+          - forward_ssh_connectivity
+          - private_connectivity
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'hostname'
+            required: true
+            description: |
+              Required. Hostname for the SSH tunnel.
+          - !ruby/object:Api::Type::String
+            name: 'username'
+            required: true
+            description: |
+              Required. Username for the SSH tunnel.
+          - !ruby/object:Api::Type::Integer
+            name: 'port'
+            required: true
+            description: |
+              Port for the SSH tunnel, default value is 22.
+          - !ruby/object:Api::Type::String
+            name: 'password'
+            immutable: true
+            sensitive: true
+            description: |
+              Input only. SSH password. Only one of `password` and `private_key` can be configured.
+            exactly_one_of:
+              - forward_ssh_connectivity.0.password
+              - forward_ssh_connectivity.0.private_key
+            custom_flatten: templates/terraform/custom_flatten/database_migration_service_connection_profile_oracle_forward_ssh_password.go.erb
+          - !ruby/object:Api::Type::String
+            name: 'privateKey'
+            immutable: true
+            sensitive: true
+            description: |
+              Input only. SSH private key. Only one of `password` and `private_key` can be configured.
+            exactly_one_of:
+              - oracle.0.forward_ssh_connectivity.0.password
+              - oracle.0.forward_ssh_connectivity.0.private_key
+            custom_flatten: templates/terraform/custom_flatten/database_migration_service_connection_profile_oracle_forward_ssh_private_key.go.erb
+      - !ruby/object:Api::Type::NestedObject
+        name: 'privateConnectivity'
+        description: |
+          Configuration for using a private network to communicate with the source database
+        exactly_one_of:
+          - oracle.0.static_service_ip_connectivity
+          - oracle.0.forward_ssh_connectivity
+          - oracle.0.private_connectivity
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'privateConnection'
+            required: true
+            description: |
+              Required. The resource name (URI) of the private connection.
   - !ruby/object:Api::Type::NestedObject
     name: 'cloudsql'
     description: |
@@ -345,6 +512,7 @@ properties:
     exactly_one_of:
       - mysql
       - postgresql
+      - oracle
       - cloudsql
       - alloydb
     properties:
@@ -502,6 +670,7 @@ properties:
     exactly_one_of:
       - mysql
       - postgresql
+      - oracle
       - cloudsql
       - alloydb
     properties:
