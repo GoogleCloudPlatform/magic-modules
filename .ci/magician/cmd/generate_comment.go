@@ -2,16 +2,17 @@ package cmd
 
 import (
 	"fmt"
+	"magician/exec"
 	"magician/github"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
 
-	cp "github.com/otiai10/copy"
 	"github.com/spf13/cobra"
 )
+
+const allowBreakingChangesLabel = 4598495472
 
 type gcGithub interface {
 	GetPullRequestLabelIDs(prNumber string) (map[int]struct{}, error)
@@ -19,39 +20,13 @@ type gcGithub interface {
 	PostComment(prNumber, comment string) error
 }
 
-type runner interface {
+type gcRunner interface {
 	Getwd() (string, error)
 	Copy(src, dest string) error
 	RemoveAll(path string) error
-	Run(path, name string, args, env []string) (string, string, error)
-}
-
-type actualRunner struct{}
-
-func (ar *actualRunner) Getwd() (string, error) {
-	return os.Getwd()
-}
-
-func (ar *actualRunner) Copy(src, dest string) error {
-	return cp.Copy(src, dest)
-}
-
-func (ar *actualRunner) RemoveAll(path string) error {
-	return os.RemoveAll(path)
-}
-
-func (ar actualRunner) Run(path, name string, args, env []string) (string, string, error) {
-	if path != "" {
-		os.Chdir(path)
-	}
-	cmd := exec.Command(name, args...)
-	cmd.Env = append(os.Environ(), env...)
-	out, err := cmd.Output()
-	if err != nil {
-		exitErr := err.(*exec.ExitError)
-		return string(out), string(exitErr.Stderr), err
-	}
-	return string(out), "", nil
+	Chdir(path string)
+	Run(name string, args, env []string) (string, error)
+	MustRun(name string, args, env []string) string
 }
 
 var generateCommentCmd = &cobra.Command{
@@ -98,11 +73,11 @@ var generateCommentCmd = &cobra.Command{
 		}
 
 		gh := github.NewGithubService()
-		execGenerateComment(buildID, projectID, buildStep, commit, pr, githubToken, gh, &actualRunner{})
+		execGenerateComment(buildID, projectID, buildStep, commit, pr, githubToken, gh, exec.NewRunner())
 	},
 }
 
-func execGenerateComment(buildID, projectID, buildStep, commit, pr, githubToken string, gh gcGithub, r runner) {
+func execGenerateComment(buildID, projectID, buildStep, commit, pr, githubToken string, gh gcGithub, r gcRunner) {
 	newBranch := "auto-pr-" + pr
 	oldBranch := "auto-pr-" + pr + "-old"
 	wd, err := r.Getwd()
@@ -121,113 +96,57 @@ func execGenerateComment(buildID, projectID, buildStep, commit, pr, githubToken 
 	tfcRepoName := "terraform-google-conversion"
 	tfcLocalPath := filepath.Join(mmLocalPath, "..", "tfc")
 
-	// TPG/TPGB difference
-	diffs, err := cloneAndDiff(tpgRepoName, tpgLocalPath, oldBranch, newBranch, "Terraform GA", githubToken, r)
-	if err != nil {
-		fmt.Printf("Error cloning and diffing tpg repo: %v\n", err)
-		os.Exit(1)
-	}
-
-	tpgbDiffs, err := cloneAndDiff(tpgbRepoName, tpgbLocalPath, oldBranch, newBranch, "Terraform Beta", githubToken, r)
-	if err != nil {
-		fmt.Printf("Error cloning and diffing tpgb repo: %v\n", err)
-		os.Exit(1)
-	}
-	diffs += tpgbDiffs
-
-	// Breaking change setup and execution
-	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
-	for _, path := range []string{"old", "new"} {
-		if err := r.Copy(tpgLocalPath, filepath.Join(diffProcessorPath, path)); err != nil {
-			fmt.Printf("Error copying files: %v\n", err)
-			os.Exit(1)
-		}
-	}
-	var tpgBreaking, tpgbBreaking, breakingChanges string
-	var diffProccessorErr error
-	if stdout, stderr, err := r.Run(diffProcessorPath, "make", []string{"build"}, []string{"OLD_REF=" + oldBranch, "NEW_REF=" + newBranch}); err != nil {
-		fmt.Printf("Error running make build in %s: %v\nstdout:\n%s\nstderr:\n%s\n", diffProcessorPath, err, stdout, stderr)
-		diffProccessorErr = err
-	} else {
-		tpgBreaking, stderr, err = r.Run(diffProcessorPath, "bin/diff-processor", []string{"breaking-changes"}, nil)
+	var diffs string
+	for _, repo := range []struct {
+		name    string
+		title   string
+		path    string
+		canFail bool
+	}{
+		{
+			name:  tpgRepoName,
+			title: "Terraform GA",
+			path:  tpgLocalPath,
+		},
+		{
+			name:  tpgbRepoName,
+			title: "Terraform Beta",
+			path:  tpgbLocalPath,
+		},
+		{
+			name:    tfcRepoName,
+			title:   "TF Conversion",
+			path:    tfcLocalPath,
+			canFail: true,
+		},
+		{
+			name:  tfoicsRepoName,
+			title: "TF OiCS",
+			path:  tfoicsLocalPath,
+		},
+	} {
+		// TPG/TPGB difference
+		repoDiffs, err := cloneAndDiff(repo.name, repo.path, oldBranch, newBranch, repo.title, githubToken, r)
 		if err != nil {
-			fmt.Printf("Error running diff-processor: %v\nstdout:\n%s\nstderr:\n%s\n", err, tpgBreaking, stderr)
-			diffProccessorErr = err
+			fmt.Printf("Error cloning and diffing tpg repo: %v\n", err)
+			if !repo.canFail {
+				os.Exit(1)
+			}
 		}
-	}
-	for _, path := range []string{"old", "new", "bin"} {
-		if err := r.RemoveAll(filepath.Join(diffProcessorPath, path)); err != nil {
-			fmt.Printf("error removing files: %v\n", err)
-			os.Exit(1)
-		}
-	}
-	for _, path := range []string{"old", "new"} {
-		if err := r.Copy(tpgbLocalPath, filepath.Join(diffProcessorPath, path)); err != nil {
-			fmt.Printf("Error copying files: %v\n", err)
-			os.Exit(1)
-		}
+		diffs += repoDiffs
 	}
 
-	if diffProccessorErr != nil {
-		fmt.Println("Breaking changes failed")
-		breakingChanges = `## Breaking Change Detection Failed
-The breaking change detector crashed during execution. This is usually due to the downstream provider(s) failing to compile. Please investigate or follow up with your reviewer.`
-	} else {
-		fmt.Println("Breaking changes succeeded")
-		breakingChanges = compareBreakingChanges(tpgBreaking, tpgbBreaking)
-	}
-
-	tpgbLocalPathOld := tpgbLocalPath + "old"
-	if err := r.Copy(tpgbLocalPath, tpgbLocalPathOld); err != nil {
-		fmt.Printf("Error copying files from %s to %s: %v\n", tpgbLocalPath, tpgbLocalPathOld, err)
-		os.Exit(1)
-	}
-	if stdout, stderr, err := r.Run(tpgbLocalPathOld, "git", []string{"checkout", "origin/" + oldBranch}, nil); err != nil {
-		fmt.Printf("Error checking out %s in %s: %v\nstdout:\n%s\nstderr:\n%s\n", oldBranch, tpgbLocalPathOld, err, stdout, stderr)
-		os.Exit(1)
-	}
-
-	if err := updatePackageName("old", tpgbLocalPathOld, r); err != nil {
-		fmt.Printf("Error updating package name in %s: %v\n", tpgbLocalPathOld, err)
-		os.Exit(1)
-	}
-	if err := updatePackageName("new", tpgbLocalPath, r); err != nil {
-		fmt.Printf("Error updating package name in %s: %v\n", tpgbLocalPath, err)
-		os.Exit(1)
-	}
-
-	missingTestDetectorPath := filepath.Join(mmLocalPath, "tools", "missing-test-detector")
-	if stdout, stderr, err := r.Run(missingTestDetectorPath, "go", []string{"mod", "edit", "-replace", fmt.Sprintf("google/provider/%s=%s", "new", tpgbLocalPath)}, nil); err != nil {
-		fmt.Printf("Error running go mod edit: %v\nstdout:\n%s\nstderr:\n%s\n", err, stdout, stderr)
-	}
-	if stdout, stderr, err := r.Run(missingTestDetectorPath, "go", []string{"mod", "edit", "-replace", fmt.Sprintf("google/provider/%s=%s", "old", tpgbLocalPathOld)}, nil); err != nil {
-		fmt.Printf("Error running go mod edit: %v\nstdout:\n%s\nstderr:\n%s\n", err, stdout, stderr)
-	}
-	if stdout, stderr, err := r.Run(missingTestDetectorPath, "go", []string{"mod", "tidy"}, nil); err != nil {
-		fmt.Printf("Error running go mod tidy: %v\nstdout:\n%s\nstderr:\n%s\n", err, stdout, stderr)
-	}
-	missingTests, stderr, err := r.Run(missingTestDetectorPath, "go", []string{"run", ".", fmt.Sprintf("-services-dir=%s/google-beta/services", tpgbLocalPath)}, nil)
+	breakingChanges, err := detectBreakingChanges(mmLocalPath, tpgLocalPath, tpgbLocalPath, oldBranch, newBranch, r)
 	if err != nil {
-		fmt.Printf("Error running missing test detector: %v\nstdout:\n%s\nstderr:\n%s\n", err, missingTests, stderr)
-		missingTests = ""
-	} else {
-		fmt.Printf("Successfully ran missing test detector:\n%s\n", missingTests)
-	}
-
-	// TF Conversion - for compatibility until at least Nov 15 2021
-	// allow this to fail for compatibility during tfv/tgc transition phase
-	tfcDiffs, err := cloneAndDiff(tfcRepoName, tfcLocalPath, oldBranch, newBranch, "TF Conversion", githubToken, r)
-	if err != nil {
-		fmt.Printf("Error getting tfc diffs: %v\n", err)
-	}
-	diffs += tfcDiffs
-
-	tfoicsDiffs, err := cloneAndDiff(tfoicsRepoName, tfoicsLocalPath, oldBranch, newBranch, "TF OiCS", githubToken, r)
-	if err != nil {
-		fmt.Printf("Error getting tf oics diffs: %v\n", err)
+		fmt.Println("Error setting up breaking change detector: ", err)
 		os.Exit(1)
 	}
-	diffs += tfoicsDiffs
+
+	missingTests, err := detectMissingTests(mmLocalPath, tpgbLocalPath, oldBranch, r)
+	if err != nil {
+		fmt.Println("Error setting up missing test detector: ", err)
+		os.Exit(1)
+	}
 
 	message := "Hi there, I'm the Modular magician. I've detected the following information about your changes:\n\n"
 	breakingState := "success"
@@ -239,7 +158,7 @@ The breaking change detector crashed during execution. This is usually due to th
 			fmt.Printf("Error getting pull request labels: %v\n", err)
 			os.Exit(1)
 		}
-		if _, ok := labels[4598495472]; !ok {
+		if _, ok := labels[allowBreakingChangesLabel]; !ok {
 			breakingState = "failure"
 		}
 	}
@@ -263,10 +182,8 @@ The breaking change detector crashed during execution. This is usually due to th
 		os.Exit(1)
 	}
 
-	if diffs, stderr, err := r.Run(mmLocalPath, "git", []string{"diff", "HEAD", "origin/main", "tools/missing-test-detector"}, nil); err != nil {
-		fmt.Printf("Error diffing with origin/main: %v\nstdout:\n%s\nstderr:\n%s\n", err, diffs, stderr)
-		os.Exit(1)
-	} else if diffs != "" {
+	r.Chdir(mmLocalPath)
+	if diffs := r.MustRun("git", []string{"diff", "HEAD", "origin/main", "tools/missing-test-detector"}, nil); diffs != "" {
 		fmt.Printf("Found diffs in missing test detector:\n%s\nRunning tests.\n", diffs)
 		if err := testTools(mmLocalPath, tpgbLocalPath, pr, commit, buildID, buildStep, projectID, gh, r); err != nil {
 			fmt.Printf("Error testing tools in %s: %v\n", mmLocalPath, err)
@@ -275,21 +192,68 @@ The breaking change detector crashed during execution. This is usually due to th
 	}
 }
 
-func cloneAndDiff(repoName, path, oldBranch, newBranch, diffTitle, githubToken string, r runner) (string, error) {
+func cloneAndDiff(repoName, path, oldBranch, newBranch, diffTitle, githubToken string, r gcRunner) (string, error) {
 	url := fmt.Sprintf("https://modular-magician:%s@github.com/modular-magician/%s", githubToken, repoName)
-	if stdout, stderr, err := r.Run("", "git", []string{"clone", "-b", newBranch, url, path}, nil); err != nil {
-		return "", fmt.Errorf("error cloning %s: %v\nstdout:\n%s\nstderr:\n%s", repoName, err, stdout, stderr)
+	if _, err := r.Run("git", []string{"clone", "-b", newBranch, url, path}, nil); err != nil {
+		return "", fmt.Errorf("error cloning %s: %v\n", repoName, err)
 	}
-	if stdout, stderr, err := r.Run(path, "git", []string{"fetch", "origin", oldBranch}, nil); err != nil {
-		return "", fmt.Errorf("error fetching branch %s in repo %s: %v\nstdout:\n%s\nstderr:\n%s", oldBranch, repoName, err, stdout, stderr)
+	r.Chdir(path)
+	if _, err := r.Run("git", []string{"fetch", "origin", oldBranch}, nil); err != nil {
+		return "", fmt.Errorf("error fetching branch %s in repo %s: %v\n", oldBranch, repoName, err)
 	}
 
-	if summary, stderr, err := r.Run(path, "git", []string{"diff", "origin/" + oldBranch, "origin/" + newBranch, "--shortstat"}, nil); err != nil {
-		return "", fmt.Errorf("error diffing %s and %s: %v\nstdout:\n%s\nstderr:\n%s", oldBranch, newBranch, err, summary, stderr)
+	if summary, err := r.Run("git", []string{"diff", "origin/" + oldBranch, "origin/" + newBranch, "--shortstat"}, nil); err != nil {
+		return "", fmt.Errorf("error diffing %s and %s: %v\n", oldBranch, newBranch, err)
 	} else if summary != "" {
 		return fmt.Sprintf("\n%s: [Diff](https://github.com/modular-magician/%s/compare/%s..%s) (%s)", diffTitle, repoName, oldBranch, newBranch, strings.TrimSuffix(summary, "\n")), nil
 	}
 	return "", nil
+}
+
+// Run the breaking change detector and return the results.
+// Returns an empty string unless there are breaking changes or the detector failed.
+// Error will be nil unless an error occurs manipulating files.
+func detectBreakingChanges(mmLocalPath, tpgLocalPath, tpgbLocalPath, oldBranch, newBranch string, r gcRunner) (string, error) {
+	// Breaking change setup and execution
+	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
+	for _, path := range []string{"old", "new"} {
+		if err := r.Copy(tpgLocalPath, filepath.Join(diffProcessorPath, path)); err != nil {
+			return "", err
+		}
+	}
+	var tpgBreaking, tpgbBreaking, breakingChanges string
+	var diffProccessorErr error
+	r.Chdir(diffProcessorPath)
+	if _, err := r.Run("make", []string{"build"}, []string{"OLD_REF=" + oldBranch, "NEW_REF=" + newBranch}); err != nil {
+		fmt.Printf("Error running make build in %s: %v\n", diffProcessorPath, err)
+		diffProccessorErr = err
+	} else {
+		tpgBreaking, err = r.Run("bin/diff-processor", []string{"breaking-changes"}, nil)
+		if err != nil {
+			fmt.Println("Diff processor error: ", err)
+			diffProccessorErr = err
+		}
+	}
+	for _, path := range []string{"old", "new", "bin"} {
+		if err := r.RemoveAll(filepath.Join(diffProcessorPath, path)); err != nil {
+			return "", err
+		}
+	}
+	for _, path := range []string{"old", "new"} {
+		if err := r.Copy(tpgbLocalPath, filepath.Join(diffProcessorPath, path)); err != nil {
+			return "", err
+		}
+	}
+
+	if diffProccessorErr != nil {
+		fmt.Println("Breaking changes failed")
+		breakingChanges = `## Breaking Change Detection Failed
+The breaking change detector crashed during execution. This is usually due to the downstream provider(s) failing to compile. Please investigate or follow up with your reviewer.`
+	} else {
+		fmt.Println("Breaking changes succeeded")
+		breakingChanges = compareBreakingChanges(tpgBreaking, tpgbBreaking)
+	}
+	return breakingChanges, nil
 }
 
 // Get the breaking change message including the unique tpg messages and all tpgb messages.
@@ -334,35 +298,93 @@ An ` + "`override-breaking-change`" + `label can be added to allow merging.
 	return ""
 }
 
+// Run the missing test detector and return the results.
+// Returns an empty string unless there are missing tests.
+// Error will be nil unless an error occurs during setup.
+func detectMissingTests(mmLocalPath, tpgbLocalPath, oldBranch string, r gcRunner) (string, error) {
+	tpgbLocalPathOld := tpgbLocalPath + "old"
+	if err := r.Copy(tpgbLocalPath, tpgbLocalPathOld); err != nil {
+		return "", err
+	}
+	oldDir, err := r.Getwd()
+	if err != nil {
+		return "", err
+	}
+	defer r.Chdir(oldDir)
+	r.Chdir(tpgbLocalPathOld)
+	if _, err := r.Run("git", []string{"checkout", "origin/" + oldBranch}, nil); err != nil {
+		return "", err
+	}
+
+	if err := updatePackageName("old", tpgbLocalPathOld, r); err != nil {
+		return "", err
+	}
+	if err := updatePackageName("new", tpgbLocalPath, r); err != nil {
+		return "", err
+	}
+
+	missingTestDetectorPath := filepath.Join(mmLocalPath, "tools", "missing-test-detector")
+	r.Chdir(missingTestDetectorPath)
+	if _, err := r.Run("go", []string{"mod", "edit", "-replace", fmt.Sprintf("google/provider/%s=%s", "new", tpgbLocalPath)}, nil); err != nil {
+		fmt.Printf("Error running go mod edit: %v\n", err)
+	}
+	if _, err := r.Run("go", []string{"mod", "edit", "-replace", fmt.Sprintf("google/provider/%s=%s", "old", tpgbLocalPathOld)}, nil); err != nil {
+		fmt.Printf("Error running go mod edit: %v\n", err)
+	}
+	if _, err := r.Run("go", []string{"mod", "tidy"}, nil); err != nil {
+		fmt.Printf("Error running go mod tidy: %v\n", err)
+	}
+	missingTests, err := r.Run("go", []string{"run", ".", fmt.Sprintf("-services-dir=%s/google-beta/services", tpgbLocalPath)}, nil)
+	if err != nil {
+		fmt.Printf("Error running missing test detector: %v\n", err)
+		missingTests = ""
+	} else {
+		fmt.Printf("Successfully ran missing test detector:\n%s\n", missingTests)
+	}
+	return missingTests, nil
+}
+
 // Update the provider package name to the given name in the given path.
 // name should be either "old" or "new".
-func updatePackageName(name, path string, r runner) error {
+func updatePackageName(name, path string, r gcRunner) error {
 	oldPackageName := "github.com/hashicorp/terraform-provider-google-beta"
 	newPackageName := "google/provider/" + name
 	fmt.Printf("Updating package name in %s from %s to %s\n", path, oldPackageName, newPackageName)
-	if stdout, stderr, err := r.Run(path, "find", []string{".", "-type", "f", "-name", "*.go", "-exec", "sed", "-i.bak", fmt.Sprintf("s~%s~%s~g", oldPackageName, newPackageName), "{}", "+"}, nil); err != nil {
-		return fmt.Errorf("error running find: %v\nstdout:\n%s\nstderr:\n%s\n", err, stdout, stderr)
+	oldDir, err := r.Getwd()
+	if err != nil {
+		return err
 	}
-	if stdout, stderr, err := r.Run(path, "sed", []string{"-i.bak", fmt.Sprintf("s|%s|%s|g", oldPackageName, newPackageName), "go.mod"}, nil); err != nil {
-		return fmt.Errorf("error running sed: %v\nstdout:\n%s\nstderr:\n%s\n", err, stdout, stderr)
+	defer r.Chdir(oldDir)
+	r.Chdir(path)
+	if _, err := r.Run("find", []string{".", "-type", "f", "-name", "*.go", "-exec", "sed", "-i.bak", fmt.Sprintf("s~%s~%s~g", oldPackageName, newPackageName), "{}", "+"}, nil); err != nil {
+		return fmt.Errorf("error running find: %v\n", err)
 	}
-	if stdout, stderr, err := r.Run(path, "sed", []string{"-i.bak", fmt.Sprintf("s|%s|%s|g", oldPackageName, newPackageName), "go.sum"}, nil); err != nil {
-		return fmt.Errorf("error running sed: %v\nstdout:\n%s\nstderr:\n%s\n", err, stdout, stderr)
+	if _, err := r.Run("sed", []string{"-i.bak", fmt.Sprintf("s|%s|%s|g", oldPackageName, newPackageName), "go.mod"}, nil); err != nil {
+		return fmt.Errorf("error running sed: %v\n", err)
+	}
+	if _, err := r.Run("sed", []string{"-i.bak", fmt.Sprintf("s|%s|%s|g", oldPackageName, newPackageName), "go.sum"}, nil); err != nil {
+		return fmt.Errorf("error running sed: %v\n", err)
 	}
 	return nil
 }
 
 // Run unit tests for the missing test detector and diff processor.
 // Report results using Github API.
-func testTools(mmLocalPath, tpgbLocalPath, pr, commit, buildID, buildStep, projectID string, gh gcGithub, r runner) error {
+func testTools(mmLocalPath, tpgbLocalPath, pr, commit, buildID, buildStep, projectID string, gh gcGithub, r gcRunner) error {
 	missingTestDetectorPath := filepath.Join(mmLocalPath, "tools", "missing-test-detector")
-	if stdout, stderr, err := r.Run(missingTestDetectorPath, "go", []string{"mod", "tidy"}, nil); err != nil {
-		fmt.Printf("error running go mod tidy in %s: %v\nstdout:\n%s\nstderr:\n%s\n", missingTestDetectorPath, err, stdout, stderr)
+	oldDir, err := r.Getwd()
+	if err != nil {
+		return err
+	}
+	defer r.Chdir(oldDir)
+	r.Chdir(missingTestDetectorPath)
+	if _, err := r.Run("go", []string{"mod", "tidy"}, nil); err != nil {
+		fmt.Printf("error running go mod tidy in %s: %v\n", missingTestDetectorPath, err)
 	}
 	servicesDir := filepath.Join(tpgbLocalPath, "google-beta", "services")
 	state := "success"
-	if stdout, stderr, err := r.Run(missingTestDetectorPath, "go", []string{"test"}, []string{"SERVICES_DIR=" + servicesDir}); err != nil {
-		fmt.Printf("error from running go test in %s: %v\nstdout:\n%s\nstderr:\n%s\n", missingTestDetectorPath, err, stdout, stderr)
+	if _, err := r.Run("go", []string{"test"}, []string{"SERVICES_DIR=" + servicesDir}); err != nil {
+		fmt.Printf("error from running go test in %s: %v\n", missingTestDetectorPath, err)
 		state = "failure"
 	}
 	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildID, buildStep, projectID)
