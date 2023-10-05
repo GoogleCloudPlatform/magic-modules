@@ -146,7 +146,8 @@
           "ipv4_range": null,
           "name": "test-network",
           "timeouts": null,
-          "project": "{{.Provider.project}}"
+          "project": "{{.Provider.project}}",
+          "network_firewall_policy_enforcement_order": "AFTER_CLASSIC_FIREWALL"
         },
         "after_unknown": {
           "gateway_ipv4": true,
