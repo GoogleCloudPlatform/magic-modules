@@ -51,11 +51,3 @@ if d.HasChange("cluster_type") && d.Get("cluster_type") == "PRIMARY"{
     return resourceAlloydbClusterRead(d, meta)
 
 }
-
-// TODO: Confirm if this behavior should be restricted or not
-// Restrict modification of secondary_config for a secondary cluster unless it is for promotion
-// if !d.HasChange("cluster_type") {
-//     if d.HasChange("secondary_config") {
-//         return fmt.Errorf("Can not modify secondary config after creation.")
-//     }
-// }
