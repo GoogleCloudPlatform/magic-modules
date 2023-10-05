@@ -139,7 +139,7 @@ func TestAccDataflowFlexTemplateJob_FullUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job, bucket, topic),
+				Config: testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job, bucket, topic, randStr),
 			},
 			{
 				ResourceName:            "google_dataflow_flex_template_job.flex_job_fullupdate",
@@ -148,7 +148,7 @@ func TestAccDataflowFlexTemplateJob_FullUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFullUpdate(job, bucket, topic),
+				Config: testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFullUpdate(job, bucket, topic, randStr),
 			},
 			{
 				ResourceName:            "google_dataflow_flex_template_job.flex_job_fullupdate",
@@ -376,7 +376,7 @@ func TestAccDataflowFlexTemplateJob_withProviderDefaultLabels(t *testing.T) {
 		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlexTemplateJob_withProviderDefaultLabels(job, bucket, topic),
+				Config: testAccDataflowFlexTemplateJob_withProviderDefaultLabels(job, bucket, topic, randStr),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_fullupdate", false),
 				),
@@ -388,7 +388,7 @@ func TestAccDataflowFlexTemplateJob_withProviderDefaultLabels(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccComputeAddress_resourceLabelsOverridesProviderDefaultLabels(job, bucket, topic),
+				Config: testAccComputeAddress_resourceLabelsOverridesProviderDefaultLabels(job, bucket, topic, randStr),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_fullupdate", false),
 				),
@@ -400,7 +400,7 @@ func TestAccDataflowFlexTemplateJob_withProviderDefaultLabels(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccComputeAddress_moveResourceLabelToProviderDefaultLabels(job, bucket, topic),
+				Config: testAccComputeAddress_moveResourceLabelToProviderDefaultLabels(job, bucket, topic, randStr),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_fullupdate", false),
 				),
@@ -412,7 +412,7 @@ func TestAccDataflowFlexTemplateJob_withProviderDefaultLabels(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccComputeAddress_resourceLabelsOverridesProviderDefaultLabels(job, bucket, topic),
+				Config: testAccComputeAddress_resourceLabelsOverridesProviderDefaultLabels(job, bucket, topic, randStr),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_fullupdate", false),
 				),
@@ -424,7 +424,7 @@ func TestAccDataflowFlexTemplateJob_withProviderDefaultLabels(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job, bucket, topic),
+				Config: testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job, bucket, topic, randStr),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_fullupdate", false),
 				),
@@ -649,7 +649,7 @@ resource "google_dataflow_flex_template_job" "flex_job" {
 `, bucket, job)
 }
 
-func testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job, bucket, topicName string) string {
+func testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job, bucket, topicName, randStr string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
@@ -659,7 +659,7 @@ resource "google_pubsub_topic" "example" {
 
 resource "google_service_account" "dataflow-sa" {
   count = 2
-  account_id   = "dataflow-sa-${count.index}"
+  account_id   = "tf-test-dataflow-%s-${count.index}"
   display_name = "DataFlow Service Account"
 }
 
@@ -723,10 +723,10 @@ resource "google_dataflow_flex_template_job" "flex_job_fullupdate" {
   }
   service_account_email = google_service_account.dataflow-sa[0].email
 }
-`, topicName, bucket, job)
+`, topicName, randStr, bucket, job)
 }
 
-func testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFullUpdate(job, bucket, topicName string) string {
+func testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFullUpdate(job, bucket, topicName, randStr string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
@@ -736,7 +736,7 @@ resource "google_pubsub_topic" "example" {
 
 resource "google_service_account" "dataflow-sa" {
 	count = 2
-	account_id   = "dataflow-sa-${count.index}"
+	account_id   = "tf-test-dataflow-%s-${count.index}"
 	display_name = "DataFlow Service Account"
 }
 
@@ -798,7 +798,7 @@ resource "google_dataflow_flex_template_job" "flex_job_fullupdate" {
   }
   service_account_email = google_service_account.dataflow-sa[1].email
 }
-`, topicName, bucket, job)
+`, topicName, randStr, bucket, job)
 }
 
 func testAccDataflowFlexTemplateJob_network(job, network1, bucket, topicName string) string {
@@ -1267,7 +1267,7 @@ resource "google_dataflow_flex_template_job" "flex_job_experiments" {
 `, topicName, bucket, job, strings.Join(experiments, `", "`))
 }
 
-func testAccDataflowFlexTemplateJob_withProviderDefaultLabels(job, bucket, topicName string) string {
+func testAccDataflowFlexTemplateJob_withProviderDefaultLabels(job, bucket, topicName, randStr string) string {
 	return fmt.Sprintf(`
 
 provider "google" {
@@ -1284,7 +1284,7 @@ resource "google_pubsub_topic" "example" {
 
 resource "google_service_account" "dataflow-sa" {
   count = 2
-  account_id   = "dataflow-sa-${count.index}"
+  account_id   = "tf-test-dataflow-%s-${count.index}"
   display_name = "DataFlow Service Account"
 }
 
@@ -1348,10 +1348,10 @@ resource "google_dataflow_flex_template_job" "flex_job_fullupdate" {
   service_account_email = google_service_account.dataflow-sa[0].email
   machine_type = "n1-standard-2"
 }
-`, topicName, bucket, job)
+`, topicName, randStr, bucket, job)
 }
 
-func testAccComputeAddress_resourceLabelsOverridesProviderDefaultLabels(job, bucket, topicName string) string {
+func testAccComputeAddress_resourceLabelsOverridesProviderDefaultLabels(job, bucket, topicName, randStr string) string {
 	return fmt.Sprintf(`
 
 provider "google" {
@@ -1368,7 +1368,7 @@ resource "google_pubsub_topic" "example" {
 
 resource "google_service_account" "dataflow-sa" {
   count = 2
-  account_id   = "dataflow-sa-${count.index}"
+  account_id   = "tf-test-dataflow-%s-${count.index}"
   display_name = "DataFlow Service Account"
 }
 
@@ -1433,10 +1433,10 @@ resource "google_dataflow_flex_template_job" "flex_job_fullupdate" {
   service_account_email = google_service_account.dataflow-sa[0].email
   machine_type = "n1-standard-2"
 }
-`, topicName, bucket, job)
+`, topicName, randStr, bucket, job)
 }
 
-func testAccComputeAddress_moveResourceLabelToProviderDefaultLabels(job, bucket, topicName string) string {
+func testAccComputeAddress_moveResourceLabelToProviderDefaultLabels(job, bucket, topicName, randStr string) string {
 	return fmt.Sprintf(`
 
 provider "google" {
@@ -1454,7 +1454,7 @@ resource "google_pubsub_topic" "example" {
 
 resource "google_service_account" "dataflow-sa" {
   count = 2
-  account_id   = "dataflow-sa-${count.index}"
+  account_id   = "tf-test-dataflow-%s-${count.index}"
   display_name = "DataFlow Service Account"
 }
 
@@ -1518,7 +1518,7 @@ resource "google_dataflow_flex_template_job" "flex_job_fullupdate" {
   service_account_email = google_service_account.dataflow-sa[0].email
   machine_type = "n1-standard-2"
 }
-`, topicName, bucket, job)
+`, topicName, randStr, bucket, job)
 }
 
 func testAccDataflowFlexJobHasOption(t *testing.T, res, option, expectedValue string, wait bool) resource.TestCheckFunc {
