@@ -628,33 +628,26 @@ properties:
     description: |
       VmwareVCenterConfig specifies vCenter config for the user cluster.
       Inherited from the admin cluster.
-    output: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'resourcePool'
         description: The name of the vCenter resource pool for the user cluster.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'datastore'
         description: The name of the vCenter datastore for the user cluster.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'datacenter'
         description: The name of the vCenter datacenter for the user cluster.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'cluster'
         description: The name of the vCenter cluster for the user cluster.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'folder'
         description: The name of the vCenter folder for the user cluster.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'caCertData'
         description:
           Contains the vCenter CA certificate public key for SSL verification.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'address'
         description: The vCenter IP address.
@@ -662,7 +655,6 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'storagePolicyName'
         description: The name of the vCenter storage policy for the user cluster.
-        output: true
   - !ruby/object:Api::Type::NestedObject
     name: status
     description: ResourceStatus representing detailed cluster state.

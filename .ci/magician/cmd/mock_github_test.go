@@ -7,55 +7,55 @@ type mockGithub struct {
 	userType          github.UserType
 	firstReviewer     string
 	previousReviewers []string
-	calledMethods     map[string]bool
+	calledMethods     map[string][]any
 }
 
-func (m *mockGithub) GetPullRequestAuthor(string) (string, error) {
-	m.calledMethods["GetPullRequestAuthor"] = true
+func (m *mockGithub) GetPullRequestAuthor(prNumber string) (string, error) {
+	m.calledMethods["GetPullRequestAuthor"] = []any{prNumber}
 	return m.author, nil
 }
 
-func (m *mockGithub) GetUserType(string) github.UserType {
-	m.calledMethods["GetUserType"] = true
+func (m *mockGithub) GetUserType(user string) github.UserType {
+	m.calledMethods["GetUserType"] = []any{user}
 	return m.userType
 }
 
-func (m *mockGithub) GetPullRequestRequestedReviewer(string) (string, error) {
-	m.calledMethods["GetPullRequestRequestedReviewer"] = true
+func (m *mockGithub) GetPullRequestRequestedReviewer(prNumber string) (string, error) {
+	m.calledMethods["GetPullRequestRequestedReviewer"] = []any{prNumber}
 	return m.firstReviewer, nil
 }
 
-func (m *mockGithub) GetPullRequestPreviousAssignedReviewers(string) ([]string, error) {
-	m.calledMethods["GetPullRequestPreviousAssignedReviewers"] = true
+func (m *mockGithub) GetPullRequestPreviousAssignedReviewers(prNumber string) ([]string, error) {
+	m.calledMethods["GetPullRequestPreviousAssignedReviewers"] = []any{prNumber}
 	return m.previousReviewers, nil
 }
 
 func (m *mockGithub) RequestPullRequestReviewer(prNumber string, reviewer string) error {
-	m.calledMethods["RequestPullRequestReviewer"] = true
+	m.calledMethods["RequestPullRequestReviewer"] = []any{prNumber, reviewer}
 	return nil
 }
 
 func (m *mockGithub) PostComment(prNumber string, comment string) error {
-	m.calledMethods["PostComment"] = true
+	m.calledMethods["PostComment"] = []any{prNumber, comment}
 	return nil
 }
 
 func (m *mockGithub) AddLabel(prNumber string, label string) error {
-	m.calledMethods["AddLabel"] = true
+	m.calledMethods["AddLabel"] = []any{prNumber, label}
 	return nil
 }
 
 func (m *mockGithub) RemoveLabel(prNumber string, label string) error {
-	m.calledMethods["RemoveLabel"] = true
+	m.calledMethods["RemoveLabel"] = []any{prNumber, label}
 	return nil
 }
 
 func (m *mockGithub) PostBuildStatus(prNumber string, title string, state string, targetUrl string, commitSha string) error {
-	m.calledMethods["PostBuildStatus"] = true
+	m.calledMethods["PostBuildStatus"] = []any{prNumber, title, state, targetUrl, commitSha}
 	return nil
 }
 
 func (m *mockGithub) CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error {
-	m.calledMethods["CreateWorkflowDispatchEvent"] = true
+	m.calledMethods["CreateWorkflowDispatchEvent"] = []any{workflowFileName, inputs}
 	return nil
 }
