@@ -26,6 +26,8 @@ func testAccDataSourceCloudIdentityGroupLookup_basicTest(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr("data.google_cloud_identity_group_lookup.lookup",
 						"name", regexp.MustCompile("^groups/.*$")),
+					resource.TestCheckResourceAttrPair("data.google_cloud_identity_group_lookup.lookup", "name",
+						"google_cloud_identity_group.cloud_identity_group_basic", "name"),
 				),
 			},
 		},
@@ -33,14 +35,12 @@ func testAccDataSourceCloudIdentityGroupLookup_basicTest(t *testing.T) {
 }
 
 func testAccCloudIdentityGroupLookupConfig(context map[string]interface{}) string {
+	// reused function below creates a group resource `google_cloud_identity_group.cloud_identity_group_basic`
 	return testAccCloudIdentityGroup_cloudIdentityGroupsBasicExample(context) + acctest.Nprintf(`
 data "google_cloud_identity_group_lookup" "lookup" {
   group_key {
-    id = "tf-test-my-identity-group%{random_suffix}@%{org_domain}"
+    id = google_cloud_identity_group.cloud_identity_group_basic.group_key[0].id
   }
-  depends_on = [
-	google_cloud_identity_group.cloud_identity_group_basic,
-  ]
 }
 `, context)
 }
