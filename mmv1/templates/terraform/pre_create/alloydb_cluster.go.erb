@@ -46,12 +46,8 @@ if val, ok := obj["clusterType"]; ok {
 	clusterType = val
 }
 
-secondaryConfigRequestBody := make(map[string]interface{})
-
 if clusterType == "SECONDARY" {
 	if secondaryConfig != nil {
-		secondaryConfigRequestBody["secondary_config"] = secondaryConfig
-
 		// Use createsecondary API if this is a secondary cluster
 		url = strings.Replace(url, "clusters?clusterId", "clusters:createsecondary?cluster_id", 1)
 
