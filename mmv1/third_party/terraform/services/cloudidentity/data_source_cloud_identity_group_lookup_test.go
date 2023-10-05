@@ -22,25 +22,87 @@ func testAccDataSourceCloudIdentityGroupLookup_basicTest(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudIdentityGroupLookupConfig(context),
+				// Create group and look it up via its group key, i.e. email we set
+				Config: testAccCloudIdentityGroupLookupConfig_groupKeyLookup(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr("data.google_cloud_identity_group_lookup.lookup",
+					resource.TestMatchResourceAttr("data.google_cloud_identity_group_lookup.email",
 						"name", regexp.MustCompile("^groups/.*$")),
-					resource.TestCheckResourceAttrPair("data.google_cloud_identity_group_lookup.lookup", "name",
+					resource.TestCheckResourceAttrPair("data.google_cloud_identity_group_lookup.email", "name",
 						"google_cloud_identity_group.cloud_identity_group_basic", "name"),
+				),
+			},
+			{
+				// Look up group via an API-generated 'additional group key'
+				Config: testAccCloudIdentityGroupLookupConfig_additionalGroupKeyLookup(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair("data.google_cloud_identity_group_lookup.additional-groupkey", "name",
+						"google_cloud_identity_group.cloud_identity_group_basic", "name"),
+					resource.TestCheckResourceAttrPair("data.google_cloud_identity_group_lookup.additional-groupkey", "name",
+						"data.google_cloud_identity_group_lookup.email", "name"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCloudIdentityGroupLookupConfig(context map[string]interface{}) string {
-	// reused function below creates a group resource `google_cloud_identity_group.cloud_identity_group_basic`
-	return testAccCloudIdentityGroup_cloudIdentityGroupsBasicExample(context) + acctest.Nprintf(`
-data "google_cloud_identity_group_lookup" "lookup" {
+func testAccCloudIdentityGroupLookupConfig_groupKeyLookup(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+# config matching testAccCloudIdentityGroup_cloudIdentityGroupsBasicExample
+resource "google_cloud_identity_group" "cloud_identity_group_basic" {
+  display_name         = "tf-test-my-identity-group%{random_suffix}"
+  initial_group_config = "WITH_INITIAL_OWNER"
+
+  parent = "customers/%{cust_id}"
+
+  group_key {
+  	id = "tf-test-my-identity-group%{random_suffix}@%{org_domain}"
+  }
+
+  labels = {
+    "cloudidentity.googleapis.com/groups.discussion_forum" = ""
+  }
+}
+
+data "google_cloud_identity_group_lookup" "email" {
   group_key {
     id = google_cloud_identity_group.cloud_identity_group_basic.group_key[0].id
   }
+}
+`, context)
+}
+
+func testAccCloudIdentityGroupLookupConfig_additionalGroupKeyLookup(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+# config matching testAccCloudIdentityGroup_cloudIdentityGroupsBasicExample
+resource "google_cloud_identity_group" "cloud_identity_group_basic" {
+  display_name         = "tf-test-my-identity-group%{random_suffix}"
+  initial_group_config = "WITH_INITIAL_OWNER"
+
+  parent = "customers/%{cust_id}"
+
+  group_key {
+  	id = "tf-test-my-identity-group%{random_suffix}@%{org_domain}"
+  }
+
+  labels = {
+    "cloudidentity.googleapis.com/groups.discussion_forum" = ""
+  }
+}
+
+data "google_cloud_identity_group_lookup" "email" {
+  group_key {
+    id = google_cloud_identity_group.cloud_identity_group_basic.group_key[0].id
+  }
+}
+
+data "google_cloud_identity_group_lookup" "additional-groupkey" {
+  group_key {
+	# This value is an automatically created 'additionalGroupKeys' value
+    id = "tf-test-my-identity-group%{random_suffix}@%{org_domain}.test-google-a.com"
+  }
+  depends_on = [
+    google_cloud_identity_group.cloud_identity_group_basic,
+  ]
 }
 `, context)
 }
