@@ -22,9 +22,12 @@ pushd $local_path
 
 # Only skip tests if we can tell for sure that no go files were changed
 echo "Checking for modified go files"
+# Fetch the latest commit in the old branch, associating them locally
+# This will let us compare the old and new branch by name on the next line
 git fetch origin $old_branch:$old_branch --depth 1
 # get the names of changed files and look for go files
 # (ignoring "no matches found" errors from grep)
+# If there was no code generated, this will always return nothing (because there's no diff)
 gofiles=$(git diff $new_branch $old_branch --name-only | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
 if [[ -z $gofiles ]]; then
   echo "Skipping tests: No go files changed"
