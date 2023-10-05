@@ -41,7 +41,8 @@ module Api
       # child, etc.).
       attr_reader :output
 
-      # If set to true value is used only on creation.
+      # If set to true, changes in the field's value require recreating the
+      # resource.
       # For nested fields, this only applies at the current level. This means
       # it should be explicitly added to each field that needs the ForceNew
       # behavior.
@@ -132,8 +133,9 @@ module Api
       # if true, then we get the default value from the Google API if no value
       # is set in the terraform configuration for this field.
       # It translates to setting the field to Computed & Optional in the schema.
-      # For nested fields, this also needs to be set on each ancestor (ie. self,
-      # parent, etc.).
+      # For nested fields, this only applies at the current level. This means
+      # it should be explicitly added to each field that needs the defaulting
+      # behavior.
       attr_reader :default_from_api
 
       # https://github.com/hashicorp/terraform/pull/20837
