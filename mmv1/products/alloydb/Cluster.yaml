@@ -468,7 +468,7 @@ properties:
       - :SECONDARY
     default_value: :PRIMARY
     description: |
-      The type of cluster. If not set, defaults to PRIMARY. If cluster is of type SECONDARY, provide the associated PRIMARY cluster in the `depends on` meta-data attribute.
+      The type of cluster. If not set, defaults to PRIMARY.
   - !ruby/object:Api::Type::NestedObject
     name: "secondaryConfig"
     description: |
