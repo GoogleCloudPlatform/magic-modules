@@ -469,9 +469,8 @@ func flattenIndexConfigs(indexConfigs []interface{}) []map[string]interface{} {
 	for _, entry := range indexConfigs {
 		indexConfig := entry.(map[string]interface{})
 		data := map[string]interface{}{
-			"field_path":  indexConfig["fieldPath"],
-			"type":        indexConfig["type"],
-			"create_time": indexConfig["createTime"],
+			"field_path": indexConfig["fieldPath"],
+			"type":       indexConfig["type"],
 		}
 		flattenedIndexConfigs = append(flattenedIndexConfigs, data)
 	}

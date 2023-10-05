@@ -20,25 +20,14 @@ data "google_organization" "default" {
 }
 
 resource "google_logging_organization_bucket_config" "basic" {
-	organization    = data.google_organization.default.organization
-	location  = "global"
-	retention_days = 30
-	bucket_id = "_Default"
-}
-```
-
-Create logging bucket with index configs
-
-```hcl
-resource "google_logging_organization_bucket_config" "example-organisation-bucket-index-configs" {
-  organization    = data.google_organization.default.organization
-  location        = "global"
-  retention_days  = 30
-  bucket_id       = "_Default"
-
-  index_configs   = {
-    file_path   = "jsonPayload.request.status"
-    type        = "INDEX_TYPE_STRING"
+  organization   = data.google_organization.default.organization
+  location       = "global"
+  retention_days = 30
+  bucket_id      = "_Default"
+  
+  index_configs  = {
+    file_path = "jsonPayload.request.status"
+    type      = "INDEX_TYPE_STRING"
   }
 }
 ```

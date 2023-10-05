@@ -524,6 +524,66 @@ func getLoggingBucketConfigs(context map[string]interface{}) map[string]string {
 
 }
 
+func TestAccLoggingBucketConfigOrganization_indexConfigs(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingBucketConfigOrganization_indexConfigs(context, "INDEX_TYPE_STRING", "INDEX_TYPE_STRING"),
+			},
+			{
+				ResourceName:            "google_logging_organization_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"organization"},
+			},
+			{
+				Config: testAccLoggingBucketConfigOrganization_indexConfigs(context, "INDEX_TYPE_STRING", "INDEX_TYPE_STRING"),
+			},
+			{
+				ResourceName:            "google_logging_organization_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"organization"},
+			},
+		},
+	})
+}
+
+func testAccLoggingBucketConfigOrganization_indexConfigs(context map[string]interface{}, urlIndexType, statusIndexType string) string {
+	return fmt.Sprintf(acctest.Nprintf(`
+data "google_organization" "default" {
+	organization = "%{org_id}"
+}
+
+resource "google_logging_organization_bucket_config" "basic" {
+	organization    = data.google_organization.default.organization
+	location  = "global"
+	retention_days = 30
+	description = "retention test 30 days"
+	bucket_id = "_Default"
+
+    index_configs {
+		field_path 	= "jsonPayload.request.url"
+		type		= "%s"
+	}
+
+	index_configs {
+		field_path 	= "jsonPayload.response.status"
+		type		= "%s"
+	}
+}
+`, context), urlIndexType, statusIndexType)
+}
+
 func TestAccLoggingBucketConfigProject_indexConfigs(t *testing.T) {
 	t.Parallel()
 
