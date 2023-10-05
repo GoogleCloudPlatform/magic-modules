@@ -1468,7 +1468,7 @@ resource "google_compute_backend_service" "foobar" {
   health_checks = [google_compute_http_health_check.zero.self_link]
 
   cdn_policy {
-	cache_mode = "USE_ORIGIN_HEADERS"
+    cache_mode = "USE_ORIGIN_HEADERS"
     cache_key_policy {
       include_protocol       = true
       include_host           = true
