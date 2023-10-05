@@ -155,6 +155,15 @@ func TestAccLoggingBucketConfigProject_locked(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"project"},
 			},
+			{
+				Config: testAccLoggingBucketConfigProject_locked(context, false),
+			},
+			{
+				ResourceName:            "google_logging_project_bucket_config.variable_locked",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
+			},
 		},
 	})
 }
