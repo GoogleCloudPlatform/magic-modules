@@ -64,7 +64,6 @@ examples:
       - 'reconciling'
       - 'update_time'
   - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
     name: 'alloydb_secondary_instance_basic'
     primary_resource_id: 'primary'
     vars:
@@ -73,9 +72,7 @@ examples:
       alloydb_instance_name: 'alloydb-instance'
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
       alloydb_secondary_instance_name: 'alloydb-secondary-instance'
-      network_name: 'alloydb-network'
-    test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "alloydb-secondary-instance-basic")'
+      network_name: 'alloydb-secondary-network'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
