@@ -195,7 +195,6 @@ properties:
       - !ruby/object:Api::Type::Map
         name: 'internalIp'
         api_name: internalIPs
-        min_version: beta
         key_name: 'interface_name'
         description: |
           Preserved internal IPs defined for this instance. This map is keyed with the name of the network interface.
@@ -223,7 +222,6 @@ properties:
                   custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
       - !ruby/object:Api::Type::Map
         name: 'externalIp'
-        min_version: beta
         api_name: externalIPs
         key_name: 'interface_name'
         description: |
