@@ -87,7 +87,6 @@ resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
   location     = "us-central1"
   network      = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
 }
 
 resource "google_alloydb_instance" "source" {
@@ -125,7 +124,6 @@ resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
   location     = "us-central1"
   network      = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
 }
 
 resource "google_alloydb_instance" "source" {
@@ -152,7 +150,6 @@ resource "google_alloydb_cluster" "restored" {
   cluster_id             = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
   location               = "us-central1"
   network                = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
   restore_backup_source {
     backup_name = google_alloydb_backup.default.name
   }
@@ -181,7 +178,6 @@ resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
   location     = "us-central1"
   network      = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
 }
 
 resource "google_alloydb_instance" "source" {
@@ -208,7 +204,6 @@ resource "google_alloydb_cluster" "restored" {
   cluster_id             = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
   location               = "us-central1"
   network                = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
 
   restore_continuous_backup_source {
     cluster = google_alloydb_cluster.source.name
@@ -233,7 +228,6 @@ resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
   location     = "us-central1"
   network      = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
 }
 
 resource "google_alloydb_instance" "source" {
@@ -260,7 +254,6 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
   location              = "us-central1"
   network               = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
   restore_backup_source {
     backup_name = google_alloydb_backup.default.name
   }
@@ -286,7 +279,6 @@ resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
   location     = "us-central1"
   network      = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
 }
 
 resource "google_alloydb_instance" "source" {
@@ -313,7 +305,6 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
   location              = "us-central1"
   network               = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
   restore_backup_source {
     backup_name = google_alloydb_backup.default.name
   }
@@ -327,7 +318,6 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
   cluster_id             = "tf-test-alloydb-pitr-restored-cluster-%{random_suffix}"
   location               = "us-central1"
   network                = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
   restore_continuous_backup_source {
     cluster = google_alloydb_cluster.source.name
     point_in_time = google_alloydb_backup.default.update_time
@@ -354,7 +344,6 @@ resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
   location     = "us-central1"
   network      = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
 }
 
 resource "google_alloydb_instance" "source" {
@@ -381,7 +370,6 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
   location              = "us-central1"
   network               = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
   restore_backup_source {
     backup_name = google_alloydb_backup.default.name
   }
@@ -400,7 +388,6 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
   cluster_id             = "tf-test-alloydb-pitr-restored-cluster-%{random_suffix}"
   location               = "us-central1"
   network                = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
   restore_continuous_backup_source {
     cluster = google_alloydb_cluster.source.name
     point_in_time = google_alloydb_backup.default.update_time
@@ -432,7 +419,6 @@ resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
   location     = "us-central1"
   network      = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
 }
 
 resource "google_alloydb_instance" "source" {
@@ -467,7 +453,6 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
   location              = "us-central1"
   network               = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
   restore_backup_source {
     backup_name = google_alloydb_backup.default2.name
   }
@@ -488,7 +473,6 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
   cluster_id             = "tf-test-alloydb-pitr-restored-cluster-%{random_suffix}"
   location               = "us-central1"
   network                = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
   restore_continuous_backup_source {
     cluster = google_alloydb_cluster.restored_from_backup.name
     point_in_time = google_alloydb_backup.default.update_time
@@ -520,7 +504,6 @@ resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
   location     = "us-central1"
   network      = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
 }
 
 resource "google_alloydb_instance" "source" {
@@ -547,7 +530,6 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
   location              = "us-central1"
   network               = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
   restore_backup_source {
     backup_name = google_alloydb_backup.default.name
   }
@@ -557,7 +539,6 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
   cluster_id             = "tf-test-alloydb-pitr-restored-cluster-%{random_suffix}"
   location               = "us-central1"
   network                = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
   restore_continuous_backup_source {
     cluster = google_alloydb_cluster.source.name
     point_in_time = google_alloydb_backup.default.update_time

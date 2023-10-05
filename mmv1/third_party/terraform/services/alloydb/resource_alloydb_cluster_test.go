@@ -50,7 +50,6 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  cluster_type = "PRIMARY"
 
   labels = {
 	foo = "bar" 
@@ -189,7 +188,6 @@ resource "google_alloydb_cluster" "default" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
   location     = "us-central1"
   network      = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  cluster_type = "PRIMARY"
 
   initial_user {
     user     = "tf-test-alloydb-cluster%{random_suffix}"
@@ -240,7 +238,6 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  cluster_type = "PRIMARY"
   lifecycle {
     prevent_destroy = true
   }  
@@ -286,7 +283,6 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  cluster_type = "PRIMARY"
   automated_backup_policy {
     location      = "us-central1"
     backup_window = "1800s"
@@ -388,7 +384,6 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  cluster_type = "PRIMARY"
   automated_backup_policy {
     location      = "us-central1"
     backup_window = "1800s"
@@ -430,7 +425,6 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  cluster_type = "PRIMARY"
   automated_backup_policy {
     location      = "us-central1"
     backup_window = "1800s"
@@ -494,7 +488,6 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  cluster_type = "PRIMARY"
   encryption_config {
     kms_key_name = google_kms_crypto_key.key.id
   }
@@ -572,7 +565,6 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  cluster_type = "PRIMARY"
   encryption_config {
     kms_key_name = google_kms_crypto_key.key.id
   }
@@ -625,7 +617,6 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  cluster_type = "PRIMARY"
   encryption_config {
     kms_key_name = google_kms_crypto_key.key.id
   }
@@ -691,7 +682,6 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  cluster_type = "PRIMARY"
   encryption_config {
     kms_key_name = google_kms_crypto_key.key.id
   }
@@ -943,7 +933,6 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  cluster_type = "PRIMARY"
   lifecycle {
     prevent_destroy = true
   }
@@ -964,7 +953,6 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  cluster_type = "PRIMARY"
 
   continuous_backup_config {
     enabled              = %{enabled}
@@ -1044,7 +1032,6 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  cluster_type = "PRIMARY"
   continuous_backup_config {
     enabled       		 = true
 	recovery_window_days = 20
@@ -1080,7 +1067,6 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  cluster_type = "PRIMARY"
   continuous_backup_config {
     enabled       		 = true
 	recovery_window_days = 20
@@ -1140,7 +1126,6 @@ resource "google_alloydb_cluster" "default" {
   network_config {
 	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
-  cluster_type = "PRIMARY"
 }
 data "google_project" "project" {}
 resource "google_compute_network" "default" {
@@ -1183,7 +1168,6 @@ resource "google_alloydb_cluster" "default" {
 	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
 	allocated_ip_range = google_compute_global_address.private_ip_alloc.name
   }
-  cluster_type = "PRIMARY"
 }
 data "google_project" "project" {}
 resource "google_compute_network" "default" {

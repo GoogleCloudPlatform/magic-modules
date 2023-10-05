@@ -2,7 +2,6 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
   cluster_id = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
   location   = "us-central1"
   network    = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
 
   initial_user {
     password = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
@@ -33,7 +32,6 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "<%= ctx[:vars]['alloydb_backup_restored_cluster_name'] %>"
   location              = "us-central1"
   network               = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
   restore_backup_source {
     backup_name = google_alloydb_backup.<%= ctx[:primary_resource_id] %>.name
   }
@@ -43,7 +41,6 @@ resource "google_alloydb_cluster" "restored_via_pitr" {
   cluster_id             = "<%= ctx[:vars]['alloydb_pitr_restored_cluster_name'] %>"
   location               = "us-central1"
   network                = data.google_compute_network.default.id
-  cluster_type = "PRIMARY"
 
   restore_continuous_backup_source {
     cluster = google_alloydb_cluster.<%= ctx[:primary_resource_id] %>.name
