@@ -682,12 +682,14 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 				},
+				<% unless version == 'ga' -%>
 				"enable_confidential_storage": {
 						Type:     schema.TypeBool,
 						Optional: true,
 						ForceNew: true,
 						Description: `If enabled boot disks are configured with confidential mode.`,
 				},
+				<% end -%>
 			},
 		},
 	}
