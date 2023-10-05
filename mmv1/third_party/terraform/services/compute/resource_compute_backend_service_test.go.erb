@@ -257,7 +257,6 @@ func TestAccComputeBackendService_withHttpsHealthCheck(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeBackendService_withCdnPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -312,7 +311,6 @@ func TestAccComputeBackendService_withCdnPolicy(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccComputeBackendService_withSecurityPolicy(t *testing.T) {
 	t.Parallel()
@@ -1381,7 +1379,6 @@ resource "google_compute_https_health_check" "zero" {
 `, serviceName, checkName)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeBackendService_withCdnPolicy(serviceName, checkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
@@ -1488,8 +1485,6 @@ resource "google_compute_http_health_check" "zero" {
 }
 `, serviceName, checkName)
 }
-
-<% end -%>
 
 func testAccComputeBackendService_withSecurityPolicy(serviceName, checkName, polName, edgePolName, polLink string, edgePolLink string) string {
 	return fmt.Sprintf(`
