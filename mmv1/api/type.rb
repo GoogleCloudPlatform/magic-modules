@@ -41,7 +41,11 @@ module Api
       # child, etc.).
       attr_reader :output
 
-      attr_reader :immutable # If set to true value is used only on creation
+      # If set to true value is used only on creation.
+      # For nested fields, this only applies at the current level. This means
+      # it should be explicitly added to each field that needs the ForceNew
+      # behavior.
+      attr_reader :immutable
 
       # url_param_only will not send the field in the resource body and will
       # not attempt to read the field from the API response.
@@ -49,6 +53,7 @@ module Api
       attr_reader :url_param_only
 
       # For nested fields, this only applies within the parent.
+      # For example, an optional parent can contain a required child.
       attr_reader :required
 
       # [Additional query Parameters to append to GET calls.
