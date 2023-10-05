@@ -4,6 +4,7 @@
 // Default change is destroy before create, so modifcation from primary <-> secondary will only delete the instance with failure to create the instance.
 if d.HasChange("instance_type") {
     return fmt.Errorf("Can not change instance type after creation.")
+}
 
 // If the SSL mode isn't specified in the update, retain the SSL mode that's already present
 if d.HasChange("client_connection_config.0.ssl_config.0.ssl_mode") {
