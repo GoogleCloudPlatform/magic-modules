@@ -73,17 +73,8 @@ func testAccDialogflowCXVersion_full(context map[string]interface{}) string {
 		avatar_uri = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
 	}
 
-	resource "google_dialogflow_cx_flow" "flow_version" {
-		parent       = google_dialogflow_cx_agent.agent_version.id
-		display_name = "MyFlow"
-		nlu_settings {
-			classification_threshold = 0.3
-			model_type               = "MODEL_TYPE_STANDARD"
-		}
-	}
-
 	resource "google_dialogflow_cx_version" "version1" {
-		parent       = google_dialogflow_cx_flow.flow_version.id
+		parent       = google_dialogflow_cx_agent.agent_version.start_flow
 		display_name = "1.0.0 updated"
 		description  = "version 1.0.0 updated"
 	}
