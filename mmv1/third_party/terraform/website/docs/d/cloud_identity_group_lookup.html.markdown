@@ -1,12 +1,12 @@
 ---
 subcategory: "Cloud Identity"
 description: |-
-  Get list of the Cloud Identity Groups under a customer or namespace.
+  Look up a Cloud Identity Group using its email and namespace.
 ---
 
 # google_cloud_identity_group_lookup
 
-Use this data source to look up the resource name of a Cloud Identity Group by its EntityKey, i.e. the group's email.
+Use this data source to look up the resource name of a Cloud Identity Group by its [EntityKey](https://cloud.google.com/identity/docs/reference/rest/v1/EntityKey), i.e. the group's email.
 
 https://cloud.google.com/identity/docs/concepts/overview#groups
 
