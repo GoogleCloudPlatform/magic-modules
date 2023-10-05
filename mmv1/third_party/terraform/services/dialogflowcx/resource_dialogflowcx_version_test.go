@@ -3,13 +3,12 @@ package dialogflowcx_test
 import (
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDialogflowCXEnvironment_update(t *testing.T) {
+func TestAccDialogflowCXVersion_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -23,18 +22,18 @@ func TestAccDialogflowCXEnvironment_update(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDialogflowCXEnvironment_basic(context),
+				Config: testAccDialogflowCXVersion_basic(context),
 			},
 			{
-				ResourceName:      "google_dialogflow_cx_environment.development",
+				ResourceName:      "google_dialogflow_cx_version.version1",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccDialogflowCXEnvironment_full(context),
+				Config: testAccDialogflowCXVersion_full(context),
 			},
 			{
-				ResourceName:      "google_dialogflow_cx_environment.development",
+				ResourceName:      "google_dialogflow_cx_version.version1",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -42,7 +41,7 @@ func TestAccDialogflowCXEnvironment_update(t *testing.T) {
 	})
 }
 
-func testAccDialogflowCXEnvironment_basic(context map[string]interface{}) string {
+func testAccDialogflowCXVersion_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_dialogflow_cx_agent" "agent_version" {
 		display_name = "tf-test-%{random_suffix}"
@@ -58,19 +57,11 @@ func testAccDialogflowCXEnvironment_basic(context map[string]interface{}) string
 		parent       = google_dialogflow_cx_agent.agent_version.start_flow
 		display_name = "1.0.0"
 		description  = "version 1.0.0"
-	}	
-
-	resource "google_dialogflow_cx_environment" "development" {
-        parent       = google_dialogflow_cx_agent.agent_version.id
-        display_name = "Development"
-        version_configs {
-            version = google_dialogflow_cx_version.version1.id
-        }
-    }
+	}
     `, context)
 }
 
-func testAccDialogflowCXEnvironment_full(context map[string]interface{}) string {
+func testAccDialogflowCXVersion_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_dialogflow_cx_agent" "agent_version" {
 		display_name = "tf-test-%{random_suffix}"
@@ -82,24 +73,19 @@ func testAccDialogflowCXEnvironment_full(context map[string]interface{}) string 
 		avatar_uri = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
 	}
 
+	resource "google_dialogflow_cx_flow" "flow_version" {
+		parent       = google_dialogflow_cx_agent.agent_version.id
+		display_name = "MyFlow"
+		nlu_settings {
+			classification_threshold = 0.3
+			model_type               = "MODEL_TYPE_STANDARD"
+		}
+	}
+
 	resource "google_dialogflow_cx_version" "version1" {
-		parent       = google_dialogflow_cx_agent.agent_version.start_flow
-		display_name = "1.0.0"
-		description  = "version 1.0.0"
+		parent       = google_dialogflow_cx_flow.flow_version.id
+		display_name = "1.0.0 updated"
+		description  = "version 1.0.0 updated"
 	}
-
-	resource "google_dialogflow_cx_version" "version2" {
-		parent       = google_dialogflow_cx_agent.agent_version.start_flow
-		display_name = "2.0.0"
-		description  = "version 2.0.0"
-	}
-
-	resource "google_dialogflow_cx_environment" "development" {
-        parent       = google_dialogflow_cx_agent.agent_version.id
-        display_name = "Development updated"
-        version_configs {
-            version = google_dialogflow_cx_version.version2.id
-        }
-    }
 	  `, context)
 }

@@ -25,6 +25,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/dialogflow/cx/docs'
   api: 'https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.environments'
 async: !ruby/object:Api::OpAsync
+  actions: ['create', 'update']
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     full_url: 'https://{{location}}-dialogflow.googleapis.com/v3/{{op_id}}'
@@ -45,12 +46,10 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-exclude_resource: true
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 40
   update_minutes: 40
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/dialogflowcx_environment.go.erb
   pre_create: templates/terraform/pre_create/dialogflow_set_location.go.erb
   pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
   pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.erb
@@ -61,9 +60,14 @@ examples:
     primary_resource_id: 'development'
     vars:
       agent_name: 'dialogflowcx-agent'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dialogflowcx_environment_regional'
+    primary_resource_id: 'development'
+    vars:
+      agent_name: 'issue12880'
 skip_sweeper: true
 id_format: '{{parent}}/environments/{{name}}'
-import_format: ['{{parent}}/environments/{{name}}']
+import_format: ['{{%parent}}/environments/{{name}}']
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
