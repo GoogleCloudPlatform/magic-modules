@@ -202,6 +202,7 @@ properties:
         default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'clientConnectionConfig'
+    default_from_api: true
     description: |
       Client connection specific configurations.
     properties:
@@ -211,11 +212,13 @@ properties:
           Configuration to enforce connectors only (ex: AuthProxy) connections to the database.
       - !ruby/object:Api::Type::NestedObject
         name: 'sslConfig'
+        default_from_api: true
         description: |
           SSL config option for this instance.
         properties:
           - !ruby/object:Api::Type::Enum
             name: 'sslMode'
+            default_from_api: true
             description: 'SSL mode. Specifies client-server SSL/TLS connection behavior.'
             values:
               - :ENCRYPTED_ONLY

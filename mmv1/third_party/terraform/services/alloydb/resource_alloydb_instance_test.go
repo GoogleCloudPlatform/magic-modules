@@ -55,13 +55,6 @@ resource "google_alloydb_instance" "default" {
   machine_config {
     cpu_count = 2
   }
-	
-	client_connection_config {
-		require_connectors = false
-		ssl_config {
-			ssl_mode = "ENCRYPTED_ONLY"
-		}
-	}
 }
 
 resource "google_alloydb_cluster" "default" {
@@ -89,13 +82,6 @@ resource "google_alloydb_instance" "default" {
 
   machine_config {
     cpu_count = 4
-  }
-	
-	client_connection_config {
-    require_connectors = false
-    ssl_config {
-      ssl_mode = "ENCRYPTED_ONLY"
-    }
   }
 
   labels = {
@@ -405,12 +391,6 @@ resource "google_alloydb_instance" "default" {
   cluster       = google_alloydb_cluster.default.name
   instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
-	client_connection_config {
-    require_connectors = false
-    ssl_config {
-      ssl_mode = "ENCRYPTED_ONLY"
-    }
-  }
 }
 
 resource "google_alloydb_cluster" "default" {
@@ -460,10 +440,6 @@ func TestAccAlloydbInstance_clientConnectionConfig_sslModeDefault(t *testing.T) 
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "client_connection_config.0.ssl_config.0.ssl_mode", "ENCRYPTED_ONLY"),
 				),
-				// Since we set the default in the custom code rather than in the yaml
-				// file, there terraform plan won't show this value being set if the
-				// user doesn't explicitly put it in their terraform file.
-				ExpectNonEmptyPlan: true,
 			},
 			{
 				ResourceName:            "google_alloydb_instance.default",
@@ -488,20 +464,12 @@ func TestAccAlloydbInstance_clientConnectionConfig_sslModeDefault(t *testing.T) 
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "client_connection_config.0.ssl_config.0.ssl_mode", "ENCRYPTED_ONLY"),
 				),
-				// If the user removes the SSL mode (i.e. it's nil), then we don't
-				// update the mode unless they explicitly change it in our custom code.
-				// Terraform plan however will still show it changing to nil.
-				ExpectNonEmptyPlan: true,
 			},
 			{
 				Config: testAccAlloydbInstance_noClientConnectionConfig(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "client_connection_config.0.ssl_config.0.ssl_mode", "ENCRYPTED_ONLY"),
 				),
-				// If the user removes the SSL mode (i.e. it's nil), then we don't
-				// update the mode unless they explicitly change it in our custom code.
-				// Terraform plan however will still show it changing to nil.
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -570,10 +538,6 @@ func TestAccAlloydbInstance_clientConnectionConfig_update(t *testing.T) {
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "client_connection_config.0.require_connectors", "false"),
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "client_connection_config.0.ssl_config.0.ssl_mode", "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
 				),
-				// If the user removes the SSL mode (i.e. it's nil), then we don't
-				// update the mode unless they explicitly change it in our custom code.
-				// Terraform plan however will still show it changing to nil.
-				ExpectNonEmptyPlan: true,
 			},
 
 			{
