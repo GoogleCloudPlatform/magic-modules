@@ -65,11 +65,10 @@ examples:
       - 'update_time'
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_secondary_instance_basic'
-    primary_resource_id: 'primary'
+    primary_resource_id: 'secondary'
     vars:
-      secondary_resource_id: 'secondary'
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_instance_name: 'alloydb-instance'
+      alloydb_primary_cluster_name: 'alloydb-primary-cluster'
+      alloydb_primary_instance_name: 'alloydb-primary-instance'
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
       alloydb_secondary_instance_name: 'alloydb-secondary-instance'
       network_name: 'alloydb-secondary-network'
