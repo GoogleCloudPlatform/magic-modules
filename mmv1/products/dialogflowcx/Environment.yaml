@@ -54,6 +54,8 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
   pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.erb
   pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
+custom_diff:
+  - 'tpgresource.DefaultProviderProject'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dialogflowcx_environment_full'
