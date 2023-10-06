@@ -80,10 +80,10 @@ examples:
       - 'update_time'
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_secondary_cluster_basic'
-    primary_resource_id: 'default'
+    primary_resource_id: 'secondary'
     vars:
-      secondary_resource_id: 'secondary'
-      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_primary_cluster_name: 'alloydb-primary-cluster'
+      alloydb_primary_instance_name: 'alloydb-primary-instance'
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_create: templates/terraform/pre_create/alloydb_cluster.go.erb
