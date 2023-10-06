@@ -26,15 +26,17 @@ else
 fi
 if [ "$1"=="beta" ]
 then
-	basepath="${basepath}/terraform-provider-google-beta/google-beta"
+	basepath="${basepath}/terraform-provider-google-beta"
+	servicepath="${basepath}/google-beta"
 else
-	basepath="${basepath}/terraform-provider-google/google"
+	basepath="${basepath}/terraform-provider-google"
+	servicepath="${basepath}/google"
 fi
 
 echo "# $resource_type: [list-of-acceptable-import-templates]" > importmetadata.txt
 echo "{" >> importmetadata.txt
 
-for file in $(find $basepath/services/**/resource_*.go -type f -print); do
+for file in $(find $servicepath/services/**/resource_*.go -type f -print); do
 	importable=$(ggrep -Pzo 'Importer:' $file)
 	product=
 	shortfile="$(basename $file .go)"
@@ -52,8 +54,8 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 		importable=$(ggrep -Pzo 'return ResourceLoggingBucketConfig' $file)
 		if [ -z "$importable"  ]
     	then
-			echo -n \	\"$resource\"\: >> importmetadata.txt
-			echo \	not importable >> importmetadata.txt
+#			echo -n \	\"$resource\"\: >> importmetadata.txt
+#			echo \	not importable >> importmetadata.txt
 
 # NOT IMPORTABLE RESOURCES
 			continue
@@ -99,28 +101,8 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 					importformat=$(ggrep -Pzos '```\n\$ terraform import(.*\n)*?```' $resourcemd)
 					if [ -z "$importformat"  ]
 		    		then
-# need to do a different check for google_* resources
-		    			resourcemd=$basepath/website/docs/r/$resource.html.markdown
-						importformat=$(ggrep -Pzos '```\n\$ terraform import(.*\n)*?```' $resourcemd)
-						if [ -z "$importformat"  ]
-	    				then
-							if [[ "$resource" == "google_folder" ]]
-							then
-								echo -n \	\"$resource\"\: >> importmetadata.txt
-								echo \ '["folders/{{folder_id}}", "{{folder_id}}"]' >> importmetadata.txt
-							else
-								echo -n \	\"$resource\"\: >> importmetadata.txt
-								echo \	NON STANDARD MD >> importmetadata.txt
-							fi
-						else
-							echo -n \	\"$resource\"\: >> importmetadata.txt
-							importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
-							importformat=$(sed -e 's| \$ terraform import [^.]*\.[^[[:space:]]* |", "|g'  <<< $importformat)
-							importformat=$(sed -e 's| ```|\"\]|g'  <<< $importformat)
-					    	echo \ "$importformat" >> importmetadata.txt
-					    fi
-						##logging bucket config is fake resource
-						##
+						echo -n \	\"$resource\"\: >> importmetadata.txt
+						echo \	"???" >> importmetadata.txt
 		    		else
 						echo -n \	\"$resource\"\: >> importmetadata.txt
 						importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
@@ -128,6 +110,36 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 						importformat=$(sed -e 's| ```|\"\]|g'  <<< $importformat)
 				    	echo \ "$importformat" >> importmetadata.txt
 			    	fi
+		    	else
+# need to do a different check for google_* resources
+	    			resourcemd=$basepath/website/docs/r/$resource.html.markdown
+					importformat=$(ggrep -Pzos '```\n\$ terraform import(.*\n)*?```' $resourcemd)
+					if [ -z "$importformat"  ]
+    				then
+						case $resource in
+						google_folder)
+							echo -n \	\"$resource\"\: >> importmetadata.txt
+							echo \ '["folders/{{folder_id}}", "{{folder_id}}"]' >> importmetadata.txt
+							;;
+						google_logging_bucket_config)
+# fake logging resources
+							;;
+						google_logging_exclusion)
+# fake logging resources
+							;;
+						*)
+		#resource needs to be hardcoded into this script for support
+							echo -n "$resource: " >> importmetadata.txt
+							echo "-- $resourcenogoog: " >> importmetadata.txt
+							echo \ NOT CONFIGURED  >> importmetadata.txt
+						esac
+					else
+						echo -n \	\"$resource\"\: >> importmetadata.txt
+						importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
+						importformat=$(sed -e 's| \$ terraform import [^.]*\.[^[[:space:]]* |", "|g'  <<< $importformat)
+						importformat=$(sed -e 's| ```|\"\]|g'  <<< $importformat)
+				    	echo \ "$importformat" >> importmetadata.txt
+				    fi
 			    fi
 		    else
 # ImportStatePassthrough resources want generically "id", which can be a single field (usually project id), or multiple combined. there is no consistent format to programatically generate formats based on existing files or markdown.
@@ -207,7 +219,7 @@ for file in $(find $basepath/services/**/resource_*.go -type f -print); do
 	    fi
 	    iamname=${resource/google/iam}
 	    iamservice=$(basename $(dirname $file))
-	    if [ -f "$basepath/services/$iamservice/$iamname.go" ]
+	    if [ -f "$servicepath/services/$iamservice/$iamname.go" ]
 	    then
 			echo -n \	\"$iamname\"\: >> importmetadata.txt
 	    	echo \ "$importformat" >> importmetadata.txt
