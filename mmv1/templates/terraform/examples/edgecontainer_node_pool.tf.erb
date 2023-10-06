@@ -24,6 +24,11 @@ resource "google_edgecontainer_node_pool" "<%= ctx[:primary_resource_id] %>" {
   location = "us-central1"
   node_location = "us-central1-edge-example-edgesite"
   node_count = 3
+
+  labels = {
+    my_key    = "my_val"
+    other_key = "other_val"
+  }
 }
 
 data "google_project" "project" {}
