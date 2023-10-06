@@ -41,11 +41,11 @@ type FrameworkProviderConfig struct {
     Zone types.String
     RequestBatcherIam *transport_tpg.RequestBatcher
     RequestBatcherServiceUsage *transport_tpg.RequestBatcher
-    Scopes []string
+    Scopes types.List
     TokenSource oauth2.TokenSource
-	  UniverseDomain types.String
+	UniverseDomain types.String
     UserAgent string
-    UserProjectOverride bool
+    UserProjectOverride types.Bool
 
     // paths for client setup
     <% products.each do |product| -%>
