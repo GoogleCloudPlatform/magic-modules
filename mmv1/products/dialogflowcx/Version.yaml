@@ -31,8 +31,6 @@ async: !ruby/object:Api::OpAsync
     wait_ms: 1000
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 60
-      update_minutes: 60
-      delete_minutes: 60
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
     resource_inside_response: true
@@ -49,6 +47,7 @@ timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 40
   update_minutes: 40
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/dialogflowcx_version.go.erb
   pre_create: templates/terraform/pre_create/dialogflow_set_location.go.erb
   pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
   pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.erb
@@ -67,7 +66,7 @@ examples:
       agent_name: 'issue12880'
 skip_sweeper: true
 id_format: '{{parent}}/versions/{{name}}'
-import_format: ['{{%parent}}/versions/{{name}}']
+import_format: ['{{parent}}/versions/{{name}}']
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
