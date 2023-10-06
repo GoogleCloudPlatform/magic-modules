@@ -60,6 +60,7 @@ examples:
     vars:
       agent_name: 'dialogflowcx-agent'
   - !ruby/object:Provider::Terraform::Examples
+    skip_docs: true
     name: 'dialogflowcx_version_regional'
     primary_resource_id: 'version_1'
     vars:
