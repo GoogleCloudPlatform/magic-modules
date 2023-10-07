@@ -148,7 +148,7 @@ func TestAccLoggingProjectSink_updatePreservesCustomWriter(t *testing.T) {
 	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
 	account := "tf-test-sink-sa" + acctest.RandString(t, 10)
 	accountUpdated := "tf-test-sink-sa" + acctest.RandString(t, 10)
-	testProject :=  envvar.GetTestProjectFromEnv()
+	testProject := envvar.GetTestProjectFromEnv()
 
 	// custom_writer_identity is write-only, and writer_dietity is an output only field
 	// verify that the value of writer_identity matches the expected custom_writer_identity.
