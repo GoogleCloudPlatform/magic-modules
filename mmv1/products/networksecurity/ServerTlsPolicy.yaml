@@ -64,6 +64,13 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: 'network_security_server_tls_policy_mtls'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-server-tls-policy'
+      trust_config_name: 'my-trust-config'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -90,7 +97,7 @@ properties:
     description: |
       Time the ServerTlsPolicy was updated in UTC.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: Set of label tags associated with the ServerTlsPolicy resource.
   - !ruby/object:Api::Type::String

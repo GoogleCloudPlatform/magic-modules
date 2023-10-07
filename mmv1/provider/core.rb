@@ -287,7 +287,17 @@ module Provider
     end
 
     def replace_import_path(output_folder, target)
-      return unless @target_version_name != 'ga'
+      data = File.read("#{output_folder}/#{target}")
+
+      if data.include? "#{TERRAFORM_PROVIDER_BETA}/#{RESOURCE_DIRECTORY_BETA}"
+        raise 'Importing a package from module ' \
+              "#{TERRAFORM_PROVIDER_BETA}/#{RESOURCE_DIRECTORY_BETA} " \
+              "is not allowed in file #{target.split('/').last}. " \
+              'Please import a package from module ' \
+              "#{TERRAFORM_PROVIDER_GA}/#{RESOURCE_DIRECTORY_GA}."
+      end
+
+      return if @target_version_name == 'ga'
 
       # Replace the import pathes in utility files
       case @target_version_name
@@ -299,7 +309,6 @@ module Provider
         dir = RESOURCE_DIRECTORY_PRIVATE
       end
 
-      data = File.read("#{output_folder}/#{target}")
       data = data.gsub(
         "#{TERRAFORM_PROVIDER_GA}/#{RESOURCE_DIRECTORY_GA}",
         "#{tpg}/#{dir}"
@@ -401,7 +410,8 @@ module Provider
     # method and group them by update url & verb.
     def properties_by_custom_update(properties)
       update_props = properties.reject do |p|
-        p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
+        p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP ||
+          p.is_a?(Api::Type::KeyValueLabels) # effective_labels is used for update
       end
 
       update_props.group_by do |p|

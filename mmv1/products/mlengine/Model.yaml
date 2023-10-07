@@ -96,6 +96,6 @@ properties:
     description:
       If true, online prediction nodes send stderr and stdout streams to
       Stackdriver Logging
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: One or more labels that you can add, to organize your models.

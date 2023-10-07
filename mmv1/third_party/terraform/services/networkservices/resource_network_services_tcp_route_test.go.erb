@@ -23,12 +23,13 @@ func TestAccNetworkServicesTcpRoute_update(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkServicesTcpRouteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-  Config: testAccNetworkServicesTcpRoute_basic(tcpServiceName, tcpHealthCheckName, tcpRouteName),
+				Config: testAccNetworkServicesTcpRoute_basic(tcpServiceName, tcpHealthCheckName, tcpRouteName),
 			},
 			{
 				ResourceName:      "google_network_services_tcp_route.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetworkServicesTcpRoute_update(tcpServiceName, tcpHealthCheckName, tcpRouteName),
@@ -37,6 +38,7 @@ func TestAccNetworkServicesTcpRoute_update(t *testing.T) {
 				ResourceName:      "google_network_services_tcp_route.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})
