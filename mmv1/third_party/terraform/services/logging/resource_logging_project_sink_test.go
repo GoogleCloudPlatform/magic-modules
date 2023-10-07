@@ -148,6 +148,12 @@ func TestAccLoggingProjectSink_updatePreservesCustomWriter(t *testing.T) {
 	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
 	account := "tf-test-sink-sa" + acctest.RandString(t, 10)
 	accountUpdated := "tf-test-sink-sa" + acctest.RandString(t, 10)
+	testProject :=  envvar.GetTestProjectFromEnv()
+
+	// custom_writer_identity is write-only, and writer_dietity is an output only field
+	// verify that the value of writer_identity matches the expected custom_writer_identity.
+	expectedWriterIdentity := fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, testProject)
+	expectedUpdatedWriterIdentity := fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", accountUpdated, testProject)
 
 	org := envvar.GetTestOrgFromEnv(t)
 	billingId := envvar.GetTestBillingAccountFromEnv(t)
@@ -160,6 +166,9 @@ func TestAccLoggingProjectSink_updatePreservesCustomWriter(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingProjectSink_customWriter(org, billingId, project, sinkName, account),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_logging_project_sink.custom_writer", "custom_writer_identity", expectedWriterIdentity),
+				),
 			},
 			{
 				ResourceName:      "google_logging_project_sink.custom_writer",
@@ -170,6 +179,9 @@ func TestAccLoggingProjectSink_updatePreservesCustomWriter(t *testing.T) {
 			},
 			{
 				Config: testAccLoggingProjectSink_customWriterUpdated(org, billingId, project, sinkName, accountUpdated),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_logging_project_sink.custom_writer", "custom_writer_identity", expectedUpdatedWriterIdentity),
+				),
 			},
 			{
 				ResourceName:            "google_logging_project_sink.custom_writer",
