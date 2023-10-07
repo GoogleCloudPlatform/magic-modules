@@ -34,8 +34,8 @@ import_format:
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     This resource creates a Firestore Backup Schedule on a project that already has
-    a Firestore database. 
-    This resource is owned by the database it is backing up, and is deleted along 
+    a Firestore database.
+    This resource is owned by the database it is backing up, and is deleted along
     with the database. The actual backups are not though.
 examples:
   - !ruby/object:Provider::Terraform::Examples
