@@ -34,13 +34,9 @@ import_format:
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     This resource creates a Firestore Backup Schedule on a project that already has
-    a Firestore database. If you haven't already created it, you may
-    create a `google_firestore_database` resource with `type` set to
-    `"FIRESTORE_NATIVE"` and `location_id` set to your chosen location.
-    If you wish to use App Engine, you may instead create a
-    `google_app_engine_application` resource with `database_type` set to
-    `"CLOUD_FIRESTORE"`. Your Firestore location will be the same as
-    the App Engine location specified.
+    a Firestore database. 
+    This resource is owned by the database it is backing up, and is deleted along 
+    with the database. The actual backups are not though.
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_backup_schedule_daily'
@@ -67,7 +63,7 @@ properties:
     name: name
     output: true
     description: |
-      A server defined name for this index. Format:
+      The unique backup schedule identifier across all locations and databases for the given project. Format:
       `projects/{{project}}/databases/{{database}}/backupSchedules/{{backupSchedule}}
     immutable: true
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
