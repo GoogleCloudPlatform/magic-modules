@@ -67,7 +67,7 @@ func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) 
 
 	projectSinkCreateRequest := config.NewLoggingClient(userAgent).Projects.Sinks.Create(id.parent(), sink)
 
-	// if custom-sa is specified, use it to write log and it reqiures uniqueWriterIdentity to be set as well
+	// if custom-sa is specified, use it to write log and it requires uniqueWriterIdentity to be set as well
 	// otherwise set the uniqueWriter identity
 	if customWriterIdentity != "" {
 		projectSinkCreateRequest = projectSinkCreateRequest.UniqueWriterIdentity(uniqueWriterIdentity).CustomWriterIdentity(customWriterIdentity)
