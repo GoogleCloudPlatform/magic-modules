@@ -39,8 +39,6 @@ func TestAccMonitoringDashboard_basic(t *testing.T) {
 }
 
 func TestAccMonitoringDashboard_gridLayout(t *testing.T) {
-	// TODO: Fix requires a breaking change https://github.com/hashicorp/terraform-provider-google/issues/9976
-	t.Skip()
 	t.Parallel()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -50,6 +48,27 @@ func TestAccMonitoringDashboard_gridLayout(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMonitoringDashboard_gridLayout(),
+			},
+			{
+				ResourceName:            "google_monitoring_dashboard.dashboard",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
+			},
+		},
+	})
+}
+
+func TestAccMonitoringDashboard_mosaicLayout(t *testing.T) {
+	t.Parallel()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringDashboardDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMonitoringDashboard_mosaicLayout(),
 			},
 			{
 				ResourceName:            "google_monitoring_dashboard.dashboard",
@@ -237,6 +256,62 @@ resource "google_monitoring_dashboard" "dashboard" {
   }
 }
 
+EOF
+}
+`)
+}
+func testAccMonitoringDashboard_mosaicLayout() string {
+	return fmt.Sprintf(`
+resource "google_monitoring_dashboard" "dashboard" {
+
+  dashboard_json = <<EOF
+  {
+  "dashboardFilters": [],
+  "displayName": "Perma diff dashboard",
+  "labels": {},
+  "mosaicLayout": {
+    "columns": 12,
+    "tiles": [
+      {
+        "height": 4,
+        "widget": {
+          "title": "SLO Compliance: 99.9%% - Good/Total Ratio - Rolling 28 days",
+          "xyChart": {
+            "chartOptions": {
+              "mode": "COLOR"
+            },
+            "dataSets": [
+              {
+                "breakdowns": [],
+                "dimensions": [],
+                "measures": [],
+                "plotType": "LINE",
+                "targetAxis": "Y1",
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "aggregation": {
+                      "perSeriesAligner": "ALIGN_NEXT_OLDER"
+                    },
+                    "filter": "select_slo_compliance(\"projects/not-a-project/services/run-service/serviceLevelObjectives/run-service-rolling-availability-slo\")"
+                  },
+                  "unitOverride": "10^2.%%"
+                }
+              }
+            ],
+            "thresholds": [
+              {
+                "label": "",
+                "targetAxis": "Y1",
+                "value": 0.999
+              }
+            ]
+          }
+        },
+        "width": 12
+      }
+    ]
+  }
+}
 EOF
 }
 `)
