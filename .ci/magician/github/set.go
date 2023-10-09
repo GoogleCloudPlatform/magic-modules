@@ -102,7 +102,7 @@ func (gh *github) CreateWorkflowDispatchEvent(workflowFileName string, inputs ma
 		"inputs": inputs,
 	})
 
-	if resp != 200 {
+	if resp != 200 && resp != 204 {
 		return fmt.Errorf("server returned %d creating workflow dispatch event", resp)
 	}
 
