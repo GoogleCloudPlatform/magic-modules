@@ -87,7 +87,6 @@ examples:
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_create: templates/terraform/pre_create/alloydb_cluster.go.erb
-  pre_update: templates/terraform/pre_update/alloydb_cluster.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'clusterId'
@@ -466,6 +465,7 @@ properties:
       - :PRIMARY
       - :SECONDARY
     default_value: :PRIMARY
+    immutable: true
     description: |
       The type of cluster. If not set, defaults to PRIMARY.
   - !ruby/object:Api::Type::NestedObject
