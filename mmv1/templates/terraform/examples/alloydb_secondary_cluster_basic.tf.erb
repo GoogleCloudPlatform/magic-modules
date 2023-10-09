@@ -29,6 +29,7 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
   location     = "us-east1"
   network      = google_compute_network.default.id
   cluster_type = "SECONDARY"
+  deletion_policy = "FORCE"
 
   continuous_backup_config {
     enabled = false

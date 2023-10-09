@@ -66,6 +66,7 @@ resource "google_alloydb_cluster" "secondary" {
   location     = "us-east1"
   network      = google_compute_network.default.id
   cluster_type = "SECONDARY"
+  deletion_policy = "FORCE"
 
   continuous_backup_config {
     enabled = false
@@ -154,6 +155,7 @@ resource "google_alloydb_cluster" "secondary" {
   location     = "us-east1"
   network      = google_compute_network.default.id
   cluster_type = "SECONDARY"
+  deletion_policy = "FORCE"
 
   continuous_backup_config {
     enabled = false
@@ -425,6 +427,7 @@ resource "google_alloydb_cluster" "secondary" {
   location     = "us-east1"
   network      = google_compute_network.default.id
   cluster_type = "SECONDARY"
+  deletion_policy = "FORCE"
 
   continuous_backup_config {
     enabled = false
@@ -527,6 +530,7 @@ resource "google_alloydb_cluster" "secondary" {
   location     = "us-east1"
   network      = google_compute_network.default.id
   cluster_type = "SECONDARY"
+  deletion_policy = "FORCE"
 
   continuous_backup_config {
     enabled = false
@@ -644,6 +648,7 @@ resource "google_alloydb_cluster" "secondary" {
   location     = "us-east1"
   network      = google_compute_network.default.id
   cluster_type = "SECONDARY"
+  deletion_policy = "FORCE"
 
   continuous_backup_config {
     enabled = false
@@ -763,6 +768,7 @@ resource "google_alloydb_cluster" "secondary" {
 	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
   cluster_type = "SECONDARY"
+  deletion_policy = "FORCE"
 
   continuous_backup_config {
     enabled = false
@@ -862,6 +868,7 @@ resource "google_alloydb_cluster" "secondary" {
 	allocated_ip_range = google_compute_global_address.private_ip_alloc.name
   }
   cluster_type = "SECONDARY"
+  deletion_policy = "FORCE"
 
   continuous_backup_config {
     enabled = false
