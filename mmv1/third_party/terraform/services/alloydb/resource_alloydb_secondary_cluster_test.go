@@ -40,7 +40,6 @@ resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
   network    = google_compute_network.default.id
-  cluster_type = "PRIMARY"
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -121,7 +120,6 @@ resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
   network    = google_compute_network.default.id
-  cluster_type = "PRIMARY"
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -198,7 +196,6 @@ resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
   network    = google_compute_network.default.id
-  cluster_type = "PRIMARY"
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -278,7 +275,6 @@ resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
   network    = google_compute_network.default.id
-  cluster_type = "PRIMARY"
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -373,7 +369,6 @@ resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
   network    = google_compute_network.default.id
-  cluster_type = "PRIMARY"
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -469,7 +464,6 @@ resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
   network    = google_compute_network.default.id
-  cluster_type = "PRIMARY"
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -580,7 +574,6 @@ resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
   network      = google_compute_network.default.id
-  cluster_type = "PRIMARY"
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -690,8 +683,6 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
 	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
-  cluster_type = "PRIMARY"
-
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -782,8 +773,6 @@ resource "google_alloydb_cluster" "primary" {
 	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
 	allocated_ip_range = google_compute_global_address.private_ip_alloc.name
   }
-  cluster_type = "PRIMARY"
-
 }
 
 resource "google_alloydb_instance" "primary" {
