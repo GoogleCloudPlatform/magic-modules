@@ -3,10 +3,6 @@ resource "google_alloydb_cluster" "primary" {
   location   = "us-central1"
   network    = google_compute_network.default.id
   cluster_type = "PRIMARY"
-
-  initial_user {
-    password = "<%= ctx[:vars]['alloydb_primary_cluster_name'] %>"
-  }
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -41,6 +37,8 @@ resource "google_alloydb_cluster" "secondary" {
   secondary_config {
     primary_cluster_name = google_alloydb_cluster.primary.name
   }
+
+  deletion_policy = "FORCE"
 
   depends_on = [google_alloydb_instance.primary]
 }
