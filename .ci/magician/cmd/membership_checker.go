@@ -13,10 +13,10 @@ import (
 )
 
 type mcGithub interface {
-	GetPullRequestAuthor(string) (string, error)
-	GetUserType(string) github.UserType
-	GetPullRequestRequestedReviewer(string) (string, error)
-	GetPullRequestPreviousAssignedReviewers(string) ([]string, error)
+	GetPullRequestAuthor(prNumber string) (string, error)
+	GetUserType(user string) github.UserType
+	GetPullRequestRequestedReviewer(prNumber string) (string, error)
+	GetPullRequestPreviousAssignedReviewers(prNumber string) ([]string, error)
 	RequestPullRequestReviewer(prNumber string, reviewer string) error
 	PostComment(prNumber string, comment string) error
 	AddLabel(prNumber string, label string) error

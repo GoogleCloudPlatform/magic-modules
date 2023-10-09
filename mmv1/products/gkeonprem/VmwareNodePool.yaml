@@ -71,8 +71,8 @@ properties:
   - !ruby/object:Api::Type::String
     name: "displayName"
     description: The display name for the node pool.
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: "annotations"
+  - !ruby/object:Api::Type::KeyValueAnnotations
+    name: 'annotations'
     description: |
       Annotations on the node Pool.
       This field has the same restrictions as Kubernetes annotations.
@@ -82,7 +82,6 @@ properties:
       Prefix must be a DNS subdomain.
       Name must be 63 characters or less, begin and end with alphanumerics,
       with dashes (-), underscores (_), dots (.), and alphanumerics between.
-    default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: "nodePoolAutoscaling"
     description: Node Pool autoscaling config for the node pool.
@@ -149,7 +148,7 @@ properties:
                 - PREFER_NO_SCHEDULE
                 - NO_EXECUTE
       - !ruby/object:Api::Type::KeyValuePairs
-        name: "labels"
+        name: 'labels'
         description: |
           The map of Kubernetes labels (key/value pairs) to be applied to each node.
           These will added in addition to any default label(s) that

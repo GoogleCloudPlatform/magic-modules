@@ -60,6 +60,9 @@ resource "google_pubsub_topic" "foo" {
 resource "google_pubsub_subscription" "foo" {
   name     = "tf-test-pubsub-subscription-%{random_suffix}"
   topic    = google_pubsub_topic.foo.name
+  labels   = {
+    my-label = "my-label-value"
+  }
 }
 
 data "google_pubsub_subscription" "foo" {

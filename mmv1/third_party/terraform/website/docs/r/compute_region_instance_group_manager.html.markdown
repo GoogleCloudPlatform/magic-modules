@@ -169,9 +169,9 @@ group. You can specify one or more values. For more information, see the [offici
 
 * `stateful_disk` - (Optional) Disks created on the instances that will be preserved on instance delete, update, etc. Structure is [documented below](#nested_stateful_disk). For more information see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/configuring-stateful-disks-in-migs). Proactive cross zone instance redistribution must be disabled before you can update stateful disks on existing instance group managers. This can be controlled via the `update_policy`.
 
-* `stateful_internal_ip` - (Optional, [Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions.html)) Internal network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_stateful_internal_ip).
+* `stateful_internal_ip` - (Optional) Internal network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_stateful_internal_ip).
 
-* `stateful_external_ip` - (Optional, [Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions.html)) External network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_stateful_external_ip).
+* `stateful_external_ip` - (Optional) External network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_stateful_external_ip).
 
 - - -
 
@@ -319,7 +319,7 @@ one of which has a `target_size.percent` of `60` will create 2 instances of that
 In addition to the arguments listed above, the following computed attributes are
 exported:
 
-* `id` - an identifier for the resource with format `{{disk.name}}`
+* `id` - an identifier for the resource with format `projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{name}}`
 
 * `fingerprint` - The fingerprint of the instance group manager.
 
@@ -361,8 +361,21 @@ This resource provides the following
 
 ## Import
 
-Instance group managers can be imported using the `name`, e.g.
+Instance group managers can be imported using any of these accepted formats:
+
+* `{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import instance group managers using one of the formats above. For example:
+
+```tf
+import {
+  id = "{{name}}"
+  to = google_compute_region_instance_group_manager.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), instance group managers can be imported using one of the formats above. For example:
 
 ```
-$ terraform import google_compute_region_instance_group_manager.appserver appserver-igm
+$ terraform import google_compute_region_instance_group_manager.default {{name}}
 ```
