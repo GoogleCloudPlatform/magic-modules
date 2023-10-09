@@ -1655,9 +1655,9 @@ resource "google_bigquery_table" "test" {
   time_partitioning {
     type                     = "%s"
     field                    = "ts"
-    require_partition_filter = true
     expiration_ms            = 1000
   }
+  require_partition_filter = true
   clustering = ["some_int", "some_string"]
   schema     = <<EOH
 [
@@ -2032,8 +2032,8 @@ resource "google_bigquery_table" "test" {
   time_partitioning {
     type                     = "DAY"
     field                    = "ts"
-    require_partition_filter = true
   }
+  require_partition_filter = true
   clustering = ["some_int", "some_string"]
   schema     = <<EOH
 [
@@ -2109,8 +2109,8 @@ resource "google_bigquery_table" "test" {
   time_partitioning {
     type                     = "DAY"
     field                    = "ts"
-    require_partition_filter = true
   }
+  require_partition_filter = true
   clustering = ["some_int", "some_string"]
   schema     = <<EOH
 [
@@ -2283,8 +2283,8 @@ resource "google_bigquery_table" "test" {
   time_partitioning {
     type                     = "DAY"
     field                    = "ts"
-    require_partition_filter = true
   }
+  require_partition_filter = true
   clustering = ["some_int", "some_string"]
   schema     = <<EOH
 [
