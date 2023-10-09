@@ -683,22 +683,22 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceCustomAudienceUpdate(t *testing.T
 		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithoutCustomAudience(context),
-			},
-			{
-				ResourceName:            "google_cloud_run_v2_service.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "location", "annotations"},
-			},
-			{
 				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithCustomAudience(context),
 			},
 			{
 				ResourceName:            "google_cloud_run_v2_service.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "location", "annotations"},
+				ImportStateVerifyIgnore: []string{"name", "location", "annotations", "launch_stage"},
+			},
+			{
+				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithoutCustomAudience(context),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "annotations", "launch_stage"},
 			},
 		},
 	})
@@ -710,7 +710,6 @@ resource "google_cloud_run_v2_service" "default" {
   provider     = google-beta
   name         = "%{service_name}"
   location     = "us-central1"
-  launch_stage = "BETA"
 
   template {
     containers {
