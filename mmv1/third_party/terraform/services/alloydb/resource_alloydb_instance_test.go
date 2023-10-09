@@ -195,12 +195,6 @@ resource "google_alloydb_instance" "default" {
     record_client_address = "true"
     query_plans_per_minute = 10
   }
-	client_connection_config {
-    require_connectors = false
-    ssl_config {
-      ssl_mode = "ENCRYPTED_ONLY"
-    }
-  }
   depends_on = [google_service_networking_connection.vpc_connection]
   lifecycle {
     ignore_changes = [
