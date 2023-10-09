@@ -24,17 +24,47 @@ func TestAccAlloydbCluster_secondaryClusterMandatoryFields(t *testing.T) {
 			{
 				Config: testAccAlloydbCluster_secondaryClusterMandatoryFields(context),
 			},
+			{
+				ResourceName:      "google_alloydb_cluster.secondary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
 
 func testAccAlloydbCluster_secondaryClusterMandatoryFields(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "primary" {
+  cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
+  location   = "us-central1"
+  network    = google_compute_network.default.id
+  cluster_type = "PRIMARY"
+}
+
+resource "google_alloydb_instance" "primary" {
+  cluster       = google_alloydb_cluster.primary.name
+  instance_id   = "tf-test-alloydb-primary-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+
+  machine_config {
+    cpu_count = 2
+  }
+
+  client_connection_config {
+    require_connectors = false
+    ssl_config {
+      ssl_mode = "ENCRYPTED_ONLY"
+    }
+  }
+
+  depends_on = [google_service_networking_connection.vpc_connection]
+}
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
-  network      = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  network      = google_compute_network.default.id
   cluster_type = "SECONDARY"
 
   continuous_backup_config {
@@ -42,149 +72,31 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   secondary_config {
-    primary_cluster_name = google_alloydb_cluster.default.name
+    primary_cluster_name = google_alloydb_cluster.primary.name
   }
-}
 
-resource "google_alloydb_cluster" "default" {
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "us-central1"
-  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  depends_on = [google_alloydb_instance.primary]
 }
 
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
-}
-
-`, context)
-}
-
-// This test passes if secondary cluster can be created with existing primary cluster and primary instance
-func TestAccAlloydbCluster_secondaryClusterWithPrimaryClusterAndInstance(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"time": {},
-		},
-		Steps: []resource.TestStep{
-			{
-				Config: testAccAlloydbCluster_secondaryClusterWithPrimaryClusterAndInstanceCreate(context),
-			},
-			{
-				Config: testAccAlloydbCluster_secondaryClusterWithPrimaryClusterAndInstanceRemoveSecondary(context),
-			},
-		},
-	})
-}
-
-func testAccAlloydbCluster_secondaryClusterWithPrimaryClusterAndInstanceCreate(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-
-resource "google_alloydb_cluster" "secondary" {
-  cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  location     = "us-east1"
-  network      = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  cluster_type = "SECONDARY"
-
-  continuous_backup_config {
-    enabled = false
-  }
-
-  secondary_config {
-    primary_cluster_name = google_alloydb_cluster.default.name
-  }
-}
-
-resource "google_alloydb_instance" "default" {
-	cluster       = google_alloydb_cluster.default.name
-	instance_id   = "tf-test-alloydb-instance%{random_suffix}"
-	instance_type = "PRIMARY"
-
-	machine_config {
-	  cpu_count = 2
-	}
-	depends_on = [google_service_networking_connection.vpc_connection]
-}
-
-resource "google_alloydb_cluster" "default" {
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "us-central1"
-  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-}
-
-data "google_project" "project" {}
-
-resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
+  name = "tf-test-alloydb-secondary-cluster%{random_suffix}"
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {
-	name          =  "tf-test-alloydb-cluster%{random_suffix}"
-	address_type  = "INTERNAL"
-	purpose       = "VPC_PEERING"
-	prefix_length = 16
-	network       = google_compute_network.default.id
-  }
-
-  resource "google_service_networking_connection" "vpc_connection" {
-	network                 = google_compute_network.default.id
-	service                 = "servicenetworking.googleapis.com"
-	reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
-  }
-
-`, context)
+  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  prefix_length = 16
+  network       = google_compute_network.default.id
 }
 
-func testAccAlloydbCluster_secondaryClusterWithPrimaryClusterAndInstanceRemoveSecondary(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-
-resource "google_alloydb_instance" "default" {
-	cluster       = google_alloydb_cluster.default.name
-	instance_id   = "tf-test-alloydb-instance%{random_suffix}"
-	instance_type = "PRIMARY"
-
-	machine_config {
-	  cpu_count = 2
-	}
-	depends_on = [google_service_networking_connection.vpc_connection]
+resource "google_service_networking_connection" "vpc_connection" {
+  network                 = google_compute_network.default.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
-
-resource "google_alloydb_cluster" "default" {
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "us-central1"
-  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-}
-
-data "google_project" "project" {}
-
-resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-	name          =  "tf-test-alloydb-cluster%{random_suffix}"
-	address_type  = "INTERNAL"
-	purpose       = "VPC_PEERING"
-	prefix_length = 16
-	network       = google_compute_network.default.id
-  }
-
-  resource "google_service_networking_connection" "vpc_connection" {
-	network                 = google_compute_network.default.id
-	service                 = "servicenetworking.googleapis.com"
-	reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
-  }
-
 `, context)
 }
 
@@ -208,34 +120,67 @@ func TestAccAlloydbCluster_secondaryClusterMissingSecondaryConfig(t *testing.T) 
 		},
 	})
 }
+
 func testAccAlloydbCluster_secondaryClusterMissingSecondaryConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "primary" {
+  cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
+  location   = "us-central1"
+  network    = google_compute_network.default.id
+  cluster_type = "PRIMARY"
+}
+
+resource "google_alloydb_instance" "primary" {
+  cluster       = google_alloydb_cluster.primary.name
+  instance_id   = "tf-test-alloydb-primary-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+
+  machine_config {
+    cpu_count = 2
+  }
+
+  client_connection_config {
+    require_connectors = false
+    ssl_config {
+      ssl_mode = "ENCRYPTED_ONLY"
+    }
+  }
+
+  depends_on = [google_service_networking_connection.vpc_connection]
+}
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
-  network      = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  network      = google_compute_network.default.id
   cluster_type = "SECONDARY"
 
   continuous_backup_config {
     enabled = false
   }
 
-  depends_on = [google_alloydb_cluster.default]
-}
-
-resource "google_alloydb_cluster" "default" {
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "us-central1"
-  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  depends_on = [google_alloydb_instance.primary]
 }
 
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
+  name = "tf-test-alloydb-secondary-cluster%{random_suffix}"
 }
 
+resource "google_compute_global_address" "private_ip_alloc" {
+  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  prefix_length = 16
+  network       = google_compute_network.default.id
+}
+
+resource "google_service_networking_connection" "vpc_connection" {
+  network                 = google_compute_network.default.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+}
 `, context)
 }
 
@@ -262,33 +207,67 @@ func TestAccAlloydbCluster_secondaryClusterDefinedSecondaryConfigButMissingClust
 
 func testAccAlloydbCluster_secondaryClusterDefinedSecondaryConfigButMissingClusterTypeSecondary(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "primary" {
+  cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
+  location   = "us-central1"
+  network    = google_compute_network.default.id
+  cluster_type = "PRIMARY"
+}
+
+resource "google_alloydb_instance" "primary" {
+  cluster       = google_alloydb_cluster.primary.name
+  instance_id   = "tf-test-alloydb-primary-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+
+  machine_config {
+    cpu_count = 2
+  }
+
+  client_connection_config {
+    require_connectors = false
+    ssl_config {
+      ssl_mode = "ENCRYPTED_ONLY"
+    }
+  }
+
+  depends_on = [google_service_networking_connection.vpc_connection]
+}
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
-  network      = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  network      = google_compute_network.default.id
 
   continuous_backup_config {
     enabled = false
   }
 
   secondary_config {
-    primary_cluster_name = google_alloydb_cluster.default.name
+    primary_cluster_name = google_alloydb_cluster.primary.name
   }
-}
 
-resource "google_alloydb_cluster" "default" {
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "us-central1"
-  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  depends_on = [google_alloydb_instance.primary]
 }
 
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
+  name = "tf-test-alloydb-secondary-cluster%{random_suffix}"
 }
 
+resource "google_compute_global_address" "private_ip_alloc" {
+  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  prefix_length = 16
+  network       = google_compute_network.default.id
+}
+
+resource "google_service_networking_connection" "vpc_connection" {
+  network                 = google_compute_network.default.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+}
 `, context)
 }
 
@@ -315,11 +294,36 @@ func TestAccAlloydbCluster_secondaryClusterDefinedSecondaryConfigButClusterTypeI
 
 func testAccAlloydbCluster_secondaryClusterDefinedSecondaryConfigButClusterTypeIsPrimary(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "primary" {
+  cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
+  location   = "us-central1"
+  network    = google_compute_network.default.id
+  cluster_type = "PRIMARY"
+}
+
+resource "google_alloydb_instance" "primary" {
+  cluster       = google_alloydb_cluster.primary.name
+  instance_id   = "tf-test-alloydb-primary-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+
+  machine_config {
+    cpu_count = 2
+  }
+
+  client_connection_config {
+    require_connectors = false
+    ssl_config {
+      ssl_mode = "ENCRYPTED_ONLY"
+    }
+  }
+
+  depends_on = [google_service_networking_connection.vpc_connection]
+}
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
-  network      = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  network      = google_compute_network.default.id
   cluster_type = "PRIMARY"
 
   continuous_backup_config {
@@ -327,22 +331,31 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   secondary_config {
-    primary_cluster_name = google_alloydb_cluster.default.name
+    primary_cluster_name = google_alloydb_cluster.primary.name
   }
-}
 
-resource "google_alloydb_cluster" "default" {
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "us-central1"
-  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  depends_on = [google_alloydb_instance.primary]
 }
 
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
+  name = "tf-test-alloydb-secondary-cluster%{random_suffix}"
 }
 
+resource "google_compute_global_address" "private_ip_alloc" {
+  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  prefix_length = 16
+  network       = google_compute_network.default.id
+}
+
+resource "google_service_networking_connection" "vpc_connection" {
+  network                 = google_compute_network.default.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+}
 `, context)
 }
 
@@ -363,10 +376,17 @@ func TestAccAlloydbCluster_secondaryClusterUpdate(t *testing.T) {
 				Config: testAccAlloydbCluster_secondaryClusterMandatoryFields(context),
 			},
 			{
+				ResourceName:      "google_alloydb_cluster.secondary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: testAccAlloydbCluster_secondaryClusterUpdate(context),
 			},
 			{
-				Config: testAccAlloydbCluster_secondaryClusterMandatoryFields(context),
+				ResourceName:      "google_alloydb_cluster.secondary",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -374,11 +394,36 @@ func TestAccAlloydbCluster_secondaryClusterUpdate(t *testing.T) {
 
 func testAccAlloydbCluster_secondaryClusterUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "primary" {
+  cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
+  location   = "us-central1"
+  network    = google_compute_network.default.id
+  cluster_type = "PRIMARY"
+}
+
+resource "google_alloydb_instance" "primary" {
+  cluster       = google_alloydb_cluster.primary.name
+  instance_id   = "tf-test-alloydb-primary-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+
+  machine_config {
+    cpu_count = 2
+  }
+
+  client_connection_config {
+    require_connectors = false
+    ssl_config {
+      ssl_mode = "ENCRYPTED_ONLY"
+    }
+  }
+
+  depends_on = [google_service_networking_connection.vpc_connection]
+}
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
-  network      = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  network      = google_compute_network.default.id
   cluster_type = "SECONDARY"
 
   continuous_backup_config {
@@ -386,35 +431,45 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   secondary_config {
-    primary_cluster_name = google_alloydb_cluster.default.name
+    primary_cluster_name = google_alloydb_cluster.primary.name
   }
 
   labels = {
     foo = "bar"
   }
-}
 
-resource "google_alloydb_cluster" "default" {
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "us-central1"
-  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  depends_on = [google_alloydb_instance.primary]
 }
 
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
+  name = "tf-test-alloydb-secondary-cluster%{random_suffix}"
 }
 
+resource "google_compute_global_address" "private_ip_alloc" {
+  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  prefix_length = 16
+  network       = google_compute_network.default.id
+}
+
+resource "google_service_networking_connection" "vpc_connection" {
+  network                 = google_compute_network.default.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+}
 `, context)
 }
 
-// This test passes if secondary cluster can be deleted
-func TestAccAlloydbCluster_secondaryClusterDelete(t *testing.T) {
+// Test if adding automatedBackupPolicy throws an error as it can not be enabled on secondary cluster
+func TestAccAlloydbCluster_secondaryClusterAddAutomatedBackupPolicy(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
+		"hour":          23,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -426,32 +481,227 @@ func TestAccAlloydbCluster_secondaryClusterDelete(t *testing.T) {
 				Config: testAccAlloydbCluster_secondaryClusterMandatoryFields(context),
 			},
 			{
-				Config: testAccAlloydbCluster_secondaryClusterDelete(context),
+				ResourceName:      "google_alloydb_cluster.secondary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Invalid input check - can not add automated backup policy to a secondary cluster
+				Config:      testAccAlloydbCluster_secondaryClusterAddAutomatedBackupPolicy(context),
+				ExpectError: regexp.MustCompile("cannot enable automated backups on secondary cluster until it is promoted"),
 			},
 		},
 	})
 }
 
-func testAccAlloydbCluster_secondaryClusterDelete(context map[string]interface{}) string {
+func testAccAlloydbCluster_secondaryClusterAddAutomatedBackupPolicy(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-
-resource "google_alloydb_cluster" "default" {
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+resource "google_alloydb_cluster" "primary" {
+  cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
-  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  network    = google_compute_network.default.id
+  cluster_type = "PRIMARY"
+}
+
+resource "google_alloydb_instance" "primary" {
+  cluster       = google_alloydb_cluster.primary.name
+  instance_id   = "tf-test-alloydb-primary-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+
+  machine_config {
+    cpu_count = 2
+  }
+
+  client_connection_config {
+    require_connectors = false
+    ssl_config {
+      ssl_mode = "ENCRYPTED_ONLY"
+    }
+  }
+
+  depends_on = [google_service_networking_connection.vpc_connection]
+}
+
+resource "google_alloydb_cluster" "secondary" {
+  cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
+  location     = "us-east1"
+  network      = google_compute_network.default.id
+  cluster_type = "SECONDARY"
+
+  continuous_backup_config {
+    enabled = false
+  }
+
+  secondary_config {
+    primary_cluster_name = google_alloydb_cluster.primary.name
+  }
+  
+  automated_backup_policy {
+    location      = "us-central1"
+    backup_window = "1800s"
+    enabled       = true
+
+    weekly_schedule {
+      days_of_week = ["MONDAY"]
+
+      start_times {
+        hours   = %{hour}
+        minutes = 0
+        seconds = 0
+        nanos   = 0
+      }
+    }
+
+    quantity_based_retention {
+      count = 1
+    }
+
+    labels = {
+      test = "tf-test-alloydb-secondary-cluster%{random_suffix}"
+    }
+  }
+
+  depends_on = [google_alloydb_instance.primary]
 }
 
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
+  name = "tf-test-alloydb-secondary-cluster%{random_suffix}"
 }
 
+resource "google_compute_global_address" "private_ip_alloc" {
+  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  prefix_length = 16
+  network       = google_compute_network.default.id
+}
+
+resource "google_service_networking_connection" "vpc_connection" {
+  network                 = google_compute_network.default.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+}
 `, context)
 }
 
-// This test passes if secondary cluster can be promoted and the original primary clusters can be deleted after that
-func TestAccAlloydbCluster_secondaryClusterPromote(t *testing.T) {
+func TestAccAlloydbCluster_secondaryClusterUsingCMEK(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"key_name":      "tf-test-key-" + acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbCluster_secondaryClusterUsingCMEK(context),
+			},
+			{
+				ResourceName:      "google_alloydb_cluster.secondary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccAlloydbCluster_secondaryClusterUsingCMEK(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "primary" {
+  cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
+  location   = "us-central1"
+  network      = google_compute_network.default.id
+  cluster_type = "PRIMARY"
+}
+
+resource "google_alloydb_instance" "primary" {
+  cluster       = google_alloydb_cluster.primary.name
+  instance_id   = "tf-test-alloydb-primary-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+
+  machine_config {
+    cpu_count = 2
+  }
+
+  client_connection_config {
+    require_connectors = false
+    ssl_config {
+      ssl_mode = "ENCRYPTED_ONLY"
+    }
+  }
+
+  depends_on = [google_service_networking_connection.vpc_connection]
+}
+
+resource "google_alloydb_cluster" "secondary" {
+  cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
+  location     = "us-east1"
+  network      = google_compute_network.default.id
+  cluster_type = "SECONDARY"
+
+  continuous_backup_config {
+    enabled = false
+  }
+
+  secondary_config {
+    primary_cluster_name = google_alloydb_cluster.primary.name
+  }
+
+  encryption_config {
+    kms_key_name = google_kms_crypto_key.key.id
+  }
+
+  depends_on = [google_alloydb_instance.primary, google_kms_crypto_key_iam_binding.crypto_key]
+}
+
+data "google_project" "project" {}
+
+resource "google_compute_network" "default" {
+  name = "tf-test-alloydb-secondary-cluster%{random_suffix}"
+}
+
+resource "google_compute_global_address" "private_ip_alloc" {
+  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  prefix_length = 16
+  network       = google_compute_network.default.id
+}
+
+resource "google_service_networking_connection" "vpc_connection" {
+  network                 = google_compute_network.default.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+}
+
+resource "google_kms_key_ring" "keyring" {
+  name     = "%{key_name}"
+  location = "us-east1"
+}
+
+resource "google_kms_crypto_key" "key" {
+  name     = "%{key_name}"
+  key_ring = google_kms_key_ring.keyring.id
+}
+
+resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+  crypto_key_id = google_kms_crypto_key.key.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  members = [
+	"serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
+  ]
+}
+`, context)
+}
+
+// Ensures secondary cluster creation works with networkConfig.
+func TestAccAlloydbCluster_secondaryClusterWithNetworkConfig(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -462,131 +712,186 @@ func TestAccAlloydbCluster_secondaryClusterPromote(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"time": {},
-		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAlloydbInstance_secondaryInstanceCreateWithMandatoryFields(context),
+				Config: testAccAlloydbCluster_secondaryClusterWithNetworkConfig(context),
 			},
 			{
-				Config: testAccAlloydbCluster_secondaryClusterPromote(context),
-			},
-			{
-				Config: testAccAlloydbCluster_secondaryClusterPromoteDeleteOriginalPrimary(context),
+				ResourceName:      "google_alloydb_cluster.secondary",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
-func testAccAlloydbCluster_secondaryClusterPromote(context map[string]interface{}) string {
+func testAccAlloydbCluster_secondaryClusterWithNetworkConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-
-resource "google_alloydb_instance" "secondary" {
-  cluster       = google_alloydb_cluster.secondary.name
-  instance_id   = "tf-test-alloydb-secondary-instance%{random_suffix}"
-  instance_type = google_alloydb_cluster.secondary.cluster_type
-
-  depends_on = [google_service_networking_connection.vpc_connection]
-
-  lifecycle {
-    ignore_changes = [instance_type]
+resource "google_alloydb_cluster" "primary" {
+  cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
+  location   = "us-central1"
+  network_config {
+	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
-}
-
-resource "google_alloydb_cluster" "secondary" {
-  cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  location     = "us-east1"
-  network      = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   cluster_type = "PRIMARY"
 
-  continuous_backup_config {
-    enabled = false
-  }
 }
 
-resource "google_alloydb_instance" "default" {
-  cluster       = google_alloydb_cluster.default.name
-  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+resource "google_alloydb_instance" "primary" {
+  cluster       = google_alloydb_cluster.primary.name
+  instance_id   = "tf-test-alloydb-primary-instance%{random_suffix}"
   instance_type = "PRIMARY"
 
-  depends_on = [google_service_networking_connection.vpc_connection]
-}
-
-resource "google_alloydb_cluster" "default" {
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "us-central1"
-  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-}
-
-data "google_project" "project" {}
-
-resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-instance%{random_suffix}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-	name          =  "tf-test-alloydb-cluster%{random_suffix}"
-	address_type  = "INTERNAL"
-	purpose       = "VPC_PEERING"
-	prefix_length = 16
-	network       = google_compute_network.default.id
+  machine_config {
+    cpu_count = 2
   }
 
-  resource "google_service_networking_connection" "vpc_connection" {
-	network                 = google_compute_network.default.id
-	service                 = "servicenetworking.googleapis.com"
-	reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+  client_connection_config {
+    require_connectors = false
+    ssl_config {
+      ssl_mode = "ENCRYPTED_ONLY"
+    }
   }
-
-`, context)
-}
-
-func testAccAlloydbCluster_secondaryClusterPromoteDeleteOriginalPrimary(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-
-resource "google_alloydb_instance" "secondary" {
-  cluster       = google_alloydb_cluster.secondary.name
-  instance_id   = "tf-test-alloydb-secondary-instance%{random_suffix}"
-  instance_type = google_alloydb_cluster.secondary.cluster_type
 
   depends_on = [google_service_networking_connection.vpc_connection]
-
-  lifecycle {
-    ignore_changes = [instance_type]
-  }
 }
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
-  network      = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  cluster_type = "PRIMARY"
+  network_config {
+	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+  cluster_type = "SECONDARY"
 
   continuous_backup_config {
     enabled = false
   }
+
+  secondary_config {
+    primary_cluster_name = google_alloydb_cluster.primary.name
+  }
+
+  depends_on = [google_alloydb_instance.primary]
 }
 
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-instance%{random_suffix}"
+  name = "tf-test-alloydb-secondary-cluster%{random_suffix}"
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {
-	name          =  "tf-test-alloydb-cluster%{random_suffix}"
-	address_type  = "INTERNAL"
-	purpose       = "VPC_PEERING"
-	prefix_length = 16
-	network       = google_compute_network.default.id
+  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  prefix_length = 16
+  network       = google_compute_network.default.id
 }
 
 resource "google_service_networking_connection" "vpc_connection" {
-	network                 = google_compute_network.default.id
-	service                 = "servicenetworking.googleapis.com"
-	reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+  network                 = google_compute_network.default.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+}
+`, context)
 }
 
+// Ensures secondary cluster creation works with networkConfig and a specified allocated IP range.
+func TestAccAlloydbCluster_secondaryClusterWithNetworkConfigAndAllocatedIPRange(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbCluster_secondaryClusterWithNetworkConfigAndAllocatedIPRange(context),
+			},
+			{
+				ResourceName:      "google_alloydb_cluster.secondary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccAlloydbCluster_secondaryClusterWithNetworkConfigAndAllocatedIPRange(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "primary" {
+  cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
+  location   = "us-central1"
+  network_config {
+	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+	allocated_ip_range = google_compute_global_address.private_ip_alloc.name
+  }
+  cluster_type = "PRIMARY"
+
+}
+
+resource "google_alloydb_instance" "primary" {
+  cluster       = google_alloydb_cluster.primary.name
+  instance_id   = "tf-test-alloydb-primary-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+
+  machine_config {
+    cpu_count = 2
+  }
+
+  client_connection_config {
+    require_connectors = false
+    ssl_config {
+      ssl_mode = "ENCRYPTED_ONLY"
+    }
+  }
+
+  depends_on = [google_service_networking_connection.vpc_connection]
+}
+
+resource "google_alloydb_cluster" "secondary" {
+  cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
+  location     = "us-east1"
+  network_config {
+	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+	allocated_ip_range = google_compute_global_address.private_ip_alloc.name
+  }
+  cluster_type = "SECONDARY"
+
+  continuous_backup_config {
+    enabled = false
+  }
+
+  secondary_config {
+    primary_cluster_name = google_alloydb_cluster.primary.name
+  }
+
+  depends_on = [google_alloydb_instance.primary]
+}
+
+data "google_project" "project" {}
+
+resource "google_compute_network" "default" {
+  name = "tf-test-alloydb-secondary-cluster%{random_suffix}"
+}
+
+resource "google_compute_global_address" "private_ip_alloc" {
+  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  prefix_length = 16
+  network       = google_compute_network.default.id
+}
+
+resource "google_service_networking_connection" "vpc_connection" {
+  network                 = google_compute_network.default.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+}
 `, context)
 }
