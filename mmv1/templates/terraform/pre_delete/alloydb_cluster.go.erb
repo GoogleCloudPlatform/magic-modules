@@ -1,4 +1,0 @@
-// Forcefully delete the secondary cluster and the dependent instances because deletion of secondary instance is not supported.
-if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "FORCE" {
-    url = url + "?force=true"
-}
