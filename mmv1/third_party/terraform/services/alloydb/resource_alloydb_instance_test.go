@@ -556,7 +556,7 @@ resource "google_alloydb_instance" "default" {
 resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
-  network    = data.google_compute_network.default.id
+  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
 }
 
 data "google_project" "project" {}
@@ -582,7 +582,7 @@ resource "google_alloydb_instance" "default" {
 resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
-  network    = data.google_compute_network.default.id
+  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
 }
 
 data "google_project" "project" {}
@@ -610,7 +610,7 @@ resource "google_alloydb_instance" "default" {
 resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
-  network    = data.google_compute_network.default.id
+  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
 }
 
 data "google_project" "project" {}
@@ -639,7 +639,7 @@ resource "google_alloydb_instance" "default" {
 resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
-  network    = data.google_compute_network.default.id
+  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
 }
 
 data "google_project" "project" {}
