@@ -32,22 +32,40 @@ func TestAccAlloydbInstance_secondaryInstanceCreateWithMandatoryFields(t *testin
 
 func testAccAlloydbInstance_secondaryInstanceCreateWithMandatoryFields(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_alloydb_instance" "secondary" {
-  cluster       = google_alloydb_cluster.secondary.name
-  instance_id   = "tf-test-alloydb-secondary-instance%{random_suffix}"
-  instance_type = google_alloydb_cluster.secondary.cluster_type
+resource "google_alloydb_cluster" "primary" {
+  cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
+  location   = "us-central1"
+  network    = google_compute_network.default.id
+  cluster_type = "PRIMARY"
 
-  depends_on = [google_service_networking_connection.vpc_connection, google_alloydb_instance.default]
-
-  lifecycle {
-    ignore_changes = [instance_type]
+  initial_user {
+    password = "tf-test-alloydb-primary-cluster%{random_suffix}"
   }
+}
+
+resource "google_alloydb_instance" "primary" {
+  cluster       = google_alloydb_cluster.primary.name
+  instance_id   = "tf-test-alloydb-primary-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+
+  machine_config {
+    cpu_count = 2
+  }
+
+  client_connection_config {
+    require_connectors = false
+    ssl_config {
+      ssl_mode = "ENCRYPTED_ONLY"
+    }
+  }
+
+  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
-  network      = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  network      = google_compute_network.default.id
   cluster_type = "SECONDARY"
 
   continuous_backup_config {
@@ -55,44 +73,50 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   secondary_config {
-    primary_cluster_name = google_alloydb_cluster.default.name
+    primary_cluster_name = google_alloydb_cluster.primary.name
   }
+
+  depends_on = [google_alloydb_instance.primary]
 }
 
-resource "google_alloydb_instance" "default" {
-  cluster       = google_alloydb_cluster.default.name
-  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
-  instance_type = "PRIMARY"
+resource "google_alloydb_instance" "secondary" {
+  cluster       = google_alloydb_cluster.secondary.name
+  instance_id   = "tf-test-alloydb-secondary-instance%{random_suffix}"
+  instance_type = google_alloydb_cluster.secondary.cluster_type
+
+  machine_config {
+    cpu_count = 2
+  }
+
+  client_connection_config {
+    require_connectors = false
+    ssl_config {
+      ssl_mode = "ENCRYPTED_ONLY"
+    }
+  }
 
   depends_on = [google_service_networking_connection.vpc_connection]
-}
-
-resource "google_alloydb_cluster" "default" {
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "us-central1"
-  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
 }
 
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-instance%{random_suffix}"
+  name = "tf-test-alloydb-secondary-network%{random_suffix}"
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {
-	name          =  "tf-test-alloydb-cluster%{random_suffix}"
-	address_type  = "INTERNAL"
-	purpose       = "VPC_PEERING"
-	prefix_length = 16
-	network       = google_compute_network.default.id
-  }
-
-resource "google_service_networking_connection" "vpc_connection" {
-	network                 = google_compute_network.default.id
-	service                 = "servicenetworking.googleapis.com"
-	reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+  name          =  "tf-test-alloydb-secondary-instance%{random_suffix}"
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  prefix_length = 16
+  network       = google_compute_network.default.id
 }
 
+resource "google_service_networking_connection" "vpc_connection" {
+  network                 = google_compute_network.default.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+}
 `, context)
 }
 
