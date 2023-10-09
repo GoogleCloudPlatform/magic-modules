@@ -178,7 +178,13 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"ENTERPRISE", "ENTERPRISE_PLUS"}, false),
-							Description:  `The edition of the instance, can be ENTERPRISE or ENTERPRISE_PLUS.`,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								// The API defaults to setting edition as ENTERPRISE but doesn't return that value
+								// back in API descriptions of resources where edition wasn't included in the create action.
+								// This results in a permadiff when state contains an empty string and config contains "ENTERPRISE"
+								return old == "" && new == "ENTERPRISE"
+							},
+							Description: `The edition of the instance, can be ENTERPRISE or ENTERPRISE_PLUS.`,
 						},
 						"advanced_machine_features": {
 							Type:     schema.TypeList,
