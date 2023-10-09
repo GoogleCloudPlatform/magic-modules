@@ -413,7 +413,7 @@ func TestAccAlloydbInstance_clientConnectionConfig_sslModeDefault(t *testing.T) 
 	t.Parallel()
 
 	suffix := acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-sslmodedefault") // acctest.BootstrapSharedTestNetwork(t, testId)
+	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-sslmodedefault")
 	context := map[string]interface{}{
 		"random_suffix": suffix,
 		"network_name":  networkName,
