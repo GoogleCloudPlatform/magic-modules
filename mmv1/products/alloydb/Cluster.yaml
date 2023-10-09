@@ -475,6 +475,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: "primaryClusterName"
+        immutable: true
         required: true
         description: |
           Name of the primary cluster must be in the format
