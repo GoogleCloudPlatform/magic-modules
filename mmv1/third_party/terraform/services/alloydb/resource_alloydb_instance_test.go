@@ -569,14 +569,6 @@ data "google_project" "project" {}
 data "google_compute_network" "default" {
 	name = "%{network_name}"
 }
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = data.google_compute_network.default.id
-}
 `, context)
 }
 
@@ -602,14 +594,6 @@ data "google_project" "project" {}
 
 data "google_compute_network" "default" {
 	name = "%{network_name}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = data.google_compute_network.default.id
 }
 `, context)
 }
@@ -639,14 +623,6 @@ data "google_project" "project" {}
 data "google_compute_network" "default" {
 	name = "%{network_name}"
 }
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = data.google_compute_network.default.id
-}
 `, context)
 }
 
@@ -675,14 +651,6 @@ data "google_project" "project" {}
 
 data "google_compute_network" "default" {
 	name = "%{network_name}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = data.google_compute_network.default.id
 }
 `, context)
 }
