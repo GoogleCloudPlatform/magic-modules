@@ -502,7 +502,7 @@ properties:
                 name: 'repositoryPath'
                 required: true
                 description: |-
-                  Specific repository from the base, e.g. `"8-stream/BaseOs/x86_64/os"`
+                  Specific repository from the base, e.g. `"centos/8-stream/BaseOS/x86_64/os"`
                 immutable: true
 
   - !ruby/object:Api::Type::Boolean
