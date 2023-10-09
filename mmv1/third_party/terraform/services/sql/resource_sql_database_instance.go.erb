@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"reflect"
 	"strings"
 	"time"
 
@@ -178,13 +179,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"ENTERPRISE", "ENTERPRISE_PLUS"}, false),
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								// The API defaults to setting edition as ENTERPRISE but doesn't return that value
-								// back in API descriptions of resources where edition wasn't included in the create action.
-								// This results in a permadiff when state contains an empty string and config contains "ENTERPRISE"
-								return old == "" && new == "ENTERPRISE"
-							},
-							Description: `The edition of the instance, can be ENTERPRISE or ENTERPRISE_PLUS.`,
+							Description:  `The edition of the instance, can be ENTERPRISE or ENTERPRISE_PLUS.`,
 						},
 						"advanced_machine_features": {
 							Type:     schema.TypeList,
@@ -1259,7 +1254,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		SettingsVersion:            int64(_settings["version"].(int)),
 		DataCacheConfig:            expandDataCacheConfig(_settings["data_cache_config"].([]interface{})),
 		Tier:                       _settings["tier"].(string),
-		Edition:                    _settings["edition"].(string),
+		Edition:                    expandEdition(_settings["edition"]),
 		AdvancedMachineFeatures:    expandSqlServerAdvancedMachineFeatures(_settings["advanced_machine_features"].([]interface{})),
 		ForceSendFields:            []string{"StorageAutoResize"},
 		ActivationPolicy:           _settings["activation_policy"].(string),
@@ -2011,7 +2006,7 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 	data := map[string]interface{}{
 		"version":                      settings.SettingsVersion,
 		"tier":                         settings.Tier,
-		"edition":                      settings.Edition,
+		"edition":                      flattenEdition(settings.Edition),
 		"activation_policy":            settings.ActivationPolicy,
 		"availability_type":            settings.AvailabilityType,
 		"collation":                    settings.Collation,
@@ -2340,6 +2335,20 @@ func flattenPasswordValidationPolicy(passwordValidationPolicy *sqladmin.Password
 	return []map[string]interface{}{data}
 }
 
+func flattenEdition(v interface{}) string {
+	if v == nil || tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+		return "ENTERPRISE"
+	}
+
+	return v.(string)
+}
+
+func expandEdition(v interface{}) string {
+	if v == nil || tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+		return "ENTERPRISE"
+	}
+	return v.(string)
+}
 
 func instanceMutexKey(project, instance_name string) string {
 	return fmt.Sprintf("google-sql-database-instance-%s-%s", project, instance_name)
