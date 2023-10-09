@@ -1,5 +1,5 @@
 ---
-subcategory: "BackupDR"
+subcategory: "BackupDR Management Server"
 description: |-
   Get information about a Backupdr Management server.
 ---
@@ -8,10 +8,13 @@ description: |-
 
 Get information about a Google Backup DR Management server.
 
+~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
+
 ## Example Usage
 
 ```hcl
-data "google_backup_dr_management_server" "my-backup-dr-management-server" {
+data google_backup_dr_management_server my-backup-dr-management-server {
    location =  "us-central1"
 }
 ```
@@ -20,7 +23,7 @@ data "google_backup_dr_management_server" "my-backup-dr-management-server" {
 
 The following arguments are supported:
 
-* `region` - (Required.) The region in which the management server resource belongs.
+* `region` - (Required) The region in which the management server resource belongs.
 
 - - -
 
