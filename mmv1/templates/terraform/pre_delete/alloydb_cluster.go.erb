@@ -1,12 +1,4 @@
-
-var clusterType interface{}
-clusterTypeProp, err := expandAlloydbClusterClusterType(d.Get("cluster_type"), d, config)
-if err != nil {
-    return err
-} else if v, ok := d.GetOkExists("cluster_type"); !tpgresource.IsEmptyValue(reflect.ValueOf(clusterTypeProp)) && (ok || !reflect.DeepEqual(v, clusterTypeProp)) {
-    clusterType = clusterTypeProp
-}
 // Forcefully delete the secondary cluster and the dependent instances because deletion of secondary instance is not supported.
-if clusterType != nil && clusterType == "SECONDARY" {
+if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "FORCE" {
     url = url + "?force=true"
 }

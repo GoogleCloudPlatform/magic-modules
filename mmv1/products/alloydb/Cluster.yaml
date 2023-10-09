@@ -480,3 +480,11 @@ properties:
         description: |
           Name of the primary cluster must be in the format
           'projects/{project}/locations/{location}/clusters/{cluster_id}'
+virtual_fields:
+  - !ruby/object:Api::Type::Enum
+    name: 'deletion_policy'
+    description: 'Policy to determine if the cluster should be deleted forecefully. Deleting a cluster forcefully, deletes the cluster and all its associated instances within the cluster.'
+    values:
+      - :DEFAULT
+      - :FORCE
+    default_value: :DEFAULT
