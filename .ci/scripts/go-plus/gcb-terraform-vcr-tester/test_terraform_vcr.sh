@@ -13,6 +13,7 @@ gh_repo=terraform-provider-google-beta
 NEWLINE=$'\n'
 
 new_branch="auto-pr-$pr_number"
+old_branch="auto-pr-$pr_number-old"
 git_remote=https://github.com/$github_username/$gh_repo
 local_path=$GOPATH/src/github.com/hashicorp/$gh_repo
 mkdir -p "$(dirname $local_path)"
@@ -21,9 +22,13 @@ pushd $local_path
 
 # Only skip tests if we can tell for sure that no go files were changed
 echo "Checking for modified go files"
+# Fetch the latest commit in the old branch, associating them locally
+# This will let us compare the old and new branch by name on the next line
+git fetch origin $old_branch:$old_branch --depth 1
 # get the names of changed files and look for go files
 # (ignoring "no matches found" errors from grep)
-gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
+# If there was no code generated, this will always return nothing (because there's no diff)
+gofiles=$(git diff $new_branch $old_branch --name-only | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
 if [[ -z $gofiles ]]; then
   echo "Skipping tests: No go files changed"
   exit 0
