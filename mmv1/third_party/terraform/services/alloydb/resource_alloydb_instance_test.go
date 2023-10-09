@@ -476,8 +476,8 @@ func TestAccAlloydbInstance_clientConnectionConfig_update(t *testing.T) {
 	t.Parallel()
 
 	suffix := acctest.RandString(t, 10)
-	networkName := 	acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-clientconnectionconfigupdate")
-	
+	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-clientconnectionconfigupdate")
+
 	context := map[string]interface{}{
 		"random_suffix":      suffix,
 		"network_name":       networkName,
