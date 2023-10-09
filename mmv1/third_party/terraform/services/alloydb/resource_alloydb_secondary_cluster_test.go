@@ -25,9 +25,10 @@ func TestAccAlloydbCluster_secondaryClusterMandatoryFields(t *testing.T) {
 				Config: testAccAlloydbCluster_secondaryClusterMandatoryFields(context),
 			},
 			{
-				ResourceName:      "google_alloydb_cluster.secondary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_cluster.secondary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels"},
 			},
 		},
 	})
@@ -348,17 +349,19 @@ func TestAccAlloydbCluster_secondaryClusterUpdate(t *testing.T) {
 				Config: testAccAlloydbCluster_secondaryClusterMandatoryFields(context),
 			},
 			{
-				ResourceName:      "google_alloydb_cluster.secondary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_cluster.secondary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterUpdate(context),
 			},
 			{
-				ResourceName:      "google_alloydb_cluster.secondary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_cluster.secondary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels"},
 			},
 		},
 	})
@@ -446,9 +449,10 @@ func TestAccAlloydbCluster_secondaryClusterAddAutomatedBackupPolicy(t *testing.T
 				Config: testAccAlloydbCluster_secondaryClusterMandatoryFields(context),
 			},
 			{
-				ResourceName:      "google_alloydb_cluster.secondary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_cluster.secondary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels"},
 			},
 			{
 				// Invalid input check - can not add automated backup policy to a secondary cluster
@@ -561,9 +565,10 @@ func TestAccAlloydbCluster_secondaryClusterUsingCMEK(t *testing.T) {
 				Config: testAccAlloydbCluster_secondaryClusterUsingCMEK(context),
 			},
 			{
-				ResourceName:      "google_alloydb_cluster.secondary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_cluster.secondary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels"},
 			},
 		},
 	})
@@ -668,9 +673,10 @@ func TestAccAlloydbCluster_secondaryClusterWithNetworkConfig(t *testing.T) {
 				Config: testAccAlloydbCluster_secondaryClusterWithNetworkConfig(context),
 			},
 			{
-				ResourceName:      "google_alloydb_cluster.secondary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_cluster.secondary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels"},
 			},
 		},
 	})
@@ -758,9 +764,10 @@ func TestAccAlloydbCluster_secondaryClusterWithNetworkConfigAndAllocatedIPRange(
 				Config: testAccAlloydbCluster_secondaryClusterWithNetworkConfigAndAllocatedIPRange(context),
 			},
 			{
-				ResourceName:      "google_alloydb_cluster.secondary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_cluster.secondary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels"},
 			},
 		},
 	})
