@@ -31,3 +31,35 @@ if backupSource != nil || continuousBackupSource != nil {
 	restoreClusterRequestBody["cluster"] = cluster
 	obj = restoreClusterRequestBody
 }
+
+
+// Read the secondary cluster config to call the api for creating secondary cluster
+
+var secondaryConfig interface{}
+var clusterType interface{}
+
+if val, ok := obj["secondaryConfig"]; ok {
+	secondaryConfig = val
+}
+
+if val, ok := obj["clusterType"]; ok {
+	clusterType = val
+}
+
+if clusterType == "SECONDARY" {
+	if secondaryConfig != nil {
+		// Use createsecondary API if this is a secondary cluster
+		url = strings.Replace(url, "clusters?clusterId", "clusters:createsecondary?cluster_id", 1)
+
+	// Validation error if secondary_config is not defined
+	} else {
+		return fmt.Errorf("Error creating cluster. Can not create secondary cluster without secondary_config field.")
+	}
+}
+
+// Validation error if secondary_config is defined but, cluster type is not secondary
+if secondaryConfig != nil {
+	if clusterType != "SECONDARY" {
+		return fmt.Errorf("Error creating cluster. Add {cluster_type: \"SECONDARY\"} if attempting to create a secondary cluster, otherwise remove the secondary_config.")
+	}
+}
