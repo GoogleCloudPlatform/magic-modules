@@ -51,7 +51,6 @@ parameters:
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "redis_cluster_ha"
-    min_version: beta
     primary_resource_id: "cluster-ha"
     vars:
       cluster_name: "ha-cluster"
