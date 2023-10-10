@@ -732,7 +732,7 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	if v, ok := d.GetOk("universe_domain"); ok {
 		if config.UniverseDomain == "" {
 			config.UniverseDomain = v.(string)
-		} else if  v.(string) != "googleapis.com" {
+		} else if  v.(string) != config.UniverseDomain {
 			fmt.Errorf("universe domain %s is already defined in the service credential file", config.UniverseDomain)
 		}
 	}
@@ -740,9 +740,6 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	// Replace hostname by the universe_domain field.
 	if config.UniverseDomain != "" && config.UniverseDomain != "googleapis.com" {
 		for key, bp := range transport_tpg.DefaultBasePaths {
-			if key == "Compute" {
-				transport_tpg.DefaultBasePaths[key] = strings.Replace(bp, "/v1", "/staging_v1", 1)
-			}
 			transport_tpg.DefaultBasePaths[key] = strings.ReplaceAll(transport_tpg.DefaultBasePaths[key], "googleapis.com", config.UniverseDomain)
 		}
 	}

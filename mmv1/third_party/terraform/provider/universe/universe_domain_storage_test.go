@@ -1,4 +1,4 @@
-package storage_test
+package universe_test
 
 import (
 	"fmt"
@@ -15,6 +15,7 @@ func TestAccUniverseDomainStorage(t *testing.T) {
 	t.Skip()
 
 	universeDomain := envvar.GetTestUniverseDomainFromEnv(t)
+	bucketName := bucketName := acctest.TestBucketName(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -22,20 +23,20 @@ func TestAccUniverseDomainStorage(t *testing.T) {
 		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccUniverseDomain_bucket(universeDomain),
+				Config: testAccUniverseDomain_bucket(universeDomain, bucketName),
 			},
 		},
 	})
 }
 
-func testAccUniverseDomain_bucket(universeDomain string) string {
+func testAccUniverseDomain_bucket(universeDomain string, bucketName string) string {
 	return fmt.Sprintf(`
 provider "google" {
   universe_domain = "%s"
 }
 	  
 resource "google_storage_bucket" "foo" {
-  name     = "storage_test_skip"
+  name     = "%s"
   location = "US"
 }
   
@@ -45,5 +46,5 @@ data "google_storage_bucket" "bar" {
 	google_storage_bucket.foo,
   ]
 }
-`, universeDomain)
+`, universeDomain, bucketName)
 }

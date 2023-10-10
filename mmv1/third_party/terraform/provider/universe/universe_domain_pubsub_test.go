@@ -1,4 +1,4 @@
-package pubsub_test
+package universe_test
 
 import (
 	"fmt"

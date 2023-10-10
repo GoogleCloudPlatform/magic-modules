@@ -1194,6 +1194,7 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 	}
 
 	log.Printf("[INFO] Authenticating using DefaultClient...")
+	log.Printf("[INFO]   -- Scopes: %s", clientScopes)
 
 	if c.UniverseDomain != "" && c.UniverseDomain != "googleapis.com" {
 		log.Printf("[INFO]   -- Sending JwtWithScope option")
@@ -1203,7 +1204,6 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 		}
 		return *creds, nil
 	}
-	log.Printf("[INFO]   -- Scopes: %s", clientScopes)
 
 	creds, err := transport.Creds(context.Background(), option.WithScopes(clientScopes...))
 	if err != nil {
