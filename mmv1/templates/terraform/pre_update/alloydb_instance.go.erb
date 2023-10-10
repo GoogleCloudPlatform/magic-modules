@@ -1,0 +1,6 @@
+// Avoid modifying instance type. No use case for this
+// Secondary instances can not be created in primary cluster and vice versa.
+// Default change is destroy before create, so modifcation from primary <-> secondary will only delete the instance with failure to create the instance.
+if d.HasChange("instance_type") {
+    return fmt.Errorf("Can not change instance type after creation.")
+}
