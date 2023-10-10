@@ -167,7 +167,7 @@ func TestAccLoggingProjectSink_updatePreservesCustomWriter(t *testing.T) {
 			{
 				Config: testAccLoggingProjectSink_customWriter(org, billingId, project, sinkName, account),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_logging_project_sink.custom_writer", "custom_writer_identity", expectedWriterIdentity),
+					resource.TestCheckResourceAttr("google_logging_project_sink.custom_writer", "writer_identity", expectedWriterIdentity),
 				),
 			},
 			{
