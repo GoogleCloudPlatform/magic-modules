@@ -72,7 +72,6 @@ examples:
       - 'oidc.0.client_secret.0.value.0.plain_text'
   - !ruby/object:Provider::Terraform::Examples
     name: 'iam_workforce_pool_provider_oidc_upload_key'
-    min_version: beta
     skip_docs: true
     primary_resource_id: 'example'
     vars:
@@ -333,7 +332,6 @@ properties:
             item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'jwksJson'
-        min_version: beta
         description: |
           OIDC JWKs in JSON String format. For details on definition of a
           JWK, see https:tools.ietf.org/html/rfc7517. If not set, then we
