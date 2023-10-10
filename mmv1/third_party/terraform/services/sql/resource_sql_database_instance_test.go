@@ -1526,6 +1526,9 @@ func TestAccSqlDatabaseInstance_Edition(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleSqlDatabaseInstance_EditionConfig_noEdition(noEditionName, enterpriseTier),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE"),
+				),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -1533,8 +1536,12 @@ func TestAccSqlDatabaseInstance_Edition(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
+			// Delete and recreate (ForceNew) triggered by passing in a new `name` value
 			{
 				Config: testGoogleSqlDatabaseInstance_EditionConfig(enterprisePlusName, enterprisePlusTier, "ENTERPRISE_PLUS"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE_PLUS"),
+				),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -1542,8 +1549,12 @@ func TestAccSqlDatabaseInstance_Edition(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
+			// Delete and recreate (ForceNew) triggered by passing in a new `name` value
 			{
 				Config: testGoogleSqlDatabaseInstance_EditionConfig(enterpriseName, enterpriseTier, "ENTERPRISE"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE"),
+				),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
