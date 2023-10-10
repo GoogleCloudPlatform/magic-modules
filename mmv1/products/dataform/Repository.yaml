@@ -36,6 +36,14 @@ examples:
       git_repository_name: 'my/repository'
       dataform_repository_name: 'dataform_repository'
       data: secret-data
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataform_repository_ssh'
+    primary_resource_id: dataform_respository
+    min_version: beta
+    vars:
+      git_repository_name: 'my/repository'
+      dataform_repository_name: 'dataform_repository'
+      data: secret-data
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
