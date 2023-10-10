@@ -1,0 +1,25 @@
+// If the SSL mode isn't specified in the update, retain the SSL mode that's already present
+if d.HasChange("client_connection_config.0.ssl_config.0.ssl_mode") {
+  old, new := d.GetChange("client_connection_config.0.ssl_config.0.ssl_mode")
+  if tpgresource.IsEmptyValue(reflect.ValueOf(new)) {
+    var c map[string]interface{}
+    if obj["clientConnectionConfig"] == nil {
+      c = make(map[string]interface{})
+    } else {
+      c = obj["clientConnectionConfig"].(map[string]interface{})
+    }
+    var s map[string]interface{}
+    if c["sslConfig"] == nil {
+      s = make(map[string]interface{})
+    } else {
+      s = c["sslConfig"].(map[string]interface{})
+    }
+    if tpgresource.IsEmptyValue(reflect.ValueOf(old)) {
+      s["sslMode"] = "ENCRYPTED_ONLY"
+    } else {
+      s["sslMode"] = old
+    }
+    c["sslConfig"] = s
+    obj["clientConnectionConfig"] = c
+  }
+}
