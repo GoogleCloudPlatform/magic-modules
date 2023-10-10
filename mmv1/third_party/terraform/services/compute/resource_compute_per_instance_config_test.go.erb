@@ -129,7 +129,6 @@ func TestAccComputePerInstanceConfig_update(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputePerInstanceConfig_statefulIps(t *testing.T) {
 	t.Parallel()
 
@@ -170,7 +169,6 @@ func TestAccComputePerInstanceConfig_statefulIps(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func testAccComputePerInstanceConfig_statefulBasic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -342,7 +340,6 @@ resource "google_compute_instance_group_manager" "igm" {
 `, context)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputePerInstanceConfig_statefulIpsBasic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
@@ -492,7 +489,6 @@ resource "google_compute_disk" "disk1" {
 }
 `, context) + testAccComputePerInstanceConfig_igm(context)
 }
-<% end -%>
 
 // Checks that the per instance config with the given name was destroyed
 func testAccCheckComputePerInstanceConfigDestroyed(t *testing.T, igmId, configName string) resource.TestCheckFunc {

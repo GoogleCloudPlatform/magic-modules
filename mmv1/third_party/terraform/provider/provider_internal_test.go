@@ -42,9 +42,12 @@ func TestProvider_ValidateCredentials(t *testing.T) {
 				return string(contents)
 			},
 		},
-		"configuring credentials as an empty string is valid": {
+		"configuring credentials as an empty string is not valid": {
 			ConfigValue: func(t *testing.T) interface{} {
 				return ""
+			},
+			ExpectedErrors: []error{
+				errors.New("expected a non-empty string"),
 			},
 		},
 		"leaving credentials unconfigured is valid": {
@@ -67,15 +70,65 @@ func TestProvider_ValidateCredentials(t *testing.T) {
 
 			// Assert
 			if len(ws) != len(tc.ExpectedWarnings) {
-				t.Errorf("Expected %d warnings, got %d: %v", len(tc.ExpectedWarnings), len(ws), ws)
+				t.Fatalf("Expected %d warnings, got %d: %v", len(tc.ExpectedWarnings), len(ws), ws)
 			}
 			if len(es) != len(tc.ExpectedErrors) {
-				t.Errorf("Expected %d errors, got %d: %v", len(tc.ExpectedErrors), len(es), es)
+				t.Fatalf("Expected %d errors, got %d: %v", len(tc.ExpectedErrors), len(es), es)
 			}
 
-			if len(tc.ExpectedErrors) > 0 {
+			if len(tc.ExpectedErrors) > 0 && len(es) > 0 {
 				if es[0].Error() != tc.ExpectedErrors[0].Error() {
-					t.Errorf("Expected first error to be \"%s\", got \"%s\"", tc.ExpectedErrors[0], es[0])
+					t.Fatalf("Expected first error to be \"%s\", got \"%s\"", tc.ExpectedErrors[0], es[0])
+				}
+			}
+		})
+	}
+}
+
+func TestProvider_ValidateEmptyStrings(t *testing.T) {
+	cases := map[string]struct {
+		ConfigValue      interface{}
+		ValueNotProvided bool
+		ExpectedWarnings []string
+		ExpectedErrors   []error
+	}{
+		"non-empty strings are valid": {
+			ConfigValue: "foobar",
+		},
+		"unconfigured values are valid": {
+			ValueNotProvided: true,
+		},
+		"empty strings are not valid": {
+			ConfigValue: "",
+			ExpectedErrors: []error{
+				errors.New("expected a non-empty string"),
+			},
+		},
+	}
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			var configValue interface{}
+			if !tc.ValueNotProvided {
+				configValue = tc.ConfigValue
+			}
+
+			// Act
+			// Note: second argument is currently unused by the function but is necessary to fulfill the SchemaValidateFunc type's function signature
+			ws, es := provider.ValidateEmptyStrings(configValue, "")
+
+			// Assert
+			if len(ws) != len(tc.ExpectedWarnings) {
+				t.Fatalf("Expected %d warnings, got %d: %v", len(tc.ExpectedWarnings), len(ws), ws)
+			}
+			if len(es) != len(tc.ExpectedErrors) {
+				t.Fatalf("Expected %d errors, got %d: %v", len(tc.ExpectedErrors), len(es), es)
+			}
+
+			if len(tc.ExpectedErrors) > 0 && len(es) > 0 {
+				if es[0].Error() != tc.ExpectedErrors[0].Error() {
+					t.Fatalf("Expected first error to be \"%s\", got \"%s\"", tc.ExpectedErrors[0], es[0])
 				}
 			}
 		})
@@ -403,7 +456,7 @@ func TestProvider_ProviderConfigure_impersonateServiceAccount(t *testing.T) {
 			ExpectedValue:    "",
 		},
 		// Handling empty strings in config
-		"when impersonate_service_account is set as an empty array the field is treated as if it's unset, without error": {
+		"when impersonate_service_account is set as an empty string the field is treated as if it's unset, without error": {
 			ConfigValues: map[string]interface{}{
 				"impersonate_service_account": "",
 				"credentials":                 transport_tpg.TestFakeCredentialsPath,
@@ -411,6 +464,16 @@ func TestProvider_ProviderConfigure_impersonateServiceAccount(t *testing.T) {
 			ExpectError:      false,
 			ExpectFieldUnset: true,
 			ExpectedValue:    "",
+		},
+		"when impersonate_service_account is set as an empty string in the config, an environment variable is used": {
+			ConfigValues: map[string]interface{}{
+				"impersonate_service_account": "",
+				"credentials":                 transport_tpg.TestFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT": "value-from-env@example.com",
+			},
+			ExpectedValue: "value-from-env@example.com",
 		},
 	}
 
@@ -1255,22 +1318,10 @@ func TestProvider_ProviderConfigure_scopes(t *testing.T) {
 		"scopes are set in the provider config as a list": {
 			ConfigValues: map[string]interface{}{
 				"credentials": transport_tpg.TestFakeCredentialsPath,
-				"scopes": []string{
-					"fizz",
-					"buzz",
-					"fizzbuzz",
-				},
+				"scopes":      []string{"fizz", "buzz", "fizzbuzz"},
 			},
-			ExpectedSchemaValue: []string{
-				"fizz",
-				"buzz",
-				"fizzbuzz",
-			},
-			ExpectedConfigValue: []string{
-				"fizz",
-				"buzz",
-				"fizzbuzz",
-			},
+			ExpectedSchemaValue: []string{"fizz", "buzz", "fizzbuzz"},
+			ExpectedConfigValue: []string{"fizz", "buzz", "fizzbuzz"},
 		},
 		"scopes can be left unset in the provider config without any issues, and a default value is used": {
 			ConfigValues: map[string]interface{}{
@@ -1389,17 +1440,17 @@ func TestProvider_ProviderConfigure_requestTimeout(t *testing.T) {
 			ExpectError:         true,
 			ExpectFieldUnset:    false,
 		},
-		// it's default value is set when RequestTimeout value is 0.
-		// This can be seen in this part of the config code where the default value is set to 120s
+		// RequestTimeout is "0s" if unset by the user, and logic elsewhere will supply a different value.
+		// This can be seen in this part of the config code where the default value is set to "120s"
 		// https://github.com/hashicorp/terraform-provider-google/blob/09cb850ee64bcd78e4457df70905530c1ed75f19/google/transport/config.go#L1228-L1233
-		"when config is unset, the value will be 0s in order to set the default value": {
+		"when request_timeout is unset in the config, the default value is 0s. (initially; this value is subsequently overwritten)": {
 			ConfigValues: map[string]interface{}{
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
 			ExpectedValue:    "0s",
 			ExpectFieldUnset: true,
 		},
-		"when value is empty, the value will be 0s in order to set the default value": {
+		"when request_timeout is set as an empty string, the default value is 0s. (initially; this value is subsequently overwritten)": {
 			ConfigValues: map[string]interface{}{
 				"request_timeout": "",
 				"credentials":     transport_tpg.TestFakeCredentialsPath,
@@ -1493,6 +1544,27 @@ func TestProvider_ProviderConfigure_requestReason(t *testing.T) {
 				// request_reason unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
+			ExpectedSchemaValue: "",
+			ExpectedConfigValue: "",
+		},
+		// Handling empty values in config
+		"when request_reason is set as an empty string in the config it is overridden by environment variables": {
+			ConfigValues: map[string]interface{}{
+				"request_reason": "",
+				"credentials":    transport_tpg.TestFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"CLOUDSDK_CORE_REQUEST_REASON": "test",
+			},
+			ExpectedSchemaValue: "test",
+			ExpectedConfigValue: "test",
+		},
+		"when request_reason is set as an empty string in the config, the field remains unset without error": {
+			ConfigValues: map[string]interface{}{
+				"request_reason": "",
+				"credentials":    transport_tpg.TestFakeCredentialsPath,
+			},
+			ExpectedSchemaValue: "",
 			ExpectedConfigValue: "",
 		},
 	}
@@ -1556,9 +1628,23 @@ func TestProvider_ProviderConfigure_batching(t *testing.T) {
 		ExpectedEnableBatchingValue bool
 		ExpectedSendAfterValue      string
 	}{
-		"if batch is an empty block, it will set the default values": {
+		"batching can be configured with values for enable_batching and send_after": {
 			ConfigValues: map[string]interface{}{
 				"credentials": transport_tpg.TestFakeCredentialsPath,
+				"batching": []interface{}{
+					map[string]interface{}{
+						"enable_batching": true,
+						"send_after":      "45s",
+					},
+				},
+			},
+			ExpectedEnableBatchingValue: true,
+			ExpectedSendAfterValue:      "45s",
+		},
+		"if batching is an empty block, it will set the default values for enable_batching and send_after": {
+			ConfigValues: map[string]interface{}{
+				"credentials": transport_tpg.TestFakeCredentialsPath,
+				// batching not set
 			},
 			// Although at the schema level it's shown that by default it's set to false, the actual default value
 			// is true and can be seen in the `ExpanderProviderBatchingConfig` struct
@@ -1567,20 +1653,7 @@ func TestProvider_ProviderConfigure_batching(t *testing.T) {
 			ExpectedSendAfterValue:      "", // uses "" value to be able to set the default value of 30s
 			ExpectFieldUnset:            true,
 		},
-		"if batch is configured with both enable_batching and send_after": {
-			ConfigValues: map[string]interface{}{
-				"credentials": transport_tpg.TestFakeCredentialsPath,
-				"batching": []interface{}{
-					map[string]interface{}{
-						"enable_batching": true,
-						"send_after":      "10s",
-					},
-				},
-			},
-			ExpectedEnableBatchingValue: true,
-			ExpectedSendAfterValue:      "10s",
-		},
-		"if batch is configured with only enable_batching": {
+		"when batching is configured with only enable_batching, send_after will be set to a default value": {
 			ConfigValues: map[string]interface{}{
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 				"batching": []interface{}{
@@ -1592,19 +1665,20 @@ func TestProvider_ProviderConfigure_batching(t *testing.T) {
 			ExpectedEnableBatchingValue: true,
 			ExpectedSendAfterValue:      "",
 		},
-		"if batch is configured with only send_after": {
+		"when batching is configured with only send_after, enable_batching will be set to a default value": {
 			ConfigValues: map[string]interface{}{
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 				"batching": []interface{}{
 					map[string]interface{}{
-						"send_after": "10s",
+						"send_after": "45s",
 					},
 				},
 			},
 			ExpectedEnableBatchingValue: false,
-			ExpectedSendAfterValue:      "10s",
+			ExpectedSendAfterValue:      "45s",
 		},
-		"if batch is configured with invalid value for send_after": {
+		// Error states
+		"if batching is configured with send_after as an invalid value, there's an error": {
 			ConfigValues: map[string]interface{}{
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 				"batching": []interface{}{
@@ -1616,7 +1690,7 @@ func TestProvider_ProviderConfigure_batching(t *testing.T) {
 			ExpectedSendAfterValue: "invalid value",
 			ExpectError:            true,
 		},
-		"if batch is configured with value without seconds (s) for send_after": {
+		"if batching is configured with send_after as number value without seconds (s), there's an error": {
 			ConfigValues: map[string]interface{}{
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 				"batching": []interface{}{
@@ -1665,10 +1739,10 @@ func TestProvider_ProviderConfigure_batching(t *testing.T) {
 				if ok {
 					val := v.(string)
 					if val != tc.ExpectedSendAfterValue {
-						t.Fatalf("expected request_timeout value set in provider data to be %v, got %v", tc.ExpectedSendAfterValue, val)
+						t.Fatalf("expected send_after value set in provider data to be %v, got %v", tc.ExpectedSendAfterValue, val)
 					}
 					if tc.ExpectFieldUnset {
-						t.Fatalf("expected request_timeout value to not be set in provider data, got %s", val)
+						t.Fatalf("expected send_after value to not be set in provider data, got %s", val)
 					}
 				}
 				// Return early in tests where errors expected

@@ -83,6 +83,18 @@ examples:
       repository_id: 'my-repository'
       description: 'example remote docker repository'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_remote_apt'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'debian-buster'
+      description: 'example remote apt repository'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_remote_yum'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'centos-8'
+      description: 'example remote yum repository'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'artifact_registry_repository_cleanup'
     min_version: beta
     primary_resource_id: 'my-repo'
@@ -131,7 +143,7 @@ properties:
     name: description
     description: |-
       The user-provided description of the repository.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels with user-defined metadata.
@@ -329,12 +341,48 @@ properties:
           The description of the remote source.
         immutable: true
       - !ruby/object:Api::Type::NestedObject
-        name: 'dockerRepository'
+        name: 'aptRepository'
         exactly_one_of:
+          - remoteRepositoryConfig.0.apt_repository
           - remoteRepositoryConfig.0.docker_repository
           - remoteRepositoryConfig.0.maven_repository
           - remoteRepositoryConfig.0.npm_repository
           - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
+        description: |-
+          Specific settings for an Apt remote repository.
+        immutable: true
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'publicRepository'
+            description: |-
+              One of the publicly available Apt repositories supported by Artifact Registry.
+            immutable: true
+            properties:
+              - !ruby/object:Api::Type::Enum
+                name: 'repositoryBase'
+                required: true
+                description: |-
+                  A common public repository base for Apt, e.g. `"debian/dists/buster"`
+                immutable: true
+                values:
+                  - :DEBIAN
+                  - :UBUNTU
+              - !ruby/object:Api::Type::String
+                name: 'repositoryPath'
+                required: true
+                description: |-
+                  Specific repository from the base.
+                immutable: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'dockerRepository'
+        exactly_one_of:
+          - remoteRepositoryConfig.0.apt_repository
+          - remoteRepositoryConfig.0.docker_repository
+          - remoteRepositoryConfig.0.maven_repository
+          - remoteRepositoryConfig.0.npm_repository
+          - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
         description: |-
           Specific settings for a Docker remote repository.
         immutable: true
@@ -352,10 +400,12 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'mavenRepository'
         exactly_one_of:
+          - remoteRepositoryConfig.0.apt_repository
           - remoteRepositoryConfig.0.docker_repository
           - remoteRepositoryConfig.0.maven_repository
           - remoteRepositoryConfig.0.npm_repository
           - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
         description: |-
           Specific settings for a Maven remote repository.
         immutable: true
@@ -373,10 +423,12 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'npmRepository'
         exactly_one_of:
+          - remoteRepositoryConfig.0.apt_repository
           - remoteRepositoryConfig.0.docker_repository
           - remoteRepositoryConfig.0.maven_repository
           - remoteRepositoryConfig.0.npm_repository
           - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
         description: |-
           Specific settings for an Npm remote repository.
         immutable: true
@@ -394,10 +446,12 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'pythonRepository'
         exactly_one_of:
+          - remoteRepositoryConfig.0.apt_repository
           - remoteRepositoryConfig.0.docker_repository
           - remoteRepositoryConfig.0.maven_repository
           - remoteRepositoryConfig.0.npm_repository
           - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
         description: |-
           Specific settings for a Python remote repository.
         immutable: true
@@ -412,6 +466,45 @@ properties:
             values:
               - :PYPI
             default_value: :PYPI
+      - !ruby/object:Api::Type::NestedObject
+        name: 'yumRepository'
+        exactly_one_of:
+          - remoteRepositoryConfig.0.apt_repository
+          - remoteRepositoryConfig.0.docker_repository
+          - remoteRepositoryConfig.0.maven_repository
+          - remoteRepositoryConfig.0.npm_repository
+          - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
+        description: |-
+          Specific settings for an Yum remote repository.
+        immutable: true
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'publicRepository'
+            description: |-
+              One of the publicly available Yum repositories supported by Artifact Registry.
+            immutable: true
+            properties:
+              - !ruby/object:Api::Type::Enum
+                name: 'repositoryBase'
+                required: true
+                description: |-
+                  A common public repository base for Yum.
+                immutable: true
+                values:
+                  - :CENTOS
+                  - :CENTOS_DEBUG
+                  - :CENTOS_VAULT
+                  - :CENTOS_STREAM
+                  - :ROCKY
+                  - :EPEL
+              - !ruby/object:Api::Type::String
+                name: 'repositoryPath'
+                required: true
+                description: |-
+                  Specific repository from the base, e.g. `"centos/8-stream/BaseOS/x86_64/os"`
+                immutable: true
+
   - !ruby/object:Api::Type::Boolean
     name: 'cleanupPolicyDryRun'
     min_version: beta

@@ -88,7 +88,7 @@ properties:
     name: 'id'
     description: 'An opaque ID uniquely identifying the table.'
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       The labels associated with this dataset. You can use these to
@@ -175,7 +175,10 @@ properties:
         name: 'expirationMs'
         description: |
           Number of milliseconds for which to keep the storage for a
-          partition.
+          partition. If unspecified when the table is created in a dataset
+          that has `defaultPartitionExpirationMs`, it will inherit
+          the value of `defaultPartitionExpirationMs` from the dataset.
+          To specify a unlimited expiration, set the value to 0.
       - !ruby/object:Api::Type::String
         name: 'field'
         description: |

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -36,6 +37,11 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 			Update: schema.DefaultTimeout(15 * time.Minute),
 			Delete: schema.DefaultTimeout(15 * time.Minute),
 		},
+
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+			tpgresource.DefaultProviderRegion,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"base_instance_name": {
@@ -380,7 +386,6 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 				},
 			},
 			<% end -%>
-			<% unless version == "ga" -%>
 			"stateful_internal_ip": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -423,7 +428,6 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
-			<% end -%>
 			"stateful_disk": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -764,14 +768,12 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	if err = d.Set("status", flattenStatus(manager.Status)); err != nil {
 		return fmt.Errorf("Error setting status in state: %s", err.Error())
 	}
-	<% unless version == "ga" -%>
 	if err = d.Set("stateful_internal_ip", flattenStatefulPolicyStatefulInternalIps(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_internal_ip in state: %s", err.Error())
 	}
 	if err = d.Set("stateful_external_ip", flattenStatefulPolicyStatefulExternalIps(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_external_ip in state: %s", err.Error())
 	}
-	<% end -%>
 	// If unset in state set to default value
 	if d.Get("wait_for_instances_status").(string) == "" {
 		if err = d.Set("wait_for_instances_status", "STABLE"); err != nil {

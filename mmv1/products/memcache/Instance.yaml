@@ -37,8 +37,6 @@ examples:
       instance_name: 'test-instance'
       network_name: 'test-network'
       address_name: 'address'
-    test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "memcache-instance-basic")'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -101,7 +99,7 @@ properties:
     name: 'discoveryEndpoint'
     description: Endpoint for Discovery API
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels to represent user-provided metadata.

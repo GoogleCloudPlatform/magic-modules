@@ -150,8 +150,19 @@ resource "google_container_aws_node_pool" "primary" {
   subnet_id = "{{aws_subnet}}"
   version   = "${data.google_container_aws_versions.versions.valid_versions[0]}"
 
+  management {
+    auto_repair = false
+  }
+
   annotations = {
     label-two = "value-two"
+  }
+
+  update_settings {
+    surge_settings {
+      max_surge = 1
+      max_unavailable = 0
+    }
   }
 
   project = "{{project}}"
