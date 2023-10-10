@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -15,7 +17,7 @@ func TestAccUniverseDomainStorage(t *testing.T) {
 	t.Skip()
 
 	universeDomain := envvar.GetTestUniverseDomainFromEnv(t)
-	bucketName := bucketName := acctest.TestBucketName(t)
+	bucketName := acctest.TestBucketName(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -47,4 +49,23 @@ data "google_storage_bucket" "bar" {
   ]
 }
 `, universeDomain, bucketName)
+}
+
+func testAccStorageBucketDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_storage_bucket" {
+				continue
+			}
+
+			_, err := config.NewStorageClient(config.UserAgent).Buckets.Get(rs.Primary.ID).Do()
+			if err == nil {
+				return fmt.Errorf("Bucket still exists")
+			}
+		}
+
+		return nil
+	}
 }

@@ -46,8 +46,8 @@
 <% end -%>
 
 <%
-  Dir["third_party/terraform/provider/*.go"].each do |file_path|
-    fname = file_path.split('/')[-1]
+  Dir["third_party/terraform/provider/**/*.go"].each do |file_path|
+    fname = file_path.delete_prefix("third_party/terraform/provider")
 -%>
 '<%= dir -%>/provider/<%= fname -%>': 'third_party/terraform/provider/<%= fname -%>'
 <% end -%>
