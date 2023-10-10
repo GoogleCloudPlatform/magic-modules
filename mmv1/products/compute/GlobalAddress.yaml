@@ -58,6 +58,7 @@ examples:
       network_name: 'my-network-name'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
+  pre_create: templates/terraform/pre_create/compute_global_address.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'address'

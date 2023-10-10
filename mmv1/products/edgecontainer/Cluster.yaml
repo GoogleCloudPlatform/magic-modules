@@ -90,9 +90,8 @@ properties:
     description: |
       The time the cluster was last updated, in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: "labels"
-    default_from_api: true
     description: "User-defined labels for the edgecloud cluster."
   - !ruby/object:Api::Type::NestedObject
     name: "fleet"
