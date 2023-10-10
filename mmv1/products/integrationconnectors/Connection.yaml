@@ -1,0 +1,241 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+!ruby/object:Api::Resource
+name: "Connection"
+description: |
+  An Integration connectors Connection.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    "Official Documentation": "https://cloud.google.com/integration-connectors/docs/createconnection"
+  api: "https://cloud.google.com/integration-connectors/docs/reference/rest/v1/projects.locations.connections"
+base_url: projects/{{project}}/locations/{{location}}/connections
+self_link: projects/{{project}}/locations/{{location}}/connections/{{name}}
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+create_url: projects/{{project}}/locations/{{region}}/connections?connectionId={{name}}
+update_verb: :PATCH
+update_mask: true
+autogen_async: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: "name"
+    base_url: "{{op_id}}"
+    wait_ms: 1000
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 50
+      update_minutes: 30
+      delete_minutes: 30
+  result: !ruby/object:Api::OpAsync::Result
+    path: "response"
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: "done"
+    complete: true
+    allowed:
+      - "true"
+      - "false"
+  error: !ruby/object:Api::OpAsync::Error
+    path: "error"
+    message: "message"
+
+parameters:
+  - !ruby/object:Api::Type::String
+    name: "location"
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      Location in which Connection needs to be created.
+
+properties:
+  - !ruby/object:Api::Type::String
+    name: "name"
+    description: |
+      Name of the connection resource.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: "region"
+    description: |
+      The region of the Connection.
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: "description"
+    description: |
+      An arbitrary description for the Conection.
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: "labels"
+    description: |
+      Resource labels to represent user provided metadata.
+  - !ruby/object:Api::Type::String
+    name: "connectorVersion"
+    description: |
+      connectorVersion.
+  - !ruby/object:Api::Type::NestedObject
+    name: "status"
+    description: |
+      Status of the Integration Connector.
+    output: true
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: "state"
+        description: |
+          State of the Integration Connector
+        default_value: :STATE_UNSPECIFIED
+        values:
+          - :STATE_UNSPECIFIED
+          - :CREATING
+          - :ACTIVE
+          - :INACTIVE
+          - :DELETING
+          - ;UPDATING
+          - :ERROR
+          - :AUTHORIZATION_REQUIRED
+  - !ruby/object:Api::Type::NestedObject
+    name: "configVariables"
+    description: |
+      Config Variables for the connection.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "key"
+        description: |
+          Key for the connection
+  - !ruby/object:Api::Type::NestedObject
+    name: "authConfig"
+    description: |
+      authConfig for the connection.
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: "authType"
+        description: |
+          authType of the Connection
+        values:
+          - AUTH_TYPE_UNSPECIFIED
+          - USER_PASSWORD
+          - OAUTH2_JWT_BEARER
+          - OAUTH2_CLIENT_CREDENTIALS
+          - SSH_PUBLIC_KEY
+          - OAUTH2_AUTH_CODE_FLOW
+      - !ruby/object:Api::Type::NestedObject
+        name: "userPassword"
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "username"
+            description: |
+              Username for Authentication.
+          - !ruby/object:Api::Type::NestedObject
+            name: "password"
+            description: |
+              Password for Authentication.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: "secretVersion"
+                description: |
+                  Secret version of Password for Authentication.
+  - !ruby/object:Api::Type::String
+    name: "serviceAccount"
+    description: |
+      Service Account that will be used.
+  - !ruby/object:Api::Type::String
+    name: "serviceDirectory"
+    description: |
+      Service Directory that will be used.
+  - !ruby/object:Api::Type::NestedObject
+    name: "destinationConfig"
+    description: |
+      DestinationConfig for the connection.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "key"
+        description: |
+          Key for the connection
+      - !ruby/object:Api::Type::Array
+        name: "destinations"
+        description: |
+          destinations for the connection
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Integer
+              name: "port"
+              description: |
+                port number
+            - !ruby/object:Api::Type::String
+              name: "serviceAttachment"
+              description: |
+                Service Attachment
+            - !ruby/object:Api::Type::String
+              name: "host"
+              description: |
+                Host
+  - !ruby/object:Api::Type::NestedObject
+    name: "nodeConfig"
+    description: |
+      Node configuration for the connection.
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: "minNodeCount"
+        description: |
+          minNodeCount for the node
+      - !ruby/object:Api::Type::Integer
+        name: "maxNodeCount"
+        description: |
+          maxNodeCount for the node
+  - !ruby/object:Api::Type::NestedObject
+    name: "eventingConfig"
+    description: |
+      Eventing Configuration of a connection
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: "registrationDestinationConfig"
+        description: |
+          registrationDestinationConfig
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: "destinationConfig"
+            description: |
+              DestinationConfig for the connection.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: "key"
+                description: |
+                  Key for the connection
+              - !ruby/object:Api::Type::Array
+                name: "destinations"
+                description: |
+                  destinations for the connection
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: "port"
+                      description: |
+                        port number
+                    - !ruby/object:Api::Type::String
+                      name: "serviceAttachment"
+                      description: |
+                        Service Attachment
+                    - !ruby/object:Api::Type::String
+                      name: "host"
+                      description: |
+                        Host
+  - !ruby/object:Api::Type::Enum
+    name: "eventingEnablementType"
+    description: |
+      Eventing Enablement Type enum.
+    values:
+      - EVENTING_ENABLEMENT_TYPE_UNSPECIFIED
+      - EVENTING_AND_CONNECTION
+      - ONLY_EVENTING
