@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
-<% if version != 'ga' -%>
+<% unless version == 'ga' -%>
 	"strings"
 <% end -%>
 
@@ -786,7 +786,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 
 		<% if version == 'ga' -%>
 		op, err := client.SecurityPolicies.Patch(project, sp, securityPolicy).Do()
-		<% elsif version == 'beta' -%>
+		<% else -%>
 		op, err := client.SecurityPolicies.Patch(project, sp, securityPolicy).UpdateMask(strings.Join(updateMask, ",")).Do()
 		<% end -%>
 
