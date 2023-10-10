@@ -19,14 +19,17 @@ resource "google_secret_manager_secret_version" "secret_version" {
   secret_data = "<%= ctx[:vars]['data'] %>"
 }
 
-resource "google_dataform_repository" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dataform_repository" "<%= ctx[:primary_resource_id] %>_git_ssh_connection" {
   provider = google-beta
   name = "<%= ctx[:vars]['dataform_repository_name'] %>"
 
   git_remote_settings {
       url = google_sourcerepo_repository.git_repository.url
       default_branch = "main"
-      authentication_token_secret_version = google_secret_manager_secret_version.secret_version.id
+      ssh_authentication_config {
+        user_private_key_secret_version = google_secret_manager_secret_version.secret_version.id
+        host_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAklOUpkDHrfHY17SbrmTIpNLTGK9Tjom/BWDSU"
+      }
   }
 
   workspace_compilation_overrides {
@@ -34,4 +37,6 @@ resource "google_dataform_repository" "<%= ctx[:primary_resource_id] %>" {
     schema_suffix = "_suffix"
     table_prefix = "prefix_"
   }
+
+  service_account = "1234567890-compute@developer.gserviceaccount.com"
 }
