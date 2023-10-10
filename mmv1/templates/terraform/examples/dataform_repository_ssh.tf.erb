@@ -19,7 +19,7 @@ resource "google_secret_manager_secret_version" "secret_version" {
   secret_data = "<%= ctx[:vars]['data'] %>"
 }
 
-resource "google_dataform_repository" "<%= ctx[:primary_resource_id] %>_git_ssh_connection" {
+resource "google_dataform_repository" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   name = "<%= ctx[:vars]['dataform_repository_name'] %>"
 
