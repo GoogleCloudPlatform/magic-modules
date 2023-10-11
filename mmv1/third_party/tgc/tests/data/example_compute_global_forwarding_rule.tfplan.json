@@ -48,7 +48,8 @@
           "port_range": "80",
           "target": "target-id",
           "timeouts": null,
-          "project": "{{.Provider.project}}"
+          "project": "{{.Provider.project}}",
+          "no_automate_dns_zone": false
         },
         "after_unknown": {
           "id": true,

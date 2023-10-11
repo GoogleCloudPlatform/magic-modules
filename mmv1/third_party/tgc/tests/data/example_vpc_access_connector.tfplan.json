@@ -44,7 +44,8 @@
                     "network": "default",
                     "region": "us-central1",
                     "timeouts": null,
-                    "project": "{{.Provider.project}}"
+                    "project": "{{.Provider.project}}",
+                    "machine_type": "e2-micro"
                 },
                 "after_unknown": {
                     "id": true,
