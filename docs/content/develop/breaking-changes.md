@@ -48,6 +48,7 @@ For more information, see
     * Changing resource deletion to skip deleting the resource by default if delete was previously called
     * Changing resource deletion to specify a force flag
   * Adding a new field with a default different from the API default
+    * If an API default is expected to change- a breaking change for the API- use `default_from_api` which will avoid sending a value and safely take the server default in Terraform
 
 ## Field-level breaking changes
 
