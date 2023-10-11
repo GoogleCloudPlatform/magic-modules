@@ -64,7 +64,7 @@ parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'cluster'
     description: |
-      Identifies the alloydb cluster. Must be in the format
+      Identifies the alloydb cluster. Must be in the format meep
       'projects/{project}/locations/{location}/clusters/{cluster_id}'
     required: true
     immutable: true
