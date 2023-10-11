@@ -582,6 +582,8 @@ cluster_config {
 * `image_uri` (Optional) The URI for the image to use for this worker.  See [the guide](https://cloud.google.com/dataproc/docs/guides/dataproc-images)
     for more information.
 
+* `min_num_instances` (Optional) The minimum number of primary worker instances to create.  If `min_num_instances` is set, cluster creation will succeed if the number of primary workers created is at least equal to the `min_num_instances` number.
+
 * `accelerators` (Optional) The Compute Engine accelerator configuration for these instances. Can be specified multiple times.
 
     * `accelerator_type` - (Required) The short name of the accelerator type to expose to this instance. For example, `nvidia-tesla-k80`.
