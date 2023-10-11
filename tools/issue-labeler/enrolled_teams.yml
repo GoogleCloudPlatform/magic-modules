@@ -1,9 +1,22 @@
 service/accesscontextmanager:
   resources:
   - google_access_context_manager_.*
+service/aiplatform-dataset:
+  resources:
+  - google_vertex_ai_dataset
+service/aiplatform-featurestore:
+  resources:
+  - google_vertex_ai_featurestore.*
 service/aiplatform-metadata:
   resources:
   - google_vertex_ai_metadata_store
+service/aiplatform-prediction:
+  resources:
+  - google_vertex_ai_endpoint
+  - google_ml_engine_model
+service/aiplatform-tensorboard:
+  resources:
+  - google_vertex_ai_tensorboard
 service/alloydb:
   resources:
   - google_alloydb_.*
@@ -75,6 +88,9 @@ service/cloudresourcemanager-crm:
   - google_organization
   - google_organization_iam_.*
   - google_resource_manager_lien
+service/cloudresourcemanager-tags:
+  resources:
+  - google_tags_.*
 service/cloudscheduler:
   resources:
   - google_cloud_scheduler_.*
@@ -90,6 +106,13 @@ service/compute-interconnect:
 service/compute-nat:
   resources:
   - google_compute_router_nat
+service/compute-pd:
+  resources:
+  - google_compute_disk.*
+  - google_compute_region_disk.*
+  - google_compute_image.*
+  - google_compute_snapshot.*
+  - google_compute_machine_image.*
 service/compute-regional-l7-load-balancer:
   resources:
   - google_compute_region_target_http_proxy
@@ -114,9 +137,16 @@ service/containeranalysis:
 service/datacatalog:
   resources:
   - google_data_catalog_.*
+service/dataflow:
+  resources:
+  - google_dataflow_.*
+  - google_data_pipeline_pipeline
 service/dataform:
   resources:
   - google_dataform_.*
+service/datamigration:
+  resources:
+  - google_database_migration_service_.*
 service/dataproc:
   resources:
   - google_dataproc_cluster
@@ -259,13 +289,31 @@ service/monitoring-uptime:
   - google_monitoring_uptime_.*
 service/network-security:
   resources:
-  - google_network_security_.*
+  - google_network_security_authorization_policy
+  - google_network_security_client_tls_policy
+  - google_network_security_gateway_security_policy
+  - google_network_security_gateway_security_policy_rule
+  - google_network_security_server_tls_policy
+  - google_network_security_tls_inspection_policy
+  - google_network_security_url_lists
+service/network-security-distributed-firewall:
+  resources:
+  - google_network_security_address_group
+  - google_compute_firewall.*
+  - google_compute_network_firewall_policy.*
+  - google_compute_region_network_firewall_policy.*
+service/networkmanagement-connectivity-test:
+  resources:
+  - google_network_management_connectivity_test
 service/notebooks:
   resources:
   - google_notebooks_.*
 service/orgpolicy:
   resources:
+  - google_folder_organization_policy
   - google_org_policy_.*
+  - google_organization_policy
+  - google_project_organization_policy
 service/osconfig:
   resources:
   - google_os_config_.*
@@ -299,6 +347,9 @@ service/run:
 service/secretmanager:
   resources:
   - google_secret_manager_.*
+service/servicedirectory:
+  resources:
+  - google_service_directory_.*
 service/serviceusage-quota:
   resources:
   - google_service_usage_consumer_quota_override
@@ -313,15 +364,7 @@ service/sqladmin:
   - google_sql_.*
 service/storage:
   resources:
-  - google_storage_bucket.*
-  - google_storage_default_object_.*
-  - google_storage_hmac_key
-  - google_storage_notification
-  - google_storage_object_.*
-  - google_storage_project_service_account
-  - google_storage_transfer_agent_pool
-  - google_storage_transfer_job
-  - google_storage_transfer_project_service_account
+  - google_storage_.*
 service/vmwareengine:
   resources:
   - google_vmwareengine_network

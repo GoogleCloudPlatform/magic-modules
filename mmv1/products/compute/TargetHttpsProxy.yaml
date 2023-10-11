@@ -43,6 +43,9 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/compute_target_https_proxy.go.erb
+  decoder: templates/terraform/decoders/compute_target_https_proxy.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'target_https_proxy_basic'
@@ -74,6 +77,14 @@ examples:
       http_health_check_name: 'http-health-check'
       server_tls_policy_name: 'my-tls-policy'
       trust_config_name: 'my-trust-config'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'target_https_proxy_certificate_manager_certificate'
+    primary_resource_id: 'default'
+    vars:
+      target_https_proxy_name: 'target-http-proxy'
+      certificate_manager_certificate_name: 'my-certificate'
+      url_map_name: 'url-map'
+      backend_service_name: 'backend-service'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -116,18 +127,35 @@ properties:
     default_value: :NONE
     custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   - !ruby/object:Api::Type::Array
+    name: 'certificateManagerCertificates'
+    description: |
+      URLs to certificate manager certificate resources that are used to authenticate connections between users and the load balancer.
+      Currently, you may specify up to 15 certificates. Certificate manager certificates do not apply when the load balancing scheme is set to INTERNAL_SELF_MANAGED.
+      sslCertificates and certificateManagerCertificates fields can not be defined together.
+      Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificates/{resourceName}` or just the self_link `projects/{project}/locations/{location}/certificates/{resourceName}`
+    update_verb: :POST
+    update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setSslCertificates'
+    item_type: Api::Type::String
+    custom_expand: 'templates/terraform/custom_expand/certificate_manager_certificate_construct_full_url.go.erb'
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    conflicts:
+      - ssl_certificates
+  - !ruby/object:Api::Type::Array
     name: 'sslCertificates'
     description: |
-      A list of SslCertificate resource URLs or Certificate Manager certificate URLs that are used to authenticate
-      connections between users and the load balancer. At least one resource must be specified.
+      URLs to SslCertificate resources that are used to authenticate connections between users and the load balancer.
+      Currently, you may specify up to 15 SSL certificates. sslCertificates do not apply when the load balancing scheme is set to INTERNAL_SELF_MANAGED.
+      sslCertificates and certificateManagerCertificates can not be defined together.
     update_verb: :POST
     update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setSslCertificates'
     item_type: !ruby/object:Api::Type::ResourceRef
       name: 'sslCertificate'
       resource: 'SslCertificate'
       imports: 'selfLink'
-      description: 'The SSL certificate URL or Certificate Manager certificate resource URL used by this TargetHttpsProxy'
+      description: 'The SSL certificate URL used by this TargetHttpsProxy'
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+    conflicts:
+      - certificate_manager_certificates
   - !ruby/object:Api::Type::String
     name: 'certificateMap'
     description: |
