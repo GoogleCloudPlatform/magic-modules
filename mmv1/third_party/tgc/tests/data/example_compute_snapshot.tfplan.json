@@ -105,7 +105,8 @@
           "terraform_labels": null,
           "timeouts": null,
           "type": "pd-ssd",
-          "zone": "us-central1-a"
+          "zone": "us-central1-a",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "creation_timestamp": true,
@@ -115,7 +116,6 @@
           "last_attach_timestamp": true,
           "last_detach_timestamp": true,
           "physical_block_size_bytes": true,
-          "project": true,
           "self_link": true,
           "source_image_encryption_key": [],
           "source_image_id": true,
@@ -162,7 +162,8 @@
             "test-name": "test-value"
           },
           "timeouts": null,
-          "zone": "us-central1-a"
+          "zone": "us-central1-a",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "creation_timestamp": true,
@@ -172,7 +173,6 @@
           "label_fingerprint": true,
           "labels": {},
           "licenses": true,
-          "project": true,
           "self_link": true,
           "snapshot_encryption_key": [],
           "snapshot_id": true,

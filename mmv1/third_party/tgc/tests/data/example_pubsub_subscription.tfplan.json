@@ -123,7 +123,8 @@
             "test-label2": "test-value2"
           },
           "timeouts": null,
-          "topic": "example-pubsub-topic"
+          "topic": "example-pubsub-topic",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "dead_letter_policy": [],
@@ -134,7 +135,6 @@
           "id": true,
           "labels": {},
           "path": true,
-          "project": true,
           "push_config": [],
           "retry_policy": [
             {
@@ -182,7 +182,8 @@
             "test-label2": "test-value2"
           },
           "timeouts": null,
-          "topic": "example-pubsub-topic"
+          "topic": "example-pubsub-topic",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "dead_letter_policy": [],
@@ -191,7 +192,6 @@
           "id": true,
           "labels": {},
           "path": true,
-          "project": true,
           "push_config": [
             {
               "oidc_token": []

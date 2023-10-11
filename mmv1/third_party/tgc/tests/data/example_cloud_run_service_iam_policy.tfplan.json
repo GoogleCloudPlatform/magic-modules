@@ -133,12 +133,12 @@
               "percent": 100,
               "revision_name": null
             }
-          ]
+          ],
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "id": true,
           "metadata": true,
-          "project": true,
           "status": true,
           "template": [
             {
@@ -209,12 +209,12 @@
         "after": {
           "location": "us-central1",
           "policy_data": "{\"bindings\":[{\"members\":[\"user:jane@example.com\"],\"role\":\"roles/editor\"}]}",
-          "service": "cloudrun-srv"
+          "service": "cloudrun-srv",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "etag": true,
-          "id": true,
-          "project": true
+          "id": true
         },
         "before_sensitive": false,
         "after_sensitive": {}

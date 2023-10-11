@@ -75,7 +75,8 @@
             }
           ],
           "tier": "BASIC_SSD",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "create_time": true,
@@ -95,7 +96,6 @@
               "reserved_ip_range": true
             }
           ],
-          "project": true,
           "zone": true
         }
       }
