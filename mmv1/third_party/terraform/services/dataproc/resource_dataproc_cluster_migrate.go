@@ -857,7 +857,7 @@ func resourceDataprocClusterResourceV0() *schema.Resource {
 										Type:     schema.TypeInt,
 										Optional: true,
 										Computed: true,
-										ForceNew: true,
+										ForceNew: false,
 										AtLeastOneOf: []string{
 											"cluster_config.0.worker_config.0.num_instances",
 											"cluster_config.0.worker_config.0.image_uri",
