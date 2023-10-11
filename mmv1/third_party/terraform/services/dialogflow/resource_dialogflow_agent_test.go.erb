@@ -47,7 +47,6 @@ func TestAccDialogflowAgent_update(t *testing.T) {
 func testAccDialogflowAgent_full1(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_dialogflow_agent" "foobar" {
-		project = google_project.agent_project.project_id
 		display_name = "tf-test-%{random_suffix}"
 		default_language_code = "en"
 		supported_language_codes = ["fr","de","es"]
@@ -66,7 +65,6 @@ func testAccDialogflowAgent_full1(context map[string]interface{}) string {
 func testAccDialogflowAgent_full2(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_dialogflow_agent" "foobar" {
-		project = google_project.agent_project.project_id
 		display_name = "tf-test-%{random_suffix}update"
 		default_language_code = "en"
 		supported_language_codes = ["no"]

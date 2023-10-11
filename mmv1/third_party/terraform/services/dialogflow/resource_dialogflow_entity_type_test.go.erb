@@ -46,7 +46,6 @@ func TestAccDialogflowEntityType_update(t *testing.T) {
 func testAccDialogflowEntityType_full1(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_dialogflow_agent" "agent" {
-		project = google_project.agent_project.project_id
 		display_name = "tf-test-agent-%{random_suffix}"
 		default_language_code = "en"
 		time_zone = "America/New_York"
@@ -54,7 +53,6 @@ func testAccDialogflowEntityType_full1(context map[string]interface{}) string {
 	
 	resource "google_dialogflow_entity_type" "foobar" {
 		depends_on = [google_dialogflow_agent.agent]
-		project = google_project.agent_project.project_id
 		display_name = "tf-test-entity-%{random_suffix}"
 		kind = "KIND_MAP"
 		enable_fuzzy_extraction = true
@@ -73,7 +71,6 @@ func testAccDialogflowEntityType_full1(context map[string]interface{}) string {
 func testAccDialogflowEntityType_full2(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_dialogflow_agent" "agent" {
-		project = google_project.agent_project.project_id
 		display_name = "tf-test-agent-%{random_suffix}"
 		default_language_code = "en"
 		time_zone = "America/New_York"
@@ -81,7 +78,6 @@ func testAccDialogflowEntityType_full2(context map[string]interface{}) string {
 	
 	resource "google_dialogflow_entity_type" "foobar" {
 		depends_on = [google_dialogflow_agent.agent]
-		project = google_project.agent_project.project_id
 		display_name = "tf-test-entity2-%{random_suffix}"
 		kind = "KIND_LIST"
 		enable_fuzzy_extraction = false
