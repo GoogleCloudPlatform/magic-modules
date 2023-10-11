@@ -23,7 +23,7 @@ func ChooseReviewers(firstRequestedReviewer string, previouslyInvolvedReviewers 
 	}
 
 	for _, reviewer := range previouslyInvolvedReviewers {
-		if isTeamReviewer(reviewer) {
+		if IsTeamReviewer(reviewer) {
 			hasPrimaryReviewer = true
 			reviewersToRequest = append(reviewersToRequest, reviewer)
 		}
@@ -43,7 +43,7 @@ func FormatReviewerComment(newPrimaryReviewer string, authorUserType UserType, t
 		panic(fmt.Sprintf("Unable to parse REVIEWER_ASSIGNMENT_COMMENT.md: %s", err))
 	}
 	sb := new(strings.Builder)
-	tmpl.Execute(sb, map[string]interface{}{
+	tmpl.Execute(sb, map[string]any{
 		"reviewer":       newPrimaryReviewer,
 		"authorUserType": authorUserType.String(),
 		"trusted":        trusted,

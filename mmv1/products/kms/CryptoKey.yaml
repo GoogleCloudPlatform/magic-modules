@@ -80,7 +80,7 @@ properties:
     immutable: true
     url_param_only: true
     ignore_read: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels with user-defined metadata to apply to this resource.

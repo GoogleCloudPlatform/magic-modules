@@ -153,6 +153,10 @@ func TestNewConfigUserAgent(t *testing.T) {
 }
 
 func TestNewConfigUserAgent_nilClientUsesDefault(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode.")
+		return
+	}
 	ctx := context.Background()
 	offline := false
 	cfg, err := NewConfig(ctx, "project", "", "", offline, "", nil)
@@ -164,6 +168,10 @@ func TestNewConfigUserAgent_nilClientUsesDefault(t *testing.T) {
 }
 
 func TestNewConfigUserAgent_usesPassedClient(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode.")
+		return
+	}
 	ctx := context.Background()
 	offline := false
 	client := &http.Client{}

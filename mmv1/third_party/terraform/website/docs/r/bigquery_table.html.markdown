@@ -106,13 +106,25 @@ The following arguments are supported:
 
 * `friendly_name` - (Optional) A descriptive name for the table.
 
-* `max_staleness`: (Optional) The maximum staleness of data that could be returned when the table (or stale MV) is queried. Staleness encoded as a string encoding of sql IntervalValue type.
+* `max_staleness`: (Optional) The maximum staleness of data that could be
+  returned when the table (or stale MV) is queried. Staleness encoded as a
+  string encoding of [SQL IntervalValue
+  type](https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types#interval_type).
 
 * `encryption_configuration` - (Optional) Specifies how the table should be encrypted.
     If left blank, the table will be encrypted with a Google-managed key; that process
     is transparent to the user.  Structure is [documented below](#nested_encryption_configuration).
 
 * `labels` - (Optional) A mapping of labels to assign to the resource.
+
+    **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+    Please refer to the field 'effective_labels' for all of the labels present on the resource.
+
+* `terraform_labels` -
+  The combination of labels configured directly on the resource and default labels configured on the provider.
+
+* `effective_labels` -
+  All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 
 * <a name="schema"></a>`schema` - (Optional) A JSON schema for the table.
 
@@ -443,7 +455,22 @@ exported:
 
 ## Import
 
-BigQuery tables imported using any of these accepted formats:
+BigQuery tables can be imported using any of these accepted formats:
+
+* `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}`
+* `{{project}}/{{dataset_id}}/{{table_id}}`
+* `{{dataset_id}}/{{table_id}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import BigQuery tables using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}"
+  to = google_bigquery_table.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), BigQuery tables can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_bigquery_table.default projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}

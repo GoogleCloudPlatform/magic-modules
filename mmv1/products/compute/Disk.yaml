@@ -290,7 +290,7 @@ properties:
     name: 'lastDetachTimestamp'
     description: 'Last detach timestamp in RFC3339 text format.'
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels to apply to this disk.  A list of key->value pairs.

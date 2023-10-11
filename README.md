@@ -3,7 +3,7 @@
 # Magic Modules
 
 Magic Modules is a code generator and CI system that's used to develop the Terraform providers
-for Google Platform, [`google`](https://github.com/hashicorp/terraform-provider-google) (or TPG) and
+for Google Cloud Platform, [`google`](https://github.com/hashicorp/terraform-provider-google) (or TPG) and
 [`google-beta`](https://github.com/hashicorp/terraform-provider-google-beta) (or TPGB).
 
 Magic Modules allows contributors to make changes against a single codebase and develop both

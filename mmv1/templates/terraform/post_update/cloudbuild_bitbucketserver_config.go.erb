@@ -21,7 +21,7 @@ if d.HasChange("connected_repositories") {
 	for _, repo := range removeRepos {
 		obj := make(map[string]interface{})
 		obj["connectedRepository"] = repo
-		res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config: config,
 			Method: "POST",
 			Project: billingProject,
@@ -61,7 +61,7 @@ if d.HasChange("connected_repositories") {
 			return err
 		}
 
-		res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config: config,
 			Method: "POST",
 			Project: billingProject,

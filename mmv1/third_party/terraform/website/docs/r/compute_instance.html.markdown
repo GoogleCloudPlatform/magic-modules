@@ -15,13 +15,13 @@ and
 
 ```hcl
 resource "google_service_account" "default" {
-  account_id   = "service_account_id"
-  display_name = "Service Account"
+  account_id   = "my-custom-sa"
+  display_name = "Custom SA for VM Instance"
 }
 
 resource "google_compute_instance" "default" {
-  name         = "test"
-  machine_type = "e2-medium"
+  name         = "my-instance"
+  machine_type = "n2-standard-2"
   zone         = "us-central1-a"
 
   tags = ["foo", "bar"]
@@ -37,7 +37,7 @@ resource "google_compute_instance" "default" {
 
   // Local SSD disk
   scratch_disk {
-    interface = "SCSI"
+    interface = "NVME"
   }
 
   network_interface {
@@ -73,9 +73,9 @@ The following arguments are supported:
 
     **Note:** If you want to update this value (resize the VM) after initial creation, you must set [`allow_stopping_for_update`](#allow_stopping_for_update) to `true`.
 
-    [Custom machine types][custom-vm-types] can be formatted as `custom-NUMBER_OF_CPUS-AMOUNT_OF_MEMORY_MB`, e.g. `custom-6-20480` for 6 vCPU and 20GB of RAM.
+    [Custom machine types](https://cloud.google.com/dataproc/docs/concepts/compute/custom-machine-types) can be formatted as `custom-NUMBER_OF_CPUS-AMOUNT_OF_MEMORY_MB`, e.g. `custom-6-20480` for 6 vCPU and 20GB of RAM.
 
-    There is a limit of 6.5 GB per CPU unless you add [extended memory][extended-custom-vm-type]. You must do this explicitly by adding the suffix `-ext`, e.g. `custom-2-15360-ext` for 2 vCPU and 15 GB of memory.
+    There is a limit of 6.5 GB per CPU unless you add [extended memory](https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#extendedmemory). You must do this explicitly by adding the suffix `-ext`, e.g. `custom-2-15360-ext` for 2 vCPU and 15 GB of memory.
 
 * `name` - (Required) A unique name for the resource, required by GCE.
     Changing this forces a new resource to be created.
@@ -117,6 +117,14 @@ The following arguments are supported:
     For more details about this behavior, see [this section](https://www.terraform.io/docs/configuration/attr-as-blocks.html#defining-a-fixed-object-collection-value).
 
 * `labels` - (Optional) A map of key/value label pairs to assign to the instance.
+    **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+	Please refer to the field 'effective_labels' for all of the labels present on the resource.
+
+* `terraform_labels` -
+  The combination of labels configured directly on the resource and default labels configured on the provider.
+
+* `effective_labels` -
+  All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 
 * `metadata` - (Optional) Metadata key/value pairs to make available from
     within the instance. Ssh keys attached in the Cloud Console will be removed.
@@ -236,7 +244,7 @@ is desired, you will need to modify your state file manually using
     For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
     These images can be referred by family name here.
 
-* `labels` - (Optional) A set of key/value label pairs assigned to the disk. This  
+* `labels` - (Optional) A set of key/value label pairs assigned to the disk. This
     field is only applicable for persistent disks.
 
 * `resource_manager_tags` - (Optional) A tag is a key-value pair that can be attached to a Google Cloud resource. You can use tags to conditionally allow or deny policies based on whether a resource has a specific tag. This value is not returned by the API. In Terraform, this value cannot be updated and changing it will recreate the resource.
@@ -285,6 +293,7 @@ is desired, you will need to modify your state file manually using
     network is in auto subnet mode, specifying the subnetwork is optional. If the network is
     in custom subnet mode, specifying the subnetwork is required.
 
+
 *  `subnetwork_project` - (Optional) The project in which the subnetwork belongs.
    If the `subnetwork` is a self_link, this field is ignored in favor of the project
    defined in the subnetwork self_link. If the `subnetwork` is a name and this
@@ -306,6 +315,8 @@ is desired, you will need to modify your state file manually using
 
 * `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET.
 
+* `network_attachment` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The URL of the network attachment that this interface should connect to in the following format: `projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}`.
+
 * `stack_type` - (Optional) The stack type for this network interface to identify whether the IPv6 feature is enabled or not. Values are IPV4_IPV6 or IPV4_ONLY. If not specified, IPV4_ONLY will be used.
 
 * `ipv6_access_config` - (Optional) An array of IPv6 access configurations for this interface.
@@ -314,6 +325,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `queue_count` - (Optional) The networking queue count that's specified by users for the network interface. Both Rx and Tx queues will be set to this number. It will be empty if not specified.
 
+* `security_policy` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.
 
 <a name="nested_access_config"></a>The `access_config` block supports:
 
@@ -325,20 +337,20 @@ specified, then this instance will have no external IPv6 Internet access. Struct
     See [the docs](https://cloud.google.com/compute/docs/instances/create-ptr-record) for how
     to become verified as a domain owner.
 
-* `network_tier` - (Optional) The [networking tier][network-tier] used for configuring this instance.
+* `network_tier` - (Optional) The [networking tier](https://cloud.google.com/network-tiers/docs/overview) used for configuring this instance.
     This field can take the following values: PREMIUM, FIXED_STANDARD or STANDARD. If this field is
     not specified, it is assumed to be PREMIUM.
 
 <a name="nested_ipv6_access_config"></a>The `ipv6_access_config` block supports:
 
-* `external_ipv6` - (Optional) The first IPv6 address of the external IPv6 range associated 
-    with this instance, prefix length is stored in externalIpv6PrefixLength in ipv6AccessConfig. 
-    To use a static external IP address, it must be unused and in the same region as the instance's zone. 
+* `external_ipv6` - (Optional) The first IPv6 address of the external IPv6 range associated
+    with this instance, prefix length is stored in externalIpv6PrefixLength in ipv6AccessConfig.
+    To use a static external IP address, it must be unused and in the same region as the instance's zone.
     If not specified, Google Cloud will automatically assign an external IPv6 address from the instance's subnetwork.
 
 * `external_ipv6_prefix_length` - (Optional) The prefix length of the external IPv6 range.
 
-* `name` - (Optional) The name of this access configuration. In ipv6AccessConfigs, the recommended name 
+* `name` - (Optional) The name of this access configuration. In ipv6AccessConfigs, the recommended name
     is "External IPv6".
 
 * `network_tier` - (Optional) The service-level to be provided for IPv6 traffic when the
@@ -390,12 +402,12 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `min_node_cpus` - (Optional) The minimum number of virtual CPUs this instance will consume when running on a sole-tenant node.
 
-* `provisioning_model` - (Optional) Describe the type of preemptible VM. This field accepts the value `STANDARD` or `SPOT`. If the value is `STANDARD`, there will be no discount. If this   is set to `SPOT`, 
+* `provisioning_model` - (Optional) Describe the type of preemptible VM. This field accepts the value `STANDARD` or `SPOT`. If the value is `STANDARD`, there will be no discount. If this   is set to `SPOT`,
     `preemptible` should be `true` and `automatic_restart` should be
     `false`. For more info about
     `SPOT`, read [here](https://cloud.google.com/compute/docs/instances/spot)
-    
-* `instance_termination_action` - (Optional) Describe the type of termination action for VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot) 
+
+* `instance_termination_action` - (Optional) Describe the type of termination action for VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot)
 
 * `max_run_duration` -  (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Only support `DELETE` `instance_termination_action` at this point. Structure is [documented below](#nested_max_run_duration).
 <a name="nested_max_run_duration"></a>The `max_run_duration` block supports:
@@ -535,12 +547,23 @@ This resource provides the following
 
 Instances can be imported using any of these accepted formats:
 
+* `projects/{{project}}/zones/{{zone}}/instances/{{name}}`
+* `{{project}}/{{zone}}/{{name}}`
+* `{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import instances using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/zones/{{zone}}/instances/{{name}}"
+  to = google_compute_instance.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), instances can be imported using one of the formats above. For example:
+
 ```
 $ terraform import google_compute_instance.default projects/{{project}}/zones/{{zone}}/instances/{{name}}
 $ terraform import google_compute_instance.default {{project}}/{{zone}}/{{name}}
 $ terraform import google_compute_instance.default {{name}}
 ```
-
-[custom-vm-types]: https://cloud.google.com/dataproc/docs/concepts/compute/custom-machine-types
-[network-tier]: https://cloud.google.com/network-tiers/docs/overview
-[extended-custom-vm-type]: https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#extendedmemory
