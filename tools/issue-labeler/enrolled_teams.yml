@@ -7,6 +7,9 @@ service/aiplatform-dataset:
 service/aiplatform-featurestore:
   resources:
   - google_vertex_ai_featurestore.*
+service/aiplatform-matching-engine:
+  resources:
+  - google_vertex_ai_index.*
 service/aiplatform-metadata:
   resources:
   - google_vertex_ai_metadata_store
@@ -74,6 +77,9 @@ service/cloudfunctions:
   resources:
   - google_cloudfunctions_.*
   - google_cloudfunctions2_.*
+service/cloudidentity-groups:
+  resources:
+  - google_cloud_identity_groups.*
 service/cloudkms:
   resources:
   - google_kms_.*
@@ -108,15 +114,22 @@ service/compute-nat:
   - google_compute_router_nat
 service/compute-pd:
   resources:
+  - google_compute_attached_disk.*
   - google_compute_disk.*
   - google_compute_region_disk.*
   - google_compute_image.*
   - google_compute_snapshot.*
   - google_compute_machine_image.*
+service/compute-projects:
+  resources:
+  - google_project_usage_export_bucket
 service/compute-regional-l7-load-balancer:
   resources:
   - google_compute_region_target_http_proxy
   - google_compute_region_target_https_proxy
+service/compute-reservation:
+  resources:
+  - google_compute_reservation.*
 service/compute-router:
   resources:
   - google_compute_router
@@ -305,6 +318,9 @@ service/network-security-distributed-firewall:
 service/networkmanagement-connectivity-test:
   resources:
   - google_network_management_connectivity_test
+service/networkservices-media-cdn:
+  resources:
+  - google_network_services_edge_cache_.*
 service/notebooks:
   resources:
   - google_notebooks_.*
