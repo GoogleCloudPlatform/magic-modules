@@ -65,7 +65,7 @@ examples:
     name: 'dialogflowcx_version_regional'
     primary_resource_id: 'version_1'
     vars:
-      agent_name: 'issue12880'
+      agent_name: 'issue-12880'
 skip_sweeper: true
 id_format: '{{parent}}/versions/{{name}}'
 import_format: ['{{parent}}/versions/{{name}}']

@@ -67,7 +67,7 @@ examples:
     name: 'dialogflowcx_environment_regional'
     primary_resource_id: 'development'
     vars:
-      agent_name: 'issue12880'
+      agent_name: 'issue-12880'
 skip_sweeper: true
 id_format: '{{parent}}/environments/{{name}}'
 import_format: ['{{parent}}/environments/{{name}}']

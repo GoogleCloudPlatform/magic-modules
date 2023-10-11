@@ -1,6 +1,6 @@
 resource "google_dialogflow_cx_agent" "agent" {
   display_name = "<%= ctx[:vars]["agent_name"] %>"
-  location = "europe-west2"
+  location = "us-central1"
   default_language_code = "en"
   supported_language_codes = ["fr","de","es"]
   time_zone = "Europe/London"
