@@ -18,7 +18,7 @@ Manages a project-level logging sink. For more information see:
 
 ~> **Note** You must [enable the Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com)
 
-## Example Usage
+## Example Usage - Basic Sink
 
 ```hcl
 resource "google_logging_project_sink" "my-sink" {
@@ -34,6 +34,8 @@ resource "google_logging_project_sink" "my-sink" {
   unique_writer_identity = true
 }
 ```
+
+## Example Usage - Cloud Storage Bucket Destination
 
 A more complete example follows: this creates a compute instance, as well as a log sink that logs all activity to a
 cloud storage bucket. Because we are using `unique_writer_identity`, we must grant it access to the bucket.
@@ -89,6 +91,8 @@ resource "google_project_iam_binding" "gcs-bucket-writer" {
 }
 ```
 
+## Example Usage - User-managed Service Account 
+
 The following example creates a sink that are configured with user-managed service accounts, by specifying
 the `custom_writer_identity` field.
 
@@ -112,7 +116,6 @@ resource "google_logging_project_sink" "my-sink" {
   # Log all WARN or higher severity messages relating to instances
   filter = "resource.type = gce_instance AND severity >= WARNING"
 
-  # unique_writer_identity has to be true in order to use user-managed service account
   unique_writer_identity = true
   
   # Use a user-managed service account
@@ -129,6 +132,8 @@ resource "google_project_iam_member" "custom-sa-logbucket-binding" {
 
 The above example will create a log sink that route logs to destination GCP project using
 an user-managed service account. 
+
+## Example Usage - Sink Exclusions
 
 The following example uses `exclusions` to filter logs that will not be exported. In this example logs are exported to a [log bucket](https://cloud.google.com/logging/docs/buckets) and there are 2 exclusions configured
 
