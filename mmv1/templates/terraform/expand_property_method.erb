@@ -28,7 +28,9 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
   }
   m := make(map[string]interface{})
   for _, raw := range v.(*schema.Set).List() {
+<%     if property.nested_properties.any? { |prop| !prop.output } -%>
     original := raw.(map[string]interface{})
+<%     end -%>
     transformed := make(map[string]interface{})
 
 <%     property.nested_properties.each do |prop| -%>
@@ -76,7 +78,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
   transformed := make(map[string]interface{})
 <%     property.nested_properties.each do |prop| -%>
-<%           next if prop.is_a?(Api::Type::KeyValuePairs) && prop.ignore_write -%>
+<%       next if prop.is_a?(Api::Type::KeyValuePairs) && prop.ignore_write -%>
 <%       next if prop.output -%>
   <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
   transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
@@ -109,7 +111,9 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
     if raw == nil {
       continue
     }
+<%           if property.nested_properties.any? { |prop| !prop.output } -%>
     original := raw.(map[string]interface{})
+<%           end -%>
 <%       else -%>
 <%         if property.allow_empty_object -%>
   if len(l) == 0 {
@@ -126,15 +130,17 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
   }
 <%         end -%>
 <%         if !property.nested_properties.empty? -%>
+<%           if property.nested_properties.any? { |prop| !prop.output } -%>
   raw := l[0]
   original := raw.(map[string]interface{})
+<%           end -%>
 <%         end -%>
 <%       end -%>
     transformed := make(map[string]interface{})
 
 <%       property.nested_properties.each do |prop| -%>
-<%           next if prop.is_a?(Api::Type::KeyValuePairs) && prop.ignore_write -%>
-<%       next if prop.output -%>
+<%         next if prop.is_a?(Api::Type::KeyValuePairs) && prop.ignore_write -%>
+<%         next if prop.output -%>
       transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.name.underscore -%>"], d, config)
       if err != nil {
         return nil, err
@@ -180,8 +186,8 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
 
 <% if !property.nested_properties.nil? -%>
 <%   property.nested_properties.each do |prop| -%>
-<%      next if prop.is_a?(Api::Type::KeyValuePairs) && prop.ignore_write -%>
-<%       next if prop.output -%>
+<%     next if prop.is_a?(Api::Type::KeyValuePairs) && prop.ignore_write -%>
+<%     next if prop.output -%>
 <%# Map is a map from {key -> object} in the API, but Terraform can't represent that
 so we treat the key as a property of the object in Terraform schema. %>
 <%=    lines(build_expand_method(prefix + titlelize_property(property), prop, object, pwd), 1) -%>
