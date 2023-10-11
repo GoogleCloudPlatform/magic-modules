@@ -35,7 +35,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
 
 <%     property.nested_properties.each do |prop| -%>
 <%       next if prop.name == property.key_name -%>
-<%       next if prop.output -%>
+<%       next if prop.output && !(prop.is_a?(Api::Type::KeyValuePairs)) -%>
     transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= Google::StringUtils.underscore(prop.name) -%>"], d, config)
     if err != nil {
       return nil, err
@@ -79,7 +79,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
   transformed := make(map[string]interface{})
 <%     property.nested_properties.each do |prop| -%>
 <%       next if prop.is_a?(Api::Type::KeyValuePairs) && prop.ignore_write -%>
-<%       next if prop.output -%>
+<%       next if prop.output && !(prop.is_a?(Api::Type::KeyValuePairs)) -%>
   <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
   transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
   if err != nil {
@@ -140,7 +140,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
 
 <%       property.nested_properties.each do |prop| -%>
 <%         next if prop.is_a?(Api::Type::KeyValuePairs) && prop.ignore_write -%>
-<%         next if prop.output -%>
+<%         next if prop.output && !(prop.is_a?(Api::Type::KeyValuePairs)) -%>
       transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.name.underscore -%>"], d, config)
       if err != nil {
         return nil, err
@@ -187,7 +187,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
 <% if !property.nested_properties.nil? -%>
 <%   property.nested_properties.each do |prop| -%>
 <%     next if prop.is_a?(Api::Type::KeyValuePairs) && prop.ignore_write -%>
-<%     next if prop.output -%>
+<%     next if prop.output && !(prop.is_a?(Api::Type::KeyValuePairs)) -%>
 <%# Map is a map from {key -> object} in the API, but Terraform can't represent that
 so we treat the key as a property of the object in Terraform schema. %>
 <%=    lines(build_expand_method(prefix + titlelize_property(property), prop, object, pwd), 1) -%>
