@@ -29,9 +29,9 @@ async: !ruby/object:Api::OpAsync
     base_url: '{{op_id}}'
     wait_ms: 1000
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 10
-      update_minutes: 10
-      delete_minutes: 10
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
   status: !ruby/object:Api::OpAsync::Status
@@ -78,8 +78,15 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_secondary_cluster_basic'
+    primary_resource_id: 'secondary'
+    vars:
+      alloydb_primary_cluster_name: 'alloydb-primary-cluster'
+      alloydb_primary_instance_name: 'alloydb-primary-instance'
+      alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_create: templates/terraform/pre_create/alloydb_restore_cluster.go.erb
+  pre_create: templates/terraform/pre_create/alloydb_cluster.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'clusterId'
@@ -452,3 +459,24 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'sourceType'
         description: 'Type of migration source.'
+  - !ruby/object:Api::Type::Enum
+    name: clusterType
+    values:
+      - :PRIMARY
+      - :SECONDARY
+    default_value: :PRIMARY
+    immutable: true
+    description: |
+      The type of cluster. If not set, defaults to PRIMARY.
+  - !ruby/object:Api::Type::NestedObject
+    name: "secondaryConfig"
+    description: |
+      Configuration of the secondary cluster for Cross Region Replication. This should be set if and only if the cluster is of type SECONDARY.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "primaryClusterName"
+        immutable: true
+        required: true
+        description: |
+          Name of the primary cluster must be in the format
+          'projects/{project}/locations/{location}/clusters/{cluster_id}'

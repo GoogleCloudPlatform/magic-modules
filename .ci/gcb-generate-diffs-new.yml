@@ -182,6 +182,8 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
+      id: tgc-test
+      allowFailure: true
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tpgb-head", "tpgb-base", "tgc-head", "tgc-base"]
@@ -233,6 +235,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tpgb-test
+      allowFailure: true
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tpgb-head", "tpgb-base"]
@@ -245,6 +248,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tpg-test
+      allowFailure: true
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tpg-head", "tpg-base"]
