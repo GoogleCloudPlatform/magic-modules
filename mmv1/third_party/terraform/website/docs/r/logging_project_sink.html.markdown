@@ -194,7 +194,7 @@ The following arguments are supported:
     `bigquery_options`, you must set `unique_writer_identity` to true.
 
 * `custom_writer_identity` - (Optional) A user managed service account that will be used to write
-    the log entries. The format must be serviceAccount:some@email. This field can only be specified if you are
+    the log entries. The format must be `serviceAccount:some@email`. This field can only be specified if you are
     routing logs to a destination outside this sink's project. If not specified, a Logging service account 
     will automatically be generated. You must set `unique_writer_identity` to true to use this feature.
 
