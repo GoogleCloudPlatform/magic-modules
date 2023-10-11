@@ -3,7 +3,7 @@ portProp, err := expandNestedComputeGlobalNetworkEndpointPort(d.Get("port"), d, 
 if err != nil {
   return err
 }
-if portProp != "" {
+if portProp != "" && portProp != 0 {
 	toDelete["port"] = portProp	
 }
 
