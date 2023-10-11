@@ -65,7 +65,8 @@
             "env": "dev"
           },
           "location": "EU",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "access": true,
@@ -77,7 +78,6 @@
           "labels": {},
           "terraform_labels": {},
           "last_modified_time": true,
-          "project": true,
           "self_link": true
         }
       }

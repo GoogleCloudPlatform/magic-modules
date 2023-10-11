@@ -54,12 +54,12 @@
                       "ssl_certificate_id"
                   ],
                   "ssl_policy": "ssl-policy-id",
-                  "timeouts": null
+                  "timeouts": null,
+                  "project": "{{.Provider.project}}"
               },
               "after_unknown": {
                   "creation_timestamp": true,
                   "id": true,
-                  "project": true,
                   "proxy_id": true,
                   "self_link": true,
                   "ssl_certificates": [

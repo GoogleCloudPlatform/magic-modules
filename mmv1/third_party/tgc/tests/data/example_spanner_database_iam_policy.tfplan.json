@@ -86,7 +86,8 @@
           "encryption_config": [],
           "instance": "my-instance",
           "name": "my-database",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "ddl": [
@@ -95,7 +96,6 @@
           ],
           "encryption_config": [],
           "id": true,
-          "project": true,
           "state": true
         },
         "before_sensitive": false,
@@ -122,12 +122,12 @@
         "after": {
           "database": "my-database",
           "instance": "my-instance",
-          "policy_data": "{\"bindings\":[{\"members\":[\"user:jane@example.com\"],\"role\":\"roles/editor\"}]}"
+          "policy_data": "{\"bindings\":[{\"members\":[\"user:jane@example.com\"],\"role\":\"roles/editor\"}]}",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "etag": true,
-          "id": true,
-          "project": true
+          "id": true
         },
         "before_sensitive": false,
         "after_sensitive": {}
@@ -151,12 +151,12 @@
           "labels": null,
           "name": "my-instance",
           "num_nodes": 1,
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "id": true,
           "processing_units": true,
-          "project": true,
           "state": true
         },
         "before_sensitive": false,

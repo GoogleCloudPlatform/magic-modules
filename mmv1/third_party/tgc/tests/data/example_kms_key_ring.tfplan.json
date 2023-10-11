@@ -35,11 +35,11 @@
         "after": {
           "location": "global",
           "name": "keyring-example",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "id": true,
-          "project": true,
           "self_link": true
         }
       }
