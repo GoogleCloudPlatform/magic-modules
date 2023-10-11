@@ -3686,6 +3686,7 @@ resource "google_container_cluster" "cluster" {
   location           = "us-central1-a"
   initial_node_count = 1
   min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+  deletion_protection = false
 }
 
 resource "google_container_node_pool" "with_confidential_boot_disk" {
@@ -3742,6 +3743,7 @@ resource "google_container_cluster" "cluster" {
   location           = "us-central1-a"
   initial_node_count = 1
   min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+  deletion_protection = false
 }
 
 resource "google_container_node_pool" "without_confidential_boot_disk" {
@@ -3757,7 +3759,7 @@ resource "google_container_node_pool" "without_confidential_boot_disk" {
     ]
 	enable_confidential_storage = false
 	machine_type = "n2-standard-2"
-  	disk_type = "hyperdisk-balanced"
+  	disk_type = "pd-balanced"
   }
 }
 `, cluster, np)

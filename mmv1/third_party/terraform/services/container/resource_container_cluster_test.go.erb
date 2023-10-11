@@ -8669,6 +8669,7 @@ resource "google_container_cluster" "with_confidential_boot_disk" {
 	disk_type = "hyperdisk-balanced"
   }
 }
+ deletion_protection = false
 }
 `, clusterName, kmsKeyName)
 }
@@ -8720,6 +8721,7 @@ resource "google_container_cluster" "with_confidential_boot_disk_node_config" {
 	enable_confidential_storage = true
 	disk_type = "hyperdisk-balanced"
   }
+  deletion_protection = false
 }
 `, clusterName, kmsKeyName)
 }
@@ -8762,9 +8764,10 @@ resource "google_container_cluster" "without_confidential_boot_disk" {
 	image_type = "COS_CONTAINERD"
     machine_type = "n2-standard-2"
     enable_confidential_storage = false
-	disk_type = "hyperdisk-balanced"
+	disk_type = "pd-balanced"
   }
 }
+ deletion_protection = false
 }
 `, clusterName)
 }
