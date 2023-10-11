@@ -1371,15 +1371,15 @@ func testAccDataprocCluster_withMinNumInstances(rnd string) string {
 resource "google_dataproc_cluster" "with_min_num_instances" {
   name   = "tf-test-dproc-%s"
   region = "us-central1"
-
+ 
   cluster_config {
-	master_config{
-		num_instances=1
-	}
-	worker_config{
-		num_instances = 3
-		min_num_instances = 2
-	}
+    master_config{
+      num_instances=1
+    }
+    worker_config{
+      num_instances = 3
+      min_num_instances = 2
+    }
   }
 }
 `, rnd)
