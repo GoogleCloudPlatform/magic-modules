@@ -539,7 +539,7 @@ cluster_config {
     num_instances    = 3
     machine_type     = "e2-medium"
     min_cpu_platform = "Intel Skylake"
-
+    min_num_instance = 2
     disk_config {
       boot_disk_type    = "pd-standard"
       boot_disk_size_gb = 30
