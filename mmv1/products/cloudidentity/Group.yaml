@@ -136,6 +136,7 @@ properties:
       properties:
         - !ruby/object:Api::Type::String
           name: 'id'
+          output: true
           description: |
             The ID of the entity.
 
@@ -148,7 +149,7 @@ properties:
             Must be unique within a namespace.
         - !ruby/object:Api::Type::String
           name: 'namespace'
-          immutable: true
+          output: true
           description: |
             The namespace in which the entity exists.
 
