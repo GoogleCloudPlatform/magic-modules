@@ -8643,7 +8643,7 @@ func TestAccContainerCluster_withConfidentialBootDisk(t *testing.T) {
 				ResourceName:            "google_container_cluster.with_confidential_boot_disk",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"min_master_version"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -8696,7 +8696,7 @@ func TestAccContainerCluster_withConfidentialBootDiskNodeConfig(t *testing.T) {
 				ResourceName:            "google_container_cluster.with_confidential_boot_disk_node_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"min_master_version"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -8743,7 +8743,7 @@ func TestAccContainerCluster_withoutConfidentialBootDisk(t *testing.T) {
 				ResourceName:            "google_container_cluster.without_confidential_boot_disk",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"min_master_version"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
