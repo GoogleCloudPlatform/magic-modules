@@ -12,7 +12,6 @@
 # limitations under the License.
 --- !ruby/object:Api::Resource
 name: "VmwareNodePool"
-min_version: beta
 base_url: "projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools"
 create_url: "projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools?vmware_node_pool_id={{name}}"
 update_url: "projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools/{{name}}"
@@ -31,7 +30,6 @@ timeouts: !ruby/object:Api::Timeouts
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "gkeonprem_vmware_node_pool_basic"
-    min_version: beta
     primary_resource_id: "nodepool-basic"
     vars:
       name: "my-nodepool"
@@ -40,7 +38,6 @@ examples:
       project: "fake-backend-360322"
   - !ruby/object:Provider::Terraform::Examples
     name: "gkeonprem_vmware_node_pool_full"
-    min_version: beta
     primary_resource_id: "nodepool-full"
     vars:
       name: "my-nodepool"
