@@ -2,7 +2,7 @@ var WorkbenchInstanceGoogleProvidedLabels = []string{
 	"consumer-project-id",
 	"consumer-project-number",
 	"notebooks-product",
-	"resource-name"
+	"resource-name",
 }
 
 func WorkbenchInstanceLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
