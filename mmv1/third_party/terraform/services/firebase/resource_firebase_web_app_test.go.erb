@@ -78,7 +78,7 @@ resource "google_apikeys_key" "key2" {
 	provider     = google-beta
 	name         = "tf-test-api-key2%{random_suffix}"
 	display_name = "Test api key 2"
-	project      = google_project.default.project_id
+	project      = "%{project_id}"
 
 	restrictions {
 		browser_key_restrictions {
