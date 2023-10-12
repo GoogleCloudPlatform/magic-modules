@@ -84,11 +84,15 @@ module OpenAPIGenerate
           field.instance_variable_set(:@item_type, 'Api::Type::Boolean')
         else
           nested_object = Api::Type::NestedObject.new
+          required_props = obj.items.required || []
           object_properties = []
           obj.items.properties&.each do |prop, i|
             prop = write_object(prop, i, i.type, false)
+            prop.instance_variable_set(:@required, true) if required_props.include?(prop.name)
+            required_props.delete(prop.name)
             object_properties.push(prop)
           end
+          raise "Unknown required properties #{required_props}" unless required_props.empty?
           nested_object.instance_variable_set(:@properties, object_properties)
           field.instance_variable_set(:@item_type, nested_object)
         end
