@@ -1785,6 +1785,45 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 	})
 }
 
+<% unless version = 'ga' -%>
+func TestAccComputeInstanceConfidentialHyperDiskBootDisk(t *testing.T) {
+	t.Parallel()
+
+	context_1 := map[string]interface{}{
+		"name":        fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"confidential_compute": true,
+		"kms_key" : acctest.BootstrapKMSKey(t)
+	}
+
+	context_2 := map[string]interface{}{
+		"name":        context_1["random_suffix"],
+		"confidential_compute": false,
+		"kms_key" : acctest.BootstrapKMSKey(t)
+	}
+
+	var instance compute.Instance
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceConfidentialHyperDiskBootDisk(context_1),
+				Check: resource.ComposeTestCheckFunc(testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance)
+				),
+			},
+			{
+				Config: testAccComputeInstanceConfidentialHyperDiskBootDisk(context_2),
+				Check: resource.ComposeTestCheckFunc(testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+				),
+			},
+
+		},
+	})
+}
+<% end -%>
+
 func TestAccComputeInstance_enableDisplay(t *testing.T) {
 	t.Parallel()
 
@@ -6849,6 +6888,44 @@ resource "google_compute_instance" "foobar" {
 }
 `, instance, enableConfidentialCompute)
 }
+
+<% unless version = 'ga' -%>
+func testAccComputeInstanceConfidentialHyperDiskBootDisk(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+}
+data "google_compute_image" "my_image" {
+  family    = "ubuntu-2004-lts"
+  project   = "ubuntu-os-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%{name}"
+  machine_type = "n2-standard-2"
+  zone         = "us-central1-a"
+
+  boot_disk {
+
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+      enable_confidential_compute = %{confidential_compute}
+      type  = "hyperdisk-balanced"
+    }
+
+    kms_key_self_link = %{kms_key}
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+	  on_host_maintenance = "TERMINATE"
+  }
+
+}
+`, context)
+}
+<% end -%>
 
 func testAccComputeInstance_enableDisplay(instance string) string {
 	return fmt.Sprintf(`
