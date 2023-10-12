@@ -38,11 +38,11 @@
           "definition": "{\n  \"type\" : \"record\",\n  \"name\" : \"Avro\",\n  \"fields\" : [\n    {\n      \"name\" : \"StringField\",\n      \"type\" : \"string\"\n    },\n    {\n      \"name\" : \"IntField\",\n      \"type\" : \"int\"\n    }\n  ]\n}\n",
           "name": "example",
           "timeouts": null,
-          "type": "AVRO"
+          "type": "AVRO",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
-          "id": true,
-          "project": true
+          "id": true
         },
         "before_sensitive": false,
         "after_sensitive": {}

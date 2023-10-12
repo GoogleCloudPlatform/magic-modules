@@ -257,7 +257,8 @@
               "main_page_suffix": "index.html",
               "not_found_page": "404.html"
             }
-          ]
+          ],
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "cors": [
@@ -326,7 +327,6 @@
           "logging": [
             {}
           ],
-          "project": true,
           "retention_policy": [
             {}
           ],

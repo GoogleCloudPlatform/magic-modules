@@ -96,7 +96,8 @@
             }
           ],
           "timeouts": null,
-          "zone": "us-central1a"
+          "zone": "us-central1a",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "id": true,
@@ -107,7 +108,6 @@
               ]
             }
           ],
-          "project": true,
           "reservation_config": [
             {}
           ],
