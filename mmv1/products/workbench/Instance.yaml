@@ -12,23 +12,23 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-base_url: "/v2/projects/{{project}}/locations/{{location}}/instances"
-create_url: "/v2/projects/{{project}}/locations/{{location}}/instances?instanceId={{instance_id}}"
-self_link: "/v2/projects/{{project}}/locations/{{location}}/instances/{{instance_id}}"
-id_format: "/v2/projects/{{project}}/locations/{{location}}/instances/{{instance_id}}"
+base_url: "projects/{{project}}/locations/{{location}}/instances"
+create_url: "projects/{{project}}/locations/{{location}}/instances?instanceId={{name}}"
+self_link: "projects/{{project}}/locations/{{location}}/instances/{{name}}"
+id_format: "projects/{{project}}/locations/{{location}}/instances/{{name}}"
 import_format:
-- "/v2/projects/{{project}}/locations/{{location}}/instances/{{instance_id}}"
+  - "projects/{{project}}/locations/{{location}}/instances/{{name}}"
 name: Instance
 description: A Workbench instance.
 update_verb: :PATCH
 update_mask: true
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  method_name_separator: :
+  method_name_separator: ":"
   fetch_iam_policy_verb: :GET
-  parent_resource_attribute: instance_name
+  parent_resource_attribute: "instance_name"
   import_format:
     [
-      'v2/projects/{{project}}/locations/{{location}}/instances/{{instance_name}}',
+      'projects/{{project}}/locations/{{location}}/instances/{{instance_name}}',
       '{{instance_name}}',
     ]
   base_url: projects/{{project}}/locations/{{location}}/instances/{{instance_name}}
@@ -44,7 +44,7 @@ examples:
     vars:
       instance_name: 'workbench-instance'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'notebook_instance_basic_gpu'
+    name: 'workbench_instance_basic_gpu'
     primary_resource_id: 'instance'
     primary_resource_name: "fmt.Sprintf(\"tf-test-workbench-instance%s\",
       context[\"\
@@ -53,7 +53,7 @@ examples:
     vars:
       instance_name: 'workbench-instance'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'notebook_instance_full'
+    name: 'workbench_instance_full'
     primary_resource_id: 'instance'
     primary_resource_name: "fmt.Sprintf(\"tf-test-workbench-instance%s\",
       context[\"\
@@ -63,11 +63,12 @@ examples:
       instance_name: 'workbench-instance'
     test_env_vars:
       service_account: :SERVICE_ACCT
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/workbench_instance.go
 properties:
 - !ruby/object:Api::Type::String
   name: name
-  description: 'Output only. The name of this notebook instance. Format: `projects/{project_id}/locations/{location}/instances/{instance_id}`'
-  output: true
+  description: 'The name of this workbench instance. Format: `projects/{project_id}/locations/{location}/instances/{instance_id}`'
   required: true
   immutable: true
   url_param_only: true
@@ -86,7 +87,7 @@ properties:
     name: acceleratorConfigs
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Enum
         name: type
         values:
           - ACCELERATOR_TYPE_UNSPECIFIED
@@ -127,45 +128,25 @@ properties:
     properties:
     - !ruby/object:Api::Type::String
       name: project
-      description: 'Required. The name of the Google Cloud project that this VM image
-        belongs to. Format: `{project_id}`'
-      required: true
+      description: |
+          The name of the Google Cloud project that this VM image belongs to.
+          Format: {project_id}
     - !ruby/object:Api::Type::String
       name: name
       description: Optional. Use VM image name to find the image.
       exactly_one_of:
-      - name
-      - family
+      - vm_image.0.name
+      - vm_image.0.family
     - !ruby/object:Api::Type::String
       name: family
       description: Optional. Use this VM image family to find the image; the newest
         image in this family will be used.
       exactly_one_of:
-      - name
-      - family
+      - vm_image.0.name
+      - vm_image.0.family
     name: vmImage
-    exactly_one_of:
-      - vm_image
-      - container_image
     description: Definition of a custom Compute Engine virtual machine image for starting
-      a notebook instance with the environment installed directly on the VM.
-  - !ruby/object:Api::Type::NestedObject
-    properties:
-    - !ruby/object:Api::Type::String
-      name: repository
-      description: 'Required. The path to the container image repository. For example:
-        `gcr.io/{project_id}/{image_name}`'
-      required: true
-    - !ruby/object:Api::Type::String
-      name: tag
-      description: Optional. The tag of the container image. If not specified, this
-        defaults to the latest tag.
-    name: containerImage
-    exactly_one_of:
-      - vm_image
-      - container_image
-    description: Definition of a container image for starting a notebook instance
-      with the environment installed in a container.
+      a workbench instance with the environment installed directly on the VM.
   - !ruby/object:Api::Type::NestedObject
     properties:
     - !ruby/object:Api::Type::String
@@ -173,7 +154,7 @@ properties:
       description: Optional. The size of the boot disk in GB attached to this instance,
         up to a maximum of 64000 GB (64 TB). If not specified, this defaults to the
         recommended value of 150GB.
-    - !ruby/object:Api::Type::String
+    - !ruby/object:Api::Type::Enum
       name: diskType
       values:
         - DISK_TYPE_UNSPECIFIED
@@ -182,7 +163,7 @@ properties:
         - PD_BALANCED
         - PD_EXTREME
       description: Optional. Indicates the type of the disk.
-    - !ruby/object:Api::Type::String
+    - !ruby/object:Api::Type::Enum
       name: diskEncryption
       values:
         - DISK_ENCRYPTION_UNSPECIFIED
@@ -208,7 +189,7 @@ properties:
         description: Optional. The size of the disk in GB attached to this VM instance,
           up to a maximum of 64000 GB (64 TB). If not specified, this defaults to
           100.
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Enum
         name: diskType
         values:
           - DISK_TYPE_UNSPECIFIED
@@ -218,7 +199,7 @@ properties:
           - PD_EXTREME
         description: Optional. Input only. Indicates the type of the disk.
         immutable: true
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Enum
         name: diskEncryption
         values:
           - DISK_ENCRYPTION_UNSPECIFIED
@@ -272,7 +253,7 @@ properties:
         description: 'Optional. The name of the subnet that this VM instance is in.
           Format: `projects/{project_id}/regions/{region}/subnetworks/{subnetwork_id}`'
         diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Enum
         name: nicType
         description: Optional. The type of vNIC to be used on this interface. This
           may be gVNIC or VirtioNet.
@@ -289,8 +270,7 @@ properties:
     item_type: Api::Type::String
     description: Optional. The Compute Engine tags to add to runtime (see [Tagging
       instances](https://cloud.google.com/compute/docs/label-or-tag-resources#tags)).
-  - !ruby/object:Api::Type::NestedObject
-    properties: []
+  - !ruby/object:Api::Type::KeyValuePairs
     name: metadata
     description: Optional. Custom metadata to apply to this instance.
   - !ruby/object:Api::Type::Boolean
@@ -341,7 +321,7 @@ properties:
     properties:
     - !ruby/object:Api::Type::String
       name: snapshot
-      description: Optional. The snapshot of the boot disk of this notebook instance
+      description: Optional. The snapshot of the boot disk of this workbench instance
         before upgrade.
     - !ruby/object:Api::Type::String
       name: vmImage
@@ -351,10 +331,10 @@ properties:
       description: Optional. The container image before this instance upgrade.
     - !ruby/object:Api::Type::String
       name: framework
-      description: Optional. The framework of this notebook instance.
+      description: Optional. The framework of this workbench instance.
     - !ruby/object:Api::Type::String
       name: version
-      description: Optional. The version of the notebook instance before this upgrade.
+      description: Optional. The version of the workbench instance before this upgrade.
     - !ruby/object:Api::Type::String
       name: state
       description: Output only. The state of this instance upgrade history entry.
@@ -398,7 +378,7 @@ properties:
   output: true
 - !ruby/object:Api::Type::Boolean
   name: disableProxyAccess
-  description: Optional. If true, the notebook instance will not register with the
+  description: Optional. If true, the workbench instance will not register with the
     proxy.
 - !ruby/object:Api::Type::KeyValuePairs
   name: labels
