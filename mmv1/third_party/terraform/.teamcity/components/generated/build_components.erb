@@ -118,7 +118,17 @@ fun BuildSteps.RunAcceptanceTests() {
         step(ScriptBuildStep {
             name = "Compile Test Binary"
             workingDir = "%PACKAGE_PATH%"
-            scriptContent = "go test -c -o test-binary"
+            scriptContent = """
+                #!/bin/bash
+                export TEST_FILE_COUNT=$(ls ./*_test.go | wc -l)
+                if test ${'$'}TEST_FILE_COUNT -gt "0"; then
+                    echo "Compiling test binary"
+                    go test -c -o test-binary
+                else
+                    echo "Skipping compilation of test binary; no Go test files found"
+                fi
+            """.trimIndent()
+
         })
 
         step(ScriptBuildStep {
