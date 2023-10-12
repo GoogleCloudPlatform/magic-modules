@@ -89,6 +89,12 @@ If you are making changes to the containers, your changes will not apply until t
 
 Pausing the pipeline is done in the cloud console, by setting the downstream-builder trigger to disabled.  You can find that trigger [here](https://console.cloud.google.com/cloud-build/triggers/edit/f80a7496-b2f4-4980-a706-c5425a52045b?project=graphite-docker-images)
 
+### Downstream build job is not triggered by commits.
+This is rare but we've seen this happened before. In this case, we need to manually trigger a Cloud Build job by running 
+```
+gcloud builds triggers run build-downstreams --sha=<COMMIT_SHA> --substitutions=BRANCH_NAME=<BASE_BRANCH_NAME>
+```
+You'll need to substitute `<COMMIT_SHA>` with the commit sha that you'd like to trigger the build against and `<BASE_BRANCH_NAME>=` with base branch that this commit is pushed into, likely `main` but could be feature branches in some cases.
 
 ## Dependency change handbook:
 If someone (often a bot) creates a PR which updates Gemfile or Gemfile.lock, they will not be able to generate diffs.  This is because bundler doesn't allow you to run a binary unless your installed gems exactly match the Gemfile.lock, and since we have to run generation before and after the change, there is no possible container that will satisfy all requirements.
