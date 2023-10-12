@@ -53,7 +53,6 @@ func dataSourceGoogleComputeNetworksRead(d *schema.ResourceData, meta interface{
 	var networks = make([]string, len(networkList.Items))
 
 	for i := 0; i < len(networkList.Items); i++ {
-		fmt.Println(networkList.Items[i])
 		networks[i] = networkList.Items[i].Name
 	}
 
@@ -69,6 +68,6 @@ func dataSourceGoogleComputeNetworksRead(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
 
-	d.SetId(fmt.Sprintf("projects/%s/global/networks/", project))
+	d.SetId(fmt.Sprintf("projects/%s/global/networks", project))
 	return nil
 }

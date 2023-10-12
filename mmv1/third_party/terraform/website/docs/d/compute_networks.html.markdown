@@ -20,15 +20,13 @@ data "google_compute_networks" "my-networks" {
 
 The following arguments are supported:
 
-* `project` - (Required) The name of the project.
+* `project` - (Optional) The name of the project.
 
 ## Attributes Reference
 
 In addition to the arguments listed above, the following attributes are exported:
 
-* `id` - an identifier for the resource with format projects/{{project}}/global/networks/
-
-* `description` - Description of this network.
+* `id` - an identifier for the resource with format projects/{{project}}/global/networks
 
 * `networks` - The list of networks in the specified project.
 
