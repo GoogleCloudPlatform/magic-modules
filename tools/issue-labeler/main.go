@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/golang/glog"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
 )
 
 var flagBackfillDate = flag.String("backfill-date", "", "run in backfill mode to apply labels to issues filed after given date")
@@ -16,15 +17,15 @@ var flagDryRun = flag.Bool("backfill-dry-run", false, "when combined with backfi
 func main() {
 	flag.Parse()
 
-	regexpLabels, err := BuildRegexLabels(EnrolledTeamsYaml)
+	regexpLabels, err := labeler.BuildRegexLabels(EnrolledTeamsYaml)
 	if err != nil {
 		glog.Exitf("Error building regex labels: %v", err)
 	}
 
 	if *flagBackfillDate == "" {
 		issueBody := os.Getenv("ISSUE_BODY")
-		affectedResources := extractAffectedResources(issueBody)
-		labels := ComputeLabels(affectedResources, regexpLabels)
+		affectedResources := labeler.ExtractAffectedResources(issueBody)
+		labels := labeler.ComputeLabels(affectedResources, regexpLabels)
 
 		if len(labels) > 0 {
 			labels = append(labels, "forward/review")
@@ -32,8 +33,8 @@ func main() {
 			fmt.Println(`["` + strings.Join(labels, `", "`) + `"]`)
 		}
 	} else {
-		issues := getIssues(*flagBackfillDate)
-		issueUpdates := computeIssueUpdates(issues, regexpLabels)
-		UpdateIssues(issueUpdates, *flagDryRun)
+		issues := labeler.GetIssues(*flagBackfillDate)
+		issueUpdates := labeler.ComputeIssueUpdates(issues, regexpLabels)
+		labeler.UpdateIssues(issueUpdates, *flagDryRun)
 	}
 }

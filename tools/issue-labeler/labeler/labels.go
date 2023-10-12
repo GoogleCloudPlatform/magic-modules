@@ -1,4 +1,4 @@
-package main
+package labeler
 
 import (
 	"fmt"
@@ -40,7 +40,7 @@ func BuildRegexLabels(teamsYaml []byte) ([]RegexpLabel, error) {
 	for label, data := range enrolledTeams {
 		for _, resource := range data.Resources {
 			exactResource := fmt.Sprintf("^%s$", resource)
-			regexpLabels = append(regexpLabels, regexpLabel{
+			regexpLabels = append(regexpLabels, RegexpLabel{
 				Regexp: regexp.MustCompile(exactResource),
 				Label:  label,
 			})
@@ -54,7 +54,7 @@ func BuildRegexLabels(teamsYaml []byte) ([]RegexpLabel, error) {
 	return regexpLabels, nil
 }
 
-func extractAffectedResources(body string) []string {
+func ExtractAffectedResources(body string) []string {
 	section := sectionRegexp.FindString(body)
 	section = commentRegexp.ReplaceAllString(section, "")
 	if section != "" {

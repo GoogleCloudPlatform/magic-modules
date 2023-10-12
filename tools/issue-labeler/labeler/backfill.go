@@ -1,4 +1,4 @@
-package main
+package labeler
 
 import (
 	"bytes"
@@ -17,7 +17,7 @@ type ErrorResponse struct {
 }
 
 type Issue struct {
-	Number      int
+	Number      uint64
 	Body        string
 	Labels      []Label
 	PullRequest map[string]any `json:"pull_request"`
@@ -28,7 +28,7 @@ type Label struct {
 }
 
 type IssueUpdate struct {
-	Number    int
+	Number    uint64
 	Labels    []string
 	OldLabels []string
 }
@@ -37,7 +37,7 @@ type IssueUpdateBody struct {
 	Labels []string `json:"labels"`
 }
 
-func getIssues(since string) []Issue {
+func GetIssues(since string) []Issue {
 	client := &http.Client{}
 	done := false
 	page := 1
@@ -78,7 +78,7 @@ func getIssues(since string) []Issue {
 	return issues
 }
 
-func computeIssueUpdates(issues []Issue, regexpLabels []RegexpLabel) []IssueUpdate {
+func ComputeIssueUpdates(issues []Issue, regexpLabels []RegexpLabel) []IssueUpdate {
 	var issueUpdates []IssueUpdate
 
 	for _, issue := range issues {
@@ -103,7 +103,7 @@ func computeIssueUpdates(issues []Issue, regexpLabels []RegexpLabel) []IssueUpda
 			issueUpdate.OldLabels = append(issueUpdate.OldLabels, label)
 		}
 
-		affectedResources := extractAffectedResources(issue.Body)
+		affectedResources := ExtractAffectedResources(issue.Body)
 		for _, needed := range ComputeLabels(affectedResources, regexpLabels) {
 			desired[needed] = struct{}{}
 		}

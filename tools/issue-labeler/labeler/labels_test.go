@@ -1,4 +1,4 @@
-package main
+package labeler
 
 import (
 	"reflect"
@@ -35,7 +35,7 @@ func TestExtractAffectedResources(t *testing.T) {
 		tc := tc
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
-			resources := extractAffectedResources(tc.body)
+			resources := ExtractAffectedResources(tc.body)
 			if !slices.Equal(resources, tc.expectedResources) {
 				t.Errorf("Expected %v, got %v", tc.expectedResources, resources)
 			}

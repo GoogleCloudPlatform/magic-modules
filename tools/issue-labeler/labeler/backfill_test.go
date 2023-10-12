@@ -1,4 +1,4 @@
-package main
+package labeler
 
 import (
 	"fmt"
@@ -160,7 +160,7 @@ func TestComputeIssueUpdates(t *testing.T) {
 		tc := tc
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
-			issueUpdates := computeIssueUpdates(tc.issues, tc.regexpLabels)
+			issueUpdates := ComputeIssueUpdates(tc.issues, tc.regexpLabels)
 			// reflect.DeepEqual treats nil & empty slices as not equal so ignore diffs if both slices are empty.
 			if (len(issueUpdates) > 0 || len(tc.expectedIssueUpdates) > 0) && !reflect.DeepEqual(issueUpdates, tc.expectedIssueUpdates) {
 				t.Errorf("Expected %v, got %v", tc.expectedIssueUpdates, issueUpdates)
