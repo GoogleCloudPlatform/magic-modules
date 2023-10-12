@@ -1389,6 +1389,48 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			}
 		}
 
+		if d.HasChange(prefix + "nodeconfig.0.taints") {
+			req := &container.UpdateNodePoolRequest{
+				Name: name,
+			}
+			if v, ok := d.GetOk(prefix + "node_config.0.taints"); ok {
+				taintsList := v.([]interface{})
+				taints := []string{}
+				for _, v := range taintsList {
+					if v != nil {
+						taints = append(taints, v.(string))
+					}
+				}
+				ntaints := &container.NodeTaints{
+					Taints: taints,
+				}
+				req.Taints = ntaints
+			}
+
+			updateF := func() error {
+				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+				if config.UserProjectOverride {
+					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
+				}
+				op, err := clusterNodePoolsUpdateCall.Do()
+				if err != nil {
+					return err
+				}
+
+				// Wait until it's updated
+				return ContainerOperationWait(config, op,
+					nodePoolInfo.project,
+					nodePoolInfo.location,
+					"updating GKE node pool", userAgent,
+					timeout)
+			}
+
+			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
+					return err
+			}
+			log.Printf("[INFO] Updated taints for Node Pool %s", d.Id())
+		}
+
 		if d.HasChange(prefix + "node_config.0.tags") {
 			req := &container.UpdateNodePoolRequest{
 				Name: name,
