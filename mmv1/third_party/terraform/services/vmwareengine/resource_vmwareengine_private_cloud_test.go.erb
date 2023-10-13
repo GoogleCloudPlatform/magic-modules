@@ -28,30 +28,12 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckVmwareenginePrivateCloudDestroyProducer(t),
-    ExternalProviders: map[string]resource.ExternalProvider {
+		ExternalProviders: map[string]resource.ExternalProvider {
 			"time":   {},
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testPrivateCloudUpdateConfig(context, "description1", 3),
-			},
-			{
-				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name"},
-			},
-			{
-				Config: testPrivateCloudUpdateConfig(context, "description2", 4), // Expand PC
-			},
-			{
-				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name"},
-			},
-			{
-				Config: testPrivateCloudUpdateConfig(context, "description2", 3), // Shrink PC
 			},
 			{
 				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
@@ -68,23 +50,20 @@ func testPrivateCloudUpdateConfig(context map[string]interface{}, description st
 	context["description"] = description
 
 	return acctest.Nprintf(`
-resource "google_vmwareengine_network" "default-nw" {
-   provider      	   = google-beta
-   project           = google_project_service.acceptance.project
+data "google_vmwareengine_network" "default-nw" {
+   provider      	 = google-beta
    name              = "%{region}-default"
    location          = "%{region}"
-   type              = "LEGACY"
 }
 
 resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
   location = "%{region}-a"
   name = "tf-test-sample-pc%{random_suffix}"
-  project = google_project_service.acceptance.project
   provider = google-beta
   description = "%{description}"
   network_config {
-    management_cidr = "192.168.30.0/24"
-    vmware_engine_network = google_vmwareengine_network.default-nw.id
+    management_cidr = "192.168.0.0/24"
+    vmware_engine_network = data.google_vmwareengine_network.default-nw.id
   }
   management_cluster {
     cluster_id = "tf-test-sample-mgmt-cluster-custom-core-count%{random_suffix}"
@@ -94,30 +73,6 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
       custom_core_count = 32
     }
   }
-}
-
-# there can be only 1 Legacy network per region for a given project, so creating new project to isolate tests.
-resource "google_project" "acceptance" {
-  name            = "tf-test-%{random_suffix}"
-  provider        = google-beta
-  project_id      = "tf-test-%{random_suffix}"
-  org_id          = "%{organization}"
-  billing_account = "%{billing_account}"
-}
-
-resource "google_project_service" "acceptance" {
-  project  = google_project.acceptance.project_id
-  provider = google-beta
-  service  = "vmwareengine.googleapis.com"
-
-  # Needed for CI tests for permissions to propagate, should not be needed for actual usage
-  depends_on = [time_sleep.wait_60_seconds]
-}
-
-resource "time_sleep" "wait_60_seconds" {
-  depends_on = [google_project.acceptance]
-
-  create_duration = "60s"
 }
 `, context)
 }

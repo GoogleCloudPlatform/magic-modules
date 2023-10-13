@@ -140,7 +140,7 @@ data "google_vmwareengine_cluster" ds {
   name = "tf-test-ext-cluster%{random_suffix}"
   provider = google-beta
   parent = google_vmwareengine_private_cloud.cluster-pc.id
-	depends_on = [
+  depends_on = [
     google_vmwareengine_cluster.vmw-engine-ext-cluster,
   ]
 }
@@ -151,7 +151,7 @@ data "google_vmwareengine_private_cloud" ds {
   project  = google_project_service.acceptance.project
   name = "tf-test-sample-pc%{random_suffix}"
   depends_on = [
-   	google_vmwareengine_private_cloud.cluster-pc,
+    google_vmwareengine_private_cloud.cluster-pc,
   ]
 }
 
