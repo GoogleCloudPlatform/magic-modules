@@ -56,6 +56,8 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
+    # https://github.com/hashicorp/terraform-provider-google/issues/16231
+    skip_vcr: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/alloydb_backup.erb
 parameters:
