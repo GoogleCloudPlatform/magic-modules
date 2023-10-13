@@ -31,26 +31,26 @@ import (
 )
 
 type FrameworkProviderConfig struct {
-    BillingProject types.String
-    Client *http.Client
-    Context context.Context
-    gRPCLoggingOptions []option.ClientOption
-    PollInterval time.Duration
-    Project types.String
-    Region types.String
-    Zone types.String
-    RequestBatcherIam *transport_tpg.RequestBatcher
-    RequestBatcherServiceUsage *transport_tpg.RequestBatcher
-    Scopes types.List
-    TokenSource oauth2.TokenSource
+	BillingProject types.String
+	Client *http.Client
+	Context context.Context
+	gRPCLoggingOptions []option.ClientOption
+	PollInterval time.Duration
+	Project types.String
+	Region types.String
+	Zone types.String
+	RequestBatcherIam *transport_tpg.RequestBatcher
+	RequestBatcherServiceUsage *transport_tpg.RequestBatcher
+	Scopes types.List
+	TokenSource oauth2.TokenSource
 	UniverseDomain types.String
-    UserAgent string
-    UserProjectOverride types.Bool
+	UserAgent string
+	UserProjectOverride types.Bool
 
-    // paths for client setup
-    <% products.each do |product| -%>
-    <%= product[:definitions].name -%>BasePath string
-    <% end -%>
+	// paths for client setup
+	<% products.each do |product| -%>
+	<%= product[:definitions].name -%>BasePath string
+	<% end -%>
 }
 
 // LoadAndValidateFramework handles the bulk of configuring the provider
