@@ -78,6 +78,7 @@ properties:
   properties:
   - !ruby/object:Api::Type::String
     name: machineType
+    default_from_api: true
     description: |
       Optional. The machine type of the VM instance. https://cloud.google.com/compute/docs/machine-resource
     pattern: projects/{{project}}/zones/{{location}}/machineTypes/{{name}}
@@ -111,14 +112,17 @@ properties:
       Currently supports only one accelerator configuration.
   - !ruby/object:Api::Type::Array
     name: serviceAccounts
+    default_from_api: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
       - !ruby/object:Api::Type::String
         name: email
+        default_from_api: true
         description: Optional. Email address of the service account.
       - !ruby/object:Api::Type::Array
         name: scopes
         item_type: Api::Type::String
+        default_from_api: true
         description: Output only. The list of scopes to be made available for this
           service account. Set by the CLH to https://www.googleapis.com/auth/cloud-platform
         output: true
@@ -145,17 +149,20 @@ properties:
       - vm_image.0.name
       - vm_image.0.family
     name: vmImage
+    default_from_api: true
     description: Definition of a custom Compute Engine virtual machine image for starting
       a workbench instance with the environment installed directly on the VM.
   - !ruby/object:Api::Type::NestedObject
     properties:
     - !ruby/object:Api::Type::String
       name: diskSizeGb
+      default_from_api: true
       description: Optional. The size of the boot disk in GB attached to this instance,
         up to a maximum of 64000 GB (64 TB). If not specified, this defaults to the
         recommended value of 150GB.
     - !ruby/object:Api::Type::Enum
       name: diskType
+      default_from_api: true
       values:
         - DISK_TYPE_UNSPECIFIED
         - PD_STANDARD
@@ -165,6 +172,7 @@ properties:
       description: Optional. Indicates the type of the disk.
     - !ruby/object:Api::Type::Enum
       name: diskEncryption
+      default_from_api: true
       values:
         - DISK_ENCRYPTION_UNSPECIFIED
         - GMEK
@@ -179,18 +187,22 @@ properties:
         Learn more about using your own encryption keys.'
       immutable: true
     name: bootDisk
+    default_from_api: true
     description: The definition of a boot disk.
   - !ruby/object:Api::Type::Array
     name: dataDisks
+    default_from_api: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
       - !ruby/object:Api::Type::String
         name: diskSizeGb
+        default_from_api: true
         description: Optional. The size of the disk in GB attached to this VM instance,
           up to a maximum of 64000 GB (64 TB). If not specified, this defaults to
           100.
       - !ruby/object:Api::Type::Enum
         name: diskType
+        default_from_api: true
         values:
           - DISK_TYPE_UNSPECIFIED
           - PD_STANDARD
@@ -201,6 +213,7 @@ properties:
         immutable: true
       - !ruby/object:Api::Type::Enum
         name: diskEncryption
+        default_from_api: true
         values:
           - DISK_ENCRYPTION_UNSPECIFIED
           - GMEK
@@ -220,38 +233,43 @@ properties:
     properties:
     - !ruby/object:Api::Type::Boolean
       name: enableSecureBoot
+      send_empty_value: true
       description: Optional. Defines whether the VM instance has Secure Boot enabled.
         Secure Boot helps ensure that the system only runs authentic software by verifying
         the digital signature of all boot components, and halting the boot process
         if signature verification fails. Disabled by default.
     - !ruby/object:Api::Type::Boolean
       name: enableVtpm
+      send_empty_value: true
       description: Optional. Defines whether the VM instance has the vTPM enabled.
         Enabled by default.
     - !ruby/object:Api::Type::Boolean
       name: enableIntegrityMonitoring
+      send_empty_value: true
       description: Optional. Defines whether the VM instance has integrity monitoring
         enabled. Enables monitoring and attestation of the boot integrity of the VM
         instance. The attestation is performed against the integrity policy baseline.
         This baseline is initially derived from the implicitly trusted boot image
         when the VM instance is created. Enabled by default.
     name: shieldedInstanceConfig
+    default_from_api: true
     description: A set of Shielded Instance options. See [Images using supported Shielded
       VM features](https://cloud.google.com/compute/docs/instances/modifying-shielded-vm).
       Not all combinations are valid.
   - !ruby/object:Api::Type::Array
     name: networkInterfaces
+    default_from_api: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
       - !ruby/object:Api::Type::String
         name: network
-        description: 'Optional. The name of the VPC that this VM instance is in. Format:
-          `projects/{project_id}/global/networks/{network_id}`'
+        description: 'Optional. The name of the VPC that this VM instance is in.'
+        custom_expand: templates/terraform/custom_expand/network_full_url.erb
         diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
       - !ruby/object:Api::Type::String
         name: subnet
-        description: 'Optional. The name of the subnet that this VM instance is in.
-          Format: `projects/{project_id}/regions/{region}/subnetworks/{subnetwork_id}`'
+        description: 'Optional. The name of the subnet that this VM instance is in.'
+        custom_expand: templates/terraform/custom_expand/network_full_url.erb
         diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
       - !ruby/object:Api::Type::Enum
         name: nicType
@@ -264,14 +282,18 @@ properties:
     description: Optional. The network interfaces for the VM. Supports only one interface.
   - !ruby/object:Api::Type::Boolean
     name: disablePublicIp
+    default_from_api: true
     description: Optional. If true, no external IP will be assigned to this VM instance.
   - !ruby/object:Api::Type::Array
     name: tags
     item_type: Api::Type::String
-    description: Optional. The Compute Engine tags to add to runtime (see [Tagging
+    default_from_api: true
+    description: Optional. The Compute Engine tags to add to instance (see [Tagging
       instances](https://cloud.google.com/compute/docs/label-or-tag-resources#tags)).
   - !ruby/object:Api::Type::KeyValuePairs
     name: metadata
+    default_from_api: true
+    diff_suppress_func: WorkbenchInstanceMetadataDiffSuppress
     description: Optional. Custom metadata to apply to this instance.
   - !ruby/object:Api::Type::Boolean
     name: enableIpForwarding
@@ -292,6 +314,7 @@ properties:
     name: gpuDriverConfig
     description: A GPU driver configuration
   name: gceSetup
+  default_from_api: true
   description: The definition of how to configure a VM instance outside of Resources
     and Identity.
 - !ruby/object:Api::Type::String
