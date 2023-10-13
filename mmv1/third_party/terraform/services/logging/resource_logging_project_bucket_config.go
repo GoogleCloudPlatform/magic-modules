@@ -106,31 +106,24 @@ See [Enabling CMEK for Logging Buckets](https://cloud.google.com/logging/docs/ro
 			},
 		},
 	},
-	"index_configs": &schema.Schema{
+	"index_configs": {
 		Type:        schema.TypeSet,
 		MaxItems:    20,
 		Optional:    true,
 		Description: `A list of indexed fields and related configuration data.`,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"field_path": &schema.Schema{
+				"field_path": {
 					Type:        schema.TypeString,
-					Required: true,
+					Required:    true,
 					Description: `The LogEntry field path to index.`,
 				},
-				"type": &schema.Schema{
+				"type": {
 					Type:     schema.TypeString,
 					Required: true,
 					Description: `The type of data in this index
 Note that some paths are automatically indexed, and other paths are not eligible for indexing. See [indexing documentation]( https://cloud.google.com/logging/docs/view/advanced-queries#indexed-fields) for details.
 For example: jsonPayload.request.status`,
-				},
-				"create_time": &schema.Schema{
-					Type:     schema.TypeString,
-					Computed: true,
-					Description: `The timestamp when the index was last modified..
-This is used to return the timestamp, and will be ignored if supplied during update.
-A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".`,
 				},
 			},
 		},
@@ -316,11 +309,8 @@ func resourceLoggingProjectBucketConfigRead(d *schema.ResourceData, meta interfa
 		return fmt.Errorf("Error setting cmek_settings: %s", err)
 	}
 
-	indexConfigs, ok := res["indexConfigs"]
-	if ok {
-		if err := d.Set("index_configs", flattenIndexConfigs(indexConfigs.([]interface{}))); err != nil {
-			return fmt.Errorf("Error setting index_configs: %s", err)
-		}
+	if err := d.Set("index_configs", flattenIndexConfigs(indexConfigs.([]interface{}))); err != nil {
+		return fmt.Errorf("Error setting index_configs: %s", err)
 	}
 
 	return nil

@@ -546,7 +546,7 @@ func TestAccLoggingBucketConfigOrganization_indexConfigs(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"organization"},
 			},
 			{
-				Config: testAccLoggingBucketConfigOrganization_indexConfigs(context, "INDEX_TYPE_STRING", "INDEX_TYPE_STRING"),
+				Config: testAccLoggingBucketConfigOrganization_indexConfigs(context, "INDEX_TYPE_STRING", "INDEX_TYPE_INTEGER"),
 			},
 			{
 				ResourceName:            "google_logging_organization_bucket_config.basic",
@@ -571,7 +571,7 @@ resource "google_logging_organization_bucket_config" "basic" {
 	description = "retention test 30 days"
 	bucket_id = "_Default"
 
-    index_configs {
+	index_configs {
 		field_path 	= "jsonPayload.request.url"
 		type		= "%s"
 	}
