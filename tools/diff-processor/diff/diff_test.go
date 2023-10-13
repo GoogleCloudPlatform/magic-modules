@@ -22,7 +22,35 @@ import (
 func TestNewProviderOldProviderChanges(t *testing.T) {
 	changes := ComputeSchemaDiff(oldProvider.ResourceMap(), newProvider.ResourceMap())
 
-	t.Logf("Changes between old and new providers: %s", spew.Sdump(changes))
+	for resource, resourceDiff := range changes {
+		if resourceDiff.ResourceConfig.Old == nil {
+			t.Logf("%s is added", resource)
+			continue
+		}
+		if resourceDiff.ResourceConfig.New == nil {
+			t.Logf("%s is removed", resource)
+			continue
+		}
+		t.Logf("%s is modified", resource)
+		if diff := cmp.Diff(resourceDiff.ResourceConfig.Old, resourceDiff.ResourceConfig.New); diff != "" {
+			t.Logf("%s config changes (-old, +new):\n%s", resource, diff)
+		}
+		for field, fieldDiff := range resourceDiff.Fields {
+			if fieldDiff.Old == nil {
+				t.Logf("%s.%s is added", resource, field)
+				continue
+			}
+			if fieldDiff.New == nil {
+				t.Logf("%s.%s is removed", resource, field)
+				continue
+			}
+			t.Logf("%s.%s is modified", resource, field)
+			if diff := cmp.Diff(fieldDiff.Old, fieldDiff.New); diff != "" {
+				t.Logf("%s.%s changes (-old, +new):\n%s", resource, field, diff)
+			}
+		}
+
+	}
 }
 
 func TestFlattenSchema(t *testing.T) {
