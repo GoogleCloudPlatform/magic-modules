@@ -540,66 +540,67 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 		return nil
 	}
 
-	config := meta.(*transport_tpg.Config)
-	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
-	if err != nil {
-		return err
+	if jobHasUpdate(d, ResourceDataflowFlexTemplateJob().Schema) {
+		config := meta.(*transport_tpg.Config)
+		userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+		if err != nil {
+			return err
+		}
+
+		project, err := tpgresource.GetProject(d, config)
+		if err != nil {
+			return err
+		}
+
+		region, err := tpgresource.GetRegion(d, config)
+		if err != nil {
+			return err
+		}
+
+		tnamemapping := tpgresource.ExpandStringMap(d, "transform_name_mapping")
+
+		env, updatedParameters, err := resourceDataflowFlexJobSetupEnv(d, config)
+		if err != nil {
+			return err
+		}
+
+		// wait until current job is running or terminated
+		err = waitForDataflowJobState(d, config, d.Id(), userAgent, d.Timeout(schema.TimeoutUpdate), "JOB_STATE_RUNNING")
+		if err != nil {
+			return fmt.Errorf("Error waiting for job with job ID %q to be running: %s", d.Id(), err)
+		}
+
+		request := dataflow.LaunchFlexTemplateRequest{
+			LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
+
+				ContainerSpecGcsPath:  d.Get("container_spec_gcs_path").(string),
+				JobName:               d.Get("name").(string),
+				Parameters:            updatedParameters,
+				TransformNameMappings: tnamemapping,
+				Environment:           &env,
+				Update:                true,
+			},
+		}
+
+		response, err := config.NewDataflowClient(userAgent).Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
+		if err != nil {
+			return err
+		}
+
+		// don't set id until new job is successfully running
+		job := response.Job
+		err = waitForDataflowJobState(d, config, job.Id, userAgent, d.Timeout(schema.TimeoutUpdate), "JOB_STATE_RUNNING")
+		if err != nil {
+			// the default behavior is to overwrite the resource's state with the state of the "new" job, even though we are returning an error here. this call to Partial prevents this behavior
+			d.Partial(true)
+			return fmt.Errorf("Error waiting for Job with job ID %q to be updated: %s", job.Id, err)
+		}
+
+		d.SetId(job.Id)
+		if err := d.Set("job_id", job.Id); err != nil {
+			return fmt.Errorf("Error setting job_id: %s", err)
+		}
 	}
-
-	project, err := tpgresource.GetProject(d, config)
-	if err != nil {
-		return err
-	}
-
-	region, err := tpgresource.GetRegion(d, config)
-	if err != nil {
-		return err
-	}
-
-	tnamemapping := tpgresource.ExpandStringMap(d, "transform_name_mapping")
-
-	env, updatedParameters, err := resourceDataflowFlexJobSetupEnv(d, config)
-	if err != nil {
-		return err
-	}
-
-	// wait until current job is running or terminated
-	err = waitForDataflowJobState(d, config, d.Id(), userAgent, d.Timeout(schema.TimeoutUpdate), "JOB_STATE_RUNNING")
-	if err != nil {
-		return fmt.Errorf("Error waiting for job with job ID %q to be running: %s", d.Id(), err)
-	}
-
-	request := dataflow.LaunchFlexTemplateRequest{
-		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
-
-			ContainerSpecGcsPath:  d.Get("container_spec_gcs_path").(string),
-			JobName:               d.Get("name").(string),
-			Parameters:            updatedParameters,
-			TransformNameMappings: tnamemapping,
-			Environment:           &env,
-			Update:                true,
-		},
-	}
-
-	response, err := config.NewDataflowClient(userAgent).Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
-	if err != nil {
-		return err
-	}
-
-	// don't set id until new job is successfully running
-	job := response.Job
-	err = waitForDataflowJobState(d, config, job.Id, userAgent, d.Timeout(schema.TimeoutUpdate), "JOB_STATE_RUNNING")
-	if err != nil {
-		// the default behavior is to overwrite the resource's state with the state of the "new" job, even though we are returning an error here. this call to Partial prevents this behavior
-		d.Partial(true)
-		return fmt.Errorf("Error waiting for Job with job ID %q to be updated: %s", job.Id, err)
-	}
-
-	d.SetId(job.Id)
-	if err := d.Set("job_id", job.Id); err != nil {
-		return fmt.Errorf("Error setting job_id: %s", err)
-	}
-
 	return resourceDataflowFlexTemplateJobRead(d, meta)
 }
 
@@ -789,7 +790,7 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 				continue
 			}
 
-			if field != "labels" && field != "terraform_labels" && d.HasChange(field) {
+			if field != "terraform_labels" && d.HasChange(field) {
 				if err := d.ForceNew(field); err != nil {
 					return err
 				}
