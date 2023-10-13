@@ -1786,22 +1786,23 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 }
 
 <% unless version = 'ga' -%>
-func TestAccComputeInstanceConfidentialHyperDiskBootDisk(t *testing.T) {
+func TestAccComputeInstance_confidentialHyperDiskBootDisk(t *testing.T) {
 	t.Parallel()
 
 	context_1 := map[string]interface{}{
-		"name":        fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"confidential_compute": true,
-		"kms_key" : acctest.BootstrapKMSKey(t)
+		"instance_name":         fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"confidential_compute":  true,
+		"kms_key" :              acctest.BootstrapKMSKey(t)
+		"zone":                  "us-central1-a"
 	}
 
 	context_2 := map[string]interface{}{
-		"name":        context_1["random_suffix"],
+		"instance_name":        context_1["instance_name"],
 		"confidential_compute": false,
-		"kms_key" : acctest.BootstrapKMSKey(t)
+		"kms_key" :             context_1["kms_key"],
+		"zone":                 context_1["zone]
 	}
 
-	var instance compute.Instance
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1810,15 +1811,12 @@ func TestAccComputeInstanceConfidentialHyperDiskBootDisk(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstanceConfidentialHyperDiskBootDisk(context_1),
-				Check: resource.ComposeTestCheckFunc(testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance)
-				),
 			},
+			computeInstanceImportStep(context_1["zone"], context_1["instance_name"], []string{"allow_stopping_for_update"}),
 			{
 				Config: testAccComputeInstanceConfidentialHyperDiskBootDisk(context_2),
-				Check: resource.ComposeTestCheckFunc(testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-				),
 			},
-
+			computeInstanceImportStep(context_2["zone"], context_2["instance_name"], []string{"allow_stopping_for_update"}),
 		},
 	})
 }
@@ -6894,14 +6892,14 @@ func testAccComputeInstanceConfidentialHyperDiskBootDisk(context map[string]inte
 	return acctest.Nprintf(`
 }
 data "google_compute_image" "my_image" {
-  family    = "ubuntu-2004-lts"
+  family    = "ubuntu-2204-lts"
   project   = "ubuntu-os-cloud"
 }
 
 resource "google_compute_instance" "foobar" {
   name         = "%{name}"
   machine_type = "n2-standard-2"
-  zone         = "us-central1-a"
+  zone         = "%{zone}"
 
   boot_disk {
 
@@ -6911,17 +6909,12 @@ resource "google_compute_instance" "foobar" {
       type  = "hyperdisk-balanced"
     }
 
-    kms_key_self_link = %{kms_key}
+    kms_key_self_link = "%{kms_key}"
   }
 
   network_interface {
     network = "default"
   }
-
-  scheduling {
-	  on_host_maintenance = "TERMINATE"
-  }
-
 }
 `, context)
 }
