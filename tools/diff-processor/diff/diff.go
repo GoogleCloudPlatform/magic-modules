@@ -3,10 +3,10 @@ package diff
 import (
 	"reflect"
 
-	"golang.org/x/exp/maps"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"golang.org/x/exp/maps"
 )
 
 // SchemaDiff is a nested map with field names as keys and Field objects
@@ -16,7 +16,7 @@ type SchemaDiff map[string]ResourceDiff
 
 type ResourceDiff struct {
 	ResourceConfig ResourceConfigDiff
-	Fields map[string]FieldDiff
+	Fields         map[string]FieldDiff
 }
 
 type ResourceConfigDiff struct {
