@@ -1170,7 +1170,8 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 				return googleoauth.Credentials{}, fmt.Errorf("unable to parse credentials from '%s': %s", contents, err)
 			}
 			log.Printf("[INFO] Authenticating using configured Google JSON 'credentials'...")
-			log.Printf("[INFO]   -- Sending JwtWithScope option")
+			log.Printf("[INFO]   -- Scopes: %s", clientScopes)
+			log.Printf("[INFO]   -- Sending EnableJwtWithScope option")
 			return *creds, nil
 		} else {
 			creds, err := transport.Creds(c.Context, option.WithCredentialsJSON([]byte(contents)), option.WithScopes(clientScopes...))
