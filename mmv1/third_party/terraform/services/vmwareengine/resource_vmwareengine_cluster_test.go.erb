@@ -72,6 +72,7 @@ func testVmwareEngineClusterConfig(context map[string]interface{}, nodeCount int
 
 resource "google_vmwareengine_cluster" "vmw-engine-ext-cluster" {
   provider = google-beta
+  project = google_project_service.acceptance.project
   name = "tf-test-ext-cluster%{random_suffix}"
   parent =  google_vmwareengine_private_cloud.cluster-pc.id
   node_type_configs {
@@ -83,6 +84,7 @@ resource "google_vmwareengine_cluster" "vmw-engine-ext-cluster" {
 
 resource "google_vmwareengine_private_cloud" "cluster-pc" {
   provider = google-beta
+  project = google_project_service.acceptance.project
   location = "%{region}-a"
   name = "tf-test-sample-pc%{random_suffix}"
   description = "Sample test PC."
@@ -103,26 +105,52 @@ resource "google_vmwareengine_private_cloud" "cluster-pc" {
 
 resource "google_vmwareengine_network" "cluster-nw" {
   provider          = google-beta
+  project           = google_project_service.acceptance.project
   name              = "%{region}-default"
   location          = "%{region}"
   type              = "LEGACY"
   description       = "PC network description."
 }
 
+# there can be only 1 Legacy network per region for a given project, so creating new project to isolate tests.
+resource "google_project" "acceptance" {
+  name            = "tf-test-%{random_suffix}"
+  provider        = google-beta
+  project_id      = "tf-test-%{random_suffix}"
+  org_id          = "%{organization}"
+  billing_account = "%{billing_account}"
+}
+
+resource "google_project_service" "acceptance" {
+  project  = google_project.acceptance.project_id
+  provider = google-beta
+  service  = "vmwareengine.googleapis.com"
+
+  # Needed for CI tests for permissions to propagate, should not be needed for actual usage
+  depends_on = [time_sleep.wait_60_seconds]
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  depends_on = [google_project.acceptance]
+
+  create_duration = "60s"
+}
+
 data "google_vmwareengine_cluster" ds {
   name = "tf-test-ext-cluster%{random_suffix}"
-	provider = google-beta
-	parent = google_vmwareengine_private_cloud.cluster-pc.id
+  provider = google-beta
+  parent = google_vmwareengine_private_cloud.cluster-pc.id
 	depends_on = [
     google_vmwareengine_cluster.vmw-engine-ext-cluster,
   ]
 }
 
 data "google_vmwareengine_private_cloud" ds {
-	location = "%{region}-a"
-	provider = google-beta
+  location = "%{region}-a"
+  provider = google-beta
+  project  = google_project_service.acceptance.project
   name = "tf-test-sample-pc%{random_suffix}"
-	depends_on = [
+  depends_on = [
    	google_vmwareengine_private_cloud.cluster-pc,
   ]
 }
