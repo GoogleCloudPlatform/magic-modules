@@ -484,7 +484,7 @@ properties:
 virtual_fields:
   - !ruby/object:Api::Type::Enum
     name: 'deletion_policy'
-    description: 'Policy to determine if the cluster should be deleted forecefully. Deleting a cluster forcefully, deletes the cluster and all its associated instances within the cluster.'
+    description: 'Policy to determine if the cluster should be deleted forcefully. Deleting a cluster forcefully, deletes the cluster and all its associated instances within the cluster.'
     values:
       - :DEFAULT
       - :FORCE
