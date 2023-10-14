@@ -69,7 +69,12 @@ func terraformShow(t *testing.T, executable, dir, tfplan string) []byte {
 
 func terraformExec(t *testing.T, executable, dir string, args ...string) []byte {
 	cmd := exec.Command(executable, args...)
-	cmd.Env = []string{"HOME=" + filepath.Join(dir, "fakehome")}
+	cmd.Env = []string{
+		"HOME=" + filepath.Join(dir, "fakehome"),
+		"GOOGLE_PROJECT=" + data.Provider["project"],
+		"GOOGLE_FOLDER=" + data.FolderID,
+		"GOOGLE_ORG=" + data.OrgID,
+	}
 	cmd.Dir = dir
 	wantError := false
 	payload, _ := run(t, cmd, wantError)
@@ -177,28 +182,6 @@ func generateTFVconvertedAsset(t *testing.T, testDir, testSlug string) {
 	}
 
 	fmt.Println("created file : " + dstFile)
-}
-
-func getTestPrefix() string {
-	credentials, ok := data.Provider["credentials"]
-	if ok {
-		credentials = "credentials = \"" + credentials + "\""
-	}
-
-	return fmt.Sprintf(`terraform {
-		required_providers {
-			google = {
-				source  = "hashicorp/google"
-				version = "~> %s"
-			}
-		}
-	}
-
-	provider "google" {
-		%s
-	}
-
-`, data.Provider["version"], credentials)
 }
 
 // newTestConfig create a config using the http test server.

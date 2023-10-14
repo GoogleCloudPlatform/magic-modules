@@ -55,6 +55,7 @@ func TestCLI(t *testing.T) {
 		{name: "example_project_create_empty_project_id"},
 		{name: "example_project_iam_member_empty_project"},
 		{name: "example_storage_bucket"},
+		{name: "example_storage_bucket_empty_project_id"},
 		{name: "example_folder_iam_binding", compareConvertOutput: compareMergedIamBindingOutput},
 		{name: "example_folder_iam_member", compareConvertOutput: compareMergedIamMemberOutput},
 		{name: "example_project_create"},
@@ -152,7 +153,7 @@ func TestCLIWithoutProject(t *testing.T) {
 		compareConvertOutput compareConvertOutputFunc
 	}{
 		{name: "example_project_create_empty_project_id"},
-		{name: "example_storage_bucket"},
+		{name: "example_storage_bucket_empty_project_id"},
 		{name: "example_project_iam_member_empty_project"},
 	}
 

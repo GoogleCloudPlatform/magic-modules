@@ -13,7 +13,6 @@
 
 --- !ruby/object:Api::Resource
 name: 'VmwareCluster'
-min_version: beta
 base_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters'
 create_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters?vmware_cluster_id={{name}}'
 update_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}'
@@ -34,7 +33,6 @@ timeouts: !ruby/object:Api::Timeouts
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_vmware_cluster_basic'
-    min_version: beta
     primary_resource_id: 'cluster-basic'
     vars:
       name: 'cluster-basic'
@@ -42,7 +40,6 @@ examples:
       project: 'fake-backend-360322'
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_vmware_cluster_f5lb'
-    min_version: beta
     primary_resource_id: 'cluster-f5lb'
     vars:
       name: 'cluster-f5lb'
@@ -50,7 +47,6 @@ examples:
       project: 'fake-backend-360322'
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_vmware_cluster_manuallb'
-    min_version: beta
     primary_resource_id: 'cluster-manuallb'
     vars:
       name: 'cluster-manuallb'
