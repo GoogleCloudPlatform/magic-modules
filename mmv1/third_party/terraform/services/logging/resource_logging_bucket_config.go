@@ -314,7 +314,7 @@ func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error setting cmek_settings: %s", err)
 	}
 
-	if err := d.Set("index_configs", flattenIndexConfigs(indexConfigs.([]interface{}))); err != nil {
+	if err := d.Set("index_configs", flattenIndexConfigs(res["indexConfigs"].([]interface{}))); err != nil {
 		return fmt.Errorf("Error setting index_configs: %s", err)
 	}
 
