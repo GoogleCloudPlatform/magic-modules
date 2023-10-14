@@ -293,6 +293,7 @@ const SharedTestNetworkPrefix = "tf-bootstrap-net-"
 // BootstrapSharedTestNetwork will return a persistent compute network for a
 // test or set of tests.
 //
+// Case 1
 // Resources like service_networking_connection use a consumer network and
 // create a complementing tenant network which we don't control. These tenant
 // networks never get cleaned up and they can accumulate to the point where a
@@ -305,9 +306,11 @@ const SharedTestNetworkPrefix = "tf-bootstrap-net-"
 // the same testId should generally not be used across tests, to avoid race
 // conditions where multiple tests attempt to modify the connection at once.
 //
+// Case 2
+//
 // Returns the name of a network, creating it if it hasn't been created in the
 // test project.
-func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
+func BootstrapSharedTestNetwork(t *testing.T, testId string, autoCreateSubnetworks bool) string {
 	project := envvar.GetTestProjectFromEnv()
 	networkName := SharedTestNetworkPrefix + testId
 
@@ -323,7 +326,7 @@ func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
 		url := fmt.Sprintf("%sprojects/%s/global/networks", config.ComputeBasePath, project)
 		netObj := map[string]interface{}{
 			"name":                  networkName,
-			"autoCreateSubnetworks": false,
+			"autoCreateSubnetworks": autoCreateSubnetworks,
 		}
 
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -442,7 +445,7 @@ func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string) str
 		t.Fatalf("Error getting project: %s", err)
 	}
 
-	networkName := BootstrapSharedTestNetwork(t, testId)
+	networkName := BootstrapSharedTestNetwork(t, testId, false)
 	networkId := fmt.Sprintf("projects/%v/global/networks/%v", project.ProjectNumber, networkName)
 	globalAddressName := BootstrapSharedTestGlobalAddress(t, testId, networkId)
 

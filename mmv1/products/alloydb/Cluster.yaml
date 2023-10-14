@@ -74,7 +74,7 @@ examples:
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "alloydb-instance-basic")'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "alloydb-instance-basic", false)'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
