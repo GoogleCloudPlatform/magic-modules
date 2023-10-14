@@ -10,7 +10,8 @@
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "autoCreateSubnetworks": true,
-        "name": "my-network"
+        "name": "my-network",
+        "networkFirewallPolicyEnforcementOrder": "AFTER_CLASSIC_FIREWALL"
       }
     }
   },

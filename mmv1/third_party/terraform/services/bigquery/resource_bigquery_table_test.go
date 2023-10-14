@@ -595,13 +595,13 @@ func TestAccBigQueryTable_MaterializedView_NonIncremental_basic(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "require_partition_filter", "time_partitioning.0.require_partition_filter"},
 			},
 			{
 				ResourceName:            "google_bigquery_table.mv_test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "require_partition_filter", "time_partitioning.0.require_partition_filter"},
 			},
 		},
 	})
@@ -1624,9 +1624,9 @@ resource "google_bigquery_table" "test" {
   time_partitioning {
     type                     = "%s"
     field                    = "ts"
-    require_partition_filter = true
     expiration_ms            = 1000
   }
+  require_partition_filter = true
   clustering = ["some_int", "some_string"]
   schema     = <<EOH
 [
@@ -2001,8 +2001,8 @@ resource "google_bigquery_table" "test" {
   time_partitioning {
     type                     = "DAY"
     field                    = "ts"
-    require_partition_filter = true
   }
+  require_partition_filter = true
   clustering = ["some_int", "some_string"]
   schema     = <<EOH
 [
@@ -2078,8 +2078,8 @@ resource "google_bigquery_table" "test" {
   time_partitioning {
     type                     = "DAY"
     field                    = "ts"
-    require_partition_filter = true
   }
+  require_partition_filter = true
   clustering = ["some_int", "some_string"]
   schema     = <<EOH
 [
