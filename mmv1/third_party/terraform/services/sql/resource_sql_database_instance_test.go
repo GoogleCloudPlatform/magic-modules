@@ -1460,10 +1460,6 @@ func TestAccSqlDatabaseInstance_encryptionKey_replicaInDifferentRegion(t *testin
 }
 
 func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
-	// skip the test until Active Directory setup issue gets resolved
-	// see https://github.com/hashicorp/terraform-provider-google/issues/13517
-	t.Skip()
-
 	t.Parallel()
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "sql-instance-ad-1")
