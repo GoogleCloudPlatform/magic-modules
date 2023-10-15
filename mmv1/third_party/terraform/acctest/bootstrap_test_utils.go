@@ -293,7 +293,7 @@ const SharedTestNetworkPrefix = "tf-bootstrap-net-"
 // BootstrapSharedTestNetwork will return a persistent compute network for a
 // test or set of tests.
 //
-// Case 1
+// Usage 1
 // Resources like service_networking_connection use a consumer network and
 // create a complementing tenant network which we don't control. These tenant
 // networks never get cleaned up and they can accumulate to the point where a
@@ -301,12 +301,13 @@ const SharedTestNetworkPrefix = "tf-bootstrap-net-"
 // test runs, we can reduce the number of tenant networks that are needed.
 // See b/146351146 for more context.
 //
+// Usage 2
+// VCP-native GKE cluster
+//
 // testId specifies the test for which a shared network is used/initialized.
 // Note that if the network is being used for a service_networking_connection,
 // the same testId should generally not be used across tests, to avoid race
 // conditions where multiple tests attempt to modify the connection at once.
-//
-// Case 2
 //
 // Returns the name of a network, creating it if it hasn't been created in the
 // test project.
