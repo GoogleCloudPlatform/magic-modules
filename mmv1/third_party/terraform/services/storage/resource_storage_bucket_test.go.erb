@@ -56,6 +56,8 @@ func TestAccStorageBucket_basic(t *testing.T) {
 func TestAccStorageBucket_basicWithAutoclass(t *testing.T) {
 	t.Parallel()
 
+	var bucket storage.Bucket
+	var updated storage.Bucket
 	bucketName := acctest.TestBucketName(t)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -66,8 +68,8 @@ func TestAccStorageBucket_basicWithAutoclass(t *testing.T) {
 			{
 				Config: testAccStorageBucket_basicWithAutoclass(bucketName, true),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_storage_bucket.bucket", "force_destroy", "false"),
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &bucket),
 				),
 			},
 			{
@@ -76,12 +78,13 @@ func TestAccStorageBucket_basicWithAutoclass(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
-			// Autoclass is ForceNew, so this destroys & recreates, but does test the explicitly disabled config
 			{
-				Config: testAccStorageBucket_basicWithAutoclass(bucketName, false),
+				Config: testAccStorageBucket_basicWithAutoclass_update(bucketName, true),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_storage_bucket.bucket", "force_destroy", "false"),
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &updated),
+					testAccCheckStorageBucketWasUpdated(&updated, &bucket),
+					testAccCheckAutoclassTerminalStorageClass("ARCHIVE", &updated),
 				),
 			},
 			{
@@ -1244,6 +1247,16 @@ func testAccCheckStorageBucketMissing(t *testing.T, bucketName string) resource.
 	}
 }
 
+func testAccCheckAutoclassTerminalStorageClass(expected string, b *storage.Bucket) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		actual := b.Autoclass.TerminalStorageClass
+		if expected != actual {
+			return fmt.Errorf("expected Autoclass Terminal Storage Class %s, instead got %s", expected, actual)
+		}
+		return nil
+	}
+}
+
 func testAccCheckStorageBucketLifecycleConditionState(expected *bool, b *storage.Bucket) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		actual := b.Lifecycle.Rule[0].Condition.IsLive
@@ -1296,9 +1309,24 @@ func testAccStorageBucket_basicWithAutoclass(bucketName string, autoclass bool) 
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
+  force_destroy = true
   autoclass  {
     enabled  = %t
   }
+}
+`, bucketName, autoclass)
+}
+
+func testAccStorageBucket_basicWithAutoclass_update(bucketName string, autoclass bool) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+	name     = "%s"
+	location = "US"
+	force_destroy = true
+	autoclass  {
+		enabled  = %t
+		terminal_storage_class = "ARCHIVE"
+	}
 }
 `, bucketName, autoclass)
 }
@@ -1680,10 +1708,7 @@ resource "google_storage_bucket" "bucket" {
       age            = 2
     }
   }
-  lifecycle_rule {
-    action {
-      type = "Delete"
-    }
+  lifecycle_rule {testAccStorageBucket_lifecycleRulesMultiple_update
     condition {
       matches_suffix = ["test"]
       age            = 2
