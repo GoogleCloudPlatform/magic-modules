@@ -15,7 +15,7 @@ import (
 )
 
 func TestAccUniverseDomainDisk(t *testing.T) {
-	// Skip VCR since this test can only run in specific test project.
+	// Skip this test in all env since this can only run in specific test project.
 	t.Skip()
 
 	universeDomain := envvar.GetTestUniverseDomainFromEnv(t)
@@ -33,9 +33,6 @@ func TestAccUniverseDomainDisk(t *testing.T) {
 }
 
 func TestAccDefaultUniverseDomainDisk(t *testing.T) {
-	// Skip VCR since this test can only run in specific test project.
-	// t.Skip()
-
 	universeDomain := "googleapis.com"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -57,7 +54,7 @@ provider "google" {
 }
 	  
 resource "google_compute_instance_template" "instance_template" {
-  name = "demo-it"
+  name = "demo-this"
   machine_type = "n1-standard-1"
 
 // boot disk

@@ -12,7 +12,7 @@ import (
 )
 
 func TestAccUniverseDomainStorage(t *testing.T) {
-	// Skip VCR since this test can only run in specific test project.
+	// Skip this test in all env since this can only run in specific test project.
 	// Location field from `google_storage_bucket` needs to be changed depending on the universe.
 	t.Skip()
 

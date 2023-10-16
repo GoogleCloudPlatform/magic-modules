@@ -650,7 +650,7 @@ func ReplaceVarsRecursive(d TerraformResourceData, config *transport_tpg.Config,
 // It also replaces {{project}}, {{project_id_or_project}}, {{region}}, and {{zone}} with their appropriate values
 // This function supports URL-encoding the result by prepending '%' to the field name e.g. {{%var}}
 func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *transport_tpg.Config, linkTmpl string, shorten bool) (func(string) string, error) {
-	var project, projectID, region, zone, universe_domain string
+	var project, projectID, region, zone string
 	var err error
 
 	if strings.Contains(linkTmpl, "{{project}}") {
@@ -668,13 +668,6 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 		if projectID == "" {
 			project, err = GetProject(d, config)
 		}
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if strings.Contains(linkTmpl, "{{universe_domain}}") {
-		universe_domain, err = GetUniverseDomain(d, config)
 		if err != nil {
 			return nil, err
 		}
@@ -708,9 +701,6 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 		}
 		if m == "region" {
 			return region
-		}
-		if m == "universe_domain" {
-			return universe_domain
 		}
 		if m == "zone" {
 			return zone

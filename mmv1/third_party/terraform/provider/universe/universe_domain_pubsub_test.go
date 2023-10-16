@@ -15,7 +15,7 @@ import (
 )
 
 func TestAccUniverseDomainPubSub(t *testing.T) {
-	// Skip VCR since this test can only run in specific test project.
+	// Skip this test in all env since this can only run in specific test project.
 	t.Skip()
 
 	universeDomain := envvar.GetTestUniverseDomainFromEnv(t)
