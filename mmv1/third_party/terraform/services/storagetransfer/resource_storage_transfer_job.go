@@ -50,6 +50,10 @@ var (
 		"transfer_spec.0.aws_s3_data_source.0.aws_access_key",
 		"transfer_spec.0.aws_s3_data_source.0.role_arn",
 	}
+	azureOptionCredentials = []string{
+		"transfer_spec.0.azure_blob_storage_data_source.0.azure_credentials",
+		"transfer_spec.0.azure_blob_storage_data_source.0.credentials_secret",
+	}
 )
 
 func ResourceStorageTransferJob() *schema.Resource {
@@ -559,9 +563,10 @@ func azureBlobStorageDataSchema() *schema.Resource {
 				Description: `Root path to transfer objects. Must be an empty string or full path name that ends with a '/'. This field is treated as an object prefix. As such, it should generally not begin with a '/'.`,
 			},
 			"azure_credentials": {
-				Type:     schema.TypeList,
-				Required: true,
-				MaxItems: 1,
+				Type:         schema.TypeList,
+				Optional:     true,
+				MaxItems:     1,
+				ExactlyOneOf: azureOptionCredentials,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"sas_token": {
@@ -573,6 +578,12 @@ func azureBlobStorageDataSchema() *schema.Resource {
 					},
 				},
 				Description: ` Credentials used to authenticate API requests to Azure.`,
+			},
+			"credentials_secret": {
+				Optional:     true,
+				Type:         schema.TypeString,
+				Description:  `Optional. The Resource name of a secret in Secret Manager.`,
+				ExactlyOneOf: azureOptionCredentials,
 			},
 		},
 	}
@@ -1099,6 +1110,9 @@ func expandAzureCredentials(azureCredentials []interface{}) *storagetransfer.Azu
 }
 
 func flattenAzureCredentials(d *schema.ResourceData) []map[string]interface{} {
+	if d.Get("transfer_spec.0.azure_blob_storage_data_source.0.azure_credentials.0.sas_token") == "" {
+		return []map[string]interface{}{}
+	}
 	data := map[string]interface{}{
 		"sas_token": d.Get("transfer_spec.0.azure_blob_storage_data_source.0.azure_credentials.0.sas_token"),
 	}
@@ -1114,19 +1128,21 @@ func expandAzureBlobStorageData(azureBlobStorageDatas []interface{}) *storagetra
 	azureBlobStorageData := azureBlobStorageDatas[0].(map[string]interface{})
 
 	return &storagetransfer.AzureBlobStorageData{
-		Container:        azureBlobStorageData["container"].(string),
-		Path:             azureBlobStorageData["path"].(string),
-		StorageAccount:   azureBlobStorageData["storage_account"].(string),
-		AzureCredentials: expandAzureCredentials(azureBlobStorageData["azure_credentials"].([]interface{})),
+		Container:         azureBlobStorageData["container"].(string),
+		Path:              azureBlobStorageData["path"].(string),
+		StorageAccount:    azureBlobStorageData["storage_account"].(string),
+		AzureCredentials:  expandAzureCredentials(azureBlobStorageData["azure_credentials"].([]interface{})),
+		CredentialsSecret: azureBlobStorageData["credentials_secret"].(string),
 	}
 }
 
 func flattenAzureBlobStorageData(azureBlobStorageData *storagetransfer.AzureBlobStorageData, d *schema.ResourceData) []map[string]interface{} {
 	data := map[string]interface{}{
-		"container":         azureBlobStorageData.Container,
-		"path":              azureBlobStorageData.Path,
-		"storage_account":   azureBlobStorageData.StorageAccount,
-		"azure_credentials": flattenAzureCredentials(d),
+		"container":          azureBlobStorageData.Container,
+		"path":               azureBlobStorageData.Path,
+		"storage_account":    azureBlobStorageData.StorageAccount,
+		"azure_credentials":  flattenAzureCredentials(d),
+		"credentials_secret": azureBlobStorageData.CredentialsSecret,
 	}
 
 	return []map[string]interface{}{data}
