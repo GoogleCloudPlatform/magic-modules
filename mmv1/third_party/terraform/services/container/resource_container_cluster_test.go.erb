@@ -8625,6 +8625,7 @@ func TestAccContainerCluster_withConfidentialBootDisk(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	npName := fmt.Sprintf("tf-test-node-pool-%s", acctest.RandString(t, 10))
 	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
 
 	if acctest.BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
@@ -8637,7 +8638,7 @@ func TestAccContainerCluster_withConfidentialBootDisk(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withConfidentialBootDisk(clusterName, kms.CryptoKey.Name),
+				Config: testAccContainerCluster_withConfidentialBootDisk(clusterName, npName, kms.CryptoKey.Name),
 			},
 			{
 				ResourceName:            "google_container_cluster.with_confidential_boot_disk",
@@ -8649,7 +8650,7 @@ func TestAccContainerCluster_withConfidentialBootDisk(t *testing.T) {
 	})
 }
 
-func testAccContainerCluster_withConfidentialBootDisk(clusterName, kmsKeyName string) string {
+func testAccContainerCluster_withConfidentialBootDisk(clusterName, npName, kmsKeyName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_confidential_boot_disk" {
   name               = "%s"
@@ -8658,7 +8659,9 @@ resource "google_container_cluster" "with_confidential_boot_disk" {
     channel = "RAPID"
   }
   node_pool {
-  node_config {
+	name = "%s"
+	initial_node_count = 1
+	node_config {
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform",
     ]
@@ -8671,7 +8674,7 @@ resource "google_container_cluster" "with_confidential_boot_disk" {
 }
  deletion_protection = false
 }
-`, clusterName, kmsKeyName)
+`, clusterName, npName, kmsKeyName)
 }
 
 func TestAccContainerCluster_withConfidentialBootDiskNodeConfig(t *testing.T) {
@@ -8730,6 +8733,7 @@ func TestAccContainerCluster_withoutConfidentialBootDisk(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -8737,7 +8741,7 @@ func TestAccContainerCluster_withoutConfidentialBootDisk(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withoutConfidentialBootDisk(clusterName),
+				Config: testAccContainerCluster_withoutConfidentialBootDisk(clusterName, npName),
 			},
 			{
 				ResourceName:            "google_container_cluster.without_confidential_boot_disk",
@@ -8748,7 +8752,7 @@ func TestAccContainerCluster_withoutConfidentialBootDisk(t *testing.T) {
 		},
 	})
 }
-func testAccContainerCluster_withoutConfidentialBootDisk(clusterName string) string {
+func testAccContainerCluster_withoutConfidentialBootDisk(clusterName string, npName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "without_confidential_boot_disk" {
   name               = "%s"
@@ -8757,7 +8761,9 @@ resource "google_container_cluster" "without_confidential_boot_disk" {
     channel = "RAPID"
   }
   node_pool {
-  node_config {
+	name = "%s"
+	initial_node_count = 1
+	node_config {
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform",
     ]
@@ -8769,6 +8775,6 @@ resource "google_container_cluster" "without_confidential_boot_disk" {
 }
  deletion_protection = false
 }
-`, clusterName)
+`, clusterName, npName)
 }
 <% end -%>
