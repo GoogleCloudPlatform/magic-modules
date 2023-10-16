@@ -53,6 +53,9 @@ func testAccDialogflowCXWebhook_basic(context map[string]interface{}) string {
 		time_zone = "America/New_York"
 		description = "Description 1."
 		avatar_uri = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
+		advanced_settings {
+			logging_settings {}
+		}
 	}
 
 	resource "google_dialogflow_cx_webhook" "my_webhook" {
@@ -77,6 +80,9 @@ func testAccDialogflowCXWebhook_full(context map[string]interface{}) string {
 		time_zone = "America/New_York"
 		description = "Description 1."
 		avatar_uri = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
+		advanced_settings {
+			logging_settings {}
+		}
 	}
 
 	resource "google_dialogflow_cx_webhook" "my_webhook" {

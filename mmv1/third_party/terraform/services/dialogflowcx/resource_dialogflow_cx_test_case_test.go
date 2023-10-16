@@ -57,6 +57,11 @@ resource "google_dialogflow_cx_agent" "agent" {
   speech_to_text_settings {
     enable_speech_adaptation = true
   }
+  advanced_settings {
+    logging_settings {
+      enable_stackdriver_logging = true
+    }
+  }
 }
 
 resource "google_dialogflow_cx_page" "page" {
@@ -139,6 +144,11 @@ resource "google_dialogflow_cx_agent" "agent" {
   enable_spell_correction    = true
   speech_to_text_settings {
     enable_speech_adaptation = true
+  }
+  advanced_settings {
+    logging_settings {
+      enable_stackdriver_logging = true
+    }
   }
 }
 
