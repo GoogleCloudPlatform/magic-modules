@@ -1793,14 +1793,14 @@ func TestAccComputeInstance_confidentialHyperDiskBootDisk(t *testing.T) {
 		"instance_name":         fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
 		"confidential_compute":  true,
 		"kms_key" :              acctest.BootstrapKMSKey(t),
-		"zone":                  "us-central1-a"
+		"zone":                  "us-central1-a",
 	}
 
 	context_2 := map[string]interface{}{
 		"instance_name":        context_1["instance_name"],
 		"confidential_compute": false,
 		"kms_key" :             context_1["kms_key"],
-		"zone":                 context_1["zone]
+		"zone":                 context_1["zone"],
 	}
 
 
@@ -1812,11 +1812,11 @@ func TestAccComputeInstance_confidentialHyperDiskBootDisk(t *testing.T) {
 			{
 				Config: testAccComputeInstanceConfidentialHyperDiskBootDisk(context_1),
 			},
-			computeInstanceImportStep(context_1["zone"], context_1["instance_name"], []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep(context_1["zone"].(string), context_1["instance_name"].(string), []string{"allow_stopping_for_update"}),
 			{
 				Config: testAccComputeInstanceConfidentialHyperDiskBootDisk(context_2),
 			},
-			computeInstanceImportStep(context_2["zone"], context_2["instance_name"], []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep(context_2["zone"].(string), context_2["instance_name"].(string), []string{"allow_stopping_for_update"}),
 		},
 	})
 }
