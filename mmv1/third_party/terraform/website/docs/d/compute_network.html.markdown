@@ -37,7 +37,9 @@ In addition to the arguments listed above, the following attributes are exported
 * `description` - Description of this network.
 
 * `gateway_ipv4` - The IP address of the gateway.
+
 * `internal_ipv6_range` - The ula internal ipv6 range assigned to this network.
+
 * `subnetworks_self_links` - the list of subnetworks which belong to the network
 
 * `self_link` - The URI of the resource.
