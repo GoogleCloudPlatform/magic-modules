@@ -14,7 +14,7 @@ Manages a Cloud Dataproc cluster resource within GCP.
 
 
 !> **Warning:** Due to limitations of the API, all arguments except
-`labels`,`cluster_config.worker_config.num_instances` and `cluster_config.preemptible_worker_config.num_instances` are non-updatable. Changing others will cause recreation of the
+`labels`,`cluster_config.worker_config.num_instances` and `cluster_config.preemptible_worker_config.num_instances` are non-updatable. Changing `cluster_config.worker_config.min_num_instances` will be ignored.Changing others will cause recreation of the
 whole cluster!
 
 ## Example Usage - Basic
