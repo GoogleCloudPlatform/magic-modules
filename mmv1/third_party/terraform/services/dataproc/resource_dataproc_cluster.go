@@ -2873,6 +2873,7 @@ func flattenPreemptibleInstanceGroupConfig(d *schema.ResourceData, icg *dataproc
 	}
 
 	data["disk_config"] = []map[string]interface{}{disk}
+	data["instance_flexibility_policy"] = []map[string]interface{}{instanceFlexibilityPolicy}
 	return []map[string]interface{}{data}
 }
 
