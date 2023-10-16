@@ -929,15 +929,16 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 	}
 
 	if v, ok := d.GetOk(prefix + "autoscaling"); ok {
-		autoscaling := v.([]interface{})[0].(map[string]interface{})
-		np.Autoscaling = &container.NodePoolAutoscaling{
-			Enabled:           true,
-			MinNodeCount:      int64(autoscaling["min_node_count"].(int)),
-			MaxNodeCount:      int64(autoscaling["max_node_count"].(int)),
-			TotalMinNodeCount: int64(autoscaling["total_min_node_count"].(int)),
-			TotalMaxNodeCount: int64(autoscaling["total_max_node_count"].(int)),
-			LocationPolicy:    autoscaling["location_policy"].(string),
-			ForceSendFields:   []string{"MinNodeCount", "MaxNodeCount", "TotalMinNodeCount", "TotalMaxNodeCount"},
+		if autoscaling, ok := v.([]interface{})[0].(map[string]interface{}); ok {
+			np.Autoscaling = &container.NodePoolAutoscaling{
+				Enabled:           true,
+				MinNodeCount:      int64(autoscaling["min_node_count"].(int)),
+				MaxNodeCount:      int64(autoscaling["max_node_count"].(int)),
+				TotalMinNodeCount: int64(autoscaling["total_min_node_count"].(int)),
+				TotalMaxNodeCount: int64(autoscaling["total_max_node_count"].(int)),
+				LocationPolicy:    autoscaling["location_policy"].(string),
+				ForceSendFields:   []string{"MinNodeCount", "MaxNodeCount", "TotalMinNodeCount", "TotalMaxNodeCount"},
+			}
 		}
 	}
 
@@ -1387,7 +1388,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 				log.Printf("[INFO] Updated logging_variant for node pool %s", name)
 			}
 		}
-		
+
 		if d.HasChange(prefix + "node_config.0.tags") {
 			req := &container.UpdateNodePoolRequest{
 				Name: name,
@@ -1405,7 +1406,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 				}
 				req.Tags = ntags
 			}
-			
+
 		    // sets tags to the empty list when user removes a previously defined list of tags entriely
 			// aka the node pool goes from having tags to no longer having any
 			if req.Tags == nil {
@@ -1415,7 +1416,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 				}
 				req.Tags = ntags
 			}
-	
+
 			updateF := func() error {
 				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
@@ -1425,7 +1426,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 				if err != nil {
 					return err
 				}
-	
+
 				// Wait until it's updated
 				return ContainerOperationWait(config, op,
 					nodePoolInfo.project,
@@ -1439,7 +1440,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			}
 			log.Printf("[INFO] Updated tags for node pool %s", name)
 		}
-		
+
 		if d.HasChange(prefix + "node_config.0.resource_labels") {
 			req := &container.UpdateNodePoolRequest{
 				Name: name,
@@ -1451,7 +1452,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 					Labels: tpgresource.ConvertStringMap(resourceLabels),
 				}
 			}
-				
+
 			updateF := func() error {
 				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
@@ -1461,7 +1462,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 				if err != nil {
 					return err
 				}
-	
+
 				// Wait until it's updated
 				return ContainerOperationWait(config, op,
 					nodePoolInfo.project,
@@ -1489,7 +1490,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 					Labels: tpgresource.ConvertStringMap(labels),
 				}
 			}
-				
+
 			updateF := func() error {
 				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
@@ -1499,7 +1500,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 				if err != nil {
 					return err
 				}
-	
+
 				// Wait until it's updated
 				return ContainerOperationWait(config, op,
 					nodePoolInfo.project,

@@ -1,5 +1,4 @@
 resource "google_gkeonprem_bare_metal_admin_cluster" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
   name = "<%= ctx[:vars]['name'] %>"
   location = "us-west1"
   description = "test description"

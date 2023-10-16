@@ -246,7 +246,7 @@ properties:
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
   - !ruby/object:Api::Type::Array
-    name: 'custom_audiences'
+    name: 'customAudiences'
     min_version: beta
     description: |
       One or more custom audiences that you want this service to support. Specify each custom audience as the full URL in a string. The custom audiences are encoded in the token and used to authenticate requests.

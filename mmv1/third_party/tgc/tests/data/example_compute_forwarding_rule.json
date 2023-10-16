@@ -15,7 +15,9 @@
         "loadBalancingScheme": "INTERNAL_MANAGED",
         "name": "test-forwarding-rule",
         "portRange": "80",
-        "region": "projects/{{.Provider.project}}/global/regions/australia-southeast1"
+        "region": "projects/{{.Provider.project}}/global/regions/australia-southeast1",
+        "allowPscGlobalAccess": false,
+        "noAutomateDnsZone":    false
       }
     }
   }
