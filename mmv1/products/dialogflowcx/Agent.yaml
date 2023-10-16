@@ -197,6 +197,7 @@ properties:
               The access token used to authenticate the access to the GitHub repository.
             sensitive: true
             ignore_read: true
+            custom_flatten: 'templates/terraform/custom_flatten/dialogflowcx_agent_git_integration_settings_github_settings_access_token.go.erb'
           - !ruby/object:Api::Type::Array
             name: 'branches'
             description: |
