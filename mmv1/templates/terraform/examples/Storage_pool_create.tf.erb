@@ -19,7 +19,7 @@ resource "google_service_networking_connection" "default" {
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 
-resource "google_netapp_storage_pool" "testPools" {
+resource "google_netapp_storage_pool" "test_pool" {
   storage_pool_id = "testpool1"
   location = "us-central1"
   service_level = "PREMIUM"
