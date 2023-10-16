@@ -142,12 +142,12 @@
               "percent": 100,
               "revision_name": null
             }
-          ]
+          ],
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "id": true,
           "metadata": true,
-          "project": true,
           "status": true,
           "template": [
             {
@@ -222,7 +222,8 @@
             "user:jane@example.com"
           ],
           "role": "roles/viewer",
-          "service": "cloudrun-srv"
+          "service": "cloudrun-srv",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "condition": [],
@@ -230,8 +231,7 @@
           "id": true,
           "members": [
             false
-          ],
-          "project": true
+          ]
         },
         "before_sensitive": false,
         "after_sensitive": {

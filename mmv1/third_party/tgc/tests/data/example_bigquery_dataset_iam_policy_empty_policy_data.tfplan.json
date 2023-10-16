@@ -164,7 +164,8 @@
           "friendly_name": null,
           "labels": null,
           "location": "US",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "access": true,
@@ -173,7 +174,6 @@
           "etag": true,
           "id": true,
           "last_modified_time": true,
-          "project": true,
           "self_link": true
         },
         "before_sensitive": false,
@@ -195,13 +195,13 @@
         ],
         "before": null,
         "after": {
-          "dataset_id": "example_dataset"
+          "dataset_id": "example_dataset",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "etag": true,
           "id": true,
-          "policy_data": true,
-          "project": true
+          "policy_data": true
         },
         "before_sensitive": false,
         "after_sensitive": {}
