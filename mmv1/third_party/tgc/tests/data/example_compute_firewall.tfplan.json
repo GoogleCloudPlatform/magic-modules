@@ -99,7 +99,8 @@
           ],
           "target_service_accounts": null,
           "target_tags": null,
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "allow": [
@@ -119,7 +120,6 @@
           "destination_ranges": true,
           "direction": true,
           "id": true,
-          "project": true,
           "self_link": true,
           "source_ranges": true,
           "source_tags": [
@@ -145,12 +145,13 @@
           "description": null,
           "ipv4_range": null,
           "name": "test-network",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}",
+          "network_firewall_policy_enforcement_order": "AFTER_CLASSIC_FIREWALL"
         },
         "after_unknown": {
           "gateway_ipv4": true,
           "id": true,
-          "project": true,
           "routing_mode": true,
           "self_link": true
         }

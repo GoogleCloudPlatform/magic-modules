@@ -166,14 +166,14 @@
           "name": "private-ip-address",
           "prefix_length": 16,
           "purpose": "VPC_PEERING",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "address": true,
           "creation_timestamp": true,
           "id": true,
           "network": true,
-          "project": true,
           "self_link": true
         }
       }
@@ -194,13 +194,14 @@
           "delete_default_routes_on_create": false,
           "description": null,
           "name": "private-network",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}",
+          "network_firewall_policy_enforcement_order": "AFTER_CLASSIC_FIREWALL"
         },
         "after_unknown": {
           "gateway_ipv4": true,
           "id": true,
           "ipv4_range": true,
-          "project": true,
           "routing_mode": true,
           "self_link": true
         }
@@ -328,7 +329,8 @@
               }
             }
           ],
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "connection_name": true,
@@ -336,7 +338,6 @@
           "id": true,
           "ip_address": true,
           "private_ip_address": true,
-          "project": true,
           "public_ip_address": true,
           "replica_configuration": [
             {}

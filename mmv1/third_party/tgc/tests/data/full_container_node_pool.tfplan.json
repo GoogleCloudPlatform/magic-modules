@@ -147,7 +147,8 @@
           "region": "us-central1",
           "timeouts": null,
           "version": "test-version",
-          "zone": "us-central1-a"
+          "zone": "us-central1-a",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "autoscaling": [
@@ -178,8 +179,7 @@
               ],
               "workload_metadata_config": []
             }
-          ],
-          "project": true
+          ]
         }
       }
     }
