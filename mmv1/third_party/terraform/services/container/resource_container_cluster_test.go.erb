@@ -803,7 +803,7 @@ func TestAccContainerCluster_withInvalidReleaseChannel(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
   networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster", true)
-  
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -6088,7 +6088,7 @@ data "google_compute_network" "container_network" {
 }
 
 <% unless version.nil? || version == 'ga' -%>
-func testAccContainerCluster_withSandboxConfig(clusterName string) string {
+func testAccContainerCluster_withSandboxConfig(clusterName, networkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
   location = "us-central1-a"
@@ -6130,7 +6130,7 @@ resource "google_container_cluster" "with_sandbox_config" {
 data "google_compute_network" "container_network" {
   name                    = "%s"
 }
-`, clusterName)
+`, clusterName, networkName)
 }
 
 func testAccContainerCluster_withSandboxConfig_changeLabels(clusterName, networkName string) string {
