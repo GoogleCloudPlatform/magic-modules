@@ -35,8 +35,10 @@ func ResourceBigtableInstance() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
 			resourceBigtableInstanceClusterReorderTypeList,
 			resourceBigtableInstanceUniqueClusterID,
+			tpgresource.SetLabelsDiff,
 		),
 
 		SchemaVersion: 1,
@@ -127,6 +129,11 @@ func ResourceBigtableInstance() *schema.Resource {
 								},
 							},
 						},
+						"state": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `The state of the cluster`,
+						},
 					},
 				},
 			},
@@ -154,10 +161,27 @@ func ResourceBigtableInstance() *schema.Resource {
 			},
 
 			"labels": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Description: `A mapping of labels to assign to the resource.
+				
+				**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
+			},
+
+			"terraform_labels": {
 				Type:        schema.TypeMap,
-				Optional:    true,
+				Computed:    true,
+				Description: `The combination of labels configured directly on the resource and default labels configured on the provider.`,
 				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: `A mapping of labels to assign to the resource.`,
+			},
+
+			"effective_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 
 			"project": {
@@ -196,8 +220,8 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	}
 	conf.DisplayName = displayName.(string)
 
-	if _, ok := d.GetOk("labels"); ok {
-		conf.Labels = tpgresource.ExpandLabels(d)
+	if _, ok := d.GetOk("effective_labels"); ok {
+		conf.Labels = tpgresource.ExpandEffectiveLabels(d)
 	}
 
 	switch d.Get("instance_type").(string) {
@@ -305,8 +329,14 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("display_name", instance.DisplayName); err != nil {
 		return fmt.Errorf("Error setting display_name: %s", err)
 	}
-	if err := d.Set("labels", instance.Labels); err != nil {
+	if err := tpgresource.SetLabels(instance.Labels, d, "labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	if err := tpgresource.SetLabels(instance.Labels, d, "terraform_labels"); err != nil {
+		return fmt.Errorf("Error setting terraform_labels: %s", err)
+	}
+	if err := d.Set("effective_labels", instance.Labels); err != nil {
+		return fmt.Errorf("Error setting effective_labels: %s", err)
 	}
 	// Don't set instance_type: we don't want to detect drift on it because it can
 	// change under-the-hood.
@@ -343,8 +373,8 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 	conf.DisplayName = displayName.(string)
 
-	if d.HasChange("labels") {
-		conf.Labels = tpgresource.ExpandLabels(d)
+	if d.HasChange("effective_labels") {
+		conf.Labels = tpgresource.ExpandEffectiveLabels(d)
 	}
 
 	switch d.Get("instance_type").(string) {
@@ -418,6 +448,7 @@ func flattenBigtableCluster(c *bigtable.ClusterInfo) map[string]interface{} {
 		"cluster_id":   c.Name,
 		"storage_type": storageType,
 		"kms_key_name": c.KMSKeyName,
+		"state":        c.State,
 	}
 	if c.AutoscalingConfig != nil {
 		cluster["autoscaling_config"] = make([]map[string]interface{}, 1)
@@ -543,6 +574,10 @@ func resourceBigtableInstanceUniqueClusterID(_ context.Context, diff *schema.Res
 	for i := 0; i < newCount.(int); i++ {
 		_, newId := diff.GetChange(fmt.Sprintf("cluster.%d.cluster_id", i))
 		clusterID := newId.(string)
+		// In case clusterID is empty, it is probably computed and this validation will be wrong.
+		if clusterID == "" {
+			continue
+		}
 		if clusters[clusterID] {
 			return fmt.Errorf("duplicated cluster_id: %q", clusterID)
 		}
@@ -559,7 +594,14 @@ func resourceBigtableInstanceUniqueClusterID(_ context.Context, diff *schema.Res
 // This doesn't use the standard unordered list utility (https://github.com/GoogleCloudPlatform/magic-modules/blob/main/templates/terraform/unordered_list_customize_diff.erb)
 // because some fields can't be modified using the API and we recreate the instance
 // when they're changed.
-func resourceBigtableInstanceClusterReorderTypeList(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+func resourceBigtableInstanceClusterReorderTypeList(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	// separate func to allow unit testing
+	return resourceBigtableInstanceClusterReorderTypeListFunc(diff, func(orderedClusters []interface{}) error {
+		return diff.SetNew("cluster", orderedClusters)
+	})
+
+}
+func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.TerraformResourceDiff, setNew func([]interface{}) error) error {
 	oldCount, newCount := diff.GetChange("cluster.#")
 
 	// Simulate Required:true, MinItems:1 for "cluster". This doesn't work
@@ -588,7 +630,9 @@ func resourceBigtableInstanceClusterReorderTypeList(_ context.Context, diff *sch
 	for i := 0; i < newCount.(int); i++ {
 		_, newId := diff.GetChange(fmt.Sprintf("cluster.%d.cluster_id", i))
 		_, c := diff.GetChange(fmt.Sprintf("cluster.%d", i))
-		clusters[newId.(string)] = c
+		typedCluster := c.(map[string]interface{})
+		typedCluster["state"] = "READY"
+		clusters[newId.(string)] = typedCluster
 	}
 
 	// create a list of clusters using the old order when possible to minimise
@@ -624,9 +668,8 @@ func resourceBigtableInstanceClusterReorderTypeList(_ context.Context, diff *sch
 		}
 	}
 
-	err := diff.SetNew("cluster", orderedClusters)
-	if err != nil {
-		return fmt.Errorf("Error setting cluster diff: %s", err)
+	if err := setNew(orderedClusters); err != nil {
+		return err
 	}
 
 	// Clusters can't have their zone, storage_type or kms_key_name updated,
@@ -652,8 +695,9 @@ func resourceBigtableInstanceClusterReorderTypeList(_ context.Context, diff *sch
 			}
 		}
 
+		currentState, _ := diff.GetChange(fmt.Sprintf("cluster.%d.state", i))
 		oST, nST := diff.GetChange(fmt.Sprintf("cluster.%d.storage_type", i))
-		if oST != nST {
+		if oST != nST && currentState.(string) != "CREATING" {
 			err := diff.ForceNew(fmt.Sprintf("cluster.%d.storage_type", i))
 			if err != nil {
 				return fmt.Errorf("Error setting cluster diff: %s", err)

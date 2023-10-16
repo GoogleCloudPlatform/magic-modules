@@ -129,7 +129,14 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 * `region` - (Optional) The region in which the cluster and associated nodes will be created in.
    Defaults to `global`.
 
-* `labels` - (Optional, Computed) The list of labels (key/value pairs) to be applied to
+* `labels` - (Optional) The list of labels (key/value pairs) configured on the resource through Terraform and to be applied to
+   instances in the cluster.
+   **Note**: This field is non-authoritative, and will only manage the labels present in your configuration. Please refer to the field `effective_labels` for all of the labels present on the resource.
+
+* `terraform_labels` -
+  The combination of labels configured directly on the resource and default labels configured on the provider.
+
+* `effective_labels` - (Computed) The list of labels (key/value pairs) to be applied to
    instances in the cluster. GCP generates some itself including `goog-dataproc-cluster-name`
    which is the name of the cluster.
 
@@ -532,7 +539,7 @@ cluster_config {
     num_instances    = 3
     machine_type     = "e2-medium"
     min_cpu_platform = "Intel Skylake"
-
+    min_num_instance = 2
     disk_config {
       boot_disk_type    = "pd-standard"
       boot_disk_size_gb = 30
@@ -574,6 +581,8 @@ cluster_config {
 
 * `image_uri` (Optional) The URI for the image to use for this worker.  See [the guide](https://cloud.google.com/dataproc/docs/guides/dataproc-images)
     for more information.
+
+* `min_num_instances` (Optional) The minimum number of primary worker instances to create.  If `min_num_instances` is set, cluster creation will succeed if the number of primary workers created is at least equal to the `min_num_instances` number.
 
 * `accelerators` (Optional) The Compute Engine accelerator configuration for these instances. Can be specified multiple times.
 

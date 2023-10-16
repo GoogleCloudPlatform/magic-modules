@@ -76,8 +76,8 @@ properties:
       The number of previous releases to retain on the channel for rollback or other
       purposes. Must be a number between 1-100. Defaults to 10 for new channels.
     default_from_api: true
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: labels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description: Text labels used for extra metadata and/or filtering
   - !ruby/object:Api::Type::Time
     name: expireTime

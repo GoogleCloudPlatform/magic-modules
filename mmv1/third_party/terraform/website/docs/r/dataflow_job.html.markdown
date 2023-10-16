@@ -102,8 +102,11 @@ The following arguments are supported:
 * `parameters` - (Optional) Key/Value pairs to be passed to the Dataflow job (as used in the template).
 * `labels` - (Optional) User labels to be specified for the job. Keys and values should follow the restrictions
    specified in the [labeling restrictions](https://cloud.google.com/compute/docs/labeling-resources#restrictions) page.
-   **NOTE**: Google-provided Dataflow templates often provide default labels that begin with `goog-dataflow-provided`.
-   Unless explicitly set in config, these labels will be ignored to prevent diffs on re-apply.
+   **Note**: This field is non-authoritative, and will only manage the labels present in your configuration. Please refer to the field `effective_labels` for all of the labels present on the resource.
+* `terraform_labels` -
+  The combination of labels configured directly on the resource and default labels configured on the provider.
+* `effective_labels` -
+  All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 * `transform_name_mapping` - (Optional) Only applicable when updating a pipeline. Map of transform name prefixes of the job to be replaced with the corresponding name prefixes of the new job. This field is not used outside of update.
 * `max_workers` - (Optional) The number of workers permitted to work on the job.  More workers may improve processing speed at additional cost.
 * `on_delete` - (Optional) One of "drain" or "cancel".  Specifies behavior of deletion during `terraform destroy`.  See above note.
@@ -130,6 +133,19 @@ The following arguments are supported:
 
 Dataflow jobs can be imported using the job `id` e.g.
 
+* `{{id}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import dataflow jobs using one of the formats above. For example:
+
+```tf
+import {
+  id = "{{id}}"
+  to = google_dataflow_job.default
+}
 ```
-$ terraform import google_dataflow_job.example 2022-07-31_06_25_42-11926927532632678660
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), dataflow jobs can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_dataflow_job.default {{id}}
 ```

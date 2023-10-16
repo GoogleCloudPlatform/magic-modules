@@ -14,6 +14,9 @@
           "values": {
             "ack_deadline_seconds": 20,
             "dead_letter_policy": [],
+            "effective_labels": {
+              "test-label1": "test-value1"
+            },
             "enable_message_ordering": null,
             "filter": null,
             "labels": {
@@ -30,6 +33,9 @@
             ],
             "retain_acked_messages": null,
             "retry_policy": [],
+            "terraform_labels": {
+              "test-label1": "test-value1"
+            },
             "timeouts": null,
             "topic": "example-pubsub-topic"
           },
@@ -85,6 +91,9 @@
         "after": {
           "ack_deadline_seconds": 20,
           "dead_letter_policy": [],
+          "effective_labels": {
+            "test-label1": "test-value1"
+          },
           "enable_message_ordering": null,
           "filter": null,
           "labels": {
@@ -101,25 +110,31 @@
           ],
           "retain_acked_messages": null,
           "retry_policy": [],
+          "terraform_labels": {
+            "test-label1": "test-value1"
+          },
           "timeouts": null,
-          "topic": "example-pubsub-topic"
+          "topic": "example-pubsub-topic",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "dead_letter_policy": [],
+          "effective_labels": {},
           "expiration_policy": true,
           "id": true,
           "labels": {},
-          "project": true,
           "push_config": [
             {
               "oidc_token": []
             }
           ],
-          "retry_policy": []
+          "retry_policy": [],
+          "terraform_labels": {}
         },
         "before_sensitive": false,
         "after_sensitive": {
           "dead_letter_policy": [],
+          "effective_labels": {},
           "expiration_policy": [],
           "labels": {},
           "push_config": [
@@ -127,7 +142,8 @@
               "oidc_token": []
             }
           ],
-          "retry_policy": []
+          "retry_policy": [],
+          "terraform_labels": {}
         }
       }
     },
@@ -148,7 +164,8 @@
             "user:jane@example.com"
           ],
           "role": "roles/editor",
-          "subscription": "example-subscription"
+          "subscription": "example-subscription",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "condition": [],
@@ -156,8 +173,7 @@
           "id": true,
           "members": [
             false
-          ],
-          "project": true
+          ]
         },
         "before_sensitive": false,
         "after_sensitive": {

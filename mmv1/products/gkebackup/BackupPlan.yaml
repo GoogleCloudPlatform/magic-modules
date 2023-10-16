@@ -44,6 +44,11 @@ examples:
     vars:
       name: 'basic-plan'
       cluster_name: 'basic-cluster'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
@@ -52,6 +57,11 @@ examples:
     vars:
       name: 'autopilot-plan'
       cluster_name: 'autopilot-cluster'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkebackup_backupplan_cmek'
     primary_resource_id: 'cmek'
@@ -59,6 +69,11 @@ examples:
       name: 'cmek-plan'
       cluster_name: 'cmek-cluster'
       key_name: 'backup-key'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
@@ -67,6 +82,11 @@ examples:
     vars:
       name: 'full-plan'
       cluster_name: 'full-cluster'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
     test_env_vars:
       project: :PROJECT_NAME
 skip_sweeper: true
@@ -138,8 +158,8 @@ properties:
           If set to True, no further update is allowed on this policy, including
           the locked field itself.
         default_from_api: true
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: labels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description: |
       Description: A set of custom labels supplied by the user.
       A list of key->value pairs.

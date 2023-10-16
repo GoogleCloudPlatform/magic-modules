@@ -6,13 +6,13 @@ import (
 	"net/http"
 )
 
-func (gh *github) PostBuildStatus(prNumber, title, state, target_url, commitSha string) error {
+func (gh *github) PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/%s", commitSha)
 
 	postBody := map[string]string{
 		"context":    title,
 		"state":      state,
-		"target_url": target_url,
+		"target_url": targetURL,
 	}
 
 	_, err := utils.RequestCall(url, "POST", gh.token, nil, postBody)
@@ -91,6 +91,26 @@ func (gh *github) RemoveLabel(prNumber, label string) error {
 	if err != nil {
 		return fmt.Errorf("failed to remove %s label: %s", label, err)
 	}
+
+	return nil
+}
+
+func (gh *github) CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error {
+	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/actions/workflows/%s/dispatches", workflowFileName)
+	resp, err := utils.RequestCall(url, "POST", gh.token, nil, map[string]any{
+		"ref":    "main",
+		"inputs": inputs,
+	})
+
+	if resp != 200 && resp != 204 {
+		return fmt.Errorf("server returned %d creating workflow dispatch event", resp)
+	}
+
+	if err != nil {
+		return fmt.Errorf("failed to create workflow dispatch event: %s", err)
+	}
+
+	fmt.Printf("Successfully created workflow dispatch event for %s with inputs %v", workflowFileName, inputs)
 
 	return nil
 }

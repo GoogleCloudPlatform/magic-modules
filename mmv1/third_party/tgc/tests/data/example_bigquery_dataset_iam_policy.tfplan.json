@@ -17,8 +17,14 @@
 					"default_table_expiration_ms": 3600000,
 					"delete_contents_on_destroy": false,
 					"description": null,
+					"effective_labels": {
+						"env": "dev"
+					},
 					"friendly_name": null,
 					"labels": {
+						"env": "dev"
+					},
+					"terraform_labels": {
 						"env": "dev"
 					},
 					"location": "EU",
@@ -55,8 +61,14 @@
 				"default_table_expiration_ms": 3600000,
 				"delete_contents_on_destroy": false,
 				"description": null,
+				"effective_labels": {
+					"env": "dev"
+				},
 				"friendly_name": null,
 				"labels": {
+					"env": "dev"
+				},
+				"terraform_labels": {
 					"env": "dev"
 				},
 				"location": "EU",
@@ -67,9 +79,11 @@
 				"access": true,
 				"creation_time": true,
 				"default_encryption_configuration": [],
+				"effective_labels": {},
 				"etag": true,
 				"id": true,
 				"labels": {},
+				"terraform_labels": {},
 				"last_modified_time": true,
 				"self_link": true
 			}
@@ -85,12 +99,12 @@
 			"before": null,
 			"after": {
 				"dataset_id": "test-dataset",
-				"policy_data": "{\"bindings\":[{\"members\":[\"serviceAccount:998476993360@cloudservices.gserviceaccount.com\",\"allAuthenticatedUsers\"],\"role\":\"roles/editor\"}]}"
+				"policy_data": "{\"bindings\":[{\"members\":[\"serviceAccount:998476993360@cloudservices.gserviceaccount.com\",\"allAuthenticatedUsers\"],\"role\":\"roles/editor\"}]}",
+				"project": "{{.Provider.project}}"
 			},
 			"after_unknown": {
 				"etag": true,
-				"id": true,
-				"project": true
+				"id": true
 			}
 		}
 	}],

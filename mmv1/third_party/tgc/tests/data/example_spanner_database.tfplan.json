@@ -69,7 +69,8 @@
           "deletion_protection": false,
           "encryption_config": [],
           "name": "my-database",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "ddl": [
@@ -79,7 +80,6 @@
           "encryption_config": [],
           "id": true,
           "instance": true,
-          "project": true,
           "state": true
         },
         "before_sensitive": false,
@@ -109,13 +109,13 @@
           "force_destroy": false,
           "labels": null,
           "num_nodes": 1,
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "id": true,
           "name": true,
           "processing_units": true,
-          "project": true,
           "state": true
         },
         "before_sensitive": false,
