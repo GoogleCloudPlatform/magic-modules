@@ -1792,7 +1792,7 @@ func TestAccComputeInstance_confidentialHyperDiskBootDisk(t *testing.T) {
 	context_1 := map[string]interface{}{
 		"instance_name":         fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
 		"confidential_compute":  true,
-		"kms_key" :              acctest.BootstrapKMSKey(t)
+		"kms_key" :              acctest.BootstrapKMSKey(t),
 		"zone":                  "us-central1-a"
 	}
 
