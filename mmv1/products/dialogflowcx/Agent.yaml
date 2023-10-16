@@ -196,6 +196,7 @@ properties:
             description: |
               The access token used to authenticate the access to the GitHub repository.
             sensitive: true
+            ignore_read: true
           - !ruby/object:Api::Type::Array
             name: 'branches'
             description: |
