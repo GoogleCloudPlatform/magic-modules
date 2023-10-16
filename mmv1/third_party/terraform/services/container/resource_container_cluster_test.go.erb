@@ -302,6 +302,7 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
+  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster", true)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -309,7 +310,7 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName),
+				Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName),
 			},
 			{
 				ResourceName:            "google_container_cluster.confidential_nodes",
@@ -318,7 +319,7 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_disableConfidentialNodes(clusterName, npName),
+				Config: testAccContainerCluster_disableConfidentialNodes(clusterName, npName, networkName),
 			},
 			{
 				ResourceName:            "google_container_cluster.confidential_nodes",
@@ -327,7 +328,7 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName),
+				Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName),
 			},
 			{
 				ResourceName:            "google_container_cluster.confidential_nodes",
@@ -344,6 +345,7 @@ func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
+  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster", true)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -351,7 +353,7 @@ func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_disableILBSubSetting(clusterName, npName),
+				Config: testAccContainerCluster_disableILBSubSetting(clusterName, npName, networkName),
 			},
 			{
 				ResourceName:      "google_container_cluster.confidential_nodes",
@@ -360,7 +362,7 @@ func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withILBSubSetting(clusterName, npName),
+				Config: testAccContainerCluster_withILBSubSetting(clusterName, npName, networkName),
 			},
 			{
 				ResourceName:      "google_container_cluster.confidential_nodes",
@@ -369,7 +371,7 @@ func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_disableILBSubSetting(clusterName, npName),
+				Config: testAccContainerCluster_disableILBSubSetting(clusterName, npName, networkName),
 			},
 			{
 				ResourceName:      "google_container_cluster.confidential_nodes",
@@ -1026,6 +1028,7 @@ func TestAccContainerCluster_regional(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-regional-%s", acctest.RandString(t, 10))
+  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster", true)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -1033,7 +1036,7 @@ func TestAccContainerCluster_regional(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_regional(clusterName),
+				Config: testAccContainerCluster_regional(clusterName, networkName),
 			},
 			{
 				ResourceName:		 "google_container_cluster.regional",
@@ -1050,6 +1053,7 @@ func TestAccContainerCluster_regionalWithNodePool(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-regional-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
+  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster", true)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -1057,7 +1061,7 @@ func TestAccContainerCluster_regionalWithNodePool(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_regionalWithNodePool(clusterName, npName),
+				Config: testAccContainerCluster_regionalWithNodePool(clusterName, npName, networkName),
 			},
 			{
 				ResourceName:		 "google_container_cluster.regional",
@@ -1073,6 +1077,7 @@ func TestAccContainerCluster_regionalWithNodeLocations(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster", true)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -1080,7 +1085,7 @@ func TestAccContainerCluster_regionalWithNodeLocations(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_regionalNodeLocations(clusterName),
+				Config: testAccContainerCluster_regionalNodeLocations(clusterName, networkName),
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_node_locations",
@@ -1306,6 +1311,7 @@ func TestAccContainerCluster_updateVersion(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster", true)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -1313,7 +1319,7 @@ func TestAccContainerCluster_updateVersion(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withLowerVersion(clusterName),
+				Config: testAccContainerCluster_withLowerVersion(clusterName, networkName),
 			},
 			{
 				ResourceName:			 "google_container_cluster.with_version",
@@ -1322,7 +1328,7 @@ func TestAccContainerCluster_updateVersion(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_updateVersion(clusterName),
+				Config: testAccContainerCluster_updateVersion(clusterName, networkName),
 			},
 			{
 				ResourceName:			 "google_container_cluster.with_version",
@@ -1369,13 +1375,15 @@ func TestAccContainerCluster_withNodeConfig(t *testing.T) {
 func TestAccContainerCluster_withLoggingVariantInNodeConfig(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster", true)
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withLoggingVariantInNodeConfig(clusterName, "MAX_THROUGHPUT"),
+				Config: testAccContainerCluster_withLoggingVariantInNodeConfig(clusterName, "MAX_THROUGHPUT", networkName),
 			},
 			{
 				ResourceName:            "google_container_cluster.with_logging_variant_in_node_config",
@@ -1391,13 +1399,15 @@ func TestAccContainerCluster_withLoggingVariantInNodePool(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	nodePoolName := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
+  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster", true)
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withLoggingVariantInNodePool(clusterName, nodePoolName, "MAX_THROUGHPUT"),
+				Config: testAccContainerCluster_withLoggingVariantInNodePool(clusterName, nodePoolName, "MAX_THROUGHPUT", networkName),
 			},
 			{
 				ResourceName:            "google_container_cluster.with_logging_variant_in_node_pool",
@@ -1521,7 +1531,7 @@ func TestAccContainerCluster_withNodeConfigScopeAlias(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withNodeConfigScopeAlias(clusterName),
+				Config: testAccContainerCluster_withNodeConfigScopeAlias(clusterName, networkName),
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_node_config_scope_alias",
@@ -1628,6 +1638,7 @@ func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster", true)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -1635,7 +1646,7 @@ func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withWorkloadMetadataConfig(clusterName),
+				Config: testAccContainerCluster_withWorkloadMetadataConfig(clusterName, networkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_workload_metadata_config",
 						"node_config.0.workload_metadata_config.0.mode", "GCE_METADATA"),
@@ -1656,6 +1667,7 @@ func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster", true)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -1663,7 +1675,7 @@ func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withSandboxConfig(clusterName),
+				Config: testAccContainerCluster_withSandboxConfig(clusterName, networkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_sandbox_config",
 						"node_config.0.sandbox_config.0.sandbox_type", "gvisor"),
@@ -1680,7 +1692,7 @@ func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 			{
 				// GKE sets automatic labels and taints on nodes. This makes
 				// sure we ignore the automatic ones and keep our own.
-				Config:   testAccContainerCluster_withSandboxConfig(clusterName),
+				Config:   testAccContainerCluster_withSandboxConfig(clusterName, networkName),
 				// When we use PlanOnly without ExpectNonEmptyPlan, we're
 				// guaranteeing that the computed fields of the resources don't
 				// force an unintentional change to the plan. That is, we
@@ -1693,7 +1705,7 @@ func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 				// the plan. We make sure we don't over-suppress and end up
 				// eliminating the labels or taints we asked for. This will
 				// destroy and recreate the cluster as labels are immutable.
-				Config: testAccContainerCluster_withSandboxConfig_changeLabels(clusterName),
+				Config: testAccContainerCluster_withSandboxConfig_changeLabels(clusterName, networkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_sandbox_config",
 						"node_config.0.labels.test.terraform.io/gke-sandbox", "true"),
@@ -1713,6 +1725,7 @@ func TestAccContainerCluster_withBootDiskKmsKey(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster", true)
 
 	if acctest.BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
 		t.Fatal("Stopping the test because a role was added to the policy.")
@@ -1724,7 +1737,7 @@ func TestAccContainerCluster_withBootDiskKmsKey(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withBootDiskKmsKey(clusterName, kms.CryptoKey.Name),
+				Config: testAccContainerCluster_withBootDiskKmsKey(clusterName, kms.CryptoKey.Name, networkName),
 			},
 			{
 				ResourceName:            "google_container_cluster.with_boot_disk_kms_key",
@@ -1770,6 +1783,7 @@ func TestAccContainerCluster_backend(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster", true)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -1777,7 +1791,7 @@ func TestAccContainerCluster_backend(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_backendRef(clusterName),
+				Config: testAccContainerCluster_backendRef(clusterName, networkName),
 			},
 			{
 				ResourceName:		 "google_container_cluster.primary",
@@ -1818,6 +1832,7 @@ func TestAccContainerCluster_withNodePoolUpdateVersion(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
+  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster", true)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -1825,7 +1840,7 @@ func TestAccContainerCluster_withNodePoolUpdateVersion(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withNodePoolLowerVersion(clusterName, npName),
+				Config: testAccContainerCluster_withNodePoolLowerVersion(clusterName, npName, networkName),
 			},
 			{
 				ResourceName:			 "google_container_cluster.with_node_pool",
@@ -1834,7 +1849,7 @@ func TestAccContainerCluster_withNodePoolUpdateVersion(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withNodePoolUpdateVersion(clusterName, npName),
+				Config: testAccContainerCluster_withNodePoolUpdateVersion(clusterName, npName, networkName),
 			},
 			{
 				ResourceName:			 "google_container_cluster.with_node_pool",
@@ -1851,13 +1866,15 @@ func TestAccContainerCluster_withNodePoolResize(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
+  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster", true)
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withNodePoolNodeLocations(clusterName, npName),
+				Config: testAccContainerCluster_withNodePoolNodeLocations(clusterName, npName, networkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_pool", "node_pool.0.node_count", "2"),
 				),
@@ -1869,7 +1886,7 @@ func TestAccContainerCluster_withNodePoolResize(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withNodePoolResize(clusterName, npName),
+				Config: testAccContainerCluster_withNodePoolResize(clusterName, npName, networkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_pool", "node_pool.0.node_count", "3"),
 				),
@@ -2304,6 +2321,7 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions(t *testing.T) {
 	t.Parallel()
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_exclusion_options"
+  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster", true)
 
 	// step1: create a new cluster and initialize the maintenceExclusion without exclusion scopes,
 	// step2: add exclusion scopes to the maintenancePolicy,
@@ -2349,7 +2367,7 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_updateExclusionOptions_RecurringMaintenanceWindow(
-					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", "NO_UPGRADES", "NO_MINOR_UPGRADES"),
+					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", "NO_UPGRADES", "NO_MINOR_UPGRADES", networkName),
 				Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName,
 							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_UPGRADES"),
@@ -4762,7 +4780,7 @@ data "google_compute_network" "container_network" {
 `, topic, topic, clusterName, topic, networkName)
 }
 
-func testAccContainerCluster_disableFilteredNotificationConfig(clusterName string, topic string) string {
+func testAccContainerCluster_disableFilteredNotificationConfig(clusterName, topic, networkName string) string {
 
 	return fmt.Sprintf(`
 
@@ -4781,11 +4799,16 @@ resource "google_container_cluster" "filtered_notification_config" {
 	}
   }
   deletion_protection = false
-}
-`, topic, topic, clusterName, topic)
+  network    = data.google_compute_network.container_network.name
 }
 
-func testAccContainerCluster_withConfidentialNodes(clusterName string, npName string) string {
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, topic, topic, clusterName, topic, networkName)
+}
+
+func testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
@@ -4806,11 +4829,16 @@ resource "google_container_cluster" "confidential_nodes" {
     enabled = true
   }
   deletion_protection = false
-}
-`, clusterName, npName)
+  network    = data.google_compute_network.container_network.name
 }
 
-func testAccContainerCluster_disableConfidentialNodes(clusterName string, npName string) string {
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, clusterName, npName, networkName)
+}
+
+func testAccContainerCluster_disableConfidentialNodes(clusterName, npName, networkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
@@ -4831,11 +4859,16 @@ resource "google_container_cluster" "confidential_nodes" {
     enabled = false
   }
   deletion_protection = false
-}
-`, clusterName, npName)
+  network    = data.google_compute_network.container_network.name
 }
 
-func testAccContainerCluster_withILBSubSetting(clusterName string, npName string) string {
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, clusterName, npName, networkName)
+}
+
+func testAccContainerCluster_withILBSubSetting(clusterName, npName, networkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
@@ -4854,11 +4887,16 @@ resource "google_container_cluster" "confidential_nodes" {
 
   enable_l4_ilb_subsetting = true
   deletion_protection = false
-}
-`, clusterName, npName)
+  network    = data.google_compute_network.container_network.name
 }
 
-func testAccContainerCluster_disableILBSubSetting(clusterName string, npName string) string {
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, clusterName, npName, networkName)
+}
+
+func testAccContainerCluster_disableILBSubSetting(clusterName, npName, networkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
@@ -4877,8 +4915,13 @@ resource "google_container_cluster" "confidential_nodes" {
 
   enable_l4_ilb_subsetting = false
   deletion_protection = false
+  network    = data.google_compute_network.container_network.name
 }
-`, clusterName, npName)
+
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, clusterName, npName, networkName)
 }
 
 func testAccContainerCluster_withNetworkPolicyEnabled(clusterName, networkName string) string {
@@ -5131,15 +5174,20 @@ resource "google_container_cluster" "with_master_authorized_networks" {
 `, clusterName)
 }
 
-func testAccContainerCluster_regional(clusterName string) string {
+func testAccContainerCluster_regional(clusterName, networkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "regional" {
   name               = "%s"
   location           = "us-central1"
   initial_node_count = 1
   deletion_protection = false
+  network    = data.google_compute_network.container_network.name
 }
-`, clusterName)
+
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, clusterName, networkName)
 }
 
 func TestAccContainerCluster_withPrivateEndpointSubnetwork(t *testing.T) {
@@ -5386,7 +5434,7 @@ data "google_compute_network" "container_network" {
 `, clusterName, flag, networkName)
 }
 
-func testAccContainerCluster_regionalWithNodePool(cluster, nodePool string) string {
+func testAccContainerCluster_regionalWithNodePool(cluster, nodePool, networkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "regional" {
   name     = "%s"
@@ -5396,11 +5444,16 @@ resource "google_container_cluster" "regional" {
     name = "%s"
   }
   deletion_protection = false
-}
-`, cluster, nodePool)
+  network    = data.google_compute_network.container_network.name
 }
 
-func testAccContainerCluster_regionalNodeLocations(clusterName string) string {
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, cluster, nodePool, networkName)
+}
+
+func testAccContainerCluster_regionalNodeLocations(clusterName, networkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_node_locations" {
   name               = "%s"
@@ -5412,11 +5465,16 @@ resource "google_container_cluster" "with_node_locations" {
     "us-central1-c",
   ]
   deletion_protection = false
-}
-`, clusterName)
+  network    = data.google_compute_network.container_network.name
 }
 
-func testAccContainerCluster_regionalUpdateNodeLocations(clusterName string) string {
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, clusterName, networkName)
+}
+
+func testAccContainerCluster_regionalUpdateNodeLocations(clusterName, networkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_node_locations" {
   name               = "%s"
@@ -5428,8 +5486,13 @@ resource "google_container_cluster" "with_node_locations" {
     "us-central1-b",
   ]
   deletion_protection = false
+  network    = data.google_compute_network.container_network.name
 }
-`, clusterName)
+
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, clusterName, networkName)
 }
 
 <% unless version == 'ga' -%>
@@ -5545,7 +5608,7 @@ data "google_compute_network" "container_network" {
 `, clusterName, networkName)
 }
 
-func testAccContainerCluster_withLowerVersion(clusterName string) string {
+func testAccContainerCluster_withLowerVersion(clusterName, networkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
   location = "us-central1-a"
@@ -5557,8 +5620,13 @@ resource "google_container_cluster" "with_version" {
   min_master_version = data.google_container_engine_versions.central1a.valid_master_versions[3]
   initial_node_count = 1
   deletion_protection = false
+  network    = data.google_compute_network.container_network.name
 }
-`, clusterName)
+
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, clusterName, networkName)
 }
 
 func testAccContainerCluster_withMasterAuthNoCert(clusterName, networkName string) string {
@@ -5582,7 +5650,7 @@ data "google_compute_network" "container_network" {
 `, clusterName, networkName)
 }
 
-func testAccContainerCluster_updateVersion(clusterName string) string {
+func testAccContainerCluster_updateVersion(clusterName, networkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
   location = "us-central1-a"
@@ -5595,8 +5663,13 @@ resource "google_container_cluster" "with_version" {
   node_version       = data.google_container_engine_versions.central1a.valid_node_versions[1]
   initial_node_count = 1
   deletion_protection = false
+  network    = data.google_compute_network.container_network.name
 }
-`, clusterName)
+
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, clusterName, networkName)
 }
 
 func testAccContainerCluster_withNodeConfig(clusterName string) string {
@@ -5649,7 +5722,7 @@ resource "google_container_cluster" "with_node_config" {
 `, clusterName)
 }
 
-func testAccContainerCluster_withLoggingVariantInNodeConfig(clusterName, loggingVariant string) string {
+func testAccContainerCluster_withLoggingVariantInNodeConfig(clusterName, loggingVariant, networkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_logging_variant_in_node_config" {
   name               = "%s"
@@ -5660,11 +5733,16 @@ resource "google_container_cluster" "with_logging_variant_in_node_config" {
     logging_variant = "%s"
   }
   deletion_protection = false
-}
-`, clusterName, loggingVariant)
+  network    = data.google_compute_network.container_network.name
 }
 
-func testAccContainerCluster_withLoggingVariantInNodePool(clusterName, nodePoolName, loggingVariant string) string {
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, clusterName, loggingVariant, networkName)
+}
+
+func testAccContainerCluster_withLoggingVariantInNodePool(clusterName, nodePoolName, loggingVariant, networkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_logging_variant_in_node_pool" {
   name               = "%s"
@@ -5678,8 +5756,13 @@ resource "google_container_cluster" "with_logging_variant_in_node_pool" {
     }
   }
   deletion_protection = false
+  network    = data.google_compute_network.container_network.name
 }
-`, clusterName, nodePoolName, loggingVariant)
+
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, clusterName, nodePoolName, loggingVariant, networkName)
 }
 
 func testAccContainerCluster_withLoggingVariantNodePoolDefault(clusterName, loggingVariant, networkName string) string {
@@ -5970,7 +6053,7 @@ data "google_compute_network" "container_network" {
 `, reservation, clusterName, networkName)
 }
 
-func testAccContainerCluster_withWorkloadMetadataConfig(clusterName string) string {
+func testAccContainerCluster_withWorkloadMetadataConfig(clusterName, networkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
   location = "us-central1-a"
@@ -5993,8 +6076,13 @@ resource "google_container_cluster" "with_workload_metadata_config" {
     }
   }
   deletion_protection = false
+  network    = data.google_compute_network.container_network.name
 }
-`, clusterName)
+
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, clusterName, networkName)
 }
 
 <% unless version.nil? || version == 'ga' -%>
@@ -6034,11 +6122,16 @@ resource "google_container_cluster" "with_sandbox_config" {
     }
   }
   deletion_protection = false
+  network    = data.google_compute_network.container_network.name
+}
+
+data "google_compute_network" "container_network" {
+  name                    = "%s"
 }
 `, clusterName)
 }
 
-func testAccContainerCluster_withSandboxConfig_changeLabels(clusterName string) string {
+func testAccContainerCluster_withSandboxConfig_changeLabels(clusterName, networkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
   location = "us-central1-a"
@@ -6075,12 +6168,17 @@ resource "google_container_cluster" "with_sandbox_config" {
     }
   }
   deletion_protection = false
+  network    = data.google_compute_network.container_network.name
 }
-`, clusterName)
+
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, clusterName, networkName)
 }
 <% end -%>
 
-func testAccContainerCluster_withBootDiskKmsKey(clusterName, kmsKeyName string) string {
+func testAccContainerCluster_withBootDiskKmsKey(clusterName, kmsKeyName, networkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_boot_disk_kms_key" {
   name               = "%s"
@@ -6099,8 +6197,13 @@ resource "google_container_cluster" "with_boot_disk_kms_key" {
     boot_disk_kms_key = "%s"
   }
   deletion_protection = false
+  network    = data.google_compute_network.container_network.name
 }
-`, clusterName, kmsKeyName)
+
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, clusterName, kmsKeyName, networkName)
 }
 
 func testAccContainerCluster_networkRef(cluster, network string) string {
@@ -6167,7 +6270,7 @@ data "google_compute_network" "container_network" {
 `, clusterName, autoUpgrade, autoRepair, networkName)
 }
 
-func testAccContainerCluster_backendRef(cluster string) string {
+func testAccContainerCluster_backendRef(cluster, networkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "my-backend-service" {
   name      = "%s-backend"
@@ -6207,8 +6310,13 @@ resource "google_container_cluster" "primary" {
     ]
   }
   deletion_protection = false
+  network    = data.google_compute_network.container_network.name
 }
-`, cluster, cluster, cluster)
+
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, cluster, cluster, cluster, networkName)
 }
 
 func testAccContainerCluster_withNodePoolBasic(cluster, nodePool string) string {
@@ -6226,7 +6334,7 @@ resource "google_container_cluster" "with_node_pool" {
 `, cluster, nodePool)
 }
 
-func testAccContainerCluster_withNodePoolLowerVersion(cluster, nodePool string) string {
+func testAccContainerCluster_withNodePoolLowerVersion(cluster, nodePool, networkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
   location = "us-central1-a"
@@ -6244,11 +6352,16 @@ resource "google_container_cluster" "with_node_pool" {
     version            = data.google_container_engine_versions.central1a.valid_node_versions[2]
   }
   deletion_protection = false
-}
-`, cluster, nodePool)
+  network    = data.google_compute_network.container_network.name
 }
 
-func testAccContainerCluster_withNodePoolUpdateVersion(cluster, nodePool string) string {
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, cluster, nodePool, networkName)
+}
+
+func testAccContainerCluster_withNodePoolUpdateVersion(cluster, nodePool, networkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
   location = "us-central1-a"
@@ -6266,11 +6379,16 @@ resource "google_container_cluster" "with_node_pool" {
     version            = data.google_container_engine_versions.central1a.valid_node_versions[1]
   }
   deletion_protection = false
-}
-`, cluster, nodePool)
+  network    = data.google_compute_network.container_network.name
 }
 
-func testAccContainerCluster_withNodePoolNodeLocations(cluster, nodePool string) string {
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, cluster, nodePool, networkName)
+}
+
+func testAccContainerCluster_withNodePoolNodeLocations(cluster, nodePool, networkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_node_pool" {
   name     = "%s"
@@ -6286,11 +6404,16 @@ resource "google_container_cluster" "with_node_pool" {
     node_count = 2
   }
   deletion_protection = false
-}
-`, cluster, nodePool)
+  network    = data.google_compute_network.container_network.name
 }
 
-func testAccContainerCluster_withNodePoolResize(cluster, nodePool string) string {
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, cluster, nodePool, networkName)
+}
+
+func testAccContainerCluster_withNodePoolResize(cluster, nodePool, networkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_node_pool" {
   name     = "%s"
@@ -6306,8 +6429,13 @@ resource "google_container_cluster" "with_node_pool" {
     node_count = 3
   }
   deletion_protection = false
+  network    = data.google_compute_network.container_network.name
 }
-`, cluster, nodePool)
+
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, cluster, nodePool, networkName)
 }
 
 <% unless version == 'ga' -%>
@@ -7149,7 +7277,7 @@ data "google_compute_network" "container_network" {
 `, cclusterName, w1startTime, w1endTime, w1startTime, w1endTime, w2startTime, w2endTime, networkName)
 }
 
-func testAccContainerCluster_updateExclusionOptions_RecurringMaintenanceWindow(cclusterName string, w1startTime, w1endTime, w2startTime, w2endTime string, scope1, scope2 string) string {
+func testAccContainerCluster_updateExclusionOptions_RecurringMaintenanceWindow(cclusterName, w1startTime, w1endTime, w2startTime, w2endTime, scope1, scope2, networkName string) string {
 
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_maintenance_exclusion_options" {
@@ -7181,8 +7309,13 @@ resource "google_container_cluster" "with_maintenance_exclusion_options" {
     	}
 	}
  }
+ network    = data.google_compute_network.container_network.name
 }
-`, cclusterName, w1startTime, w1endTime, w1startTime, w1endTime, scope1, w2startTime, w2endTime, scope2)
+
+data "google_compute_network" "container_network" {
+  name                    = "%s"
+}
+`, cclusterName, w1startTime, w1endTime, w1startTime, w1endTime, scope1, w2startTime, w2endTime, scope2, networkName)
 }
 
 func testAccContainerCluster_withExclusion_NoMaintenanceWindow(clusterName string, w1startTime, w1endTime, networkName string) string {
