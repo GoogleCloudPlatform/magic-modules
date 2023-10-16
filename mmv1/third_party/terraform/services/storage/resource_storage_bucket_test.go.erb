@@ -1708,8 +1708,11 @@ resource "google_storage_bucket" "bucket" {
       age            = 2
     }
   }
-  lifecycle_rule {testAccStorageBucket_lifecycleRulesMultiple_update
-    condition {
+  lifecycle_rule {
+    action {
+	  type = "Delete"
+	}
+	condition {
       matches_suffix = ["test"]
       age            = 2
     }
