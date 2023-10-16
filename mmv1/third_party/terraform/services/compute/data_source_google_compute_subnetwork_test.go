@@ -90,8 +90,8 @@ resource "google_compute_subnetwork" "foobar" {
   description              = "my-description"
   ip_cidr_range            = "10.0.0.0/24"
   network                  = google_compute_network.foobar.self_link
-  stack_type			   = "IPV4_IPV6"
-  ipv6_access_type		   = "INTERNAL"
+  stack_type               = "IPV4_IPV6"
+  ipv6_access_type         = "INTERNAL"
   private_ip_google_access = true
   secondary_ip_range {
     range_name    = "tf-test-secondary-range"
