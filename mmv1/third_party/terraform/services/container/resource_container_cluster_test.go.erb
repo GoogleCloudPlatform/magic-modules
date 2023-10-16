@@ -4714,10 +4714,10 @@ resource "google_container_cluster" "notification_config" {
   location           = "us-central1-a"
   initial_node_count = 3
   notification_config {
-	pubsub {
-	  enabled = true
-	  topic   = google_pubsub_topic.%s.id
-	}
+    pubsub {
+      enabled = true
+      topic   = google_pubsub_topic.%s.id
+    }
   }
   deletion_protection = false
   network    = data.google_compute_network.container_network.name
@@ -4725,7 +4725,6 @@ resource "google_container_cluster" "notification_config" {
 
 data "google_compute_network" "container_network" {
   name                    = "%s"
-}
 }
 `, topic, topic, clusterName, topic, networkName)
 }
