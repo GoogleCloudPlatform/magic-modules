@@ -1710,9 +1710,9 @@ resource "google_storage_bucket" "bucket" {
   }
   lifecycle_rule {
     action {
-	  type = "Delete"
-	}
-	condition {
+      type = "Delete"
+    }
+    condition {
       matches_suffix = ["test"]
       age            = 2
     }
