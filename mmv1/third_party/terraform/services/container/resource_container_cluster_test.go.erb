@@ -2615,7 +2615,7 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaults(t *testing.T) {
 				ExpectNonEmptyPlan: false,
 			},
 			{
-				Config: testAccContainerCluster_autoprovisioningDefaultsMinCpuPlatform(clusterName, includeMinCpuPlatform),
+				Config: testAccContainerCluster_autoprovisioningDefaultsMinCpuPlatform(clusterName, networkName, includeMinCpuPlatform),
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_autoprovisioning",
@@ -2624,7 +2624,7 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaults(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_autoprovisioningDefaultsMinCpuPlatform(clusterName, !includeMinCpuPlatform),
+				Config: testAccContainerCluster_autoprovisioningDefaultsMinCpuPlatform(clusterName, networkName, !includeMinCpuPlatform),
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_autoprovisioning",
@@ -7806,7 +7806,7 @@ resource "google_container_cluster" "with_resource_labels" {
 `, location)
 }
 
-func testAccContainerCluster_withExternalIpsConfig(projectID, clusterName string, enabled bool) string {
+func testAccContainerCluster_withExternalIpsConfig(projectID, clusterName, networkName string, enabled bool) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
     project_id = "%s"
