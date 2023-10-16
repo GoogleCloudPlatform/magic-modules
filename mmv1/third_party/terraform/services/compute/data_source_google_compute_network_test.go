@@ -71,10 +71,10 @@ func testAccDataSourceGoogleNetworkCheck(data_source_name string, resource_name 
 func testAccDataSourceGoogleNetworkConfig(name string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
-  name        = "%s"
-  description = "my-description"
+  name                     = "%s"
+  description              = "my-description"
   enable_ula_internal_ipv6 = true
-  auto_create_subnetworks = false
+  auto_create_subnetworks  = false
 }
 
 data "google_compute_network" "my_network" {
