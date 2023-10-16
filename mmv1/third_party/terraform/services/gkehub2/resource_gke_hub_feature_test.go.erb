@@ -391,13 +391,8 @@ resource "google_gke_hub_membership" "membership" {
 }
 
 resource "google_gke_hub_feature" "feature" {
-  name = "multiclusteringress"
+  name = "mesh"
   location = "global"
-  spec {
-    multiclusteringress {
-      config_membership = google_gke_hub_membership.membership.id
-    }
-  }
   fleet_default_member_config {
     mesh {
       management = "MANAGEMENT_AUTOMATIC"
@@ -414,13 +409,8 @@ resource "google_gke_hub_membership" "membership" {
 }
 
 resource "google_gke_hub_feature" "feature" {
-  name = "multiclusteringress"
+  name = "mesh"
   location = "global"
-  spec {
-    multiclusteringress {
-      config_membership = google_gke_hub_membership.membership.id
-    }
-  }
   fleet_default_member_config {
     mesh {
       management = "MANAGEMENT_MANUAL"
