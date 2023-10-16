@@ -1785,7 +1785,7 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 	})
 }
 
-<% unless version = 'ga' -%>
+<% unless version == 'ga' -%>
 func TestAccComputeInstance_confidentialHyperDiskBootDisk(t *testing.T) {
 	t.Parallel()
 
@@ -6887,7 +6887,7 @@ resource "google_compute_instance" "foobar" {
 `, instance, enableConfidentialCompute)
 }
 
-<% unless version = 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccComputeInstanceConfidentialHyperDiskBootDisk(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 }
