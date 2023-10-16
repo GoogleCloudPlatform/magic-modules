@@ -359,8 +359,8 @@ properties:
       "overwrite" update happens.
     output: true
     ignore_read: true
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: labels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description:
       The labels with user-defined metadata to organize your Endpoints. Label
       keys and values can be no longer than 64 characters (Unicode codepoints),

@@ -27,6 +27,7 @@ func TestAccNetworkSecurityServerTlsPolicy_update(t *testing.T) {
 				ResourceName:      "google_network_security_server_tls_policy.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetworkSecurityServerTlsPolicy_update(serverTlsPolicyName),
@@ -35,6 +36,7 @@ func TestAccNetworkSecurityServerTlsPolicy_update(t *testing.T) {
 				ResourceName:      "google_network_security_server_tls_policy.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})

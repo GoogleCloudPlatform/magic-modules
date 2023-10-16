@@ -47,6 +47,9 @@ examples:
       dns_compute_instance: 'dns-compute-instance'
       allow_http_traffic: 'allow-http-traffic'
       example_zone_googlecloudexample: 'example-zone-googlecloudexample'
+      dns_name: "googlecloudexample.net."
+    test_vars_overrides:
+      dns_name: '"mz.gcp.tfacc.hashicorptest.com."'
     ignore_read_extra:
       - 'force_destroy'
   - !ruby/object:Provider::Terraform::Examples
@@ -70,6 +73,19 @@ examples:
       network_1_name: 'network-1'
       network_2_name: 'network-2'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'dns_managed_zone_private_multiproject'
+    skip_docs: true
+    primary_resource_id: 'private-zone'
+    vars:
+      zone_name: 'private-zone'
+      network_1_name: 'network-1'
+      network_2_name: 'network-2'
+      project_1_name: 'project-1'
+      project_2_name: 'project-2'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+  - !ruby/object:Provider::Terraform::Examples
     name: 'dns_managed_zone_private_forwarding'
     primary_resource_id: 'private-zone'
     skip_test: true
@@ -84,6 +100,11 @@ examples:
       zone_name: 'private-zone'
       network_1_name: 'network-1'
       cluster_1_name: 'cluster-1'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'dns_managed_zone_private_peering'
     primary_resource_id: 'peering-zone'
@@ -234,7 +255,7 @@ properties:
       The time that this resource was created on the server.
       This is in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       A set of key/value label pairs to assign to this ManagedZone.
@@ -290,7 +311,7 @@ properties:
             }
             raw := v.(map[string]interface{})
             if url, ok := raw["network_url"]; ok {
-              return tpgresource.SelfLinkNameHash(url)
+              return tpgresource.SelfLinkRelativePathHash(url)
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsManagedZonePrivateVisibilityConfigNetworksSchema())

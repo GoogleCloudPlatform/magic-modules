@@ -59,7 +59,6 @@ examples:
       org_id: :ORG_ID
       billing_acct:
         :BILLING_ACCT
-    skip_vcr: true
     skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_create: 'templates/terraform/custom_create/identity_platform_config.go'
@@ -73,6 +72,89 @@ properties:
     name: 'autodeleteAnonymousUsers'
     description: |
       Whether anonymous users will be auto-deleted after a period of 30 days
+  - !ruby/object:Api::Type::NestedObject
+    name: 'signIn'
+    description: |
+      Configuration related to local sign in methods.
+    default_from_api: true
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: email
+        description: |
+          Configuration options related to authenticating a user by their email address.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: enabled
+            required: true
+            description: |
+              Whether email auth is enabled for the project or not.
+          - !ruby/object:Api::Type::Boolean
+            name: 'passwordRequired'
+            description: |
+              Whether a password is required for email auth or not. If true, both an email and
+              password must be provided to sign in. If false, a user may sign in via either
+              email/password or email link.
+      - !ruby/object:Api::Type::NestedObject
+        name: phoneNumber
+        description: |
+          Configuration options related to authenticated a user by their phone number.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: enabled
+            required: true
+            description: |
+              Whether phone number auth is enabled for the project or not.
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: 'testPhoneNumbers'
+            description: |
+              A map of <test phone number, fake code> that can be used for phone auth testing.
+      - !ruby/object:Api::Type::NestedObject
+        name: anonymous
+        custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_anonymous.go'
+        description: |
+          Configuration options related to authenticating an anonymous user.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: enabled
+            required: true
+            send_empty_value: true
+            description: |
+              Whether anonymous user auth is enabled for the project or not.
+      - !ruby/object:Api::Type::Boolean
+        name: allowDuplicateEmails
+        description: |
+          Whether to allow more than one account to have the same email.
+      - !ruby/object:Api::Type::NestedObject
+        name: hashConfig
+        output: true
+        description: |
+          Output only. Hash config information.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: algorithm
+            output: true
+            description: |
+              Different password hash algorithms used in Identity Toolkit.
+          - !ruby/object:Api::Type::String
+            name: 'signerKey'
+            output: true
+            description: |
+              Signer key in base64.
+          - !ruby/object:Api::Type::String
+            name: 'saltSeparator'
+            output: true
+            description: |
+              Non-printable character to be inserted between the salt and plain text password in base64.
+          - !ruby/object:Api::Type::Integer
+            name: rounds
+            output: true
+            description: |
+              How many rounds for hash calculation. Used by scrypt and other similar password derivation algorithms.
+          - !ruby/object:Api::Type::Integer
+            name: 'memoryCost'
+            output: true
+            description: |
+              Memory cost for hash calculation. Used by scrypt and other similar password derivation algorithms. See https://tools.ietf.org/html/rfc7914 for explanation of field.
   - !ruby/object:Api::Type::NestedObject
     name: 'blockingFunctions'
     description: |
@@ -141,3 +223,34 @@ properties:
       List of domains authorized for OAuth redirects.
     item_type: Api::Type::String
     default_from_api: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'smsRegionConfig'
+    description: |
+      Configures the regions where users are allowed to send verification SMS for the project or tenant. This is based on the calling code of the destination phone number.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'allowByDefault'
+        exactly_one_of:
+          - sms_region_config.0.allow_by_default
+          - sms_region_config.0.allowlist_only
+        description: |
+          A policy of allowing SMS to every region by default and adding disallowed regions to a disallow list.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: disallowedRegions
+            description: |
+              Two letter unicode region codes to disallow as defined by https://cldr.unicode.org/ The full list of these region codes is here: https://github.com/unicode-cldr/cldr-localenames-full/blob/master/main/en/territories.json
+            item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: 'allowlistOnly'
+        exactly_one_of:
+          - sms_region_config.0.allow_by_default
+          - sms_region_config.0.allowlist_only
+        description: |
+          A policy of only allowing regions by explicitly adding them to an allowlist.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: allowedRegions
+            description: |
+              Two letter unicode region codes to allow as defined by https://cldr.unicode.org/ The full list of these region codes is here: https://github.com/unicode-cldr/cldr-localenames-full/blob/master/main/en/territories.json
+            item_type: Api::Type::String

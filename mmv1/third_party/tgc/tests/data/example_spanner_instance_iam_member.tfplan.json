@@ -61,12 +61,12 @@
           "labels": null,
           "name": "spanner-instance",
           "num_nodes": 1,
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "id": true,
           "processing_units": true,
-          "project": true,
           "state": true
         },
         "before_sensitive": false,
@@ -88,13 +88,13 @@
           "condition": [],
           "instance": "spanner-instance",
           "member": "user:jane@example.com",
-          "role": "roles/compute.networkUser"
+          "role": "roles/compute.networkUser",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "condition": [],
           "etag": true,
-          "id": true,
-          "project": true
+          "id": true
         },
         "before_sensitive": false,
         "after_sensitive": {

@@ -82,6 +82,14 @@ The following arguments are supported:
     without deleting the Project via the Google API.
 
 * `labels` - (Optional) A set of key/value label pairs to assign to the project.
+  **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+	Please refer to the field 'effective_labels' for all of the labels present on the resource.
+
+* `terraform_labels` -
+  The combination of labels configured directly on the resource and default labels configured on the provider.
+
+* `effective_labels` -
+  All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 
 * `auto_create_network` - (Optional) Controls whether the 'default' network exists on the project. Defaults
     to `true`, where it is created. If set to `false`, the default network will still be created by GCP but
@@ -112,6 +120,19 @@ This resource provides the following
 
 Projects can be imported using the `project_id`, e.g.
 
+* `{{project_id}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Projects using one of the formats above. For example:
+
+```tf
+import {
+  id = "{{project_id}}"
+  to = google_project.default
+}
 ```
-$ terraform import google_project.my_project your-project-id
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Projects can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_project.default {{project_id}}
 ```
