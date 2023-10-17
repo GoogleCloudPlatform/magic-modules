@@ -32,6 +32,8 @@ examples:
     vars:
       agent_name: 'dialogflowcx-agent'
       bucket_name: 'dialogflowcx-bucket'
+    ignore_read_extra:
+      - git_integration_settings.0.github_settings.0.access_token
 id_format: 'projects/{{project}}/locations/{{location}}/agents/{{name}}'
 import_format: ['projects/{{project}}/locations/{{location}}/agents/{{name}}']
 skip_sweeper: true

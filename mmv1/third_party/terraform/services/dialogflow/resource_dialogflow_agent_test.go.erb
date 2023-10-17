@@ -29,7 +29,7 @@ func TestAccDialogflowAgent_update(t *testing.T) {
 				ResourceName:            "google_dialogflow_agent.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"avatar_uri", "tier"},
+				ImportStateVerifyIgnore: []string{"avatar_uri", "tier", "git_integration_settings.0.github_settings.0.access_token"},
 			},
 			{
 				Config: testAccDialogflowAgent_full2(context),
@@ -38,7 +38,7 @@ func TestAccDialogflowAgent_update(t *testing.T) {
 				ResourceName:            "google_dialogflow_agent.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"avatar_uri", "tier"},
+				ImportStateVerifyIgnore: []string{"avatar_uri", "tier", "git_integration_settings.0.github_settings.0.access_token"},
 			},
 		},
 	})
