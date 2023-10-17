@@ -4747,7 +4747,6 @@ resource "google_container_cluster" "notification_config" {
 data "google_compute_network" "container_network" {
   name                    = "%s"
 }
-}
 `, clusterName, networkName)
 }
 
