@@ -197,6 +197,7 @@ properties:
     description: |
       Optional. The number of replica nodes per shard.
     required: false
+    send_empty_value: true
   - !ruby/object:Api::Type::Integer
     name: sizeGb
     description: |
