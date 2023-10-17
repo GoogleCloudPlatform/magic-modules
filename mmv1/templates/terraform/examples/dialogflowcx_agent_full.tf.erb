@@ -26,10 +26,6 @@ resource "google_dialogflow_cx_agent" "<%= ctx[:primary_resource_id] %>" {
       max_digits = 1
       finish_digit = "#"
     }
-    logging_settings {
-      enable_stackdriver_logging = true
-      enable_interaction_logging = true
-    }
   }
   git_integration_settings {
     github_settings {

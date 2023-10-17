@@ -51,9 +51,6 @@ func testAccDialogflowCXPage_basic(context map[string]interface{}) string {
     time_zone                = "America/New_York"
     description              = "Description 1."
     avatar_uri               = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
-    advanced_settings {
-      logging_settings {}
-    }
   }
 
   resource "google_dialogflow_cx_page" "my_page" {
@@ -77,11 +74,6 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
     enable_spell_correction    = true
     speech_to_text_settings {
       enable_speech_adaptation = true
-    }
-    advanced_settings {
-      logging_settings {
-        enable_stackdriver_logging = true
-      }
     }
   }
 

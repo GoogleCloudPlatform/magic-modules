@@ -61,9 +61,6 @@ func testAccDialogflowCXAgent_basic(context map[string]interface{}) string {
 		time_zone = "America/New_York"
 		description = "Description 1."
 		avatar_uri = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
-		advanced_settings {
-			logging_settings {}
-		}
 	}
 	`, context)
 }
@@ -98,10 +95,6 @@ func testAccDialogflowCXAgent_full(context map[string]interface{}) string {
 				max_digits = 1
 				finish_digit = "#"
 			}
-			logging_settings {
-				enable_stackdriver_logging = true
-				enable_interaction_logging = true
-			}
 		}
 		git_integration_settings {
 			github_settings {
@@ -135,9 +128,6 @@ func testAccDialogflowCXAgent_removeAdvancedSettings(context map[string]interfac
 		time_zone = "America/New_York"
 		description = "Description 1."
 		avatar_uri = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
-		advanced_settings {
-			logging_settings {}
-		}
 	}
 	  `, context)
 }

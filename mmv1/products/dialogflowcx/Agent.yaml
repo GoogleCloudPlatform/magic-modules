@@ -153,24 +153,6 @@ properties:
             name: 'finishDigit'
             description: |
               The digit that terminates a DTMF digit sequence.
-      - !ruby/object:Api::Type::NestedObject
-        name: 'loggingSettings'
-        send_empty_value: true
-        allow_empty_object: true
-        description: |
-          Settings for logging. Settings for Dialogflow History, Contact Center messages, StackDriver logs, and speech logging. Exposed at the following levels:
-          * Agent level
-        properties:
-          - !ruby/object:Api::Type::Boolean
-            name: 'enableStackdriverLogging'
-            send_empty_value: true
-            description: |
-              If true, StackDriver logging is currently enabled.
-          - !ruby/object:Api::Type::Boolean
-            name: 'enableInteractionLogging'
-            send_empty_value: true
-            description: |
-              If true, DF Interaction logging is currently enabled.
   - !ruby/object:Api::Type::NestedObject
     name: 'gitIntegrationSettings'
     description: |
