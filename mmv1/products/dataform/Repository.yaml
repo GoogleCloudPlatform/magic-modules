@@ -105,6 +105,7 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'tokenStatus'
         output: true
+        deprecation_message: The field does not contain any token status information. Instead use https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories/computeAccessTokenStatus
         description: |
           Indicates the status of the Git access token. https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories#TokenStatus
   - !ruby/object:Api::Type::NestedObject
@@ -123,3 +124,18 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'serviceAccount'
     description: The service account to run workflow invocations under.
+  - !ruby/object:Api::Type::String
+    name: npmrcEnvironmentVariablesSecretVersion
+    description: Optional. The name of the Secret Manager secret version to be used to interpolate variables into the .npmrc file for package installation operations. Must be in the format projects/*/secrets/*/versions/*. The file itself must be in a JSON format.
+  - !ruby/object:Api::Type::String
+    name: displayName
+    description: Optional. The repository's user-friendly name.
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: labels
+    description: |
+      Optional. Repository user labels.
+      An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+  - !ruby/object:Api::Type::Boolean
+    name: setAuthenticatedUserAdmin
+    immutable: true
+    description: Optional. Input only. If set to true, the authenticated user will be granted the roles/dataform.admin role on the created repository. To modify access to the created repository later apply setIamPolicy from https://cloud.google.com/dataform/reference/rest#rest-resource:-v1beta1.projects.locations.repositories
