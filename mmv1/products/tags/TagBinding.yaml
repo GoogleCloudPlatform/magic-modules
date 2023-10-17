@@ -50,7 +50,6 @@ examples:
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
     name: 'tag_binding_with_namespaced_value'
-    skip_test: false
     primary_resource_id: 'binding_with_value'
     vars:
       key_short_name: 'keyname'
