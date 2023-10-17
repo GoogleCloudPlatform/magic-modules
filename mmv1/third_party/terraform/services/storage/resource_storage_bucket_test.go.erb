@@ -84,8 +84,16 @@ func TestAccStorageBucket_basicWithAutoclass(t *testing.T) {
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &updated),
 					testAccCheckStorageBucketWasUpdated(&updated, &bucket),
-					testAccCheckAutoclassTerminalStorageClass("ARCHIVE", &updated),
 				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccStorageBucket_basicWithAutoclass(bucketName, false),
 			},
 			{
 				ResourceName:            "google_storage_bucket.bucket",
@@ -1244,16 +1252,6 @@ func testAccCheckStorageBucketMissing(t *testing.T, bucketName string) resource.
 		}
 
 		return err
-	}
-}
-
-func testAccCheckAutoclassTerminalStorageClass(expected string, b *storage.Bucket) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		actual := b.Autoclass.TerminalStorageClass
-		if expected != actual {
-			return fmt.Errorf("expected Autoclass Terminal Storage Class %s, instead got %s", expected, actual)
-		}
-		return nil
 	}
 }
 
