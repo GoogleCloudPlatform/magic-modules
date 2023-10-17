@@ -2315,9 +2315,11 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.IdentityServiceConfig = expandIdentityServiceConfig(v)
 	}
 
+<% unless version == 'ga' -%>
 	if v, ok := d.GetOk("tpu_config"); ok {
 		cluster.TpuConfig = expandContainerClusterTpuConfig(v)
 	}
+<% end -%>
 
 	if v, ok := d.GetOk("resource_usage_export_config"); ok {
 		cluster.ResourceUsageExportConfig = expandResourceUsageExportConfig(v)
@@ -4996,7 +4998,6 @@ func expandWorkloadIdentityConfig(configured interface{}) *container.WorkloadIde
 	return v
 }
 
-<% unless version == 'ga' -%>
 func expandIdentityServiceConfig(configured interface{}) *container.IdentityServiceConfig {
 	l := configured.([]interface{})
 	v := &container.IdentityServiceConfig{}
@@ -5006,7 +5007,6 @@ func expandIdentityServiceConfig(configured interface{}) *container.IdentityServ
 
 	return v
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func expandPodSecurityPolicyConfig(configured interface{}) *container.PodSecurityPolicyConfig {
@@ -5550,7 +5550,6 @@ func flattenWorkloadIdentityConfig(c *container.WorkloadIdentityConfig, d *schem
 	}
 }
 
-<% unless version == 'ga' -%>
 func flattenIdentityServiceConfig(c *container.IdentityServiceConfig, d *schema.ResourceData, config *transport_tpg.Config) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -5562,7 +5561,6 @@ func flattenIdentityServiceConfig(c *container.IdentityServiceConfig, d *schema.
 		},
 	}
 }
-<% end -%>
 
 func flattenPodCidrOverprovisionConfig(c *container.PodCIDROverprovisionConfig) []map[string]interface{} {
 	if c == nil {
