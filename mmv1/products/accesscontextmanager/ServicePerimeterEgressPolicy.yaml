@@ -79,6 +79,21 @@ properties:
           Should be in the format of email address. The email address should
           represent individual user or service account only.
         item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'sources'
+        description: 'Sources that this EgressPolicy authorizes access from.'
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'accessLevel'
+              description: 'An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.'
+      - !ruby/object:Api::Type::Enum
+        name: 'sourceRestriction'
+        description: 'Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.'
+        values:
+          - :SOURCE_RESTRICTION_UNSPECIFIED
+          - :SOURCE_RESTRICTION_ENABLED
+          - :SOURCE_RESTRICTION_DISABLED
   - !ruby/object:Api::Type::NestedObject
     name: 'egressTo'
     description: |
