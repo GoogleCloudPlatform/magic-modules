@@ -1,5 +1,18 @@
-from golang:1.19-bullseye as resource
+# Stage 1: Download go module cache for builds
+FROM golang:1.19-bullseye AS builder
+
+WORKDIR /app1
+ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/.ci/magician/go.mod" go.mod
+ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/.ci/magician/go.sum" go.sum
+RUN go mod download
+
+# Stage 2: Creating the final imag
+FROM golang:1.19-bullseye
 SHELL ["/bin/bash", "-c"]
+
+# Copy Go dependencies from builder
+COPY --from=builder /go/pkg/mod /go/pkg/mod
+
 # Set up Github SSH cloning.
 RUN ssh-keyscan github.com >> /known_hosts
 RUN echo "UserKnownHostsFile /known_hosts" >> /etc/ssh/ssh_config
