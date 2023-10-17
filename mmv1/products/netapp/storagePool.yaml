@@ -94,7 +94,8 @@ async: !ruby/object:Api::OpAsync
   # actions: ['create', 'update', 'delete']
   operation: !ruby/object:Api::OpAsync::Operation
     base_url: '{{op_id}}'
-
+id_format: 'projects/{{project}}/locations/{{location}}/storagePools/{{storage_pool_id}}'
+import_format: ['projects/{{project}}/locations/{{location}}/storagePools/{{storage_pool_id}}']
   # If true, the provider sets the resource's Terraform ID after the resource is created,
   # taking into account values that are set by the API at create time. This is only possible
   # when the completed operation's JSON includes the created resource in the "response" field.
