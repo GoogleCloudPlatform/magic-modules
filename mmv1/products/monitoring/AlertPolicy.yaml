@@ -52,6 +52,13 @@ examples:
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
+  # skipping tests because the API is full of race conditions
+  - !ruby/object:Provider::Terraform::Examples
+    skip_test: true
+    name: 'monitoring_alert_policy_promql_condition'
+    primary_resource_id: 'alert_policy'
+    vars:
+      alert_policy_display_name: 'My Alert Policy'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/monitoring_alert_policy.go.erb
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
