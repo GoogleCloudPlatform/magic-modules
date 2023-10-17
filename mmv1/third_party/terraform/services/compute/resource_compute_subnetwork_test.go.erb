@@ -144,6 +144,19 @@ func TestAccComputeSubnetwork_update(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				// 
+				Config: testAccComputeSubnetwork_update4(cnName, "10.2.0.0/24", subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeSubnetworkExists(
+						t, "google_compute_subnetwork.network-with-private-google-access", &subnetwork),
+				),
+			},
+			{
+				ResourceName:      "google_compute_subnetwork.network-with-private-google-access",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 
@@ -510,6 +523,31 @@ resource "google_compute_subnetwork" "network-with-private-google-access" {
     range_name    = "tf-test-secondary-range-update"
     ip_cidr_range = "192.168.10.0/24"
   }
+
+  external_ipv6_prefix = "2001:1234:5678:1234"
+}
+`, cnName, subnetworkName, cidrRange)
+}
+
+func testAccComputeSubnetwork_update4(cnName, cidrRange, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "custom-test" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "network-with-private-google-access" {
+  name          = "%s"
+  ip_cidr_range = "%s"
+  region        = "us-central1"
+  network       = google_compute_network.custom-test.self_link
+
+  secondary_ip_range {
+    range_name    = "tf-test-secondary-range-update"
+    ip_cidr_range = "192.168.10.0/24"
+  }
+
+  external_ipv6_prefix = "2001:1234:5678:4321"
 }
 `, cnName, subnetworkName, cidrRange)
 }
