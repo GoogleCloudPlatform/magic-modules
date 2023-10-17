@@ -139,3 +139,4 @@ properties:
     name: setAuthenticatedUserAdmin
     immutable: true
     description: Optional. Input only. If set to true, the authenticated user will be granted the roles/dataform.admin role on the created repository. To modify access to the created repository later apply setIamPolicy from https://cloud.google.com/dataform/reference/rest#rest-resource:-v1beta1.projects.locations.repositories
+    
