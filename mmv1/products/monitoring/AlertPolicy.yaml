@@ -828,8 +828,6 @@ properties:
         - !ruby/object:Api::Type::NestedObject
           name: conditionPrometheusQueryLanguage
           description: |
-            A Monitoring Query Language query that outputs a boolean stream
-
             A condition type that allows alert policies to be defined using
             Prometheus Query Language (PromQL).
 
