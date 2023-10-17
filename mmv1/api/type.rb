@@ -801,6 +801,51 @@ module Api
       def validate
         super
         check :ignore_write, type: :boolean, default: false
+
+        return if @__resource.__product.nil?
+
+        product_name = @__resource.__product.name
+        resource_name = @__resource.name
+
+        if lineage == 'labels' || lineage == 'metadata.labels' ||
+           lineage == 'configuration.labels'
+          if !(is_a? Api::Type::KeyValueLabels) &&
+             # The label value must be empty string, so skip this resource
+             !(product_name == 'CloudIdentity' && resource_name == 'Group') &&
+
+             # The "labels" field has type Array, so skip this resource
+             !(product_name == 'DeploymentManager' && resource_name == 'Deployment') &&
+
+             # https://github.com/hashicorp/terraform-provider-google/issues/16219
+             !(product_name == 'Edgenetwork' && resource_name == 'Network') &&
+
+             # https://github.com/hashicorp/terraform-provider-google/issues/16219
+             !(product_name == 'Edgenetwork' && resource_name == 'Subnet') &&
+
+             # "userLabels" is the resource labels field
+             !(product_name == 'Monitoring' && resource_name == 'NotificationChannel') &&
+
+             # The "labels" field has type Array, so skip this resource
+             !(product_name == 'Monitoring' && resource_name == 'MetricDescriptor')
+            raise "Please use type KeyValueLabels for field #{lineage} " \
+                  "in resource #{product_name}/#{resource_name}"
+          end
+        elsif is_a? Api::Type::KeyValueLabels
+          raise "Please don't use type KeyValueLabels for field #{lineage} " \
+                "in resource #{product_name}/#{resource_name}"
+        end
+
+        if lineage == 'annotations' || lineage == 'metadata.annotations'
+          if !(is_a? Api::Type::KeyValueAnnotations) &&
+             # The "annotations" field has "ouput: true", so skip this eap resource
+             !(product_name == 'Gkeonprem' && resource_name == 'BareMetalAdminClusterEnrollment')
+            raise "Please use type KeyValueAnnotations for field #{lineage} " \
+                  "in resource #{product_name}/#{resource_name}"
+          end
+        elsif is_a? Api::Type::KeyValueAnnotations
+          raise "Please don't use type KeyValueAnnotations for field #{lineage} " \
+                "in resource #{product_name}/#{resource_name}"
+        end
       end
 
       def field_min_version
