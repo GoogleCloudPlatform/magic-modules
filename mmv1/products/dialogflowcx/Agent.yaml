@@ -119,6 +119,7 @@ properties:
     description: |
       Hierarchical advanced settings for this agent. The settings exposed at the lower level overrides the settings exposed at the higher level.
       Hierarchy: Agent->Flow->Page->Fulfillment/Parameter.
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'audioExportGcsDestination'
