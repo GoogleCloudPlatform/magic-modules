@@ -715,7 +715,7 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	if config.Credentials != "" {
 		contents, _, err := verify.PathOrContents(config.Credentials)
 		if err != nil {
-			fmt.Errorf("error loading service account credentials: %s", err)
+			return nil, diag.FromErr(fmt.Errorf("error loading service account credentials: %s", err))
 		}
 		var content map[string]any
 
@@ -733,7 +733,7 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		if config.UniverseDomain == "" {
 			config.UniverseDomain = v.(string)
 		} else if  v.(string) != config.UniverseDomain {
-			fmt.Errorf("universe domain %s is already defined in the service credential file", config.UniverseDomain)
+			return nil, diag.FromErr(fmt.Errorf("'%s' does not match the universe domain '%s' already set in the credential file ~/.config/gcloud/application_default_credentials.json. The 'universe_domain' provider configuration can not be used to override the universe domain that is defined in the active credential.  Set the 'universe_domain' provider configuration when universe domain information is not already available in the credential, e.g. when authenticating with a JWT token.", v, config.UniverseDomain))
 		}
 	}
 
