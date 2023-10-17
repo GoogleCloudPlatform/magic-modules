@@ -51,7 +51,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'tag_binding_with_namespaced_value'
     skip_test: true
-    primary_resource_id: 'binding'
+    primary_resource_id: 'binding_with_value'
     vars:
       key_short_name: 'keyname'
       value_short_name: 'valuename'
