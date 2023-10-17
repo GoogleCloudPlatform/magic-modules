@@ -48,7 +48,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "gkehub_membership_binding_basic"
     primary_resource_name: "fmt.Sprintf(\"tf-test-membership%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-membership-binding%s\", context[\"random_suffix\"])"
-    primary_resource_id: "example"
+    primary_resource_id: "membership_binding"
     vars:
       cluster_name: "basiccluster"
       deletion_protection: 'true'

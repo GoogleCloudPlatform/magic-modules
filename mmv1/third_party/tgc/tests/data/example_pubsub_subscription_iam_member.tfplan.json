@@ -109,7 +109,8 @@
             "test-label1": "test-value1"
           },
           "timeouts": null,
-          "topic": "example-pubsub-topic"
+          "topic": "example-pubsub-topic",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "dead_letter_policy": [],
@@ -117,7 +118,6 @@
           "expiration_policy": true,
           "id": true,
           "labels": {},
-          "project": true,
           "push_config": [
             {
               "oidc_token": []
@@ -157,13 +157,13 @@
           "condition": [],
           "member": "user:jane@example.com",
           "role": "roles/editor",
-          "subscription": "example-subscription"
+          "subscription": "example-subscription",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "condition": [],
           "etag": true,
-          "id": true,
-          "project": true
+          "id": true
         },
         "before_sensitive": false,
         "after_sensitive": {

@@ -1141,8 +1141,8 @@ func ResourceContainerCluster() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Computed:         true,
-							ValidateFunc:     validation.StringInSlice([]string{"VULNERABILITY_DISABLED", "VULNERABILITY_BASIC", "VULNERABILITY_MODE_UNSPECIFIED"}, false),
-							Description:      `Sets the mode of the Kubernetes security posture API's workload vulnerability scanning. Available options include VULNERABILITY_DISABLED and VULNERABILITY_BASIC.`,
+							ValidateFunc:     validation.StringInSlice([]string{"VULNERABILITY_DISABLED", "VULNERABILITY_BASIC", "VULNERABILITY_ENTERPRISE", "VULNERABILITY_MODE_UNSPECIFIED"}, false),
+							Description:      `Sets the mode of the Kubernetes security posture API's workload vulnerability scanning. Available options include VULNERABILITY_DISABLED, VULNERABILITY_BASIC and VULNERABILITY_ENTERPRISE.`,
 							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("VULNERABILITY_MODE_UNSPECIFIED"),
 						},
 					},
@@ -2927,13 +2927,13 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 				},
 		    },
 		}
-		
+
 	    updateF := updateFunc(req, "updating net admin for GKE autopilot workload policy config")
 		// Call update serially.
 		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
 		    return err
 	    }
-		
+
 		log.Printf("[INFO] GKE cluster %s's autopilot workload policy config allow_net_admin has been set to %v", d.Id(), allowed)
 	}
 
@@ -3429,7 +3429,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		o, n := d.GetChange("ip_allocation_policy.0.additional_pod_ranges_config.0.pod_range_names")
 		old_names := o.(*schema.Set)
 		new_names := n.(*schema.Set)
-		
+
 		// Filter unchanged names.
 		removed_names := old_names.Difference(new_names)
 		added_names := new_names.Difference(old_names)
@@ -4094,7 +4094,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 func resourceContainerClusterDelete(d *schema.ResourceData, meta interface{}) error {
 	if d.Get("deletion_protection").(bool) {
-		return fmt.Errorf("Cannot destroy cluster because deletion_protection is set to true. Set it to false to proceed with instance deletion.")
+		return fmt.Errorf("Cannot destroy cluster because deletion_protection is set to true. Set it to false to proceed with cluster deletion.")
 	}
 	config := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)

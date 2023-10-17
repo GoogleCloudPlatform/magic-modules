@@ -491,6 +491,8 @@ module Api
       # The effective_annotations field is used to write to API,
       # instead of the annotations field.
       annotations.ignore_write = true
+      note = get_labels_field_note(annotations.name)
+      annotations.description = "#{annotations.description}\n\n#{note}"
 
       @custom_diff ||= []
       if parent.nil?

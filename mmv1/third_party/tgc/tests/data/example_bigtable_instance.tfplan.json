@@ -57,7 +57,8 @@
           "labels": {
             "test-name": "test-value"
           },
-          "name": "tf-instance"
+          "name": "tf-instance",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "cluster": [
@@ -65,8 +66,7 @@
           ],
           "display_name": true,
           "id": true,
-          "labels": {},
-          "project": true
+          "labels": {}
         }
       }
     }

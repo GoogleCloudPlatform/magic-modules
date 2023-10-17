@@ -898,9 +898,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		// add the "effective_annotations" property when the current property is top level "annotations"
 
 		if p.IsResourceLabels() || p.IsResourceAnnotations() {
-			note := "**Note**: This field is non-authoritative, and will only manage the labels present in your configuration. " +
-				"Please refer to the field `effective_labels` for all of the labels present on the resource."
-			p.Description = fmt.Sprintf("%s\n\n%s", p.Description, note)
+			p.Description = fmt.Sprintf("%s\n\n%s", p.Description, get_labels_field_note(p.title))
 			p.Settable = false
 			p.StateGetter = nil
 
@@ -974,4 +972,8 @@ func build_terraform_labels_field(p Property, resource *Resource, parent *Proper
 		PackageName: p.PackageName,
 		StateSetter: &stateSetter,
 	}
+}
+
+func get_labels_field_note(title string) string {
+	return fmt.Sprintf("**Note**: This field is non-authoritative, and will only manage the %s present in your configuration.\nPlease refer to the field `effective_%s` for all of the %s present on the resource.", title, title, title)
 }

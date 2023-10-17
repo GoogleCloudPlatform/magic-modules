@@ -30,8 +30,7 @@ var (
 	trustedContributors = []string{}
 
 	// This is for reviewers who are "on vacation": will not receive new review assignments but will still receive re-requests for assigned PRs.
-	onVacationReviewers = []string{
-	}
+	onVacationReviewers = []string{}
 )
 
 type UserType int64
@@ -77,7 +76,7 @@ func isTeamMember(author, githubToken string) bool {
 	return slices.Contains(reviewerRotation, author) || slices.Contains(trustedContributors, author)
 }
 
-func isTeamReviewer(reviewer string) bool {
+func IsTeamReviewer(reviewer string) bool {
 	return slices.Contains(reviewerRotation, reviewer)
 }
 

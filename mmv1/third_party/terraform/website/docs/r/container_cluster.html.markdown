@@ -122,14 +122,14 @@ locations. In contrast, in a regional cluster, cluster master nodes are present
 in multiple zones in the region. For that reason, regional clusters should be
 preferred.
 
-* `deletion_protection` - (Optional) Whether or not to allow Terraform to destroy 
-the cluster. Unless this field is set to false in Terraform state, a 
+* `deletion_protection` - (Optional) Whether or not to allow Terraform to destroy
+the cluster. Unless this field is set to false in Terraform state, a
 `terraform destroy` or `terraform apply` that would delete the cluster will fail.
 
 * `addons_config` - (Optional) The configuration for addons supported by GKE.
     Structure is [documented below](#nested_addons_config).
 
-* `allow_net_admin` - (Optional) Enable NET_ADMIN for the cluster. Defaults to 
+* `allow_net_admin` - (Optional) Enable NET_ADMIN for the cluster. Defaults to
 `false`. This field should only be enabled for Autopilot clusters (`enable_autopilot`
 set to `true`).
 
@@ -194,7 +194,7 @@ set this to a value of at least `1`, alongside setting
 `remove_default_node_pool` to `true`.
 
 * `ip_allocation_policy` - (Optional) Configuration of cluster IP allocation for
-VPC-native clusters. If this block is unset during creation, it will be set by the GKE backend. 
+VPC-native clusters. If this block is unset during creation, it will be set by the GKE backend.
 Structure is [documented below](#nested_ip_allocation_policy).
 
 * `networking_mode` - (Optional) Determines whether alias IPs or routes will be used for pod IPs in the cluster.
@@ -732,7 +732,7 @@ Default value is `IPV4`.
 Possible values are `IPV4` and `IPV4_IPV6`.
 
 * `additional_pod_ranges_config` - (Optional) The configuration for additional pod secondary ranges at
-the cluster level. Used for Autopilot clusters and Standard clusters with which control of the 
+the cluster level. Used for Autopilot clusters and Standard clusters with which control of the
 secondary Pod IP address assignment to node pools isn't needed. Structure is [documented below](#nested_additional_pod_ranges_config).
 
 
@@ -920,19 +920,7 @@ kubelet_config {
 }
 ```
 
-* `linux_node_config` - (Optional)
-Linux node configuration, currently supported attributes can be found [here](https://cloud.google.com/sdk/gcloud/reference/beta/container/node-pools/create#--system-config-from-file).
-Note that validations happen all server side. All attributes are optional.
-Structure is [documented below](#nested_linux_node_config).
-
-```hcl
-linux_node_config {
-  sysctls = {
-    "net.core.netdev_max_backlog" = "10000"
-    "net.core.rmem_max"           = "10000"
-  }
-}
-```
+* `linux_node_config` - (Optional) Parameters that can be configured on Linux nodes. Structure is [documented below](#nested_linux_node_config).
 
 * `node_group` - (Optional) Setting this field will assign instances of this pool to run on the specified node group. This is useful for running workloads on [sole tenant nodes](https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes).
 
@@ -1238,9 +1226,25 @@ not specifying the `kubelet_config` block should be the equivalent of specifying
 
 <a name="nested_linux_node_config"></a>The `linux_node_config` block supports:
 
-* `sysctls` - (Required)  The Linux kernel parameters to be applied to the nodes
+* `sysctls` - (Optional) The Linux kernel parameters to be applied to the nodes
 and all pods running on the nodes. Specified as a map from the key, such as
-`net.core.wmem_max`, to a string value.
+`net.core.wmem_max`, to a string value. Currently supported attributes can be found [here](https://cloud.google.com/sdk/gcloud/reference/beta/container/node-pools/create#--system-config-from-file).
+Note that validations happen all server side. All attributes are optional.
+
+```hcl
+linux_node_config {
+  sysctls = {
+    "net.core.netdev_max_backlog" = "10000"
+    "net.core.rmem_max"           = "10000"
+  }
+}
+```
+
+* `cgroup_mode` - (Optional) Possible cgroup modes that can be used.
+    Accepted values are:
+    * `CGROUP_MODE_UNSPECIFIED`: CGROUP_MODE_UNSPECIFIED is when unspecified cgroup configuration is used. The default for the GKE node OS image will be used.
+    * `CGROUP_MODE_V1`: CGROUP_MODE_V1 specifies to use cgroupv1 for the cgroup configuration on the node image.
+    * `CGROUP_MODE_V2`: CGROUP_MODE_V2 specifies to use cgroupv2 for the cgroup configuration on the node image.
 
 <a name="nested_vertical_pod_autoscaling"></a>The `vertical_pod_autoscaling` block supports:
 
@@ -1273,7 +1277,7 @@ and all pods running on the nodes. Specified as a map from the key, such as
 * `mode` - (Optional) Sets the mode of the Kubernetes security posture API's off-cluster features. Available options include `DISABLED` and `BASIC`.
 
 
-* `vulnerability_mode` - (Optional) Sets the mode of the Kubernetes security posture API's workload vulnerability scanning. Available options include `VULNERABILITY_DISABLED` and `VULNERABILITY_BASIC`.
+* `vulnerability_mode` - (Optional) Sets the mode of the Kubernetes security posture API's workload vulnerability scanning. Available options include `VULNERABILITY_DISABLED`, `VULNERABILITY_BASIC` and `VULNERABILITY_ENTERPRISE`.
 
 
 ## Attributes Reference
@@ -1334,12 +1338,27 @@ This resource provides the following
 GKE clusters can be imported using the `project` , `location`, and `name`. If the project is omitted, the default
 provider value will be used. Examples:
 
+* `projects/{{project_id}}/locations/{{location}}/clusters/{{cluster_id}}`
+* `{{project_id}}/{{location}}/{{cluster_id}}`
+* `{{location}}/{{cluster_id}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import GKE clusters using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project_id}}/locations/{{location}}/clusters/{{cluster_id}}"
+  to = google_container_cluster.default
+}
 ```
-$ terraform import google_container_cluster.mycluster projects/my-gcp-project/locations/us-east1-a/clusters/my-cluster
 
-$ terraform import google_container_cluster.mycluster my-gcp-project/us-east1-a/my-cluster
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), GKE clusters can be imported using one of the formats above. For example:
 
-$ terraform import google_container_cluster.mycluster us-east1-a/my-cluster
+```
+$ terraform import google_container_cluster.default projects/{{project_id}}/locations/{{location}}/clusters/{{cluster_id}}
+
+$ terraform import google_container_cluster.default {{project_id}}/{{location}}/{{cluster_id}}
+
+$ terraform import google_container_cluster.default {{location}}/{{cluster_id}}
 ```
 
 ~> **Note:** This resource has several fields that control Terraform-specific behavior and aren't present in the API. If they are set in config and you import a cluster, Terraform may need to perform an update immediately after import. Most of these updates should be no-ops but some may modify your cluster if the imported state differs.

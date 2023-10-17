@@ -54,7 +54,8 @@
           "min_tls_version": "TLS_1_2",
           "name": "custom-ssl-policy",
           "profile": "CUSTOM",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "creation_timestamp": true,
@@ -65,7 +66,6 @@
           "enabled_features": true,
           "fingerprint": true,
           "id": true,
-          "project": true,
           "self_link": true
         },
         "before_sensitive": false,

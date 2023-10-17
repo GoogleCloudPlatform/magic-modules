@@ -122,6 +122,7 @@ func TestAccContainerCluster_misc(t *testing.T) {
 }
 
 func TestAccContainerCluster_withAddons(t *testing.T) {
+	t.Skipf("Skipping test %s due to https://github.com/hashicorp/terraform-provider-google/issues/16114", t.Name())
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
@@ -188,7 +189,7 @@ func TestAccContainerCluster_withDeletionProtection(t *testing.T) {
 			{
 				Config: testAccContainerCluster_withDeletionProtection(clusterName, "true"),
 				Destroy:     true,
-				ExpectError: regexp.MustCompile("Cannot destroy cluster because deletion_protection is set to true. Set it to false to proceed with instance deletion."),
+				ExpectError: regexp.MustCompile("Cannot destroy cluster because deletion_protection is set to true. Set it to false to proceed with cluster deletion."),
 			},
 			{
 				Config: testAccContainerCluster_withDeletionProtection(clusterName, "false"),

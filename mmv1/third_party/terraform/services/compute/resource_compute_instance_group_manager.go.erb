@@ -354,7 +354,6 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 				Description: `When used with wait_for_instances specifies the status to wait for. When STABLE is specified this resource will wait until the instances are stable before returning. When UPDATED is set, it will wait for the version target to be reached and any per instance configs to be effective and all instances configs to be effective as well as all instances to be stable before returning.`,
 				<% end -%>
 			},
-			<% unless version == "ga" -%>
 			"stateful_internal_ip": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -397,7 +396,6 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
-			<% end -%>
 			"stateful_disk": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -780,14 +778,12 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err = d.Set("stateful_disk", flattenStatefulPolicy(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_disk in state: %s", err.Error())
 	}
-	<% unless version == "ga" -%>
 	if err = d.Set("stateful_internal_ip", flattenStatefulPolicyStatefulInternalIps(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_internal_ip in state: %s", err.Error())
 	}
 	if err = d.Set("stateful_external_ip", flattenStatefulPolicyStatefulExternalIps(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_external_ip in state: %s", err.Error())
 	}
-	<% end -%>
 	if err := d.Set("fingerprint", manager.Fingerprint); err != nil {
 		return fmt.Errorf("Error setting fingerprint: %s", err)
 	}
@@ -1125,7 +1121,6 @@ func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
 		preservedState.Disks = disks
 	}
 
-	<% unless version == "ga" -%>
 	if d.HasChange("stateful_internal_ip") {
 		oldInternalIps, newInternalIps := d.GetChange("stateful_internal_ip")
 		preservedState.InternalIPs = expandStatefulIps(newInternalIps.([]interface{}))
@@ -1154,7 +1149,6 @@ func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
 		preservedState.ForceSendFields = append(preservedState.ForceSendFields, "ExternalIPs")
 	}
 
-	<% end -%>
 	statefulPolicy := &compute.StatefulPolicy{PreservedState: preservedState}
 	statefulPolicy.ForceSendFields = append(statefulPolicy.ForceSendFields, "PreservedState")
 
@@ -1174,7 +1168,6 @@ func expandStatefulDisks(statefulDisk []interface{}) map[string]compute.Stateful
 	return statefulDisksMap
 }
 
-<% unless version == "ga" -%>
 func expandStatefulIps(statefulIP []interface{}) map[string]compute.StatefulPolicyPreservedStateNetworkIp {
 	statefulIpsMap :=	make(map[string]compute.StatefulPolicyPreservedStateNetworkIp)
 
@@ -1187,7 +1180,6 @@ func expandStatefulIps(statefulIP []interface{}) map[string]compute.StatefulPoli
 	}
 	return statefulIpsMap
 }
-<% end -%>
 
 func expandVersions(configured []interface{}) []*compute.InstanceGroupManagerVersion {
 	versions := make([]*compute.InstanceGroupManagerVersion, 0, len(configured))
@@ -1313,7 +1305,7 @@ func flattenStatefulPolicy(statefulPolicy *compute.StatefulPolicy) []map[string]
 	}
 	return result
 }
-<% unless version == "ga" -%>
+
 func flattenStatefulPolicyStatefulInternalIps(statefulPolicy *compute.StatefulPolicy) []map[string]interface{} {
 	if statefulPolicy == nil || statefulPolicy.PreservedState == nil || statefulPolicy.PreservedState.InternalIPs == nil {
 		return make([]map[string]interface{}, 0, 0)
@@ -1345,7 +1337,7 @@ func flattenStatefulPolicyStatefulExternalIps(statefulPolicy *compute.StatefulPo
 	}
 	return result
 }
-<% end -%>
+
 func flattenUpdatePolicy(updatePolicy *compute.InstanceGroupManagerUpdatePolicy) []map[string]interface{} {
 	results := []map[string]interface{}{}
 	if updatePolicy != nil {

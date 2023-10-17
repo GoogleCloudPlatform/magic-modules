@@ -54,12 +54,12 @@
           ],
           "ssl_policy": "ssl-policy-id",
           "timeouts": null,
-          "url_map": "url-map-id"
+          "url_map": "url-map-id",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "creation_timestamp": true,
           "id": true,
-          "project": true,
           "proxy_bind": true,
           "proxy_id": true,
           "self_link": true,

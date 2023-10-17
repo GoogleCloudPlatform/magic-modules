@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"reflect"
 	"strings"
 	"time"
 
@@ -15,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 	"github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -177,6 +177,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 						"edition": {
 							Type:         schema.TypeString,
 							Optional:     true,
+							Default:      "ENTERPRISE",
 							ValidateFunc: validation.StringInSlice([]string{"ENTERPRISE", "ENTERPRISE_PLUS"}, false),
 							Description:  `The edition of the instance, can be ENTERPRISE or ENTERPRISE_PLUS.`,
 						},
@@ -2005,7 +2006,7 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 	data := map[string]interface{}{
 		"version":                      settings.SettingsVersion,
 		"tier":                         settings.Tier,
-		"edition":                      settings.Edition,
+		"edition":                      flattenEdition(settings.Edition),
 		"activation_policy":            settings.ActivationPolicy,
 		"availability_type":            settings.AvailabilityType,
 		"collation":                    settings.Collation,
@@ -2334,6 +2335,13 @@ func flattenPasswordValidationPolicy(passwordValidationPolicy *sqladmin.Password
 	return []map[string]interface{}{data}
 }
 
+func flattenEdition(v interface{}) string {
+	if v == nil || tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+		return "ENTERPRISE"
+	}
+
+	return v.(string)
+}
 
 func instanceMutexKey(project, instance_name string) string {
 	return fmt.Sprintf("google-sql-database-instance-%s-%s", project, instance_name)
