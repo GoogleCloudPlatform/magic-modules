@@ -48,6 +48,20 @@ examples:
       project_id: '"tf-test-" + acctest.RandString(t, 10)'
     test_env_vars:
       org_id: :ORG_ID
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'tag_binding_with_namespaced_value'
+    skip_test: true
+    primary_resource_id: 'binding'
+    vars:
+      key_short_name: 'keyname'
+      value_short_name: 'valuename'
+      project_id: project_id
+    test_vars_overrides:
+      key_short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
+      value_short_name: '"tf-test-value-" + acctest.RandString(t, 10)'
+      project_id: '"tf-test-" + acctest.RandString(t, 10)'
+    test_env_vars:
+      org_id: :ORG_ID      
 properties:
   - !ruby/object:Api::Type::String
     name: name
