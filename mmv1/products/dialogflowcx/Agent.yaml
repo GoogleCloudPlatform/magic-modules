@@ -158,6 +158,7 @@ properties:
     name: 'gitIntegrationSettings'
     description: |
       Git integration settings for this agent.
+    allow_empty_object: true
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'githubSettings'
@@ -192,6 +193,7 @@ properties:
     name: 'textToSpeechSettings'
     description: |
       Settings related to speech synthesizing.
+    allow_empty_object: true
     properties:
       # This is a map of language -> some settings. List of languages is large and constantly expanding so we use a string instead of a NestedObject with 100 properties.
       - !ruby/object:Api::Type::String

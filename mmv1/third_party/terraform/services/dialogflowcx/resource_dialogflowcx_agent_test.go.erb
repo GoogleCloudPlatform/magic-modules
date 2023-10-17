@@ -42,7 +42,7 @@ func TestAccDialogflowCXAgent_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"git_integration_settings.0.github_settings.0.access_token"},
 			},
 			{
-				Config: testAccDialogflowCXAgent_removeAdvancedSettings(context),
+				Config: testAccDialogflowCXAgent_removeSettings(context),
 			},
 			{
 				ResourceName:            "google_dialogflow_cx_agent.foobar",
@@ -121,7 +121,7 @@ func testAccDialogflowCXAgent_full(context map[string]interface{}) string {
 	  `, context)
 }
 
-func testAccDialogflowCXAgent_removeAdvancedSettings(context map[string]interface{}) string {
+func testAccDialogflowCXAgent_removeSettings(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_dialogflow_cx_agent" "foobar" {
 		display_name = "tf-test-%{random_suffix}"
@@ -131,6 +131,9 @@ func testAccDialogflowCXAgent_removeAdvancedSettings(context map[string]interfac
 		time_zone = "America/New_York"
 		description = "Description 1."
 		avatar_uri = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
+		advanced_settings {}
+		git_integration_settings {}
+		text_to_speech_settings {}
 	}
 	  `, context)
 }
