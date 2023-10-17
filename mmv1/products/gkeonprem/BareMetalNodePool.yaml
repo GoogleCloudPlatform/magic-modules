@@ -13,7 +13,6 @@
 
 --- !ruby/object:Api::Resource
 name: 'BareMetalNodePool'
-min_version: beta
 base_url: 'projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools'
 create_url: 'projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools?bare_metal_node_pool_id={{name}}'
 update_url: 'projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools/{{name}}'
@@ -32,7 +31,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_bare_metal_node_pool_basic'
     primary_resource_id: 'nodepool-basic'
-    min_version: beta
     vars:
       name: 'my-nodepool'
       cluster: 'my-cluster'
@@ -41,7 +39,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_bare_metal_node_pool_full'
     primary_resource_id: 'nodepool-full'
-    min_version: beta
     vars:
       name: 'my-nodepool'
       cluster: 'my-cluster'
@@ -74,7 +71,7 @@ properties:
     name: 'displayName'
     description: |
       The display name for the Bare Metal Node Pool.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueAnnotations
     name: 'annotations'
     description: |
       Annotations on the Bare Metal Node Pool.
@@ -85,7 +82,6 @@ properties:
       Prefix must be a DNS subdomain.
       Name must be 63 characters or less, begin and end with alphanumerics,
       with dashes (-), underscores (_), dots (.), and alphanumerics between.
-    default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'nodePoolConfig'
     required: true

@@ -154,13 +154,13 @@ properties:
     name: ttlConfig
     custom_expand: templates/terraform/custom_expand/empty_object_if_set.go.erb
     description: |
-      If set, this field is configured for TTL deletion.
+       The TTL configuration for this Field. If set to an empty block (i.e. `ttl_config {}`), a TTL policy is configured based on the field. If unset, a TTL policy is not configured (or will be disabled upon updating the resource).
     send_empty_value: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: state
         description: |
-          The state of the TTL configuration.
+          The state of TTL (time-to-live) configuration for documents that have this Field set.
         output: true
         values:
           - :CREATING

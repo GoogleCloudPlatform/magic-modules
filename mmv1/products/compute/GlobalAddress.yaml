@@ -58,6 +58,7 @@ examples:
       network_name: 'my-network-name'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
+  pre_create: templates/terraform/pre_create/compute_global_address.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'address'
@@ -86,7 +87,7 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
     required: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels to apply to this address.  A list of key->value pairs.

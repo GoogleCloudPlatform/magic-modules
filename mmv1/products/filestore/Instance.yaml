@@ -44,7 +44,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'filestore_instance_enterprise'
     primary_resource_id: 'instance'
-    skip_test: true # https://github.com/GoogleCloudPlatform/magic-modules/pull/5875#discussion_r844285335
+    # https://github.com/GoogleCloudPlatform/magic-modules/pull/5875#discussion_r844285335
+    skip_test: true
     vars:
       instance_name: 'test-instance'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -95,10 +96,10 @@ properties:
     name: 'tier'
     description: |
       The service tier of the instance.
-      Possible values include: STANDARD, PREMIUM, BASIC_HDD, BASIC_SSD, HIGH_SCALE_SSD and ENTERPRISE
+      Possible values include: STANDARD, PREMIUM, BASIC_HDD, BASIC_SSD, HIGH_SCALE_SSD, ZONAL and ENTERPRISE
     required: true
     immutable: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels to represent user-provided metadata.

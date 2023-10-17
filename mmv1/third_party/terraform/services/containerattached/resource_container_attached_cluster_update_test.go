@@ -26,7 +26,7 @@ func TestAccContainerAttachedCluster_update(t *testing.T) {
 				ResourceName:            "google_container_attached_cluster.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "annotations"},
 			},
 			{
 				Config: testAccContainerAttachedCluster_containerAttachedCluster_update(context),
@@ -35,7 +35,7 @@ func TestAccContainerAttachedCluster_update(t *testing.T) {
 				ResourceName:            "google_container_attached_cluster.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "annotations"},
 			},
 			{
 				Config: testAccContainerAttachedCluster_containerAttachedCluster_destroy(context),
@@ -44,7 +44,7 @@ func TestAccContainerAttachedCluster_update(t *testing.T) {
 				ResourceName:            "google_container_attached_cluster.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "annotations"},
 			},
 		},
 	})
@@ -90,6 +90,9 @@ resource "google_container_attached_cluster" "primary" {
       enabled = true
     }
   }
+  binary_authorization {
+    evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
+  }
 }
 `, context)
 }
@@ -127,6 +130,9 @@ resource "google_container_attached_cluster" "primary" {
   }
   monitoring_config {
     managed_prometheus_config {}
+  }
+  binary_authorization {
+    evaluation_mode = "DISABLED"
   }
   lifecycle {
     prevent_destroy = true
@@ -170,6 +176,9 @@ resource "google_container_attached_cluster" "primary" {
   }
   monitoring_config {
     managed_prometheus_config {}
+  }
+  binary_authorization {
+    evaluation_mode = "DISABLED"
   }
 }
 `, context)

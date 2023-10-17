@@ -67,7 +67,8 @@
               "main_page_suffix": "index.html",
               "not_found_page": "404.html"
             }
-          ]
+          ],
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "uniform_bucket_level_access": true,
@@ -76,7 +77,6 @@
           "id": true,
           "lifecycle_rule": [],
           "logging": [],
-          "project": true,
           "retention_policy": [],
           "self_link": true,
           "url": true,

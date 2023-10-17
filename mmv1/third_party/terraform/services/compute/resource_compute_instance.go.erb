@@ -46,6 +46,9 @@ var (
 		"boot_disk.0.initialize_params.0.image",
 		"boot_disk.0.initialize_params.0.labels",
 		"boot_disk.0.initialize_params.0.resource_manager_tags",
+<% unless version == 'ga' -%>
+		"boot_disk.0.initialize_params.0.enable_confidential_compute",
+<% end -%>
 	}
 
 	schedulingKeys = []string{
@@ -241,6 +244,15 @@ func ResourceComputeInstance() *schema.Resource {
 										ForceNew:     true,
 										Description:  `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
 									},
+<% unless version == 'ga' -%>
+									"enable_confidential_compute": {
+										Type:             schema.TypeBool,
+										Optional:         true,
+										AtLeastOneOf: initializeParamsKeys,
+										ForceNew:         true,
+										Description:      `A flag to enable confidential compute mode on boot disk`,
+									},
+<% end -%>
 								},
 							},
 						},
@@ -305,6 +317,17 @@ func ResourceComputeInstance() *schema.Resource {
 							Description:      `The name or self_link of the subnetwork attached to this interface.`,
 						},
 
+						<% if version == "beta" -%>
+						"network_attachment": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							ForceNew:     	  true,
+							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+							Description:      `The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.`,
+						},
+						<% end %>
+
 						"subnetwork_project": {
 							Type:        schema.TypeString,
 							Optional:    true,
@@ -356,6 +379,13 @@ func ResourceComputeInstance() *schema.Resource {
 										Optional:    true,
 										Description: `The DNS domain name for the public PTR record.`,
 									},
+									<% unless version == 'ga' -%>
+									"security_policy": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: `A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.`,
+									},
+									<% end -%>
 								},
 							},
 						},
@@ -433,8 +463,30 @@ func ResourceComputeInstance() *schema.Resource {
 										ForceNew:    true,
 										Description: `The name of this access configuration. In ipv6AccessConfigs, the recommended name is External IPv6.`,
 									},
+									<% unless version == 'ga' -%>
+									"security_policy": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: `A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.`,
+									},
+									<% end -%>
 								},
 							},
+						},
+
+						"internal_ipv6_prefix_length": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Computed:    true,
+							Description: `The prefix length of the primary internal IPv6 range.`,
+						},
+
+						"ipv6_address": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							DiffSuppressFunc: ipv6RepresentationDiffSuppress,
+							Description: `An IPv6 internal network address for this network interface. If not specified, Google Cloud will automatically assign an internal IPv6 address from the instance's subnetwork.`,
 						},
 
 						"queue_count": {
@@ -443,6 +495,14 @@ func ResourceComputeInstance() *schema.Resource {
 							ForceNew:    true,
 							Description: `The networking queue count that's specified by users for the network interface. Both Rx and Tx queues will be set to this number. It will be empty if not specified.`,
 						},
+
+						<% unless version == 'ga' -%>
+						"security_policy": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.`,
+						},
+						<% end -%>
 					},
 				},
 			},
@@ -598,7 +658,24 @@ func ResourceComputeInstance() *schema.Resource {
 				Type:        schema.TypeMap,
 				Optional:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: `A set of key/value label pairs assigned to the instance.`,
+				Description: `A set of key/value label pairs assigned to the instance.
+				
+				**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
+			},
+
+			"terraform_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `The combination of labels configured directly on the resource and default labels configured on the provider.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+
+			"effective_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 
 			"metadata": {
@@ -774,6 +851,12 @@ be from 0 to 999,999,999 inclusive.`,
 				Description: `The scratch disks attached to the instance.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"device_name": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: `Name with which the attached disk is accessible under /dev/disk/by-id/`,
+						},
 						"interface": {
 							Type:         schema.TypeString,
 							Required:     true,
@@ -1034,6 +1117,8 @@ be from 0 to 999,999,999 inclusive.`,
 			},
 		},
 		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+			tpgresource.DefaultProviderZone,
 			customdiff.If(
 				func(_ context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 					return d.HasChange("guest_accelerator")
@@ -1042,6 +1127,7 @@ be from 0 to 999,999,999 inclusive.`,
 			),
 			desiredStatusDiff,
 			forceNewIfNetworkIPNotUpdatable,
+			tpgresource.SetLabelsDiff,
 		),
 		UseJSONNumber: true,
 	}
@@ -1175,7 +1261,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		NetworkPerformanceConfig:   networkPerformanceConfig,
 		Tags:                       resourceInstanceTags(d),
 		Params:                     params,
-		Labels:                     tpgresource.ExpandLabels(d),
+		Labels:                     tpgresource.ExpandEffectiveLabels(d),
 		ServiceAccounts:            expandServiceAccounts(d.Get("service_account").([]interface{})),
 		GuestAccelerators:          accels,
 		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
@@ -1274,6 +1360,13 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
+	<% unless version == 'ga' -%>
+	securityPolicies, err := computeInstanceMapSecurityPoliciesCreate(d, config)
+	if err != nil {
+		return err
+	}
+	<% end -%>
+
 	log.Printf("[INFO] Requesting instance creation")
 	op, err := config.NewComputeClient(userAgent).Instances.Insert(project, zone.Name, instance).Do()
 	if err != nil {
@@ -1291,6 +1384,13 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		return waitErr
 	}
 
+	<% unless version == 'ga' -%>
+	err = computeInstanceAddSecurityPolicy(d, config, securityPolicies, project, z, userAgent, instance.Name)
+	if err != nil {
+		return fmt.Errorf("Error creating instance while setting the security policies: %s", err)
+	}
+	<% end -%>
+	
 	err = waitUntilInstanceHasDesiredStatus(config, d)
 	if err != nil {
 		return fmt.Errorf("Error waiting for status: %s", err)
@@ -1375,7 +1475,15 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	if err := d.Set("labels", instance.Labels); err != nil {
+	if err := tpgresource.SetLabels(instance.Labels, d, "labels"); err != nil {
+		return err
+	}
+
+	if err := tpgresource.SetLabels(instance.Labels, d, "terraform_labels"); err != nil {
+		return err
+	}
+
+	if err := d.Set("effective_labels", instance.Labels); err != nil {
 		return err
 	}
 
@@ -1494,7 +1602,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	}
 <% unless version == 'ga' -%>
 	// Add extra check on Scheduling to prevent STOP instance setting MaxRunDuration.
-	// When Instance being stopped, GCE will wipe out the MaxRunDuration field. 
+	// When Instance being stopped, GCE will wipe out the MaxRunDuration field.
 	// And Terraform has no visiblity on this field after then. Given the infrastructure
 	// constraint, MaxRunDuration will only be supported with instance has
 	// DELETE InstanceTerminationAction
@@ -1654,8 +1762,8 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
-	if d.HasChange("labels") {
-		labels := tpgresource.ExpandLabels(d)
+	if d.HasChange("effective_labels") {
+		labels := tpgresource.ExpandEffectiveLabels(d)
 		labelFingerprint := d.Get("label_fingerprint").(string)
 		req := compute.InstancesSetLabelsRequest{Labels: labels, LabelFingerprint: labelFingerprint}
 
@@ -1732,6 +1840,30 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if len(networkInterfaces) != len(instance.NetworkInterfaces) {
 		return fmt.Errorf("Instance had unexpected number of network interfaces: %d", len(instance.NetworkInterfaces))
 	}
+
+	<% unless version == 'ga' -%>	
+	updateSecurityPolicy := false
+	for i := 0; i < len(instance.NetworkInterfaces); i++ {
+		prefix := fmt.Sprintf("network_interface.%d", i)
+		// check if sec policy has been changed
+		// check if access config has been changed because it may be deleted and needs to be re-created.
+		if d.HasChange(prefix+".security_policy") || d.HasChange(prefix+".access_config") || d.HasChange(prefix+".ipv6_access_config") {
+			if instance.Status != "RUNNING" {
+				return fmt.Errorf("Error to update security policy because the current instance status must be \"RUNNING\". The security policy or some access config may have changed which requires the security policy to be re-applied")
+			}
+			updateSecurityPolicy = true
+		}
+	}
+
+	securityPolicies := make(map[string][]string)
+	if updateSecurityPolicy {
+		// map the security policies to call SetSecurityPolicy because the next section of the code removes and re-creates the access_config which ends up removing the security_policy.
+		securityPolicies, err = computeInstanceMapSecurityPoliciesUpdate(d, config)
+		if err != nil {
+			return err
+		}
+	}
+	<% end -%>
 
 	var updatesToNIWhileStopped []func(inst *compute.Instance) error
 	for i := 0; i < len(networkInterfaces); i++ {
@@ -1840,6 +1972,40 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			}
 		}
 
+		if !updateDuringStop && d.HasChange(prefix+".ipv6_address") {
+
+			networkInterfacePatchObj := &compute.NetworkInterface{
+				Ipv6Address: d.Get(prefix+".ipv6_address").(string),
+				Fingerprint:   instNetworkInterface.Fingerprint,
+			}
+			updateCall := config.NewComputeClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
+			op, err := updateCall()
+			if err != nil {
+				return errwrap.Wrapf("Error updating network interface: {{err}}", err)
+			}
+			opErr := ComputeOperationWaitTime(config, op, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+			if opErr != nil {
+				return opErr
+			}
+		}
+
+		if !updateDuringStop && d.HasChange(prefix+".internal_ipv6_prefix_length") {
+
+			networkInterfacePatchObj := &compute.NetworkInterface{
+				InternalIpv6PrefixLength: d.Get(prefix+".internal_ipv6_prefix_length").(int64),
+				Fingerprint:              instNetworkInterface.Fingerprint,
+			}
+			updateCall := config.NewComputeClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
+			op, err := updateCall()
+			if err != nil {
+				return errwrap.Wrapf("Error updating network interface: {{err}}", err)
+			}
+			opErr := ComputeOperationWaitTime(config, op, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+			if opErr != nil {
+				return opErr
+			}
+		}
+
 		if updateDuringStop {
 			// Lets be explicit about what we are changing in the patch call
 			networkInterfacePatchObj := &compute.NetworkInterface{
@@ -1852,6 +2018,14 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			// otherwise this could fail if the network ip is not compatible with the new Subnetwork/Network.
 			if d.HasChange(prefix + ".network_ip") {
 				networkInterfacePatchObj.NetworkIP = networkInterface.NetworkIP
+			}
+
+			if d.HasChange(prefix+".internal_ipv6_prefix_length") {
+				networkInterfacePatchObj.Ipv6Address = networkInterface.Ipv6Address
+			}
+
+			if d.HasChange(prefix+".ipv6_address") {
+				networkInterfacePatchObj.Ipv6Address = networkInterface.Ipv6Address
 			}
 
 			// Access config can run into some issues since we can't tell the difference between
@@ -2232,6 +2406,14 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
+	<% unless version == 'ga' -%>
+	// The access config must be updated only if the machine is still RUNNING and after each access_config for each interface has been re-created.
+	err = computeInstanceAddSecurityPolicy(d, config, securityPolicies, project, zone, userAgent, instance.Name)
+	if err != nil {
+		return fmt.Errorf("Error updating instance while setting the security policies: %s", err)
+	}
+	<% end -%>
+
 	// We made it, disable partial mode
 	d.Partial(false)
 
@@ -2559,6 +2741,12 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 			disk.InitializeParams.DiskSizeGb = int64(v.(int))
 		}
 
+		<% unless version == 'ga' -%>
+		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.enable_confidential_compute"); ok {
+			disk.InitializeParams.EnableConfidentialCompute = v.(bool)
+		}
+		<% end -%>
+
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.type"); ok {
 			diskTypeName := v.(string)
 			diskType, err := readDiskType(config, d, diskTypeName)
@@ -2624,6 +2812,9 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 			"size":   diskDetails.SizeGb,
 			"labels": diskDetails.Labels,
 			"resource_manager_tags": d.Get("boot_disk.0.initialize_params.0.resource_manager_tags"),
+<% unless version == 'ga' -%>
+			"enable_confidential_compute": diskDetails.EnableConfidentialCompute,
+<% end -%>
 		}}
 	}
 
@@ -2653,6 +2844,7 @@ func expandScratchDisks(d *schema.ResourceData, config *transport_tpg.Config, pr
 		scratchDisks = append(scratchDisks, &compute.AttachedDisk{
 			AutoDelete: true,
 			Type:       "SCRATCH",
+			DeviceName: d.Get(fmt.Sprintf("scratch_disk.%d.device_name", i)).(string),
 			Interface:  d.Get(fmt.Sprintf("scratch_disk.%d.interface", i)).(string),
 			DiskSizeGb: int64(d.Get(fmt.Sprintf("scratch_disk.%d.size", i)).(int)),
 			InitializeParams: &compute.AttachedDiskInitializeParams{
@@ -2666,6 +2858,7 @@ func expandScratchDisks(d *schema.ResourceData, config *transport_tpg.Config, pr
 
 func flattenScratchDisk(disk *compute.AttachedDisk) map[string]interface{} {
 	result := map[string]interface{}{
+		"device_name": disk.DeviceName,
 		"interface": disk.Interface,
 		"size": disk.DiskSizeGb,
 	}

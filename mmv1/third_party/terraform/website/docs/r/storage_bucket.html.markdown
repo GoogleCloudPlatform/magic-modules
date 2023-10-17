@@ -168,6 +168,8 @@ The following arguments are supported:
 
 * `enabled` - (Required) While set to `true`, autoclass automatically transitions objects in your bucket to appropriate storage classes based on each object's access pattern.
 
+* `terminal_storage_class` - (Optional) The storage class that objects in the bucket eventually transition to if they are not read for a certain length of time. Supported values include: `NEARLINE`, `ARCHIVE`.
+
 <a name="nested_versioning"></a>The `versioning` block supports:
 
 * `enabled` - (Required) While set to `true`, versioning is fully enabled for this bucket.
@@ -249,11 +251,23 @@ passed to the import command it will be inferred from the provider block or envi
 If it cannot be inferred it will be queried from the Compute API (this will fail if the API is
 not enabled).
 
-e.g.
+* `{{project_id}}/{{bucket}}`
+* `{{bucket}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Storage buckets using one of the formats above. For example:
+
+```tf
+import {
+  id = "{{project_id}}/{{bucket}}"
+  to = google_storage_bucket.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Storage buckets can be imported using one of the formats above. For example:
 
 ```
-$ terraform import google_storage_bucket.image-store image-store-bucket
-$ terraform import google_storage_bucket.image-store tf-test-project/image-store-bucket
+$ terraform import google_storage_bucket.default {{bucket}}
+$ terraform import google_storage_bucket.default {{project_id}}/{{bucket}}
 ```
 
 ~> **Note:** Terraform will import this resource with `force_destroy` set to

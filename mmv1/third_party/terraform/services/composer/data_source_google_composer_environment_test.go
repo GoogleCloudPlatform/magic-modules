@@ -25,6 +25,8 @@ func TestAccDataSourceComposerEnvironment_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceComposerEnvironment_basic(context),
 				Check: resource.ComposeTestCheckFunc(
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_composer_environment.test",
+						"google_composer_environment.test"),
 					testAccCheckGoogleComposerEnvironmentMeta("data.google_composer_environment.test"),
 				),
 			},
@@ -90,6 +92,9 @@ resource "google_composer_environment" "test" {
 		software_config {
 			image_version = "composer-1-airflow-2"
 		}
+	}
+	labels = {
+		my-label = "my-label-value"
 	}
 }
 

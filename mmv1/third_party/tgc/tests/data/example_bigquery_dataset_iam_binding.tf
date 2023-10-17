@@ -17,7 +17,7 @@
 terraform {
   required_providers {
     google = {
-      source = "hashicorp/google"
+      source = "hashicorp/google-beta"
       version = "~> {{.Provider.version}}"
     }
   }
@@ -36,7 +36,7 @@ resource "google_bigquery_dataset" "example_dataset" {
   labels = {
     env = "dev"
   }
-  
+
 }
 
 resource "google_bigquery_dataset_iam_binding" "dataset" {

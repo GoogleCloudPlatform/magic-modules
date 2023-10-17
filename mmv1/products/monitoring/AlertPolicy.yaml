@@ -52,6 +52,13 @@ examples:
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
+  # skipping tests because the API is full of race conditions
+  - !ruby/object:Provider::Terraform::Examples
+    skip_test: true
+    name: 'monitoring_alert_policy_promql_condition'
+    primary_resource_id: 'alert_policy'
+    vars:
+      alert_policy_display_name: 'My Alert Policy'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/monitoring_alert_policy.go.erb
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
@@ -828,8 +835,6 @@ properties:
         - !ruby/object:Api::Type::NestedObject
           name: conditionPrometheusQueryLanguage
           description: |
-            A Monitoring Query Language query that outputs a boolean stream
-
             A condition type that allows alert policies to be defined using
             Prometheus Query Language (PromQL).
 
@@ -859,7 +864,7 @@ properties:
                 alerting rule, then this value should be taken from the enclosing
                 rule group.
             - !ruby/object:Api::Type::KeyValuePairs
-              name: labels
+              name: 'labels'
               description: |
                 Labels to add to or overwrite in the PromQL query result. Label names
                 must be valid.
@@ -878,10 +883,7 @@ properties:
                 in order to refer to the original Prometheus configuration file.
                 The rule group name and the alert name are necessary to update the
                 relevant AlertPolicies in case the definition of the rule group changes
-                in the future.
-
-                This field is optional. If this field is not empty, then it must be a
-                valid Prometheus label name.
+                in the future. This field is optional.
             - !ruby/object:Api::Type::String
               name: alertRule
               description: |

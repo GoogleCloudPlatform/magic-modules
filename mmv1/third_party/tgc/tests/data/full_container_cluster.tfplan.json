@@ -34,7 +34,6 @@
             "default_max_pods_per_node": 42,
             "description": "test-description",
             "enable_autopilot": null,
-            "enable_binary_authorization": false,
             "enable_kubernetes_alpha": true,
             "enable_legacy_abac": true,
             "enable_shielded_nodes": true,
@@ -277,7 +276,6 @@
           "default_max_pods_per_node": 42,
           "description": "test-description",
           "enable_autopilot": null,
-          "enable_binary_authorization": false,
           "enable_kubernetes_alpha": true,
           "enable_legacy_abac": true,
           "enable_shielded_nodes": true,
@@ -391,7 +389,8 @@
           "resource_usage_export_config": [],
           "subnetwork": "test-subnetwork",
           "timeouts": null,
-          "vertical_pod_autoscaling": []
+          "vertical_pod_autoscaling": [],
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "addons_config": [
@@ -496,7 +495,6 @@
             }
           ],
           "private_ipv6_google_access": true,
-          "project": true,
           "release_channel": true,
           "resource_labels": {},
           "resource_usage_export_config": [],
