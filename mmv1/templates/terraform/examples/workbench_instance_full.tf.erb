@@ -70,10 +70,10 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
 }
 
 data "google_compute_network" "my_network" {
-  name = "default"
+  name = "test-default"
 }
 
 data "google_compute_subnetwork" "my_subnetwork" {
-  name   = "default"
+  name   = "test-default"
   region = "us-central1"
 }

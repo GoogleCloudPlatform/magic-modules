@@ -35,11 +35,6 @@ func WorkbenchInstanceTagsDiffSuppress(k, old, new string, d *schema.ResourceDat
 		}
 	}
 
-	// Let diff be determined by tags (above)
-	if strings.Contains(k, "tags.%") {
-		return true
-	}
-
 	// For other keys, don't suppress diff.
 	return false
 }
@@ -47,7 +42,7 @@ func WorkbenchInstanceTagsDiffSuppress(k, old, new string, d *schema.ResourceDat
 func WorkbenchInstanceLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// Suppress diffs for the labels
 	for _, label := range WorkbenchInstanceProvidedLabels {
-		if strings.Contains(k, label) && new == "" {
+		if strings.Contains(k, label){
 			return true
 		}
 	}

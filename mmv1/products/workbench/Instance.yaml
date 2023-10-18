@@ -135,9 +135,13 @@ properties:
       description: |
           The name of the Google Cloud project that this VM image belongs to.
           Format: {project_id}
+      ignore_read: true
+      custom_flatten: templates/terraform/custom_flatten/workbench_instance_vm_image_project_flatten.go.erb
     - !ruby/object:Api::Type::String
       name: name
       description: Optional. Use VM image name to find the image.
+      ignore_read: true
+      custom_flatten: templates/terraform/custom_flatten/workbench_instance_vm_image_name_flatten.go.erb
       exactly_one_of:
       - vm_image.0.name
       - vm_image.0.family
@@ -145,6 +149,8 @@ properties:
       name: family
       description: Optional. Use this VM image family to find the image; the newest
         image in this family will be used.
+      ignore_read: true
+      custom_flatten: templates/terraform/custom_flatten/workbench_instance_vm_image_family_flatten.go.erb
       exactly_one_of:
       - vm_image.0.name
       - vm_image.0.family
@@ -265,12 +271,11 @@ properties:
         name: network
         description: 'Optional. The name of the VPC that this VM instance is in.'
         custom_expand: templates/terraform/custom_expand/network_full_url.erb
-        diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+        diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
       - !ruby/object:Api::Type::String
         name: subnet
         description: 'Optional. The name of the subnet that this VM instance is in.'
-        custom_expand: templates/terraform/custom_expand/network_full_url.erb
-        diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+        diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
       - !ruby/object:Api::Type::Enum
         name: nicType
         description: Optional. The type of vNIC to be used on this interface. This
@@ -328,6 +333,7 @@ properties:
   description: 'Optional. Input only. The owner of this instance after creation. Format:
     `alias@example.com` Currently supports one owner only. If not specified, all of
     the service account users of your VM instance''s service account can use the instance.'
+  ignore_read: true
   immutable: true
 - !ruby/object:Api::Type::String
   name: creator
