@@ -390,6 +390,28 @@ resource "google_project_service" "test_mesh" {
   service = "meshconfig.googleapis.com"
 }
 
+resource "google_project_service" "test_mci" {
+  service = "multiclusteringress.googleapis.com"
+}
+
+resource "google_project_service" "test_acm" {
+  service = "anthosconfigmanagement.googleapis.com"
+}
+
+resource "google_project_service" "test_mcsd" {
+  service = "multiclusterservicediscovery.googleapis.com"
+}
+
+resource "google_project_service" "test_compute" {
+  service = "compute.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_project_service" "test_container" {
+  service = "container.googleapis.com"
+  disable_on_destroy = false
+}
+
 resource "google_project_service" "test_gkehub" {
   service = "gkehub.googleapis.com"
   disable_on_destroy = false
@@ -416,6 +438,28 @@ func testAccGKEHubFeature_FleetDefaultMemberConfigServiceMeshUpdate(context map[
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_project_service" "test_mesh" {
   service = "meshconfig.googleapis.com"
+}
+
+resource "google_project_service" "test_mci" {
+  service = "multiclusteringress.googleapis.com"
+}
+
+resource "google_project_service" "test_acm" {
+  service = "anthosconfigmanagement.googleapis.com"
+}
+
+resource "google_project_service" "test_mcsd" {
+  service = "multiclusterservicediscovery.googleapis.com"
+}
+
+resource "google_project_service" "test_compute" {
+  service = "compute.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_project_service" "test_container" {
+  service = "container.googleapis.com"
+  disable_on_destroy = false
 }
 
 resource "google_project_service" "test_gkehub" {
