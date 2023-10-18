@@ -179,7 +179,7 @@ func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *tes
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	testId := "sql-instance-clone-2"
-	networkName := acctest.BootstrapSharedTestNetwork(t, testId, false)
+	networkName := acctest.BootstrapSharedTestNetwork(t, testId)
 	projectNumber := envvar.GetTestProjectNumberFromEnv()
 	networkId := fmt.Sprintf("projects/%v/global/networks/%v", projectNumber, networkName)
 	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId, networkId)
@@ -981,13 +981,13 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(t *testi
 
 	projectNumber := envvar.GetTestProjectNumberFromEnv()
 	testId := "sql-instance-allocated-1"
-	networkName := acctest.BootstrapSharedTestNetwork(t, testId, false)
+	networkName := acctest.BootstrapSharedTestNetwork(t, testId)
 	networkId := fmt.Sprintf("projects/%v/global/networks/%v", projectNumber, networkName)
 	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId, networkId)
 	acctest.BootstrapSharedServiceNetworkingConnection(t, testId)
 
 	updateTestId := "sql-instance-allocated-update-1"
-	networkName_update := acctest.BootstrapSharedTestNetwork(t, updateTestId, false)
+	networkName_update := acctest.BootstrapSharedTestNetwork(t, updateTestId)
 	networkId_update := fmt.Sprintf("projects/%v/global/networks/%v", projectNumber, networkName_update)
 	addressName_update := acctest.BootstrapSharedTestGlobalAddress(t, updateTestId, networkId_update)
 	acctest.BootstrapSharedServiceNetworkingConnection(t, updateTestId)
@@ -1027,7 +1027,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(t
 
 	projectNumber := envvar.GetTestProjectNumberFromEnv()
 	testId := "sql-instance-replica-1"
-	networkName := acctest.BootstrapSharedTestNetwork(t, testId, false)
+	networkName := acctest.BootstrapSharedTestNetwork(t, testId)
 	networkId := fmt.Sprintf("projects/%v/global/networks/%v", projectNumber, networkName)
 	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId, networkId)
 	acctest.BootstrapSharedServiceNetworkingConnection(t, testId)
@@ -1063,7 +1063,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(t *
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	projectNumber := envvar.GetTestProjectNumberFromEnv()
 	testId := "sql-instance-clone-1"
-	networkName := acctest.BootstrapSharedTestNetwork(t, testId, false)
+	networkName := acctest.BootstrapSharedTestNetwork(t, testId)
 	networkId := fmt.Sprintf("projects/%v/global/networks/%v", projectNumber, networkName)
 	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId, networkId)
 	acctest.BootstrapSharedServiceNetworkingConnection(t, testId)

@@ -356,7 +356,7 @@ func TestAccAlloydbInstance_createInstanceWithNetworkConfigAndAllocatedIPRange(t
 
 	projectNumber := envvar.GetTestProjectNumberFromEnv()
 	testId := "alloydbinstance-network-config-1"
-	networkName := acctest.BootstrapSharedTestNetwork(t, testId, false)
+	networkName := acctest.BootstrapSharedTestNetwork(t, testId)
 	networkId := fmt.Sprintf("projects/%v/global/networks/%v", projectNumber, networkName)
 	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId, networkId)
 	acctest.BootstrapSharedServiceNetworkingConnection(t, testId)

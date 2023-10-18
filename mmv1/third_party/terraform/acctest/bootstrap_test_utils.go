@@ -302,7 +302,8 @@ const SharedTestNetworkPrefix = "tf-bootstrap-net-"
 // See b/146351146 for more context.
 //
 // Usage 2
-// VCP-native GKE cluster
+// Bootstrap networks used in tests (gke clusters, dataproc clusters...)
+// to avoid traffic to the default network
 //
 // testId specifies the test for which a shared network is used/initialized.
 // Note that if the network is being used for a service_networking_connection,
@@ -311,7 +312,7 @@ const SharedTestNetworkPrefix = "tf-bootstrap-net-"
 //
 // Returns the name of a network, creating it if it hasn't been created in the
 // test project.
-func BootstrapSharedTestNetwork(t *testing.T, testId string, autoCreateSubnetworks bool) string {
+func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
 	project := envvar.GetTestProjectFromEnv()
 	networkName := SharedTestNetworkPrefix + testId
 
@@ -327,7 +328,7 @@ func BootstrapSharedTestNetwork(t *testing.T, testId string, autoCreateSubnetwor
 		url := fmt.Sprintf("%sprojects/%s/global/networks", config.ComputeBasePath, project)
 		netObj := map[string]interface{}{
 			"name":                  networkName,
-			"autoCreateSubnetworks": autoCreateSubnetworks,
+			"autoCreateSubnetworks": false,
 		}
 
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -446,7 +447,7 @@ func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string) str
 		t.Fatalf("Error getting project: %s", err)
 	}
 
-	networkName := BootstrapSharedTestNetwork(t, testId, false)
+	networkName := BootstrapSharedTestNetwork(t, testId)
 	networkId := fmt.Sprintf("projects/%v/global/networks/%v", project.ProjectNumber, networkName)
 	globalAddressName := BootstrapSharedTestGlobalAddress(t, testId, networkId)
 
