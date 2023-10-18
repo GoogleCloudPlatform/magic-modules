@@ -378,16 +378,6 @@ subnetwork in which the cluster's instances are launched.
 * `security_posture_config` - (Optional)
 Enable/Disable Security Posture API features for the cluster. Structure is [documented below](#nested_security_posture_config).
 
-* `enable_confidential_storage` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
-Enabling Confidential Storage will create boot disk with confidential mode. It is disabled by default, to enable it set `enable_confidential_storage=true` in resource `google_container_node_pool`.
-```
-node_pool{
-  node_config{
-    enable_confidential_storage = true
-  }
-}
-```
-
 <a name="nested_default_snat_status"></a>The `default_snat_status` block supports
 
 *  `disabled` - (Required) Whether the cluster disables default in-node sNAT rules. In-node sNAT rules will be disabled when defaultSnatStatus is disabled.When disabled is set to false, default IP masquerade rules will be applied to the nodes to prevent sNAT on cluster internal traffic
@@ -787,6 +777,9 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
 * `enabled` - (Required) Whether network policy is enabled on the cluster.
 
 <a name="nested_node_config"></a>The `node_config` block supports:
+
+* `enable_confidential_storage` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+Enabling Confidential Storage will create boot disk with confidential mode. It is disabled by default, to enable it set `enable_confidential_storage=true` in  `node_config` in resource `google_container_cluster` or in `google_container_node_pool`.
 
 * `disk_size_gb` - (Optional) Size of the disk attached to each node, specified
     in GB. The smallest allowed disk size is 10GB. Defaults to 100GB.
