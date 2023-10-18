@@ -1,7 +1,7 @@
 ---
 subcategory: "Cloud TPU v2"
 description: |-
-  Get available accelerator types.
+  Get available accelerator types.test
 ---
 
 # google\_tpu\_v2\_accelerator\_types
