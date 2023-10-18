@@ -398,6 +398,7 @@ resource "google_gke_hub_feature" "feature" {
       management = "MANAGEMENT_AUTOMATIC"
     }
   }
+  depends_on = [google_project_service.mesh]
 }
 `, context)
 }
@@ -416,6 +417,7 @@ resource "google_gke_hub_feature" "feature" {
       management = "MANAGEMENT_MANUAL"
     }
   }
+  depends_on = [google_project_service.mesh]
 }
 `, context)
 }
