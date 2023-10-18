@@ -55,7 +55,7 @@ resource "google_cloud_identity_group" "cloud_identity_group_basic" {
   parent = "customers/%{cust_id}"
 
   group_key {
-  	id = "tf-test-my-identity-group%{random_suffix}@%{org_domain}"
+    id = "tf-test-my-identity-group%{random_suffix}@%{org_domain}"
   }
 
   labels = {
@@ -81,7 +81,7 @@ resource "google_cloud_identity_group" "cloud_identity_group_basic" {
   parent = "customers/%{cust_id}"
 
   group_key {
-  	id = "tf-test-my-identity-group%{random_suffix}@%{org_domain}"
+    id = "tf-test-my-identity-group%{random_suffix}@%{org_domain}"
   }
 
   labels = {
@@ -97,7 +97,7 @@ data "google_cloud_identity_group_lookup" "email" {
 
 data "google_cloud_identity_group_lookup" "additional-groupkey" {
   group_key {
-	# This value is an automatically created 'additionalGroupKeys' value
+    # This value is an automatically created 'additionalGroupKeys' value
     id = "tf-test-my-identity-group%{random_suffix}@%{org_domain}.test-google-a.com"
   }
   depends_on = [
