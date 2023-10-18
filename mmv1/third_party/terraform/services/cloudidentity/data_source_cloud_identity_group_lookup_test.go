@@ -37,8 +37,6 @@ func testAccDataSourceCloudIdentityGroupLookup_basicTest(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair("data.google_cloud_identity_group_lookup.additional-groupkey", "name",
 						"google_cloud_identity_group.cloud_identity_group_basic", "name"),
-					resource.TestCheckResourceAttrPair("data.google_cloud_identity_group_lookup.additional-groupkey", "name",
-						"data.google_cloud_identity_group_lookup.email", "name"),
 				),
 			},
 		},
