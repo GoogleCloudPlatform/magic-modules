@@ -682,6 +682,14 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 				},
+				<% unless version == 'ga' -%>
+				"enable_confidential_storage": {
+						Type:     schema.TypeBool,
+						Optional: true,
+						ForceNew: true,
+						Description: `If enabled boot disks are configured with confidential mode.`,
+				},
+				<% end -%>
 			},
 		},
 	}
@@ -968,6 +976,12 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.SoleTenantConfig = expandSoleTenantConfig(v)
 	}
 
+	<% unless version == 'ga' -%>
+	if v,ok := nodeConfig["enable_confidential_storage"]; ok {
+		nc.EnableConfidentialStorage = v.(bool)
+	}
+	<% end -%>
+	
 	<% unless version == "ga" -%>
 	if v, ok := nodeConfig["host_maintenance_policy"]; ok {
 		nc.HostMaintenancePolicy = expandHostMaintenancePolicy(v)
@@ -1206,6 +1220,9 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"advanced_machine_features": flattenAdvancedMachineFeaturesConfig(c.AdvancedMachineFeatures),
 		"sole_tenant_config":        flattenSoleTenantConfig(c.SoleTenantConfig),
 		"fast_socket":               flattenFastSocket(c.FastSocket),
+	<% unless version == 'ga' -%>		
+		"enable_confidential_storage": c.EnableConfidentialStorage,
+	<% end -%>
 	})
 
 	if len(c.OauthScopes) > 0 {
