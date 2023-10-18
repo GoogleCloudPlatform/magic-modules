@@ -22,6 +22,28 @@ var WorkbenchInstanceProvidedMetadata = []string{
 	"shutdown-script",
 }
 
+var WorkbenchInstanceProvidedTags = []string{
+	"deeplearning-vm",
+	"notebook-instance",
+}
+
+func WorkbenchInstanceTagsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Suppress diffs for the tags
+	for _, tag := range WorkbenchInstanceProvidedTags {
+		if strings.Contains(k, tag) {
+			return true
+		}
+	}
+
+	// Let diff be determined by tags (above)
+	if strings.Contains(k, "tags.%") {
+		return true
+	}
+
+	// For other keys, don't suppress diff.
+	return false
+}
+
 func WorkbenchInstanceLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// Suppress diffs for the labels
 	for _, label := range WorkbenchInstanceProvidedLabels {
@@ -48,7 +70,7 @@ func WorkbenchInstanceMetadataDiffSuppress(k, old, new string, d *schema.Resourc
 	}
 
 	// Let diff be determined by metadata (above)
-	if strings.Contains(k, "gce_setup.0.metadata.%") {
+	if strings.Contains(k, "metadata.%") {
 		return true
 	}
 

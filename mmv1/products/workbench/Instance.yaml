@@ -403,7 +403,7 @@ properties:
   name: disableProxyAccess
   description: Optional. If true, the workbench instance will not register with the
     proxy.
-- !ruby/object:Api::Type::KeyValuePairs
+- !ruby/object:Api::Type::KeyValueLabels
   name: labels
   description: Optional. Labels to apply to this instance. These can be later modified
     by the UpdateInstance method.
