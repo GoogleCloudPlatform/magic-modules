@@ -930,7 +930,7 @@ func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string
 			"name":        subnetName,
 			"region ":     region,
 			"network":     networkUrl,
-			"ipCidrRange": "10.77.1.0/28",
+			"ipCidrRange": "10.77.1.0/20",
 		}
 
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
