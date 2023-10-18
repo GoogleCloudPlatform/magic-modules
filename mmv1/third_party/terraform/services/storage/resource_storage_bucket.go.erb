@@ -257,20 +257,11 @@ func ResourceStorageBucket() *schema.Resource {
 			},
 
 			"per_object_retention": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"enabled": {
-							Type:        schema.TypeBool,
-							Required:    true,
-							Description: `While set to true, enables each object in the bucket to have its own retention policy, which prevents deletion until stored for a specific length of time.`,
-						},
-					},
-				},
-				Description: `The bucket's object retention configuration.`,
-			}
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: `Enables each object in the bucket to have its own retention policy, which prevents deletion until stored for a specific length of time.`,
+			},
 
 			"versioning": {
 				Type:     schema.TypeList,
@@ -553,9 +544,7 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 	}
 	sb.Lifecycle = lifecycle
 
-	if v, ok := d.GetOk("per_object_retention"); ok {
-		sb.ObjectRetention = expandBucketObjectRetention(v)
-	}
+	objectRetention := d.Get("per_object_retention").(bool)
 
 	if v, ok := d.GetOk("versioning"); ok {
 		sb.Versioning = expandBucketVersioning(v)
@@ -614,7 +603,8 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			res, err = config.NewStorageClient(userAgent).Buckets.Insert(project, sb).Do()
+			res, err = config.NewStorageClient(userAgent).Buckets.Insert(project,
+				sb).EnableObjectRetention(objectRetention).Do()
 			return err
 		},
 	})
@@ -686,12 +676,6 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 		sb.Billing = &storage.BucketBilling{
 			RequesterPays:   v.(bool),
 			ForceSendFields: []string{"RequesterPays"},
-		}
-	}
-
-	if d.HasChange("per_object_retention") {
-		if v, ok := d.GetOk("per_object_retention"); ok {
-			sb.ObjectRetention = expandBucketObjectRetention(v)
 		}
 	}
 
@@ -1147,35 +1131,14 @@ func flattenBucketRetentionPolicy(bucketRetentionPolicy *storage.BucketRetention
 	return bucketRetentionPolicies
 }
 
-func expandBucketObjectRetention(configured interface{}) *storage.BucketObjectRetention {
-	objectRetentionList := configured.([]interface{})
-	if len(objectRetentionList) == 0 {
-		return nil
-	}
-
-	objectRetention := objectRetentionList[0].(map[string]interface{})
-
-	bucketObjectRetention := &storage.BucketObjectRetention{}
-
-	if objectRetention["enabled"].(bool) {
-		bucketObjectRetention.Mode = "Enabled"
-	}
-
-	return bucketObjectRetention
-}
-
-func flattenBucketObjectRetention(bucketObjectRetention *storage.BucketObjectRetention) []map[string]interface{} {
-	objectRetentionList := make([]map[string]interface{}, 0, 1)
-
+func flattenBucketObjectRetention(bucketObjectRetention *storage.BucketObjectRetention) bool {
 	if bucketObjectRetention == nil {
-		return objectRetentionList
+		return false
 	}
-
-	objectRetention := map[string]interface{}{
-		"Mode": bucketVersioning.Mode,
+	if bucketObjectRetention.Mode == "Enabled" {
+		return true
 	}
-	objectRetentionList = append(objectRetentionList, objectRetention)
-	return objectRetentionList
+	return false
 }
 
 func expandBucketVersioning(configured interface{}) *storage.BucketVersioning {
