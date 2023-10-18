@@ -386,6 +386,15 @@ func TestAccGKEHubFeature_FleetDefaultMemberConfigServiceMesh(t *testing.T) {
 
 func testAccGKEHubFeature_FleetDefaultMemberConfigServiceMesh(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+resource "google_project_service" "test_mesh" {
+  service = "meshconfig.googleapis.com"
+}
+
+resource "google_project_service" "test_gkehub" {
+  service = "gkehub.googleapis.com"
+  disable_on_destroy = false
+}
+
 resource "google_gke_hub_membership" "membership" {
   membership_id = "tf-test%{random_suffix}"
 }
@@ -398,13 +407,22 @@ resource "google_gke_hub_feature" "feature" {
       management = "MANAGEMENT_AUTOMATIC"
     }
   }
-  depends_on = [google_project_service.mesh]
+  depends_on = [google_project_service.test_mesh]
 }
 `, context)
 }
 
 func testAccGKEHubFeature_FleetDefaultMemberConfigServiceMeshUpdate(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+resource "google_project_service" "test_mesh" {
+  service = "meshconfig.googleapis.com"
+}
+
+resource "google_project_service" "test_gkehub" {
+  service = "gkehub.googleapis.com"
+  disable_on_destroy = false
+}
+
 resource "google_gke_hub_membership" "membership" {
   membership_id = "tf-test%{random_suffix}"
 }
@@ -417,7 +435,7 @@ resource "google_gke_hub_feature" "feature" {
       management = "MANAGEMENT_MANUAL"
     }
   }
-  depends_on = [google_project_service.mesh]
+  depends_on = [google_project_service.test_mesh]
 }
 `, context)
 }
