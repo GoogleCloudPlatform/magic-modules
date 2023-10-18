@@ -254,6 +254,7 @@ properties:
                     properties:
                       - !ruby/object:Api::Type::String
                         name: 'network'
+                        required: true
                         description: 'Required. Network name to be allowed by this Access Level. Networks of foreign organizations requires `compute.network.get` permission to be granted to caller.'
                       - !ruby/object:Api::Type::Array
                         name: 'vpcIpSubnetworks'
