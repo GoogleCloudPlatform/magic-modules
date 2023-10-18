@@ -89,12 +89,6 @@ resource "google_cloud_identity_group" "cloud_identity_group_basic" {
   }
 }
 
-data "google_cloud_identity_group_lookup" "email" {
-  group_key {
-    id = google_cloud_identity_group.cloud_identity_group_basic.group_key[0].id
-  }
-}
-
 data "google_cloud_identity_group_lookup" "additional-groupkey" {
   group_key {
     # This value is an automatically created 'additionalGroupKeys' value
