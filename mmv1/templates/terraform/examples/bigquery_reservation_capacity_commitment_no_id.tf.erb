@@ -9,5 +9,5 @@ resource "time_sleep" "wait_61_seconds" {
   depends_on = [google_bigquery_capacity_commitment.<%= ctx[:primary_resource_id] %>]
 
   # Only needed for CI tests to be able to tear down the commitment once it's expired
-    create_duration = "61s"
+  create_duration = "61s"
 }
