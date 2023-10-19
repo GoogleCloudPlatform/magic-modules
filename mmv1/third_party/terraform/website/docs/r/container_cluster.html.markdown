@@ -420,7 +420,7 @@ Enable/Disable Security Posture API features for the cluster. Structure is [docu
 * `istio_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     Structure is [documented below](#nested_istio_config).
 
-* `identity_service_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)). Structure is [documented below](#nested_identity_service_config).
+* `identity_service_config` - (Optional). Structure is [documented below](#nested_identity_service_config).
 
 * `dns_cache_config` - (Optional).
     The status of the NodeLocal DNSCache addon. It is disabled by default.
@@ -783,6 +783,9 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
 
 * `disk_type` - (Optional) Type of the disk attached to each node
     (e.g. 'pd-standard', 'pd-balanced' or 'pd-ssd'). If unspecified, the default disk type is 'pd-standard'
+
+* `enable_confidential_storage` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+Enabling Confidential Storage will create boot disk with confidential mode. It is disabled by default.
 
 * `ephemeral_storage_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk. Structure is [documented below](#nested_ephemeral_storage_config).
 

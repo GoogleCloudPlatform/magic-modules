@@ -1754,7 +1754,6 @@ func ResourceContainerCluster() *schema.Resource {
 				},
 			},
 
-<% unless version == 'ga' -%>
 			"identity_service_config": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
@@ -1771,7 +1770,6 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 
 	"service_external_ips_config": {
 		Type:        schema.TypeList,
@@ -2313,16 +2311,16 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.WorkloadIdentityConfig = expandWorkloadIdentityConfig(v)
 	}
 
-<% unless version == 'ga' -%>
 	if v, ok := d.GetOk("identity_service_config"); ok {
 		cluster.IdentityServiceConfig = expandIdentityServiceConfig(v)
 	}
 
+<% unless version == 'ga' -%>
 	if v, ok := d.GetOk("tpu_config"); ok {
 		cluster.TpuConfig = expandContainerClusterTpuConfig(v)
 	}
-
 <% end -%>
+
 	if v, ok := d.GetOk("resource_usage_export_config"); ok {
 		cluster.ResourceUsageExportConfig = expandResourceUsageExportConfig(v)
 	}
@@ -2748,11 +2746,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-<% unless version == 'ga' -%>
 	if err := d.Set("identity_service_config", flattenIdentityServiceConfig(cluster.IdentityServiceConfig, d, config)); err != nil {
 		return err
 	}
-<% end -%>
 
 	if err := d.Set("service_external_ips_config", flattenServiceExternalIpsConfig(cluster.NetworkConfig.ServiceExternalIpsConfig)); err != nil {
 		return err
@@ -3766,7 +3762,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s workload identity config has been updated", d.Id())
 	}
 
-<% unless version == 'ga' -%>
 	if d.HasChange("identity_service_config") {
 		req := &container.UpdateClusterRequest{}
 		if v, ok := d.GetOk("identity_service_config"); !ok {
@@ -3789,7 +3784,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s identity service config has been updated", d.Id())
 	}
-<% end -%>
 
 	if d.HasChange("logging_config") {
 		req := &container.UpdateClusterRequest{
@@ -5004,7 +4998,6 @@ func expandWorkloadIdentityConfig(configured interface{}) *container.WorkloadIde
 	return v
 }
 
-<% unless version == 'ga' -%>
 func expandIdentityServiceConfig(configured interface{}) *container.IdentityServiceConfig {
 	l := configured.([]interface{})
 	v := &container.IdentityServiceConfig{}
@@ -5014,7 +5007,6 @@ func expandIdentityServiceConfig(configured interface{}) *container.IdentityServ
 
 	return v
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func expandPodSecurityPolicyConfig(configured interface{}) *container.PodSecurityPolicyConfig {
@@ -5558,7 +5550,6 @@ func flattenWorkloadIdentityConfig(c *container.WorkloadIdentityConfig, d *schem
 	}
 }
 
-<% unless version == 'ga' -%>
 func flattenIdentityServiceConfig(c *container.IdentityServiceConfig, d *schema.ResourceData, config *transport_tpg.Config) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -5570,7 +5561,6 @@ func flattenIdentityServiceConfig(c *container.IdentityServiceConfig, d *schema.
 		},
 	}
 }
-<% end -%>
 
 func flattenPodCidrOverprovisionConfig(c *container.PodCIDROverprovisionConfig) []map[string]interface{} {
 	if c == nil {

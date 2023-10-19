@@ -413,26 +413,22 @@ func schemaNodeConfig() *schema.Schema {
 				"taint": {
 					Type:        schema.TypeList,
 					Optional:    true,
-					ForceNew:    true,
 					Description: `List of Kubernetes taints to be applied to each node.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"key": {
 								Type:     schema.TypeString,
 								Required: true,
-								ForceNew: true,
 								Description: `Key for taint.`,
 							},
 							"value": {
 								Type:     schema.TypeString,
 								Required: true,
-								ForceNew: true,
 								Description: `Value for taint.`,
 							},
 							"effect": {
 								Type:         schema.TypeString,
 								Required:     true,
-								ForceNew:     true,
 								ValidateFunc: validation.StringInSlice([]string{"NO_SCHEDULE", "PREFER_NO_SCHEDULE", "NO_EXECUTE"}, false),
 								Description: `Effect for taint.`,
 							},
@@ -682,6 +678,14 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 				},
+				<% unless version == 'ga' -%>
+				"enable_confidential_storage": {
+						Type:     schema.TypeBool,
+						Optional: true,
+						ForceNew: true,
+						Description: `If enabled boot disks are configured with confidential mode.`,
+				},
+				<% end -%>
 			},
 		},
 	}
@@ -968,6 +972,12 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.SoleTenantConfig = expandSoleTenantConfig(v)
 	}
 
+	<% unless version == 'ga' -%>
+	if v,ok := nodeConfig["enable_confidential_storage"]; ok {
+		nc.EnableConfidentialStorage = v.(bool)
+	}
+	<% end -%>
+	
 	<% unless version == "ga" -%>
 	if v, ok := nodeConfig["host_maintenance_policy"]; ok {
 		nc.HostMaintenancePolicy = expandHostMaintenancePolicy(v)
@@ -1206,6 +1216,9 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"advanced_machine_features": flattenAdvancedMachineFeaturesConfig(c.AdvancedMachineFeatures),
 		"sole_tenant_config":        flattenSoleTenantConfig(c.SoleTenantConfig),
 		"fast_socket":               flattenFastSocket(c.FastSocket),
+	<% unless version == 'ga' -%>		
+		"enable_confidential_storage": c.EnableConfidentialStorage,
+	<% end -%>
 	})
 
 	if len(c.OauthScopes) > 0 {
