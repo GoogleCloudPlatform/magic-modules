@@ -66,6 +66,10 @@ resource "google_tpu_v2_vm" "tpu" {
   runtime_version  = "tpu-vm-tf-2.13.0"
   accelerator_type = "v2-8"
 
+  scheduling_config {
+    preemptible = true
+  }
+
   data_disks {
     source_disk = google_compute_disk.disk.id
     mode        = "READ_ONLY"
@@ -111,6 +115,10 @@ resource "google_tpu_v2_vm" "tpu" {
 
   runtime_version  = "tpu-vm-tf-2.13.0"
   accelerator_type = "v2-8"
+
+  scheduling_config {
+    preemptible = true
+  }
 
   data_disks {
     source_disk = google_compute_disk.disk2.id
