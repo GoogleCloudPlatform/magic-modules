@@ -33,6 +33,7 @@ import_format:
   ]
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/bigquery_reservation_capacity_commitment.go.erb
+  custom_import: templates/terraform/custom_import/bigquery_reservation_capacity_commitment_set_id.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_reservation_capacity_commitment_basic'
