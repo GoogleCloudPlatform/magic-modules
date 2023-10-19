@@ -27,7 +27,10 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Introduction to Reservations': 'https://cloud.google.com/bigquery/docs/reservations-intro'
   api: 'https://cloud.google.com/bigquery/docs/reference/reservations/rest/v1/projects.locations.capacityCommitments'
 id_format: '{{name}}'
-import_format: ['{{name}}']
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/capacityCommitments/{{capacity_commitment_id}}',
+  ]
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/bigquery_reservation_capacity_commitment.go.erb
 examples:
