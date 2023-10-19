@@ -67,6 +67,16 @@ examples:
       instance_name: 'private-cache'
       address_name: 'address'
       network_name: 'redis-test-network'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'redis_instance_private_service_test'
+    primary_resource_id: 'cache'
+    vars:
+      instance_name: 'private-cache'
+      network_name: 'redis-test-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+    skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'redis_instance_mrr'
     primary_resource_id: 'cache'

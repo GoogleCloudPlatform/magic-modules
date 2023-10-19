@@ -37,6 +37,16 @@ examples:
       node_name: 'test-tpu'
       global_address_name: 'my-global-address'
       network_name: 'tpu-node-network'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'tpu_node_full_test'
+    primary_resource_id: 'tpu'
+    vars:
+      node_name: 'test-tpu'
+      network_name: 'tpu-node-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+    skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/tpu_node.erb'
 custom_diff: [
