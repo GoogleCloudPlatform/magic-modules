@@ -2860,7 +2860,6 @@ func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withIdentityServiceConfig(t *testing.T) {
 	t.Parallel()
 
@@ -2909,7 +2908,6 @@ func TestAccContainerCluster_withIdentityServiceConfig(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerCluster_withLoggingConfig(t *testing.T) {
 	t.Parallel()
@@ -8016,7 +8014,6 @@ resource "google_container_cluster" "primary" {
 `, clusterName, gatewayApiChannel)
 }
 
-<% unless version == 'ga' -%>
 func testAccContainerCluster_withIdentityServiceConfigEnabled(name string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
@@ -8044,7 +8041,6 @@ resource "google_container_cluster" "primary" {
 }
 `, name)
 }
-<% end -%>
 
 func testAccContainerCluster_withLoggingConfigEnabled(name string) string {
 	return fmt.Sprintf(`
