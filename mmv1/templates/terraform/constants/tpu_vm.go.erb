@@ -1,0 +1,29 @@
+
+// Suppress unremovable default scope values from GCP.
+func tpuServiceAccountAddedScopesSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if strings.Contains(k, "scope.#") && (new == "0" || new == "") && old != new {
+		return false
+	}
+
+	// Get changes for service_account.xx.scope
+	b := strings.Split(k, ".")
+	o, n := d.GetChange(strings.TrimSuffix(k, "."+b[len(b)-1]))
+	if o == nil || n == nil {
+		return false
+	}
+
+	oList := normalizeScopes(tpgresource.ConvertStringArr(o.([]interface{})))
+	nList := normalizeScopes(tpgresource.ConvertStringArr(n.([]interface{})))
+
+	return reflect.DeepEqual(oList, nList)
+}
+
+func normalizeScopes(scopes []string) []string {
+	var result []string
+	for _, s := range scopes {
+		if s != "https://www.googleapis.com/auth/pubsub" {
+			result = append(result, s)
+		}
+	}
+	return result
+}

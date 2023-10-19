@@ -15,4 +15,56 @@ resource "google_tpu_v2_vm" "<%= ctx[:primary_resource_id] %>" {
 
   runtime_version  = "tpu-vm-tf-2.13.0"
   accelerator_type = "v2-8"
+
+  network_config {
+    can_ip_forward      = true
+    enable_external_ips = true
+  }
+  
+  scheduling_config {
+    preemptible = true
+  }
+
+  shielded_instance_config {
+    enable_secure_boot = true
+  }
+
+  service_account {
+    email = google_service_account.sa.email
+    scope = [
+      "https://www.googleapis.com/auth/cloud-platform",
+    ]
+  }
+
+  data_disks {
+    source_disk = google_compute_disk.disk.id
+    mode        = "READ_ONLY"
+  }
+
+  labels = {
+    foo = "bar"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  tags = ["foo"]
+}
+
+resource "google_service_account" "sa" {
+  provider = google-beta
+
+  account_id   = "<%= ctx[:vars]['sa_id'] %>"
+  display_name = "Test TPU V2 VM"
+}
+
+resource "google_compute_disk" "disk" {
+  provider = google-beta
+
+  name  = "<%= ctx[:vars]['disk_name'] %>"
+  image = "debian-cloud/debian-11"
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-c"
 }
