@@ -44,7 +44,7 @@ type attachedClusterGroup struct {
 //    ],
 // }
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-  l := v.([]interface{})
+	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
 	}
