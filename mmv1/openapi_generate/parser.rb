@@ -215,11 +215,33 @@ module OpenAPIGenerate
       resource
     end
 
+    def build_product(spec_path, output)
+      root = OpenAPIParser.parse(YAML.load_file(spec_path))
+      version = root.raw_schema["info"]["version"]
+      server = root.raw_schema["servers"][0]["url"]
+      product_name = spec_path.split("/").last.split("_").first
+      product_path = File.join(output, product_name)
+      Dir.mkdir(product_path) unless File.exists?(product_path)
+      product = Api::Product.new()
+      api_version = Api::Product::Version.new()
+      api_version.base_url = "#{server}/#{version}/"
+      api_version.name = "ga"
+      product.versions = [api_version]
+      display_name = root.raw_schema["info"]["title"].sub(" API", "")
+      # Name is on the Api::Object::Named parent resource, lets not modify that
+      product.instance_variable_set(:@name, display_name.gsub(" ", ""))
+      product.display_name = display_name
+      product.scopes = ["https://www.googleapis.com/auth/cloud-platform"]
+      File.write(File.join(output, "/#{product_name}/product.yaml"), product.to_yaml)
+      product_path
+    end
+
     def write_yaml(spec_path, output)
       resource_paths = find_resources(spec_path)
+      product_path = build_product(spec_path, output)
       resource_paths.each do |path_array|
         resource = build_resource(spec_path, path_array[0], path_array[1])
-        file_path = File.join(output, "#{resource.name}.yaml")
+        file_path = File.join(product_path, "#{resource.name}.yaml")
         File.write(file_path, resource.to_yaml)
       end
     end
