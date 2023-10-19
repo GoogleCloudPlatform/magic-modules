@@ -544,8 +544,6 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 	}
 	sb.Lifecycle = lifecycle
 
-	objectRetention := d.Get("per_object_retention").(bool)
-
 	if v, ok := d.GetOk("versioning"); ok {
 		sb.Versioning = expandBucketVersioning(v)
 	}
@@ -603,8 +601,11 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			res, err = config.NewStorageClient(userAgent).Buckets.Insert(project,
-				sb).EnableObjectRetention(objectRetention).Do()
+			insertCall := config.NewStorageClient(userAgent).Buckets.Insert(project, sb)
+			if d.Get("per_object_retention").(bool) {
+				insertCall.EnableObjectRetention(true)
+			}
+			res, err = insertCall.Do()
 			return err
 		},
 	})

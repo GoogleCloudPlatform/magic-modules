@@ -6,12 +6,14 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"crypto/sha256"
 	"encoding/base64"
@@ -207,6 +209,29 @@ func ResourceStorageBucketObject() *schema.Resource {
 				},
 			},
 
+			"retention": {
+				Type:          schema.TypeList,
+				MaxItems:      1,
+				Optional:      true,
+				ConflictsWith: []string{"event_based_hold"},
+				Description:   `Object level retention configuration.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"retain_until": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: `Time in RFC 3339 (e.g. 2030-01-01T02:03:04Z) until which object retention protects this object.`,
+						},
+						"mode": {
+							Type:         schema.TypeString,
+							Required:     true,
+							Description:  `The object retention mode. Supported values include: "UNLOCKED", "LOCKED".`,
+							ValidateFunc: validation.StringInSlice([]string{"UNLOCKED", "LOCKED"}, false),
+						},
+					},
+				},
+			},
+
 			"event_based_hold": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -312,6 +337,10 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 		object.KmsKeyName = v.(string)
 	}
 
+	if v, ok := d.GetOk("retention"); ok {
+		object.Retention = expandObjectRetention(v)
+	}
+
 	if v, ok := d.GetOk("event_based_hold"); ok {
 		object.EventBasedHold = v.(bool)
 	}
@@ -357,6 +386,13 @@ func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error retrieving object during update %s: %s", name, err)
 	}
 
+	hasRetentionChanges := d.HasChange("retention")
+	if hasRetentionChanges {
+		if v, ok := d.GetOk("retention"); ok {
+			res.Retention = expandObjectRetention(v)
+		}
+	}
+
 	if d.HasChange("event_based_hold") {
 		v := d.Get("event_based_hold")
 		res.EventBasedHold = v.(bool)
@@ -368,6 +404,9 @@ func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{})
 	}
 
 	updateCall := objectsService.Update(bucket, name, res)
+	if hasRetentionChanges {
+		updateCall.OverrideUnlockedRetention(true)
+	}
 	_, err = updateCall.Do()
 
 	if err != nil {
@@ -443,6 +482,9 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("media_link", res.MediaLink); err != nil {
 		return fmt.Errorf("Error setting media_link: %s", err)
 	}
+	if err := d.Set("retention", flattenObjectRetention(res.Retention)); err != nil {
+		return fmt.Errorf("Error setting lifecycle_rule: %s", err)
+	}
 	if err := d.Set("event_based_hold", res.EventBasedHold); err != nil {
 		return fmt.Errorf("Error setting event_based_hold: %s", err)
 	}
@@ -512,4 +554,40 @@ func expandCustomerEncryption(input []interface{}) map[string]string {
 		expanded["encryption_algorithm"] = original["encryption_algorithm"].(string)
 	}
 	return expanded
+}
+
+func expandObjectRetention(configured interface{}) *storage.ObjectRetention {
+	retentions := configured.([]interface{})
+	if len(retentions) == 0 {
+		return nil
+	}
+	retention := retentions[0].(map[string]interface{})
+
+	mode := "Unlocked"
+	if retention["mode"].(string) == "LOCKED" {
+		mode = "Locked"
+	}
+
+	objectRetention := &storage.ObjectRetention{
+		RetainUntilTime: retention["retain_until"].(string),
+		Mode:            mode,
+	}
+
+	return objectRetention
+}
+
+func flattenObjectRetention(objectRetention *storage.ObjectRetention) []map[string]interface{} {
+	retentions := make([]map[string]interface{}, 0, 1)
+
+	if objectRetention == nil {
+		return retentions
+	}
+
+	retention := map[string]interface{}{
+		"mode":         strings.ToUpper(objectRetention.Mode),
+		"retain_until": objectRetention.RetainUntilTime,
+	}
+
+	retentions = append(retentions, retention)
+	return retentions
 }
