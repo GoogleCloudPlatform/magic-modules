@@ -85,6 +85,18 @@ examples:
       alloydb_primary_cluster_name: 'alloydb-primary-cluster'
       alloydb_primary_instance_name: 'alloydb-primary-instance'
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_secondary_cluster_basic_test'
+    primary_resource_id: 'secondary'
+    vars:
+      alloydb_primary_cluster_name: 'alloydb-primary-cluster'
+      alloydb_primary_instance_name: 'alloydb-primary-instance'
+      alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
+      network_name: 'alloydb-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+    skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_create: templates/terraform/pre_create/alloydb_cluster.go.erb
 parameters:

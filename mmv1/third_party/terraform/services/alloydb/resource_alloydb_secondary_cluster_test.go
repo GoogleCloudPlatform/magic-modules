@@ -14,6 +14,7 @@ func TestAccAlloydbCluster_secondaryClusterMandatoryFields(t *testing.T) {
 	// https://github.com/hashicorp/terraform-provider-google/issues/16231
 	acctest.SkipIfVcr(t)
 	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -40,7 +41,7 @@ func testAccAlloydbCluster_secondaryClusterMandatoryFields(context map[string]in
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
-  network    = google_compute_network.default.id
+  network    = data.google_compute_network.default.id
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -51,14 +52,12 @@ resource "google_alloydb_instance" "primary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
-  network      = google_compute_network.default.id
+  network      = data.google_compute_network.default.id
   cluster_type = "SECONDARY"
 
   continuous_backup_config {
@@ -74,22 +73,8 @@ resource "google_alloydb_cluster" "secondary" {
 
 data "google_project" "project" {}
 
-resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-secondary-cluster%{random_suffix}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+data "google_compute_network" "default" {
+  name = "%{network_name}"
 }
 `, context)
 }
@@ -99,6 +84,7 @@ func TestAccAlloydbCluster_secondaryClusterMissingSecondaryConfig(t *testing.T) 
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -120,7 +106,7 @@ func testAccAlloydbCluster_secondaryClusterMissingSecondaryConfig(context map[st
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
-  network    = google_compute_network.default.id
+  network    = data.google_compute_network.default.id
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -131,14 +117,12 @@ resource "google_alloydb_instance" "primary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
-  network      = google_compute_network.default.id
+  network      = data.google_compute_network.default.id
   cluster_type = "SECONDARY"
 
   continuous_backup_config {
@@ -150,22 +134,8 @@ resource "google_alloydb_cluster" "secondary" {
 
 data "google_project" "project" {}
 
-resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-secondary-cluster%{random_suffix}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+data "google_compute_network" "default" {
+  name = "%{network_name}"
 }
 `, context)
 }
@@ -178,6 +148,7 @@ func TestAccAlloydbCluster_secondaryClusterDefinedSecondaryConfigButMissingClust
 	acctest.SkipIfVcr(t)
 
 	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -199,7 +170,7 @@ func testAccAlloydbCluster_secondaryClusterDefinedSecondaryConfigButMissingClust
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
-  network    = google_compute_network.default.id
+  network    = data.google_compute_network.default.id
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -210,14 +181,12 @@ resource "google_alloydb_instance" "primary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
-  network      = google_compute_network.default.id
+  network      = data.google_compute_network.default.id
 
   continuous_backup_config {
     enabled = false
@@ -232,22 +201,8 @@ resource "google_alloydb_cluster" "secondary" {
 
 data "google_project" "project" {}
 
-resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-secondary-cluster%{random_suffix}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+data "google_compute_network" "default" {
+  name = "%{network_name}"
 }
 `, context)
 }
@@ -257,6 +212,7 @@ func TestAccAlloydbCluster_secondaryClusterDefinedSecondaryConfigButClusterTypeI
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -278,7 +234,7 @@ func testAccAlloydbCluster_secondaryClusterDefinedSecondaryConfigButClusterTypeI
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
-  network    = google_compute_network.default.id
+  network    = data.google_compute_network.default.id
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -289,14 +245,12 @@ resource "google_alloydb_instance" "primary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
-  network      = google_compute_network.default.id
+  network      = data.google_compute_network.default.id
   cluster_type = "PRIMARY"
 
   continuous_backup_config {
@@ -312,22 +266,8 @@ resource "google_alloydb_cluster" "secondary" {
 
 data "google_project" "project" {}
 
-resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-secondary-cluster%{random_suffix}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+data "google_compute_network" "default" {
+  name = "%{network_name}"
 }
 `, context)
 }
@@ -337,6 +277,7 @@ func TestAccAlloydbCluster_secondaryClusterUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -372,7 +313,7 @@ func testAccAlloydbCluster_secondaryClusterUpdate(context map[string]interface{}
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
-  network    = google_compute_network.default.id
+  network    = data.google_compute_network.default.id
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -383,14 +324,12 @@ resource "google_alloydb_instance" "primary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
-  network      = google_compute_network.default.id
+  network      = data.google_compute_network.default.id
   cluster_type = "SECONDARY"
 
   continuous_backup_config {
@@ -410,22 +349,8 @@ resource "google_alloydb_cluster" "secondary" {
 
 data "google_project" "project" {}
 
-resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-secondary-cluster%{random_suffix}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+data "google_compute_network" "default" {
+  name = "%{network_name}"
 }
 `, context)
 }
@@ -435,6 +360,7 @@ func TestAccAlloydbCluster_secondaryClusterAddAutomatedBackupPolicy(t *testing.T
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 		"random_suffix": acctest.RandString(t, 10),
 		"hour":          23,
 	}
@@ -467,7 +393,7 @@ func testAccAlloydbCluster_secondaryClusterAddAutomatedBackupPolicy(context map[
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
-  network    = google_compute_network.default.id
+  network    = data.google_compute_network.default.id
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -478,14 +404,12 @@ resource "google_alloydb_instance" "primary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
-  network      = google_compute_network.default.id
+  network      = data.google_compute_network.default.id
   cluster_type = "SECONDARY"
 
   continuous_backup_config {
@@ -526,22 +450,8 @@ resource "google_alloydb_cluster" "secondary" {
 
 data "google_project" "project" {}
 
-resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-secondary-cluster%{random_suffix}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+data "google_compute_network" "default" {
+  name = "%{network_name}"
 }
 `, context)
 }
@@ -550,6 +460,7 @@ func TestAccAlloydbCluster_secondaryClusterUsingCMEK(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 		"random_suffix": acctest.RandString(t, 10),
 		"key_name":      "tf-test-key-" + acctest.RandString(t, 10),
 	}
@@ -577,7 +488,7 @@ func testAccAlloydbCluster_secondaryClusterUsingCMEK(context map[string]interfac
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
-  network      = google_compute_network.default.id
+  network      = data.google_compute_network.default.id
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -588,14 +499,12 @@ resource "google_alloydb_instance" "primary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
-  network      = google_compute_network.default.id
+  network      = data.google_compute_network.default.id
   cluster_type = "SECONDARY"
 
   continuous_backup_config {
@@ -615,22 +524,8 @@ resource "google_alloydb_cluster" "secondary" {
 
 data "google_project" "project" {}
 
-resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-secondary-cluster%{random_suffix}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+data "google_compute_network" "default" {
+  name = "%{network_name}"
 }
 
 resource "google_kms_key_ring" "keyring" {
@@ -658,6 +553,7 @@ func TestAccAlloydbCluster_secondaryClusterWithNetworkConfig(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -685,7 +581,7 @@ resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
   network_config {
-	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+	network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
   }
 }
 
@@ -697,15 +593,13 @@ resource "google_alloydb_instance" "primary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
   network_config {
-	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+	network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
   }
   cluster_type = "SECONDARY"
 
@@ -722,22 +616,8 @@ resource "google_alloydb_cluster" "secondary" {
 
 data "google_project" "project" {}
 
-resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-secondary-cluster%{random_suffix}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+data "google_compute_network" "default" {
+  name = "%{network_name}"
 }
 `, context)
 }
@@ -747,6 +627,8 @@ func TestAccAlloydbCluster_secondaryClusterWithNetworkConfigAndAllocatedIPRange(
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"address_name":  acctest.BootstrapSharedTestGlobalAddress(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -774,8 +656,8 @@ resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
   network_config {
-	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-	allocated_ip_range = google_compute_global_address.private_ip_alloc.name
+	network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
+	allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
   }
 }
 
@@ -787,16 +669,14 @@ resource "google_alloydb_instance" "primary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
   network_config {
-	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-	allocated_ip_range = google_compute_global_address.private_ip_alloc.name
+	network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
+	allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
   }
   cluster_type = "SECONDARY"
 
@@ -813,22 +693,12 @@ resource "google_alloydb_cluster" "secondary" {
 
 data "google_project" "project" {}
 
-resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-secondary-cluster%{random_suffix}"
+data "google_compute_network" "default" {
+  name = "%{network_name}"
 }
 
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+data "google_compute_global_address" "private_ip_alloc" {
+  name          =  "%{address_name}"
 }
 `, context)
 }
