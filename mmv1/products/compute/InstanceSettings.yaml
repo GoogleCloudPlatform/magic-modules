@@ -23,6 +23,7 @@ create_url: 'projects/{{project}}/zones/{{zone}}/instanceSettings?update_mask={{
 update_verb: :PATCH
 update_url: 'projects/{{project}}/zones/{{zone}}/instanceSettings?update_mask={{update_mask}}'
 import_format: ['projects/{{project}}/zones/{{zone}}/instanceSettings']
+min_version: beta
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
