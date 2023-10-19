@@ -5395,7 +5395,7 @@ func TestAccContainerCluster_withEnablePrivateEndpointToggle(t *testing.T) {
 	})
 }
 
-func testAccContainerCluster_withEnablePrivateEndpoint(clusterName, flag, networkName, subnetworkName string) string
+func testAccContainerCluster_withEnablePrivateEndpoint(clusterName, flag, networkName, subnetworkName string) string {
 
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "uscentral1a" {
