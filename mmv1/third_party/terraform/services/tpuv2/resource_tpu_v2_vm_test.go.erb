@@ -140,6 +140,16 @@ resource "google_tpu_v2_vm" "tpu" {
   }
 }
 
+resource "google_compute_disk" "disk" {
+  provider = google-beta
+
+  name  = "tf-test-tpu-%{random_suffix}"
+  image = "debian-cloud/debian-11"
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-c"
+}
+
 resource "google_compute_disk" "disk2" {
   provider = google-beta
 
