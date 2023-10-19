@@ -37,6 +37,7 @@ examples:
     primary_resource_id: 'basic_flow'
     vars:
       agent_name: 'dialogflowcx-agent'
+      bucket_name: 'dialogflowcx-bucket'
 skip_sweeper: true
 id_format: '{{parent}}/flows/{{name}}'
 import_format: ['{{parent}}/flows/{{name}}']
@@ -538,3 +539,42 @@ properties:
         values:
           - :MODEL_TRAINING_MODE_AUTOMATIC
           - :MODEL_TRAINING_MODE_MANUAL
+  - !ruby/object:Api::Type::NestedObject
+    name: 'advancedSettings'
+    description: |
+      Hierarchical advanced settings for this flow. The settings exposed at the lower level overrides the settings exposed at the higher level.
+      Hierarchy: Agent->Flow->Page->Fulfillment/Parameter.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'audioExportGcsDestination'
+        description: |
+          If present, incoming audio is exported by Dialogflow to the configured Google Cloud Storage destination. Exposed at the following levels:
+          * Agent level
+          * Flow level
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'uri'
+            description: |
+              The Google Cloud Storage URI for the exported objects. Whether a full object name, or just a prefix, its usage depends on the Dialogflow operation.
+              Format: gs://bucket/object-name-or-prefix
+      - !ruby/object:Api::Type::NestedObject
+        name: 'dtmfSettings'
+        description: |
+          Define behaviors for DTMF (dual tone multi frequency). DTMF settings does not override each other. DTMF settings set at different levels define DTMF detections running in parallel. Exposed at the following levels:
+          * Agent level
+          * Flow level
+          * Page level
+          * Parameter level
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enabled'
+            description: |
+              If true, incoming audio is processed for DTMF (dual tone multi frequency) events. For example, if the caller presses a button on their telephone keypad and DTMF processing is enabled, Dialogflow will detect the event (e.g. a "3" was pressed) in the incoming audio and pass the event to the bot to drive business logic (e.g. when 3 is pressed, return the account balance).
+          - !ruby/object:Api::Type::Integer
+            name: 'maxDigits'
+            description: |
+              Max length of DTMF digits.
+          - !ruby/object:Api::Type::String
+            name: 'finishDigit'
+            description: |
+              The digit that terminates a DTMF digit sequence.
