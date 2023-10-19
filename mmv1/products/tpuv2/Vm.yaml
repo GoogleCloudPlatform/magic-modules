@@ -58,6 +58,8 @@ examples:
     primary_resource_id: 'tpu'
     vars:
       vm_name: 'test-tpu'
+      network_name: 'tpu-net'
+      subnet_name: 'tpu-subnet'
       sa_id: 'tpu-sa'
       disk_name: 'tpu-disk'
 parameters:
@@ -92,6 +94,16 @@ properties:
     name: 'description'
     description: |
       Text description of the TPU.
+  - !ruby/object:Api::Type::String
+    name: 'cidrBlock'
+    default_from_api: true
+    description: |
+      The CIDR block that the TPU node will use when selecting an IP address. This CIDR block must
+      be a /29 block; the Compute Engine networks API forbids a smaller block, and using a larger
+      block would be wasteful (a node can only consume one IP address). Errors will occur if the
+      CIDR block has already been used for a currently existing TPU node, the CIDR block conflicts
+      with any subnetworks in the user's provided network, or the provided network is peered with
+      another network that is using that CIDR block.
   - !ruby/object:Api::Type::NestedObject
     name: 'networkConfig'
     default_from_api: true
@@ -99,6 +111,20 @@ properties:
     description: |
       Network configurations for the TPU node.
     properties:
+      - !ruby/object:Api::Type::String
+        name: 'network'
+        immutable: true
+        default_from_api: true
+        description: |
+          The name of the network for the TPU node. It must be a preexisting Google Compute Engine
+          network. If none is provided, "default" will be used.
+      - !ruby/object:Api::Type::String
+        name: 'subnetwork'
+        immutable: true
+        default_from_api: true
+        description: |
+          The name of the subnetwork for the TPU node. It must be a preexisting Google Compute
+          Engine subnetwork. If none is provided, "default" will be used.
       - !ruby/object:Api::Type::Boolean
         name: 'enableExternalIps'
         default_from_api: true
