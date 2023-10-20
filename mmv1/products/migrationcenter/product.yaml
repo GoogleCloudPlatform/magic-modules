@@ -1,0 +1,9 @@
+--- !ruby/object:Api::Product
+versions:
+- !ruby/object:Api::Product::Version
+  base_url: https://migrationcenter.googleapis.com/v1/
+  name: ga
+name: MigrationCenter
+display_name: Migration Center
+scopes:
+- https://www.googleapis.com/auth/cloud-platform
