@@ -91,7 +91,7 @@ properties:
           Internet protocol versions this policy-based route applies to.
         values:
           - :IPV4
-      - !ruby/object:Api::Type::String # probably could have been an enum, but it's a string in the API
+      - !ruby/object:Api::Type::String  # probably could have been an enum, but it's a string in the API
         name: 'ipProtocol'
         default_value: "ALL"
         description: |
@@ -108,18 +108,18 @@ properties:
           The destination IP range of outgoing packets that this policy-based route applies to. Default is "0.0.0.0/0" if protocol version is IPv4.
   - !ruby/object:Api::Type::Enum
     name: 'nextHopOtherRoutes'
-    exactly_one_of: # next_hop union
-    - next_hop_ilb_ip
-    - next_hop_other_routes
+    exactly_one_of:  # next_hop union
+      - next_hop_ilb_ip
+      - next_hop_other_routes
     description: |
       Other routes that will be referenced to determine the next hop of the packet.
     values:
     - :DEFAULT_ROUTING
   - !ruby/object:Api::Type::String
     name: 'nextHopIlbIp'
-    exactly_one_of: # next_hop union
-    - next_hop_ilb_ip
-    - next_hop_other_routes
+    exactly_one_of:  # next_hop union
+      - next_hop_ilb_ip
+      - next_hop_other_routes
     description: |
       The IP address of a global-access-enabled L4 ILB that is the next hop for matching packets.
   - !ruby/object:Api::Type::Integer
@@ -129,29 +129,29 @@ properties:
       The priority of this policy-based route. Priority is used to break ties in cases where there are more than one matching policy-based routes found. In cases where multiple policy-based routes are matched, the one with the lowest-numbered priority value wins. The default value is 1000. The priority value must be from 1 to 65535, inclusive.
   - !ruby/object:Api::Type::NestedObject
     name: 'virtualMachine'
-    exactly_one_of: # target union
-    - virtual_machine
-    - interconnect_attachment
+    exactly_one_of:  # target union
+      - virtual_machine
+      - interconnect_attachment
     description: |
       VM instances to which this policy-based route applies to.
     properties:
       - !ruby/object:Api::Type::Array
         name: 'tags'
-        required: true # optional in API docs, but that doesn't make sense here
+        required: true  # optional in API docs, but that doesn't make sense here
         description: |
           A list of VM instance tags that this policy-based route applies to. VM instances that have ANY of tags specified here will install this PBR.
         item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: 'interconnectAttachment'
-    exactly_one_of: # target union
-    - virtual_machine
-    - interconnect_attachment
+    exactly_one_of:  # target union
+      - virtual_machine
+      - interconnect_attachment
     description: |
       The interconnect attachments that this policy-based route applies to.
     properties:
       - !ruby/object:Api::Type::String
         name: 'region'
-        required: true # optional in API docs, but that doesn't make sense here
+        required: true  # optional in API docs, but that doesn't make sense here
         description: |
           Cloud region to install this policy-based route on for Interconnect attachments. Use `all` to install it on all Interconnect attachments.
   - !ruby/object:Api::Type::Time
@@ -176,7 +176,7 @@ properties:
        If potential misconfigurations are detected for this route, this field will be populated with warning messages.
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - !ruby/object:Api::Type::String # technically enum, but doesn't matter for output fields
+        - !ruby/object:Api::Type::String  # technically enum, but doesn't matter for output fields
           name: 'code'
           output: true
           description: |
