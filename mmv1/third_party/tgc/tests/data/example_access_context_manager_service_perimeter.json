@@ -15,7 +15,13 @@
           "egressPolicies": [
             {
               "egressFrom": {
-                "identityType": "ANY_USER_ACCOUNT"
+                "identityType": "ANY_USER_ACCOUNT",
+                "source_restriction": "SOURCE_RESTRICTION_ENABLED",
+                "sources": [
+                    {
+                      "access_level": "accessPolicies/987654/accessLevels/restrict_storage"
+                    }
+                  ]
               }
             }
           ],
