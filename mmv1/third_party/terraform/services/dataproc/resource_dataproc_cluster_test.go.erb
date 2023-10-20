@@ -410,9 +410,6 @@ func TestAccDataprocCluster_updatable(t *testing.T) {
 	t.Parallel()
 
 	rnd := acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
-	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
-	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
 	var cluster dataproc.Cluster
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -421,7 +418,7 @@ func TestAccDataprocCluster_updatable(t *testing.T) {
 		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocCluster_updatable(rnd, subnetworkName, 2, 1),
+				Config: testAccDataprocCluster_updatable(rnd, 2, 1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.updatable", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.updatable", "cluster_config.0.master_config.0.num_instances", "1"),
@@ -429,7 +426,7 @@ func TestAccDataprocCluster_updatable(t *testing.T) {
 					resource.TestCheckResourceAttr("google_dataproc_cluster.updatable", "cluster_config.0.preemptible_worker_config.0.num_instances", "1")),
 			},
 			{
-				Config: testAccDataprocCluster_updatable(rnd, subnetworkName, 2, 0),
+				Config: testAccDataprocCluster_updatable(rnd, 2, 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.updatable", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.updatable", "cluster_config.0.master_config.0.num_instances", "1"),
@@ -437,7 +434,7 @@ func TestAccDataprocCluster_updatable(t *testing.T) {
 					resource.TestCheckResourceAttr("google_dataproc_cluster.updatable", "cluster_config.0.preemptible_worker_config.0.num_instances", "0")),
 			},
 			{
-				Config: testAccDataprocCluster_updatable(rnd, subnetworkName, 3, 2),
+				Config: testAccDataprocCluster_updatable(rnd, 3, 2),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_dataproc_cluster.updatable", "cluster_config.0.master_config.0.num_instances", "1"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.updatable", "cluster_config.0.worker_config.0.num_instances", "3"),
@@ -1718,7 +1715,7 @@ resource "google_dataproc_cluster" "with_init_action" {
 `, bucket, rnd, objName, objName, rnd, subnetworkName)
 }
 
-func testAccDataprocCluster_updatable(rnd, subnetworkName string, w, p int) string {
+func testAccDataprocCluster_updatable(rnd string, w, p int) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "updatable" {
   name   = "tf-test-dproc-%s"
@@ -1726,10 +1723,6 @@ resource "google_dataproc_cluster" "updatable" {
   graceful_decommission_timeout = "0.2s"
 
   cluster_config {
-    gce_cluster_config {
-      subnetwork = "%s"
-    }
-
     master_config {
       num_instances = "1"
       machine_type  = "e2-medium"
@@ -1754,7 +1747,7 @@ resource "google_dataproc_cluster" "updatable" {
     }
   }
 }
-`, rnd, subnetworkName, w, p)
+`, rnd, w, p)
 }
 
 func testAccDataprocCluster_nonPreemptibleSecondary(rnd, subnetworkName string) string {
