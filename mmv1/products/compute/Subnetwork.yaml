@@ -394,7 +394,7 @@ properties:
     name: 'externalIpv6Prefix'
     default_from_api: true
     description: |
-      The range of external IPv6 addresses that are owned by this subnetwork. Defaults to "2600:1900:4000:1ae::/64".
+      The range of external IPv6 addresses that are owned by this subnetwork.
   - !ruby/object:Api::Type::Boolean
     name: 'allowSubnetCidrRoutesOverlap'
     default_from_api: true
