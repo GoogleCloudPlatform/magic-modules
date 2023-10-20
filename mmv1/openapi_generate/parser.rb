@@ -84,22 +84,17 @@ module OpenAPIGenerate
           field.instance_variable_set(:@item_type, 'Api::Type::Boolean')
         else
           nested_object = Api::Type::NestedObject.new
-          required_props = obj.items.required || []
-          object_properties = []
-          obj.items.properties&.each do |prop, i|
-            prop = write_object(prop, i, i.type, false)
-            prop.instance_variable_set(:@required, true) if required_props.include?(prop.name)
-            required_props.delete(prop.name)
-            object_properties.push(prop)
-          end
-          raise "Unknown required properties #{required_props}" unless required_props.empty?
+          object_properties = build_properties(
+            obj.items.properties,
+            obj.items.required || []
+          )
           nested_object.instance_variable_set(:@properties, object_properties)
           field.instance_variable_set(:@item_type, nested_object)
         end
       else
         raise "Failed to identify field type #{type}"
-
       end
+
       field.instance_variable_set(:@description, obj.description || 'No description')
       if url_param
         field.instance_variable_set(:@url_param_only, true)
@@ -148,18 +143,10 @@ module OpenAPIGenerate
         parameter_object.instance_variable_set(:@immutable, true)
         parameters.push(parameter_object)
       end
-      properties = []
-      required_properties = path.post.request_body.content['application/json'].schema.required || []
-      path.post.request_body.content['application/json'].schema.properties.each do |prop, i|
-        prop_object = write_object(prop, i, i.type, false)
-        prop_object.instance_variable_set(:@required, true) if required_properties.include?(prop)
-        required_properties.delete(prop)
-        properties.push(prop_object)
-      end
-      unless required_properties.empty?
-        raise "Unknown required properties in top-level object #{required_properties}"
-
-      end
+      properties = build_properties(
+        path.post.request_body.content['application/json'].schema.properties,
+        path.post.request_body.content['application/json'].schema.required || []
+      )
 
       id_param = path.post.parameters.select do |p|
         p.name.downcase.include?(resource_name.downcase)
@@ -167,6 +154,20 @@ module OpenAPIGenerate
       raise 'did not find ID param' unless id_param
 
       [properties, parameters, id_param.name]
+    end
+
+    def build_properties(properties, required)
+      prop_objects = []
+      properties.each do |prop, i|
+        prop_object = write_object(prop, i, i.type, false)
+        prop_object.instance_variable_set(:@required, true) if required.include?(prop)
+
+        required.delete(prop)
+        prop_objects.push(prop_object)
+      end
+      raise "Unknown required properties in object #{required}" unless required.empty?
+
+      prop_objects
     end
 
     def base_url(resource_path)
@@ -199,8 +200,13 @@ module OpenAPIGenerate
       resource.instance_variable_set(:@name, resource_name)
       # TODO(slevenick): Get resource description published in OpenAPI spec
       resource.description = 'Description'
-      resource.update_verb = :PATCH
-      resource.update_mask = true
+      if update?(spec_path, resource_name)
+        resource.update_verb = :PATCH
+        resource.update_mask = true
+      else
+        resource.immutable = true
+      end
+
       resource.autogen_async = true
       resource.properties = properties
       resource.parameters = parameters
@@ -215,23 +221,37 @@ module OpenAPIGenerate
       resource
     end
 
+    def update?(spec_path, resource_name)
+      root = OpenAPIParser.parse(YAML.load_file(spec_path))
+      root.paths.path.each do |path|
+        # PATCH is the standard update method
+        next unless path[1].patch
+
+        return true if path[1].patch.operation_id.start_with?("Update#{resource_name}")
+      end
+      false
+    end
+
     def build_product(spec_path, output)
       root = OpenAPIParser.parse(YAML.load_file(spec_path))
-      version = root.raw_schema["info"]["version"]
-      server = root.raw_schema["servers"][0]["url"]
-      product_name = spec_path.split("/").last.split("_").first
+      version = root.raw_schema['info']['version']
+      server = root.raw_schema['servers'][0]['url']
+      product_name = spec_path.split('/').last.split('_').first
       product_path = File.join(output, product_name)
-      Dir.mkdir(product_path) unless File.exists?(product_path)
-      product = Api::Product.new()
-      api_version = Api::Product::Version.new()
+      FileUtils.mkdir_p(product_path)
+      product = Api::Product.new
+      api_version = Api::Product::Version.new
       api_version.base_url = "#{server}/#{version}/"
-      api_version.name = "ga"
+      # TODO(slevenick) figure out how to tell the API version
+      api_version.name = 'ga'
       product.versions = [api_version]
-      display_name = root.raw_schema["info"]["title"].sub(" API", "")
+      # Standard titling is "Service Name API"
+      display_name = root.raw_schema['info']['title'].sub(' API', '')
       # Name is on the Api::Object::Named parent resource, lets not modify that
-      product.instance_variable_set(:@name, display_name.gsub(" ", ""))
+      product.instance_variable_set(:@name, display_name.gsub(' ', ''))
       product.display_name = display_name
-      product.scopes = ["https://www.googleapis.com/auth/cloud-platform"]
+      # Scopes should be added soon to OpenAPI, until then use global scope
+      product.scopes = ['https://www.googleapis.com/auth/cloud-platform']
       File.write(File.join(output, "/#{product_name}/product.yaml"), product.to_yaml)
       product_path
     end

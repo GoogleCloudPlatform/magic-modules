@@ -102,9 +102,7 @@ module Api
       end
     end
 
-    def display_name=(display_name)
-      @display_name = display_name
-    end
+    attr_writer :display_name
 
     # Most general version that exists for the product
     # If GA is present, use that, else beta, else alpha
