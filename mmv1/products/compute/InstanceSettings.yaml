@@ -44,6 +44,7 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
     name: 'instance_settings_basic'
     primary_resource_id: 'gce_instance_settings'
     test_env_vars:
