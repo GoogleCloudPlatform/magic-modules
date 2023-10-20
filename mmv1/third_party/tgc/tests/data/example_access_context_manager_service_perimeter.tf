@@ -57,6 +57,10 @@ resource "google_access_context_manager_service_perimeter" "service-perimeter" {
 
     egress_policies {
       egress_from {
+        sources {
+          access_level = "accessPolicies/987654/accessLevels/restrict_storage"
+        }
+	source_restriction = "SOURCE_RESTRICTION_ENABLED"
         identity_type = "ANY_USER_ACCOUNT"
       }
     }
