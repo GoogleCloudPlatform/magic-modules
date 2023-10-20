@@ -347,6 +347,21 @@ properties:
                     - :ANY_USER_ACCOUNT
                     - :ANY_SERVICE_ACCOUNT
                 - !ruby/object:Api::Type::Array
+                  name: 'sources'
+                  description: 'Sources that this EgressPolicy authorizes access from.'
+                  item_type: !ruby/object:Api::Type::NestedObject
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: 'accessLevel'
+                        description: 'An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.'
+                - !ruby/object:Api::Type::Enum
+                  name: 'sourceRestriction'
+                  description: 'Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.'
+                  values:
+                    - :SOURCE_RESTRICTION_UNSPECIFIED
+                    - :SOURCE_RESTRICTION_ENABLED
+                    - :SOURCE_RESTRICTION_DISABLED
+                - !ruby/object:Api::Type::Array
                   name: 'identities'
                   description: |
                     A list of identities that are allowed access through this `EgressPolicy`.
@@ -619,6 +634,21 @@ properties:
                     - :ANY_IDENTITY
                     - :ANY_USER_ACCOUNT
                     - :ANY_SERVICE_ACCOUNT
+                - !ruby/object:Api::Type::Array
+                  name: 'sources'
+                  description: 'Sources that this EgressPolicy authorizes access from.'
+                  item_type: !ruby/object:Api::Type::NestedObject
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: 'accessLevel'
+                        description: 'An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.'
+                - !ruby/object:Api::Type::Enum
+                  name: 'sourceRestriction'
+                  description: 'Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.'
+                  values:
+                    - :SOURCE_RESTRICTION_UNSPECIFIED
+                    - :SOURCE_RESTRICTION_ENABLED
+                    - :SOURCE_RESTRICTION_DISABLED
                 - !ruby/object:Api::Type::Array
                   name: 'identities'
                   description: |
