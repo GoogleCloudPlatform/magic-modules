@@ -114,7 +114,7 @@ properties:
     description: |
       Other routes that will be referenced to determine the next hop of the packet.
     values:
-    - :DEFAULT_ROUTING
+      - :DEFAULT_ROUTING
   - !ruby/object:Api::Type::String
     name: 'nextHopIlbIp'
     exactly_one_of:  # next_hop union
