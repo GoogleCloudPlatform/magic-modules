@@ -2370,9 +2370,13 @@ resource "google_dataproc_metastore_service" "ms" {
 
   network_config {
     consumers {
-      subnetwork = "%s"
+      subnetwork = data.google_compute_subnetwork.subnet.id
     }
   }
+}
+
+data "google_compute_subnetwork" "subnet" {
+  name = "%s"
 }
 `, clusterName, subnetworkName, serviceId, subnetworkName)
 }
@@ -2411,9 +2415,13 @@ resource "google_dataproc_metastore_service" "ms" {
 
   network_config {
     consumers {
-      subnetwork = "%s"
+      subnetwork = data.google_compute_subnetwork.subnet.id
     }
   }
+}
+
+data "google_compute_subnetwork" "subnet" {
+  name = "%s"
 }
 `, clusterName, subnetworkName, serviceId, subnetworkName)
 }
