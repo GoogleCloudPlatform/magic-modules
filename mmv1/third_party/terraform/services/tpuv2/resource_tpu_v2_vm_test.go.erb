@@ -59,7 +59,7 @@ func testAccTpuV2Vm_full(context map[string]interface{}) string {
 resource "google_tpu_v2_vm" "tpu" {
   provider = google-beta
 
-  name        = "tf-test-test-tpu-%{random_suffix}"
+  name        = "tf-test-tpu-%{random_suffix}"
   zone        = "us-central1-c"
   description = "Text description of the TPU."
 
@@ -93,7 +93,7 @@ resource "google_tpu_v2_vm" "tpu" {
 resource "google_compute_disk" "disk" {
   provider = google-beta
 
-  name  = "tf-test-tpu-%{random_suffix}"
+  name  = "tf-test-tpu-disk-%{random_suffix}"
   image = "debian-cloud/debian-11"
   size  = 10
   type  = "pd-ssd"
@@ -109,7 +109,7 @@ func testAccTpuV2Vm_update(context map[string]interface{}, preventDestroy bool) 
 resource "google_tpu_v2_vm" "tpu" {
   provider = google-beta
 
-  name        = "tf-test-test-tpu-%{random_suffix}"
+  name        = "tf-test-tpu-%{random_suffix}"
   zone        = "us-central1-c"
   description = "Text description of the TPU updated."
 
@@ -148,7 +148,7 @@ resource "google_tpu_v2_vm" "tpu" {
 resource "google_compute_disk" "disk" {
   provider = google-beta
 
-  name  = "tf-test-tpu-%{random_suffix}"
+  name  = "tf-test-tpu-disk-%{random_suffix}"
   image = "debian-cloud/debian-11"
   size  = 10
   type  = "pd-ssd"
@@ -158,7 +158,7 @@ resource "google_compute_disk" "disk" {
 resource "google_compute_disk" "disk2" {
   provider = google-beta
 
-  name  = "tf-test-tpu2-%{random_suffix}"
+  name  = "tf-test-tpu-disk2-%{random_suffix}"
   image = "debian-cloud/debian-11"
   size  = 10
   type  = "pd-ssd"
