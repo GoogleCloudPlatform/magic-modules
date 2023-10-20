@@ -2367,8 +2367,14 @@ resource "google_dataproc_metastore_service" "ms" {
 	hive_metastore_config {
 		version = "3.1.2"
 	}
+
+  network_config {
+    consumers {
+      subnetwork = "%s"
+    }
+  }
 }
-`, clusterName, subnetworkName, serviceId)
+`, clusterName, subnetworkName, serviceId, subnetworkName)
 }
 
 func testAccDataprocCluster_withMetastoreConfig_update(clusterName, serviceId, subnetworkName string) string {
@@ -2402,6 +2408,12 @@ resource "google_dataproc_metastore_service" "ms" {
 	hive_metastore_config {
 		version = "3.1.2"
 	}
+
+  network_config {
+    consumers {
+      subnetwork = "%s"
+    }
+  }
 }
-`, clusterName, subnetworkName, serviceId)
+`, clusterName, subnetworkName, serviceId, subnetworkName)
 }

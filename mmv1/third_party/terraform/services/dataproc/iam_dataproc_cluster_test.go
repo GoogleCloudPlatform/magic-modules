@@ -230,9 +230,7 @@ resource "google_dataproc_cluster" "cluster" {
     gce_cluster_config {
       subnetwork = "%s"
     }
-  }
-
-  cluster_config {
+      
     # Keep the costs down with smallest config we can get away with
     software_config {
       override_properties = {
