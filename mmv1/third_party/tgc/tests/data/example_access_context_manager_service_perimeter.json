@@ -19,7 +19,7 @@
                 "sourceRestriction": "SOURCE_RESTRICTION_ENABLED",
                 "sources": [
                     {
-                      "access_level": "accessPolicies/987654/accessLevels/restrict_storage"
+                      "accessLevel": "accessPolicies/987654/accessLevels/restrict_storage"
                     }
                   ]
               }
