@@ -38,10 +38,14 @@ module OpenAPIGenerate
       when 'locationsId'
         name = 'location'
       end
+      additional_description = ''
 
       case type
       when 'string'
         field = Api::Type::String.new(name)
+        if obj.respond_to?(:enum) && obj.enum
+          additional_description = "\n Possible values:\n #{obj.enum.join("\n")}"
+        end
       when 'integer'
         field = Api::Type::Integer.new
         field.instance_variable_set(:@name, name)
@@ -95,7 +99,10 @@ module OpenAPIGenerate
         raise "Failed to identify field type #{type}"
       end
 
-      field.instance_variable_set(:@description, obj.description || 'No description')
+      field.instance_variable_set(
+        :@description,
+        "#{obj.description} #{additional_description}" || 'No description'
+      )
       if url_param
         field.instance_variable_set(:@url_param_only, true)
         field.instance_variable_set(:@required, true) if obj.required
