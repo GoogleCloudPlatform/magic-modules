@@ -97,6 +97,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'cidrBlock'
     default_from_api: true
+    immutable: true
     description: |
       The CIDR block that the TPU node will use when selecting an IP address. This CIDR block must
       be a /29 block; the Compute Engine networks API forbids a smaller block, and using a larger
@@ -113,21 +114,20 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'network'
-        immutable: true
         default_from_api: true
+        immutable: true
         description: |
           The name of the network for the TPU node. It must be a preexisting Google Compute Engine
           network. If none is provided, "default" will be used.
       - !ruby/object:Api::Type::String
         name: 'subnetwork'
-        immutable: true
         default_from_api: true
+        immutable: true
         description: |
           The name of the subnetwork for the TPU node. It must be a preexisting Google Compute
           Engine subnetwork. If none is provided, "default" will be used.
       - !ruby/object:Api::Type::Boolean
         name: 'enableExternalIps'
-        default_from_api: true
         immutable: true
         send_empty_value: true
         description: |
@@ -135,7 +135,6 @@ properties:
           false, the specified subnetwork or network should have Private Google Access enabled.
       - !ruby/object:Api::Type::Boolean
         name: 'canIpForward'
-        default_from_api: true
         immutable: true
         send_empty_value: true
         description: |
@@ -144,6 +143,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'serviceAccount'
     default_from_api: true
+    immutable: true
     description: |
       The Google Cloud Platform Service Account to be used by the TPU node VMs. If None is
       specified, the default compute service account will be used.
@@ -165,9 +165,9 @@ properties:
         item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: 'schedulingConfig'
+    immutable: true
     description: |
       The scheduling options for this node.
-    immutable: true
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'preemptible'
@@ -195,6 +195,7 @@ properties:
             "projects/my-project/zones/us-central1-c/disks/my-disk".
         - !ruby/object:Api::Type::Enum
           name: 'mode'
+          default_value: :READ_WRITE
           description: |
             The mode in which to attach this disk. If not specified, the default is READ_WRITE
             mode. Only applicable to dataDisks.
@@ -203,9 +204,9 @@ properties:
             - 'READ_ONLY'
   - !ruby/object:Api::Type::NestedObject
     name: 'shieldedInstanceConfig'
+    immutable: true
     description: |
       Shielded Instance options.
-    immutable: true
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'enableSecureBoot'

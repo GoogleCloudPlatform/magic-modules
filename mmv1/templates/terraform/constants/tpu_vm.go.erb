@@ -18,6 +18,8 @@ func tpuServiceAccountAddedScopesSuppress(k, old, new string, d *schema.Resource
 	return reflect.DeepEqual(oList, nList)
 }
 
+// Normalize the scopes by filtering out the `https://www.googleapis.com/auth/pubsub` scope during
+// comparison
 func normalizeScopes(scopes []string) []string {
 	var result []string
 	for _, s := range scopes {
