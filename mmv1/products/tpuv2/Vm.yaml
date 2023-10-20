@@ -118,14 +118,18 @@ properties:
         immutable: true
         description: |
           The name of the network for the TPU node. It must be a preexisting Google Compute Engine
-          network. If none is provided, "default" will be used.
+          network. If both network and subnetwork are specified, the given subnetwork must belong
+          to the given network. If network is not specified, it will be looked up from the
+          subnetwork if one is provided, or otherwise use "default".
       - !ruby/object:Api::Type::String
         name: 'subnetwork'
         default_from_api: true
         immutable: true
         description: |
           The name of the subnetwork for the TPU node. It must be a preexisting Google Compute
-          Engine subnetwork. If none is provided, "default" will be used.
+          Engine subnetwork. If both network and subnetwork are specified, the given subnetwork
+          must belong to the given network. If subnetwork is not specified, the subnetwork with the
+          same name as the network will be used.
       - !ruby/object:Api::Type::Boolean
         name: 'enableExternalIps'
         immutable: true

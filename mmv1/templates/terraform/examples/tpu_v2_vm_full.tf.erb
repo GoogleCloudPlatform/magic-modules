@@ -76,7 +76,7 @@ resource "google_service_account" "sa" {
   provider = google-beta
 
   account_id   = "<%= ctx[:vars]['sa_id'] %>"
-  display_name = "Test TPU V2 VM"
+  display_name = "Test TPU VM"
 }
 
 resource "google_compute_disk" "disk" {
