@@ -50,14 +50,12 @@ examples:
     primary_resource_id: 'tpu'
     vars:
       vm_name: 'test-tpu'
-    skip_test: true # The test case is covered in the update test
   - !ruby/object:Provider::Terraform::Examples
     name: 'tpu_v2_vm_full'
     min_version: 'beta'
     primary_resource_id: 'tpu'
     vars:
       vm_name: 'test-tpu'
-    skip_test: true # The test case is covered in the update test
 parameters:
   - !ruby/object:Api::Type::String
     name: 'zone'

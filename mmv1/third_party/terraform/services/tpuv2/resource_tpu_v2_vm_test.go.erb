@@ -3,16 +3,11 @@ package tpuv2_test
 
 <% unless version == 'ga' -%>
 import (
-	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccTpuV2Vm_update(t *testing.T) {
@@ -99,44 +94,5 @@ resource "google_tpu_v2_vm" "tpu" {
   accelerator_type = "v2-8"
 }
 `, context)
-}
-
-func testAccCheckTpuV2VmDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		for name, rs := range s.RootModule().Resources {
-			if rs.Type != "google_tpu_v2_vm" {
-				continue
-			}
-			if strings.HasPrefix(name, "data.") {
-				continue
-			}
-
-			config := acctest.GoogleProviderConfig(t)
-
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{TpuV2BasePath}}projects/{{project}}/locations/{{zone}}/nodes/{{name}}")
-			if err != nil {
-				return err
-			}
-
-			billingProject := ""
-
-			if config.BillingProject != "" {
-				billingProject = config.BillingProject
-			}
-
-			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    config,
-				Method:    "GET",
-				Project:   billingProject,
-				RawURL:    url,
-				UserAgent: config.UserAgent,
-			})
-			if err == nil {
-				return fmt.Errorf("TpuV2Vm still exists at %s", url)
-			}
-		}
-
-		return nil
-	}
 }
 <% end -%>
