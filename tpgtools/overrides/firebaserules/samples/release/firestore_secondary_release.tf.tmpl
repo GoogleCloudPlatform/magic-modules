@@ -1,0 +1,36 @@
+resource "google_firebaserules_release" "primary" {
+  provider     = google-beta
+  name         = "cloud.firestore/${google_firestore_database.secondary.name}"
+  ruleset_name = "projects/{{project}}/rulesets/${google_firebaserules_ruleset.firestore.name}"
+  project      = "{{project}}"
+
+  lifecycle {
+    replace_triggered_by = [
+      google_firebaserules_ruleset.firestore
+    ]
+  }
+}
+
+# Provision a non-default Firestore database.
+resource "google_firestore_database" "secondary" {
+  project     = "{{project}}"
+  name        = "{{database}"
+  location_id = "{{region}}"
+  type        = "FIRESTORE_NATIVE"
+}
+
+# Create a ruleset of Firebase Security Rules from a local file.
+resource "google_firebaserules_ruleset" "firestore" {
+  provider = google-beta
+  project  = "{{project}}"
+  source {
+    files {
+      name    = "firestore.rules"
+      content = "service cloud.firestore {match /databases/{database}/documents { match /{document=**} { allow read, write: if false; } } }""
+    }
+  }
+
+  depends_on = [
+    google_firestore_database.secondary
+  ]
+}
