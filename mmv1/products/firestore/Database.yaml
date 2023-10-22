@@ -104,6 +104,8 @@ examples:
     name: 'firestore_database_with_delete_protection'
     primary_resource_id: 'database'
     skip_test: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: templates/terraform/pre_delete/firestore_database.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: name
