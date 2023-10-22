@@ -47,7 +47,6 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-skip_delete: true
 autogen_async: true
 id_format: 'projects/{{project}}/databases/{{name}}'
 import_format:
