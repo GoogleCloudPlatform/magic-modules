@@ -1,6 +1,6 @@
 resource "google_migration_center_preference_set" "<%= ctx[:primary_resource_id] %>" {
   location          = "us-central1"
-  preference_set_id = "<%= ctx[:vars]['group_name'] %>"
+  preference_set_id = "<%= ctx[:vars]['set_name'] %>"
   description       = "Terraform integration test description"
   display_name      = "Terraform integration test display"
   virtual_machine_preferences {
