@@ -214,11 +214,7 @@ func resourceLoggingProjectBucketConfigCreate(d *schema.ResourceData, meta inter
 	obj["retentionDays"] = d.Get("retention_days")
 	obj["analyticsEnabled"] = d.Get("enable_analytics")
 	obj["cmekSettings"] = expandCmekSettings(d.Get("cmek_settings"))
-	expandedIndexConfigs, err := expandIndexConfigs(d.Get("index_configs").(*schema.Set).List())
-	obj["indexConfigs"] = expandedIndexConfigs
-	if err != nil {
-		return err
-	}
+	obj["indexConfigs"] = expandIndexConfigs(d.Get("index_configs"))
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}/buckets?bucketId={{bucket_id}}")
 	if err != nil {
@@ -309,7 +305,7 @@ func resourceLoggingProjectBucketConfigRead(d *schema.ResourceData, meta interfa
 		return fmt.Errorf("Error setting cmek_settings: %s", err)
 	}
 
-	if err := d.Set("index_configs", flattenIndexConfigs(res["indexConfigs"].([]interface{}))); err != nil {
+	if err := d.Set("index_configs", flattenIndexConfigs(res["indexConfigs"])); err != nil {
 		return fmt.Errorf("Error setting index_configs: %s", err)
 	}
 
@@ -356,12 +352,7 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 	obj["retentionDays"] = d.Get("retention_days")
 	obj["description"] = d.Get("description")
 	obj["cmekSettings"] = expandCmekSettings(d.Get("cmek_settings"))
-
-	expandedIndexConfigs, err := expandIndexConfigs(d.Get("index_configs").(*schema.Set).List())
-	obj["indexConfigs"] = expandedIndexConfigs
-	if err != nil {
-		return err
-	}
+	obj["indexConfigs"] = expandIndexConfigs(d.Get("index_configs"))
 
 	updateMask := []string{}
 	if d.HasChange("retention_days") {

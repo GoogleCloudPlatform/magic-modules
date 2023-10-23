@@ -225,11 +225,7 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{},
 	obj["description"] = d.Get("description")
 	obj["retentionDays"] = d.Get("retention_days")
 	obj["cmekSettings"] = expandCmekSettings(d.Get("cmek_settings"))
-	expandedIndexConfigs, err := expandIndexConfigs(d.Get("index_configs").(*schema.Set).List())
-	obj["indexConfigs"] = expandedIndexConfigs
-	if err != nil {
-		return err
-	}
+	obj["indexConfigs"] = expandIndexConfigs(d.Get("index_configs"))
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}/buckets?bucketId={{bucket_id}}")
 	if err != nil {
@@ -314,7 +310,7 @@ func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error setting cmek_settings: %s", err)
 	}
 
-	if err := d.Set("index_configs", flattenIndexConfigs(res["indexConfigs"].([]interface{}))); err != nil {
+	if err := d.Set("index_configs", flattenIndexConfigs(res["indexConfigs"])); err != nil {
 		return fmt.Errorf("Error setting index_configs: %s", err)
 	}
 
@@ -338,12 +334,7 @@ func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{})
 	obj["retentionDays"] = d.Get("retention_days")
 	obj["description"] = d.Get("description")
 	obj["cmekSettings"] = expandCmekSettings(d.Get("cmek_settings"))
-
-	expandedIndexConfigs, err := expandIndexConfigs(d.Get("index_configs").(*schema.Set).List())
-	obj["indexConfigs"] = expandedIndexConfigs
-	if err != nil {
-		return err
-	}
+	obj["indexConfigs"] = expandIndexConfigs(d.Get("index_configs"))
 
 	updateMask := []string{}
 	if d.HasChange("retention_days") {
@@ -447,9 +438,15 @@ func flattenCmekSettings(cmekSettings interface{}) []map[string]interface{} {
 	return []map[string]interface{}{data}
 }
 
-func expandIndexConfigs(originalIndexConfigs []interface{}) ([]map[string]interface{}, error) {
-	transformedIndexConfigs := make([]map[string]interface{}, 0, len(originalIndexConfigs))
-	for _, entry := range originalIndexConfigs {
+func expandIndexConfigs(maybeIndexConfigs interface{}) []map[string]interface{} {
+	if maybeIndexConfigs == nil {
+		return nil
+	}
+
+	indexConfigs := maybeIndexConfigs.(*schema.Set).List()
+	transformedIndexConfigs := make([]map[string]interface{}, 0, len(indexConfigs))
+
+	for _, entry := range indexConfigs {
 		original := entry.(map[string]interface{})
 
 		transformed := map[string]interface{}{
@@ -458,18 +455,26 @@ func expandIndexConfigs(originalIndexConfigs []interface{}) ([]map[string]interf
 		}
 		transformedIndexConfigs = append(transformedIndexConfigs, transformed)
 	}
-	return transformedIndexConfigs, nil
+	return transformedIndexConfigs
 }
 
-func flattenIndexConfigs(indexConfigs []interface{}) []map[string]interface{} {
+func flattenIndexConfigs(maybeIndexConfigs interface{}) []map[string]interface{} {
+	if maybeIndexConfigs == nil {
+		return nil
+	}
+
+	indexConfigs := maybeIndexConfigs.([]interface{})
 	flattenedIndexConfigs := make([]map[string]interface{}, 0, len(indexConfigs))
+
 	for _, entry := range indexConfigs {
 		indexConfig := entry.(map[string]interface{})
-		data := map[string]interface{}{
+		if len(indexConfig) < 1 {
+			continue
+		}
+		flattenedIndexConfigs = append(flattenedIndexConfigs, map[string]interface{}{
 			"field_path": indexConfig["fieldPath"],
 			"type":       indexConfig["type"],
-		}
-		flattenedIndexConfigs = append(flattenedIndexConfigs, data)
+		})
 	}
 	return flattenedIndexConfigs
 }
