@@ -476,7 +476,7 @@ properties:
     default_from_api: true
     description: |
       The target cluster version. For example: "1.5.0".
-    update_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}:upgrade'
+    update_url: 'projects/{{project}}/locations/{{location}}/clusters/{{name}}:upgrade'
     update_verb: :POST
   - !ruby/object:Api::Type::Enum
     name: "releaseChannel"
