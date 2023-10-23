@@ -141,31 +141,19 @@ properties:
           api_name: "intValue"
           description: |
             Integer Value of configVariable
-          exactly_one_of:
-            - "integer_value"
-            - "string_value"
-            - "boolean_value"
         - !ruby/object:Api::Type::String
           name: "stringValue"
           description: |
             String Value of configVariabley
-          exactly_one_of:
-            - "integer_value"
-            - "string_value"
-            - "boolean_value"
         - !ruby/object:Api::Type::Boolean
           name: "booleanValue"
           api_name: "boolValue"
           description: |
             Boolean Value of configVariable
-          exactly_one_of:
-            - "integer_value"
-            - "string_value"
-            - "boolean_value"
         - !ruby/object:Api::Type::NestedObject
           name: "secretValue"
           description: |
-            Secret value of configVariable
+            Secret value of configVariable.
           properties:
             - !ruby/object:Api::Type::String
               name: "secretVersion"
@@ -174,7 +162,7 @@ properties:
         - !ruby/object:Api::Type::NestedObject
           name: "encryptionKeyValue"
           description: |
-            Encription key value of configVariable
+            Encription key value of configVariable.
           properties:
             - !ruby/object:Api::Type::Enum
               name: "type"
@@ -193,7 +181,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: "authConfig"
     description: |
-      AuthConfig for the connection.
+      authConfig for the connection.
     properties:
       - !ruby/object:Api::Type::Enum
         name: "authType"
@@ -222,32 +210,20 @@ properties:
               name: "integerValue"
               api_name: "intValue"
               description: |
-                Integer Value of configVariable
-              exactly_one_of:
-                - "integer_value"
-                - "string_value"
-                - "boolean_value"
+                Integer Value of configVariable.
             - !ruby/object:Api::Type::String
               name: "stringValue"
               description: |
-                String Value of configVariabley
-              exactly_one_of:
-                - "integer_value"
-                - "string_value"
-                - "boolean_value"
+                String Value of configVariabley.
             - !ruby/object:Api::Type::Boolean
               name: "booleanValue"
               api_name: "boolValue"
               description: |
-                Boolean Value of configVariable
-              exactly_one_of:
-                - "integer_value"
-                - "string_value"
-                - "boolean_value"
+                Boolean Value of configVariable.
             - !ruby/object:Api::Type::NestedObject
               name: "secretValue"
               description: |
-                Secret value of configVariable
+                Secret value of configVariable.
               properties:
                 - !ruby/object:Api::Type::String
                   name: "secretVersion"
@@ -256,7 +232,7 @@ properties:
             - !ruby/object:Api::Type::NestedObject
               name: "encryptionKeyValue"
               description: |
-                Encription key value of configVariable
+                Encription key value of configVariable.
               properties:
                 - !ruby/object:Api::Type::Enum
                   name: "type"
@@ -594,28 +570,16 @@ properties:
               name: "integerValue"
               api_name: "intValue"
               description: |
-                Integer Value of configVariable
-              exactly_one_of:
-                - "integer_value"
-                - "string_value"
-                - "boolean_value"
+                Integer Value of configVariable.
             - !ruby/object:Api::Type::String
               name: "stringValue"
               description: |
-                String Value of configVariabley
-              exactly_one_of:
-                - "integer_value"
-                - "string_value"
-                - "boolean_value"
+                String Value of configVariabley.
             - !ruby/object:Api::Type::Boolean
               name: "booleanValue"
               api_name: "boolValue"
               description: |
-                Boolean Value of configVariable
-              exactly_one_of:
-                - "integer_value"
-                - "string_value"
-                - "boolean_value"
+                Boolean Value of configVariable.
             - !ruby/object:Api::Type::NestedObject
               name: "secretValue"
               description: |
@@ -730,28 +694,16 @@ properties:
                   name: "integerValue"
                   api_name: "intValue"
                   description: |
-                    Integer Value of configVariable
-                  exactly_one_of:
-                    - "integer_value"
-                    - "string_value"
-                    - "boolean_value"
+                    Integer Value of configVariable.
                 - !ruby/object:Api::Type::String
                   name: "stringValue"
                   description: |
-                    String Value of configVariabley
-                  exactly_one_of:
-                    - "integer_value"
-                    - "string_value"
-                    - "boolean_value"
+                    String Value of configVariabley.
                 - !ruby/object:Api::Type::Boolean
                   name: "booleanValue"
                   api_name: "boolValue"
                   description: |
-                    Boolean Value of configVariable
-                  exactly_one_of:
-                    - "integer_value"
-                    - "string_value"
-                    - "boolean_value"
+                    Boolean Value of configVariable.
                 - !ruby/object:Api::Type::NestedObject
                   name: "secretValue"
                   description: |
@@ -940,28 +892,16 @@ properties:
               name: "integerValue"
               api_name: "intValue"
               description: |
-                Integer Value of configVariable
-              exactly_one_of:
-                - "integer_value"
-                - "string_value"
-                - "boolean_value"
+                Integer Value of configVariable.
             - !ruby/object:Api::Type::String
               name: "stringValue"
               description: |
-                String Value of configVariabley
-              exactly_one_of:
-                - "integer_value"
-                - "string_value"
-                - "boolean_value"
+                String Value of configVariabley.
             - !ruby/object:Api::Type::Boolean
               name: "booleanValue"
               api_name: "boolValue"
               description: |
-                Boolean Value of configVariable
-              exactly_one_of:
-                - "integer_value"
-                - "string_value"
-                - "boolean_value"
+                Boolean Value of configVariable.
             - !ruby/object:Api::Type::NestedObject
               name: "secretValue"
               description: |
@@ -974,7 +914,7 @@ properties:
             - !ruby/object:Api::Type::NestedObject
               name: "encryptionKeyValue"
               description: |
-                Encription key value of configVariable
+                Encription key value of configVariable.
               properties:
                 - !ruby/object:Api::Type::Enum
                   name: "type"
@@ -1010,30 +950,42 @@ properties:
             description: |
               Integer Value of configVariable
             exactly_one_of:
-              - "integer_value"
-              - "string_value"
-              - "boolean_value"
+              - "encryptionKey.integer_value"
+              - "encryptionKey.string_value"
+              - "encryptionKey.boolean_value"
+              - "encryptionKey.secret_value"
+              - "encryptionKey.encryption_key_value"
           - !ruby/object:Api::Type::String
             name: "stringValue"
             description: |
               String Value of configVariabley
             exactly_one_of:
-              - "integer_value"
-              - "string_value"
-              - "boolean_value"
+              - "encryptionKey.integer_value"
+              - "encryptionKey.string_value"
+              - "encryptionKey.boolean_value"
+              - "encryptionKey.secret_value"
+              - "encryptionKey.encryption_key_value"
           - !ruby/object:Api::Type::Boolean
             name: "booleanValue"
             api_name: "boolValue"
             description: |
               Boolean Value of configVariable
             exactly_one_of:
-              - "integer_value"
-              - "string_value"
-              - "boolean_value"
+              - "encryptionKey.integer_value"
+              - "encryptionKey.string_value"
+              - "encryptionKey.boolean_value"
+              - "encryptionKey.secret_value"
+              - "encryptionKey.encryption_key_value"
           - !ruby/object:Api::Type::NestedObject
             name: "secretValue"
             description: |
               Secret value of configVariable
+            exactly_one_of:
+              - "encryptionKey.integer_value"
+              - "encryptionKey.string_value"
+              - "encryptionKey.boolean_value"
+              - "encryptionKey.secret_value"
+              - "encryptionKey.encryption_key_value"
             properties:
               - !ruby/object:Api::Type::String
                 name: "secretVersion"
@@ -1042,7 +994,13 @@ properties:
           - !ruby/object:Api::Type::NestedObject
             name: "encryptionKeyValue"
             description: |
-              Encription key value of configVariable
+              Encription key value of configVariable.
+            exactly_one_of:
+              - "encryptionKey.integer_value"
+              - "encryptionKey.string_value"
+              - "encryptionKey.boolean_value"
+              - "encryptionKey.secret_value"
+              - "encryptionKey.encryption_key_value"
             properties:
               - !ruby/object:Api::Type::Enum
                 name: "type"
