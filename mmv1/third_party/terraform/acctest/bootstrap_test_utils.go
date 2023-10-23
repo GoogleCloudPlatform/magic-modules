@@ -293,12 +293,17 @@ const SharedTestNetworkPrefix = "tf-bootstrap-net-"
 // BootstrapSharedTestNetwork will return a persistent compute network for a
 // test or set of tests.
 //
+// Usage 1
 // Resources like service_networking_connection use a consumer network and
 // create a complementing tenant network which we don't control. These tenant
 // networks never get cleaned up and they can accumulate to the point where a
 // limit is reached for the organization. By reusing a consumer network across
 // test runs, we can reduce the number of tenant networks that are needed.
 // See b/146351146 for more context.
+//
+// Usage 2
+// Bootstrap networks used in tests (gke clusters, dataproc clusters...)
+// to avoid traffic to the default network
 //
 // testId specifies the test for which a shared network is used/initialized.
 // Note that if the network is being used for a service_networking_connection,
@@ -356,11 +361,36 @@ func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
 	return network.Name
 }
 
+type AddressSettings struct {
+	PrefixLength int
+}
+
+func AddressWithPrefixLength(prefixLength int) func(*AddressSettings) {
+	return func(settings *AddressSettings) {
+		settings.PrefixLength = prefixLength
+	}
+}
+
+func NewAddressSettings(options ...func(*AddressSettings)) *AddressSettings {
+	settings := &AddressSettings{
+		PrefixLength: 16, // default prefix length
+	}
+
+	for _, o := range options {
+		o(settings)
+	}
+	return settings
+}
+
 const SharedTestGlobalAddressPrefix = "tf-bootstrap-addr-"
 
-func BootstrapSharedTestGlobalAddress(t *testing.T, testId, networkId string) string {
+// params are the functions to set compute global address
+func BootstrapSharedTestGlobalAddress(t *testing.T, testId string, params ...func(*AddressSettings)) string {
 	project := envvar.GetTestProjectFromEnv()
+	projectNumber := envvar.GetTestProjectNumberFromEnv()
 	addressName := SharedTestGlobalAddressPrefix + testId
+	networkName := BootstrapSharedTestNetwork(t, testId)
+	networkId := fmt.Sprintf("projects/%v/global/networks/%v", projectNumber, networkName)
 
 	config := BootstrapConfig(t)
 	if config == nil {
@@ -372,11 +402,14 @@ func BootstrapSharedTestGlobalAddress(t *testing.T, testId, networkId string) st
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[DEBUG] Global address %q not found, bootstrapping", addressName)
 		url := fmt.Sprintf("%sprojects/%s/global/addresses", config.ComputeBasePath, project)
+
+		settings := NewAddressSettings(params...)
+
 		netObj := map[string]interface{}{
 			"name":          addressName,
 			"address_type":  "INTERNAL",
 			"purpose":       "VPC_PEERING",
-			"prefix_length": 16,
+			"prefix_length": settings.PrefixLength,
 			"network":       networkId,
 		}
 
@@ -415,6 +448,8 @@ func BootstrapSharedTestGlobalAddress(t *testing.T, testId, networkId string) st
 // if it hasn't been created in the test project, and a service networking connection
 // if it hasn't been created in the test project.
 //
+// params are the functions to set compute global address
+//
 // BootstrapSharedServiceNetworkingConnection returns a persistent compute network name
 // for a test or set of tests.
 //
@@ -426,23 +461,29 @@ func BootstrapSharedTestGlobalAddress(t *testing.T, testId, networkId string) st
 // https://cloud.google.com/vpc/docs/configure-private-services-access#removing-connection
 //
 // testId specifies the test for which a shared network and a gobal address are used/initialized.
-func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string) string {
+func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string, params ...func(*AddressSettings)) string {
 	parentService := "services/servicenetworking.googleapis.com"
-	project := envvar.GetTestProjectFromEnv()
-	projectNumber := envvar.GetTestProjectNumberFromEnv()
+	projectId := envvar.GetTestProjectFromEnv()
 
 	config := BootstrapConfig(t)
 	if config == nil {
 		return ""
 	}
 
-	networkName := BootstrapSharedTestNetwork(t, testId)
-	networkId := fmt.Sprintf("projects/%v/global/networks/%v", projectNumber, networkName)
-	globalAddressName := BootstrapSharedTestGlobalAddress(t, testId, networkId)
+	// Get project number by calling the API
+	crmClient := config.NewResourceManagerClient(config.UserAgent)
+	project, err := crmClient.Projects.Get(projectId).Do()
+	if err != nil {
+		t.Fatalf("Error getting project: %s", err)
+	}
+
+	networkName := SharedTestNetworkPrefix + testId
+	networkId := fmt.Sprintf("projects/%v/global/networks/%v", project.ProjectNumber, networkName)
+	globalAddressName := BootstrapSharedTestGlobalAddress(t, testId, params...)
 
 	readCall := config.NewServiceNetworkingClient(config.UserAgent).Services.Connections.List(parentService).Network(networkId)
 	if config.UserProjectOverride {
-		readCall.Header().Add("X-Goog-User-Project", project)
+		readCall.Header().Add("X-Goog-User-Project", projectId)
 	}
 	response, err := readCall.Do()
 	if err != nil {
@@ -467,7 +508,7 @@ func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string) str
 
 		createCall := config.NewServiceNetworkingClient(config.UserAgent).Services.Connections.Create(parentService, connection)
 		if config.UserProjectOverride {
-			createCall.Header().Add("X-Goog-User-Project", project)
+			createCall.Header().Add("X-Goog-User-Project", projectId)
 		}
 		op, err := createCall.Do()
 		if err != nil {
@@ -475,7 +516,7 @@ func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string) str
 		}
 
 		log.Printf("[DEBUG] Waiting for service networking connection creation to finish")
-		if err := tpgservicenetworking.ServiceNetworkingOperationWaitTime(config, op, "Create Service Networking Connection", config.UserAgent, project, 4*time.Minute); err != nil {
+		if err := tpgservicenetworking.ServiceNetworkingOperationWaitTime(config, op, "Create Service Networking Connection", config.UserAgent, projectId, 4*time.Minute); err != nil {
 			t.Fatalf("Error bootstrapping shared test service networking connection: %s", err)
 		}
 	}
@@ -919,7 +960,7 @@ func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string
 			"name":        subnetName,
 			"region ":     region,
 			"network":     networkUrl,
-			"ipCidrRange": "10.77.1.0/28",
+			"ipCidrRange": "10.77.0.0/20",
 		}
 
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
