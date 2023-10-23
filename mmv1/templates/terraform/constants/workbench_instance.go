@@ -98,15 +98,25 @@ var WorkbenchInstanceProvidedTags = []string{
 
 func WorkbenchInstanceTagsDiffSuppress(_, _, _ string, d *schema.ResourceData) bool {
   old, new := d.GetChange("gce_setup.0.tags")
-
 	oldValue := old.([]interface{})
 	newValue := new.([]interface{})
+	oldValueList := []string{}
+	newValueList := []string{}
 
-	log.Printf("[DEBUG] - Diff is %v, %T,%v, %T", oldValue,oldValue,newValue,newValue)
+	for _, item := range oldValue {
+		oldValueList = append(oldValueList,item.(string))
+	}
 
-	//oldTags := reflect.ValueOf(old)
-	//newTags := reflect.ValueOf(new)
+	for _, item := range newValue {
+		newValueList = append(newValueList,item.(string))
+	}
+	newValueList= append(newValueList,WorkbenchInstanceProvidedTags...)
 
+	sort.Strings(oldValueList)
+	sort.Strings(newValueList)
+	if reflect.DeepEqual(oldValueList, newValueList) {
+		return true
+	}
 	return false
 }
 
