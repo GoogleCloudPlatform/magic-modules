@@ -26,6 +26,9 @@ update_url: projects/{{project}}/locations/{{zone}}/nodes/{{name}}
 update_verb: :PATCH
 update_mask: true
 autogen_async: true
+custom_diff: [
+  'acceleratorTypeCustomizeDiff',
+]
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -86,10 +89,13 @@ properties:
       Runtime version for the TPU.
   - !ruby/object:Api::Type::String
     name: 'acceleratorType'
+    default_from_api: true
     immutable: true
-    default_value: 'v2-8'
+    conflicts:
+      - accelerator_config
     description: |
-      TPU accelerator type for the TPU. If not specified, this defaults to 'v2-8'.
+      TPU accelerator type for the TPU. `accelerator_type` cannot be used at the same time as
+      `accelerator_config`. If neither is specified, `accelerator_type` defaults to 'v2-8'.
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -219,6 +225,32 @@ properties:
         required: true
         description: |
           Defines whether the instance has Secure Boot enabled.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'acceleratorConfig'
+    default_from_api: true
+    immutable: true
+    conflicts:
+      - accelerator_type
+    description: |
+      The AccleratorConfig for the TPU Node. `accelerator_config` cannot be used at the same time
+      as `accelerator_type`. If neither is specified, `accelerator_type` defaults to 'v2-8'.
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'type'
+        immutable: true
+        required: true
+        description: |
+          Type of TPU.
+        values:
+          - 'V2'
+          - 'V3'
+          - 'V4'
+      - !ruby/object:Api::Type::String
+        name: 'topology'
+        immutable: true
+        required: true
+        description: |
+          Topology of TPU in chips.
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: Resource labels to represent user-provided metadata.
