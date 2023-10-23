@@ -11,7 +11,7 @@ WORKDIR /app1/magic-modules-main/.ci/magician
 # Build the binary (we won't use it in the final image, but it's cached)
 RUN go build -o /dev/null .
 
-# Stage 2: Creating the final imag
+# Stage 2: Creating the final image
 FROM golang:1.19-bullseye
 SHELL ["/bin/bash", "-c"]
 ENV GOCACHE=/go/cache
