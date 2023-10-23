@@ -80,16 +80,21 @@ parameters:
       Name of Connection needs to be created.
 
 properties:
-  - !ruby/object:Api::Type::String
-    name: "region"
+  - !ruby/object:Api::Type::Time
+    name: "createTime"
     description: |
-      The region of the Connection.
+      Time the Namespace was created in UTC.
+    output: true
+  - !ruby/object:Api::Type::Time
+    name: "updateTime"
+    description: |
+      Time the Namespace was updated in UTC.
     output: true
   - !ruby/object:Api::Type::String
     name: "description"
     description: |
       An arbitrary description for the Conection.
-  - !ruby/object:Api::Type::KeyValueLabels
+  - !ruby/object:Api::Type::KeyValuePairs
     name: "labels"
     description: |
       Resource labels to represent user provided metadata.
@@ -162,6 +167,7 @@ properties:
           properties:
             - !ruby/object:Api::Type::String
               name: "secretVersion"
+              required: true
               description: |
                 Secret version of Secret Value for Config variable.
         - !ruby/object:Api::Type::NestedObject
@@ -174,14 +180,13 @@ properties:
               description: |
                 Type of Encription Key
               values:
-                - TYPE_UNSPECIFIED
                 - GOOGLE_MANAGED
                 - CUSTOMER_MANAGED
             - !ruby/object:Api::Type::String
               name: "kmsKeyName"
               description: |
-                The [KMS key name] with which the content of the Operation is encrypted. The expected
-                format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
+                The [KMS key name] with which the content of the Operation is encrypted. The expected 
+                format: projects/*/locations/*/keyRings/*/cryptoKeys/*. 
                 Will be empty string if google managed.
   - !ruby/object:Api::Type::NestedObject
     name: "authConfig"
@@ -192,8 +197,8 @@ properties:
         name: "authType"
         description: |
           authType of the Connection
+        required: true
         values:
-          - AUTH_TYPE_UNSPECIFIED
           - USER_PASSWORD
           - OAUTH2_JWT_BEARER
           - OAUTH2_CLIENT_CREDENTIALS
@@ -232,6 +237,7 @@ properties:
               properties:
                 - !ruby/object:Api::Type::String
                   name: "secretVersion"
+                  required: true
                   description: |
                     Secret version of Secret Value for Config variable.
             - !ruby/object:Api::Type::NestedObject
@@ -244,14 +250,13 @@ properties:
                   description: |
                     Type of Encription Key
                   values:
-                    - TYPE_UNSPECIFIED
                     - GOOGLE_MANAGED
                     - CUSTOMER_MANAGED
                 - !ruby/object:Api::Type::String
                   name: "kmsKeyName"
                   description: |
-                    The [KMS key name] with which the content of the Operation is encrypted. The expected
-                    format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
+                    The [KMS key name] with which the content of the Operation is encrypted. The expected 
+                    format: projects/*/locations/*/keyRings/*/cryptoKeys/*. 
                     Will be empty string if google managed.
       - !ruby/object:Api::Type::String
         name: "authKey"
@@ -271,9 +276,16 @@ properties:
             properties:
               - !ruby/object:Api::Type::String
                 name: "secretVersion"
+                required: true
                 description: |
                   The resource name of the secret version in the format,
                   format as: projects/*/secrets/*/versions/*.
+        exactly_one_of:
+          - auth_config.0.user_password
+          - auth_config.0.oauth2_jwt_bearer
+          - auth_config.0.oauth2_client_credentials
+          - auth_config.0.ssh_public_key
+          - auth_config.0.oauth2_auth_code_flow
       - !ruby/object:Api::Type::NestedObject
         name: "oauth2JwtBearer"
         properties:
@@ -281,11 +293,12 @@ properties:
             name: "clientKey"
             description: |
               Secret version reference containing a PKCS#8 PEM-encoded private key associated with the Client Certificate.
-              This private key will be used to sign JWTs used for the jwt-bearer authorization grant.
+              This private key will be used to sign JWTs used for the jwt-bearer authorization grant. 
               Specified in the form as: projects/*/secrets/*/versions/*.
             properties:
               - !ruby/object:Api::Type::String
                 name: "secretVersion"
+                required: true
                 description: |
                   The resource name of the secret version in the format,
                   format as: projects/*/secrets/*/versions/*.
@@ -306,6 +319,12 @@ properties:
                 name: "audience"
                 description: |
                   Value for the "aud" claim.
+        exactly_one_of:
+          - auth_config.0.user_password
+          - auth_config.0.oauth2_jwt_bearer
+          - auth_config.0.oauth2_client_credentials
+          - auth_config.0.ssh_public_key
+          - auth_config.0.oauth2_auth_code_flow
       - !ruby/object:Api::Type::NestedObject
         name: "oauth2ClientCredentials"
         properties:
@@ -320,9 +339,16 @@ properties:
             properties:
               - !ruby/object:Api::Type::String
                 name: "secretVersion"
+                required: true
                 description: |
-                  The resource name of the secret version in the format,
+                  The resource name of the secret version in the format, 
                   format as: projects/*/secrets/*/versions/*.
+        exactly_one_of:
+          - auth_config.0.user_password
+          - auth_config.0.oauth2_jwt_bearer
+          - auth_config.0.oauth2_client_credentials
+          - auth_config.0.ssh_public_key
+          - auth_config.0.oauth2_auth_code_flow
       - !ruby/object:Api::Type::NestedObject
         name: "sshPublicKey"
         properties:
@@ -337,8 +363,9 @@ properties:
             properties:
               - !ruby/object:Api::Type::String
                 name: "secretVersion"
+                required: true
                 description: |
-                  The resource name of the secret version in the format,
+                  The resource name of the secret version in the format, 
                   format as: projects/*/secrets/*/versions/*.
           - !ruby/object:Api::Type::String
             name: "certType"
@@ -351,9 +378,16 @@ properties:
             properties:
               - !ruby/object:Api::Type::String
                 name: "secretVersion"
+                required: true
                 description: |
-                  The resource name of the secret version in the format,
+                  The resource name of the secret version in the format, 
                   format as: projects/*/secrets/*/versions/*.
+        exactly_one_of:
+          - auth_config.0.user_password
+          - auth_config.0.oauth2_jwt_bearer
+          - auth_config.0.oauth2_client_credentials
+          - auth_config.0.ssh_public_key
+          - auth_config.0.oauth2_auth_code_flow
       - !ruby/object:Api::Type::NestedObject
         name: "oauth2AuthCodeFlow"
         properties:
@@ -380,8 +414,9 @@ properties:
             properties:
               - !ruby/object:Api::Type::String
                 name: "secretVersion"
+                required: true
                 description: |
-                  The resource name of the secret version in the format,
+                  The resource name of the secret version in the format, 
                   format as: projects/*/secrets/*/versions/*.
           - !ruby/object:Api::Type::Array
             name: "scopes"
@@ -396,6 +431,12 @@ properties:
             name: "authUri"
             description: |
               Auth URL for Authorization Code Flow.
+        exactly_one_of:
+          - auth_config.0.user_password
+          - auth_config.0.oauth2_jwt_bearer
+          - auth_config.0.oauth2_client_credentials
+          - auth_config.0.ssh_public_key
+          - auth_config.0.oauth2_auth_code_flow
 
   - !ruby/object:Api::Type::NestedObject
     name: "lockConfig"
@@ -406,6 +447,7 @@ properties:
         name: "locked"
         description: |
           Indicates whether or not the connection is locked.
+        required: true
       - !ruby/object:Api::Type::String
         name: "reason"
         description: |
@@ -421,6 +463,7 @@ properties:
           name: "key"
           description: |
             The key is the destination identifier that is supported by the Connector.
+          required: true
         - !ruby/object:Api::Type::Array
           name: "destination"
           api_name: "destinations"
@@ -449,11 +492,6 @@ properties:
     description: |
       The name of the Service Directory service name. Used for Private Harpoon to resolve the ILB address.
       e.g. "projects/cloud-connectors-e2e-testing/locations/us-central1/namespaces/istio-system/services/istio-ingressgateway-connectors"
-    output: true
-  - !ruby/object:Api::Type::String
-    name: "envoyImageLocation"
-    description: |
-      GCR location where the envoy image is stored. formatted like: gcr.io/{bucketName}/{imageName}
     output: true
   - !ruby/object:Api::Type::Boolean
     name: "suspended"
@@ -484,6 +522,7 @@ properties:
         name: "enabled"
         description: |
           Enabled represents whether logging is enabled or not for a connection.
+        required: true
   - !ruby/object:Api::Type::NestedObject
     name: "sslConfig"
     description: |
@@ -493,8 +532,8 @@ properties:
         name: "type"
         description: |
           Enum for controlling the SSL Type (TLS/MTLS)
+        required: true
         values:
-          - SSL_TYPE_UNSPECIFIED
           - TLS
           - MTLS
       - !ruby/object:Api::Type::Enum
@@ -512,6 +551,7 @@ properties:
         properties:
           - !ruby/object:Api::Type::String
             name: "secretVersion"
+            required: true
             description: |
               Secret version of Secret Value for Config variable.
       - !ruby/object:Api::Type::NestedObject
@@ -521,6 +561,7 @@ properties:
         properties:
           - !ruby/object:Api::Type::String
             name: "secretVersion"
+            required: true
             description: |
               Secret version of Secret Value for Config variable.
       - !ruby/object:Api::Type::NestedObject
@@ -530,6 +571,7 @@ properties:
         properties:
           - !ruby/object:Api::Type::String
             name: "secretVersion"
+            required: true
             description: |
               Secret version of Secret Value for Config variable.
       - !ruby/object:Api::Type::NestedObject
@@ -539,6 +581,7 @@ properties:
         properties:
           - !ruby/object:Api::Type::String
             name: "secretVersion"
+            required: true
             description: |
               Secret version of Secret Value for Config variable.
       - !ruby/object:Api::Type::Enum
@@ -546,14 +589,12 @@ properties:
         description: |
           Type of Server Cert (PEM/JKS/.. etc.)
         values:
-          - CERT_TYPE_UNSPECIFIED
           - PEM
       - !ruby/object:Api::Type::Enum
         name: "clientCertType"
         description: |
           Type of Client Cert (PEM/JKS/.. etc.)
         values:
-          - CERT_TYPE_UNSPECIFIED
           - PEM
       - !ruby/object:Api::Type::Boolean
         name: "useSsl"
@@ -592,6 +633,7 @@ properties:
               properties:
                 - !ruby/object:Api::Type::String
                   name: "secretVersion"
+                  required: true
                   description: |
                     Secret version of Secret Value for Config variable.
             - !ruby/object:Api::Type::NestedObject
@@ -604,14 +646,13 @@ properties:
                   description: |
                     Type of Encription Key
                   values:
-                    - TYPE_UNSPECIFIED
                     - GOOGLE_MANAGED
                     - CUSTOMER_MANAGED
                 - !ruby/object:Api::Type::String
                   name: "kmsKeyName"
                   description: |
-                    The [KMS key name] with which the content of the Operation is encrypted. The expected
-                    format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
+                    The [KMS key name] with which the content of the Operation is encrypted. The expected 
+                    format: projects/*/locations/*/keyRings/*/cryptoKeys/*. 
                     Will be empty string if google managed.
   - !ruby/object:Api::Type::Enum
     name: "subscriptionType"
@@ -632,7 +673,6 @@ properties:
     description: |
       Eventing enablement type. Will be nil if eventing is not enabled.
     values:
-      - EVENTING_ENABLEMENT_TYPE_UNSPECIFIED
       - EVENTING_AND_CONNECTION
       - ONLY_EVENTING
   - !ruby/object:Api::Type::NestedObject
@@ -677,7 +717,6 @@ properties:
             description: |
               authType of the Connection
             values:
-              - AUTH_TYPE_UNSPECIFIED
               - USER_PASSWORD
               - OAUTH2_JWT_BEARER
               - OAUTH2_CLIENT_CREDENTIALS
@@ -716,6 +755,7 @@ properties:
                   properties:
                     - !ruby/object:Api::Type::String
                       name: "secretVersion"
+                      required: true
                       description: |
                         Secret version of Secret Value for Config variable.
                 - !ruby/object:Api::Type::NestedObject
@@ -728,14 +768,13 @@ properties:
                       description: |
                         Type of Encription Key
                       values:
-                        - TYPE_UNSPECIFIED
                         - GOOGLE_MANAGED
                         - CUSTOMER_MANAGED
                     - !ruby/object:Api::Type::String
                       name: "kmsKeyName"
                       description: |
-                        The [KMS key name] with which the content of the Operation is encrypted. The expected
-                        format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
+                        The [KMS key name] with which the content of the Operation is encrypted. The expected 
+                        format: projects/*/locations/*/keyRings/*/cryptoKeys/*. 
                         Will be empty string if google managed.
           - !ruby/object:Api::Type::String
             name: "authKey"
@@ -755,6 +794,7 @@ properties:
                 properties:
                   - !ruby/object:Api::Type::String
                     name: "secretVersion"
+                    required: true
                     description: |
                       The resource name of the secret version in the format,
                       format as: projects/*/secrets/*/versions/*.
@@ -765,11 +805,12 @@ properties:
                 name: "clientKey"
                 description: |
                   Secret version reference containing a PKCS#8 PEM-encoded private key associated with the Client Certificate.
-                  This private key will be used to sign JWTs used for the jwt-bearer authorization grant.
+                  This private key will be used to sign JWTs used for the jwt-bearer authorization grant. 
                   Specified in the form as: projects/*/secrets/*/versions/*.
                 properties:
                   - !ruby/object:Api::Type::String
                     name: "secretVersion"
+                    required: true
                     description: |
                       The resource name of the secret version in the format,
                       format as: projects/*/secrets/*/versions/*.
@@ -804,8 +845,9 @@ properties:
                 properties:
                   - !ruby/object:Api::Type::String
                     name: "secretVersion"
+                    required: true
                     description: |
-                      The resource name of the secret version in the format,
+                      The resource name of the secret version in the format, 
                       format as: projects/*/secrets/*/versions/*.
           - !ruby/object:Api::Type::NestedObject
             name: "sshPublicKey"
@@ -821,8 +863,9 @@ properties:
                 properties:
                   - !ruby/object:Api::Type::String
                     name: "secretVersion"
+                    required: true
                     description: |
-                      The resource name of the secret version in the format,
+                      The resource name of the secret version in the format, 
                       format as: projects/*/secrets/*/versions/*.
               - !ruby/object:Api::Type::String
                 name: "certType"
@@ -835,8 +878,9 @@ properties:
                 properties:
                   - !ruby/object:Api::Type::String
                     name: "secretVersion"
+                    required: true
                     description: |
-                      The resource name of the secret version in the format,
+                      The resource name of the secret version in the format, 
                       format as: projects/*/secrets/*/versions/*.
           - !ruby/object:Api::Type::NestedObject
             name: "oauth2AuthCodeFlow"
@@ -864,8 +908,9 @@ properties:
                 properties:
                   - !ruby/object:Api::Type::String
                     name: "secretVersion"
+                    required: true
                     description: |
-                      The resource name of the secret version in the format,
+                      The resource name of the secret version in the format, 
                       format as: projects/*/secrets/*/versions/*.
               - !ruby/object:Api::Type::Array
                 name: "scopes"
@@ -914,6 +959,7 @@ properties:
               properties:
                 - !ruby/object:Api::Type::String
                   name: "secretVersion"
+                  required: true
                   description: |
                     Secret version of Secret Value for Config variable.
             - !ruby/object:Api::Type::NestedObject
@@ -924,16 +970,15 @@ properties:
                 - !ruby/object:Api::Type::Enum
                   name: "type"
                   description: |
-                    Type of Encription Key
+                    Type of Encryption Key
                   values:
-                    - TYPE_UNSPECIFIED
                     - GOOGLE_MANAGED
                     - CUSTOMER_MANAGED
                 - !ruby/object:Api::Type::String
                   name: "kmsKeyName"
                   description: |
-                    The [KMS key name] with which the content of the Operation is encrypted. The expected
-                    format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
+                    The [KMS key name] with which the content of the Operation is encrypted. The expected 
+                    format: projects/*/locations/*/keyRings/*/cryptoKeys/*. 
                     Will be empty string if google managed.
       - !ruby/object:Api::Type::Boolean
         name: "enrichmentEnabled"
@@ -994,6 +1039,7 @@ properties:
             properties:
               - !ruby/object:Api::Type::String
                 name: "secretVersion"
+                required: true
                 description: |
                   Secret version of Secret Value for Config variable.
           - !ruby/object:Api::Type::NestedObject
@@ -1010,16 +1056,15 @@ properties:
               - !ruby/object:Api::Type::Enum
                 name: "type"
                 description: |
-                  Type of Encription Key
+                  Type of Encryption Key
                 values:
-                  - TYPE_UNSPECIFIED
                   - GOOGLE_MANAGED
                   - CUSTOMER_MANAGED
               - !ruby/object:Api::Type::String
                 name: "kmsKeyName"
                 description: |
-                  The [KMS key name] with which the content of the Operation is encrypted. The expected
-                  format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
+                  The [KMS key name] with which the content of the Operation is encrypted. The expected 
+                  format: projects/*/locations/*/keyRings/*/cryptoKeys/*. 
                   Will be empty string if google managed.
   - !ruby/object:Api::Type::Enum
     name: "connectorVersionLaunchStage"

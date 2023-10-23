@@ -1,9 +1,7 @@
 resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['connection_name'] %>"
-  location = "us-central1"
   connector_version = "projects/connectors-harsha/locations/global/providers/gcp/connectors/pubsub/versions/1"
   description = "tf created description"
-  location = "us-central1"
   config_variable {
       key = "project_id"
       string_value = "connectors-autopush-harsha"
