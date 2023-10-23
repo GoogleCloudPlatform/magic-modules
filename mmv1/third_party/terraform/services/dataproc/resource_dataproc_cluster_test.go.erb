@@ -971,9 +971,6 @@ func TestAccDataprocCluster_withMetastoreConfig(t *testing.T) {
 	updateServiceId := "tf-test-metastore-srv-update-" + acctest.RandString(t, 10)
 	msName_basic := fmt.Sprintf("projects/%s/locations/us-central1/services/%s", pid, basicServiceId)
 	msName_update := fmt.Sprintf("projects/%s/locations/us-central1/services/%s", pid, updateServiceId)
-	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
-	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
-	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
 	
 	var cluster dataproc.Cluster
 	clusterName := "tf-test-" + acctest.RandString(t, 10)
@@ -983,7 +980,7 @@ func TestAccDataprocCluster_withMetastoreConfig(t *testing.T) {
 		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocCluster_withMetastoreConfig(clusterName, basicServiceId, subnetworkName),
+				Config: testAccDataprocCluster_withMetastoreConfig(clusterName, basicServiceId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_metastore_config", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_metastore_config", "cluster_config.0.metastore_config.0.dataproc_metastore_service",msName_basic),
@@ -991,7 +988,7 @@ func TestAccDataprocCluster_withMetastoreConfig(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataprocCluster_withMetastoreConfig_update(clusterName, updateServiceId, subnetworkName),
+				Config: testAccDataprocCluster_withMetastoreConfig_update(clusterName, updateServiceId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_metastore_config", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_metastore_config", "cluster_config.0.metastore_config.0.dataproc_metastore_service", msName_update),
@@ -2329,92 +2326,64 @@ resource "google_dataproc_autoscaling_policy" "asp" {
 `, rnd, subnetworkName, rnd)
 }
 
-func testAccDataprocCluster_withMetastoreConfig(clusterName, serviceId, subnetworkName string) string {
+func testAccDataprocCluster_withMetastoreConfig(clusterName, serviceId string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_metastore_config" {
-	name                  = "%s"
-	region                = "us-central1"
+  name                  = "%s"
+  region                = "us-central1"
 
-	cluster_config {
-    gce_cluster_config {
-      subnetwork = "%s"
-    }
-
-		metastore_config {
-			dataproc_metastore_service = google_dataproc_metastore_service.ms.name
-		}
-	}
-}
-
-resource "google_dataproc_metastore_service" "ms" {
-	service_id = "%s"
-	location   = "us-central1"
-	port       = 9080
-	tier       = "DEVELOPER"
-
-	maintenance_window {
-		hour_of_day = 2
-		day_of_week = "SUNDAY"
-	}
-
-	hive_metastore_config {
-		version = "3.1.2"
-	}
-
-  network_config {
-    consumers {
-      subnetwork = data.google_compute_subnetwork.subnet.id
+  cluster_config {
+    metastore_config {
+      dataproc_metastore_service = google_dataproc_metastore_service.ms.name
     }
   }
 }
 
-data "google_compute_subnetwork" "subnet" {
-  name = "%s"
+resource "google_dataproc_metastore_service" "ms" {
+  service_id = "%s"
+  location   = "us-central1"
+  port       = 9080
+  tier       = "DEVELOPER"
+
+  maintenance_window {
+    hour_of_day = 2
+    day_of_week = "SUNDAY"
+  }
+
+  hive_metastore_config {
+    version = "3.1.2"
+  }
 }
-`, clusterName, subnetworkName, serviceId, subnetworkName)
+`, clusterName, serviceId)
 }
 
-func testAccDataprocCluster_withMetastoreConfig_update(clusterName, serviceId, subnetworkName string) string {
+func testAccDataprocCluster_withMetastoreConfig_update(clusterName, serviceId string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_metastore_config" {
-	name                  = "%s"
-	region                = "us-central1"
+  name                  = "%s"
+  region                = "us-central1"
 
-	cluster_config {
-    gce_cluster_config {
-      subnetwork = "%s"
-    }
-
-		metastore_config {
-			dataproc_metastore_service = google_dataproc_metastore_service.ms.name
-		}
-	}
-}
-
-resource "google_dataproc_metastore_service" "ms" {
-	service_id = "%s"
-	location   = "us-central1"
-	port       = 9080
-	tier       = "DEVELOPER"
-
-	maintenance_window {
-		hour_of_day = 2
-		day_of_week = "SUNDAY"
-	}
-
-	hive_metastore_config {
-		version = "3.1.2"
-	}
-
-  network_config {
-    consumers {
-      subnetwork = data.google_compute_subnetwork.subnet.id
+  cluster_config {
+    metastore_config {
+      dataproc_metastore_service = google_dataproc_metastore_service.ms.name
     }
   }
 }
 
-data "google_compute_subnetwork" "subnet" {
-  name = "%s"
+resource "google_dataproc_metastore_service" "ms" {
+  service_id = "%s"
+  location   = "us-central1"
+  port       = 9080
+  tier       = "DEVELOPER"
+
+  maintenance_window {
+    hour_of_day = 2
+    day_of_week = "SUNDAY"
+  }
+
+  hive_metastore_config {
+    version = "3.1.2"
+  }
 }
-`, clusterName, subnetworkName, serviceId, subnetworkName)
+`, clusterName, serviceId)
 }
