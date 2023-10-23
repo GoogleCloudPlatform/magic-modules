@@ -51,11 +51,13 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_delete: templates/terraform/custom_delete/clear_instance_settings.go.erb
   test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
 parameters:
-  - !ruby/object:Api::Type::String
+  - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
-    description: 'The zone where the instance settings resides.'
+    resource: 'Zone'
+    imports: 'name'
+    description: 'A reference to the zone where the machine resides.'
     required: true
-    url_param_only: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'update_mask'
     required: true
