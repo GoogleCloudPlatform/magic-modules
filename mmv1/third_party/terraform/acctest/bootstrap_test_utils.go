@@ -1040,6 +1040,11 @@ func BootstrapNetworkAttachment(t *testing.T, networkAttachmentName string, subn
 	return networkAttachment.Name
 }
 
+// The default network within GCP already comes pre configured with
+// certain firewall rules open to allow internal communication. As we
+// are boostrapping a network for dataproc tests, we need to additionally
+// open up similar rules to allow the nodes to talk to each other
+// internally as part of their configuration or this will just hang.
 const SharedTestFirewallPrefix = "tf-bootstrap-firewall-"
 
 func BootstrapFirewallForDataprocSharedNetwork(t *testing.T, firewallName string, networkName string) {
