@@ -1,0 +1,48 @@
+
+resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_id] %>" {
+    name     = "<%= ctx[:vars]['connection_name'] %>"
+    description = "tf updated description"
+    location = "us-central1"
+    service_account = "893437653600-compute@developer.gserviceaccount.com"
+    connector_version = "projects/connectors-autopush-harsha/locations/global/providers/zendesk/connectors/zendesk/versions/1"
+    config_variable {
+        key = "proxy_enabled"
+        boolean_value = false
+    }
+    suspended = false
+    auth_config {
+      auth_type = "USER_PASSWORD"
+      user_password {
+        username = "brijeshpanara@google.com"
+        password {
+          secret_version = "projects/893437653600/secrets/us-pass/versions/1"
+        }
+      }
+    }
+
+    destination_config {
+      key = "url"
+      destination {
+          host = "https://test6091.zendesk.com"
+      }
+    }
+    eventing_enablement_type = "EVENTING_AND_CONNECTION"
+    eventing_config {
+        registration_destination_config {
+          key = "registration_destination_config"
+          destinations {
+              host = "https://test6091.zendesk.com"
+            }
+        }
+        auth_config {
+          auth_type = "USER_PASSWORD"
+          user_password {
+            username = "brijeshpanara@google.com"
+            password {
+              secret_version = "projects/893437653600/secrets/us-pass/versions/1"
+            }
+          }
+        }
+        enrichment_enabled = true
+      }
+  }

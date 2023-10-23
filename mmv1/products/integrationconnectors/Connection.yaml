@@ -36,6 +36,11 @@ examples:
     primary_resource_id: "pubsubconnection"
     vars:
       connection_name: "test-pubsub"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "integration_connectors_connection_advanced"
+    primary_resource_id: "zendeskconnection"
+    vars:
+      connection_name: "test-zendesk"
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: "name"
