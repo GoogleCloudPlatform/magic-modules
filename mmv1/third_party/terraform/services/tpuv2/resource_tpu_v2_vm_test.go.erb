@@ -3,29 +3,19 @@ package tpuv2_test
 
 <% unless version == 'ga' -%>
 import (
-	"fmt"
-	"strings"
 	"testing"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccTpuV2Vm_update(t *testing.T) {
 	t.Parallel()
 
-        randomSuffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-                "random_suffix": randomSuffix,
-                "description": "Old description original context",
-	}
-	updatedContext := map[string]interface{}{
-                "random_suffix": randomSuffix,
-                "description": "New description updated context",
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -40,16 +30,25 @@ func TestAccTpuV2Vm_update(t *testing.T) {
 				ResourceName:            "google_tpu_v2_vm.tpu",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone"},
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "zone"},
 			},
 			{
-				Config: testAccTpuV2Vm_update(updatedContext),
+				Config: testAccTpuV2Vm_update(context, true),
 			},
 			{
 				ResourceName:            "google_tpu_v2_vm.tpu",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone"},
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "zone"},
+			},
+			{
+				Config: testAccTpuV2Vm_update(context, false),
+			},
+			{
+				ResourceName:            "google_tpu_v2_vm.tpu",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "zone"},
 			},
 		},
 	})
@@ -57,86 +56,114 @@ func TestAccTpuV2Vm_update(t *testing.T) {
 
 func testAccTpuV2Vm_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_tpu_v2_runtime_versions" "available" {
-  provider = google-beta
-}
-
-data "google_tpu_v2_accelerator_types" "available" {
-  provider = google-beta
-}
-
 resource "google_tpu_v2_vm" "tpu" {
   provider = google-beta
 
-  name = "tf-test-test-tpu%{random_suffix}"
-  zone = "us-central1-c"
-  description = "%{description}"
+  name        = "tf-test-tpu-%{random_suffix}"
+  zone        = "us-central1-c"
+  description = "Text description of the TPU."
 
   runtime_version  = "tpu-vm-tf-2.13.0"
   accelerator_type = "v2-8"
+
+  scheduling_config {
+    preemptible = true
+  }
+
+  data_disks {
+    source_disk = google_compute_disk.disk.id
+    mode        = "READ_ONLY"
+  }
+
+  labels = {
+    foo = "bar"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  tags = ["foo"]
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "google_compute_disk" "disk" {
+  provider = google-beta
+
+  name  = "tf-test-tpu-disk-%{random_suffix}"
+  image = "debian-cloud/debian-11"
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-c"
 }
 `, context)
 }
 
-func testAccTpuV2Vm_update(context map[string]interface{}) string {
+func testAccTpuV2Vm_update(context map[string]interface{}, preventDestroy bool) string {
+	context["prevent_destroy"] = strconv.FormatBool(preventDestroy)
+
 	return acctest.Nprintf(`
-data "google_tpu_v2_runtime_versions" "available" {
-  provider = google-beta
-}
-
-data "google_tpu_v2_accelerator_types" "available" {
-  provider = google-beta
-}
-
 resource "google_tpu_v2_vm" "tpu" {
   provider = google-beta
 
-  name = "tf-test-test-tpu%{random_suffix}"
-  zone = "us-central1-c"
-  description = "%{description}"
+  name        = "tf-test-tpu-%{random_suffix}"
+  zone        = "us-central1-c"
+  description = "Text description of the TPU updated."
 
   runtime_version  = "tpu-vm-tf-2.13.0"
   accelerator_type = "v2-8"
+
+  scheduling_config {
+    preemptible = true
+  }
+
+  data_disks {
+    source_disk = google_compute_disk.disk.id
+    mode        = "READ_WRITE"
+  }
+
+  data_disks {
+    source_disk = google_compute_disk.disk2.id
+    mode        = "READ_ONLY"
+  }
+
+  labels = {
+    baz = "bar"
+  }
+
+  metadata = {
+    baz = "bar"
+  }
+
+  tags = ["baz"]
+
+  lifecycle {
+    prevent_destroy = %{prevent_destroy}
+  }
+}
+
+resource "google_compute_disk" "disk" {
+  provider = google-beta
+
+  name  = "tf-test-tpu-disk-%{random_suffix}"
+  image = "debian-cloud/debian-11"
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-c"
+}
+
+resource "google_compute_disk" "disk2" {
+  provider = google-beta
+
+  name  = "tf-test-tpu-disk2-%{random_suffix}"
+  image = "debian-cloud/debian-11"
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-c"
 }
 `, context)
-}
-
-func testAccCheckTpuV2VmDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		for name, rs := range s.RootModule().Resources {
-			if rs.Type != "google_tpu_v2_vm" {
-				continue
-			}
-			if strings.HasPrefix(name, "data.") {
-				continue
-			}
-
-			config := acctest.GoogleProviderConfig(t)
-
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{TpuV2BasePath}}projects/{{project}}/locations/{{zone}}/nodes/{{name}}")
-			if err != nil {
-				return err
-			}
-
-			billingProject := ""
-
-			if config.BillingProject != "" {
-				billingProject = config.BillingProject
-			}
-
-			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    config,
-				Method:    "GET",
-				Project:   billingProject,
-				RawURL:    url,
-				UserAgent: config.UserAgent,
-			})
-			if err == nil {
-				return fmt.Errorf("TpuV2Vm still exists at %s", url)
-			}
-		}
-
-		return nil
-	}
 }
 <% end -%>
