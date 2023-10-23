@@ -29,3 +29,18 @@ func normalizeScopes(scopes []string) []string {
 	}
 	return result
 }
+
+// For backwards compatibility, we need to maintain original behavior where `accelerator_type`
+// defaults "v2-8" when nothing is set. However, if the newly introduced `accelerator_config` field
+// is set, then use that value instead of the `accelerator_type` default.
+func acceleratorTypeCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
+	_, isTypeSet := diff.GetOk("accelerator_type")
+	_, isConfigSet := diff.GetOk("accelerator_config")
+	if !isTypeSet && !isConfigSet {
+		if err := diff.SetNew("accelerator_type", "v2-8"); err != nil {
+			return err
+		}
+	}
+
+	return nil	
+}
