@@ -47,10 +47,6 @@ examples:
     min_version: beta
     name: 'instance_settings_basic'
     primary_resource_id: 'gce_instance_settings'
-    test_env_vars:
-      project: :PROJECT_NAME
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_delete: templates/terraform/custom_delete/clear_instance_settings.go.erb
   test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
