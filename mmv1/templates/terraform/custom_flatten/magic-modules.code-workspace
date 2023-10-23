@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../../../.."
+		},
+		{
+			"path": "../../../../../learn-terraform-gcp"
+		},
+		{
+			"path": "../../../../../go/src/github.com/hashicorp/terraform-provider-google-beta"
+		}
+	],
+  "settings": {}
+}

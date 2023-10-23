@@ -63,6 +63,17 @@ examples:
       instance_name: 'workbench-instance'
     test_env_vars:
       service_account: :SERVICE_ACCT
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'workbench_instance_labels'
+    primary_resource_id: 'instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-workbench-instance%s\",
+      context[\"\
+      random_suffix\"])"
+    region_override: 'us-west1-a'
+    vars:
+      instance_name: 'workbench-instance'
+    test_env_vars:
+      service_account: :SERVICE_ACCT
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/workbench_instance.go
 properties:
@@ -293,6 +304,7 @@ properties:
     name: tags
     item_type: Api::Type::String
     default_from_api: true
+    diff_suppress_func: WorkbenchInstanceTagsDiffSuppress
     description: Optional. The Compute Engine tags to add to instance (see [Tagging
       instances](https://cloud.google.com/compute/docs/label-or-tag-resources#tags)).
   - !ruby/object:Api::Type::KeyValuePairs
@@ -413,7 +425,7 @@ properties:
   name: labels
   description: Optional. Labels to apply to this instance. These can be later modified
     by the UpdateInstance method.
-  diff_suppress_func: WorkbenchInstanceLabelDiffSuppress
+  diff_suppress_func: WorkbenchInstanceLabelsDiffSuppress
 parameters:
 - !ruby/object:Api::Type::String
   name: location

@@ -1,0 +1,48 @@
+resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['instance_name'] %>"
+  location = "us-central1-a"
+
+  gce_setup {
+
+    service_accounts {
+      email = "<%= ctx[:test_env_vars]["service_account"] %>"
+    }
+
+    shielded_instance_config {
+      enable_secure_boot = true
+      enable_vtpm = true
+      enable_integrity_monitoring = true
+    }
+
+    network_interfaces {
+      network = data.google_compute_network.my_network.id
+      subnet = data.google_compute_subnetwork.my_subnetwork.id
+      nic_type = "GVNIC"
+    }
+
+    disable_public_ip = true
+
+    tags = ["abc","def"]
+
+    metadata = {
+      terraform = "true"
+    }
+
+  }
+
+  instance_owners  = [ "<%= ctx[:test_env_vars]["service_account"] %>"]
+
+  labels = {
+    k = "val"
+  }
+
+}
+
+data "google_compute_network" "my_network" {
+  name = "test-default"
+}
+
+data "google_compute_subnetwork" "my_subnetwork" {
+  name   = "test-default"
+  region = "us-central1"
+}

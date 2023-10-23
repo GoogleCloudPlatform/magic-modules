@@ -5,44 +5,10 @@ var WorkbenchInstanceProvidedLabels = []string{
 	"resource-name",
 }
 
-var WorkbenchInstanceProvidedMetadata = []string{
-	"disable-swap-binaries",
-	"enable-guest-attributes",
-	"enable-oslogin",
-	"install-nvidia-driver",
-	"notebooks-api",
-	"notebooks-api-version",
-	"nvidia-driver-gcs-path",
-	"proxy-backend-id",
-	"proxy-mode",
-	"proxy-registration-url",
-	"proxy-url",
-	"proxy-user-mail",
-	"serial-port-logging-enable",
-	"shutdown-script",
-}
-
-var WorkbenchInstanceProvidedTags = []string{
-	"deeplearning-vm",
-	"notebook-instance",
-}
-
-func WorkbenchInstanceTagsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	// Suppress diffs for the tags
-	for _, tag := range WorkbenchInstanceProvidedTags {
-		if strings.Contains(k, tag) {
-			return true
-		}
-	}
-
-	// For other keys, don't suppress diff.
-	return false
-}
-
-func WorkbenchInstanceLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+func WorkbenchInstanceLabelsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// Suppress diffs for the labels
 	for _, label := range WorkbenchInstanceProvidedLabels {
-		if strings.Contains(k, label){
+		if strings.Contains(k, label) && new == "" {
 			return true
 		}
 	}
@@ -56,19 +22,91 @@ func WorkbenchInstanceLabelDiffSuppress(k, old, new string, d *schema.ResourceDa
 	return false
 }
 
+
+var WorkbenchInstanceProvidedMetadata = []string{
+	"disable-swap-binaries",
+  "enable-guest-attributes",
+  "proxy-backend-id",
+  "proxy-registration-url",
+	"agent-health-check-interval-seconds",
+	"agent-health-check-path",
+	"container",
+	"data-disk-uri",
+	"dataproc-allow-custom-clusters",
+	"dataproc-cluster-name",
+	"dataproc-configs",
+	"dataproc-default-subnet",
+	"dataproc-locations-list",
+	"dataproc-machine-types-list",
+	"dataproc-notebooks-url",
+	"dataproc-region",
+	"dataproc-service-account",
+	"disable-check-xsrf",
+	"framework",
+	"gcs-data-bucket",
+	"generate-diagnostics-bucket",
+	"generate-diagnostics-file",
+	"generate-diagnostics-options",
+	"image-url",
+	"install-monitoring-agent",
+	"install-nvidia-driver",
+	"installed-extensions",
+	"notebooks-api",
+	"notebooks-api-version",
+	"notebooks-examples-location",
+	"notebooks-location",
+	"proxy-mode",
+	"proxy-status",
+	"proxy-url",
+	"proxy-user-mail",
+	"report-container-health",
+	"report-notebook-metrics",
+	"report-system-health",
+	"report-system-status",
+	"restriction",
+	"serial-port-logging-enable",
+	"shutdown-script",
+	"title",
+	"use-collaborative",
+	"version",
+	"enable-oslogin",
+}
+
 func WorkbenchInstanceMetadataDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	// Suppress diffs for the metadata
+	// Suppress diffs for the Metadata
 	for _, metadata := range WorkbenchInstanceProvidedMetadata {
 		if strings.Contains(k, metadata) && new == "" {
 			return true
 		}
 	}
 
-	// Let diff be determined by metadata (above)
-	if strings.Contains(k, "metadata.%") {
+	// Let diff be determined by metadata
+	if strings.Contains(k, "gce_setup.0.metadata.%") {
 		return true
 	}
 
 	// For other keys, don't suppress diff.
 	return false
 }
+
+
+var WorkbenchInstanceProvidedTags = []string{
+	"deeplearning-vm",
+	"notebook-instance",
+}
+
+
+func WorkbenchInstanceTagsDiffSuppress(_, _, _ string, d *schema.ResourceData) bool {
+  old, new := d.GetChange("gce_setup.0.tags")
+
+	oldValue := old.([]interface{})
+	newValue := new.([]interface{})
+
+	log.Printf("[DEBUG] - Diff is %v, %T,%v, %T", oldValue,oldValue,newValue,newValue)
+
+	//oldTags := reflect.ValueOf(old)
+	//newTags := reflect.ValueOf(new)
+
+	return false
+}
+
