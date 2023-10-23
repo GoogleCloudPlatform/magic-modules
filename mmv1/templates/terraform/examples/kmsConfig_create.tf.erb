@@ -1,0 +1,6 @@
+resource "google_netapp_kmsconfig" "<%= ctx[:primary_resource_id] %>" {
+  kms_name = "<%= ctx[:vars]['kms_name'] %>"
+  description=""
+  crypto_key_name="projects/cxo-automation-gcp/locations/us-central1/keyRings/kmsRing2/cryptoKeys/kmsCrypto111"
+  location="us-central1"
+}

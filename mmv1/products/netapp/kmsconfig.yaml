@@ -1,0 +1,101 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+!ruby/object:Api::Resource # API resource name
+name: "kmsconfig"
+description: |
+  kmsconfig.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    # Link to quickstart in the API's Guides section. For example:
+    # 'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
+    "QUICKSTART_TITLE": "https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.kmsConfigs"
+  # Link to the REST API reference for the resource. For example,
+  api: "https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.kmsConfigs"
+base_url: projects/{{project}}/locations/{{location}}/kmsConfigs
+self_link: projects/{{project}}/locations/{{location}}/kmsConfigs/{{kms_name}}
+create_url: projects/{{project}}/locations/{{location}}/kmsConfigs?kmsConfigId={{kms_name}}
+update_url: projects/{{project}}/locations/{{location}}/kmsConfigs/{{kms_name}}
+update_verb: :PATCH
+update_mask: true
+autogen_async: true
+
+async: !ruby/object:Api::OpAsync
+  # Overrides which API calls return operations. Default: ['create',
+  # 'update', 'delete']
+  # actions: ['create', 'update', 'delete']
+  operation: !ruby/object:Api::OpAsync::Operation
+    base_url: "{{op_id}}"
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: templates/terraform/post_create/KMS_Verify.go.erb
+
+id_format: "projects/{{project}}/locations/{{location}}/kmsConfigs/{{kms_name}}"
+import_format:
+  ["projects/{{project}}/locations/{{location}}/kmsConfigs/{{kms_name}}"]
+parameters:
+  - !ruby/object:Api::Type::String
+    name: "location"
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      LOCATION_DESCRIPTION
+  - !ruby/object:Api::Type::String
+    name: "kms_name"
+    description: "Name of the KmsConfig."
+    required: true
+    immutable: true
+    url_param_only: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "kmsConfig_create"
+    primary_resource_id: "kmsConfig"
+    vars:
+      kms_name: "kms-test"
+properties:
+  # Fields go here
+  - !ruby/object:Api::Type::String
+    name: name
+    output: true
+    description: |
+      The resource name of the snapshot. Format: projects/{projectId}/locations/{location}/volumes/{volumeId}/snapshots/{snapshotId}.
+  - !ruby/object:Api::Type::String
+    name: "description"
+    description: |
+      Description for the destination volume.
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: "labels"
+    description: |
+      Labels with user-defined metadata.
+      This field may contain up to 64 entries. Label keys and values may be no
+      longer than 63 characters. Label keys must begin with a lowercase letter
+      and may only contain lowercase letters, Integer characters, underscores,
+      and dashes.
+  - !ruby/object:Api::Type::String
+    name: "cryptoKeyName"
+    description: |
+      Required. Customer managed crypto key resource full name. Format: projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{key}.
+    required: true
+
+  - !ruby/object:Api::Type::String
+    name: "instructions"
+    description: |
+      Output only. Instructions to provide the access to the customer provided encryption key.
+    output: true
+
+  - !ruby/object:Api::Type::String
+    name: "serviceAccount"
+    description: |
+      Output only. The Service account which will have access to the customer provided encryption key.
+    output: true
