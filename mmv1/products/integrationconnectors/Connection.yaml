@@ -187,13 +187,13 @@ properties:
             - !ruby/object:Api::Type::String
               name: "kmsKeyName"
               description: |
-                The [KMS key name] with which the content of the Operation is encrypted. The expected 
-                format: projects/*/locations/*/keyRings/*/cryptoKeys/*. 
+                The [KMS key name] with which the content of the Operation is encrypted. The expected
+                format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
                 Will be empty string if google managed.
   - !ruby/object:Api::Type::NestedObject
     name: "authConfig"
     description: |
-      authConfig for the connection.
+      AuthConfig for the connection.
     properties:
       - !ruby/object:Api::Type::Enum
         name: "authType"
@@ -269,8 +269,8 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: "kmsKeyName"
                   description: |
-                    The [KMS key name] with which the content of the Operation is encrypted. The expected 
-                    format: projects/*/locations/*/keyRings/*/cryptoKeys/*. 
+                    The [KMS key name] with which the content of the Operation is encrypted. The expected
+                    format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
                     Will be empty string if google managed.
       - !ruby/object:Api::Type::String
         name: "authKey"
@@ -300,7 +300,7 @@ properties:
             name: "clientKey"
             description: |
               Secret version reference containing a PKCS#8 PEM-encoded private key associated with the Client Certificate.
-              This private key will be used to sign JWTs used for the jwt-bearer authorization grant. 
+              This private key will be used to sign JWTs used for the jwt-bearer authorization grant.
               Specified in the form as: projects/*/secrets/*/versions/*.
             properties:
               - !ruby/object:Api::Type::String
@@ -340,7 +340,7 @@ properties:
               - !ruby/object:Api::Type::String
                 name: "secretVersion"
                 description: |
-                  The resource name of the secret version in the format, 
+                  The resource name of the secret version in the format,
                   format as: projects/*/secrets/*/versions/*.
       - !ruby/object:Api::Type::NestedObject
         name: "sshPublicKey"
@@ -357,7 +357,7 @@ properties:
               - !ruby/object:Api::Type::String
                 name: "secretVersion"
                 description: |
-                  The resource name of the secret version in the format, 
+                  The resource name of the secret version in the format,
                   format as: projects/*/secrets/*/versions/*.
           - !ruby/object:Api::Type::String
             name: "certType"
@@ -371,7 +371,7 @@ properties:
               - !ruby/object:Api::Type::String
                 name: "secretVersion"
                 description: |
-                  The resource name of the secret version in the format, 
+                  The resource name of the secret version in the format,
                   format as: projects/*/secrets/*/versions/*.
       - !ruby/object:Api::Type::NestedObject
         name: "oauth2AuthCodeFlow"
@@ -400,7 +400,7 @@ properties:
               - !ruby/object:Api::Type::String
                 name: "secretVersion"
                 description: |
-                  The resource name of the secret version in the format, 
+                  The resource name of the secret version in the format,
                   format as: projects/*/secrets/*/versions/*.
           - !ruby/object:Api::Type::Array
             name: "scopes"
@@ -641,8 +641,8 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: "kmsKeyName"
                   description: |
-                    The [KMS key name] with which the content of the Operation is encrypted. The expected 
-                    format: projects/*/locations/*/keyRings/*/cryptoKeys/*. 
+                    The [KMS key name] with which the content of the Operation is encrypted. The expected
+                    format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
                     Will be empty string if google managed.
   - !ruby/object:Api::Type::Enum
     name: "subscriptionType"
@@ -777,8 +777,8 @@ properties:
                     - !ruby/object:Api::Type::String
                       name: "kmsKeyName"
                       description: |
-                        The [KMS key name] with which the content of the Operation is encrypted. The expected 
-                        format: projects/*/locations/*/keyRings/*/cryptoKeys/*. 
+                        The [KMS key name] with which the content of the Operation is encrypted. The expected
+                        format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
                         Will be empty string if google managed.
           - !ruby/object:Api::Type::String
             name: "authKey"
@@ -808,7 +808,7 @@ properties:
                 name: "clientKey"
                 description: |
                   Secret version reference containing a PKCS#8 PEM-encoded private key associated with the Client Certificate.
-                  This private key will be used to sign JWTs used for the jwt-bearer authorization grant. 
+                  This private key will be used to sign JWTs used for the jwt-bearer authorization grant.
                   Specified in the form as: projects/*/secrets/*/versions/*.
                 properties:
                   - !ruby/object:Api::Type::String
@@ -848,7 +848,7 @@ properties:
                   - !ruby/object:Api::Type::String
                     name: "secretVersion"
                     description: |
-                      The resource name of the secret version in the format, 
+                      The resource name of the secret version in the format,
                       format as: projects/*/secrets/*/versions/*.
           - !ruby/object:Api::Type::NestedObject
             name: "sshPublicKey"
@@ -865,7 +865,7 @@ properties:
                   - !ruby/object:Api::Type::String
                     name: "secretVersion"
                     description: |
-                      The resource name of the secret version in the format, 
+                      The resource name of the secret version in the format,
                       format as: projects/*/secrets/*/versions/*.
               - !ruby/object:Api::Type::String
                 name: "certType"
@@ -879,7 +879,7 @@ properties:
                   - !ruby/object:Api::Type::String
                     name: "secretVersion"
                     description: |
-                      The resource name of the secret version in the format, 
+                      The resource name of the secret version in the format,
                       format as: projects/*/secrets/*/versions/*.
           - !ruby/object:Api::Type::NestedObject
             name: "oauth2AuthCodeFlow"
@@ -908,7 +908,7 @@ properties:
                   - !ruby/object:Api::Type::String
                     name: "secretVersion"
                     description: |
-                      The resource name of the secret version in the format, 
+                      The resource name of the secret version in the format,
                       format as: projects/*/secrets/*/versions/*.
               - !ruby/object:Api::Type::Array
                 name: "scopes"
@@ -987,8 +987,8 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: "kmsKeyName"
                   description: |
-                    The [KMS key name] with which the content of the Operation is encrypted. The expected 
-                    format: projects/*/locations/*/keyRings/*/cryptoKeys/*. 
+                    The [KMS key name] with which the content of the Operation is encrypted. The expected
+                    format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
                     Will be empty string if google managed.
       - !ruby/object:Api::Type::Boolean
         name: "enrichmentEnabled"
@@ -1055,8 +1055,8 @@ properties:
               - !ruby/object:Api::Type::String
                 name: "kmsKeyName"
                 description: |
-                  The [KMS key name] with which the content of the Operation is encrypted. The expected 
-                  format: projects/*/locations/*/keyRings/*/cryptoKeys/*. 
+                  The [KMS key name] with which the content of the Operation is encrypted. The expected
+                  format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
                   Will be empty string if google managed.
   - !ruby/object:Api::Type::Enum
     name: "connectorVersionLaunchStage"
