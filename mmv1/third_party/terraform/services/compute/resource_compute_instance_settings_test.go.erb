@@ -3,9 +3,11 @@
 package compute_test
 
 import (
+<% if version == "beta" -%>
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+<% end -%>
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
