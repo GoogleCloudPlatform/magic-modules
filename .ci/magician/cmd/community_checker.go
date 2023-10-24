@@ -76,6 +76,7 @@ func execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBran
 		"_HEAD_REPO_URL": headRepoUrl,
 		"_HEAD_BRANCH":   headBranch,
 		"_BASE_BRANCH":   baseBranch,
+		"_CALLER_ID":     os.Getenv("BUILD_ID"),
 	}
 
 	author, err := gh.GetPullRequestAuthor(prNumber)
