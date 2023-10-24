@@ -32,6 +32,8 @@ examples:
     name: 'org_policy_custom_constraint_basic'
     primary_resource_id: 'constraint'
     vars:
+      policy_name: 'custom.disableGkeAutoUpgrade'
+    test_vars_overrides:
       policy_name: 'custom.disableGkeAutoUpgrade-'
     test_env_vars:
       org_id: :ORG_ID
@@ -39,6 +41,8 @@ examples:
     name: 'org_policy_custom_constraint_full'
     primary_resource_id: 'constraint'
     vars:
+      policy_name: 'custom.disableGkeAutoUpgrade'
+    test_vars_overrides:
       policy_name: 'custom.disableGkeAutoUpgrade-'
     test_env_vars:
       org_id: :ORG_TARGET
