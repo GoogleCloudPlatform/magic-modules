@@ -1047,13 +1047,13 @@ func BootstrapNetworkAttachment(t *testing.T, networkAttachmentName string, subn
 // internally as part of their configuration or this will just hang.
 const SharedTestFirewallPrefix = "tf-bootstrap-firewall-"
 
-func BootstrapFirewallForDataprocSharedNetwork(t *testing.T, firewallName string, networkName string) {
+func BootstrapFirewallForDataprocSharedNetwork(t *testing.T, firewallName string, networkName string) string {
 	project := envvar.GetTestProjectFromEnv()
 	firewallName = SharedTestFirewallPrefix + firewallName
 
 	config := BootstrapConfig(t)
 	if config == nil {
-		return
+		return ""
 	}
 
 	log.Printf("[DEBUG] Getting Firewall %q for Network %q", firewallName, networkName)
@@ -1110,7 +1110,7 @@ func BootstrapFirewallForDataprocSharedNetwork(t *testing.T, firewallName string
 	if firewall == nil {
 		t.Fatalf("Error getting Firewall %q: is nil", firewallName)
 	}
-	return
+	return firewall.Name
 }
 
 func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *transport_tpg.Config) (string, error) {
