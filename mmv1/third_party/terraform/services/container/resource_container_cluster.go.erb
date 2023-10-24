@@ -3936,8 +3936,10 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			log.Printf("[INFO] GKE cluster %s Gateway API has been updated", d.Id())
 		}
 	}
-
+        log.Printf("[DEBUG] @ has change: %v", d.HasChange("fleet"))
+	log.Printf("[DEBUG] @@ fleet has change: %v", d.Get("fleet"))
 	if d.HasChange("fleet") {
+		log.Printf("[DEBUG] @@@ fleet has change: %v", d.Get("fleet"))
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
 				DesiredFleet: expandFleet(d.Get("fleet")),
