@@ -403,6 +403,7 @@ resource "google_dialogflow_cx_flow" "default_start_flow" {
   parent                = google_dialogflow_cx_agent.agent.id
   is_default_start_flow = true
   display_name          = "Default Start Flow"
+  description           = "A start flow created along with the agent"
 
   nlu_settings {
     classification_threshold = 0.3
