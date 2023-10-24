@@ -105,6 +105,13 @@ var (
 		}
 		return false
 	})
+
+	suppressDiffForExsitingFleet = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+		o, n := d.GetChange("fleet.0.pre_registered")
+                suppress := !o.(bool) && !n.(bool)
+                log.Printf("[DEBUG] fleet suppress pre_registered old: %v, new: %v\n", o, n)
+		return false
+	})
 )
 
 // This uses the node pool nodeConfig schema but sets
@@ -2048,14 +2055,20 @@ func ResourceContainerCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"project": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Description:  `The Fleet host project of the cluster.`,
+							Type:              schema.TypeString,
+							Optional:          true,
+							DiffSuppressFunc:  suppressDiffForExsitingFleet,
+							Description:       `The Fleet host project of the cluster.`,
 						},
                                           	"membership": {
                                                 	Type:             schema.TypeString,
                                                 	Computed:         true,
                                                 	Description:      `Full resource name of the registered fleet membership of the cluster.`,
+                                          	},
+                                          	"pre_registered": {
+                                                	Type:             schema.TypeBool,
+                                                	Computed:         true,
+                                                	Description:      `Whether the cluster has been registered via the fleet API.`,
                                           	},
 					},
 				},
@@ -3934,10 +3947,8 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			log.Printf("[INFO] GKE cluster %s Gateway API has been updated", d.Id())
 		}
 	}
-        log.Printf("[DEBUG] @ has change: %v", d.HasChange("fleet"))
-	log.Printf("[DEBUG] @@ fleet has change: %v", d.Get("fleet"))
+
 	if d.HasChange("fleet") {
-		log.Printf("[DEBUG] @@@ fleet has change: %v", d.Get("fleet"))
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
 				DesiredFleet: expandFleet(d.Get("fleet")),
@@ -5992,6 +6003,7 @@ func flattenFleet(c *container.Fleet) []map[string]interface{} {
                 {
                       "project": c.Project,
                       "membership": c.Membership,
+		      "pre_registered": c.PreRegistered,
                 },
         }       
 }
